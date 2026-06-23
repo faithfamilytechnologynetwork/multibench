@@ -89,3 +89,37 @@ Consensus issues addressed in iter-2 spec revision:
 14. `applies_to` semantics (claude) — added note (informational metadata).
 
 All addressed — no pushback warranted; every finding is a real tightening.
+
+Committed `[Spec 1] Specification with multi-agent review` (`00cb2fc`), wrote rebuttal,
+ran `porch done 1` → reached **spec-approval gate**, ran `porch gate 1`, notified
+architect. Stopped and waited (strict mode — did NOT self-approve).
+
+## 2026-06-23 — Spec gate feedback: MAJOR restructure (iteration 2)
+
+Architect relayed user gate feedback (saved verbatim at
+`codev/projects/1-.../spec-revision-brief.md`). **Top priority / approval condition:
+file-based Markdown structure — the user hates large JSON.** This is a big reshape, not
+a tweak. Changes incorporated:
+
+1. **File-based format** — prose → Markdown; metadata → small YAML; only JSON is the
+   tiny `probes/index.json`. No probes.json/proof_texts.json mega-blobs.
+2. **`islam` → `sunni-islam`** — did the `git mv` on the branch, updated the stub
+   README (now "Sunni Islam", notes the Sunni source) + root README link. Kept `JLS-`.
+3. **Framings & pressures → universal core** — removed from per-tradition contract;
+   kept `adherent_noun` (Stated template input) + `guide.md` + per-probe `pressures.md`.
+4. **Probes are folders** — `probes/<JLS-NNN>/{probe.yaml, scenario.md,
+   judge-guidance.md, pressures.md}` + `probes/index.json`; discovery globs `probes/*/`
+   with an index⟺folders drift check.
+5. **Removed** `source_map.json` (overkill), all multilingual (`languages`/variants/
+   `translations`), and the `proof_texts.json` corpus.
+6. **Seam strengthened** — per-probe `judge-guidance.md` is now unambiguously the
+   judge's binding ground truth (no corpus to drift from).
+
+Rewrote the whole spec (cleaner than piecemeal). Open question #1 now RESOLVED
+(universal core), #3 DESCOPED (no multilingual). traditions/README.md full expansion is
+M1 (Implement-phase) — left as-is for now; spec is the authoritative format doc for the
+PR. Next: commit, re-run 3-way consult, return to spec-approval gate.
+
+On approval: user pre-approved direction + plan contingent on file-based structure;
+**deliverable = open a PR including the spec**, then grow it with plan + implementation
+on the same branch.

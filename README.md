@@ -23,8 +23,8 @@ directory, not changing the core.** See
 
 ## Repository layout
 
-- [`traditions/`](traditions/) — pluggable per-tradition modules; Islam is the
-  first ([`traditions/islam/`](traditions/islam/)).
+- [`traditions/`](traditions/) — pluggable per-tradition modules; Sunni Islam is
+  the first ([`traditions/sunni-islam/`](traditions/sunni-islam/)).
 - [`apps/`](apps/) — applications and standalone tools (e.g. `jaleesbrowser`,
   and the `tradition_validator`).
 - [`workflows/`](workflows/) — pipelines such as judging and probe generation.
@@ -32,7 +32,7 @@ directory, not changing the core.** See
 ## Status
 
 Bootstrap. This repo currently holds the Codev project setup and the expandable
-directory structure; the harness and the Islam port are not yet migrated in.
+directory structure; the harness and the Sunni Islam port are not yet migrated in.
 
 MultiBench generalizes [JaleesBench](https://github.com/iaser-ai/jaleesbench),
 which instantiated this construct for Islam.
