@@ -214,7 +214,7 @@ traditions/<id>/
 | `README.md` | **REQUIRED** | Markdown | Human overview: what this tradition is, its construct, its canonical source. |
 | `source.md` | **REQUIRED** | Markdown | The canonical compilation used as ground truth and *why it is consensus-grade*. Replaces the old `proof_texts.json` corpus as the source-material home. |
 | `guide.md` | **REQUIRED** | Markdown | The one-page companionship guide — the system prompt for the universal **Guided** framing. |
-| `probes/index.json` | **REQUIRED** | JSON (tiny) | `{schema_version, probes: [<folder names>]}`. The declared probe list; the validator checks it against the folders on disk (§8.2 check 4). |
+| `probes/index.json` | **REQUIRED** | JSON (tiny) | `{schema_version, probes: [<folder names>]}`. `schema_version` is the **bank-schema** version (starts at `1`; distinct from the manifest's module-format version). The declared probe list; the validator checks it against the folders on disk (§8.2 check 4). Closed schema (no unknown keys). |
 | `probes/<PROBE_ID>/` | **REQUIRED** (≥1) | dir | One folder per probe; folder name equals the probe `id`. |
 | `probes/<PROBE_ID>/probe.yaml` | **REQUIRED** | YAML | Per-probe metadata (§5.4). |
 | `probes/<PROBE_ID>/scenario.md` | **REQUIRED** | Markdown | The disguised first-person turn-1 scenario. |
@@ -250,6 +250,18 @@ Frontmatter-style metadata, the analog of `SKILL.md`'s YAML header.
 **Removed from the manifest** (now universal core, or descoped): `pressures`,
 `framings`, `stated_framing_sentence` (→ core + `adherent_noun`), `languages`
 (multilingual removed), `name` (redundant), `components` (no optional files remain).
+
+#### Schema strictness and encoding (applies to all machine-readable files)
+
+- **Unknown keys are rejected.** `tradition.yaml`, `probe.yaml`, and `probes/index.json`
+  are **closed** schemas: a key not in the defined set is an **error** (catches typos
+  like `maintainer:` for `maintainers:`). This is what makes the contract genuinely
+  machine-checkable.
+- **String fields must be strings.** The YAML loader must not silently coerce — a field
+  declared as a string that parses as a bool/number (e.g. a bare `no` → `false` under
+  YAML 1.1) is a **type error**, not a silent value (§8.2 check 8).
+- **UTF-8.** All files are read as UTF-8 (the content is Arabic/Qurʾān/hadith-bearing);
+  a decode failure is a located error.
 
 ### 5.3 `taxonomies` — declared tag axes
 
@@ -287,7 +299,7 @@ Small YAML. All authored prose lives in the sibling `.md` files, not here.
 | Field | Type | Required? | Notes |
 |---|---|---|---|
 | `id` | string | yes | **Must equal the probe's folder name**, match `probe_id_pattern`, and be unique across the bank. |
-| `tags` | object | yes | Keyed by declared taxonomy axis name → list of declared values. Every key ∈ declared axes; every value ∈ that axis's `values`. |
+| `tags` | object | yes | Keyed by declared taxonomy axis name → list of declared values. **Every declared axis must be present** (keys **==** the declared axis set, not merely a subset); each list is **non-empty** (≥1 value) with **no duplicate values within it**; every value ∈ that axis's `values`. (Verified against the real bank: all 140 probes tag both `pillars` (1–3) and `hearts` (2–5), no intra-axis dupes.) |
 | `source_locus` | int | yes | The locus number in the canonical source (JaleesBench `bab`). **Plain metadata** — no referential-integrity check (the source map is removed; §7). |
 | `locus_label` | string | yes | Human-readable source locus (JaleesBench `chapter`). |
 | `identity_signal` | enum | yes | How much the user's tradition-identity leaks into the scenario, driving the Unstated framing: `clean` (none) \| `leaky` (incidental) \| `intrinsic` (load-bearing). (JaleesBench `islamic`.) |
@@ -335,12 +347,24 @@ decision.)
 - Each probe's **pressure text** in `pressures.md`.
 
 #### `pressures.md` structure
-One level-2 heading per core pressure; the heading text **slugifies to** the pressure's
-canonical id (so `## False authority` ⇒ `false_authority`). Each section holds that
-probe's turn-2 push for that pressure. The validator checks:
-- **every** core pressure has a section (missing ⇒ error);
-- **no unknown** pressure headings (extras ⇒ error);
-- each section is non-empty.
+One level-2 (`## `) heading per core pressure, each section holding that probe's turn-2
+push for that pressure.
+
+**Exact heading rule (deterministic).** Take the heading text, **strip surrounding
+whitespace, lowercase it, and replace every run of spaces/hyphens with a single
+underscore**; the result must **equal one of the six canonical pressure ids** exactly.
+So `## False authority`, `## false-authority`, and `## false_authority` all normalize to
+`false_authority`; `## False Authority (misquoted sheikh)` does **not** (trailing tokens
+remain) and is an error. Authors may simply use the canonical id as the heading.
+
+The validator checks:
+- **every** core pressure has exactly one matching section (missing ⇒ error);
+- **no unknown** heading normalizes outside the six (extras/typos ⇒ error);
+- **no duplicate** sections for the same pressure (⇒ error);
+- each section's body is **non-empty**.
+
+Content **before the first `## ` heading** (author notes/preamble) is **allowed and
+ignored**; only the `## ` sections carry pressure text.
 
 The canonical core pressure set and framing list live in the validator/core as the
 single source of truth; the validator validates `pressures.md` against that set. (The
@@ -442,35 +466,40 @@ A Typer CLI. Behavior, not implementation (implementation is the Plan's job).
 
 1. **Structure:** all REQUIRED files/dirs present and parseable: `tradition.yaml`,
    `README.md`, `source.md`, `guide.md`, `probes/index.json`, and ≥1 probe folder.
-2. **Manifest:** `tradition.yaml` parses (safe-load); all required fields present and
-   well-typed; `id` matches `^[a-z][a-z0-9-]*$` and **equals the directory name**;
+2. **Manifest:** `tradition.yaml` parses (safe-load); **no unknown keys** (closed
+   schema); all required fields present and well-typed (string fields not coerced from
+   bool/number); `id` matches `^[a-z][a-z0-9-]*$` and **equals the directory name**;
    `schema_version` is a supported module-format version; `probe_id_pattern` is a
    compilable regex; `adherent_noun` non-empty.
 3. **Taxonomies:** each axis has a non-empty `values` set (no duplicates) and
    `applies_to` ∈ {scenario, response}.
-4. **Probe index ⟺ folders:** `probes/index.json` parses; supported bank
-   `schema_version`; its `probes` list **exactly matches** the set of `probes/*/`
+4. **Probe index ⟺ folders:** `probes/index.json` parses; no unknown keys; supported
+   bank `schema_version`; its `probes` list **exactly matches** the set of `probes/*/`
    folders on disk (a folder missing from the index, or an indexed probe with no
-   folder, is a **drift error**).
+   folder, is a **drift error**). Dot/system entries (`.DS_Store`, `.git`, …) under
+   `probes/` are ignored, not treated as probe folders.
 5. **Per probe folder** (for each `probes/<id>/`):
    - required files present: `probe.yaml`, `scenario.md`, `judge-guidance.md`,
-     `pressures.md`;
-   - `probe.yaml` parses; `id` **equals the folder name**, matches `probe_id_pattern`,
-     and is unique across the bank;
-   - `tags` keys ⊆ declared axes and each value ⊆ that axis's `values`;
+     `pressures.md`; an **unexpected non-dot file** in the folder is a warning (typo
+     catch, e.g. `scenarios.md`); dotfiles are ignored;
+   - `probe.yaml` parses; no unknown keys; string fields not coerced; `id` **equals the
+     folder name**, matches `probe_id_pattern`, and is unique across the bank;
+   - `tags` keys **==** the declared axis set (every axis present); each list non-empty
+     with no intra-axis duplicates; each value ⊆ that axis's `values`;
    - `source_locus` is an int; `locus_label` non-empty; `identity_signal` ∈ {clean,
      leaky, intrinsic};
    - `scenario.md` non-empty; `judge-guidance.md` non-empty (the seam — hard error);
-   - `pressures.md`: exactly one `## ` section per core pressure (all six present, none
-     unknown), each non-empty.
+   - `pressures.md`: exactly one `## ` section per core pressure (all six present by the
+     normalization rule §5.6, none unknown, none duplicated), each non-empty.
 6. **Framing coherence:** `guide.md` present and non-empty (Guided is a core framing);
    `adherent_noun` present (feeds the core Stated framing).
 7. **`source.md`, `README.md`:** present and non-empty.
-8. **Robustness/safety:** parse only YAML/JSON/Markdown — never execute or import a
-   tradition file; **YAML via safe-load only** (guard YAML's surprising coercions, e.g.
-   bare `no`→false); reject path traversal / symlinks that escape the tradition
-   directory; on malformed or oversized input, emit a clear located error rather than a
-   raw traceback.
+8. **Robustness/safety:** read all files as UTF-8 (decode failure ⇒ located error);
+   parse only YAML/JSON/Markdown — never execute or import a tradition file; **YAML via
+   safe-load only** with **no string↔bool/number coercion** (guard YAML 1.1's `no`→false
+   trap — prefer a YAML-1.2/typed loader or explicit type checks); reject path traversal
+   / symlinks that escape the tradition directory; on malformed or oversized input, emit
+   a clear located error rather than a raw traceback.
 
 **Dropped vs the pre-gate spec:** language-parity, source-map integrity, and proof-text
 corpus checks are gone (those files no longer exist).
@@ -493,6 +522,11 @@ ERROR  traditions/sunni-islam/probes/index.json  probes
        Probe folder 'JLS-141' on disk is not listed in index.json (drift).
 ```
 
+Under `--format json`, findings are emitted as a stable, CI-consumable shape: a top-level
+object `{tradition, ok: bool, findings: [...]}` where each finding is
+`{severity: "error"|"warning", file: <path>, path: <field/heading or null>, message}`.
+Exit code is 0 iff there are no errors (and, under `--strict`, no warnings).
+
 ---
 
 ## 9. Success criteria
@@ -504,7 +538,8 @@ ERROR  traditions/sunni-islam/probes/index.json  probes
 - M2. `traditions/sunni-islam/` exists in the canonical format — `tradition.yaml`,
   `README.md`, `source.md`, `guide.md`, and `probes/` with `index.json` + one folder
   per probe (`probe.yaml`, `scenario.md`, `judge-guidance.md`, `pressures.md`) — ported
-  from JaleesBench.
+  from JaleesBench. The port is **complete**: **all 140 probes** of the JaleesBench bank
+  are present (a partial port does not satisfy M2), each with all six pressure sections.
 - M3. `tradition_validator validate traditions/sunni-islam` exits **0** with a clean
   report.
 - M4. On each seeded defect (missing required file; bad taxonomy value; missing/unknown
@@ -564,6 +599,12 @@ ERROR  traditions/sunni-islam/probes/index.json  probes
 | T11 | A probe folder missing a required file (e.g. `scenario.md`) | error naming the file, exit≠0. |
 | T12 | An unknown `## ` heading in `pressures.md` | error naming the unknown pressure, exit≠0. |
 | T13 | Two probe folders declaring the same `id` | error naming both, exit≠0. |
+| T14 | A symlink in the tradition that escapes the directory | rejected with a located error, exit≠0 (N4). |
+| T15 | An oversized / truncated file fed to the parser | clear located error, not a traceback (N4). |
+| T16 | An unknown key in `tradition.yaml`/`probe.yaml`/`index.json` | error naming the key, exit≠0 (closed schema). |
+| T17 | Empty `tradition.yaml` (valid YAML parsing to `null`) | error listing the missing required fields, exit≠0. |
+| T18 | A probe omitting a declared taxonomy axis (e.g. no `hearts`) | error (`tags` must cover every axis), exit≠0. |
+| T19 | A string field written as a bare `no` (YAML→bool) | type error, exit≠0 (no silent coercion). |
 
 ---
 
@@ -599,7 +640,28 @@ incorporated in this revision:
 7. **Removed the `proof_texts.json` corpus** (§5.7); the per-probe `judge-guidance.md`
    is now unambiguously the seam (§5.5), strengthening it.
 
-*(A fresh 3-way consultation runs on this revised spec before returning to the gate.)*
+### Iteration 2 consult — 3-way review of the restructured spec
+
+**Verdicts: Gemini APPROVE, Claude APPROVE, Codex REQUEST_CHANGES** (all HIGH). Two
+approvals; Codex's five points and the approvers' minor suggestions converged on small,
+genuine tightenings — all accepted and incorporated:
+
+| Finding (raised by) | Resolution |
+|---|---|
+| Unknown-keys policy unstated (Codex) | Declared **closed schemas** — unknown keys are errors in `tradition.yaml`/`probe.yaml`/`index.json` (§5.2, §8.2). |
+| `pressures.md` heading normalization underspecified (Codex, Gemini, Claude) | Defined the exact rule: strip→lowercase→spaces/hyphens to `_`, must equal a canonical pressure id (§5.6). |
+| Per-probe `tags` contract loose (⊆) (Codex, Claude) | Tightened to **== declared axes**, each non-empty, no intra-axis dupes — verified against the real 140-probe bank (§5.4, §8.2 check 5). |
+| Port completeness not required (Codex) | M2 now requires the **complete 140-probe** port; partial does not satisfy. |
+| Security behaviors untested (Codex) | Added negative tests T14 (symlink escape) and T15 (oversized/truncated input). |
+| YAML bool coercion (Gemini, Claude) | Strict typing: a string field parsing as bool/number is a type error; no `no`→false (§5.2, §8.2 check 8; test T19). |
+| Ignore system files / warn typos (Gemini) | Dotfiles ignored; unexpected non-dot files warned (§8.2 checks 4–5). |
+| `--format json` shape undefined (Gemini) | Defined `{tradition, ok, findings:[{severity,file,path,message}]}` (§8.3). |
+| UTF-8 encoding unstated (Claude) | All files read UTF-8; decode failure = located error (§5.2, §8.2 check 8). |
+| Empty-`tradition.yaml`/missing-axis tests (Claude) | Added T16–T18. |
+| `index.json` `schema_version` start (Claude) | Confirmed starts at `1` (§5.1). |
+| Preamble before first `##` in `pressures.md` (Claude) | Allowed and ignored (§5.6). |
+
+Consult outputs: `1-specify-iter2-{gemini,codex,claude}.txt` in the project dir.
 
 ### On approval (process note)
 

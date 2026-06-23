@@ -123,3 +123,25 @@ PR. Next: commit, re-run 3-way consult, return to spec-approval gate.
 On approval: user pre-approved direction + plan contingent on file-based structure;
 **deliverable = open a PR including the spec**, then grow it with plan + implementation
 on the same branch.
+
+Committed restructure as `[Spec 1] Specification with user feedback` (`3733f40`, after an
+amend — first `git add` aborted on a stale `traditions/islam/README.md` pathspec and only
+the rename landed; amended to fold in spec/README/thread/brief/rebuttal).
+
+## 2026-06-23 — Iteration-2 consult (on restructured spec)
+
+Porch is parked at `gate_pending` (spec-approval). Per strict mode I did NOT mutate that
+state (no rollback/approve/status.yaml edit) — the architect's brief delegated the next
+action to me ("re-run your 3-way consult, return to the gate"), so I ran the consult
+manually (advisory; the human approves the gate).
+
+**Verdicts: Gemini APPROVE, Claude APPROVE, Codex REQUEST_CHANGES — all HIGH.** Two
+approvals. Codex's 5 points + the approvers' minors all converged on small tightenings;
+all accepted (no pushback). Key changes: closed schemas (unknown keys = error); exact
+`pressures.md` heading normalization; `tags == declared axes` (non-empty, no dupes —
+verified vs real bank); M2 requires the COMPLETE 140-probe port; strict YAML typing (no
+`no`→false); `--format json` shape; UTF-8; +tests T14–T19. Logged in spec §10 + iter2
+rebuttal. Outputs: `1-specify-iter2-*.txt`.
+
+Next: commit, re-notify architect that revised spec + iter2 consult (2× APPROVE) are
+ready behind the still-pending spec-approval gate.
