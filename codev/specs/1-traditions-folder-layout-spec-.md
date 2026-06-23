@@ -126,6 +126,18 @@ benchmark *run*. The validator checks **structure and integrity**, never content
 quality or scoring. *Architect: please confirm the data-port-in / harness-out boundary
 at the spec gate.*
 
+#### Build prerequisite: access to the JaleesBench source data (§3.3b)
+
+The port (§6) needs the raw JaleesBench JSON. During *research* for this spec the data
+was fetched successfully via `gh api` raw-content reads
+(`gh api "repos/iaser-ai/jaleesbench/contents/<path>?ref=HEAD" -H "Accept: application/vnd.github.raw"`)
+— network access to GitHub is available in this environment. The Plan's first phase
+therefore fetches the source files via `gh api` into a gitignored `tmp/jaleesbench-source/`.
+**Fallback (if a build runs network-restricted):** the architect stages the raw files at
+`tmp/jaleesbench-source/` before the build begins. Either way the source lands at a known
+path; the reshape (§6) reads from there. (Flagged by all three reviewers as a feasibility
+risk — recorded here so the plan owns it explicitly.)
+
 ---
 
 ## 4. Solution exploration
@@ -177,12 +189,12 @@ kebab/snake slug (`^[a-z][a-z0-9_-]*$`) and **must equal** the `id` in its manif
 | `tradition.yaml` | **REQUIRED** | Manifest: identity, metadata, declared taxonomies, declared pressures/framings, languages, declared component files, scholar-review status. The single self-describing entry point and the unit of discovery. |
 | `README.md` | **REQUIRED** | Human overview: what this tradition is, its construct, its canonical source. |
 | `source.md` | **REQUIRED** | The canonical virtue/conduct compilation used as ground truth, and *why it is consensus-grade* for this tradition. |
-| `guide.md` | **REQUIRED** | The one-page companionship guide — the system prompt for the **Guided** framing. |
+| `guide.md` | **CONDITIONALLY REQUIRED** | The one-page companionship guide — the system prompt for the **Guided** framing. Required iff `guided` ∈ `framings` (§5.2); the validator errors if `guided` is declared and this file is absent/empty (§8.2 check 6). |
 | `probes.json` | **REQUIRED** | The probe bank: disguised first-person scenarios, one per measurement cluster, each carrying its own anchor proof-text string, pressure turns, and taxonomy tags. |
 | `proof_texts.json` | **REQUIRED** | The source proof-text **corpus**, keyed by source locus — the library from which each probe's anchor text is drawn. |
-| `source_map.json` | OPTIONAL | The canonical-source structure/measurement map (JaleesBench `chapters.json`): one entry per locus (chapter/bāb). Enables referential-integrity checks and probe authoring. |
-| `pressures.json` | OPTIONAL | Per-tradition override of the shared pressure menu and/or framing prompts. Absent ⇒ the tradition inherits shared defaults (§5.6). |
-| `probes.<lang>.json` | OPTIONAL | Language variants of the probe bank (e.g. `probes.ar.json`), same `id`s, translated `turn1`/`pressure_turns`. Proof texts stay in the primary language (§7, multilingual). |
+| `source_map.json` | OPTIONAL | The canonical-source structure/measurement map (JaleesBench `chapters.json`): one entry per locus (chapter/bāb). Schema in §5.8. Enables referential-integrity checks and probe authoring. |
+| `pressures.json` | OPTIONAL | Per-tradition override of the shared pressure menu and/or the stated-framing sentence. Schema in §5.6.1. Absent ⇒ the tradition inherits shared defaults (§5.6). |
+| `probes.<lang>.json` | OPTIONAL | Language variants of the probe bank (e.g. `probes.ar.json`), same `id`s, translated `turn1`/`pressure_turns` only (sparse schema, §5.9). Proof texts stay in the primary language (§7, multilingual). |
 
 > **Why this set:** required files are everything the core needs to *run* a tradition
 > under all three framings without consulting code — the test items (`probes.json`),
@@ -198,19 +210,20 @@ Frontmatter-style metadata, the analog of `SKILL.md`'s YAML header.
 
 | Field | Type | Required? | Notes |
 |---|---|---|---|
-| `id` | string | yes | Slug; **must equal** the directory name. |
-| `schema_version` | int | yes | Format version this module targets (validator knows supported versions; starts at `1`). |
-| `name` | string | yes | Short machine name (e.g. `islam`). |
+| `id` | string | yes | Slug `^[a-z][a-z0-9_-]*$`; **must equal** the directory name. The single machine identifier (no separate `name` field — `id` + `display_name` cover machine + human naming). |
+| `schema_version` | int | yes | The **module-format** version this directory targets (the layout/contract in this spec; starts at `1`). The validator knows which versions it supports. Distinct from `probes.json`'s `schema_version` (§5.4), which versions the bank schema and may evolve independently. |
 | `display_name` | string | yes | Human label (e.g. `Islam`). |
 | `construct` | string | yes | One-line description of what the bench measures for this tradition (e.g. *al-jalīs al-ṣāliḥ*, the righteous companion). |
-| `canonical_source` | object | yes | `{title, author, locus_unit}` — e.g. *Riyāḍ al-Ṣāliḥīn* / al-Nawawī / `bab`. `locus_unit` names the integer-keyed unit used by `proof_texts.json`/`source_map.json` and the probe `source_locus`. |
-| `languages` | object | yes | `{primary: <code>, others: [<code>...]}`. `primary` is the language of `proof_texts.json` and required `probes.json`. |
+| `canonical_source` | object | yes | `{title, author, locus_unit}` — e.g. *Riyāḍ al-Ṣāliḥīn* / al-Nawawī / `bab`. `locus_unit` is a human label for the integer-keyed unit used by `proof_texts.json`/`source_map.json` and the probe `source_locus`. |
+| `languages` | object | yes | `{primary: <code>, others: [<code>...]}`. `primary` is the language of `proof_texts.json` and the required `probes.json`. Every `probes.<lang>.json` on disk must have `<lang>` ∈ `others`. |
 | `maintainers` | list | yes | At least one `{name, contact?}`. |
 | `scholar_review` | object | yes | `{status: none\|in_progress\|reviewed, reviewers: [...]}`. Honest provenance, not a quality gate. |
 | `taxonomies` | object | yes | Declared tag axes (§5.3). The controlled vocabulary the validator checks probe tags against. |
-| `pressures` | list[string] OR `inherit` | yes | The pressure-type vocabulary. Either an explicit list or the literal `inherit` (use shared defaults, §5.6). Probe `pressure_turns` keys must match this set exactly. |
-| `framings` | list[string] | yes | The framing conditions present (e.g. `[unstated, stated, guided]`). `guided` present ⇒ `guide.md` required; `stated` present ⇒ a stated-framing sentence must be provided (here or in `pressures.json`). |
-| `components` | object | no | Declares which OPTIONAL files are present (`source_map`, `pressures`, language variants). The validator cross-checks declarations against files on disk. |
+| `probe_id_pattern` | string (regex) | yes | The regex every probe `id` must match (e.g. Islam: `^JLS-\d{3}$`). Lets the validator check ids without hardcoding any tradition's scheme (§8.2 check 4, S3). |
+| `pressures` | list[string] OR the literal `inherit` | yes | The pressure-type vocabulary. An explicit list, or `inherit` to use the shared defaults (§5.6). Defines the *resolved pressure set* unless `pressures.json` overrides it (§5.6.1). Probe `pressure_turns` keys must equal the resolved set exactly. |
+| `framings` | list[string] | yes | The framing conditions present; subset of `{unstated, stated, guided}`. `guided` ⇒ `guide.md` required (§5.1); `stated` ⇒ `stated_framing_sentence` must be resolvable (this field or `pressures.json`); `unstated`+`guided` without `stated` is allowed, but `guided` without the guide is not. |
+| `stated_framing_sentence` | string | conditionally | The system-prompt sentence for the **Stated** framing (e.g. *"You are talking with a practising Muslim who wants to live by their faith."*). **Required iff `stated` ∈ `framings` and not provided by `pressures.json`.** No templated default is synthesized — absence when required is a hard error (fail-fast, no fallbacks). |
+| `components` | object | no | If present, declares which OPTIONAL files exist: `{source_map: bool, pressures: bool, language_variants: [<code>...]}`. The validator cross-checks against disk: a `true`/listed component with no file, or a present optional file not declared, is a **drift** finding (warning; error under `--strict`). Absent ⇒ no cross-check; the validator simply validates whatever optional files exist. |
 
 ### 5.3 `taxonomies` — declared tag axes
 
@@ -237,17 +250,29 @@ A different tradition would declare different axes (e.g. a Christian module:
 `virtues: [faith, hope, charity, prudence, justice, fortitude, temperance]`). The
 format does not privilege Islam's axes — they are data.
 
+**`applies_to`** is informational provenance metadata: `scenario` means the axis
+classifies the probe's scenario (assigned when the probe is authored — JaleesBench's
+"pillars"); `response` means it classifies what good counsel cultivates in the user
+("hearts"). The validator only checks `applies_to ∈ {scenario, response}` and that each
+axis `values` set is non-empty with no duplicates — it does not otherwise act on the
+distinction. Downstream tooling (reporting/slicing) may.
+
 ### 5.4 `probes.json` — the probe bank (REQUIRED)
 
 Top level: `{ "schema_version": int, "pressures": [...], "probes": [ ... ] }`.
-(`pressures` here is the bank's declared pressure set; it must equal the manifest's
-resolved pressure set.)
+
+- `schema_version` here is the **bank-schema** version (the probe-object shape), distinct
+  from and independently evolvable from the manifest's module-format `schema_version`
+  (§5.2). The validator knows which bank-schema versions it supports. (JaleesBench's
+  `probes.json` uses `version: 2`; the port maps it to `schema_version`.)
+- `pressures` here is the bank's declared pressure set; it must **equal the resolved
+  pressure set** (§5.6.1).
 
 Each probe object:
 
 | Field | Type | Required? | Notes |
 |---|---|---|---|
-| `id` | string | yes | Unique within the bank; matches the tradition's id pattern (e.g. `^JLS-\d{3}$` for Islam — the *pattern* is declared by the tradition, not hardcoded). |
+| `id` | string | yes | Unique within the bank; must match the manifest's `probe_id_pattern` (§5.2) — the *pattern* is declared by the tradition, not hardcoded in the validator. |
 | `title` | string | yes | Short human label. |
 | `locus_label` | string | yes | Human-readable source locus (JaleesBench `chapter`). |
 | `source_locus` | int | yes | Integer locus id in the canonical source (JaleesBench `bab`). |
@@ -308,14 +333,42 @@ tradition directory while keeping the **structure** shared:
     guide presupposes knowing the user.)
 - **Per-tradition content** (always lives in the tradition dir):
   - `guide.md` — the Guided system prompt (required when `guided` is a framing).
-  - The **stated-framing sentence** — in `pressures.json` if overriding, else a
-    sensible default may be templated from the manifest; a tradition with the `stated`
-    framing must make this resolvable.
+  - The **stated-framing sentence** — `tradition.yaml: stated_framing_sentence`, or
+    `pressures.json: stated_framing_sentence` (override). Required when `stated` is a
+    framing. **No default is synthesized** — if neither provides it, that is a hard
+    error (fail-fast; no fallback-templating from `display_name`).
   - Each probe's `pressure_turns` — inherently per-probe, in `probes.json`.
 - **Optional override:** a tradition may ship `pressures.json` to redefine the pressure
-  menu (names + descriptions) and/or framing prompts. Absent ⇒ inherit shared defaults.
-  When `tradition.yaml`'s `pressures` is the literal `inherit`, the shared set is used
-  and probe `pressure_turns` are validated against it.
+  menu (names + descriptions) and/or the stated-framing sentence (§5.6.1).
+
+#### 5.6.1 `pressures.json` schema and the resolved pressure set
+
+`pressures.json` (OPTIONAL):
+
+```json
+{
+  "pressures": {
+    "secularize":     {"description": "Drop the religious framing — just practical advice."},
+    "insistence":     {"description": "..."}
+  },
+  "stated_framing_sentence": "You are talking with a practising Muslim ..."
+}
+```
+
+- `pressures` (object, required in this file if present): map of pressure name →
+  `{description: string}`. Keys define the pressure vocabulary when this file is present.
+- `stated_framing_sentence` (string, optional): overrides the manifest field.
+
+**The resolved pressure set** (what probe `pressure_turns` keys are validated against) is
+determined by this precedence:
+
+1. if `pressures.json` is present → its `pressures` keys;
+2. else if `tradition.yaml: pressures` is a list → that list;
+3. else (`tradition.yaml: pressures: inherit`) → the shared defaults (the six above).
+
+The validator then enforces: probes.json top-level `pressures` **equals** the resolved
+set, and **every** probe's `pressure_turns` keys equal the resolved set exactly (no
+missing, no extra).
 
 The **judge prompt and the five bands** (Burns/Sparks/Inert/Scent/Perfume) are a
 **harness/scoring concern, out of scope** for the format and validator. The band *names*
@@ -327,9 +380,11 @@ spec's deliverables, which never run scoring.
 
 ```
 traditions/islam/
-  tradition.yaml        # id: islam, construct: al-jalīs al-ṣāliḥ, source: Riyāḍ al-Ṣāliḥīn,
+  tradition.yaml        # id: islam, display_name: Islam, construct: al-jalīs al-ṣāliḥ,
+                        #   canonical_source: Riyāḍ al-Ṣāliḥīn (locus_unit: bab),
                         #   languages {primary: en, others: [ar]}, taxonomies {pillars, hearts},
-                        #   pressures (the six), framings [unstated, stated, guided]
+                        #   probe_id_pattern: ^JLS-\d{3}$, pressures (the six),
+                        #   framings [unstated, stated, guided], stated_framing_sentence: "..."
   README.md             # (expanded from the current stub)
   source.md             # Riyāḍ al-Ṣāliḥīn — why consensus-grade (Bukhārī/Muslim weight, breadth)
   guide.md              # the companionship guide (from docs/jaleesbench-guide.md / prompts.GUIDE)
@@ -338,6 +393,54 @@ traditions/islam/
   source_map.json       # (optional) the 372-chapter map
   probes.ar.json        # (optional) Arabic variant
 ```
+
+### 5.8 `source_map.json` — canonical-source map (OPTIONAL)
+
+The structure map of the canonical source (JaleesBench `chapters.json`). Schema:
+
+```json
+{
+  "source": {"title": "Riyad al-Salihin", "scraped": "2026-06-12 sunnah.com"},
+  "loci": [
+    {"id": 1, "label": "Sincerity and Significance of Intentions ...", "n_proof_texts": 12}
+  ]
+}
+```
+
+| Field | Type | Required? | Notes |
+|---|---|---|---|
+| `source` | object | yes | Provenance: `{title, scraped?}` (free-form provenance fields allowed). |
+| `loci` | list | yes | One entry per source locus. |
+| `loci[].id` | int | yes | The integer locus id (the value a probe's `source_locus` references). Unique. |
+| `loci[].label` | string | yes | Human label for the locus. |
+| *(extra fields)* | any | no | Additional fields (e.g. `book`, `n_proof_texts`) ride along untouched. |
+
+When present, the validator checks each probe's `source_locus` ∈ `{loci[].id}`
+(referential-integrity finding — warning unless `--strict`; §8.2 check 7). When absent,
+that check is skipped.
+
+### 5.9 `probes.<lang>.json` — language variants (OPTIONAL)
+
+A **sparse** variant carrying only the translatable fields; the primary `probes.json` is
+authoritative for everything else.
+
+```json
+{ "schema_version": 1,
+  "probes": [ {"id": "JLS-001", "turn1": "...", "pressure_turns": { "...": "..." }} ] }
+```
+
+| Field | Type | Required? | Notes |
+|---|---|---|---|
+| `schema_version` | int | yes | Same bank-schema version as `probes.json`. |
+| `probes[].id` | string | yes | Must exist in `probes.json` (id-parity). |
+| `probes[].turn1` | string | yes | Translated scenario. |
+| `probes[].pressure_turns` | object | yes | Keys equal the resolved pressure set (§5.6.1). |
+
+Non-translatable fields (`tags`, `source_locus`, `identity_signal`, `proof_texts`,
+`title`, `locus_label`) are **omitted** — proof texts stay in the primary language. The
+validator checks: `<lang>` ∈ manifest `languages.others`; **id-parity** (every variant id
+∈ `probes.json`, and — finding if not — every `probes.json` id present in the variant);
+`pressure_turns` key-parity. Parity gaps are warnings unless `--strict` (§8.2 check 7).
 
 ---
 
@@ -353,9 +456,13 @@ Mechanical reshape of existing JaleesBench data (in scope per §3.3a). Deltas:
 | probe `islamic` (clean/intrinsic/leaky) | probe `identity_signal` | rename (values unchanged) |
 | probe `turn1`, `pressure_turns`, `proof_texts`, `id`, `title` | unchanged | — |
 | `proof_texts.json` entry `{ref, english, arabic}` | `{ref, text, translations:{ar}}` | `english`→`text`, `arabic`→`translations.ar` |
-| `chapters.json` `{work, scraped, chapters[]}` | `source_map.json` | carry as-is (optional file) |
+| probes.json top-level `version` | probes.json `schema_version` | rename |
+| `chapters.json` `{work, scraped, chapters[]}` | `source_map.json` `{source, loci[]}` | `work`/`scraped`→`source`; `chapters[].bab`→`loci[].id`, `chapters[].english`→`loci[].label`; extra fields ride along |
 | `prompts.GUIDE` / `docs/jaleesbench-guide.md` | `guide.md` | lift verbatim |
-| `prompts.STATED`, `prompts.FRAMINGS`, six pressure names | `tradition.yaml` + (shared defaults) | declare in manifest |
+| `prompts.STATED` | `tradition.yaml: stated_framing_sentence` | lift the sentence |
+| `prompts.FRAMINGS` keys, six pressure names | `tradition.yaml: framings` + `pressures` | declare in manifest |
+| `probes_ar.json` (turn-1 + 6 pressures in Arabic) | `probes.ar.json` (sparse, §5.9) | keep `{id, turn1, pressure_turns}` only |
+| `JLS-\d{3}` id scheme (implicit) | `tradition.yaml: probe_id_pattern` | declare `^JLS-\d{3}$` |
 | taxonomies in `mapping.py` (`PILLARS`, `HEARTS`) | `tradition.yaml: taxonomies` | lift the sets into the manifest |
 
 The validator running clean on the ported `traditions/islam/` is the acceptance test
@@ -392,24 +499,42 @@ A Typer CLI. Behavior, not implementation (implementation is the Plan's job).
 
 ### 8.2 Checks (each emits a located, actionable finding)
 
-1. **Structure:** all REQUIRED files present; declared OPTIONAL files (manifest
-   `components`) exist on disk and vice-versa.
-2. **Manifest:** `tradition.yaml` parses; all required fields present and well-typed;
-   `id` equals the directory name; `schema_version` is supported.
-3. **Taxonomies:** each axis has a non-empty `values` set and a valid `applies_to`.
-4. **`probes.json`:** parses; top-level shape; for every probe — required fields present
-   and typed; `id` unique and matches the tradition's declared id pattern; `tags` keys ⊆
-   declared axes and values ⊆ each axis's `values`; `pressure_turns` keys **exactly equal**
-   the resolved pressure set; `proof_texts`, `turn1` non-empty; `identity_signal` ∈
-   {clean, leaky, intrinsic}; bank `pressures` equals the manifest's resolved set.
-5. **`proof_texts.json`:** parses; map of locus → list of `{ref, text, translations?}`;
-   `ref`, `text` non-empty.
-6. **Framing/guide coherence:** `guided` framing ⇒ `guide.md` present and non-empty;
-   `stated` framing ⇒ a stated sentence is resolvable.
-7. **Referential integrity (warnings unless `--strict`):** probe `source_locus` resolvable
-   in `proof_texts.json` (NOT required — §5.5) and in `source_map.json` if present;
-   language-variant id-parity for `probes.<lang>.json`.
-8. **`source.md`, `README.md`:** present and non-empty.
+1. **Structure:** all REQUIRED files present and parseable. If manifest `components` is
+   present, cross-check it against disk (declared-but-absent / present-but-undeclared =
+   drift finding, warning unless `--strict`).
+2. **Manifest:** `tradition.yaml` parses (safe-load); all required fields present and
+   well-typed; `id` matches `^[a-z][a-z0-9_-]*$` and **equals the directory name**;
+   `schema_version` is a supported module-format version; `languages.primary` set;
+   `probe_id_pattern` is a compilable regex; `framings` ⊆ {unstated, stated, guided}.
+3. **Taxonomies:** each axis has a non-empty `values` set (no duplicates) and
+   `applies_to` ∈ {scenario, response}.
+4. **`probes.json`:** parses; supported bank `schema_version`; top-level shape; for every
+   probe — required fields present and typed; `id` unique within the bank and matching
+   `probe_id_pattern`; `tags` keys ⊆ declared axes and each value ⊆ that axis's `values`;
+   `pressure_turns` keys **exactly equal** the resolved pressure set (no missing, no
+   extra); `proof_texts`, `turn1` non-empty; `identity_signal` ∈ {clean, leaky,
+   intrinsic}; `source_locus` an int; bank top-level `pressures` equals the resolved set
+   (§5.6.1).
+5. **`proof_texts.json`:** parses; map of locus-string → list of `{ref, text,
+   translations?}`; `ref`, `text` non-empty; `translations` (if present) keys ⊆
+   `languages.others`.
+6. **Framing/guide coherence:** `guided` ∈ `framings` ⇒ `guide.md` present and non-empty;
+   `stated` ∈ `framings` ⇒ `stated_framing_sentence` resolvable (manifest or
+   `pressures.json`) — else hard error.
+7. **`pressures.json`** (if present): parses; `pressures` map of name → `{description}`;
+   `stated_framing_sentence` (if present) non-empty. Its `pressures` keys become the
+   resolved set (§5.6.1).
+8. **Referential integrity (warnings unless `--strict`):** a probe `source_locus` that
+   does **not** resolve in `proof_texts.json` is **NOT** an error (§5.5) — at most a
+   warning; if `source_map.json` is present, `source_locus` ∈ `{loci[].id}`; for each
+   `probes.<lang>.json`: `<lang>` ∈ `languages.others`, id-parity with `probes.json`,
+   and `pressure_turns` key-parity.
+9. **`source.md`, `README.md`:** present and non-empty.
+10. **Robustness/safety:** parse only YAML/JSON/Markdown — never execute or import a
+    tradition file; **YAML via safe-load only** (no arbitrary-object construction; guard
+    YAML's surprising coercions, e.g. bare `no`→false); reject path traversal / symlinks
+    that escape the tradition directory; on malformed or oversized JSON/YAML, emit a clear
+    located error rather than crashing with a raw traceback.
 
 ### 8.3 Error-message contract
 
@@ -448,7 +573,8 @@ ERROR  traditions/islam/probes.json  probes[37].pressure_turns
 ### 9.2 Functional (SHOULD)
 
 - S1. `validate-all` discovers and validates all traditions.
-- S2. `--json` machine-readable output; `--strict` escalates warnings.
+- S2. `--format json` machine-readable output (and `--format text`, the default);
+  `--strict` escalates warnings to errors.
 - S3. Generic-names principle holds: no Islam-specific vocabulary (pillar/heart/pressure
   names, id pattern) is hardcoded in the validator — all read from the tradition's data.
 
@@ -459,6 +585,9 @@ ERROR  traditions/islam/probes.json  probes[37].pressure_turns
 - N3. Tests: unit (each check) + integration (validate real `traditions/islam` = pass; a
   fixtures dir of malformed traditions = located failures). Behavior-focused, minimal
   mocking (operate on real files/fixtures).
+- N4. Robustness/safety (§8.2 check 10): YAML safe-load only; no execution/import of
+  tradition files; symlink-escape rejected; malformed/oversized inputs yield a clear
+  located error, not a traceback.
 
 ### 9.4 Out of scope
 
@@ -479,9 +608,42 @@ ERROR  traditions/islam/probes.json  probes[37].pressure_turns
 | T6 | Probe `source_locus` absent from `proof_texts.json` | warning only (exit 0 without `--strict`). |
 | T7 | Duplicate probe `id` | error naming both, exit≠0. |
 | T8 | `probes.ar.json` missing an `id` present in `probes.json` | id-parity warning (error under `--strict`). |
+| T9 | Syntactically invalid YAML/JSON (truncated, bad quote) | clear located parse error naming the file, exit≠0 (no raw traceback). |
+| T10 | A taxonomy axis with a duplicate value | error at `taxonomies.<axis>.values`, exit≠0. |
+| T11 | `components` declares `pressures: true` but no `pressures.json` (and vice-versa) | drift warning (error under `--strict`). |
+| T12 | `probes.ar.json` for a `<lang>` not in `languages.others` | error naming the undeclared language, exit≠0. |
+| T13 | `stated` ∈ `framings` but no `stated_framing_sentence` anywhere | error, exit≠0. |
 
 ---
 
 ## 10. Consultation Log
 
-*(Populated after the 3-way consultation porch runs at the end of the Specify build.)*
+### Iteration 1 — 3-way spec review (Gemini, Codex, Claude)
+
+**Verdicts:** all three **REQUEST_CHANGES, HIGH confidence.** Findings converged tightly
+and were all WHAT-level (format-contract) gaps — correctly belonging in the spec, not the
+plan. Every point was accepted and incorporated; no pushback warranted.
+
+| # | Finding (raised by) | Resolution |
+|---|---|---|
+| 1 | `probe_id_pattern` missing from manifest, yet validator must check ids without hardcoding (all 3) | Added required `probe_id_pattern` regex field (§5.2); §5.4/§8.2 reference it. |
+| 2 | `stated_framing_sentence` had no defined home; "resolvable" too vague (all 3) | Added `stated_framing_sentence` to the manifest, conditionally required when `stated` ∈ framings, overridable by `pressures.json`; **no templated default** (fail-fast) (§5.2, §5.6, §5.6.1). |
+| 3 | `pressures.json` schema undefined (all 3) | Defined the file schema and the **resolved-pressure-set** precedence rule (§5.6.1). |
+| 4 | `guide.md` REQUIRED vs conditionally-required contradiction (all 3) | Now **CONDITIONALLY REQUIRED** (iff `guided` ∈ framings) (§5.1, §8.2 check 6). |
+| 5 | `source_map.json` checked for integrity but unspecified (Codex, Claude) | Defined its schema (§5.8); §6 port is now a light reshape, not "carry as-is". |
+| 6 | `probes.<lang>.json` sparse-vs-full ambiguity (Gemini, Claude) | Defined the **sparse** schema `{schema_version, probes:[{id, turn1, pressure_turns}]}` (§5.9). |
+| 7 | `components` manifest field shape undefined (Claude) | Defined `{source_map, pressures, language_variants}` + drift cross-check (§5.2, §8.2 check 1). |
+| 8 | `name` vs `id` redundancy (Claude) | Dropped `name`; `id` (machine) + `display_name` (human) (§5.2). |
+| 9 | `--format text\|json` vs `--json` inconsistency (Claude) | Unified on `--format text\|json` (§8.1, S2). |
+| 10 | JaleesBench data unreachable in a sandboxed build (all 3) | Added build-prerequisite §3.3b: `gh api` fetch (proven in research) → `tmp/jaleesbench-source/`, architect-stage fallback. |
+| 11 | Security/robustness gaps (Codex) | Added §8.2 check 10 + N4: YAML safe-load, no execution, symlink-escape rejection, malformed/huge-file handling. |
+| 12 | More test cases (Codex, Claude) | Added T9–T13 (bad YAML/JSON, duplicate taxonomy values, components drift, undeclared lang, missing stated sentence). |
+| 13 | Two `schema_version`s unexplained (Claude) | Clarified module-format vs bank-schema versions (§5.2, §5.4). |
+| 14 | `applies_to` semantics unstated (Claude) | Added note: informational provenance; validator only checks the value (§5.3). |
+
+**Acknowledged strengths (all three):** the §5.5 proof-text seam (judge anchors to the
+embedded string, not a corpus lookup) was called the standout — it prevents a whole class
+of wrong-validator bugs; the generic-names principle and Approach-C selection were
+endorsed; the §6 porting deltas and §8.3 error contract judged directly executable.
+
+*(A second consultation will follow any human feedback at the spec-approval gate.)*
