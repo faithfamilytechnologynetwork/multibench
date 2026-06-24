@@ -38,4 +38,4 @@ taxonomies:
     - self_accounting
     - truthfulness
     - vigilance
-probe_id_pattern: ^JLS-\d{3}$
+scenario_id_pattern: ^JLS-\d{3}$

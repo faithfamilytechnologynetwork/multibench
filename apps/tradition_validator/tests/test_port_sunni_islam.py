@@ -9,7 +9,7 @@ from pathlib import Path
 
 import pytest
 
-from tradition_validator.validator import list_probe_folders, validate_tradition
+from tradition_validator.validator import list_scenario_folders, validate_tradition
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 TRADITION = REPO_ROOT / "traditions" / "sunni-islam"
@@ -31,6 +31,6 @@ def test_sunni_islam_validates_clean():
     reason="traditions/sunni-islam not generated",
 )
 def test_sunni_islam_has_full_bank():
-    # The port is complete: all 140 JaleesBench probes, listed and on disk.
-    folders = list_probe_folders(TRADITION / "probes")
+    # The port is complete: all 140 scenarios (from the JaleesBench bank), listed and on disk.
+    folders = list_scenario_folders(TRADITION / "scenarios")
     assert len(folders) == 140

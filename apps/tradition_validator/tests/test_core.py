@@ -65,10 +65,10 @@ def test_required_file_sets():
         "source.md",
         "guide.md",
     )
-    assert core.REQUIRED_PROBE_FILES == (
-        "probe.yaml",
-        "scenario.md",
+    assert core.REQUIRED_SCENARIO_FILES == (
+        "scenario.yaml",
+        "turn1.md",
         "judge-guidance.md",
         "pressures.md",
     )
-    assert core.PROBES_INDEX == "probes/index.json"
+    assert core.SCENARIOS_INDEX == "scenarios/index.json"

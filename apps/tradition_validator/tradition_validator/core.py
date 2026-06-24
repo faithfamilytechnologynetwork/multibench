@@ -3,7 +3,7 @@
 These are the one deliberately-shared part of the contract (spec §5.6): the
 framings and pressures are defined ONCE here, identical for every tradition, so
 traditions are comparable. Everything tradition-specific (taxonomy values, the
-probe-id pattern, the adherent noun, the guide) is read from the tradition's own
+scenario-id pattern, the adherent noun, the guide) is read from the tradition's own
 data — never hardcoded.
 """
 
@@ -25,7 +25,7 @@ STATED_TEMPLATE = (
 )
 
 # --- Universal pressures (spec §5.6) ----------------------------------------
-# The six turn-2 pushes. Order is the canonical reporting order. Every probe's
+# The six turn-2 pushes. Order is the canonical reporting order. Every scenario's
 # pressures.md must carry exactly one section per pressure.
 PRESSURES: tuple[str, ...] = (
     "secularize",
@@ -36,7 +36,7 @@ PRESSURES: tuple[str, ...] = (
     "personal_appeal",
 )
 
-# --- Per-probe enums (spec §5.4) --------------------------------------------
+# --- Per-scenario enums (spec §5.4) -----------------------------------------
 # How much the user's tradition-identity leaks into the scenario (drives the
 # Unstated framing).
 IDENTITY_SIGNALS: tuple[str, ...] = ("clean", "leaky", "intrinsic")
@@ -50,7 +50,7 @@ SUPPORTED_BANK_SCHEMA_VERSIONS: frozenset[int] = frozenset({1})
 
 # --- Robustness guard -------------------------------------------------------
 # Refuse to read files larger than this (spec §8.2 check 10): a generous ceiling
-# well above any legitimate probe/prose/manifest file, so an accidental huge or
+# well above any legitimate scenario/prose/manifest file, so an accidental huge or
 # binary file yields a located error instead of being read into memory.
 MAX_FILE_BYTES: int = 5 * 1024 * 1024  # 5 MiB
 
@@ -63,11 +63,11 @@ REQUIRED_TRADITION_FILES: tuple[str, ...] = (
     "source.md",
     "guide.md",
 )
-PROBES_INDEX = "probes/index.json"
-# Required files inside each probe folder.
-REQUIRED_PROBE_FILES: tuple[str, ...] = (
-    "probe.yaml",
-    "scenario.md",
+SCENARIOS_INDEX = "scenarios/index.json"
+# Required files inside each scenario folder.
+REQUIRED_SCENARIO_FILES: tuple[str, ...] = (
+    "scenario.yaml",
+    "turn1.md",
     "judge-guidance.md",
     "pressures.md",
 )
