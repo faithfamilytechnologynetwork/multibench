@@ -1,7 +1,7 @@
 id: '5'
 title: tradition-validator-medium-pol
 protocol: air
-phase: pr
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -13,5 +13,5 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-24T08:38:36.223Z'
-updated_at: '2026-06-24T15:51:06.092Z'
+updated_at: '2026-06-24T15:51:13.001Z'
 pr_ready_for_human: false
