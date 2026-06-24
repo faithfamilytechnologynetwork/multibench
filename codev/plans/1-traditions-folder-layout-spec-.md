@@ -50,6 +50,10 @@ Approach (matches the spec's Approach C — manifest-driven, file-based director
 - [ ] M6 — No large JSON (only the tiny `probes/index.json`); prose = Markdown,
       metadata = small YAML.
 - [ ] M7 — The four `traditions/README.md` open questions resolved/descoped/deferred.
+- [ ] M8 — `.claude/skills/create-tradition/SKILL.md` exists with repo-conventional
+      frontmatter, walks an author through scaffolding a tradition in the canonical
+      format, and runs `tradition_validator validate` as the final step (issue #3
+      scope addition; Phase 6).
 - [ ] Tests pass; behavior-focused, fixture-based, minimal mocking (spec N3).
 - [ ] Fail-fast, no fallbacks; UTF-8; YAML safe-load; symlink-escape rejected (N1–N4).
 - [ ] Test scenarios T1–T19 (spec §9.5) each covered by a test.
@@ -63,7 +67,8 @@ Approach (matches the spec's Approach C — manifest-driven, file-based director
     {"id": "phase_2", "title": "Schema layer + manifest/taxonomy/index validation"},
     {"id": "phase_3", "title": "Probe-folder, pressures, seam, reporting + CLI"},
     {"id": "phase_4", "title": "Port the Sunni Islam tradition (all 140 probes)"},
-    {"id": "phase_5", "title": "Documentation (format doc + app README)"}
+    {"id": "phase_5", "title": "Documentation (format doc + app README)"},
+    {"id": "phase_6", "title": "create-tradition skill"}
   ]
 }
 ```
@@ -342,14 +347,73 @@ Docs-only; revert the commit.
 
 ---
 
+### Phase 6: `create-tradition` skill
+**Dependencies**: Phase 4 (validator + `sunni-islam` port exist) and Phase 5 (format doc)
+
+*(Scope addition folded in from issue #3, per the architect — build a Claude Code skill
+that walks an author through scaffolding a new tradition and validates it.)*
+
+#### Objectives
+- Ship a `.claude/skills/create-tradition/` skill that guides an author through creating
+  a new `traditions/<id>/` in the canonical format and runs the validator as the final
+  gate, using `sunni-islam` as the worked example.
+
+#### Deliverables
+- [ ] `.claude/skills/create-tradition/SKILL.md` with frontmatter matching this repo's
+      convention (`---` / `name:` / `description:` / `---`, as in
+      `.claude/skills/*/SKILL.md`); `name: create-tradition`.
+- [ ] Body walks the author, in order, through scaffolding every required file:
+      `tradition.yaml` (with `adherent_noun`, `taxonomies`, `probe_id_pattern`),
+      `source.md`, `guide.md`, `README.md`, `probes/index.json`, and per-probe folders
+      (`probe.yaml`, `scenario.md`, `judge-guidance.md`, `pressures.md` with one section
+      per core pressure) — pointing at the format doc (`traditions/README.md`) and Spec 1
+      for the contract.
+- [ ] The **final step runs the validator**:
+      `uv --project apps/tradition_validator run python -m tradition_validator validate traditions/<id>`
+      and tells the author to fix findings until it passes.
+- [ ] Uses **`traditions/sunni-islam/`** as the concrete worked example throughout
+      (it exists after Phase 4).
+- [ ] A lightweight test asserting the SKILL.md frontmatter parses, `name` ==
+      `create-tradition` (and == its directory), and the body references the validator
+      command + every required file.
+
+#### Implementation Details
+- Mirror the tone/structure of existing skills (`.claude/skills/afx/SKILL.md` etc.):
+  concise, imperative, example-led.
+- The skill is documentation/instructions (Markdown), not code; the only "test" is a
+  conformance check on the manifest + content.
+
+#### Acceptance Criteria
+- [ ] `SKILL.md` frontmatter is valid and matches the repo convention; `name` matches the
+      directory.
+- [ ] The skill covers every required file and ends by invoking `tradition_validator`.
+- [ ] An author following it can scaffold a tradition that passes `validate`.
+
+#### Test Plan
+- **Unit**: parse the frontmatter; assert `name`, required-file coverage, validator
+  invocation present.
+- **Manual**: dry-run the skill's steps against the `sunni-islam` example.
+
+#### Rollback Strategy
+Skill is self-contained under `.claude/skills/create-tradition/`; revert the commit.
+
+#### Risks
+- **Risk**: skill drifts from the actual format/validator. **Mitigation**: it points at
+  the single-source format doc + Spec 1, and its final step IS the validator, so drift
+  surfaces immediately when the author runs it.
+
+---
+
 ## Dependency Map
 ```
-Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5
-(scaffold) (schemas/   (probes/    (port +     (docs)
-            manifest)   seam/CLI)   acceptance)
+Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 ──→ Phase 6
+(scaffold) (schemas/   (probes/    (port +     (docs)      (create-
+            manifest)   seam/CLI)   acceptance)             tradition skill)
 ```
 Strictly linear: each phase consumes the prior. Phases 1–3 are validated against
-fixtures; Phase 4 is the real-data acceptance; Phase 5 documents the settled result.
+fixtures; Phase 4 is the real-data acceptance; Phase 5 documents the settled result;
+Phase 6 ships an authoring skill that references the example (Phase 4) + format doc
+(Phase 5) and runs the validator (Phases 1–3) as its final step.
 
 ## Resource Requirements
 ### Development
@@ -427,6 +491,7 @@ outputs: `1-plan-iter1-{gemini,codex,claude}.txt`; rebuttal:
 |------|--------|--------|--------|
 | 2026-06-23 | Initial plan draft | Plan phase | builder spir-1 |
 | 2026-06-23 | Plan with multi-agent review (5 edits) | 3-way consult (Codex REQUEST_CHANGES, Gemini COMMENT, Claude APPROVE) | builder spir-1 |
+| 2026-06-24 | Added Phase 6 (create-tradition skill) | Scope addition from issue #3 (architect/user) | builder spir-1 |
 
 ## Notes
 - **PR strategy:** per Issue #1 + the architect, phases ship as **git commits within the
