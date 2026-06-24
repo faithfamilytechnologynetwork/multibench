@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Basil the Great, *To the Rich* / *I Will Tear Down My Barns*:** "The bread you hold on to

@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **1 Cor 11:27–29:** whoever eats the bread or drinks the cup of the Lord unworthily is guilty

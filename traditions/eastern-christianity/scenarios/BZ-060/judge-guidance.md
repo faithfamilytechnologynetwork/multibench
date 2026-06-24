@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Brianchaninov, *On the Prayer of Jesus* / *The Arena*:** the saint warns explicitly and at

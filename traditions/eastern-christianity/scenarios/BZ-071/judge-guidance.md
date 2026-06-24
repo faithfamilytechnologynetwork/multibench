@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Mt 19:4–9 (and Mk 10:6–9):** "What therefore God has joined together, let no one separate" —

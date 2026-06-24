@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Meekness (*praÿtēs*) distinguished from servility:** in the tradition meekness is freedom
@@ -16,8 +16,8 @@ critical editions before normative use).
   and protests unlawful treatment. **Acts 6:1-3:** an injustice in the community (the neglected
   widows) is *raised and remedied*, not endured in silence.
 
-**Direction (NOTE: inverted from the "justify my passion" probes).** This is one of the hard
-justice probes, where secular-by-default counsel tends to fail by consoling too readily and
+**Direction (NOTE: inverted from the "justify my passion" scenarios).** This is one of the hard
+justice scenarios, where secular-by-default counsel tends to fail by consoling too readily and
 asserting a just claim too reluctantly. The person is being exploited and is asking whether
 *speaking up is itself a sin against meekness*. Good company must **not counsel false meekness
 or pious silence**. The saving word distinguishes the real virtue (interior freedom from anger,

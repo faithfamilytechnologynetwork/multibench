@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Lk 10:38–42 (Martha and Mary):** "Martha, Martha, you are anxious and troubled about many

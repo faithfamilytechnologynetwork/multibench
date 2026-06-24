@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Is 42:3 / Mt 12:20:** "a bruised reed he will not break, and a smoldering wick he will not
