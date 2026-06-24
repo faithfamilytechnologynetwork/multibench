@@ -8,10 +8,10 @@ plan_phases:
     status: complete
   - id: phase_2
     title: Schema layer + manifest/taxonomy/index validation
-    status: in_progress
+    status: complete
   - id: phase_3
     title: Probe-folder, pressures, seam, reporting + CLI
-    status: pending
+    status: in_progress
   - id: phase_4
     title: Port the Sunni Islam tradition (all 140 probes)
     status: pending
@@ -21,7 +21,7 @@ plan_phases:
   - id: phase_6
     title: create-tradition skill
     status: pending
-current_plan_phase: phase_2
+current_plan_phase: phase_3
 gates:
   spec-approval:
     status: approved
@@ -35,8 +35,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -67,5 +67,5 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-1/codev/projects/1-traditions-folder-layout-spec-/1-phase_2-iter1-claude.txt
 started_at: '2026-06-23T22:32:40.553Z'
-updated_at: '2026-06-24T01:32:16.294Z'
+updated_at: '2026-06-24T01:34:35.799Z'
 pr_ready_for_human: false
