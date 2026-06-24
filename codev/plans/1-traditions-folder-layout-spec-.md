@@ -151,6 +151,10 @@ Phase is additive (new `apps/tradition_validator/` + `.gitignore`); revert the c
 #### Implementation Details
 - Findings carry a path (field path or file) so messages match the spec §8.3 contract.
 - The valid fixture is the backbone for later phases (extended, not duplicated).
+- **Pydantic strict typing** (note): strict `str` fields also reject an unquoted integer
+  (`id: 123`, `id: 001`) and an unquoted bool (`no`/`yes`) — both surface as type errors,
+  not silent conversions (spec §8.2 check 8). String fields that legitimately look
+  numeric (none in this schema) would require quoting.
 
 #### Acceptance Criteria
 - [ ] Valid fixture → no manifest/index findings.
@@ -188,10 +192,19 @@ Additive modules; revert the commit. No earlier phase touched.
       M5)**; `pressures.md` parsed for `## ` sections via `normalize_heading` — all six
       core pressures present, none unknown, none duplicated, each body non-empty,
       preamble-before-first-heading ignored (spec §5.6).
+- [ ] **Tradition-level prose checks (spec §8.2 check 9):** `README.md` and `source.md`
+      present **and non-empty** (presence is from Phase 1's structure check; non-empty is
+      added here alongside the other prose-content checks). Tests assert empty
+      `README.md`/`source.md` each → located error.
 - [ ] Warnings for unexpected non-dot files in a probe folder; dotfiles/system files
       ignored (spec §8.2 checks 4–5).
 - [ ] Safety: UTF-8 enforced; reject symlinks/paths escaping the tradition dir;
-      malformed/oversized inputs → located error not traceback (N4).
+      malformed inputs → located error not traceback (N4). **Oversized handling
+      (concrete, for T15):** `loaders.py` checks each file's size before reading; a file
+      exceeding a `MAX_FILE_BYTES` guard in `core.py` (generous default, e.g. 5 MB —
+      well above any legitimate probe/prose file) yields a located error instead of
+      being read into memory; a truncated YAML/JSON file surfaces as a located parse
+      error (not a traceback).
 - [ ] `--format json` output `{tradition, ok, findings:[…]}` (spec §8.3); `validate-all`
       globs `*/tradition.yaml`; exit-code semantics finalized (0 iff no errors; under
       `--strict`, no warnings).
@@ -237,15 +250,21 @@ fixtures) — the port (Phase 4) is independent.
       (`uv run python -m tradition_validator.port_jaleesbench --source tmp/jaleesbench-source --out traditions/sunni-islam`).
       Reads `probes.json` (+ `prompts.py` GUIDE text staged as a file); writes the tree
       per the spec §6 delta table.
-- [ ] Fetch step: `gh api` raw reads of JaleesBench `jaleesbench/jaleesbench/data/probes.json`
-      and the guide text into `tmp/jaleesbench-source/` (spec §3.3b); architect-stage
-      fallback documented.
+- [ ] Fetch step: `gh api` raw reads into `tmp/jaleesbench-source/` (spec §3.3b;
+      architect-stage fallback) of:
+      `jaleesbench/jaleesbench/data/probes.json` (the bank),
+      `jaleesbench/jaleesbench/prompts.py` (the porter extracts the `GUIDE` string for
+      `guide.md` and `STATED` for confirming `adherent_noun`), and
+      `jaleesbench/jaleesbench/mapping.py` (the `PILLARS`/`HEARTS` sets for `taxonomies`).
 - [ ] Generated `traditions/sunni-islam/`: `tradition.yaml` (id `sunni-islam`,
       `display_name` Sunni Islam, construct, `canonical_source` {Riyāḍ al-Ṣāliḥīn,
       al-Nawawī, bab}, `adherent_noun: Muslim`, `taxonomies` {pillars, hearts from
       `mapping.py`}, `probe_id_pattern: ^JLS-\d{3}$`, maintainers, scholar_review),
-      `source.md`, `guide.md`, `probes/index.json`, and **140** `JLS-NNN/` folders each
-      with `probe.yaml`, `scenario.md`, `judge-guidance.md`, `pressures.md`.
+      `source.md` (Riyāḍ al-Ṣāliḥīn rationale), `guide.md` (from `prompts.GUIDE`),
+      **a finalized conformant `README.md`** (the porter replaces the current "to port"
+      stub with a non-empty overview so M2/§8.2-check-9 pass; Phase 5 may further
+      polish it), `probes/index.json`, and **140** `JLS-NNN/` folders each with
+      `probe.yaml`, `scenario.md`, `judge-guidance.md`, `pressures.md`.
 - [ ] Integration test `tests/test_port_sunni_islam.py`: `validate traditions/sunni-islam`
       → exit 0, zero errors (skips cleanly if the tradition isn't generated, so the suite
       is hermetic; the committed tradition makes it run).
@@ -382,9 +401,22 @@ own output *is* its observability: located findings + exit codes.)
 - [ ] Confirm `uv sync && uv run pytest` green from a clean checkout.
 
 ## Expert Review
-**Date**: (pending) — porch runs the 3-way consult after this draft.
-**Key Feedback**: (to be filled from Gemini/Codex/Claude.)
-**Plan Adjustments**: (to be filled.)
+**Date**: 2026-06-23 — 3-way consult (iter 1).
+**Verdicts**: Claude **APPROVE**, Gemini **COMMENT**, Codex **REQUEST_CHANGES** (all HIGH).
+**Key Feedback** (all accepted, no pushback):
+- README.md / source.md **non-empty** validation wasn't an explicit deliverable
+  (Codex, Gemini) → added to Phase 3.
+- Phase 4 omitted `traditions/sunni-islam/README.md` and didn't say when the stub is
+  finalized (Codex) → added a finalized conformant README to Phase 4 deliverables.
+- T15 "oversized" handling lacked a concrete approach (Codex) → defined a
+  `MAX_FILE_BYTES` size guard in Phase 3.
+- Guide-text fetch source underspecified (Gemini) → Phase 4 now fetches `prompts.py`
+  (for `GUIDE`/`STATED`) and `mapping.py` (for taxonomies) explicitly.
+- Pydantic strict typing also rejects unquoted int ids (Gemini) → noted in Phase 2.
+
+**Plan Adjustments**: applied the five edits above; phase structure unchanged. Consult
+outputs: `1-plan-iter1-{gemini,codex,claude}.txt`; rebuttal:
+`1-plan-iter1-rebuttals.md`.
 
 ## Approval
 - [ ] Expert AI Consultation Complete (3-way)
@@ -394,6 +426,7 @@ own output *is* its observability: located findings + exit codes.)
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
 | 2026-06-23 | Initial plan draft | Plan phase | builder spir-1 |
+| 2026-06-23 | Plan with multi-agent review (5 edits) | 3-way consult (Codex REQUEST_CHANGES, Gemini COMMENT, Claude APPROVE) | builder spir-1 |
 
 ## Notes
 - **PR strategy:** per Issue #1 + the architect, phases ship as **git commits within the

@@ -177,3 +177,13 @@ unknown-key + `no`→bool requirements. Validator built test-first vs fixtures, 
 the validate CLI) — flagged for consult/architect. Porch checks (plan_exists/phases_json/
 ≥2 phases) verified. Next: commit, `porch done 1` → 3-way plan consult → plan-approval gate
 (pre-approved; will ping architect).
+
+## 2026-06-23 — Plan 3-way consult (iter 1)
+
+Verdicts: **Claude APPROVE, Gemini COMMENT, Codex REQUEST_CHANGES** (all HIGH). All
+accepted (no pushback), 5 edits, phases unchanged: (1) README.md/source.md non-empty
+checks → Phase 3; (2) finalized sunni-islam README.md → Phase 4; (3) concrete oversized
+handling (`MAX_FILE_BYTES` guard) → Phase 3; (4) Phase-4 fetch now pulls prompts.py +
+mapping.py explicitly; (5) Pydantic-strict-rejects-int note → Phase 2. Logged in plan
+Expert Review + `1-plan-iter1-rebuttals.md`. Next: commit, rebuttal via porch, → plan
+gate, ping architect (pre-approved).
