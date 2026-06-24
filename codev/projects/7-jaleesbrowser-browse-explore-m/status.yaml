@@ -1,33 +1,14 @@
 id: '7'
 title: jaleesbrowser-browse-explore-m
 protocol: spir
-phase: implement
-plan_phases:
-  - id: phase_1
-    title: Package scaffold + format constants + tolerant reader core (discovery + manifest + safe-read)
-    status: in_progress
-  - id: phase_2
-    title: 'Scenario & section reading: index/folder drift, scenario.yaml, pressures parsing, notices'
-    status: pending
-  - id: phase_3
-    title: 'Rendering layer: Jinja2 templates + safe markdown pipeline (views as HTML strings)'
-    status: pending
-  - id: phase_4
-    title: Static-site build command + client-side filter/search + determinism & link integrity
-    status: pending
-  - id: phase_5
-    title: serve [--watch], README, and end-to-end CLI polish
-    status: pending
-current_plan_phase: phase_1
+phase: specify
+plan_phases: []
+current_plan_phase: null
 gates:
   spec-approval:
-    status: approved
-    requested_at: '2026-06-24T06:51:37.381Z'
-    approved_at: '2026-06-24T08:20:12.525Z'
+    status: pending
   plan-approval:
-    status: approved
-    requested_at: '2026-06-24T08:54:01.726Z'
-    approved_at: '2026-06-24T15:51:14.837Z'
+    status: pending
   pr:
     status: pending
   verify-approval:
@@ -36,4 +17,5 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-24T06:34:20.093Z'
-updated_at: '2026-06-24T15:51:27.072Z'
+updated_at: '2026-06-24T15:55:31.935Z'
+pr_ready_for_human: false
