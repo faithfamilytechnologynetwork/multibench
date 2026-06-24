@@ -337,3 +337,13 @@ judge-guidance.md + pressures.md). **`validate traditions/sunni-islam` → PASS,
 claude APPROVE; codex consult initially didn't write output (porch flagged "run remaining
 consultations (codex)") → re-ran codex → APPROVE. **Both APPROVE → phase_4 COMPLETE.** Now
 at **phase_5** (docs: expand traditions/README.md = M1, app READMEs).
+
+## 2026-06-24 — Phase 5 COMPLETE (docs) → Phase 6 (skill)
+
+Rewrote `traditions/README.md` as the canonical format doc (M1); expanded
+`apps/tradition_validator/README.md` (usage + JSON shape + port cmd); updated `apps/README.md`;
+added `test_docs.py` doc-drift guard. Phase 5 consult took 3 iters: iter1 (codex RC / claude
+COMMENT) stale root-README status → fixed; iter2 (codex RC / claude APPROVE) validator README
+claimed bad-path→exit2 but it's exit1 → corrected README + added exit-code test; iter3
+**both APPROVE → phase_5 COMPLETE**. 70 tests pass. Now at **phase_6** — the
+`create-tradition` skill (final phase).
