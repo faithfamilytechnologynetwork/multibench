@@ -32,13 +32,14 @@ gates:
     requested_at: '2026-06-24T00:41:13.451Z'
     approved_at: '2026-06-24T00:43:53.470Z'
   pr:
-    status: pending
+    status: approved
     requested_at: '2026-06-24T02:28:14.837Z'
+    approved_at: '2026-06-24T05:12:31.068Z'
   verify-approval:
     status: pending
 iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-23T22:32:40.553Z'
-updated_at: '2026-06-24T02:28:14.837Z'
-pr_ready_for_human: true
+updated_at: '2026-06-24T05:12:31.068Z'
+pr_ready_for_human: false
