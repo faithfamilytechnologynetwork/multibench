@@ -77,3 +77,22 @@ unbuilt) → no separate spec re-gate; rides to human at plan-approval. Flagged 
 
 Next: rebuttal written → `porch done 7` → expect plan-approval gate. Notify architect +
 coordinate with #8 (spir-8) on the eventual result schema.
+
+## 2026-06-24 — Plan iter-2 consult + #6 MERGED → rebased onto main
+
+Plan iter-2 consult: **Codex REQUEST_CHANGES** (one point: Phase-4 client-filter testing too
+manual) + **Claude APPROVE** (all iter-1 gaps resolved, full spec coverage). Fixed Codex's
+point by extracting filter/sort/query-state into a **pure-Python `filtering.py`** (the
+authoritative semantics) with exhaustive `test_filtering.py`; JS reduced to a thin applier.
+No spec-required behavior now rests on a manual check.
+
+**#6/#9 MERGED on main** (commit 31620e2) + follow-up #10 — and per architect, **rebased
+builder/spir-7 onto origin/main** (clean, 0 conflicts; my codev/* files don't overlap main's
+traditions/ rename). Verified real post-rename data matches my `constants.py`:
+`scenarios/` + `index.json` key `"scenarios"` + `scenario.yaml` + `turn1.md` +
+`scenario_id_pattern`. **R1 (top risk) RESOLVED.** Bonus: a 2nd real tradition landed —
+`eastern-christianity` (100 scenarios, BZ-### ids, axes passions/virtues/economia/register vs
+sunni-islam's pillars/hearts) → now a real test of multi-tradition discovery + no-hardcoded-axes.
+
+Plan + spec updated (R1 resolved, filtering.py, 2-tradition verification). Next: `porch done 7`
+→ iter-3 consult → expect plan-approval gate (human). Then coordinate w/ #8 on result schema.

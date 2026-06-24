@@ -16,9 +16,11 @@ their scenarios — plus a `serve [--watch]` convenience. The package mirrors th
 
 The build splits into a **data layer** (tolerant, fail-soft reader → in-memory model) and a
 **presentation layer** (Jinja2 render → static build → serve), so the data layer is fully
-testable before any HTML exists. Verification throughout uses **synthetic post-rename
-fixtures** (the #6 rename is not merged yet), and a final rebase-onto-`main` happens in the
-Verify phase.
+testable before any HTML exists. Verification uses **synthetic fixtures** for the
+malformed/degradation cases (which cannot be produced from the read-only real data) **and the
+two real post-rename traditions** — `sunni-islam` (140) and `eastern-christianity` (100) — now
+that **#6 has merged (PR #9, commit 31620e2) and this branch is rebased onto `main`**, so we
+plan/implement against real renamed data rather than a hypothesised format.
 
 ### Plan-level decisions (resolving the spec's deferred open questions)
 
@@ -98,7 +100,8 @@ apps/multibrowser/
     loader.py                   # tolerant discover/load → model (P1 discovery+manifest, P2 scenarios)
     markdown.py                 # markdown-it-py + nh3 render-to-safe-HTML (P3)
     render.py                   # Jinja2 render of index/tradition/scenario (P3)
-    site.py                     # build orchestration + filter-index JSON (P4)
+    filtering.py                # pure filter/sort/query-state fns + filter-index builder (P4) — Python-tested semantics
+    site.py                     # build orchestration + page writing (P4)
     serve.py                    # http.server + optional watchfiles rebuild (P5)
     templates/                  # *.html.j2 (P3)
     assets/                     # styles.css (P3), filter.js (P4) — all local, no CDN
@@ -107,7 +110,7 @@ apps/multibrowser/
     test_safeio.py test_loader_discovery.py  # P1
     test_loader_scenarios.py                  # P2
     test_render.py                            # P3
-    test_site.py                              # P4
+    test_filtering.py  test_site.py           # P4
     test_cli.py                               # P5
 ```
 
@@ -130,7 +133,10 @@ apps/multibrowser/
       `PRESSURES_FILE="pressures.md"`, `INDEX="scenarios/index.json"`,
       `ID_PATTERN_KEY="scenario_id_pattern"`), plus `PRESSURES` (6, canonical order),
       `FRAMINGS`, `IDENTITY_SIGNALS`, `STATED_TEMPLATE`, `MAX_FILE_BYTES=5*1024*1024`,
-      `normalize_heading()`. **All format names live here only** (one-file edit at #6 rebase).
+      `normalize_heading()` (trim → lowercase → spaces/hyphens → `_`, matching the validator).
+      **All format names live here only** (kept isolated for future-proofing; #6 is already
+      merged, so these now match real data — verified: `index.json` inner key is `scenarios`,
+      manifest key is `scenario_id_pattern`).
 - [ ] `model.py`: `Notice(severity, scope, where, message)`, `TaxonomyAxis`, `Manifest`,
       `Tradition` (manifest + **prose: README/source/guide (text|None + notices)** + scenarios +
       aggregated notices), placeholder `Scenario` (filled in P2) including the **results-ready**
@@ -306,23 +312,39 @@ Revert the phase commit; data layer (P1/P2) unaffected.
 
 #### Objectives
 - `multibrowser build --out DIR`: write the full static site (index + per-tradition +
-  per-scenario pages + assets), an embedded **filter-index JSON**, and **client-side
-  filter/search** (OR-within-axis, AND-across-axes, free-text). Guarantee determinism,
-  link-integrity, and read-only.
+  per-scenario pages + assets) and an embedded **filter-index**, with the filter/sort/
+  query-state **semantics implemented as pure, automatically-tested Python** and the client JS
+  as a thin applier. Guarantee determinism, link-integrity, and read-only.
 
 #### Deliverables
+- [ ] **`filtering.py` — the authoritative filter/sort/query-state semantics as pure Python
+      functions** (this resolves the iter-2 "client behavior must be *automatically* tested"
+      gap; Codex offered "a Python-side reference implementation checked against generated
+      filter-index cases" as an acceptable path — this is it):
+  - `build_filter_index(tradition) -> dict`: the per-tradition data the site embeds (per
+    scenario: per-axis tag membership, `identity_signal`, `source_locus`, lowercased
+    `search_text`). Deterministic (sorted keys/order).
+  - `apply_selection(index, selection) -> list[id]`: **OR-within-axis, AND-across-axes**, plus
+    identity_signal, `source_locus` range, and free-text — the single source of truth for the
+    spec's filter semantics.
+  - `sort_ids(index, key) -> list[id]`: by `id` or `source_locus` (S1).
+  - `encode_selection` / `decode_selection`: Selection ⇄ query string, round-trippable and
+    **fail-soft** to defaults on bad input (S3).
+- [ ] `assets/filter.js`: a **thin applier** of the embedded index that mirrors
+      `apply_selection` / `sort_ids` / `decode_selection` over the precomputed membership — so
+      the JS surface stays minimal and the *semantics* live in the Python-tested reference. (No
+      JS test toolchain is added; the JS mirrors a documented, Python-verified contract.)
+      OR-within/AND-across tag filters, identity_signal, `source_locus` range (min/max inputs),
+      free-text, sort, live result counts; active filters+sort reflected in the query string,
+      fail-soft restore. No framework, no CDN.
 - [ ] `site.py`: orchestrate output paths (stable scheme: `index.html`,
-      `<tradition>/index.html`, `<tradition>/<scenario_id>.html`), write pages, copy
-      `assets/`, emit a per-tradition `filter-index.json` (scenarios × tags/identity_signal/
-      locus/search-text), **safely serialized** (`</` escaped). Deterministic: sorted keys,
-      stable ordering, no timestamps. **Writes only under `--out`.**
-- [ ] `assets/filter.js`: vanilla JS reading the embedded index; OR-within/AND-across tag
-      filters, identity_signal filter, **`source_locus` range filter (min/max numeric inputs)**,
-      free-text search, **sort by `id` or `source_locus` (S1)**, live result counts; reflect
-      active filters + sort in the query string (S3), fail-soft restore. No framework, no CDN.
+      `<tradition>/index.html`, `<tradition>/<scenario_id>.html`), write pages, copy `assets/`,
+      embed each tradition's `build_filter_index(...)` output, **safely serialized** (`</`
+      escaped). Deterministic: sorted keys, stable ordering, no timestamps. **Writes only under
+      `--out`.**
 - [ ] `cli.py`: `build(traditions_root=Path("traditions"), out=Path("dist"))` Typer command;
       fail-loud on invalid root / no traditions / unwritable out (invocation class).
-- [ ] `tests/test_site.py`.
+- [ ] `tests/test_filtering.py` (**exhaustive, automated**) + `tests/test_site.py`.
 
 #### Implementation Details
 - **Suggested intra-phase order** (this is the densest phase): output-path scheme →
@@ -340,25 +362,31 @@ Revert the phase commit; data layer (P1/P2) unaffected.
 - [ ] Re-running `build` on unchanged input is **byte-identical** (determinism).
 - [ ] Tradition tree **unchanged** after build (snapshot invariant).
 - [ ] No emitted file references an external CDN/URL.
-- [ ] Filter-index JSON present and well-formed; it carries the data needed for
-      OR-within/AND-across filtering, locus-range, free-text, and **sort by id/source_locus**
-      (filter/sort logic unit-tested where feasible — e.g. membership precomputed server-side —
-      else asserted via the embedded data + a documented manual check).
+- [ ] **Filter/sort/query-state semantics are automatically tested in `filtering.py`** —
+      `apply_selection` (OR-within/AND-across, identity_signal, locus-range, free-text),
+      `sort_ids`, and `encode∘decode` round-trip are covered by `test_filtering.py` against
+      generated cases over both real axis shapes; **no spec-required behavior rests on a manual
+      check.** The embedded index is the same `build_filter_index` output the tests exercise.
 - [ ] All Phase-4 tests pass.
 
 #### Test Plan
-- **Unit**: output-path scheme; filter-index construction (OR/AND membership precomputed or
-  asserted); determinism (build twice, diff).
-- **Integration**: full build of fixture → link integrity + read-only snapshot + no-CDN scan.
-- **Manual**: open `dist/index.html` via `file://`, exercise filters/search/deep-links.
+- **Unit (automated, primary)**: `test_filtering.py` — exhaustive `apply_selection` /
+  `sort_ids` / `encode∘decode` over generated selections on both traditions' axis shapes,
+  including OR-within/AND-across, locus-range edges, free-text, and malformed-query→defaults.
+- **Unit**: output-path scheme; determinism (build twice, diff).
+- **Integration**: full build of fixture + the two real traditions → link integrity +
+  read-only snapshot + no-CDN scan.
+- **Manual (confirmatory only, not the test of record)**: open `dist/index.html` via `file://`,
+  exercise filters/search/deep-links to confirm the JS applier matches the Python reference.
 
 #### Rollback Strategy
 Revert the phase commit; P1–P3 (data + render-to-string) remain usable and tested.
 
 #### Risks
 - **Risk**: client JS filter logic drifts from the spec's OR/AND semantics.
-  **Mitigation**: precompute membership server-side into the index where possible; document
-  and manually verify the JS path; keep logic minimal.
+  **Mitigation**: the semantics live in the **Python-tested `filtering.py` reference**; the JS
+  is a thin applier of its precomputed membership over a documented contract; keep JS logic
+  minimal so drift surface is tiny.
 - **Risk**: non-determinism from dict/set ordering. **Mitigation**: sort everything emitted.
 
 ---
@@ -424,8 +452,8 @@ Strictly linear: each phase builds on the prior and is independently committable
 ### Technical Risks
 | Risk | Probability | Impact | Mitigation |
 |------|------------|--------|------------|
-| #6 (probe→scenario rename) not merged; real data still old vocab | H | M | Build against post-rename; verify on synthetic fixtures; names isolated in `constants.py`; rebase + verify on real data in Verify phase |
-| `scenario.md`→`turn1.md` is #6's least-obvious rename | M | M | Confirm against #6's actual impl at rebase; single-file fix in `constants.py` |
+| ~~#6 not merged~~ — **RESOLVED**: #6 merged (PR #9, `31620e2`) + follow-ups (#10); branch **rebased onto `main`** | done | M | Real post-rename data confirmed on disk (`scenarios/`, `scenario.yaml`, `turn1.md`, `scenario_id_pattern`, `index.json` key `scenarios`) and matches `constants.py`; build/implement against real data + the renamed validator |
+| ~~`scenario.md`→`turn1.md` least-obvious rename~~ — **confirmed on real data** (`scenarios/<id>/turn1.md` exists) | done | — | `constants.py` already targets `turn1.md` |
 | #8 result schema still speccing; multibrowser must consume it later | M | M | v1 fixes only the seam shape (optional `results` slot + `load_results` boundary + reserved region); defer field-level schema binding to a #8-coordinated follow-up; **no fake results in v1** |
 | Over-building toward a results UI | L | M | Spec §2.1/§4 reframing; no score/compare code anywhere |
 | Markdown sanitizer strips Arabic/citations | M | M | Allow-list tuned; Arabic/citation fixtures assert survival |
@@ -442,9 +470,11 @@ N/A — progress measured by completed phases, not time (per protocol).
    no-CDN — all green on the fixture.
 3. **Before "done" (Phase 5)**: real-user path — `serve` and browse locally; full suite green;
    confirm the results-ready seams are present and **inert** (`results=None`, empty reserved region).
-4. **Verify phase (post-merge)**: rebase onto `main` after #6; run `build`/`serve` against the
-   real `traditions/sunni-islam`; confirm the 140-scenario tradition renders + filters + stays
-   read-only.
+4. **During Implement (real data — #6 already merged + rebased)**: run `build`/`serve` against
+   the real `traditions/sunni-islam` (140) **and** `traditions/eastern-christianity` (100,
+   different axes: `passions`/`virtues`/`economia`/`register`) — confirms multi-tradition
+   discovery, no-hardcoded-axes, the 140/100-scenario render + filter, and read-only. The
+   Verify phase re-confirms on the integrated `main`.
 
 ## Monitoring and Observability
 N/A — a static-site generator / local CLI. "Observability" = the inline notices surfaced in
@@ -486,6 +516,22 @@ mitigated by keeping `--watch` off the tested path).
 (`Scenario.results=None`, `load_results→None`, reserved `_results.html.j2`) threaded through
 P1–P3, anticipating #8, with **no results UI built in v1**.
 
+**Plan iteration 2 (2026-06-24) — Codex: REQUEST_CHANGES (one point) · Claude: APPROVE.** Claude
+confirmed all iter-1 gaps resolved and every spec requirement covered. Codex's sole remaining
+point: Phase 4's filter/query-state testing was "unit-tested where feasible / documented manual
+check" — too weak for a spec-required acceptance path. **Resolved** by extracting the
+filter/sort/query-state semantics into a pure-Python **`filtering.py`** (the authoritative,
+exhaustively `test_filtering.py`-covered reference — exactly Codex's suggested "Python-side
+reference checked against generated filter-index cases"), with the client JS reduced to a thin
+applier of its precomputed membership. No spec-required behavior now rests on a manual check.
+
+**Real-data rebase (2026-06-24):** #6 merged on `main` (PR #9 `31620e2` + #10) mid-Plan; per
+the architect, **rebased this branch onto `main`** so plan/implement run against real renamed
+data. Verified on disk that the format matches `constants.py` (`scenarios/`, `scenario.yaml`,
+`turn1.md`, `scenario_id_pattern`, `index.json` key `scenarios`). R1 (the top risk) is resolved;
+a **second real tradition** `eastern-christianity` (100 scenarios, axes `passions`/`virtues`/
+`economia`/`register`) now exercises multi-tradition discovery + no-hardcoded-axes for real.
+
 ## Approval
 - [ ] Expert AI Consultation Complete
 - [ ] Human plan-approval gate
@@ -496,13 +542,16 @@ P1–P3, anticipating #8, with **no results UI built in v1**.
 | 2026-06-24 | Initial plan | Spec 7 approved | builder spir-7 |
 | 2026-06-24 | Plan iter-1 review folded in (Codex REQUEST_CHANGES / Claude APPROVE): prose loading, S1 sort, stub-tradition rendering + minor notes | Consultation feedback | builder spir-7 |
 | 2026-06-24 | Rename → `multibrowser`; results posture → results-ready (inert seams for #8) | Architect-directed | builder spir-7 |
+| 2026-06-24 | Plan iter-2: added `filtering.py` (Python-tested filter/sort/query-state semantics) resolving Codex's "client behavior must be automatically tested" gap | Consultation feedback | builder spir-7 |
+| 2026-06-24 | #6 merged → **rebased branch onto `main`**; R1 resolved; now verifying against 2 real traditions (sunni-islam 140 + eastern-christianity 100) | Architect-directed | builder spir-7 |
 
 ## Notes
 - **Phases ship as git commits within a single PR** (per the issue's PR strategy), not as
   separate PRs; the PR opens during/after Phase 5 unless the architect requests an earlier one.
-- The `#6` dependency is acknowledged and accepted per the issue's directive; it is the top
-  risk and is handled by fixtures-now / rebase-in-Verify, with all format names isolated in
-  `constants.py`.
+- The `#6` dependency is **now resolved**: #6 merged (PR #9, commit `31620e2`) + follow-ups
+  (#10), and this branch is **rebased onto `main`**. Real data is post-rename and matches
+  `constants.py`; format names remain isolated there for future-proofing. There are now **two**
+  real traditions to verify against (`sunni-islam` 140; `eastern-christianity` 100).
 - **#8 (judging) coordination:** v1 ships only the results seam (optional `results` slot +
   `load_results` boundary + reserved render region), all inert. The concrete `ScenarioResults`
   schema is a follow-up bound to #8's output once its format stabilizes — tracked, not built in
