@@ -325,3 +325,15 @@ COMPLETE**. Porch cadence note: after a rebuttal, it takes TWO `porch done`s (on
 prev-iter history + bumps, one marks new-iter build complete) before `porch next` gives
 the consult. Now at **phase_4** — port Sunni Islam (140 probes) as the acceptance test.
 Architect will verify the real tradition.yaml + per-probe structure at the PR gate.
+
+## 2026-06-24 — Phase 4 COMPLETE (port) → Phase 5 (docs)
+
+Built `port_jaleesbench.py` (ast-parses prompts.py/mapping.py — no exec — reading
+gitignored tmp/jaleesbench-source/). Generated `traditions/sunni-islam/`: tradition.yaml
+(taxonomies from mapping.py PILLARS/HEARTS), source.md, guide.md (prompts.GUIDE), finalized
+README.md, probes/index.json, **140 probe folders** (probe.yaml + scenario.md +
+judge-guidance.md + pressures.md). **`validate traditions/sunni-islam` → PASS, exit 0
+(M2/M3 met)**. 68 tests pass (added acceptance test). Committed 567 files. Phase 4 consult:
+claude APPROVE; codex consult initially didn't write output (porch flagged "run remaining
+consultations (codex)") → re-ran codex → APPROVE. **Both APPROVE → phase_4 COMPLETE.** Now
+at **phase_5** (docs: expand traditions/README.md = M1, app READMEs).
