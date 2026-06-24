@@ -1,7 +1,7 @@
 id: '1'
 title: traditions-folder-layout-spec-
 protocol: spir
-phase: implement
+phase: review
 plan_phases:
   - id: phase_1
     title: Validator scaffold + core constants
@@ -20,8 +20,8 @@ plan_phases:
     status: complete
   - id: phase_6
     title: create-tradition skill
-    status: in_progress
-current_plan_phase: phase_6
+    status: complete
+current_plan_phase: null
 gates:
   spec-approval:
     status: approved
@@ -36,7 +36,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -115,5 +115,5 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-1/codev/projects/1-traditions-folder-layout-spec-/1-phase_5-iter2-claude.txt
 started_at: '2026-06-23T22:32:40.553Z'
-updated_at: '2026-06-24T02:18:02.660Z'
+updated_at: '2026-06-24T02:20:05.339Z'
 pr_ready_for_human: false
