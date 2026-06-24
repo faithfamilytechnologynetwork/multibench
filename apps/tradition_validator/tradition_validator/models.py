@@ -88,4 +88,15 @@ class ProbesIndex(BaseModel):
     model_config = _STRICT
     schema_version: int
     probes: list[str] = Field(default_factory=list)
-    # (probe.yaml / per-probe-folder models arrive in Phase 3.)
+
+
+class ProbeMeta(BaseModel):
+    """``probe.yaml`` (spec §5.4). Shape + types only; ``tags`` axis/value membership is
+    checked against the manifest's declared taxonomies in the validator."""
+
+    model_config = _STRICT
+    id: str = Field(min_length=1)
+    tags: dict[str, list[str]] = Field(min_length=1)
+    source_locus: int
+    locus_label: str = Field(min_length=1)
+    identity_signal: Literal["clean", "leaky", "intrinsic"]

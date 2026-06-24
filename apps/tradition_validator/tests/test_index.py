@@ -1,6 +1,7 @@
 """probes/index.json validation + index⟺folders drift (spec §5.1, §8.2 check 4)."""
 
 import json
+import shutil
 from pathlib import Path
 
 from conftest import find_finding
@@ -68,7 +69,7 @@ def test_index_invalid_json(valid_tradition: Path):
 
 
 def test_no_probe_folders(valid_tradition: Path):
-    (valid_tradition / "probes" / "JLS-001").rmdir()
+    shutil.rmtree(valid_tradition / "probes" / "JLS-001")
     _write_index(valid_tradition, {"schema_version": 1, "probes": []})
     report = validate_tradition(valid_tradition)
     assert not report.ok(strict=False)

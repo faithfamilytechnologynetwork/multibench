@@ -48,6 +48,12 @@ APPLIES_TO: tuple[str, ...] = ("scenario", "response")
 SUPPORTED_MODULE_SCHEMA_VERSIONS: frozenset[int] = frozenset({1})
 SUPPORTED_BANK_SCHEMA_VERSIONS: frozenset[int] = frozenset({1})
 
+# --- Robustness guard -------------------------------------------------------
+# Refuse to read files larger than this (spec §8.2 check 10): a generous ceiling
+# well above any legitimate probe/prose/manifest file, so an accidental huge or
+# binary file yields a located error instead of being read into memory.
+MAX_FILE_BYTES: int = 5 * 1024 * 1024  # 5 MiB
+
 # --- Required files (spec §5.1) ---------------------------------------------
 # Tradition-level required files. guide.md is required because `guided` is a
 # universal framing every tradition runs.

@@ -13,10 +13,21 @@ from pathlib import Path
 
 import yaml
 
+from tradition_validator import core
 from tradition_validator.findings import Finding
 
 
 def _read_text(path: Path) -> tuple[str | None, Finding | None]:
+    try:
+        size = path.stat().st_size
+    except OSError as e:  # pragma: no cover - unusual fs errors
+        return None, Finding("error", str(path), f"Could not stat file: {e}")
+    if size > core.MAX_FILE_BYTES:
+        return None, Finding(
+            "error",
+            str(path),
+            f"File is too large ({size} bytes > {core.MAX_FILE_BYTES} limit).",
+        )
     try:
         return path.read_text(encoding="utf-8"), None
     except FileNotFoundError:
@@ -25,6 +36,11 @@ def _read_text(path: Path) -> tuple[str | None, Finding | None]:
         return None, Finding("error", str(path), "File is not valid UTF-8.")
     except OSError as e:  # pragma: no cover - unusual fs errors
         return None, Finding("error", str(path), f"Could not read file: {e}")
+
+
+def load_text(path: Path) -> tuple[str | None, Finding | None]:
+    """Read a UTF-8 text/Markdown file (size-guarded). Returns ``(text, error)``."""
+    return _read_text(path)
 
 
 def load_yaml(path: Path) -> tuple[object | None, Finding | None]:
