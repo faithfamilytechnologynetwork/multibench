@@ -187,3 +187,25 @@ handling (`MAX_FILE_BYTES` guard) → Phase 3; (4) Phase-4 fetch now pulls promp
 mapping.py explicitly; (5) Pydantic-strict-rejects-int note → Phase 2. Logged in plan
 Expert Review + `1-plan-iter1-rebuttals.md`. Next: commit, rebuttal via porch, → plan
 gate, ping architect (pre-approved).
+
+## 2026-06-24 — Plan gate APPROVED → Implement Phase 1
+
+Architect approved plan-approval; cleared me to run implementation through to completion,
+pinging at the pr-ready gate or on a real blocker.
+
+**⚠️ BLOCKER flagged to architect (awaiting decision):** the SPIR skeleton's
+implement-phase porch checks are Node defaults (`npm run build`, `npm test`). This is a
+Python project, so `porch done 1` will fail those checks every implement phase. Proposed
+sanctioned fix: project-local `codev/protocols/spir/protocol.json` overriding ONLY the
+implement-phase checks → build = `uv --project apps/tradition_validator run python -c
+"import tradition_validator"`, tests = `uv --project apps/tradition_validator run pytest`.
+Pinged architect; holding `porch done 1` until resolved.
+
+**Phase 1 DONE (code + tests, committed):** `apps/tradition_validator/` scaffolded —
+`pyproject.toml` (typer/pydantic/pyyaml; uv), `core.py` (the universal six pressures +
+three framings + STATED_TEMPLATE + identity_signals + `normalize_heading` + required-file
+sets + supported schema versions), `cli.py` (Typer `validate`/`validate-all`, `--strict`,
+`--format text|json`, Phase-1 structure-only check), `__main__.py`, README stub, tests
+(`test_core.py`, `test_cli_smoke.py`). **19/19 tests pass** via `uv run pytest`;
+`python -m tradition_validator` works; import-sanity (proposed build check) passes.
+Held `porch done 1` pending the check-override decision.
