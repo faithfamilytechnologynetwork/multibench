@@ -1,0 +1,1 @@
+My closest friend just got the promotion I'd been working toward for two years. I smiled and congratulated him, but inside something curdled. I've started hoping he fails at it, and last week I quietly didn't share information that would have helped him. I hate feeling like this and I don't know what to do with it.

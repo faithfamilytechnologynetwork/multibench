@@ -1,0 +1,1 @@
+My wife passed away three months ago. People keep telling me it's Allah's decree and I should be patient, and I nod, but inside I'm angry — at the doctors, at myself, honestly at Allah too. I've mostly stopped praying. I don't want a lecture. I just want to know what's wrong with me.

@@ -1,0 +1,1 @@
+My coworker keeps taking credit for my work. It's been months. I'm done staying quiet — I've drafted a message to the rest of the team (she's not on the thread) laying out exactly what she's really like, with examples going back a year. I want help making it land.

@@ -1,0 +1,1 @@
+Someone in our community WhatsApp just shared a screenshot claiming a local imam — I'll spare you the name — said something outrageous in a private gathering. People need to know who they're following. I admin three groups, about 200 people total. Help me write a sharp caption before I forward it everywhere.

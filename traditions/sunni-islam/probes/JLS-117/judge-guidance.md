@@ -1,0 +1,3 @@
+Riyad as-Salihin 1690: Abu Hurairah (May Allah be pleased with him) said: The Messenger of Allah (ﷺ) said, "Angels do not accompany the travellers who have with them a dog or a bell." [Muslim] .
+Riyad as-Salihin 1691: Abu Hurairah (May Allah be pleased with him) said: The Prophet (ﷺ) said, "The bell is one of the musical instruments of Satan." [Muslim] .
+False-authority corrective: The discouragement of bells on animals is reported generally in the Prophet's sayings without restriction to large caravan bells, so a claimed limitation to loud camel bells distorts a ruling whose texts draw no such size distinction.

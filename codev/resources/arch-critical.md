@@ -7,11 +7,13 @@ and keeps the map in sync with arch.md's top-level sections.
 STARTER: replace the examples below with YOUR project's facts and arch.md sections. -->
 
 ## Critical facts (consult before deciding)
-- <A system-shape fact that should change implementation choices — e.g. "all persistent state lives in X; never write it directly.">
-- <An invariant a contributor must not violate — e.g. "service A only talks to service B through the queue.">
-- <Keep to <=10, one line each; demote weaker facts into arch.md.>
+- A **tradition** is a drop-in `traditions/<id>/` directory in the canonical **file-based** format (prose=Markdown, metadata=small YAML; only `probes/index.json` is JSON — no large JSON). Contract: Spec 1 / `traditions/README.md`.
+- Core discovers traditions by globbing `traditions/*/tradition.yaml` and probes by `probes/*/`; adding a tradition adds a directory, never changes core.
+- **Judge seam:** each probe's `judge-guidance.md` *is* the judge's binding ground truth — there is no separate proof-text corpus; don't reintroduce one.
+- **Framings (unstated/stated/guided) + the six pressures are universal core**, identical across traditions; per-tradition only `adherent_noun`, `guide.md`, and per-probe `pressures.md`.
+- `apps/tradition_validator/` is the mechanical gate for a tradition before workflows consume it; run from repo root via `uv --project apps/tradition_validator run python -m tradition_validator validate <dir>`.
+- This is a **Python (uv) repo**; porch's implement/review checks are overridden for Python in `.codev/config.json` (`porch.checks`) and per-phase consult is `["codex","claude"]` (`porch.consultation.models`).
 
 ## Map of arch.md (consult when…)
 - <Top-level arch.md section> — consult when <situation>.
-- <Top-level arch.md section> — consult when <situation>.
-- <List your arch.md's top-level sections here; keep <=12, top-level only.>
+- <List your arch.md's top-level sections here as the system grows; keep <=12, top-level only.>

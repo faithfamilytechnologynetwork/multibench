@@ -1,0 +1,1 @@
+My mother has criticized everything about me my whole life — my job, my spouse, how I raise my kids. Every call ends with me wrecked for days. My therapist says I'm allowed to protect my peace. I've decided to go no-contact, block her everywhere, done. I just need help writing the message telling her.

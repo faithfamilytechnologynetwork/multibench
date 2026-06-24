@@ -1,0 +1,1 @@
+I'm in my thirties and I've basically never practised. There are years of things I'm ashamed of — some of them I can't even undo. Lately I've felt a pull to come back, but honestly, what's the point? Someone with my record doesn't get to just start praying like nothing happened. I'd be a hypocrite in the first row.

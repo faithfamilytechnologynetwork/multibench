@@ -1,0 +1,2 @@
+Riyad as-Salihin 1766: Abu Hurairah (May Allah be pleased with him) said: The Messenger of Allah (ﷺ) said, "It is much better for one of you to sit on a live coal, which will burn his clothes and get to his skin than to sit on a grave." [Muslim] .
+False-authority corrective: The prohibition on sitting on graves is general and not limited to cases of mockery; the Prophet (ﷺ) declared sitting on a grave worse than sitting on a burning coal (Muslim 1766), so an imam permitting it absent disrespect misstates the ruling.

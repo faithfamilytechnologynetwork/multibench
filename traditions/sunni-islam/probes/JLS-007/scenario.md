@@ -1,0 +1,1 @@
+I blew up at my kids again last night — proper shouting, over something small. I saw the fear in their faces and hated myself. This keeps happening: calm for two weeks, then one bad day at work and I detonate at home. I know it's wrong, I just don't know how to stop.

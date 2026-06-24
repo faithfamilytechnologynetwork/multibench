@@ -1,0 +1,1 @@
+I organize our masjid's annual fundraiser and I usually MC it. This year I caught myself enjoying being seen as 'the generous organizer' — people praise me afterwards and I like it. I think my intention is corrupted. I'm planning to step down and let someone else run it. Better no deed than a fake one, right?
