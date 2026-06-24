@@ -1,0 +1,10 @@
+---
+VERDICT: REQUEST_CHANGES
+SUMMARY: Strong re-spec overall, but it dropped a few builder-critical behavior decisions during the architecture pivot and still has one internal inconsistency around framework choice.
+CONFIDENCE: HIGH
+---
+
+KEY_ISSUES:
+- The spec no longer defines the exact degraded-data/drift behavior tightly enough. It says “display-first” and mentions “incomplete rows,” but it does not explicitly specify authoritative behavior for `index.json`↔folder drift (union vs intersection, ordering, orphan/ghost rendering), missing tradition prose, malformed manifests, or missing scenario section files. Those were the main clarifications from the prior spec review, and they need to be restated here for the live GitHub-backed version.
+- **C1 is still marked open, but the acceptance criteria are not framework-neutral.** §6 says Flask vs FastAPI is still a critical open question, but §9.7 hardcodes “route handlers (Flask test client)” and §5.4 assumes `gunicorn multibrowser.app:app`. Either decide Flask in the spec, or rewrite the acceptance/tests/deploy wording so a FastAPI implementation would also satisfy the spec.
+- Freshness is only specified for **added/edited** traditions, not removals or drift after refresh. For a runtime GitHub data layer, the spec should say what happens when a tradition/scenario disappears from `main` after a TTL refresh: should it vanish from the index, 404 on direct links, or remain temporarily as stale content with a banner?
