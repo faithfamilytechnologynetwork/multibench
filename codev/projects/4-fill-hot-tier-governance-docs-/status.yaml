@@ -1,0 +1,17 @@
+id: '4'
+title: fill-hot-tier-governance-docs-
+protocol: air
+phase: verified
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: approved
+    requested_at: '2026-06-24T08:50:29.825Z'
+    approved_at: '2026-06-24T15:51:10.868Z'
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-06-24T06:49:22.458Z'
+updated_at: '2026-06-24T15:51:31.289Z'
+pr_ready_for_human: false
