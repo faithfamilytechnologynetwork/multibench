@@ -114,3 +114,27 @@ Iter-3: **Codex REQUEST_CHANGES** (2 pts) + **Claude APPROVE**. Fixed both:
    "automated test-of-record." Swept plan; remaining "manual" mentions are legit confirmatory steps.
 
 Next: `porch done 7` → iter-4 consult (expect convergence) → plan-approval gate (human).
+
+## 2026-06-24 — ⚠️ MAJOR ARCHITECTURE PIVOT (user-directed) → rolled back to SPECIFY
+
+Plan-approval was APPROVED and I'd just entered Implement — then the user **fundamentally
+changed the architecture**. HALTED before writing any code (only task placeholders + an
+uncommitted config tweak, reverted). Ran `porch rollback 7 specify`.
+
+**OLD (now invalidated):** Approach A = Python static-site generator over LOCAL files.
+**NEW direction (user, via architect):**
+- A **deployable LIVE web app** — NO static-compilation/build stage.
+- **GitHub is the data layer**: read `traditions/` from `faithfamilytechnologynetwork/multibench@main`
+  **at runtime** via GitHub API / raw content (NOT local FS, NOT a prebuilt bundle) — so
+  new/edited traditions appear **without a redeploy**.
+- **Deploy on Railway.** Keep it **relatively simple**.
+
+**KEEP (still applies):** corpus-browse goal + features (index→tradition→scenario, filter/slice);
+display-first/inline-notice posture; no hardcoded taxonomy vocab; inert results-ready seam (#8).
+**DROP:** static build, `build`/`serve --watch`, filtering.py-as-static-index (filtering now
+server-side), local safeio path-containment (no local FS).
+**NEW to spec (with consultation):** Python web framework (Flask vs FastAPI), GitHub
+fetch + caching + rate-limit/token handling, Railway deploy shape.
+
+Plan: re-spec → spec consult (codex+claude) → spec-approval gate (architect brings to user).
+spir-8 (#8) coordination: per architect, do it directly once #8's spec firms up; v1 inert seam stands.

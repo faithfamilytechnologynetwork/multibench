@@ -1,5 +1,11 @@
 # Plan: multibrowser — browse & explore MultiBench traditions
 
+> ⚠️ **SUPERSEDED — pending rewrite (2026-06-24).** This plan describes the now-invalidated
+> *static-site generator over local files* (Approach A). The architecture pivoted to a **live
+> web app reading GitHub at runtime, deployed on Railway** (see the re-spec). After the new spec
+> is approved, this plan will be **rewritten** for the new architecture. Kept temporarily for
+> history; do not implement from it.
+
 ## Metadata
 - **ID**: plan-2026-06-24-multibrowser
 - **Status**: draft
