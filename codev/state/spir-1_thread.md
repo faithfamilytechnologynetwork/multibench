@@ -209,3 +209,26 @@ sets + supported schema versions), `cli.py` (Typer `validate`/`validate-all`, `-
 (`test_core.py`, `test_cli_smoke.py`). **19/19 tests pass** via `uv run pytest`;
 `python -m tradition_validator` works; import-sanity (proposed build check) passes.
 Held `porch done 1` pending the check-override decision.
+
+## 2026-06-24 — npm-check confirmed REAL; fixed via .codev/config.json; +Phase 6
+
+`porch done 1` confirmed the npm checks HARD-BLOCK (build: `npm run build` → ENOENT, no
+package.json; not a false alarm). Architect (after confirming porch source) authorized the
+surgical fix: `.codev/config.json` `porch.checks` (config > protocol, survives codev
+updates) — `build: {skip:true}`, `tests: {command:"uv run pytest", cwd:"apps/tradition_validator"}`.
+Verified porch honors per-check `cwd` (path.resolve). Applied + committed; re-ran
+`porch done 1` → build skipped, tests ✓ (19/19), **BUILD COMPLETE** for phase_1.
+
+**Scope addition (issue #3): Phase 6 = `create-tradition` skill.** Added to the plan
+(JSON now 6 phases + prose + M8 + dep map). The skill walks an author through scaffolding
+traditions/<id>/ and runs `tradition_validator validate` as the final step, using
+sunni-islam as the worked example. Sequenced after port (P4) + docs (P5).
+
+**Porch phase-tracking snag:** porch caches `plan_phases` (5) in status.yaml and only
+re-extracts at the plan→implement transition (verified in porch source: next.js/index.js
+call extractPlanPhases only on entering implement; rollback-to-plan also). So phase_6 in
+the plan FILE isn't yet in porch's tracking. Cheapest fix is NOW (phase_1 build done but
+not yet 3-way-consulted): either (a) I rollback to plan + re-approve (re-runs plan consult,
+resets phase_1 — code committed so cheap), or (b) architect adds phase_6 to status.yaml
+plan_phases directly (their domain; no re-consult). Asked architect to pick before I run
+the phase_1 verification (which would be wasted if we rollback).
