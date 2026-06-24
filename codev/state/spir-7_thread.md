@@ -35,3 +35,19 @@ and their scenarios (read-only). Reference: JaleesBench's `jaleesbrowser` (iaser
   format names in one constants module, rebase onto main after #6 merges. Documented as a risk.
 
 Next: draft spec → `porch done 7` → porch runs 3-way consult → iterate → spec-approval gate.
+
+## 2026-06-23 — Spec iter-1 consult done, feedback incorporated
+
+Ran the 2-way consult (codex + claude; Gemini excluded by repo config). **Codex:
+REQUEST_CHANGES, Claude: COMMENT — no blockers**, strong convergence. Both praised the §2.1
+"this is NOT JaleesBench's results browser, there are no results to browse" reframing as the
+key risk-killer. Incorporated all 11 sharpenings (see spec §11 Consultation Log table):
+the substantive one was a real fail-soft/fail-loud inconsistency → added an explicit §8
+**degradation-scope table** (invocation aborts; tradition/scenario/section degrade to inline
+notices). Also nailed down: OR-within/AND-across filter semantics, index↔folder drift policy,
+prev/next order, read-only tree-snapshot test, output escaping/path-containment/no-CDN, and
+an "inline notice = rendered HTML warning" definition. Deferred to Plan: watch mechanism,
+validator-import-vs-vendored-model, markdown renderer/sanitizer pick. Both endorsed Approach A
+(Python static-site generator) over B and the post-rename-with-synthetic-fixtures sequencing.
+
+Next: `porch next 7` → expect spec-approval gate (human). Will notify architect.
