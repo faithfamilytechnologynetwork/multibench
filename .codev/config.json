@@ -9,6 +9,10 @@
     "checks": {
       "build": { "skip": true },
       "tests": { "command": "uv run pytest", "cwd": "apps/tradition_validator" }
+    },
+    "consultation": {
+      "//": "Drop the blind Gemini reviewer from per-phase consults: its impl/code-review sandbox can't see the worktree (no VERDICT -> parsed REQUEST_CHANGES). Codex+Claude review the real code; architect runs a full 3-way integration CMAP at the PR gate (diff fed inline, where Gemini works). Global (also applies to the review phase).",
+      "models": ["codex", "claude"]
     }
   },
   "worktree": {
