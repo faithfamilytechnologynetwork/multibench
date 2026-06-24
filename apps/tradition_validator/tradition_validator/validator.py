@@ -141,7 +141,7 @@ def _validate_probe_folder(
     root: Path,
     manifest: TraditionManifest | None,
     report: Report,
-    seen_ids: set[str],
+    seen_ids: dict[str, str],
 ) -> None:
     if not _within_root(folder, root):
         report.error(str(folder), "Probe folder escapes the tradition directory (symlink not allowed).")
@@ -182,8 +182,20 @@ def _validate_probe_folder(
                 "id",
             )
         if meta.id in seen_ids:
-            report.error(str(probe_path), f"duplicate probe id '{meta.id}'.", "id")
-        seen_ids.add(meta.id)
+            first = seen_ids[meta.id]
+            # Name BOTH conflicting locations (spec T13): a finding on each file.
+            report.error(
+                str(probe_path),
+                f"duplicate probe id '{meta.id}' (also declared in {first}).",
+                "id",
+            )
+            report.error(
+                first,
+                f"duplicate probe id '{meta.id}' (also declared in {probe_path}).",
+                "id",
+            )
+        else:
+            seen_ids[meta.id] = str(probe_path)
         if manifest is not None:
             # fullmatch so an unanchored probe_id_pattern still requires the whole id.
             if not re.compile(manifest.probe_id_pattern).fullmatch(meta.id):
@@ -349,7 +361,7 @@ def validate_tradition(tradition_dir: Path, strict: bool = False) -> Report:
     manifest = _validate_manifest(tradition_dir, report)
     _validate_index_and_drift(tradition_dir, report)
 
-    seen_ids: set[str] = set()
+    seen_ids: dict[str, str] = {}  # probe id -> first file that declared it
     for folder_name in list_probe_folders(tradition_dir / "probes"):
         _validate_probe_folder(
             tradition_dir / "probes" / folder_name, tradition_dir, manifest, report, seen_ids

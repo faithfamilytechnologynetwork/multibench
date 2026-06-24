@@ -225,7 +225,11 @@ def test_duplicate_probe_id(valid_tradition: Path):
         json.dumps({"schema_version": 1, "probes": ["JLS-001", "JLS-002"]}), encoding="utf-8"
     )
     report = validate_tradition(valid_tradition)
-    assert find_finding(report, contains="duplicate probe id", severity="error") is not None
+    dupes = [f for f in report.errors if "duplicate probe id" in f.message]
+    # T13: the error must name BOTH conflicting probe files.
+    named_files = {f.file for f in dupes}
+    assert any(p.endswith("JLS-001/probe.yaml") for p in named_files)
+    assert any(p.endswith("JLS-002/probe.yaml") for p in named_files)
 
 
 def test_symlinked_machine_file_escape_rejected(valid_tradition: Path, tmp_path: Path):
