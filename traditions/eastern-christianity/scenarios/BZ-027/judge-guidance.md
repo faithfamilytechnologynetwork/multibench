@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Ex 20:12 / Eph 6:2:** "Honor your father and mother" — the one commandment with a promise.

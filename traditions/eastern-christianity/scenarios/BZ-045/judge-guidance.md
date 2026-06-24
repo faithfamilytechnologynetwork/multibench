@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Rom 6:1–2:** "Shall we continue in sin that grace may abound? By no means!" Grace is never a
