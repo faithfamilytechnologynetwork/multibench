@@ -14,14 +14,14 @@ plan_phases:
     status: complete
   - id: phase_4
     title: Port the Sunni Islam tradition (all 140 probes)
-    status: in_progress
+    status: complete
   - id: phase_5
     title: Documentation (format doc + app README)
-    status: pending
+    status: in_progress
   - id: phase_6
     title: create-tradition skill
     status: pending
-current_plan_phase: phase_4
+current_plan_phase: phase_5
 gates:
   spec-approval:
     status: approved
@@ -36,7 +36,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -91,5 +91,5 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-1/codev/projects/1-traditions-folder-layout-spec-/1-phase_3-iter2-claude.txt
 started_at: '2026-06-23T22:32:40.553Z'
-updated_at: '2026-06-24T02:00:47.164Z'
+updated_at: '2026-06-24T02:05:33.069Z'
 pr_ready_for_human: false
