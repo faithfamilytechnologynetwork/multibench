@@ -410,15 +410,14 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
 
 ## 9. Risks & Mitigations
 
-- **R1 — #6 not merged (and not yet even renamed on its branch).** `main` and this worktree
-  carry the OLD vocabulary; `origin/builder/air-6` currently differs from `main` only by a
-  `status.yaml`. Building against post-rename means multibrowser **cannot run against the
-  live `traditions/sunni-islam` in this worktree until #6 merges and we rebase.**
-  *Mitigation:* (a) verify during Implement using **synthetic post-rename fixtures** in
-  `tests/`; (b) isolate format names in one constants module; (c) rebase onto `main` after #6
-  merges and re-verify on real data in the Verify phase; (d) flag the sequencing to the
-  architect. *This dependency is acknowledged and accepted per the issue's directive — not a
-  blocker for spec/plan.*
+- **R1 — #6 vocabulary dependency — ✅ RESOLVED (2026-06-24).** #6 merged into `main` (PR #9,
+  commit `31620e2`) plus follow-ups (#10); the new vocabulary (`scenarios/`, `scenario.yaml`,
+  `turn1.md`, `scenario_id_pattern`, `index.json` key `scenarios`) is live for **both**
+  `sunni-islam` (140) and the new `eastern-christianity` (100), and **this branch has been
+  rebased onto `main`** — so multibrowser now plans/implements against real renamed data. The
+  format on disk was verified to match the `constants.py` mapping. (Format names remain
+  isolated in one constants module for future-proofing per C2.) *Originally the top risk;
+  retained here for history.*
 - **R2 — Over-building toward JaleesBench's results UI.** Mitigated by §2.1/§4 making the
   "no results data" reframing explicit and cutting all score/compare features.
 - **R3 — Markdown rendering of Arabic / diacritics / proof-text citations** in
