@@ -232,3 +232,23 @@ not yet 3-way-consulted): either (a) I rollback to plan + re-approve (re-runs pl
 resets phase_1 — code committed so cheap), or (b) architect adds phase_6 to status.yaml
 plan_phases directly (their domain; no re-consult). Asked architect to pick before I run
 the phase_1 verification (which would be wasted if we rollback).
+
+## 2026-06-24 — Rollback to plan (option a) → Phase 6 reviewed → plan gate (iter 2)
+
+Architect chose (a) the porch-sanctioned rollback (not status.yaml hand-edits). Confirmed
+both required commits on PR #2 first (config override `2a12d76`, Phase 6 plan `fa1bf9d`),
+then `porch rollback 1 plan`. Porch retained iter-1 review history → opened plan iteration
+2. `porch done` → 3-way consult (iter 2); I augmented the `--context` file to direct
+reviewers at the new Phase 6.
+
+**Plan iter-2 verdicts: Claude APPROVE, Gemini COMMENT, Codex REQUEST_CHANGES (HIGH)** —
+all on Phase 6 details, all accepted: skill-conformance tests go in
+`apps/tradition_validator/tests/` (run under porch's pytest), SKILL.md located via
+`Path(__file__).parents`; added an end-to-end test (scaffold scratch tradition per skill →
+validate exits 0); skill enumerates the six pressure headings + prose-non-empty reminder;
+validator command stated run-from-repo-root; description trigger phrasing. Rebuttal:
+`1-plan-iter2-rebuttals.md`.
+
+Reached **plan-approval gate (iter 2)**; requested it; pushed (origin==local edea8be);
+notified architect. Holding phase_1 verification until after plan re-approval + implement
+re-entry (so it isn't reset). On approval porch re-extracts all 6 phases.
