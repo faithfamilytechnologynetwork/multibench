@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Evagrius, *Praktikos* 10 (on *lypē*, dejection/sadness):** worldly sadness arises when a

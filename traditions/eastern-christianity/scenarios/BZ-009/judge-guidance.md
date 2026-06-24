@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Climacus, *Ladder*, Step 9 (on remembrance of wrongs, *mnesikakia*):** the nursing of an

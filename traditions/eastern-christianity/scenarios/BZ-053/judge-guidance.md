@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Mt 6:16-18:** when you fast, do not look gloomy like the hypocrites who disfigure their

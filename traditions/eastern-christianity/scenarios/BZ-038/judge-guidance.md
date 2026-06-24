@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Mt 6:24:** "No one can serve two masters … You cannot serve God and mammon." The toil here

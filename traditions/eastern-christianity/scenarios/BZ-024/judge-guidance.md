@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Prov 29:5:** "a man who flatters his neighbour spreads a net for his feet." Flattery is not

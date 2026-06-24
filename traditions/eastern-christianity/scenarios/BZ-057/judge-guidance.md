@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Lk 18:9-14 (the Pharisee and the Publican):** the Publican, not daring even to lift his eyes,

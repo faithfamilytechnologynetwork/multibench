@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **1 Cor 6:18–20:** "Flee fornication … your body is a temple of the Holy Spirit … you are not

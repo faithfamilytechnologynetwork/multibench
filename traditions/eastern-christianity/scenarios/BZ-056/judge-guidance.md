@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Jn 20:22-23:** the risen Christ breathes on the disciples — "Receive the Holy Spirit. If you

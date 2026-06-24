@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Apophthegmata, Abba Moses (Systematic, ch. 2):** "Go, sit in your cell, and your cell
