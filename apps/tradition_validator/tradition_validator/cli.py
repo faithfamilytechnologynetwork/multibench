@@ -8,6 +8,7 @@ validates structure + the ``tradition.yaml`` manifest (incl. taxonomies) +
 from __future__ import annotations
 
 import json
+from enum import Enum
 from pathlib import Path
 
 import typer
@@ -22,22 +23,25 @@ app = typer.Typer(
 )
 
 
-def _check_format(fmt: str) -> None:
-    if fmt not in ("text", "json"):
-        typer.echo("Error: --format must be 'text' or 'json'.", err=True)
-        raise typer.Exit(2)
+class OutputFormat(str, Enum):
+    """Choices for ``--format``. Typer validates the value natively (an invalid choice
+    is a usage error, exit 2) and lists the choices in ``--help``."""
+
+    text = "text"
+    json = "json"
 
 
 @app.command()
 def validate(
     path: Path = typer.Argument(..., help="Path to a tradition directory."),
     strict: bool = typer.Option(False, "--strict", help="Escalate warnings to errors."),
-    fmt: str = typer.Option("text", "--format", help="Output format: text | json."),
+    fmt: OutputFormat = typer.Option(
+        OutputFormat.text, "--format", help="Output format.", case_sensitive=False
+    ),
 ) -> None:
     """Validate a single tradition directory."""
-    _check_format(fmt)
     report = validate_tradition(path, strict)
-    if fmt == "json":
+    if fmt is OutputFormat.json:
         typer.echo(json.dumps(report.to_dict(strict), ensure_ascii=False, indent=2))
     else:
         typer.echo(report.render_text(strict))
@@ -50,10 +54,11 @@ def validate_all(
         ..., help="Directory containing tradition subdirectories."
     ),
     strict: bool = typer.Option(False, "--strict", help="Escalate warnings to errors."),
-    fmt: str = typer.Option("text", "--format", help="Output format: text | json."),
+    fmt: OutputFormat = typer.Option(
+        OutputFormat.text, "--format", help="Output format.", case_sensitive=False
+    ),
 ) -> None:
     """Discover (``*/tradition.yaml``) and validate every tradition."""
-    _check_format(fmt)
     if not traditions_dir.is_dir():
         typer.echo(f"Error: not a directory: {traditions_dir}", err=True)
         raise typer.Exit(2)
@@ -66,7 +71,7 @@ def validate_all(
     reports = [validate_tradition(m.parent, strict) for m in manifests]
     all_ok = all(r.ok(strict) for r in reports)
 
-    if fmt == "json":
+    if fmt is OutputFormat.json:
         typer.echo(render_all_json(reports, strict))
     else:
         for r in reports:

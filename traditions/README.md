@@ -86,6 +86,17 @@ counsel cultivates). The validator checks every scenario tag against these axes.
 names are the tradition's own (Sunni Islam uses `pillars` + `hearts`; another tradition
 would use its own).
 
+**Each axis is an independent namespace, so the same term may legitimately appear in more
+than one axis.** In Sunni Islam, `patience` is both a conduct **pillar** (`applies_to:
+scenario` — the scenario is *about* patience) and a heart state under **hearts**
+(`applies_to: response` — good counsel *cultivates* patience). These are distinct
+classifications that happen to share a word; they are not duplicates and must not be
+collapsed. The validator scopes every value to its own axis (`tags.<axis>` is checked only
+against `taxonomies.<axis>.values`), so a term shared across axes is correct by
+construction — there is no cross-axis uniqueness rule, by design. New traditions should
+follow this convention: reuse a term across axes only when each axis's `applies_to` sense
+genuinely applies, and keep within-axis values unique.
+
 ## `scenario.yaml`
 
 ```yaml
