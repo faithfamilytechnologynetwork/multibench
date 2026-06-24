@@ -313,3 +313,15 @@ preamble ignored); tradition prose (README/source/guide) non-empty; unexpected p
 files → warning; safety: `MAX_FILE_BYTES` size guard (loaders) + symlink-escape rejection
 (validator). conftest now scaffolds complete valid probe folders. **60 tests pass**;
 end-to-end CLI validates a complete tradition (exit 0). Next: `porch done 1` → 2-way consult.
+
+## 2026-06-24 — Phase 3 COMPLETE (3 iters) → Phase 4 (port)
+
+Phase 3 2-way consult took 3 iters: iter1 codex RC (symlink guard only covered .md reads,
+not yaml/json; missing prose/guide tests) + claude COMMENT (T5/T13/empty-prose tests) →
+fixed (guard all loads, fullmatch id, +test_prose, T13, file-symlink test; 66 tests);
+iter2 codex RC (duplicate-id only flagged 2nd occurrence; T13 wants both named) → fixed
+(track first file, emit on both); iter3 **codex APPROVE + claude APPROVE → phase_3
+COMPLETE**. Porch cadence note: after a rebuttal, it takes TWO `porch done`s (one records
+prev-iter history + bumps, one marks new-iter build complete) before `porch next` gives
+the consult. Now at **phase_4** — port Sunni Islam (140 probes) as the acceptance test.
+Architect will verify the real tradition.yaml + per-probe structure at the PR gate.
