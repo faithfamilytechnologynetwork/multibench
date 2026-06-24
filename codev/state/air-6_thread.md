@@ -58,3 +58,24 @@ This is materially larger than what was approved (140→240 scenarios) and touch
 builder's work, so I did NOT merge. Surfaced to architect with recommendation: fold the
 eastern-christianity migration (same mechanical rename) into this PR, re-verify validate-all
 --strict for both, then squash-merge. Working tree clean; no local merge started. Awaiting go.
+
+## UPDATE 2026-06-24b: Architect approved Option A — EC folded in (mechanical rename)
+
+- Merged origin/main; resolved README.md / traditions/README.md conflicts (kept BOTH the
+  rename's doc changes AND eastern-christianity's additions; applied scenario vocab to EC's
+  worked-example prose).
+- EC mechanical rename: `git mv probes→scenarios` (100 BZ folders), probe.yaml→scenario.yaml,
+  scenario.md→turn1.md, index `scenarios` key, tradition.yaml `scenario_id_pattern` (kept
+  `^BZ-\d{3}$` + BZ-NNN ids), README.md + source.md doc prose.
+- **Verified:** validate-all --strict **ALL PASS (2 traditions)**; pytest **74 pass**;
+  structural-token grep (`probes/`,`probe.yaml`,`scenario.md`,`probe_id_pattern`) clean across
+  both + in-scope. EC validates clean on the rename alone — NO non-rename conformance issue
+  (guardrail not triggered).
+
+### OPEN CALL before squash-merge: bare-word "probe" in EC judge-guidance.md (the seam)
+EC's ~100 `judge-guidance.md` files contain the author's bare-word "probe" in prose ("Binding
+ground truth for this probe", "a catechesis probe", "the 'justify my passion' probes", …).
+The issue lists `judge-guidance.md` as **unchanged** and the architect guardrail says **do not
+alter EC content**, so I left the seam untouched. (sunni's judge-guidance had no probe vocab,
+so "unchanged" held there silently; EC's does, so the rule now bites.) Surfaced to architect:
+leave-as-is (recommended; it's the binding seam) vs sweep. Merge held pending that one answer.
