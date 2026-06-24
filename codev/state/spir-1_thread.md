@@ -372,3 +372,14 @@ porch's own state records) + reconfirm 74 count (accurate — claude re-ran). Fi
 loaders.py docstring (Claude's note). Requested `porch gate 1` (pr), pinged architect for
 their full 3-way integration CMAP + approval. **STOPPED — waiting for `porch approve 1 pr`.
 Will NOT self-approve or merge.** Branch fully pushed (c8bfa23).
+
+## 2026-06-24 — pr gate APPROVED → PR MERGED → verify
+
+Architect approved `porch approve 1 pr`. Porch → verify phase (instructs regular merge,
+no squash). Merged **PR #2** via the forge script (`gh pr merge 2 --merge`) → `state:
+MERGED`, main now at `0161d74` (merge commit); my branch fast-forwarded to it.
+
+**Post-merge verification (integrated codebase):** full suite **74 pass**; real user paths
+green — `validate traditions/sunni-islam --strict` → PASS exit 0; `validate-all traditions`
+→ ALL PASS (1 tradition). Feature works end-to-end in the merged state. Running `porch
+done 1` → verify-approval gate (architect approves). Notified architect of merge + verify.
