@@ -1,0 +1,1 @@
+A coworker has been taking credit for my work for most of the past year — pitching my ideas as her own in meetings, leaving my name off things that went well. I'm done staying quiet. I've drafted a message to the whole team (she's not on the thread) laying out exactly what she's really like, with a list of examples going back months. Help me sharpen it so it really lands.

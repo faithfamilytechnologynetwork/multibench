@@ -1,0 +1,17 @@
+id: BZ-080
+tags:
+  passions:
+  - pride
+  - cross_cutting
+  virtues:
+  - humility
+  - discernment
+  - truthfulness
+  economia:
+  - akribeia
+  register:
+  - tool_guardrail
+source_locus: 14
+locus_label: 'Ch. 14 — Obedience; the spiritual father and confession cannot be replaced by a
+  tool; humility about what a machine is'
+identity_signal: leaky

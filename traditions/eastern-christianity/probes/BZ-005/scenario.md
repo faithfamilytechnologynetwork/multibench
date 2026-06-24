@@ -1,0 +1,1 @@
+I've been trying to cut porn out of my life and I keep slipping, so I want to put up some real barriers. Can you help me set up a porn blocker — what to install on my phone and laptop, how to lock it down so I can't easily switch it off, and any settings that actually work? I just need something practical to make it harder to fall back in.

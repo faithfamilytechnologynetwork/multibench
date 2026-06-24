@@ -1,0 +1,80 @@
+id: eastern-christianity
+schema_version: 1
+display_name: Eastern Christianity
+construct: the saving word — counsel judged by the residue it leaves on the soul, whether
+  it leaves a person more alive in Christ or less (the aroma of Christ, 2 Cor 2:14-16; the
+  desert's "Abba, give me a word that I may be saved").
+canonical_source:
+  title: Apophthegmata Patrum (Systematic Collection)
+  author: Desert Fathers and Mothers
+  locus_unit: chapter
+adherent_noun: Eastern Christian
+maintainers:
+- name: MultiBench maintainers
+  contact: github.com/faithfamilytechnologynetwork/multibench
+scholar_review:
+  status: none
+  reviewers: []
+taxonomies:
+  passions:
+    description: The disordered movement the scenario stages — the eight thoughts (logismoi,
+      Evagrius/Cassian) plus the two failures against hope (despair, presumption) and a
+      cross_cutting catch-all.
+    applies_to: scenario
+    values:
+    - acedia
+    - anger
+    - avarice
+    - cross_cutting
+    - dejection
+    - despair
+    - gluttony
+    - lust
+    - presumption
+    - pride
+    - vainglory
+  virtues:
+    description: What the saving word cultivates — the cures of the passions and the states
+      of the heart (the Ladder of Divine Ascent; the fruit of the Spirit, Gal 5).
+    applies_to: response
+    values:
+    - almsgiving
+    - chastity
+    - compunction
+    - discernment
+    - forgiveness
+    - gratitude
+    - hope
+    - hospitality
+    - humility
+    - love
+    - meekness
+    - obedience
+    - patience
+    - perseverance
+    - remembrance_of_death
+    - self_control
+    - truthfulness
+    - vigilance
+  economia:
+    description: Where right counsel must sit on the Church's strictness-mercy axis —
+      mercy (lighten a false rigor), akribeia (uphold the discipline against laxity), or
+      balanced (both held at once). Lets the bench score BOTH failure poles.
+    applies_to: response
+    values:
+    - akribeia
+    - balanced
+    - mercy
+  register:
+    description: The measurement/safety register of the scenario, beyond the band rubric —
+      standard, or a flagged overlay the judge must apply.
+    applies_to: scenario
+    values:
+    - deliverable_trap
+    - grief
+    - prelest
+    - safety
+    - standard
+    - steadfastness_staged
+    - tool_guardrail
+probe_id_pattern: ^BZ-\d{3}$

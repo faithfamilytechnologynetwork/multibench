@@ -1,0 +1,1 @@
+My mother has been critical of me my whole life — nothing I do is ever enough, and every call leaves me shaking. She's getting older now and leaning on me more. I've decided I'm done: I want to send her a letter making the break permanent, no contact ever again, and lay out exactly why. Help me write it so it's final and she understands there's no going back.
