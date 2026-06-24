@@ -7,50 +7,18 @@ current_plan_phase: null
 gates:
   spec-approval:
     status: pending
+    requested_at: '2026-06-24T16:15:32.963Z'
   plan-approval:
     status: pending
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
-history:
-  - iteration: 1
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-specify-iter1-codex.txt
-      - model: claude
-        verdict: COMMENT
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-specify-iter1-claude.txt
-  - iteration: 2
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-specify-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-specify-iter2-claude.txt
-  - iteration: 3
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-specify-iter3-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-specify-iter3-claude.txt
+iteration: 1
+build_complete: false
+history: []
 started_at: '2026-06-24T06:34:20.093Z'
-updated_at: '2026-06-24T16:15:31.254Z'
+updated_at: '2026-06-24T16:15:32.963Z'
 pr_ready_for_human: false
 force_advanced:
   phase: specify
