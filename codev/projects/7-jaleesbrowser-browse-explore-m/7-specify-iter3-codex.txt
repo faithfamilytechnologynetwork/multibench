@@ -1,0 +1,10 @@
+---
+VERDICT: REQUEST_CHANGES
+SUMMARY: Strong and largely builder-ready re-spec, but it still needs three runtime-behavior clarifications around snapshot swapping, filter URL encoding, and startup health semantics.
+CONFIDENCE: HIGH
+---
+KEY_ISSUES:
+- **Snapshot swap / stale-cache semantics are still underspecified and partially self-conflicting.** In §5.2 the old SHA cache is discarded as soon as a new SHA is confirmed, but §5.2/§5.5 also require stale-cache fallback on GitHub failure. That leaves an avoidable failure window during refresh: a previously warm app can become effectively cold if the new snapshot is only partially fetched when GitHub errors. Specify an atomic “last known good snapshot” rule: keep serving the old snapshot until the new snapshot is successfully discoverable/usable, then swap.
+- **The canonical query-string encoding for multi-select taxonomy filters is missing.** §5.3 says `?<axis>=<val>` and §7 says OR-within-axis, but it never says whether multiple values are encoded as repeated params (`?pillars=a&pillars=b`), comma-separated values, or something else. That is builder-critical for deep links, form wiring, and deterministic tests; choose one canonical encoding and define invalid/duplicate handling.
+- **Startup failure vs `/healthz` behavior is internally inconsistent.** §5.5 says bad startup config should “fail fast” and also that `/healthz` reports unhealthy. On Railway those are different modes. Pick one explicit contract: either the process exits on invalid required config, or it starts and reports unhealthy; don’t require both.
+

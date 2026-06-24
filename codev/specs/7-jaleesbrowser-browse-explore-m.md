@@ -227,11 +227,14 @@ mock):
 **Caching & freshness** (the mechanism behind "no redeploy"):
 - An in-memory cache keyed by **commit SHA**. Content fetched per `(sha, path)` is immutable, so
   cached until the SHA changes.
-- **Single live snapshot (bounded memory):** when a new SHA is confirmed, the prior SHA's cached
-  data is **discarded** — the cache holds essentially one snapshot at a time, so memory does not
-  grow across commits on Railway. A consequence: a **removed** tradition/scenario simply isn't in
-  the next tree → it **drops from the index** on refresh and its direct links **404** against the
-  new snapshot (no stale ghosts of deleted content).
+- **Single live snapshot, atomic last-known-good swap (bounded memory + no cold window):** the
+  app always serves a **last-known-good** snapshot. On refresh, the new SHA's snapshot is built
+  lazily and only **promoted** once it is successfully discoverable/usable (commit + tree
+  resolved); the prior snapshot's data is **discarded only *after* promotion**. So a mid-refresh
+  GitHub failure never makes a warm app go cold — it **defers the swap** and shows the stale
+  banner; and memory holds essentially one live snapshot (no growth across commits on Railway).
+  A consequence of promotion: a **removed** tradition/scenario isn't in the new tree → it **drops
+  from the index** and its direct links **404** against the promoted snapshot (no stale ghosts).
 - A short **TTL** (default e.g. 60s, configurable) gates how often `latest_sha()` is re-checked.
   On a request past the TTL, re-check the SHA; if it changed, the new snapshot is used (lazily,
   per accessed tradition) → **new/edited traditions appear within ~TTL, no redeploy**.
@@ -253,13 +256,19 @@ no SSRF.
 - `GET /` — tradition index (each: display_name, id, construct, canonical source, adherent_noun,
   scenario count, scholar_review status).
 - `GET /t/<tradition_id>` — manifest header, prose (README/source/guide), taxonomy axes, and the
-  **scenario list** with **filter/slice via query params** (`?<axis>=<val>&identity_signal=…&
-  locus_min=…&locus_max=…&q=…&sort=id|source_locus`). Filters: **OR within an axis, AND across
-  axes**; free-text over id/locus_label. Deep-linkable (the query string *is* the state).
+  **scenario list** with **filter/slice via query params**. **Canonical encoding:** each taxonomy
+  axis uses a **repeated param** to select multiple values (`?pillars=restraint&pillars=justice`)
+  — **OR within an axis, AND across axes**; `identity_signal` likewise repeatable (OR);
+  `locus_min`/`locus_max` (inclusive, one-sided allowed); `q` (free-text over id/locus_label);
+  `sort=id|source_locus`. Unknown axis names/values and duplicate values are **ignored / de-duped,
+  fail-soft** (never an error). Deep-linkable (the query string *is* the state).
 - `GET /t/<tradition_id>/<scenario_id>` — scenario detail: header (id, locus, identity_signal,
   tag chips), **turn-1**, **six pressures in canonical order**, **judge-guidance** (collapsible),
   the universal **framings** context, and the **reserved results region** (empty in v1).
-- `GET /healthz` — liveness for Railway (does not depend on GitHub being reachable).
+- `GET /healthz` — **liveness only**: returns 200 whenever the process is up, **independent of
+  GitHub reachability** (a transient GitHub outage must not fail the health check or cycle the
+  pod). Invalid *required* config is caught at **startup** (the process exits — see §5.5), so a
+  running process is by definition correctly configured.
 
 ### 5.4 Railway deploy shape
 
@@ -279,7 +288,7 @@ failures degrade to stale-cache + banner (§5.2).
 
 | Failure | Class | Behavior |
 |---|---|---|
-| Missing/invalid required env at startup (bad repo/ref) | **Startup** | Fail fast with a clear log; `/healthz` reports unhealthy. |
+| Missing/invalid required env at startup (bad repo/ref) | **Startup** | **Fail fast — exit non-zero** with a clear log (don't start a broken server). A *running* process is therefore always correctly configured, so `/healthz` is pure liveness (§5.3). |
 | GitHub unreachable / rate-limited (403) / timeout | **GitHub layer** | Serve **stale cache + banner** notice; if no cache, a friendly error page. Never crash; bounded timeouts. |
 | `tradition.yaml` missing / invalid / schema-violating | **Tradition** | Render a **stub tradition page** (top notice); still list scenarios from `index.json`/folders with whatever metadata parses; manifest-derived UI (taxonomy filters) **skipped with a notice**. |
 | `scenarios/index.json` missing / invalid | **Tradition** | Derive the scenario set from the tree's `scenarios/*/` folders instead, with a notice; declared order falls back to id-sorted. |
@@ -421,6 +430,17 @@ spec's degradation detail). All incorporated:
 
 No blockers; Claude APPROVE, and Codex's REQUEST_CHANGES items are all one-paragraph
 clarifications now folded in.
+
+### Re-spec iteration 3 (Codex: REQUEST_CHANGES · Claude: APPROVE)
+
+Claude APPROVE ("all prior concerns addressed; degradation behavior comprehensive"). Codex
+raised three runtime-contract clarifications — all folded in:
+
+| # | Change |
+|---|---|
+| 1 | **Atomic last-known-good snapshot swap** (§5.2): keep serving the prior snapshot until the new SHA's snapshot is successfully promoted; discard old data only after promotion → a mid-refresh GitHub failure never makes a warm app go cold (resolves the discard-vs-serve-stale tension). |
+| 2 | **Canonical query-string encoding** (§5.3): multi-value taxonomy/identity filters use **repeated params** (`?pillars=a&pillars=b`), OR-within/AND-across; unknown/duplicate values ignored/de-duped fail-soft. |
+| 3 | **Single startup/`/healthz` contract** (§5.3/§5.5): invalid required config → process **exits** at startup; `/healthz` is **pure liveness** (200 when up, independent of GitHub). No "start-but-unhealthy" mode. |
 
 ## 12. Carried-over vs. changed (quick reference for reviewers)
 
