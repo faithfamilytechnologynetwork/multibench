@@ -1,0 +1,93 @@
+I'll review this plan by first verifying the claims it makes against the actual codebase, then assessing coverage, phasing, and risk.Now let me check one more detail — the existing probe file structure to confirm the plan's assumptions about what needs to change at rebase:Good — now I have all the ground truth I need. The current probe directories contain `probe.yaml`, `scenario.md`, `pressures.md`, `judge-guidance.md` — confirming the plan's OLD→NEW rename mapping is accurate.
+
+---
+
+## Plan Review: 7-jaleesbrowser-browse-explore-m
+
+### 1. Spec Coverage — Thorough
+
+I walked through every MUST/SHOULD/COULD requirement:
+
+| Requirement | Plan coverage | Phase |
+|---|---|---|
+| M1 (discover traditions) | `discover()` in loader.py | P1 |
+| M2 (tradition index) | render_index + index.html.j2 | P3/P4 |
+| M3 (manifest header) | render_tradition + tradition.html.j2 | P3 |
+| M4 (tradition prose: README/source/guide) | tradition template, markdown.py | P3 |
+| M5 (taxonomy axes from manifest) | tradition template, "never hardcoded" noted | P3 |
+| M6 (scenario list, union/ordering, orphan/ghost) | load_index + union logic + notices | P2 |
+| M7 (filter/slice: OR-within, AND-across, free-text) | filter-index.json + filter.js | P4 |
+| S1 (sort + result counts) | filter.js | P4 |
+| M8 (scenario detail: turn-1, 6 pressures, judge-guidance) | scenario.html.j2 + parse_pressures | P2/P3 |
+| M9 (prev/next in declared order) | site.py prev/next computation | P4 |
+| S2 (universal framings context) | _framings.html.j2 | P3 |
+| S3 (filters in URL query string) | filter.js query-string + fail-soft restore | P4 |
+| M10 (read-only) | snapshot-hash invariant test | P4 |
+| M11 (deep-linkable) | stable URL scheme, one file per view | P4 |
+| §8 degradation table (all 7 rows) | Invocation → fail-loud in cli.py; content → Notice model throughout | P1–P4 |
+| §10 non-functional (deterministic, self-contained, no CDN) | sorted keys, build-twice test, no-CDN scan | P4 |
+
+**No spec requirement is unaddressed. No phase exceeds spec scope.** The COULD items (cross-tradition view, GitHub Pages, RTL) are correctly deferred to post-implementation.
+
+### 2. Phase Breakdown — Clean and Logical
+
+The strictly linear dependency chain (`P1 → P2 → P3 → P4 → P5`) is the right structure for this project. Each phase is independently committable and testable — a builder can run the test suite after each phase and get a green bar.
+
+**Sizing is well-balanced:**
+- P1 (scaffold + safeio + discovery): foundational, right-sized for a first commit
+- P2 (complete data model): the meaty data layer — appropriately isolated from rendering
+- P3 (templates + markdown): the rendering layer as pure functions (HTML strings, no I/O)
+- P4 (build + client JS): the integration phase — largest but unavoidably so
+- P5 (serve + polish): light finishing
+
+The data/presentation split (P1–P2 vs P3–P5) is a strong architectural choice — it means the data layer is fully testable before any HTML exists, and a bad template can't block data-layer work.
+
+### 3. Technical Approach — Sound
+
+**I1 decision (vendor, don't import):** Verified against the codebase — `tradition_validator` models use `ConfigDict(extra="forbid", strict=True)`, which would reject unknown keys that a display-first browser should render with a notice. The plan's dataclass-based read-model with tolerant parsing is the right call. Re-implementing `_within_root` and `MAX_FILE_BYTES` locally is a trivial cost for clean decoupling.
+
+**I3 decision (markdown-it-py + nh3):** Good picks. `markdown-it-py` is the Python port of the JS `markdown-it` (same family as the reference), actively maintained, Unicode-correct. `nh3` is the Rust-based successor to the deprecated `bleach`. The "raw HTML disabled + sanitizer" belt-and-suspenders approach matches §8's security requirements.
+
+**Constants isolation:** The plan puts all post-rename names in `constants.py` — verified that the current codebase uses `probe.yaml` / `scenario.md` / `probe_id_pattern` / `probes/`, so at rebase time, only `constants.py` needs updating. Smart.
+
+**Mirroring tradition_validator conventions:** Confirmed the plan's target layout matches the sibling app's actual structure (`__main__.py` → `cli.py:app`, Typer, flat package, hatchling build backend).
+
+### 4. Testability — Strong
+
+Each phase has a dedicated test file with clear scope:
+- **P1:** `test_safeio.py` (containment, size, UTF-8), `test_loader_discovery.py` (globbing, bad manifest tolerance)
+- **P2:** `test_loader_scenarios.py` (index fallback, union/order, orphan/ghost, pressures normalization variants, unknown-tag flagging)
+- **P3:** `test_render.py` (sanitization, Arabic round-trip, notice rendering, structure assertions)
+- **P4:** `test_site.py` (determinism via build-twice-diff, link integrity, read-only snapshot, no-CDN scan)
+- **P5:** `test_cli.py` (CLI smoke, CliRunner build+serve, bad-root fail-loud)
+
+The synthetic post-rename fixtures approach is correct given the #6 dependency — the plan explicitly includes good + malformed + Arabic-bearing fixtures.
+
+**One observation:** The §10.7 acceptance criterion asks for "an integration test that renders a fixture tradition end-to-end and asserts… the OR-within/AND-across filter results." The plan's Phase 4 test_site.py covers link integrity and determinism but the filter-logic testing is described as "unit-tested where feasible, else asserted via the embedded data + a documented manual check." This is honest and pragmatic — testing vanilla JS filter logic from Python is legitimately hard — but the builder should know the spec calls this out. The plan does acknowledge it.
+
+### 5. Risk Assessment — Well-Calibrated
+
+The #6 dependency is the top risk and is handled thoroughly (synthetic fixtures, constants isolation, rebase-in-Verify, explicit Validation Checkpoint #4). The probability/impact ratings are realistic.
+
+**One risk I'd add (minor):** The `watchfiles` package is Rust-backed, which means it needs a Rust compiler or a pre-built wheel at install time. On standard platforms this is fine (wheels exist), but it could surprise a builder on an unusual arch. Since `watchfiles` is only needed for `--watch` (not the core `build`/`serve`), this is low-impact. The plan already notes keeping `--watch` untested-in-CI.
+
+### 6. Minor Observations (non-blocking)
+
+1. **Phase 4 is the densest phase** — it includes build orchestration, client-side JS, CLI `build` command, filter-index JSON, determinism guarantee, link-integrity check, AND read-only snapshot invariant. A builder could benefit from a suggested ordering within the phase (e.g., site.py output paths first → build orchestration → filter-index → filter.js → CLI wiring → tests). But the deliverables list is already in a logical order, so this is a readability nicety, not a defect.
+
+2. **`source_locus` range filtering** — the spec (M7) says filter by "source_locus (value or range)." The plan mentions "locus-range filters" in the filter.js description but doesn't elaborate on the range UI (a slider? min/max inputs?). This is appropriately a builder decision, but worth noting.
+
+3. **The plan's constants.py lists `normalize_heading()`** as a function — it's good that heading normalization is centralized alongside the format constants, since it's the bridge between raw `## ` headings and the canonical pressure keys.
+
+---
+
+**Overall Assessment:** This is an exceptionally well-structured plan. It faithfully covers every spec requirement, makes sound and well-justified technical decisions (each verified against the actual codebase), provides clear guidance for builders with explicit deliverables and acceptance criteria per phase, and honestly assesses its risks. The data/presentation layer split is architecturally clean. A builder could follow this plan without needing to re-read the spec for clarification.
+
+---
+VERDICT: APPROVE
+SUMMARY: Comprehensive, spec-faithful plan with sound technical decisions (verified against codebase), clean phase decomposition, and thorough test strategy — ready for human review.
+CONFIDENCE: HIGH
+---
+
+KEY_ISSUES:
+- None

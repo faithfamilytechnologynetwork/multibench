@@ -1,24 +1,28 @@
-# Spec 7: jaleesbrowser — browse & explore MultiBench traditions
+# Spec 7: multibrowser — browse & explore MultiBench traditions
 
 | | |
 |---|---|
 | **Issue** | #7 |
 | **Protocol** | SPIR |
-| **Status** | Specify (draft for 3-way review) |
-| **App path** | `apps/jaleesbrowser/` |
+| **Status** | Spec-approved 2026-06-24; **amended post-approval** (architect-directed — see §11): app renamed `jaleesbrowser`→`multibrowser`; results reframed "cut"→"anticipated/additive (#8)". |
+| **App path** | `apps/multibrowser/` |
 | **Depends on** | #6 (probe→scenario rename, in-flight) — see Risks |
 
 ## 1. Summary
 
-Build `apps/jaleesbrowser/` — a **read-only browser/explorer for MultiBench traditions and
+Build `apps/multibrowser/` — a **read-only browser/explorer for MultiBench traditions and
 their scenarios**. A user can navigate a tradition, read each scenario (the turn-1 opening,
 the six pressure pushes, the judge-guidance), see the manifest/taxonomy metadata, and
 **filter/slice** the scenario set by taxonomy tags, `identity_signal`, and source locus.
 
 The worked reference is **JaleesBench's `jaleesbrowser`** (github.com/iaser-ai/jaleesbench):
 a static, zero-install, deep-linkable explorer. We adapt its *browsing/viewer spirit* to a
-fundamentally different subject (see §2.1): MultiBench has, today, **no model results to
-compare** — jaleesbrowser browses the **authored corpus**, not a benchmark run.
+different subject (see §2.1): MultiBench has, **today**, no collected model results to
+compare — so **v1 browses the authored corpus**, not a benchmark run. Judgement results
+(per-scenario scores / bands / verdicts) are coming from the **judging workflow (#8, in
+parallel)**; v1 does **not** build a results UI, but its data model and page structure
+**reserve a clean, additive extension point** so #8's output slots in later without a
+rewrite (§4 / §4.1).
 
 ## 2. Problem Analysis
 
@@ -29,18 +33,28 @@ to compare **model-vs-model RESULTS**: pick Model A and Model B, a pressure and 
 and read their two responses side by side with per-judge verdicts and band scores. It is fed
 by a Python `export_web.py` that pre-computes a score matrix + per-probe gzip shards.
 
-**MultiBench #7 is not that.** At this point MultiBench has only the **authored tradition
-format** — `traditions/<id>/` — and no collected model responses, judgments, or scores. So:
+**MultiBench #7's v1 is not that — yet.** Today MultiBench has only the **authored tradition
+format** — `traditions/<id>/` — and no collected model responses, judgments, or scores. The
+judging workflow **(#8) is being built in parallel** and **will** produce per-scenario
+judgement results (scores / bands / verdicts, anchored to each scenario's `judge-guidance.md`).
+So the posture is **"corpus now, results-ready"**:
 
-- The thing to browse is the **authored content and its metadata**, not results.
-- JaleesBench's score-matrix / model-selectors / verdict-bands / shard machinery is **out of
-  scope** — there is nothing to populate it.
-- What we keep from the reference is the **explorer experience**: a catalog → drill-in flow,
-  rich markdown rendering of authored prose, taxonomy-driven filtering, deep-linkable views,
-  and a static/zero-install/deterministic build philosophy.
+- **v1 browses the authored content and its metadata** — the catalog → drill-in explorer,
+  rich markdown prose, taxonomy-driven filter/slice, deep-linkable views, and the
+  static/zero-install/deterministic build — all adapted from the reference.
+- **v1 does NOT build a results UI.** JaleesBench's score-matrix / model-selectors /
+  verdict-bands / shard machinery is **deferred**, not designed-out: there is no data to
+  populate it until #8 lands.
+- **But the design anticipates results additively.** The data model carries an optional,
+  unpopulated per-scenario `results` slot; the scenario page reserves a clearly-marked region
+  where scores/bands/verdicts will render; and a small **`ResultsSource` seam** (a no-op
+  returning "none" in v1) is the single place #8's output gets wired in. When #8 ships, the
+  results layer slots in **without a rewrite** (§4.1).
 
-This reframing is the most important design fact in this spec. A reviewer who assumes
-"clone JaleesBench's browser" will over-build a results UI with no data behind it.
+This dual framing is the most important design fact in this spec. A reviewer who assumes
+"clone JaleesBench's results browser" will over-build a UI with no data; a reviewer who reads
+"results are out of scope" too literally will paint the data model into a corner that forces a
+rewrite when #8 lands. **v1 = corpus browser; structure = results-ready.**
 
 ### 2.2 Current state vs desired state
 
@@ -68,10 +82,10 @@ framings context (the Stated template instantiated with `adherent_noun`, and the
   pressures, identity_signal distribution) before contributing.
 - **The public (secondary)** — if hosted, a shareable way to explore what MultiBench tests.
 
-### 2.4 The data jaleesbrowser consumes (POST-RENAME format)
+### 2.4 The data multibrowser consumes (POST-RENAME format)
 
 Per the issue, the spec targets the **post-rename vocabulary** landing in #6. The mapping
-from the format on `main` today (old) to what jaleesbrowser reads (new):
+from the format on `main` today (old) to what multibrowser reads (new):
 
 | Concept | OLD (on `main` today) | NEW (target — #6) |
 |---|---|---|
@@ -83,7 +97,7 @@ from the format on `main` today (old) to what jaleesbrowser reads (new):
 | Judge seam | `judge-guidance.md` | `judge-guidance.md` (unchanged) |
 | Pressure pushes | `pressures.md` | `pressures.md` (unchanged) |
 
-Files jaleesbrowser reads per tradition (all UTF-8):
+Files multibrowser reads per tradition (all UTF-8):
 
 ```
 traditions/<id>/
@@ -123,7 +137,7 @@ traditions/<id>/
 
 - The dataset is small and local: one tradition ≈ 140 scenarios of small markdown files;
   there are a handful of traditions. No DB, pagination-at-scale, or streaming is needed.
-- jaleesbrowser reads the live files under `traditions/` (a path argument); it does not
+- multibrowser reads the live files under `traditions/` (a path argument); it does not
   require a pre-computed export the way JaleesBench does.
 - Authored markdown is semi-trusted (repo content), but rendering still sanitizes/escapes as
   defense-in-depth, and never executes embedded code.
@@ -134,11 +148,11 @@ The issue has no formal `## Baked Decisions` heading, but states these as firm d
 they are treated as fixed. The **delivery approach** is *explicitly left open* for this spec +
 3-way consultation to decide (§5).
 
-1. **Read-only.** jaleesbrowser MUST NOT create, modify, move, or delete anything under
+1. **Read-only.** multibrowser MUST NOT create, modify, move, or delete anything under
    `traditions/`. It only reads.
 2. **Python conventions.** Python + `uv`; **Typer** for any CLI (per repo + global prefs).
    No `src/` import prefix; run via `python -m`.
-3. **Location.** The app lives at `apps/jaleesbrowser/` (its own uv package, like
+3. **Location.** The app lives at `apps/multibrowser/` (its own uv package, like
    `apps/tradition_validator/`).
 4. **Post-rename vocabulary.** Spec and build against `scenarios/` / `scenario.yaml` /
    `turn1.md` / `scenario_id_pattern` / `scenarios/index.json`. Rebase onto `main` after #6
@@ -149,16 +163,43 @@ they are treated as fixed. The **delivery approach** is *explicitly left open* f
 
 ## 4. Out of scope
 
-- **Anything results-shaped**: model responses, scoring, judge verdicts-of-models, band
-  ladders, model-vs-model comparison, a score matrix. (No such data exists in MultiBench yet;
-  this is the core JaleesBench feature we intentionally drop.)
-- **Running the benchmark / judging workflow** (collection, judging, normalization).
+- **A results UI / results rendering — DEFERRED to a later spec, not designed-out.** v1 does
+  not build model-response views, scoring, judge verdicts-of-models, band ladders,
+  model-vs-model comparison, or a score matrix — there is no data until **#8** lands. But per
+  §2.1 / §4.1 the data model and page structure **reserve an additive extension point** for
+  per-scenario judgement results; this is the deliberate difference from "ignore results
+  entirely." (Building the actual results UI is the later spec's job.)
+- **Running the benchmark / judging workflow** (collection, judging, normalization) — that is
+  #8's job; multibrowser only *consumes* #8's eventual output, additively.
 - **Authoring or editing** traditions/scenarios (that is `create-tradition` + the validator).
-- **Validation as a gate** — jaleesbrowser is not a second validator; it may *surface* obvious
+- **Validation as a gate** — multibrowser is not a second validator; it may *surface* obvious
   problems inline (e.g. "missing pressure: flattery") but it does not replace
   `tradition_validator` and does not exit-fail on content defects.
 - **Multi-language / RTL** (traditions are single-language; a nice-to-have, §6).
 - **Auth, multi-user, a database, write-back, server-side persistence.**
+
+### 4.1 Results-ready extension point (anticipating #8)
+
+The judging workflow (#8) is speccing in parallel; multibrowser must consume its output
+**additively** later. v1 builds exactly three small, inert seams — and nothing more:
+
+1. **Data model:** `Scenario` carries an optional `results: ScenarioResults | None`, **`None`
+   in v1** (no results data exists). `ScenarioResults` is a thin forward-declared shape — not
+   populated, and not rendered with real data, in v1.
+2. **Loader seam:** a single `ResultsSource` boundary (e.g. `load_results(scenario) -> None` in
+   v1) is the **only** place #8's output is read. When #8 ships, this one function changes;
+   nothing else in the loader does. (Mirrors the reference's praised `DataSource` seam.)
+3. **Render reservation:** the scenario template includes a clearly-marked, currently-empty
+   results region (a partial that renders nothing — or a subtle "no judgement results yet"
+   placeholder — when `results is None`). When data exists, that region renders scores / bands
+   / verdicts beside the `judge-guidance` seam they are anchored to.
+
+**Coordination with #8 (open, tracked).** The concrete `ScenarioResults` schema is **not fixed
+in this spec** — it binds to #8's result format, which is still being specced. multibrowser
+commits only to the *seam shape* (optional per-scenario slot + single load boundary + reserved
+render region); the field-level schema binding is a **follow-up** once #8's schema stabilizes
+(Verify / next spec, not v1). v1 ships with the seam present and returning `None`. This keeps
+v1 honest (no fake results) while guaranteeing the later integration is purely additive.
 
 ## 5. Solution Exploration (delivery approach — the open decision)
 
@@ -170,8 +211,8 @@ the **presentation/runtime shell**. The decision is which shell to build for v1.
 
 A Typer CLI that reads `traditions/` and renders a **self-contained static site** (server-
 side-generated HTML via Jinja2; one page per tradition and per scenario; a small embedded
-`index.json` + vanilla-JS for client-side filter/search; no JS framework). `jaleesbrowser
-build --out dist/` emits the site; `jaleesbrowser serve` builds + serves it locally
+`index.json` + vanilla-JS for client-side filter/search; no JS framework). `multibrowser
+build --out dist/` emits the site; `multibrowser serve` builds + serves it locally
 (`http.server`) with an optional `--watch` rebuild.
 
 - **Pros:** Stays in the repo's language (Python/uv/Typer) with **zero Node toolchain**;
@@ -185,7 +226,7 @@ build --out dist/` emits the site; `jaleesbrowser serve` builds + serves it loca
 
 ### Approach B — Python live web app (Flask/FastAPI + Jinja2)
 
-`jaleesbrowser serve` runs a small server that reads `traditions/` live; filtering is
+`multibrowser serve` runs a small server that reads `traditions/` live; filtering is
 server-side query-params re-rendering templates (no client JS needed).
 
 - **Pros:** No build step / always live; dynamic filtering "just works" without JS; simplest
@@ -218,7 +259,7 @@ Rebuild the reference's Vite/React app for tradition content.
 ### Recommendation
 
 **Approach A (Python static-site generator with an optional `serve --watch`).** It honors
-every firm constraint (Python/uv/Typer, read-only, `apps/jaleesbrowser/`), reproduces the
+every firm constraint (Python/uv/Typer, read-only, `apps/multibrowser/`), reproduces the
 reference's static/zero-install/deep-linkable/deterministic spirit, reuses the validator's
 data model, and avoids both a second language (D) and a hard dependency on a running process
 (B). The `serve --watch` convenience closes most of B's live-editing gap. **The 3-way
@@ -236,7 +277,7 @@ static-hostable-deliverable vs zero-build-live-interaction).
 
 **Important (affects design):**
 - **I1 — Data-model reuse:** depend on the `tradition_validator` package's pydantic
-  `models.py`, or vendor a lean read-model in jaleesbrowser? *Lean toward: reuse the pydantic
+  `models.py`, or vendor a lean read-model in multibrowser? *Lean toward: reuse the pydantic
   schemas but read **tolerantly** (display-first) rather than fail-fast — decided in §8.*
 - **I2 — Reading posture:** the browser must render even an *imperfect* / in-progress
   tradition (a missing pressure, an unknown tag), surfacing problems as inline notices rather
@@ -349,7 +390,7 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
   small vendored read-model is a **Plan** decision (I1); the spec fixes only the *posture*.
 
 - **Security / safe rendering** (resolves Codex #5 / Claude path-containment & CDN notes):
-  - **Path containment + size cap.** jaleesbrowser **replicates the validator's containment
+  - **Path containment + size cap.** multibrowser **replicates the validator's containment
     guard** — reject symlinks and `..` escapes outside the tradition root — and the
     `MAX_FILE_BYTES` (5 MiB) read cap; an oversized/escaping file is a located notice, not a
     traceback or a read outside the tree.
@@ -371,7 +412,7 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
 
 - **R1 — #6 not merged (and not yet even renamed on its branch).** `main` and this worktree
   carry the OLD vocabulary; `origin/builder/air-6` currently differs from `main` only by a
-  `status.yaml`. Building against post-rename means jaleesbrowser **cannot run against the
+  `status.yaml`. Building against post-rename means multibrowser **cannot run against the
   live `traditions/sunni-islam` in this worktree until #6 merges and we rebase.**
   *Mitigation:* (a) verify during Implement using **synthetic post-rename fixtures** in
   `tests/`; (b) isolate format names in one constants module; (c) rebase onto `main` after #6
@@ -389,8 +430,8 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
 
 A reviewer can, from a clean checkout (post-#6-rename data, or the synthetic fixtures):
 
-1. Run a single documented command (`uv --project apps/jaleesbrowser run python -m
-   jaleesbrowser …`) and reach a browsable tradition index. *(M1, M2)*
+1. Run a single documented command (`uv --project apps/multibrowser run python -m
+   multibrowser …`) and reach a browsable tradition index. *(M1, M2)*
 2. Open a tradition and see its manifest, prose (README/source/guide), and taxonomy axes.
    *(M3–M5)*
 3. See all scenarios in a list and **filter/slice by taxonomy tag, identity_signal, and
@@ -403,7 +444,7 @@ A reviewer can, from a clean checkout (post-#6-rename data, or the synthetic fix
    after both `build` and `serve`, assert identical). *(M10)*
 6. Every view is reachable by a stable link, and **all generated inter-page links resolve**
    (tradition→scenario, prev/next, back-to-index) — no dangling links. *(M11)*
-7. **Tests pass** (`uv --project apps/jaleesbrowser run pytest`): unit tests for the
+7. **Tests pass** (`uv --project apps/multibrowser run pytest`): unit tests for the
    tolerant reader (incl. malformed-content fixtures — missing/empty/non-UTF-8/oversized
    section files, an orphan and a ghost scenario, a missing/extra pressure, an unknown tag —
    and Arabic-bearing content) and the pressures/index parsing; an integration test that
@@ -422,6 +463,25 @@ throughout; no secrets/large data committed.
 
 *(Porch runs the consultation — Codex + Claude per this repo's config; Gemini's per-phase
 consult cannot see the worktree here — after `porch done`.)*
+
+### Post-approval amendments (2026-06-24, architect-directed — visible at plan-approval)
+
+After the spec-approval gate, the architect relayed two user-directed changes. Both were
+folded into this spec (and the plan) during the Plan phase; neither alters what v1 *builds*:
+
+1. **Rename `jaleesbrowser` → `multibrowser`** (consistent with MultiBench naming). All app /
+   package / module / doc references updated. *Note:* the porch project slug and the
+   spec/plan/review **filenames** remain `7-jaleesbrowser-browse-explore-m.md` (porch state is
+   keyed to that slug; renaming the files would break porch's checks and is not a manual edit).
+   The reference project's own browser stays `JaleesBench's jaleesbrowser`.
+2. **Results posture: "cut" → "anticipated/additive".** §2.1 and §4 reframed; new **§4.1**
+   adds the results-ready extension point (optional `results` slot, `ResultsSource` seam,
+   reserved render region) anticipating the judging workflow **#8**. v1 still builds **no**
+   results UI; the change is structural readiness + #8 schema coordination, not new v1 surface.
+
+*Re-gate judgment:* these do not change v1's build surface (rename is cosmetic; results
+remain unbuilt in v1), so a separate spec re-gate is judged unnecessary — the amendments ride
+to the human at the **plan-approval** gate. Flagged to the architect for confirmation.
 
 ### Iteration 1 (Codex: REQUEST_CHANGES · Claude: COMMENT — no blockers)
 

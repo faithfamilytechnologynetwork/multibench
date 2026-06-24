@@ -1,7 +1,7 @@
-# Plan: jaleesbrowser — browse & explore MultiBench traditions
+# Plan: multibrowser — browse & explore MultiBench traditions
 
 ## Metadata
-- **ID**: plan-2026-06-24-jaleesbrowser
+- **ID**: plan-2026-06-24-multibrowser
 - **Status**: draft
 - **Specification**: [codev/specs/7-jaleesbrowser-browse-explore-m.md](../specs/7-jaleesbrowser-browse-explore-m.md)
 - **Created**: 2026-06-24
@@ -9,7 +9,7 @@
 ## Executive Summary
 
 Implements the spec's **Approach A**: a Python (`uv` / **Typer**) **static-site generator**
-at `apps/jaleesbrowser/` that reads `traditions/` **read-only** (post-rename #6 vocabulary)
+at `apps/multibrowser/` that reads `traditions/` **read-only** (post-rename #6 vocabulary)
 and emits a self-contained, deep-linkable, offline static site for browsing traditions and
 their scenarios — plus a `serve [--watch]` convenience. The package mirrors the sibling
 `apps/tradition_validator/` flat-package layout.
@@ -25,7 +25,7 @@ Verify phase.
 - **I1 — data model: vendor a lean read-model; do NOT import `tradition_validator`.** The
   validator's pydantic schemas are `extra="forbid"` + `strict=True` (the wrong posture for
   display-first), and a path-dependency would couple two independent apps' build order (both
-  reviewers flagged this). jaleesbrowser defines its own **`dataclass`-based** read-models in
+  reviewers flagged this). multibrowser defines its own **`dataclass`-based** read-models in
   `model.py` and reads tolerantly. It mirrors the validator's *shapes* and reuses its
   *safety ideas* (path containment, 5 MiB cap) by re-implementing them locally.
 - **I3 — markdown: `markdown-it-py` (raw-HTML disabled) + `nh3` sanitizer.** Unicode-correct
@@ -37,6 +37,24 @@ Verify phase.
 **Dependencies** (`pyproject.toml`): `typer`, `jinja2`, `markdown-it-py`, `nh3`, `pyyaml`,
 `watchfiles`. Dev: `pytest`. (No `pydantic` — dataclasses keep reads deliberately tolerant.)
 
+### Scope updates folded in (architect-directed, 2026-06-24)
+
+- **Rename `jaleesbrowser` → `multibrowser`** throughout (app / package / module / docs). The
+  porch project slug and the spec/plan/review **filenames** stay
+  `7-jaleesbrowser-browse-explore-m.md` (porch state is keyed to that slug; renaming the files
+  would break porch's checks). The reference project's own browser stays `JaleesBench's jaleesbrowser`.
+- **Results-ready (anticipating #8) — without building a results UI in v1** (spec §4.1). Three
+  small, inert seams are threaded through the phases below, and nothing more:
+  - **P1/P2 data model:** `Scenario.results: ScenarioResults | None = None` (`None` in v1);
+    `ScenarioResults` a thin forward-declared shape.
+  - **P2 loader seam:** `load_results(scenario) -> None` — the single boundary #8's output will
+    feed; v1 returns `None`.
+  - **P3 render reservation:** a `_results.html.j2` partial that renders nothing (or a subtle
+    "no judgement results yet" placeholder) when `results is None`.
+  - **Coordination:** the concrete `ScenarioResults` schema binds to #8's format (still
+    speccing) — deferred to a #8-coordinated follow-up; v1 fixes only the seam shape. **No fake
+    results in v1.**
+
 ## Success Metrics
 - [ ] All spec §10 acceptance criteria met (browse index→tradition→scenario; filter/slice by
       tag/identity_signal/locus; six-pressure layout; judge-guidance + turn-1 rendered).
@@ -45,8 +63,11 @@ Verify phase.
 - [ ] **Self-contained**: generated site has no external CDN/network references (offline-clean).
 - [ ] **Deterministic**: rebuilding unchanged input yields byte-identical output.
 - [ ] **Link integrity**: all generated inter-page links resolve.
-- [ ] Tests pass: `uv --project apps/jaleesbrowser run pytest`; no reduction in coverage.
-- [ ] README documents install, commands, and the #6 rebase note.
+- [ ] **Tradition prose** (README/source/guide) rendered, each degrading to a notice if absent (M4).
+- [ ] **Results-ready seams present and inert**: `Scenario.results=None`, `load_results→None`,
+      reserved render region empty — **no results UI in v1** (spec §4.1).
+- [ ] Tests pass: `uv --project apps/multibrowser run pytest`; no reduction in coverage.
+- [ ] README documents install, commands, the #6 rebase note, and the #8 results-ready seam.
 
 ## Phases (Machine Readable)
 
@@ -65,10 +86,10 @@ Verify phase.
 ## Target package layout (built across phases)
 
 ```
-apps/jaleesbrowser/
+apps/multibrowser/
   pyproject.toml                # uv package (Phase 1)
   README.md                     # Phase 5
-  jaleesbrowser/
+  multibrowser/
     __init__.py  __main__.py    # Phase 1
     cli.py                      # Typer app; `build` (P4), `serve` (P5)
     constants.py                # post-rename names, PRESSURES, FRAMINGS, IDENTITY_SIGNALS, STATED_TEMPLATE (P1)
@@ -96,14 +117,14 @@ apps/jaleesbrowser/
 **Dependencies**: None
 
 #### Objectives
-- Stand up the `apps/jaleesbrowser/` uv package and the foundational data primitives:
+- Stand up the `apps/multibrowser/` uv package and the foundational data primitives:
   format constants, dataclass read-models, safe file I/O, tradition **discovery**, and
   **tolerant manifest** loading.
 
 #### Deliverables
-- [ ] `pyproject.toml` (deps above; `[project.scripts] jaleesbrowser = "jaleesbrowser.cli:app"`;
-      pytest config) + `jaleesbrowser/__init__.py`, `__main__.py`, a minimal `cli.py` Typer app
-      (so `python -m jaleesbrowser --help` works).
+- [ ] `pyproject.toml` (deps above; `[project.scripts] multibrowser = "multibrowser.cli:app"`;
+      pytest config) + `multibrowser/__init__.py`, `__main__.py`, a minimal `cli.py` Typer app
+      (so `python -m multibrowser --help` works).
 - [ ] `constants.py`: the **post-rename** names (`SCENARIOS_DIR="scenarios"`,
       `SCENARIO_META="scenario.yaml"`, `TURN1="turn1.md"`, `JUDGE="judge-guidance.md"`,
       `PRESSURES_FILE="pressures.md"`, `INDEX="scenarios/index.json"`,
@@ -111,16 +132,23 @@ apps/jaleesbrowser/
       `FRAMINGS`, `IDENTITY_SIGNALS`, `STATED_TEMPLATE`, `MAX_FILE_BYTES=5*1024*1024`,
       `normalize_heading()`. **All format names live here only** (one-file edit at #6 rebase).
 - [ ] `model.py`: `Notice(severity, scope, where, message)`, `TaxonomyAxis`, `Manifest`,
-      `Tradition` (manifest + notices + scenarios), placeholder `Scenario` (filled in P2).
+      `Tradition` (manifest + **prose: README/source/guide (text|None + notices)** + scenarios +
+      aggregated notices), placeholder `Scenario` (filled in P2) including the **results-ready**
+      `results: ScenarioResults | None = None` field, plus a thin forward-declared
+      `ScenarioResults` shape (unpopulated in v1; spec §4.1).
 - [ ] `safeio.py`: `read_text(path, root)` → returns `(text|None, Notice|None)`: rejects
       symlink/`..` escapes outside `root`, enforces `MAX_FILE_BYTES`, UTF-8 only — fail-soft
       to a `Notice`, never a traceback. `load_yaml`/`load_json` wrappers (yaml.safe_load).
 - [ ] `loader.py`: `discover(root)` globs `traditions/*/tradition.yaml`; `load_manifest()`
       tolerantly parses the manifest into `Manifest` (unknown keys → notice, not rejection;
-      missing required → notice + stub).
+      missing required → notice + stub); `load_prose()` reads the tradition-level prose
+      **`README.md` / `source.md` / `guide.md`** via `safeio`, each **display-first**: a
+      missing / empty / non-UTF-8 / oversized prose file degrades to a `Notice` on the
+      `Tradition`, never an abort (spec M4 + §8 tradition-scope rows).
 - [ ] `tests/fixtures/`: one **good** post-rename tradition (small, ~3 scenarios, includes
-      Arabic content) + malformed manifest variants; `tests/test_safeio.py`,
-      `tests/test_loader_discovery.py`.
+      Arabic content) + malformed manifest variants + a **missing/empty prose** variant (e.g.
+      absent `source.md`); `tests/test_safeio.py`, `tests/test_loader_discovery.py` (incl.
+      prose-degradation → notice, no exception).
 
 #### Implementation Details
 - Mirror `tradition_validator` package conventions (flat package, `__main__`, Typer in `cli.py`).
@@ -130,9 +158,10 @@ apps/jaleesbrowser/
   `Notice`s on the tradition; never raise on content.
 
 #### Acceptance Criteria
-- [ ] `python -m jaleesbrowser --help` runs.
+- [ ] `python -m multibrowser --help` runs.
 - [ ] `discover()` finds the fixture tradition(s); a bad/missing manifest yields a stub +
-      notice (no exception).
+      notice (no exception); a missing/empty tradition prose file (README/source/guide) yields
+      a `Notice`, not an exception.
 - [ ] `safeio` rejects a symlink-escape and an oversized file with a located notice;
       round-trips UTF-8 incl. Arabic.
 - [ ] All Phase-1 tests pass.
@@ -141,7 +170,7 @@ apps/jaleesbrowser/
 - **Unit**: `safeio` containment/size/UTF-8; `discover` globbing; manifest tolerance (unknown
   key, missing required, non-UTF-8 manifest).
 - **Integration**: none yet (no rendering).
-- **Manual**: `python -m jaleesbrowser --help`.
+- **Manual**: `python -m multibrowser --help`.
 
 #### Rollback Strategy
 Revert the phase commit; nothing else depends on it yet.
@@ -172,13 +201,17 @@ Revert the phase commit; nothing else depends on it yet.
       the 6 canonical pressures **in canonical order**; missing/extra/duplicate/unrecognized →
       notice; content before first `##` ignored.
 - [ ] Complete `Scenario` model (id, tags, source_locus, locus_label, identity_signal, turn1,
-      judge_guidance, pressures{canonical→text|None}, notices).
+      judge_guidance, pressures{canonical→text|None}, notices, **`results=None`**).
+- [ ] **Results seam (inert):** `load_results(scenario) -> ScenarioResults | None` returning
+      **`None`** in v1 — the single boundary #8's output will later feed (spec §4.1);
+      `Scenario.results` is populated from it (always `None` in v1). Nothing else reads results.
 - [ ] Fixtures: orphan, ghost, missing/extra pressure, non-UTF-8 section, oversized file,
       unknown tag, Arabic judge-guidance; `tests/test_loader_scenarios.py`.
 
 #### Implementation Details
-- One public entry, e.g. `load_tradition(path, root) -> Tradition` (manifest + scenarios +
-  aggregated notices), and `load_all(root) -> list[Tradition]`.
+- One public entry, e.g. `load_tradition(path, root) -> Tradition` (manifest + **prose** +
+  scenarios + aggregated notices), and `load_all(root) -> list[Tradition]`. `Scenario.results`
+  is filled from the inert `load_results` seam (always `None` in v1).
 - Pressures map keeps canonical order regardless of file order; `None` value ⇒ render a notice
   in P3.
 
@@ -219,12 +252,18 @@ Revert the phase commit; Phase 1 remains intact and tested.
 - [ ] `render.py`: `render_index(traditions)`, `render_tradition(t)`, `render_scenario(t, s,
       prev, next)` returning HTML strings via Jinja2 (`autoescape=True`).
 - [ ] `templates/`: `base.html.j2`, `index.html.j2`, `tradition.html.j2`, `scenario.html.j2`,
-      `_notice.html.j2`, `_framings.html.j2`. Scenario template lays out header (id, locus,
-      identity_signal, tag chips), **turn-1**, **six pressures in canonical order**,
-      **judge-guidance** (collapsible). Tradition template: manifest header, prose
-      (README/source/guide), taxonomy axes, scenario table. Index: tradition cards.
-      `_framings.html.j2`: Stated template instantiated with `adherent_noun`, Guided pointer,
-      Unstated note, six-pressure glosses (S2).
+      `_notice.html.j2`, `_framings.html.j2`, **`_results.html.j2`**. Scenario template lays out
+      header (id, locus, identity_signal, tag chips), **turn-1**, **six pressures in canonical
+      order**, **judge-guidance** (collapsible), and the **reserved results region** —
+      `_results.html.j2`, which renders **nothing** (or a subtle "no judgement results yet"
+      placeholder) when `scenario.results is None` (always, in v1) and is the slot #8's
+      scores/bands/verdicts will fill (spec §4.1). Tradition template: manifest header, prose
+      (README/source/guide, each degrading to its notice if absent), taxonomy axes, scenario
+      table. **Stub-tradition rendering:** when the manifest is invalid/missing, the tradition
+      page still renders — a top-of-page notice, the scenario list from folders/index, and
+      manifest-derived UI (taxonomy filters) **skipped with a notice** (spec §8 tradition row).
+      Index: tradition cards. `_framings.html.j2`: Stated template instantiated with
+      `adherent_noun`, Guided pointer, Unstated note, six-pressure glosses (S2).
 - [ ] `assets/styles.css` (local; notice styling = visually-distinct warning block).
 - [ ] `tests/test_render.py`.
 
@@ -241,6 +280,10 @@ Revert the phase commit; Phase 1 remains intact and tested.
 - [ ] Notices render as visible HTML warning blocks.
 - [ ] Index/tradition/scenario render without error for the good fixture and for malformed
       fixtures (notices shown).
+- [ ] **Stub-tradition**: an invalid-manifest fixture still renders a tradition page (top
+      notice + scenario list + taxonomy-UI-skipped notice), no crash.
+- [ ] **Reserved results region** renders empty (or the placeholder) for every v1 scenario
+      (`results is None`); no scores/bands/verdicts markup is emitted in v1.
 - [ ] All Phase-3 tests pass.
 
 #### Test Plan
@@ -262,7 +305,7 @@ Revert the phase commit; data layer (P1/P2) unaffected.
 **Dependencies**: Phase 3
 
 #### Objectives
-- `jaleesbrowser build --out DIR`: write the full static site (index + per-tradition +
+- `multibrowser build --out DIR`: write the full static site (index + per-tradition +
   per-scenario pages + assets), an embedded **filter-index JSON**, and **client-side
   filter/search** (OR-within-axis, AND-across-axes, free-text). Guarantee determinism,
   link-integrity, and read-only.
@@ -273,15 +316,21 @@ Revert the phase commit; data layer (P1/P2) unaffected.
       `assets/`, emit a per-tradition `filter-index.json` (scenarios × tags/identity_signal/
       locus/search-text), **safely serialized** (`</` escaped). Deterministic: sorted keys,
       stable ordering, no timestamps. **Writes only under `--out`.**
-- [ ] `assets/filter.js`: vanilla JS reading the embedded index; OR-within/AND-across filters,
-      identity_signal + locus-range filters, free-text search, live result counts; reflect
-      active filters in the query string (S3), fail-soft restore. No framework, no CDN.
+- [ ] `assets/filter.js`: vanilla JS reading the embedded index; OR-within/AND-across tag
+      filters, identity_signal filter, **`source_locus` range filter (min/max numeric inputs)**,
+      free-text search, **sort by `id` or `source_locus` (S1)**, live result counts; reflect
+      active filters + sort in the query string (S3), fail-soft restore. No framework, no CDN.
 - [ ] `cli.py`: `build(traditions_root=Path("traditions"), out=Path("dist"))` Typer command;
       fail-loud on invalid root / no traditions / unwritable out (invocation class).
 - [ ] `tests/test_site.py`.
 
 #### Implementation Details
+- **Suggested intra-phase order** (this is the densest phase): output-path scheme →
+  page-write orchestration → filter-index JSON → `filter.js` (filters + **sort** + search) →
+  CLI `build` wiring → tests.
 - Prev/next computed in **default declared order** (P2 order) for stable static links (M9).
+- **Sort (S1)** by `id`/`source_locus` is a client-side reordering of the filtered set; the
+  static page order (prev/next) is unaffected.
 - Link integrity: collect all emitted hrefs, assert each resolves to an emitted file.
 - Read-only: snapshot-hash the traditions tree before/after `build`, assert identical.
 
@@ -291,8 +340,10 @@ Revert the phase commit; data layer (P1/P2) unaffected.
 - [ ] Re-running `build` on unchanged input is **byte-identical** (determinism).
 - [ ] Tradition tree **unchanged** after build (snapshot invariant).
 - [ ] No emitted file references an external CDN/URL.
-- [ ] Filter-index JSON present and well-formed; (filter logic unit-tested where feasible, else
-      asserted via the embedded data + a documented manual check).
+- [ ] Filter-index JSON present and well-formed; it carries the data needed for
+      OR-within/AND-across filtering, locus-range, free-text, and **sort by id/source_locus**
+      (filter/sort logic unit-tested where feasible — e.g. membership precomputed server-side —
+      else asserted via the embedded data + a documented manual check).
 - [ ] All Phase-4 tests pass.
 
 #### Test Plan
@@ -325,7 +376,7 @@ Revert the phase commit; P1–P3 (data + render-to-string) remain usable and tes
       Serving is read-only over the built dir; **never writes under `traditions/`**.
 - [ ] `cli.py`: `serve(traditions_root, out, port, watch=False)` Typer command.
 - [ ] `README.md`: install (`uv sync`), `build`/`serve` usage from repo root
-      (`uv --project apps/jaleesbrowser run python -m jaleesbrowser …`), the filter/slice
+      (`uv --project apps/multibrowser run python -m multibrowser …`), the filter/slice
       feature summary, and the **#6 rebase note** (built against post-rename vocab; run against
       real `traditions/` only after #6 merges + rebase).
 - [ ] `tests/test_cli.py`: `--help` for all commands; `build` smoke via Typer `CliRunner`;
@@ -341,7 +392,7 @@ Revert the phase commit; P1–P3 (data + render-to-string) remain usable and tes
       content (via test client or a localhost request in-test).
 - [ ] Bad invocation (missing root) exits non-zero with a clear message.
 - [ ] README commands are accurate and copy-pasteable.
-- [ ] Full suite green: `uv --project apps/jaleesbrowser run pytest`.
+- [ ] Full suite green: `uv --project apps/multibrowser run pytest`.
 
 #### Test Plan
 - **Unit**: CLI arg wiring; watch-loop guard.
@@ -375,6 +426,7 @@ Strictly linear: each phase builds on the prior and is independently committable
 |------|------------|--------|------------|
 | #6 (probe→scenario rename) not merged; real data still old vocab | H | M | Build against post-rename; verify on synthetic fixtures; names isolated in `constants.py`; rebase + verify on real data in Verify phase |
 | `scenario.md`→`turn1.md` is #6's least-obvious rename | M | M | Confirm against #6's actual impl at rebase; single-file fix in `constants.py` |
+| #8 result schema still speccing; multibrowser must consume it later | M | M | v1 fixes only the seam shape (optional `results` slot + `load_results` boundary + reserved region); defer field-level schema binding to a #8-coordinated follow-up; **no fake results in v1** |
 | Over-building toward a results UI | L | M | Spec §2.1/§4 reframing; no score/compare code anywhere |
 | Markdown sanitizer strips Arabic/citations | M | M | Allow-list tuned; Arabic/citation fixtures assert survival |
 | Client-side filter logic drift | M | L | Precompute membership server-side where feasible; minimal JS; manual verify |
@@ -388,7 +440,8 @@ N/A — progress measured by completed phases, not time (per protocol).
    exactly its expected notices (no exceptions).
 2. **After Phase 4**: full static build — link integrity, determinism, read-only snapshot,
    no-CDN — all green on the fixture.
-3. **Before "done" (Phase 5)**: real-user path — `serve` and browse locally; full suite green.
+3. **Before "done" (Phase 5)**: real-user path — `serve` and browse locally; full suite green;
+   confirm the results-ready seams are present and **inert** (`results=None`, empty reserved region).
 4. **Verify phase (post-merge)**: rebase onto `main` after #6; run `build`/`serve` against the
    real `traditions/sunni-islam`; confirm the 140-scenario tradition renders + filters + stays
    read-only.
@@ -398,7 +451,7 @@ N/A — a static-site generator / local CLI. "Observability" = the inline notice
 the rendered site and clear non-zero exits on invocation errors.
 
 ## Documentation Updates Required
-- [ ] `apps/jaleesbrowser/README.md` (Phase 5).
+- [ ] `apps/multibrowser/README.md` (Phase 5).
 - [ ] Consider a one-line pointer from `traditions/README.md` / `apps/README.md` to the browser
       (Review phase, if warranted).
 - [ ] Arch/lessons hot-tier docs via the `update-arch-docs` skill (Review phase) if a durable
@@ -409,9 +462,29 @@ the rendered site and clear non-zero exits on invocation errors.
 - [ ] (COULD, out of v1) GitHub Pages deploy workflow; light/dark theme; cross-tradition view.
 
 ## Expert Review
-**Date**: (pending — porch runs Codex + Claude after `porch done`)
-**Key Feedback**: _to be recorded._
-**Plan Adjustments**: _to be recorded._
+
+**Plan iteration 1 (2026-06-24) — Codex: REQUEST_CHANGES · Claude: APPROVE.** Both verified the
+plan against the codebase and called the phase decomposition, the data/presentation split, and
+the I1/I3 decisions sound. Claude found no blockers; Codex raised three concrete coverage gaps —
+all accepted and folded in:
+
+- **Tradition prose (README/source/guide) loading/degradation was unassigned (M4).** → Added
+  `load_prose()` to Phase 1 loader, prose fields on `Tradition`, a missing-prose fixture, and
+  acceptance/test coverage (display-first degradation).
+- **S1 sorting (by id / source_locus) not planned.** → Added explicit sort to Phase 4
+  `filter.js` deliverable, implementation details, and acceptance/test.
+- **Stub-tradition-on-invalid-manifest rendering only implicit.** → Made explicit in the Phase 3
+  templates deliverable (top notice + scenario list + taxonomy-UI-skipped notice) with an
+  acceptance criterion + test.
+
+Claude's non-blocking notes also folded in: `source_locus` range UI = min/max numeric inputs; a
+suggested intra-phase ordering for the dense Phase 4; the `watchfiles` Rust-wheel note (already
+mitigated by keeping `--watch` off the tested path).
+
+**Plan Adjustments (architect-directed, same revision):** app renamed `jaleesbrowser` →
+`multibrowser`; results posture moved from "cut" to "results-ready" — three inert seams
+(`Scenario.results=None`, `load_results→None`, reserved `_results.html.j2`) threaded through
+P1–P3, anticipating #8, with **no results UI built in v1**.
 
 ## Approval
 - [ ] Expert AI Consultation Complete
@@ -421,6 +494,8 @@ the rendered site and clear non-zero exits on invocation errors.
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
 | 2026-06-24 | Initial plan | Spec 7 approved | builder spir-7 |
+| 2026-06-24 | Plan iter-1 review folded in (Codex REQUEST_CHANGES / Claude APPROVE): prose loading, S1 sort, stub-tradition rendering + minor notes | Consultation feedback | builder spir-7 |
+| 2026-06-24 | Rename → `multibrowser`; results posture → results-ready (inert seams for #8) | Architect-directed | builder spir-7 |
 
 ## Notes
 - **Phases ship as git commits within a single PR** (per the issue's PR strategy), not as
@@ -428,3 +503,8 @@ the rendered site and clear non-zero exits on invocation errors.
 - The `#6` dependency is acknowledged and accepted per the issue's directive; it is the top
   risk and is handled by fixtures-now / rebase-in-Verify, with all format names isolated in
   `constants.py`.
+- **#8 (judging) coordination:** v1 ships only the results seam (optional `results` slot +
+  `load_results` boundary + reserved render region), all inert. The concrete `ScenarioResults`
+  schema is a follow-up bound to #8's output once its format stabilizes — tracked, not built in
+  v1. A coordination note to the #8 effort (via the architect) is sent so the seam matches #8's
+  eventual shape.
