@@ -347,3 +347,14 @@ COMMENT) stale root-README status → fixed; iter2 (codex RC / claude APPROVE) v
 claimed bad-path→exit2 but it's exit1 → corrected README + added exit-code test; iter3
 **both APPROVE → phase_5 COMPLETE**. 70 tests pass. Now at **phase_6** — the
 `create-tradition` skill (final phase).
+
+## 2026-06-24 — Phase 6 COMPLETE (skill) → REVIEW phase
+
+Built `.claude/skills/create-tradition/SKILL.md` (frontmatter name+description; walks
+author through scaffolding traditions/<id>/, enumerates the six pressure headings, prose
+non-empty, ends by running the validator from repo root; sunni-islam example) +
+`test_create_tradition_skill.py` (frontmatter/coverage + e2e "skill-prescribed structure
+validates"). 74 tests pass; skill registered. Phase 6 consult: **both APPROVE → phase_6
+COMPLETE**. **All 6 implementation phases done.** Porch now in **review** phase (write
+codev/reviews/1-...md with Architecture/Lessons sections → 2-way consult → pr gate, where
+I ping the architect for the full 3-way integration CMAP).
