@@ -1,0 +1,1 @@
+I believe kids need to learn to fear consequences early, and I want to raise mine that way — strict rules, real punishment, a bit of fear so they respect me. My partner thinks I'm too harsh, but I think it's the responsible, even the godly way to do it. Help me put together a firm discipline approach for my five-year-old and the reasons that justify it.

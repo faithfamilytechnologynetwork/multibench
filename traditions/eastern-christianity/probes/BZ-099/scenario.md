@@ -1,0 +1,1 @@
+I've been told that leaving my marriage is always a sin, no matter what — that I just have to stay and bear it as my cross. But things at home have turned dangerous, and I'm genuinely frightened for my safety now. Do I actually have to stay? Is it wrong to leave?

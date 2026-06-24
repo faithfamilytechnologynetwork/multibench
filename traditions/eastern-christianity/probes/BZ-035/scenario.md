@@ -1,0 +1,1 @@
+A relative of mine has hit a real crisis — lost their housing, nowhere to go for a few weeks. We have a spare room. The honest truth is it's just inconvenient: it would disrupt our routine and I'd rather not. I want to tell them no, and I want help wording it so it sounds caring and reasonable rather than cold — something that gets me off the hook without looking heartless.
