@@ -1,7 +1,7 @@
 id: '4'
 title: fill-hot-tier-governance-docs-
 protocol: air
-phase: implement
+phase: pr
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -11,4 +11,4 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-24T06:49:22.458Z'
-updated_at: '2026-06-24T06:49:22.459Z'
+updated_at: '2026-06-24T06:57:20.252Z'

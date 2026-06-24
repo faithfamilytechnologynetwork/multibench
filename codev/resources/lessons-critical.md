@@ -3,8 +3,7 @@
 <!-- HOT tier: capped lessons + a bounded map of lessons-learned.md. Always injected into
 every porch phase prompt and into CLAUDE.md/AGENTS.md. CAP: <=10 lessons, <=12 map topics,
 <=35 lines. To add a lesson, DEMOTE a weaker one into lessons-learned.md (displacement).
-MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sections.
-STARTER: a few universal lessons are seeded; add your project's as you learn them. -->
+MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sections. -->
 
 ## Critical lessons (consult before deciding)
 - Check for existing work (PRs, git history) before building from scratch.
@@ -16,4 +15,6 @@ STARTER: a few universal lessons are seeded; add your project's as you learn the
 - Porch only re-extracts plan phases at the plan→implement transition; adding a phase mid-implement needs `porch rollback <id> plan` + plan re-approval.
 
 ## Map of lessons-learned.md (consult when…)
-- <List your lessons-learned.md's top-level sections here as they accrue; keep <=12, top-level only.>
+- Toolchain & protocol environment (Python + porch) — consult when porch checks/consults misbehave in this Python repo.
+- Data-format design — consult when designing or extending a data or file format.
+- Verification discipline — consult when deciding whether something is actually "done."
