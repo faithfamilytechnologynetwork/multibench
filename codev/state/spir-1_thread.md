@@ -302,3 +302,14 @@ claude APPROVE. Fixed: drift now located on index.json at `probes` (spec §8.3 c
 added `find_finding` helper + tightened drift/id tests to assert severity+file+path. iter2:
 **codex APPROVE + claude APPROVE → phase_2 COMPLETE (clean)**. Now at **phase_3** (probe
 folders, judge seam, pressures.md, prose non-empty, safety).
+
+## 2026-06-24 — Phase 3 built (probe folders, seam, pressures, safety)
+
+Added: `ProbeMeta` model; per-probe validation (id==folder + probe_id_pattern + unique;
+tags keys == declared axes, non-empty/no-dup, values ∈ axis); scenario.md non-empty;
+**judge-guidance.md non-empty = the seam** (hard error); `pressures.md` parsed via
+`normalize_heading` (all six core pressures present, none unknown/dup, each non-empty,
+preamble ignored); tradition prose (README/source/guide) non-empty; unexpected probe
+files → warning; safety: `MAX_FILE_BYTES` size guard (loaders) + symlink-escape rejection
+(validator). conftest now scaffolds complete valid probe folders. **60 tests pass**;
+end-to-end CLI validates a complete tradition (exit 0). Next: `porch done 1` → 2-way consult.
