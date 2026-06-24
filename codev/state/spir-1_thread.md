@@ -358,3 +358,17 @@ validates"). 74 tests pass; skill registered. Phase 6 consult: **both APPROVE �
 COMPLETE**. **All 6 implementation phases done.** Porch now in **review** phase (write
 codev/reviews/1-...md with Architecture/Lessons sections → 2-way consult → pr gate, where
 I ping the architect for the full 3-way integration CMAP).
+
+## 2026-06-24 — REVIEW complete → PR-ready gate (waiting)
+
+Wrote `codev/reviews/1-...md` (M1–M8 met, what-went-well/challenging, systematic issues,
+Architecture Updates + Lessons Learned Updates, methodology notes). Populated hot-tier
+governance docs (`arch-critical.md`/`lessons-critical.md`) with real facts/lessons. Updated
+PR #2 body to the final state. Review checks pass (pr_exists, arch/lessons headings,
+e2e self-skip). Review consult (2-way, type pr): **claude APPROVE, codex COMMENT** (both
+non-blocking) → porch advanced to the **pr gate**. Codex non-blocking notes: porch's auto
+`chore(porch)` commits don't match `[Spec 1][Phase]` (squash-on-merge handles it; they're
+porch's own state records) + reconfirm 74 count (accurate — claude re-ran). Fixed one stale
+loaders.py docstring (Claude's note). Requested `porch gate 1` (pr), pinged architect for
+their full 3-way integration CMAP + approval. **STOPPED — waiting for `porch approve 1 pr`.
+Will NOT self-approve or merge.** Branch fully pushed (c8bfa23).
