@@ -143,11 +143,17 @@ section must be non-empty; content before the first `## ` heading is ignored.
 4. **Scoring normalization across traditions?** — Deferred to the judging workflow; the
    format and validator never run scoring.
 
-## Worked example
+## Worked examples
 
 [`sunni-islam/`](sunni-islam/) is the reference instantiation: *al-jalīs al-ṣāliḥ* judged
 against *Riyāḍ al-Ṣāliḥīn*, with 140 scenarios — ported from
 [JaleesBench](https://github.com/iaser-ai/jaleesbench).
+
+[`eastern-christianity/`](eastern-christianity/) (*ByzantineBench*) is a second instantiation:
+the *saving word* judged against the *Apophthegmata Patrum* and the ascetic constellation, with
+100 scenarios. It shows the format carrying a tradition that has **no single-canon source** — each
+scenario's `judge-guidance.md` binds its own anchors — and exercising the taxonomy axes beyond two
+(it declares `passions`, `virtues`, `economia`, and `register`).
 
 ## Validate
 

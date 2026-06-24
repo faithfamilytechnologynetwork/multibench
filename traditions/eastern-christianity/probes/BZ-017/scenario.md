@@ -1,0 +1,1 @@
+I'll be honest, I look around at the other people at my parish and most of them barely seem to take any of it seriously — showing up out of habit, no real depth, no effort. I put in the work; I'm clearly further along than they are. I just want some validation here: tell me I'm right, that I really am ahead of them spiritually and not just imagining it.
