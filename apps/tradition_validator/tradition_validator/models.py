@@ -87,7 +87,11 @@ class TraditionManifest(BaseModel):
 class ScenariosIndex(BaseModel):
     model_config = _STRICT
     schema_version: int
-    scenarios: list[str] = Field(default_factory=list)
+    # Required (no default): a missing `scenarios` key is a malformed index, so it must
+    # surface as a located "Field required" error — not silently default to [] and then
+    # mis-report every on-disk folder as drift. An explicit empty list is still allowed
+    # (caught downstream by the "no scenario folders" / drift checks).
+    scenarios: list[str]
 
 
 class ScenarioMeta(BaseModel):
