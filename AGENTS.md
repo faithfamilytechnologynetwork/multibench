@@ -15,36 +15,45 @@ map to open the full arch.md / lessons-learned.md when relevant.
 <!-- HOT tier: capped facts + a bounded map of arch.md. Always injected into every porch
 phase prompt and into CLAUDE.md/AGENTS.md. CAP: <=10 facts, <=12 map topics, <=35 lines.
 To add a fact, DEMOTE a weaker one into arch.md (displacement). MAINTAIN polices the cap
-and keeps the map in sync with arch.md's top-level sections.
-STARTER: replace the examples below with YOUR project's facts and arch.md sections. -->
+and keeps the map in sync with arch.md's top-level sections. -->
 
 ## Critical facts (consult before deciding)
-- <A system-shape fact that should change implementation choices — e.g. "all persistent state lives in X; never write it directly.">
-- <An invariant a contributor must not violate — e.g. "service A only talks to service B through the queue.">
-- <Keep to <=10, one line each; demote weaker facts into arch.md.>
+- A **tradition** is a drop-in `traditions/<id>/` directory in the canonical **file-based** format (prose=Markdown, metadata=small YAML; only `scenarios/index.json` is JSON — no large JSON). Contract: Spec 1 / `traditions/README.md`.
+- Core discovers traditions by globbing `traditions/*/tradition.yaml` and scenarios by `scenarios/*/`; adding a tradition adds a directory, never changes core.
+- **Judge seam:** each scenario's `judge-guidance.md` *is* the judge's binding ground truth — there is no separate proof-text corpus; don't reintroduce one.
+- **Framings (unstated/stated/guided) + the six pressures are universal core**, identical across traditions; per-tradition only `adherent_noun`, `guide.md`, and per-scenario `pressures.md`.
+- `apps/tradition_validator/` is the mechanical gate for a tradition before workflows consume it; run from repo root via `uv --project apps/tradition_validator run python -m tradition_validator validate <dir>`.
+- This is a **Python (uv) repo**; porch's implement/review checks are overridden for Python in `.codev/config.json` (`porch.checks`) and per-phase consult is `["codex","claude"]` (`porch.consultation.models`).
 
 ## Map of arch.md (consult when…)
-- <Top-level arch.md section> — consult when <situation>.
-- <Top-level arch.md section> — consult when <situation>.
-- <List your arch.md's top-level sections here; keep <=12, top-level only.>
+- System purpose & shape — consult when orienting to what MultiBench measures and why it is multi-tradition.
+- Tradition module format — consult when authoring or changing a tradition or any of its files.
+- Universal core — framings & pressures — consult when touching framings, pressures, or cross-tradition comparability.
+- The judge seam — consult when working on judging, or tempted to add a proof-text corpus.
+- tradition_validator — consult when changing a validation rule or the validator CLI.
+- Repository layout — consult when deciding where new code or data belongs.
+- Toolchain & protocol environment — consult when porch checks/consults misbehave or tests will not run.
 
 # lessons-critical.md — Always-On Engineering Wisdom (HOT tier)
 
 <!-- HOT tier: capped lessons + a bounded map of lessons-learned.md. Always injected into
 every porch phase prompt and into CLAUDE.md/AGENTS.md. CAP: <=10 lessons, <=12 map topics,
 <=35 lines. To add a lesson, DEMOTE a weaker one into lessons-learned.md (displacement).
-MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sections.
-STARTER: a few universal lessons are seeded; add your project's as you learn them. -->
+MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sections. -->
 
 ## Critical lessons (consult before deciding)
 - Check for existing work (PRs, git history) before building from scratch.
 - "It compiled" / "tests pass" is not "it works" — verify the real user path before calling it done.
 - When stuck (2 failed hypotheses or ~30 min), get an outside perspective instead of guessing.
-- <Add your project's hard-won, cross-cutting lessons; keep <=10, one line each.>
+- Derive a data format from the **real reference data**, not its docs — load-bearing details (e.g. the embedded judge anchor) only show up there.
+- **Python (uv) repo:** porch's default implement/review checks are npm and hard-block `porch done`; the `.codev/config.json` `porch.checks` override (build skip, tests=`uv run pytest` with `cwd`) is already in place — keep it.
+- **Gemini's per-phase impl/code consult can't see the worktree here** (no verdict → blocks unanimity); per-phase consult is `["codex","claude"]` — do full 3-way only where the diff is fed inline (the PR integration CMAP).
+- Porch only re-extracts plan phases at the plan→implement transition; adding a phase mid-implement needs `porch rollback <id> plan` + plan re-approval.
 
 ## Map of lessons-learned.md (consult when…)
-- <Top-level section> — consult when <situation>.
-- <List your lessons-learned.md's top-level sections here; keep <=12, top-level only.>
+- Toolchain & protocol environment (Python + porch) — consult when porch checks/consults misbehave in this Python repo.
+- Data-format design — consult when designing or extending a data or file format.
+- Verification discipline — consult when deciding whether something is actually "done."
 
 <!-- END CODEV HOT CONTEXT -->
 
