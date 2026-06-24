@@ -17,7 +17,7 @@ FORMAT_DOC = REPO_ROOT / "traditions" / "README.md"
 @pytest.mark.skipif(not FORMAT_DOC.is_file(), reason="traditions/README.md not present")
 def test_format_doc_covers_required_files_and_pressures():
     text = FORMAT_DOC.read_text(encoding="utf-8")
-    for name in (*core.REQUIRED_TRADITION_FILES, "index.json", *core.REQUIRED_PROBE_FILES):
+    for name in (*core.REQUIRED_TRADITION_FILES, "index.json", *core.REQUIRED_SCENARIO_FILES):
         assert name in text, f"format doc does not mention required file: {name}"
     for pressure in core.PRESSURES:
         assert pressure in text, f"format doc does not mention core pressure: {pressure}"

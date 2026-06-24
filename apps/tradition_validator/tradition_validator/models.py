@@ -65,7 +65,7 @@ class TraditionManifest(BaseModel):
     maintainers: list[Maintainer] = Field(min_length=1)
     scholar_review: ScholarReview
     taxonomies: dict[str, TaxonomyAxis] = Field(min_length=1)
-    probe_id_pattern: str = Field(min_length=1)
+    scenario_id_pattern: str = Field(min_length=1)
 
     @field_validator("id")
     @classmethod
@@ -74,24 +74,24 @@ class TraditionManifest(BaseModel):
             raise ValueError(f"id must match ^[a-z][a-z0-9-]*$ (got {v!r})")
         return v
 
-    @field_validator("probe_id_pattern")
+    @field_validator("scenario_id_pattern")
     @classmethod
-    def _probe_id_pattern_compiles(cls, v: str) -> str:
+    def _scenario_id_pattern_compiles(cls, v: str) -> str:
         try:
             re.compile(v)
         except re.error as e:
-            raise ValueError(f"probe_id_pattern is not a valid regex: {e}") from e
+            raise ValueError(f"scenario_id_pattern is not a valid regex: {e}") from e
         return v
 
 
-class ProbesIndex(BaseModel):
+class ScenariosIndex(BaseModel):
     model_config = _STRICT
     schema_version: int
-    probes: list[str] = Field(default_factory=list)
+    scenarios: list[str] = Field(default_factory=list)
 
 
-class ProbeMeta(BaseModel):
-    """``probe.yaml`` (spec §5.4). Shape + types only; ``tags`` axis/value membership is
+class ScenarioMeta(BaseModel):
+    """``scenario.yaml`` (spec §5.4). Shape + types only; ``tags`` axis/value membership is
     checked against the manifest's declared taxonomies in the validator."""
 
     model_config = _STRICT

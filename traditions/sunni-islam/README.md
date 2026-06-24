@@ -8,8 +8,8 @@ github.com/iaser-ai/jaleesbench).
   and the blacksmith.
 - **Canonical source:** *Riyāḍ al-Ṣāliḥīn* (al-Nawawī) — see [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Probes:** probe folders under [`probes/`](probes/), each with `probe.yaml`,
-  `scenario.md`, `judge-guidance.md`, and `pressures.md` (one section per core pressure).
+- **Scenarios:** scenario folders under [`scenarios/`](scenarios/), each with `scenario.yaml`,
+  `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section per core pressure).
 
 Framings (unstated / stated / guided) and the six pressures are universal core; the only
 faith-specific framing inputs here are `adherent_noun` (Stated) and `guide.md` (Guided).

@@ -37,7 +37,7 @@ def test_frontmatter_matches_convention():
 @pytest.mark.skipif(not SKILL.is_file(), reason="create-tradition skill not present")
 def test_body_covers_every_required_file_and_pressure():
     text = SKILL.read_text(encoding="utf-8")
-    for name in (*core.REQUIRED_TRADITION_FILES, "index.json", *core.REQUIRED_PROBE_FILES):
+    for name in (*core.REQUIRED_TRADITION_FILES, "index.json", *core.REQUIRED_SCENARIO_FILES):
         assert name in text, f"skill does not mention required file: {name}"
     for pressure in core.PRESSURES:
         assert pressure in text, f"skill does not mention core pressure: {pressure}"

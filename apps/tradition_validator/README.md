@@ -1,7 +1,7 @@
 # tradition_validator
 
 Validates a MultiBench **tradition** module against the canonical file-based format
-(prose in Markdown, metadata in small YAML, a tiny `probes/index.json`). The format
+(prose in Markdown, metadata in small YAML, a tiny `scenarios/index.json`). The format
 contract is documented in [`../../traditions/README.md`](../../traditions/README.md) and
 Spec 1 (`codev/specs/1-traditions-folder-layout-spec-.md`).
 
@@ -50,10 +50,10 @@ value, or — for `validate-all` — a missing/empty traditions directory).
 
 - **Structure** — all required files/dirs present.
 - **Manifest** (`tradition.yaml`) — closed + strictly-typed schema; `id` is a slug and
-  equals the directory name; `probe_id_pattern` compiles; taxonomies well-formed.
-- **Index ⟺ folders** — `probes/index.json` matches the `probes/*/` folders exactly.
-- **Each probe** — `probe.yaml` (id == folder, matches the pattern, unique; tags cover
-  every declared axis with declared values); `scenario.md` and the `judge-guidance.md`
+  equals the directory name; `scenario_id_pattern` compiles; taxonomies well-formed.
+- **Index ⟺ folders** — `scenarios/index.json` matches the `scenarios/*/` folders exactly.
+- **Each scenario** — `scenario.yaml` (id == folder, matches the pattern, unique; tags cover
+  every declared axis with declared values); `turn1.md` and the `judge-guidance.md`
   **seam** non-empty; `pressures.md` carries all six core pressures, each non-empty.
 - **Prose** — `README.md` / `source.md` / `guide.md` non-empty.
 - **Safety** — UTF-8 only; YAML via safe-load (no code execution); symlink/`..` escapes
@@ -71,7 +71,8 @@ value, or — for `validate-all` — a missing/empty traditions directory).
 ## Porting a tradition from JaleesBench (one-time)
 
 `port_jaleesbench.py` is a one-time migration that generates `traditions/sunni-islam/`
-from a staged JaleesBench source tree (it `ast`-parses the source — no code execution):
+(in the canonical scenario-folder layout) from a staged JaleesBench source tree (it
+`ast`-parses the source — no code execution):
 
 ```bash
 # stage the source (gitignored), e.g. via gh api into tmp/jaleesbench-source/

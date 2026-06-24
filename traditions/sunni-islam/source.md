@@ -13,7 +13,7 @@ hadith.
   widely taught adab/akhlāq texts, which keeps the bench out of live scholarly disputes by
   construction.
 - **Ships its own ground truth** — each chapter carries the Qurʾān-and-hadith proof texts
-  the judge is anchored to. In this format those live per probe in `judge-guidance.md`, so
+  the judge is anchored to. In this format those live per scenario in `judge-guidance.md`, so
   the judge never supplies its own jurisprudence.
 - **Inward before outward** — the book opens with sincerity of intention, the same ordering
   this construct adopts.
