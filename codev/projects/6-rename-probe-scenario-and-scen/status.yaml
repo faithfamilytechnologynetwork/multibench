@@ -1,7 +1,7 @@
 id: '6'
 title: rename-probe-scenario-and-scen
 protocol: air
-phase: implement
+phase: pr
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -11,4 +11,4 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-24T06:24:24.323Z'
-updated_at: '2026-06-24T06:24:24.324Z'
+updated_at: '2026-06-24T06:51:28.083Z'
