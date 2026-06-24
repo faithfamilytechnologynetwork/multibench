@@ -252,3 +252,28 @@ validator command stated run-from-repo-root; description trigger phrasing. Rebut
 Reached **plan-approval gate (iter 2)**; requested it; pushed (origin==local edea8be);
 notified architect. Holding phase_1 verification until after plan re-approval + implement
 re-entry (so it isn't reset). On approval porch re-extracts all 6 phases.
+
+## 2026-06-24 — Implement Phase 1 verification + GEMINI IMPL-CONSULT BLOCKER
+
+Plan gate approved → implement re-entry → porch tracks all 6 phases (phase_1 in_progress,
+build check skipped via override). Ran phase_1 impl 3-way consult:
+- **iter 1:** codex REQUEST_CHANGES (real bug: `validate-all --format json` emitted
+  concatenated JSON objects → invalid), claude APPROVE, gemini no-verdict. Fixed: cli.py
+  now emits one `{ok, traditions:[...]}` doc; added validate-all tests (23 pass). Committed.
+- **iter 2:** codex COMMENT (minor: README run-cwd), claude APPROVE, gemini no-verdict.
+  Fixed README cwd. Committed.
+
+**BLOCKER (flagged to architect): Gemini impl consults can't see the worktree.** Its
+consult sandbox (`/var/folders/.../codev-consult-*`) is empty and it stalls asking
+permission to search the home dir → produces **no VERDICT** → porch's parseVerdict
+defaults that to **REQUEST_CHANGES** → `allApprove` is never true → every implement phase
+will iterate to the ceiling (`max_iterations=3`) then **force-advance**. (Gemini worked
+for spec/plan because that content is inline in the prompt; impl needs file access.)
+Codex+Claude (the substantive reviewers) are already satisfied on phase_1.
+
+Fix found in porch source: `.codev/config.json` `porch.consultation.models`
+(config > protocol verify.models; accepts a subset or `"none"`). Recommended:
+set `["codex","claude"]` to drop the non-functional gemini → clean 2-way impl review,
+no force-advances. This is a review-policy change (governance) → architect's call, so I
+flagged it and am HOLDING the phase_1 iter-3 consult pending their decision (running it
+would just burn consults + force-advance).
