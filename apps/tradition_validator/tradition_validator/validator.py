@@ -1,9 +1,9 @@
 """Tradition validation engine.
 
 Covers (spec §5, §8.2): directory structure; the ``tradition.yaml`` manifest +
-taxonomies; ``probes/index.json`` ⟺ probe-folder drift; tradition-level prose
-non-emptiness; per-probe folders (``probe.yaml`` schema + taxonomy membership,
-``scenario.md``, the ``judge-guidance.md`` seam, and ``pressures.md`` coverage);
+taxonomies; ``scenarios/index.json`` ⟺ scenario-folder drift; tradition-level prose
+non-emptiness; per-scenario folders (``scenario.yaml`` schema + taxonomy membership,
+``turn1.md``, the ``judge-guidance.md`` seam, and ``pressures.md`` coverage);
 plus robustness guards (UTF-8 / safe-load / size cap via loaders, symlink-escape
 rejection here).
 """
@@ -18,7 +18,7 @@ from pydantic import ValidationError
 from tradition_validator import core
 from tradition_validator.findings import Finding, Report
 from tradition_validator.loaders import load_json, load_text, load_yaml
-from tradition_validator.models import ProbeMeta, ProbesIndex, TraditionManifest
+from tradition_validator.models import ScenarioMeta, ScenariosIndex, TraditionManifest
 
 
 def _pydantic_findings(exc: ValidationError, file: str) -> list[Finding]:
@@ -47,12 +47,12 @@ def _guard_within(path: Path, root: Path, report: Report) -> bool:
     return True
 
 
-def list_probe_folders(probes_dir: Path) -> list[str]:
-    """Probe folder names under probes/, ignoring dot/system entries (spec §8.2)."""
-    if not probes_dir.is_dir():
+def list_scenario_folders(scenarios_dir: Path) -> list[str]:
+    """Scenario folder names under scenarios/, ignoring dot/system entries (spec §8.2)."""
+    if not scenarios_dir.is_dir():
         return []
     return sorted(
-        p.name for p in probes_dir.iterdir() if p.is_dir() and not p.name.startswith(".")
+        p.name for p in scenarios_dir.iterdir() if p.is_dir() and not p.name.startswith(".")
     )
 
 
@@ -104,7 +104,7 @@ def _validate_pressures_md(path: Path, root: Path, report: Report) -> None:
         report.error(str(path), "Path escapes the tradition directory.")
         return
     if not path.is_file():
-        report.error(str(path), "Required probe file missing: pressures.md")
+        report.error(str(path), "Required scenario file missing: pressures.md")
         return
     text, err = load_text(path)
     if err:
@@ -136,7 +136,7 @@ def _validate_pressures_md(path: Path, root: Path, report: Report) -> None:
                 report.error(str(path), f"pressure section '{pressure}' is empty.", f"## {pressure}")
 
 
-def _validate_probe_folder(
+def _validate_scenario_folder(
     folder: Path,
     root: Path,
     manifest: TraditionManifest | None,
@@ -144,95 +144,95 @@ def _validate_probe_folder(
     seen_ids: dict[str, str],
 ) -> None:
     if not _within_root(folder, root):
-        report.error(str(folder), "Probe folder escapes the tradition directory (symlink not allowed).")
+        report.error(str(folder), "Scenario folder escapes the tradition directory (symlink not allowed).")
         return
 
     # Required files present; unexpected non-dot files -> warning (typo catch).
-    expected = set(core.REQUIRED_PROBE_FILES)
-    for fname in core.REQUIRED_PROBE_FILES:
+    expected = set(core.REQUIRED_SCENARIO_FILES)
+    for fname in core.REQUIRED_SCENARIO_FILES:
         if not (folder / fname).is_file():
-            report.error(str(folder / fname), f"Required probe file missing: {fname}")
+            report.error(str(folder / fname), f"Required scenario file missing: {fname}")
     for child in folder.iterdir():
         if child.name.startswith("."):
             continue
         if child.is_file() and child.name not in expected:
-            report.warning(str(child), f"unexpected file in probe folder: {child.name}")
+            report.warning(str(child), f"unexpected file in scenario folder: {child.name}")
 
-    # probe.yaml
-    probe_path = folder / "probe.yaml"
-    meta: ProbeMeta | None = None
-    if probe_path.is_file() and _guard_within(probe_path, root, report):
-        data, err = load_yaml(probe_path)
+    # scenario.yaml
+    scenario_path = folder / "scenario.yaml"
+    meta: ScenarioMeta | None = None
+    if scenario_path.is_file() and _guard_within(scenario_path, root, report):
+        data, err = load_yaml(scenario_path)
         if err:
             report.extend([err])
         elif data is None:
-            report.error(str(probe_path), "probe.yaml is empty (no fields).")
+            report.error(str(scenario_path), "scenario.yaml is empty (no fields).")
         elif not isinstance(data, dict):
-            report.error(str(probe_path), "probe.yaml must be a YAML mapping.")
+            report.error(str(scenario_path), "scenario.yaml must be a YAML mapping.")
         else:
             try:
-                meta = ProbeMeta.model_validate(data)
+                meta = ScenarioMeta.model_validate(data)
             except ValidationError as e:
-                report.extend(_pydantic_findings(e, str(probe_path)))
+                report.extend(_pydantic_findings(e, str(scenario_path)))
     if meta is not None:
         if meta.id != folder.name:
             report.error(
-                str(probe_path),
-                f"probe id '{meta.id}' must equal its folder name '{folder.name}'.",
+                str(scenario_path),
+                f"scenario id '{meta.id}' must equal its folder name '{folder.name}'.",
                 "id",
             )
         if meta.id in seen_ids:
             first = seen_ids[meta.id]
             # Name BOTH conflicting locations (spec T13): a finding on each file.
             report.error(
-                str(probe_path),
-                f"duplicate probe id '{meta.id}' (also declared in {first}).",
+                str(scenario_path),
+                f"duplicate scenario id '{meta.id}' (also declared in {first}).",
                 "id",
             )
             report.error(
                 first,
-                f"duplicate probe id '{meta.id}' (also declared in {probe_path}).",
+                f"duplicate scenario id '{meta.id}' (also declared in {scenario_path}).",
                 "id",
             )
         else:
-            seen_ids[meta.id] = str(probe_path)
+            seen_ids[meta.id] = str(scenario_path)
         if manifest is not None:
-            # fullmatch so an unanchored probe_id_pattern still requires the whole id.
-            if not re.compile(manifest.probe_id_pattern).fullmatch(meta.id):
+            # fullmatch so an unanchored scenario_id_pattern still requires the whole id.
+            if not re.compile(manifest.scenario_id_pattern).fullmatch(meta.id):
                 report.error(
-                    str(probe_path),
-                    f"probe id '{meta.id}' does not match probe_id_pattern "
-                    f"'{manifest.probe_id_pattern}'.",
+                    str(scenario_path),
+                    f"scenario id '{meta.id}' does not match scenario_id_pattern "
+                    f"'{manifest.scenario_id_pattern}'.",
                     "id",
                 )
-            _validate_tags(probe_path, meta, manifest, report)
+            _validate_tags(scenario_path, meta, manifest, report)
 
-    # Prose files (scenario, the judge seam) must be present + non-empty.
-    _nonempty_text(folder / "scenario.md", root, report)
+    # Prose files (the turn-1 opening, the judge seam) must be present + non-empty.
+    _nonempty_text(folder / "turn1.md", root, report)
     _nonempty_text(folder / "judge-guidance.md", root, report, seam=True)
     _validate_pressures_md(folder / "pressures.md", root, report)
 
 
 def _validate_tags(
-    probe_path: Path, meta: ProbeMeta, manifest: TraditionManifest, report: Report
+    scenario_path: Path, meta: ScenarioMeta, manifest: TraditionManifest, report: Report
 ) -> None:
     declared = set(manifest.taxonomies.keys())
     present = set(meta.tags.keys())
     for missing in sorted(declared - present):
-        report.error(str(probe_path), f"missing required taxonomy axis '{missing}' in tags.", "tags")
+        report.error(str(scenario_path), f"missing required taxonomy axis '{missing}' in tags.", "tags")
     for extra in sorted(present - declared):
-        report.error(str(probe_path), f"unknown taxonomy axis '{extra}' in tags.", f"tags.{extra}")
+        report.error(str(scenario_path), f"unknown taxonomy axis '{extra}' in tags.", f"tags.{extra}")
     for axis in sorted(present & declared):
         values = meta.tags[axis]
         if not values:
-            report.error(str(probe_path), f"tags.{axis} must be non-empty.", f"tags.{axis}")
+            report.error(str(scenario_path), f"tags.{axis} must be non-empty.", f"tags.{axis}")
         if len(set(values)) != len(values):
-            report.error(str(probe_path), f"duplicate values in tags.{axis}.", f"tags.{axis}")
+            report.error(str(scenario_path), f"duplicate values in tags.{axis}.", f"tags.{axis}")
         allowed = set(manifest.taxonomies[axis].values)
         for v in values:
             if v not in allowed:
                 report.error(
-                    str(probe_path),
+                    str(scenario_path),
                     f"unknown taxonomy value '{v}' for axis '{axis}'. "
                     f"Declared: {sorted(allowed)}.",
                     f"tags.{axis}",
@@ -278,12 +278,12 @@ def _validate_manifest(tradition_dir: Path, report: Report) -> TraditionManifest
 
 
 def _validate_index_and_drift(tradition_dir: Path, report: Report) -> None:
-    index_path = tradition_dir / core.PROBES_INDEX
-    folders = list_probe_folders(tradition_dir / "probes")
+    index_path = tradition_dir / core.SCENARIOS_INDEX
+    folders = list_scenario_folders(tradition_dir / "scenarios")
     if not folders:
         report.error(
-            str(tradition_dir / "probes"),
-            "No probe folders found under probes/ (need at least one).",
+            str(tradition_dir / "scenarios"),
+            "No scenario folders found under scenarios/ (need at least one).",
         )
 
     if not index_path.is_file():
@@ -298,7 +298,7 @@ def _validate_index_and_drift(tradition_dir: Path, report: Report) -> None:
         report.error(str(index_path), "index.json must be a JSON object.")
         return
     try:
-        index = ProbesIndex.model_validate(data)
+        index = ScenariosIndex.model_validate(data)
     except ValidationError as e:
         report.extend(_pydantic_findings(e, str(index_path)))
         return
@@ -311,22 +311,22 @@ def _validate_index_and_drift(tradition_dir: Path, report: Report) -> None:
             "schema_version",
         )
 
-    if len(set(index.probes)) != len(index.probes):
-        dupes = sorted({p for p in index.probes if index.probes.count(p) > 1})
-        report.error(str(index_path), f"duplicate entries in probes list: {dupes}.", "probes")
+    if len(set(index.scenarios)) != len(index.scenarios):
+        dupes = sorted({s for s in index.scenarios if index.scenarios.count(s) > 1})
+        report.error(str(index_path), f"duplicate entries in scenarios list: {dupes}.", "scenarios")
 
-    idx_set, fld_set = set(index.probes), set(folders)
+    idx_set, fld_set = set(index.scenarios), set(folders)
     for missing in sorted(idx_set - fld_set):
         report.error(
             str(index_path),
-            f"index lists probe '{missing}' but no probes/{missing}/ folder exists (drift).",
-            "probes",
+            f"index lists scenario '{missing}' but no scenarios/{missing}/ folder exists (drift).",
+            "scenarios",
         )
     for extra in sorted(fld_set - idx_set):
         report.error(
             str(index_path),
-            f"probe folder '{extra}' is on disk but not listed in index.json (drift).",
-            "probes",
+            f"scenario folder '{extra}' is on disk but not listed in index.json (drift).",
+            "scenarios",
         )
 
 
@@ -346,10 +346,10 @@ def validate_tradition(tradition_dir: Path, strict: bool = False) -> Report:
     for name in core.REQUIRED_TRADITION_FILES:
         if not (tradition_dir / name).is_file():
             report.error(str(tradition_dir / name), f"Required file missing: {name}")
-    if not (tradition_dir / core.PROBES_INDEX).is_file():
+    if not (tradition_dir / core.SCENARIOS_INDEX).is_file():
         report.error(
-            str(tradition_dir / core.PROBES_INDEX),
-            f"Required file missing: {core.PROBES_INDEX}",
+            str(tradition_dir / core.SCENARIOS_INDEX),
+            f"Required file missing: {core.SCENARIOS_INDEX}",
         )
 
     # Tradition-level prose must be non-empty (spec §8.2 checks 6/9). guide.md is
@@ -361,10 +361,10 @@ def validate_tradition(tradition_dir: Path, strict: bool = False) -> Report:
     manifest = _validate_manifest(tradition_dir, report)
     _validate_index_and_drift(tradition_dir, report)
 
-    seen_ids: dict[str, str] = {}  # probe id -> first file that declared it
-    for folder_name in list_probe_folders(tradition_dir / "probes"):
-        _validate_probe_folder(
-            tradition_dir / "probes" / folder_name, tradition_dir, manifest, report, seen_ids
+    seen_ids: dict[str, str] = {}  # scenario id -> first file that declared it
+    for folder_name in list_scenario_folders(tradition_dir / "scenarios"):
+        _validate_scenario_folder(
+            tradition_dir / "scenarios" / folder_name, tradition_dir, manifest, report, seen_ids
         )
 
     return report

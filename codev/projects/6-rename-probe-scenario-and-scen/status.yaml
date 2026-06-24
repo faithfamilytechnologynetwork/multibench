@@ -1,0 +1,17 @@
+id: '6'
+title: rename-probe-scenario-and-scen
+protocol: air
+phase: verified
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: approved
+    requested_at: '2026-06-24T06:53:06.677Z'
+    approved_at: '2026-06-24T08:20:10.602Z'
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-06-24T06:24:24.323Z'
+updated_at: '2026-06-24T08:20:23.433Z'
+pr_ready_for_human: false

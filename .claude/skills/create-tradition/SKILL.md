@@ -1,13 +1,13 @@
 ---
 name: create-tradition
-description: Scaffold a new MultiBench tradition under traditions/<id>/ in the canonical file-based format (tradition.yaml + prose Markdown + one folder per probe) and validate it with tradition_validator. Use this whenever you are creating, adding, porting, or authoring a new tradition (faith/wisdom tradition) for MultiBench, or when someone says "add a tradition", "create a tradition", or "scaffold a tradition". sunni-islam is the worked example to copy from.
+description: Scaffold a new MultiBench tradition under traditions/<id>/ in the canonical file-based format (tradition.yaml + prose Markdown + one folder per scenario) and validate it with tradition_validator. Use this whenever you are creating, adding, porting, or authoring a new tradition (faith/wisdom tradition) for MultiBench, or when someone says "add a tradition", "create a tradition", or "scaffold a tradition". sunni-islam is the worked example to copy from.
 ---
 
 # Create a MultiBench tradition
 
 A tradition is a **self-contained, drop-in directory** under `traditions/`. It is
 **file-based**: prose lives in Markdown, structured metadata in small YAML, and the only
-JSON is a tiny `probes/index.json`. Discovery is mechanical (`traditions/*/tradition.yaml`),
+JSON is a tiny `scenarios/index.json`. Discovery is mechanical (`traditions/*/tradition.yaml`),
 and the final step is always: **run the validator until it passes.**
 
 **Read first:** [`traditions/README.md`](../../../traditions/README.md) (the format doc)
@@ -35,7 +35,7 @@ maintainers: [{name: ..., contact: ...}]   # at least one
 scholar_review: {status: none, reviewers: []}   # none | in_progress | reviewed
 taxonomies:                     # your own tag axes; each value set non-empty, no dupes
   <axis>: {description: ..., applies_to: scenario|response, values: [...]}
-probe_id_pattern: '^...$'        # regex every probe id (and folder name) must match
+scenario_id_pattern: '^...$'     # regex every scenario id (and folder name) must match
 ```
 
 ### 3. Write the tradition prose (all **non-empty**)
@@ -43,14 +43,14 @@ probe_id_pattern: '^...$'        # regex every probe id (and folder name) must m
 - `source.md` — the canonical source and **why it is consensus-grade**.
 - `guide.md` — the one-page companionship guide (the Guided-framing system prompt).
 
-### 4. Create the probe bank
-Make `probes/` with:
-- `probes/index.json` — `{"schema_version": 1, "probes": ["<ID-1>", "<ID-2>", ...]}`. It
-  must list **exactly** the probe folders on disk (any mismatch is a drift error).
-- One folder per probe, named by its id (matching `probe_id_pattern`).
+### 4. Create the scenario bank
+Make `scenarios/` with:
+- `scenarios/index.json` — `{"schema_version": 1, "scenarios": ["<ID-1>", "<ID-2>", ...]}`. It
+  must list **exactly** the scenario folders on disk (any mismatch is a drift error).
+- One folder per scenario, named by its id (matching `scenario_id_pattern`).
 
-### 5. Fill each probe folder `probes/<ID>/`
-- `probe.yaml`:
+### 5. Fill each scenario folder `scenarios/<ID>/`
+- `scenario.yaml`:
   ```yaml
   id: <ID>                      # must equal the folder name
   tags:                         # every declared taxonomy axis present; values from that axis
@@ -59,8 +59,8 @@ Make `probes/` with:
   locus_label: <human label>
   identity_signal: clean        # clean | leaky | intrinsic
   ```
-- `scenario.md` — the turn-1 scenario (prose, non-empty).
-- `judge-guidance.md` — **the judge's binding ground truth** for this probe (the proof
+- `turn1.md` — the turn-1 opening scenario (prose, non-empty).
+- `judge-guidance.md` — **the judge's binding ground truth** for this scenario (the proof
   texts / direction). Required and non-empty — this is what the judge is anchored to.
 - `pressures.md` — one `## ` section per **core pressure**, each non-empty. The six core
   pressures (use these exact headings):
@@ -79,7 +79,7 @@ Make `probes/` with:
 
 ## Notes
 - **Framings and pressures are universal core** — you do NOT define them. You only supply
-  `adherent_noun` (Stated), `guide.md` (Guided), and each probe's `pressures.md` text.
+  `adherent_noun` (Stated), `guide.md` (Guided), and each scenario's `pressures.md` text.
 - Every prose file and every `pressures.md` section must be **non-empty**.
 - Single language: there is no multilingual support and no separate proof-text corpus.
 

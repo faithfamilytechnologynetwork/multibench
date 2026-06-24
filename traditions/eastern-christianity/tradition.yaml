@@ -77,4 +77,4 @@ taxonomies:
     - standard
     - steadfastness_staged
     - tool_guardrail
-probe_id_pattern: ^BZ-\d{3}$
+scenario_id_pattern: ^BZ-\d{3}$

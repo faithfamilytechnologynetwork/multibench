@@ -8,7 +8,7 @@ changing the core.**
 
 The format is **file-based and human-first**: every piece of authored prose lives in
 its own **Markdown** file; only small structural metadata lives in **YAML** plus one
-tiny `probes/index.json`. **There are no large JSON blobs.** A tradition is browsable
+tiny `scenarios/index.json`. **There are no large JSON blobs.** A tradition is browsable
 and diff-able as ordinary documents, and the validator reads the same files
 mechanically.
 
@@ -25,17 +25,17 @@ traditions/<id>/
   README.md               # human overview of the tradition (prose)
   source.md               # the canonical source and why it is consensus-grade (prose)
   guide.md                # the Guided-framing system prompt (prose)
-  probes/
-    index.json            # tiny: {schema_version, probes: [<folder names>]}
-    <PROBE_ID>/           # one folder per probe; folder name == probe id
-      probe.yaml          # per-probe metadata (small YAML)
-      scenario.md         # the turn-1 scenario (prose)
+  scenarios/
+    index.json            # tiny: {schema_version, scenarios: [<folder names>]}
+    <SCENARIO_ID>/        # one folder per scenario; folder name == scenario id
+      scenario.yaml       # per-scenario metadata (small YAML)
+      turn1.md            # the turn-1 opening scenario (prose)
       judge-guidance.md   # the judge's binding ground truth — the "seam" (prose)
       pressures.md        # one "## <pressure>" section per CORE pressure (prose)
 ```
 
 `<id>` is a slug (`^[a-z][a-z0-9-]*$`) and **must equal** the `id` in `tradition.yaml`.
-All files are read as **UTF-8**. `tradition.yaml`, `probe.yaml`, and `index.json` are
+All files are read as **UTF-8**. `tradition.yaml`, `scenario.yaml`, and `index.json` are
 **closed schemas** — an unknown key is an error (it catches typos), and string fields
 are not coerced (a bare `no` is rejected, not silently read as `false`).
 
@@ -47,14 +47,14 @@ are not coerced (a bare `no` is rejected, not silently read as `false`).
 | `README.md` | Human overview (non-empty). |
 | `source.md` | The canonical compilation used as ground truth and *why it is consensus-grade* (non-empty). |
 | `guide.md` | The one-page companionship guide — the system prompt for the **Guided** framing (non-empty). |
-| `probes/index.json` | `{schema_version, probes: [<folder names>]}`. The declared probe list; it must match the `probes/*/` folders exactly (drift is an error). |
-| `probes/<id>/probe.yaml` | Per-probe metadata (below). |
-| `probes/<id>/scenario.md` | The disguised first-person turn-1 scenario (non-empty). |
-| `probes/<id>/judge-guidance.md` | The proof texts / direction the judge is bound to for this probe — the seam (non-empty). |
-| `probes/<id>/pressures.md` | One `## <pressure>` section per core pressure, each non-empty. |
+| `scenarios/index.json` | `{schema_version, scenarios: [<folder names>]}`. The declared scenario list; it must match the `scenarios/*/` folders exactly (drift is an error). |
+| `scenarios/<id>/scenario.yaml` | Per-scenario metadata (below). |
+| `scenarios/<id>/turn1.md` | The disguised first-person turn-1 scenario (non-empty). |
+| `scenarios/<id>/judge-guidance.md` | The proof texts / direction the judge is bound to for this scenario — the seam (non-empty). |
+| `scenarios/<id>/pressures.md` | One `## <pressure>` section per core pressure, each non-empty. |
 
 There are no optional files: a tradition is single-language, and the proof-text corpus
-and source map were intentionally dropped (each probe carries its own `judge-guidance.md`).
+and source map were intentionally dropped (each scenario carries its own `judge-guidance.md`).
 
 ## `tradition.yaml`
 
@@ -66,7 +66,7 @@ construct: al-jalīs al-ṣāliḥ — the righteous companion, judged by the re
 canonical_source:
   title: Riyāḍ al-Ṣāliḥīn
   author: al-Nawawī
-  locus_unit: bab               # the unit a probe's source_locus counts in
+  locus_unit: bab               # the unit a scenario's source_locus counts in
 adherent_noun: Muslim           # feeds the core Stated-framing template (below)
 maintainers:
   - {name: ..., contact: ...}   # at least one
@@ -74,22 +74,22 @@ scholar_review: {status: none, reviewers: []}   # status: none | in_progress | r
 taxonomies:                     # declared tag axes (below)
   pillars: {description: ..., applies_to: scenario, values: [...]}
   hearts:  {description: ..., applies_to: response, values: [...]}
-probe_id_pattern: '^JLS-\d{3}$' # regex every probe id (and folder name) must match
+scenario_id_pattern: '^JLS-\d{3}$' # regex every scenario id (and folder name) must match
 ```
 
 ### Taxonomies
 
 A tradition declares its own **tag axes**. Each axis has a controlled `values` set
 (non-empty, no duplicates) and `applies_to: scenario | response` (informational
-provenance — `scenario` classifies the probe; `response` classifies what good counsel
-cultivates). The validator checks every probe tag against these axes. Axis names are the
-tradition's own (Sunni Islam uses `pillars` + `hearts`; another tradition would use its
-own).
+provenance — `scenario` classifies the scenario itself; `response` classifies what good
+counsel cultivates). The validator checks every scenario tag against these axes. Axis
+names are the tradition's own (Sunni Islam uses `pillars` + `hearts`; another tradition
+would use its own).
 
-## `probe.yaml`
+## `scenario.yaml`
 
 ```yaml
-id: JLS-001                     # must equal the folder name and match probe_id_pattern
+id: JLS-001                     # must equal the folder name and match scenario_id_pattern
 tags:                           # every declared axis present; each value in that axis
   pillars: [restraint, justice]
   hearts: [vigilance, patience]
@@ -103,8 +103,8 @@ duplicates, and every value is one the axis declared.
 
 ## The judge seam — `judge-guidance.md`
 
-Each probe's `judge-guidance.md` **is** the proof texts and direction the judge is bound
-to when scoring that probe. There is no separate corpus to drift from — the binding is
+Each scenario's `judge-guidance.md` **is** the proof texts and direction the judge is bound
+to when scoring that scenario. There is no separate corpus to drift from — the binding is
 local by construction. It is required and must be non-empty.
 
 ## Universal core — framings & pressures
@@ -120,11 +120,11 @@ contract.
   `flattery`, `personal_appeal`.
 
 The only faith-specific framing inputs a tradition supplies are **`adherent_noun`** (for
-Stated), **`guide.md`** (for Guided), and each probe's **`pressures.md`** push text.
+Stated), **`guide.md`** (for Guided), and each scenario's **`pressures.md`** push text.
 
 ### `pressures.md`
 
-One level-2 (`## `) heading per core pressure, each section holding that probe's turn-2
+One level-2 (`## `) heading per core pressure, each section holding that scenario's turn-2
 push. Heading text is normalized (trim → lowercase → spaces/hyphens to `_`) and must
 equal a canonical pressure id — so `## False authority`, `## false-authority`, and
 `## false_authority` all work. Every core pressure must be present exactly once; each
@@ -133,10 +133,10 @@ section must be non-empty; content before the first `## ` heading is ignored.
 ## Open design questions — resolved / descoped
 
 1. **Pressures/framings shared or per-tradition?** — Universal core (above), for
-   comparability. Faith-specific remainder: `adherent_noun`, `guide.md`, per-probe
+   comparability. Faith-specific remainder: `adherent_noun`, `guide.md`, per-scenario
    `pressures.md`.
 2. **`tradition.yaml` vs a Python registry for discovery?** — `tradition.yaml`;
-   discovery globs `traditions/*/tradition.yaml` and `probes/*/`. No registry (it would
+   discovery globs `traditions/*/tradition.yaml` and `scenarios/*/`. No registry (it would
    force core changes per tradition).
 3. **Multilingual handling?** — Descoped: a tradition is single-language (the embedded
    `judge-guidance.md` anchor is the language of record).
@@ -146,13 +146,13 @@ section must be non-empty; content before the first `## ` heading is ignored.
 ## Worked examples
 
 [`sunni-islam/`](sunni-islam/) is the reference instantiation: *al-jalīs al-ṣāliḥ* judged
-against *Riyāḍ al-Ṣāliḥīn*, with 140 probes — ported from
+against *Riyāḍ al-Ṣāliḥīn*, with 140 scenarios — ported from
 [JaleesBench](https://github.com/iaser-ai/jaleesbench).
 
 [`eastern-christianity/`](eastern-christianity/) (*ByzantineBench*) is a second instantiation:
 the *saving word* judged against the *Apophthegmata Patrum* and the ascetic constellation, with
-100 probes. It shows the format carrying a tradition that has **no single-canon source** — each
-probe's `judge-guidance.md` binds its own anchors — and exercising the taxonomy axes beyond two
+100 scenarios. It shows the format carrying a tradition that has **no single-canon source** — each
+scenario's `judge-guidance.md` binds its own anchors — and exercising the taxonomy axes beyond two
 (it declares `passions`, `virtues`, `economia`, and `register`).
 
 ## Validate

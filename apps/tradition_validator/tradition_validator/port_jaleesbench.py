@@ -2,7 +2,7 @@
 
 Reads a staged JaleesBench source tree (``probes.json`` + ``prompts.py`` + ``mapping.py``;
 see Spec §3.3b — fetch via ``gh api`` into a gitignored ``tmp/jaleesbench-source/``) and
-writes the file-based tradition: ``tradition.yaml`` + prose + one folder per probe.
+writes the file-based tradition: ``tradition.yaml`` + prose + one folder per scenario.
 
 Run from the repo root:
 
@@ -41,7 +41,7 @@ hadith.
   widely taught adab/akhlāq texts, which keeps the bench out of live scholarly disputes by
   construction.
 - **Ships its own ground truth** — each chapter carries the Qurʾān-and-hadith proof texts
-  the judge is anchored to. In this format those live per probe in `judge-guidance.md`, so
+  the judge is anchored to. In this format those live per scenario in `judge-guidance.md`, so
   the judge never supplies its own jurisprudence.
 - **Inward before outward** — the book opens with sincerity of intention, the same ordering
   this construct adopts.
@@ -60,8 +60,8 @@ github.com/iaser-ai/jaleesbench).
   and the blacksmith.
 - **Canonical source:** *Riyāḍ al-Ṣāliḥīn* (al-Nawawī) — see [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Probes:** probe folders under [`probes/`](probes/), each with `probe.yaml`,
-  `scenario.md`, `judge-guidance.md`, and `pressures.md` (one section per core pressure).
+- **Scenarios:** scenario folders under [`scenarios/`](scenarios/), each with `scenario.yaml`,
+  `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section per core pressure).
 
 Framings (unstated / stated / guided) and the six pressures are universal core; the only
 faith-specific framing inputs here are `adherent_noun` (Stated) and `guide.md` (Guided).
@@ -150,7 +150,7 @@ def port(
                 "values": hearts,
             },
         },
-        "probe_id_pattern": r"^JLS-\d{3}$",
+        "scenario_id_pattern": r"^JLS-\d{3}$",
     }
 
     out.mkdir(parents=True, exist_ok=True)
@@ -161,15 +161,15 @@ def port(
     (out / "README.md").write_text(README_MD, encoding="utf-8")
     (out / "guide.md").write_text(guide.rstrip() + "\n", encoding="utf-8")
 
-    probes_dir = out / "probes"
-    shutil.rmtree(probes_dir, ignore_errors=True)  # deterministic regen
-    probes_dir.mkdir(parents=True, exist_ok=True)
+    scenarios_dir = out / "scenarios"
+    shutil.rmtree(scenarios_dir, ignore_errors=True)  # deterministic regen
+    scenarios_dir.mkdir(parents=True, exist_ok=True)
 
     ids: list[str] = []
     for p in bank["probes"]:
         pid = p["id"]
         ids.append(pid)
-        folder = probes_dir / pid
+        folder = scenarios_dir / pid
         folder.mkdir(parents=True, exist_ok=True)
         meta = {
             "id": pid,
@@ -178,22 +178,22 @@ def port(
             "locus_label": p["chapter"],
             "identity_signal": p["islamic"],
         }
-        (folder / "probe.yaml").write_text(
+        (folder / "scenario.yaml").write_text(
             yaml.safe_dump(meta, sort_keys=False, allow_unicode=True), encoding="utf-8"
         )
-        (folder / "scenario.md").write_text(p["turn1"].rstrip() + "\n", encoding="utf-8")
+        (folder / "turn1.md").write_text(p["turn1"].rstrip() + "\n", encoding="utf-8")
         (folder / "judge-guidance.md").write_text(
             p["proof_texts"].rstrip() + "\n", encoding="utf-8"
         )
         sections = [f"## {pr}\n\n{p['pressure_turns'][pr].rstrip()}\n" for pr in core.PRESSURES]
         (folder / "pressures.md").write_text("\n".join(sections), encoding="utf-8")
 
-    (probes_dir / "index.json").write_text(
-        json.dumps({"schema_version": 1, "probes": sorted(ids)}, ensure_ascii=False, indent=2)
+    (scenarios_dir / "index.json").write_text(
+        json.dumps({"schema_version": 1, "scenarios": sorted(ids)}, ensure_ascii=False, indent=2)
         + "\n",
         encoding="utf-8",
     )
-    typer.echo(f"ported {len(ids)} probes -> {out}")
+    typer.echo(f"ported {len(ids)} scenarios -> {out}")
 
 
 if __name__ == "__main__":  # pragma: no cover
