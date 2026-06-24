@@ -3,6 +3,8 @@
 import json
 from pathlib import Path
 
+from conftest import find_finding
+
 from tradition_validator.validator import validate_tradition
 
 
@@ -18,14 +20,22 @@ def test_index_lists_missing_folder(valid_tradition: Path):
     _write_index(valid_tradition, {"schema_version": 1, "probes": ["JLS-001", "JLS-999"]})
     report = validate_tradition(valid_tradition)
     assert not report.ok(strict=False)
-    assert any("JLS-999" in f.message and "drift" in f.message for f in report.errors)
+    # Assert the FULL located contract: severity + file + path (spec §8.3).
+    f = find_finding(report, contains="JLS-999", severity="error")
+    assert f is not None and "drift" in f.message
+    assert f.file.endswith("probes/index.json")
+    assert f.path == "probes"
 
 
 def test_folder_not_in_index(valid_tradition: Path):
     (valid_tradition / "probes" / "JLS-002").mkdir()
     report = validate_tradition(valid_tradition)
     assert not report.ok(strict=False)
-    assert any("JLS-002" in f.message and "drift" in f.message for f in report.errors)
+    # This drift case is located on index.json at `probes`, like the inverse case.
+    f = find_finding(report, contains="JLS-002", severity="error")
+    assert f is not None and "drift" in f.message
+    assert f.file.endswith("probes/index.json")
+    assert f.path == "probes"
 
 
 def test_index_unknown_key(valid_tradition: Path):

@@ -3,6 +3,7 @@
 from pathlib import Path
 
 import yaml
+from conftest import find_finding
 
 from tradition_validator.validator import validate_tradition
 
@@ -30,7 +31,11 @@ def test_id_must_equal_dirname(valid_tradition: Path):
     _write_manifest(valid_tradition, m)
     report = validate_tradition(valid_tradition)
     assert not report.ok(strict=False)
-    assert any("directory name" in f.message for f in report.errors)
+    # Full located contract: error on tradition.yaml at `id`.
+    f = find_finding(report, contains="directory name", severity="error")
+    assert f is not None
+    assert f.file.endswith("tradition.yaml")
+    assert f.path == "id"
 
 
 def test_unknown_key_rejected(valid_tradition: Path):

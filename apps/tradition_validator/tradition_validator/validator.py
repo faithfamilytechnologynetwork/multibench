@@ -116,9 +116,12 @@ def _validate_index_and_drift(tradition_dir: Path, report: Report) -> None:
             "probes",
         )
     for extra in sorted(fld_set - idx_set):
+        # Located on index.json at `probes`, consistent with the missing-folder case
+        # above and the spec §8.3 error-contract example.
         report.error(
-            str(tradition_dir / "probes" / extra),
+            str(index_path),
             f"probe folder '{extra}' is on disk but not listed in index.json (drift).",
+            "probes",
         )
 
 

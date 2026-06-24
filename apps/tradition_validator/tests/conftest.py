@@ -79,6 +79,15 @@ def write_tradition(
     return t
 
 
+def find_finding(report, *, contains: str, severity: str | None = None):
+    """Return the first finding whose message contains ``contains`` (and matches
+    ``severity`` if given), else None. Lets tests assert file+path+severity."""
+    for f in report.findings:
+        if contains in f.message and (severity is None or f.severity == severity):
+            return f
+    return None
+
+
 @pytest.fixture
 def make_tradition():
     """Factory fixture: ``make_tradition(root, ...)`` -> tradition Path."""
