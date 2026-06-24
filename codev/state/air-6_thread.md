@@ -30,4 +30,13 @@ Protocol: AIR (strict). Mechanical terminology refactor of the Spec 1 subsystem 
 - Data: `git mv` probes→scenarios, 140× probe.yaml→scenario.yaml + scenario.md→turn1.md, index.json key, tradition.yaml field, sunni README/source prose. Validates clean (strict, exit 0).
 - Skill + docs (traditions/README, validator/README, root README, workflows/README) updated; doc-consistency tests green.
 - Spec 1: surgical vocabulary pass on normative sections §1–§9 + transparency banner. Preserved: §10 Consultation Log (historical), JaleesBench provenance (`probes.json`, port-table left column, JaleesBench-harness `probe-gen`, the §5.5 embedded-anchor evidence sentence).
-- Next: acceptance grep + full verify, then commit/PR.
+- Verified: pytest 74 pass; validate/validate-all `--strict` exit 0; 140 scenario folders w/ scenario.yaml+turn1.md+judge-guidance.md+pressures.md; acceptance grep clean (only provenance).
+- Committed (f99b3d6, conventional, no co-author per user pref), pushed. **PR #9** opened with review in body. porch advanced impl→pr; checks (pr_exists, e2e_tests) green.
+
+## STATUS: PR gate reached — WAITING FOR HUMAN APPROVAL (`porch approve 6 pr`)
+
+PR: https://github.com/faithfamilytechnologynetwork/multibench/pull/9
+
+**Follow-up for architect (not in this PR's scope):** `codev/resources/arch-critical.md`
+(+ CLAUDE.md/AGENTS.md mirrors) still reference `probes/*/` — HOT-tier governance docs owned
+by MAINTAIN/update-arch-docs. Recommend a short MAINTAIN pass to refresh that one fact.
