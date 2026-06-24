@@ -4,6 +4,13 @@
     "builder": "claude",
     "shell": "bash"
   },
+  "porch": {
+    "//": "Python project: override the skeleton's npm implement-phase checks (config > protocol; survives codev updates). build has no analog (pure-Python package); tests run pytest in the validator package.",
+    "checks": {
+      "build": { "skip": true },
+      "tests": { "command": "uv run pytest", "cwd": "apps/tradition_validator" }
+    }
+  },
   "worktree": {
     "//": "Opt-in runnable worktree config. See CLAUDE.md > Runnable Worktrees for stack-specific recipes (pnpm, npm, yarn, bun, cargo, poetry/uv, go mod). Defaults shown below are no-ops; fill in to enable.",
     "symlinks": [],
