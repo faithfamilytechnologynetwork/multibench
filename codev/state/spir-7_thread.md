@@ -159,3 +159,27 @@ Flask-consistent); specified **removals** (drop from index + 404 on next refresh
 ends, one-sided allowed.
 
 Next: `porch done 7` → expect spec-approval gate (human). Notify architect.
+
+## 2026-06-24 — ⚠️ 2nd ARCHITECTURE PIVOT (user) → re-spec #2: FRONTEND SPA stack
+
+Flask spec REJECTED at the gate (before approval). New direction: the team's **standard
+frontend stack** — pure client-side SPA, **no Python**: Vite6 + React19 + TS5 + Tailwind4 +
+HeroUI + TanStack Router/Query, react-markdown+rehype-sanitize, vitest. Mirror
+`cluesmith/shannon/apps/web` (confirmed its package.json: HeroUI v3, Tailwind 4, TanStack
+Router 1.141 / Query 5, react-markdown 10, rehype-sanitize 6, vite 6, vitest 3, react 19;
+pnpm catalog). multibrowser = STANDALONE (no @shannon/* deps, concrete pins), excluding
+shannon's Tauri/Sentry/oRPC/auth extras.
+
+Architecture: **pure frontend SPA**; **GitHub fetched client-side at runtime via TanStack
+Query** (git-trees + raw, SHA-pinned); **Railway STATIC-SITE deploy** (vite build = app code
+only, data stays live from GitHub → NOT data-baking). Client rate limit = **60/hr unauth, NO
+token in client** — mitigate w/ SHA-pinned snapshot (tree=1/snapshot), raw off-budget, gentle
+SHA poll, keep-cached-on-403 + banner; proxy = FUTURE only. KEEP: browse features, display-
+first/§5.5 degradation table, no-hardcoded-taxonomy, inert #8 seam.
+
+⚠️ porch JS-check: `.codev/config.json` tests=pytest (python). multibrowser=vitest → will need
+a JS override at IMPLEMENT (architect flagged; will ping then). Verified vs real repo: api +
+raw both CORS-enabled; whole tree in 1 call; raw off-budget.
+
+Re-spec #2 written. Next: porch rollback/redo consult cycle → re-consult (codex+claude) →
+spec-approval gate. Architect brings to user.
