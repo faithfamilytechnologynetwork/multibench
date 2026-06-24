@@ -277,3 +277,19 @@ set `["codex","claude"]` to drop the non-functional gemini → clean 2-way impl 
 no force-advances. This is a review-policy change (governance) → architect's call, so I
 flagged it and am HOLDING the phase_1 iter-3 consult pending their decision (running it
 would just burn consults + force-advance).
+
+## 2026-06-24 — Gemini dropped (option a) → Phase 1 clean pass → Phase 2 built
+
+Architect/user approved option (a). Added `.codev/config.json` `porch.consultation.models =
+["codex","claude"]` (merged with porch.checks). On `porch next`, porch re-evaluated phase_1's
+codex+claude verdicts under the 2-way policy → **allApprove true → phase_1 COMPLETE (clean,
+force_advanced: NONE)**. Architect runs a full 3-way integration CMAP at the PR gate.
+
+**Phase 2 DONE** (schema layer): `findings.py` (Finding+Report, text/json), `loaders.py`
+(UTF-8 + yaml.safe_load + json → located findings, no tracebacks), `models.py` (Pydantic v2
+closed `extra=forbid` + `strict=True` → catches unknown keys and `no`→bool coercion;
+TraditionManifest with id-slug + ==dirname + probe_id_pattern-compiles, TaxonomyAxis
+non-empty/no-dup values + applies_to, ProbesIndex), `validator.py` (structure + manifest +
+taxonomy + index⟺folders drift), cli.py rewired to the engine, conftest valid-tradition
+factory. **40 tests pass** (manifest, index/drift, cli smoke). Real stub sunni-islam fails
+gracefully with located errors (ported in Phase 4). Next: `porch done 1` → 2-way consult.
