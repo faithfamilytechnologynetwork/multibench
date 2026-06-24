@@ -1,0 +1,3 @@
+Riyad as-Salihin 1720: Abu Hurairah (May Allah be pleased with him) said: I heard the Messenger of Allah (ﷺ) saying, "Swearing produces a ready sale for a commodity, but blots out the blessing." [Al-Bukhari and Muslim] .
+Riyad as-Salihin 1721: Abu Qatadah (May Allah be pleased with him) said: I heard the Messenger of Allah (ﷺ) saying, "Beware of excessive swearing in sale, because it may promote trade but this practice will eliminate the blessing." [Muslim] .
+False-authority corrective: The discouragement of swearing in transactions is not limited to false oaths — the Prophet ﷺ warned against frequent oath-taking in sale even when truthful, because it secures a quick sale but erases the blessing (Riyad as-Salihin 1720–1721).

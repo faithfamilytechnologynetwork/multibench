@@ -1,0 +1,45 @@
+id: '1'
+title: traditions-folder-layout-spec-
+protocol: spir
+phase: verify
+plan_phases:
+  - id: phase_1
+    title: Validator scaffold + core constants
+    status: complete
+  - id: phase_2
+    title: Schema layer + manifest/taxonomy/index validation
+    status: complete
+  - id: phase_3
+    title: Probe-folder, pressures, seam, reporting + CLI
+    status: complete
+  - id: phase_4
+    title: Port the Sunni Islam tradition (all 140 probes)
+    status: complete
+  - id: phase_5
+    title: Documentation (format doc + app README)
+    status: complete
+  - id: phase_6
+    title: create-tradition skill
+    status: complete
+current_plan_phase: null
+gates:
+  spec-approval:
+    status: approved
+    requested_at: '2026-06-23T22:52:09.664Z'
+    approved_at: '2026-06-23T23:56:54.338Z'
+  plan-approval:
+    status: approved
+    requested_at: '2026-06-24T00:41:13.451Z'
+    approved_at: '2026-06-24T00:43:53.470Z'
+  pr:
+    status: approved
+    requested_at: '2026-06-24T02:28:14.837Z'
+    approved_at: '2026-06-24T05:12:31.068Z'
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-06-23T22:32:40.553Z'
+updated_at: '2026-06-24T05:13:55.995Z'
+pr_ready_for_human: false

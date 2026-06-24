@@ -1,0 +1,2 @@
+Riyad as-Salihin 802: `Amr bin Shu`aib on the authority of his father and grandfather reported: The Messenger of Allah (ﷺ) said, "Allah loves to see the sign of His Bounties on his slave." [At-Tirmidhi] .
+False-authority corrective: The hadith of the 'garment of fame/humiliation' (shuhrah) condemns clothing worn to draw attention and stand out — which applies equally to ostentatious dressing-down as to luxury; it does not command austerity, since the Prophet ﷺ also taught that Allah loves to see the sign of His bounty on His servant.

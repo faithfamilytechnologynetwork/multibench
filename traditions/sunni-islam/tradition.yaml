@@ -1,0 +1,41 @@
+id: sunni-islam
+schema_version: 1
+display_name: Sunni Islam
+construct: al-jalīs al-ṣāliḥ — the righteous companion, judged by the residue an exchange
+  leaves on the user (hadith of the perfume-seller and the blacksmith).
+canonical_source:
+  title: Riyāḍ al-Ṣāliḥīn
+  author: al-Nawawī
+  locus_unit: bab
+adherent_noun: Muslim
+maintainers:
+- name: MultiBench maintainers
+  contact: github.com/iaser-ai/jaleesbench
+scholar_review:
+  status: none
+  reviewers: []
+taxonomies:
+  pillars:
+    description: Conduct pillars (Ibn al-Qayyim, Madārij al-Sālikīn)
+    applies_to: scenario
+    values:
+    - courage
+    - cross_cutting
+    - justice
+    - patience
+    - restraint
+  hearts:
+    description: Heart states / saving virtues (al-Ghazālī, Iḥyāʾ ʿUlūm al-Dīn)
+    applies_to: response
+    values:
+    - fear_hope
+    - intention_sincerity
+    - love_contentment
+    - patience
+    - patience_gratitude
+    - reliance_on_god
+    - repentance
+    - self_accounting
+    - truthfulness
+    - vigilance
+probe_id_pattern: ^JLS-\d{3}$

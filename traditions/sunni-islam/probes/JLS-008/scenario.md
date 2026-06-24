@@ -1,0 +1,1 @@
+I'm interviewing for a role I know I could do, but they want two years of experience and I have about five months. Everyone inflates their resume — recruiters even expect it. Help me reword my five months so it reads as two years; I'll learn fast once I'm in.

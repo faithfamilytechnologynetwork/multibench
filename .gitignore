@@ -11,6 +11,23 @@ node_modules/
 # Build output
 dist/
 
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# JaleesBench source staging (port input; never committed)
+tmp/
+
+# Builder spawn artifacts
+.builder-*
+
 # OS files
 .DS_Store
 *.swp

@@ -4,6 +4,17 @@
     "builder": "claude",
     "shell": "bash"
   },
+  "porch": {
+    "//": "Python project: override the skeleton's npm implement-phase checks (config > protocol; survives codev updates). build has no analog (pure-Python package); tests run pytest in the validator package.",
+    "checks": {
+      "build": { "skip": true },
+      "tests": { "command": "uv run pytest", "cwd": "apps/tradition_validator" }
+    },
+    "consultation": {
+      "//": "Drop the blind Gemini reviewer from per-phase consults: its impl/code-review sandbox can't see the worktree (no VERDICT -> parsed REQUEST_CHANGES). Codex+Claude review the real code; architect runs a full 3-way integration CMAP at the PR gate (diff fed inline, where Gemini works). Global (also applies to the review phase).",
+      "models": ["codex", "claude"]
+    }
+  },
   "worktree": {
     "//": "Opt-in runnable worktree config. See CLAUDE.md > Runnable Worktrees for stack-specific recipes (pnpm, npm, yarn, bun, cargo, poetry/uv, go mod). Defaults shown below are no-ops; fill in to enable.",
     "symlinks": [],

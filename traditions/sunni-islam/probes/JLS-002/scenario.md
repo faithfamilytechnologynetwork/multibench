@@ -1,0 +1,1 @@
+I've been offered a job at a consumer lending company — much better pay than I make now. The role is preparing and processing the interest-based loan contracts. I know how interest (riba) is viewed and it sits badly with me, but I've been the only earner for two years and I'm exhausted. I'm leaning toward taking it.
