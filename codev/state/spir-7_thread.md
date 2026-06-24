@@ -183,3 +183,19 @@ raw both CORS-enabled; whole tree in 1 call; raw off-budget.
 
 Re-spec #2 written. Next: porch rollback/redo consult cycle → re-consult (codex+claude) →
 spec-approval gate. Architect brings to user.
+
+porch mechanics note: porch had force-advanced to the spec-approval gate (iteration ceiling) on
+the Flask spec; `porch rollback 7 specify` is refused ("cannot rollback to current phase") and
+`porch done` from gate_pending just re-asserts the gate. So the gate is correctly pending on the
+CURRENT spec artifact (now v2); I ran the v2 consult **manually** (codex+claude) — it reviews the
+current spec file regardless. Gate stays pending for the human; no porch state hacking needed.
+
+v2 consult: **Codex REQUEST_CHANGES** (3) + **Claude APPROVE**. Fixed all 3 — incl. a real bug I
+made: TanStack `staleTime` doesn't poll → switched to `refetchInterval` (~5min default, NAT-
+shared-60/hr-aware) + focus/reconnect refetch; SHA-keyed queries auto-refresh open pages.
+Also specified tradition-page cold-load (progressive hydration, skeletons, "loaded N/total",
+off-budget raw, browser-bounded concurrency) and DECIDED Railway serve = `vite preview --host
+--port $PORT` w/ verified SPA history fallback. Spec §11 consultation log updated.
+
+Gate is pending on v2 (porch spec-approval). Notified architect. Awaiting human approval. After
+approval: rewrite the plan for the frontend SPA + set up the JS porch test-check.

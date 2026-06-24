@@ -208,8 +208,12 @@ One typed GitHub client module is the **only** place `fetch()` to GitHub happens
 mock). Query design:
 
 - **`useLatestSha()`** — key `['gh','sha',repo,ref]`; `GET /repos/{repo}/commits/{ref}` → SHA.
-  `staleTime ≈ 60s` (gentle poll; no aggressive `refetchInterval`). This is the **freshness
-  trigger**.
+  **This is the freshness trigger and must *actively refetch*** — TanStack `staleTime` alone does
+  **not** poll. Use **`refetchInterval`** (default ≈ **5 min**, via `VITE_SHA_POLL_MS`) **plus
+  `refetchOnWindowFocus` / `refetchOnReconnect`**, with `refetchIntervalInBackground: false`. The
+  interval default is deliberately conservative: the unauthenticated budget is **60 req/hr per IP
+  and may be *shared* across users behind one NAT**, so a tight 60 s poll could exhaust it — ~5 min
+  (≈12 polls/hr) leaves ample headroom while focus/reconnect gives snappier updates on return.
 - **`useTree(sha)`** — key `['gh','tree',repo,sha]`; recursive git-trees once per SHA; filter
   `traditions/*/…`. `staleTime: Infinity` (immutable per SHA); long `gcTime`.
 - **`useRawFile(sha, path)`** — key `['gh','raw',repo,sha,path]`; fetch `raw.githubusercontent…/
@@ -218,12 +222,22 @@ mock). Query design:
   (manifest + prose + each `scenario.yaml`), scenario detail (its 4 files). Composed from the
   primitives above; scenario *body* files fetched lazily on the detail route.
 
-**Freshness / "no redeploy":** the SHA poll (staleTime ~60s) surfaces a new commit SHA; tree and
-content queries are **keyed by SHA**, so navigating after the SHA changes lazily fetches the new
-snapshot → **new/edited traditions appear within ~the poll window, no redeploy**. Old-SHA queries
-are garbage-collected by TanStack Query `gcTime` (bounded memory). **Removed** traditions/scenarios
-simply aren't in the new tree → drop from the index; direct links → in-SPA 404 against the new
-snapshot.
+**Freshness / "no redeploy":** the `useLatestSha` `refetchInterval` poll surfaces a new commit
+SHA; tree and content queries are **keyed by SHA**, so when the polled SHA changes, components
+re-render with the new key and TanStack Query **automatically fetches the new snapshot — even on
+an already-open page, no navigation required** → **new/edited traditions appear within ~the poll
+interval (or sooner on focus/reconnect), no redeploy**. Old-SHA queries are garbage-collected by
+`gcTime` (bounded memory). **Removed** traditions/scenarios simply aren't in the new tree → drop
+from the index; direct links → in-SPA 404 against the new snapshot.
+
+**Tradition-page cold load (100–140 `scenario.yaml`):** the scenario list needs every scenario's
+metadata (for the columns + filtering). The client fires those **`raw` fetches (off-budget)** via
+TanStack Query and **progressively hydrates** the list — rows render as their metadata resolves
+(HeroUI skeletons for pending rows) with a **"loaded N / total" indicator**; concurrency is
+naturally bounded by the browser's per-host connection cap (optionally an explicit small cap,
+e.g. 8). Filters and counts operate over the **already-loaded** rows and finalize when all
+metadata is in (a notice indicates "still loading…" while incomplete). Each `scenario.yaml` is
+cached (immutable per SHA), so revisits and the detail page are instant.
 
 **Rate-limit & failure handling (display-first):** on a `403` with `X-RateLimit-Remaining: 0`
 (or network error/timeout), show a **banner notice** (with the reset time when available) and
@@ -249,13 +263,15 @@ Filters live in **type-safe search params** validated with `zod` (TanStack Route
 
 ### 5.4 Railway static deploy
 
-`vite build` → `dist/` (static assets; **no tradition data baked in**). Served as a static SPA
-with **history fallback** (client-side routing) binding Railway's `$PORT` — e.g. start
-`vite preview --host 0.0.0.0 --port $PORT` (mirrors shannon's `serve` script) or
-`npx serve -s dist -l $PORT`. Railway Nixpacks auto-detects Node; build = the package's `build`
-script. Config via Vite env (`VITE_*`): `VITE_MULTIBENCH_REPO` (default
-`faithfamilytechnologynetwork/multibench`), `VITE_MULTIBENCH_REF` (`main`),
-`VITE_SHA_POLL_STALE_MS`. (No token — client app.)
+`vite build` → `dist/` (static assets; **no tradition data baked in**). **Decision: serve with
+`vite preview --host 0.0.0.0 --port $PORT`** — no extra dependency, mirrors shannon's `serve`
+script, and Vite's default `appType:'spa'` provides **history fallback** so deep links like
+`/t/sunni-islam/JLS-001` serve `index.html`. **SPA history fallback is a required, verified
+acceptance item** (§9.1). (`serve -s dist -l $PORT` is the drop-in alternative if a hardened
+static server is later preferred.) Railway Nixpacks auto-detects Node; build = the package's
+`build` script; start = the `vite preview` command above. Config via Vite env (`VITE_*`):
+`VITE_MULTIBENCH_REPO` (default `faithfamilytechnologynetwork/multibench`), `VITE_MULTIBENCH_REF`
+(`main`), `VITE_SHA_POLL_MS` (default ~300000). (No token — client app.)
 
 ### 5.5 Content degradation & drift behavior (display-first)
 
@@ -288,8 +304,9 @@ and the rendered filtered list derive from the same client-side filter → canno
   rate limit). *Spec position: ~60s poll, long content gcTime, persistence optional.*
 - **I2 — Rate-limit UX:** banner + reset countdown + "retry"; how prominent. *Spec position:
   non-blocking banner, keep cached data visible.*
-- **I3 — Static-serve command on Railway:** `vite preview` vs `serve -s dist`. *Spec position:
-  `vite preview --host --port $PORT` (no extra dep, mirrors shannon); confirm SPA fallback.*
+- **I3 — Static-serve command on Railway: DECIDED → `vite preview --host 0.0.0.0 --port $PORT`**
+  (§5.4; no extra dep, mirrors shannon, default SPA history fallback). `serve -s dist` documented
+  as the drop-in alternative.
 - **I4 — Package manager:** pnpm (matches shannon) vs npm; standalone, concrete pins (no
   catalog). *Spec position: pnpm.*
 - **I5 — YAML in-browser:** `js-yaml` (or similar) for `tradition.yaml`/`scenario.yaml`. Confirm.
@@ -311,8 +328,9 @@ themes); an "about this benchmark" panel; RTL/Arabic.
   search params**; result counts shown.
 - **M6.** Scenario **detail**: turn-1, six pressures in canonical order, judge-guidance, with
   tags/identity/locus; malformed scenario → inline notice, not a crash.
-- **M7. Freshness:** a tradition added/edited on `main` appears **without redeploy** (within the
-  SHA-poll/cache window).
+- **M7. Freshness:** a tradition added/edited on `main` appears **without redeploy** while the
+  app is open — within the **SHA `refetchInterval`** (default ~5 min) or sooner on window
+  focus/reconnect, because SHA-keyed queries refetch when the polled SHA changes (§5.2).
 - **M8. Resilience (display-first):** bad content → inline notice; GitHub rate-limit/outage →
   banner + last cached data (or a friendly notice); an error boundary prevents blank crashes.
 - **M9. Read-only & safe:** no writes; fixed repo/ref; ids validated; markdown sanitized
@@ -343,7 +361,8 @@ results-ready seam wired through types + the reserved region (S3).
 
 1. `vite build` produces a static bundle with **no tradition data baked in**; deployed on Railway
    (or `vite preview`), the **index lists the traditions currently on `main`**, fetched in the
-   browser. *(M1, M2, M10)*
+   browser, and a **deep link** (e.g. `/t/sunni-islam/JLS-001`) loads directly — **SPA history
+   fallback verified**. *(M1, M2, M10)*
 2. A tradition page shows manifest, prose, taxonomy axes, and the scenario list. *(M3, M4)*
 3. **Filter/slice** by tag (OR-within/AND-across), identity_signal, and locus, plus search, with
    counts and **deep-linkable URLs** (search params). *(M5)*
@@ -389,7 +408,22 @@ results-ready seam wired through types + the reserved region (S3).
 - **Prior consults superseded:** v0 (static-site) had 2 spec rounds + 3 plan rounds; v1 (Flask)
   had 3 spec rounds. Both architectures were rejected by the user before implementation; their
   reviews targeted designs that no longer apply. Retained in git history.
-- _Pending: first consult on this v2 (frontend SPA) spec._
+### v2 (frontend SPA) consult — Codex: REQUEST_CHANGES · Claude: APPROVE
+
+Both verified the §2.4 format + §2.5 GitHub facts against the live repo; Claude APPROVE
+("exceptionally thorough; verified-correct; well-bounded"). Codex's three points — all
+substantive and folded in:
+
+| # | Change |
+|---|---|
+| 1 | **Freshness mechanism was technically wrong** — `staleTime` alone does not poll. Fixed (§5.2/M7): `useLatestSha` uses **`refetchInterval`** (default ~5 min, conservative because the 60/hr unauth budget may be NAT-shared) **+ `refetchOnWindowFocus`/`refetchOnReconnect`**; SHA-keyed queries then auto-refetch the new snapshot on an open page. |
+| 2 | **Tradition-page cold-load (100–140 `scenario.yaml`) underspecified.** Fixed (§5.2): fire `raw` (off-budget) fetches, **progressively hydrate** rows with HeroUI skeletons + a "loaded N/total" indicator, browser-bounded concurrency (optional cap ~8); filters operate over loaded rows and finalize when complete. |
+| 3 | **Railway serving ambiguous.** Decided (§5.4/§6 I3): **`vite preview --host 0.0.0.0 --port $PORT`** with **required, verified SPA history fallback** (§9.1); `serve -s dist` documented as the alternative. |
+
+> *Process note:* porch had already force-advanced to the spec-approval gate (iteration ceiling)
+> on the prior (Flask) spec; this v2 consult was run directly. The gate is correctly positioned on
+> the **current** spec artifact (= this v2). No blockers remain (Claude APPROVE; Codex's three
+> clarifications incorporated).
 
 ## 12. Carried-over vs. changed (for reviewers)
 
