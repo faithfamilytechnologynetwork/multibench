@@ -49,7 +49,7 @@ def test_validate_all_text(make_tradition, tmp_path: Path):
     make_tradition(tmp_path, "sunni-islam")
     # A second, broken tradition (manifest present so it's discovered, but invalid).
     broken = tmp_path / "broken"
-    (broken / "probes").mkdir(parents=True)
+    (broken / "scenarios").mkdir(parents=True)
     (broken / "tradition.yaml").write_text("not: a valid manifest\n", encoding="utf-8")
     result = runner.invoke(app, ["validate-all", str(tmp_path)])
     assert result.exit_code == 1
@@ -59,7 +59,7 @@ def test_validate_all_text(make_tradition, tmp_path: Path):
 def test_validate_all_json_single_document(make_tradition, tmp_path: Path):
     make_tradition(tmp_path, "sunni-islam")
     broken = tmp_path / "broken"
-    (broken / "probes").mkdir(parents=True)
+    (broken / "scenarios").mkdir(parents=True)
     (broken / "tradition.yaml").write_text("not: a valid manifest\n", encoding="utf-8")
     result = runner.invoke(app, ["validate-all", str(tmp_path), "--format", "json"])
     payload = json.loads(result.output)  # must be ONE valid document

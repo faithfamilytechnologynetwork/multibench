@@ -73,9 +73,9 @@ def test_string_field_not_coerced_from_bool(valid_tradition: Path):
     assert any("adherent_noun" in (f.path or "") for f in report.errors)
 
 
-def test_bad_probe_id_pattern_regex(valid_tradition: Path):
+def test_bad_scenario_id_pattern_regex(valid_tradition: Path):
     m = _load_manifest(valid_tradition)
-    m["probe_id_pattern"] = "JLS-(\\d{3}"  # unbalanced paren
+    m["scenario_id_pattern"] = "JLS-(\\d{3}"  # unbalanced paren
     _write_manifest(valid_tradition, m)
     report = validate_tradition(valid_tradition)
     assert not report.ok(strict=False)

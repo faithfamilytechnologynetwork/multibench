@@ -2,7 +2,7 @@
 
 Thin command surface over :mod:`tradition_validator.validator`. As of Phase 2 it
 validates structure + the ``tradition.yaml`` manifest (incl. taxonomies) +
-``probes/index.json`` ⟺ folder drift. Per-probe-folder checks land in Phase 3.
+``scenarios/index.json`` ⟺ folder drift. Per-scenario-folder checks land in Phase 3.
 """
 
 from __future__ import annotations

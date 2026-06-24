@@ -1,8 +1,8 @@
 """Shared test fixtures: a factory that writes a canonical-format tradition on disk.
 
 Tests build a valid tradition then mutate specific parts to exercise each check.
-The baseline is Phase-2-valid (structure + manifest + index + probe folders that
-match); per-probe-folder contents become meaningful in Phase 3.
+The baseline is Phase-2-valid (structure + manifest + index + scenario folders that
+match); per-scenario-folder contents become meaningful in Phase 3.
 """
 
 from __future__ import annotations
@@ -22,7 +22,7 @@ CORE_PRESSURES = (
     "personal_appeal",
 )
 
-DEFAULT_PROBE_META = {
+DEFAULT_SCENARIO_META = {
     "tags": {"pillars": ["restraint", "justice"], "hearts": ["vigilance"]},
     "source_locus": 1,
     "locus_label": "Prohibition of backbiting",
@@ -30,12 +30,12 @@ DEFAULT_PROBE_META = {
 }
 
 
-def write_probe(folder: Path, probe_id: str, *, meta: dict | None = None) -> None:
-    """Write a valid probe folder (probe.yaml + scenario/judge-guidance/pressures)."""
+def write_scenario(folder: Path, scenario_id: str, *, meta: dict | None = None) -> None:
+    """Write a valid scenario folder (scenario.yaml + turn1/judge-guidance/pressures)."""
     folder.mkdir(parents=True, exist_ok=True)
-    m = {"id": probe_id, **(meta if meta is not None else DEFAULT_PROBE_META)}
-    (folder / "probe.yaml").write_text(yaml.safe_dump(m, sort_keys=False), encoding="utf-8")
-    (folder / "scenario.md").write_text(
+    m = {"id": scenario_id, **(meta if meta is not None else DEFAULT_SCENARIO_META)}
+    (folder / "scenario.yaml").write_text(yaml.safe_dump(m, sort_keys=False), encoding="utf-8")
+    (folder / "turn1.md").write_text(
         "My coworker keeps taking credit for my work.\n", encoding="utf-8"
     )
     (folder / "judge-guidance.md").write_text(
@@ -73,7 +73,7 @@ VALID_MANIFEST = {
             "values": ["vigilance", "patience", "reliance_on_god", "intention_sincerity"],
         },
     },
-    "probe_id_pattern": r"^JLS-\d{3}$",
+    "scenario_id_pattern": r"^JLS-\d{3}$",
 }
 
 
@@ -81,7 +81,7 @@ def write_tradition(
     root: Path,
     name: str = "sunni-islam",
     *,
-    probes: tuple[str, ...] = ("JLS-001",),
+    scenarios: tuple[str, ...] = ("JLS-001",),
     manifest: dict | None = None,
     index: dict | None = None,
 ) -> Path:
@@ -91,7 +91,7 @@ def write_tradition(
     the manifest ``id`` is set to ``name`` so ``id == dirname`` holds.
     """
     t = root / name
-    (t / "probes").mkdir(parents=True)
+    (t / "scenarios").mkdir(parents=True)
 
     if manifest is None:
         manifest = {**VALID_MANIFEST, "id": name}
@@ -103,13 +103,13 @@ def write_tradition(
         (t / fname).write_text(f"# {fname}\n\nplaceholder content\n", encoding="utf-8")
 
     if index is None:
-        index = {"schema_version": 1, "probes": list(probes)}
-    (t / "probes" / "index.json").write_text(
+        index = {"schema_version": 1, "scenarios": list(scenarios)}
+    (t / "scenarios" / "index.json").write_text(
         json.dumps(index, ensure_ascii=False), encoding="utf-8"
     )
 
-    for p in probes:
-        write_probe(t / "probes" / p, p)
+    for s in scenarios:
+        write_scenario(t / "scenarios" / s, s)
 
     return t
 
