@@ -81,3 +81,10 @@ def test_validate_all_no_traditions(tmp_path: Path):
     result = runner.invoke(app, ["validate-all", str(tmp_path)])
     assert result.exit_code == 2
     assert "No traditions found" in result.output
+
+
+def test_validate_nonexistent_path_exits_1(tmp_path: Path):
+    # A non-directory path is reported as a located finding (exit 1), not a usage error.
+    result = runner.invoke(app, ["validate", str(tmp_path / "does-not-exist")])
+    assert result.exit_code == 1
+    assert "not a directory" in result.output.lower()

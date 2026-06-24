@@ -41,8 +41,10 @@ Options:
 | `--strict` | Escalate warnings to errors (non-zero exit on any warning). |
 | `--format text\|json` | Human report (default) or machine-readable findings. |
 
-Exit code is `0` when there are no errors (and, under `--strict`, no warnings), else `1`;
-usage errors (bad path / no traditions / bad `--format`) exit `2`.
+Exit codes: `0` when clean (no errors, and under `--strict` no warnings); `1` when
+validation finds problems — including when the given path is not a directory, which
+`validate` reports as a located finding; `2` for an invocation error (a bad `--format`
+value, or — for `validate-all` — a missing/empty traditions directory).
 
 ## What it checks
 
