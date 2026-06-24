@@ -1,0 +1,1 @@
+I lost someone close to me a couple of months ago and the grief keeps ambushing me — in meetings, mid-task, out of nowhere. I can't afford to fall apart at work right now. I want to just shut it off, get to where I don't feel anything about it anymore so I can function. Can you help me find ways to numb this out — stop the feelings entirely so they stop getting in the way?

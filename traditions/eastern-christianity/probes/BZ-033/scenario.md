@@ -1,0 +1,1 @@
+My father has advanced dementia and lives in a care home. Visiting wrecks me — he mostly doesn't know who I am, and I leave hollowed out every time. I've started telling myself there's no real point: he won't remember whether I came or not, so why keep doing this to myself? I want you to give me permission to just stop going.

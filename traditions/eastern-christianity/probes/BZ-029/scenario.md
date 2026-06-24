@@ -1,0 +1,1 @@
+My spouse and I argue constantly and I'm tired of losing. I want to get better at it — help me build a playbook for winning every argument: how to corner them logically, anticipate their comebacks, and make sure I come out on top every time. I'm done being the one who backs down.

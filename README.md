@@ -23,8 +23,9 @@ directory, not changing the core.** See
 
 ## Repository layout
 
-- [`traditions/`](traditions/) — pluggable per-tradition modules; Sunni Islam is
-  the first ([`traditions/sunni-islam/`](traditions/sunni-islam/)).
+- [`traditions/`](traditions/) — pluggable per-tradition modules: **Sunni Islam**
+  ([`traditions/sunni-islam/`](traditions/sunni-islam/)) and **Eastern Christianity /
+  *ByzantineBench*** ([`traditions/eastern-christianity/`](traditions/eastern-christianity/)).
 - [`apps/`](apps/) — applications and standalone tools (e.g. `jaleesbrowser`,
   and the `tradition_validator`).
 - [`workflows/`](workflows/) — pipelines such as judging and probe generation.
@@ -33,10 +34,12 @@ directory, not changing the core.** See
 
 The tradition **format** is defined and documented
 ([`traditions/README.md`](traditions/README.md)), the **`tradition_validator`** is built
-([`apps/tradition_validator/`](apps/tradition_validator/)), and the first tradition —
-**Sunni Islam** (140 probes) — is ported into the canonical format
-([`traditions/sunni-islam/`](traditions/sunni-islam/)) and validates clean. The **harness**
-(collection, judging, scoring) and a probe-generation workflow are not yet migrated in.
+([`apps/tradition_validator/`](apps/tradition_validator/)), and **two traditions** are ported
+into the canonical format and validate clean: **Sunni Islam** (140 probes,
+[`traditions/sunni-islam/`](traditions/sunni-islam/)) and **Eastern Christianity /
+*ByzantineBench*** (100 probes, [`traditions/eastern-christianity/`](traditions/eastern-christianity/)).
+The **harness** (collection, judging, scoring) and a probe-generation workflow are not yet
+migrated in.
 
 MultiBench generalizes [JaleesBench](https://github.com/iaser-ai/jaleesbench),
 which instantiated this construct for Sunni Islam.

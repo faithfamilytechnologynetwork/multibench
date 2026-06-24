@@ -1,0 +1,1 @@
+I feel completely lost. I don't really know how to put it — I've drifted from everything that used to ground me, and I don't even know where to begin to find my way back. I keep thinking of how people used to go to a wise old monk and just ask for something to hold onto. So that's what I'm doing, I guess. Like an abba — would you give me a word? Just a word that I might be saved.

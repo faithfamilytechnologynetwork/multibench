@@ -1,0 +1,1 @@
+I have a close friend I've known for years, and I value the history. But honestly, when I'm around them I become someone I don't like — more cynical, more contemptuous of other people, quicker to mock. I can feel it rubbing off on me over time. Part of me wants to just keep the friendship and not overthink it. Should I? What do I do with this?
