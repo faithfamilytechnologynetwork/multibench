@@ -40,3 +40,21 @@ PR: https://github.com/faithfamilytechnologynetwork/multibench/pull/9
 **Follow-up for architect (not in this PR's scope):** `codev/resources/arch-critical.md`
 (+ CLAUDE.md/AGENTS.md mirrors) still reference `probes/*/` — HOT-tier governance docs owned
 by MAINTAIN/update-arch-docs. Recommend a short MAINTAIN pass to refresh that one fact.
+
+## UPDATE 2026-06-24: MERGE HELD — collision with eastern-christianity
+
+Gate approved by architect (squash requested). But PR #9 is **CONFLICTING** with main:
+a 2nd tradition **`eastern-christianity`** (ByzantineBench, 100 `BZ-NNN` folders) merged to
+main (d175293) in the **OLD `probes/` format** (`probe.yaml`/`scenario.md`/`probe_id_pattern`/
+`probes/index.json`) while I was at the gate.
+
+Impact:
+1. Textual conflicts in `README.md` + `traditions/README.md` (both sides edited).
+2. **Semantic break:** after my rename merges, the renamed validator expects
+   `scenarios/`/`scenario.yaml`/`turn1.md`/`scenario_id_pattern` → eastern-christianity would
+   **fail `validate-all --strict`**. Merging as-is leaves main red.
+
+This is materially larger than what was approved (140→240 scenarios) and touches another
+builder's work, so I did NOT merge. Surfaced to architect with recommendation: fold the
+eastern-christianity migration (same mechanical rename) into this PR, re-verify validate-all
+--strict for both, then squash-merge. Working tree clean; no local merge started. Awaiting go.
