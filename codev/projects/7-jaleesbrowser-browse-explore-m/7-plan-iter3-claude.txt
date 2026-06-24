@@ -1,0 +1,87 @@
+I'll verify key claims against the actual codebase before reviewing the plan.Good — every factual claim the plan makes about the codebase checks out. Now let me review the plan itself against the spec.
+
+## Plan Review: 7-jaleesbrowser-browse-explore-m (Iteration 3)
+
+### Context
+
+This is iteration 3. Both previous iterations had Codex REQUEST_CHANGES and Claude APPROVE. The builder has addressed all raised concerns:
+
+1. **Iter 1 (3 gaps):** Tradition prose loading/degradation (M4), S1 sorting, stub-tradition rendering — all added with deliverables, acceptance criteria, and tests.
+2. **Iter 2 (1 gap):** Filter/query-state testability too manual — resolved with `filtering.py` as a pure-Python authoritative reference, exhaustively tested, with JS as a thin applier.
+
+I've verified all codebase claims against the actual repo. Every factual assertion is accurate: the validator's `extra="forbid"` + `strict=True` posture, the post-rename format (`scenarios/`, `scenario.yaml`, `turn1.md`, `scenario_id_pattern`), the `index.json` key `scenarios`, the eastern-christianity axes (`passions`/`virtues`/`economia`/`register`), and the flat-package layout the plan mirrors.
+
+### Spec Coverage
+
+Systematically checking every spec requirement:
+
+| Requirement | Covered? | Phase |
+|---|---|---|
+| M1 — discovery via glob | ✅ | P1 `discover()` |
+| M2 — tradition index rendering | ✅ | P3 `render_index` |
+| M3 — manifest header | ✅ | P3 tradition template |
+| M4 — prose (README/source/guide) | ✅ | P1 `load_prose()` + P3 render (iter-1 fix) |
+| M5 — taxonomy axes from manifest | ✅ | P3, no hardcoded axes |
+| M6 — scenario list with union/ordering/orphan/ghost | ✅ | P2 `load_index()` |
+| M7 — filter/slice (OR-within/AND-across) | ✅ | P4 `filtering.py` + `filter.js` |
+| M8 — scenario detail (turn1, 6 pressures, judge-guidance) | ✅ | P2 parse + P3 render |
+| M9 — prev/next in declared order | ✅ | P4 `site.py` |
+| M10 — read-only | ✅ | P4 snapshot test |
+| M11 — deep-linkable | ✅ | P4 output-path scheme |
+| S1 — sort by id/source_locus | ✅ | P4 `sort_ids()` (iter-1 fix) |
+| S2 — framings context | ✅ | P3 `_framings.html.j2` |
+| S3 — filter state in URL | ✅ | P4 `encode/decode_selection` |
+| §4.1 — results-ready seams | ✅ | P1 model, P2 loader seam, P3 reserved region |
+| §8 degradation table (all rows) | ✅ | P1 safeio + P2 notices + P3 stub-tradition (iter-1 fix) |
+| §10 non-functional (determinism, self-contained, link integrity) | ✅ | P4 tests |
+
+**No spec requirement is uncovered. No phase exceeds spec scope.**
+
+### Phase Breakdown
+
+The five-phase linear decomposition is clean:
+
+- **P1 (scaffold + reader core)** — right-sized; foundations only, independently testable.
+- **P2 (scenarios + notices)** — completes the data layer; the full model is testable before any HTML.
+- **P3 (rendering)** — clean separation: render-to-string, no file output yet.
+- **P4 (build + filtering)** — the densest phase, acknowledged by the builder with an intra-phase ordering guide. Appropriately dense because the filter-index, site build, and link-integrity checks are tightly coupled.
+- **P5 (serve + README)** — light capstone; `build` is the shippable core (P4), so P5 is low-risk polish.
+
+Each phase is independently committable. Dependencies are strictly linear and respected.
+
+### Technical Approach
+
+- **I1 (vendor, don't import validator):** Correct. The validator's `extra="forbid"` + `strict=True` posture is incompatible with display-first. Verified against actual `models.py`.
+- **I3 (markdown-it-py + nh3):** Sound choice. `markdown-it-py` is Unicode-correct for the Arabic corpus; `nh3` is the modern successor to deprecated `bleach`.
+- **`filtering.py` as authoritative reference:** This is the right call. It makes the spec's filter semantics testable in Python without introducing a JS test toolchain, while keeping the JS surface minimal.
+- **`safeio.py` reimplementing containment:** Correct given I1; avoids cross-app coupling.
+
+### Testability
+
+Every phase has concrete test files, acceptance criteria, and a test plan. The iter-2 fix (Python-tested filter semantics) closed the last gap where spec-required behavior relied on manual verification. The testing strategy now covers:
+
+- Reader tolerance (synthetic fixtures for every §8 degradation row)
+- Real data (both traditions: sunni-islam 140, eastern-christianity 100 with different axes)
+- Determinism (build-twice byte-identity)
+- Link integrity (all emitted hrefs resolve)
+- Read-only invariant (snapshot hash)
+- Filter semantics (exhaustive `test_filtering.py`)
+
+### Risk Assessment
+
+The risk table is honest and current. R1 (the #6 dependency) is genuinely resolved — I confirmed the post-rename format on disk. The remaining risks (sanitizer stripping Arabic, client JS drift, non-determinism) all have concrete mitigations. The #8 results-seam risk is appropriately scoped: fix the seam shape, defer the schema binding.
+
+### Remaining Observations (non-blocking)
+
+None. The two previous review rounds have refined this plan to the point where every spec requirement maps to a deliverable, every deliverable has an acceptance criterion, every acceptance criterion has a test, and the technical claims are verified against real code. The builder's rebuttals were substantive and evidenced — all three Codex gaps from iter-1 and the one from iter-2 were resolved with concrete plan edits, not hand-waves.
+
+A builder picking up this plan would know exactly what to build, in what order, with what files, and how to verify each phase. That's the bar.
+
+---
+VERDICT: APPROVE
+SUMMARY: All previous review gaps resolved; every spec requirement covered with deliverables, acceptance criteria, and automated tests; all codebase claims verified accurate — plan is ready for human review.
+CONFIDENCE: HIGH
+---
+
+KEY_ISSUES:
+- None

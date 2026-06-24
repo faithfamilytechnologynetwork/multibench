@@ -96,3 +96,21 @@ sunni-islam's pillars/hearts) → now a real test of multi-tradition discovery +
 
 Plan + spec updated (R1 resolved, filtering.py, 2-tradition verification). Next: `porch done 7`
 → iter-3 consult → expect plan-approval gate (human). Then coordinate w/ #8 on result schema.
+
+(Note: rebasing the already-pushed branch made the porch auto-push non-fast-forward → resolved
+with `git push --force-with-lease` after confirming all 13 "dropped" remote commits were my own
+pre-rebase spir-7 work, all replayed onto main. Local≡remote now.)
+
+## 2026-06-24 — Plan iter-3 consult: Codex RC (2 pts) fixed, Claude APPROVE
+
+Iter-3: **Codex REQUEST_CHANGES** (2 pts) + **Claude APPROVE**. Fixed both:
+1. **Ghost/stub rows in filtering** were underspecified → added an explicit Phase-4 rule:
+   `build_filter_index` emits an entry for every rendered row (ghost/stub get null/empty
+   metadata); metadata-less rows can't satisfy a positive predicate (excluded under any active
+   filter, present when unfiltered); `None` locus sorts last; counts≡rendered list (both from
+   `apply_selection`). Stub-tradition: tag-axis UI skipped, identity/locus/search/sort still
+   work. test_filtering covers a ghost + a no-axes tradition.
+2. **Stale "manual verify" risk-table row** contradicting the filtering.py posture → updated to
+   "automated test-of-record." Swept plan; remaining "manual" mentions are legit confirmatory steps.
+
+Next: `porch done 7` → iter-4 consult (expect convergence) → plan-approval gate (human).

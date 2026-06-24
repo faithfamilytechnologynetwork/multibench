@@ -1,0 +1,8 @@
+---
+VERDICT: REQUEST_CHANGES
+SUMMARY: Strong, spec-faithful plan overall, but it still leaves core list-filter behavior for ghost/stub scenarios underspecified and has one stale mitigation note that contradicts the updated testing posture.
+CONFIDENCE: HIGH
+---
+KEY_ISSUES:
+- The plan does not explicitly say how **ghost/index-only stub rows** participate in Phase 4’s filter-index, sorting, counts, query-state restore, and tests. Spec M6/M7 make the scenario list itself the filterable surface, and ghost rows are part of that list. Right now `build_filter_index`, `apply_selection`, and the client applier are described in terms of normal scenario data only; the builder needs explicit rules for rows with missing tags/locus/identity metadata so rendered rows, counts, and filtered results cannot diverge.
+- The bottom **Risk Analysis** table still uses the old mitigation for client-filter drift (“manual verify”), which conflicts with the revised authoritative-`filtering.py` approach. Update that section so the plan is internally consistent about the test-of-record.

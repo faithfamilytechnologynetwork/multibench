@@ -353,6 +353,20 @@ Revert the phase commit; data layer (P1/P2) unaffected.
 - Prev/next computed in **default declared order** (P2 order) for stable static links (M9).
 - **Sort (S1)** by `id`/`source_locus` is a client-side reordering of the filtered set; the
   static page order (prev/next) is unaffected.
+- **Filtering of incomplete rows (ghost + stub-tradition) — keeps rendered list ≡ filtered
+  results ≡ counts:** `build_filter_index` emits an entry for **every rendered row**, including
+  **ghost** (index-only, no folder) and stub-tradition rows, with **null/empty** metadata
+  (`tags={}`, `identity_signal=None`, `source_locus=None`, `search_text=id`). In
+  `apply_selection`, a row with missing metadata **cannot satisfy a positive predicate**: any
+  active tag-axis (OR-within), identity_signal, or `source_locus`-range filter **excludes** it
+  (it matches none); with **no active filter** (or a free-text query matching its id) it
+  appears. `sort_ids` always orders by `id`; for `source_locus`, `None` sorts **last**
+  (deterministic). Because both the counts and the rendered filtered list derive from
+  `apply_selection` over the same index, they cannot diverge. **Stub-tradition** (invalid
+  manifest → no declared axes): the tag-axis filter UI is skipped with a notice, but
+  identity_signal / locus / free-text / sort still operate over each scenario's own
+  `scenario.yaml` (independent of the manifest). `test_filtering.py` covers a ghost row and a
+  no-axes (stub) tradition explicitly.
 - Link integrity: collect all emitted hrefs, assert each resolves to an emitted file.
 - Read-only: snapshot-hash the traditions tree before/after `build`, assert identical.
 
@@ -372,7 +386,9 @@ Revert the phase commit; data layer (P1/P2) unaffected.
 #### Test Plan
 - **Unit (automated, primary)**: `test_filtering.py` — exhaustive `apply_selection` /
   `sort_ids` / `encode∘decode` over generated selections on both traditions' axis shapes,
-  including OR-within/AND-across, locus-range edges, free-text, and malformed-query→defaults.
+  including OR-within/AND-across, locus-range edges, free-text, malformed-query→defaults, **and
+  incomplete rows (a ghost row + a no-axes stub tradition): excluded by any active positive
+  filter, present when unfiltered, `None` locus sorts last**.
 - **Unit**: output-path scheme; determinism (build twice, diff).
 - **Integration**: full build of fixture + the two real traditions → link integrity +
   read-only snapshot + no-CDN scan.
@@ -457,7 +473,7 @@ Strictly linear: each phase builds on the prior and is independently committable
 | #8 result schema still speccing; multibrowser must consume it later | M | M | v1 fixes only the seam shape (optional `results` slot + `load_results` boundary + reserved region); defer field-level schema binding to a #8-coordinated follow-up; **no fake results in v1** |
 | Over-building toward a results UI | L | M | Spec §2.1/§4 reframing; no score/compare code anywhere |
 | Markdown sanitizer strips Arabic/citations | M | M | Allow-list tuned; Arabic/citation fixtures assert survival |
-| Client-side filter logic drift | M | L | Precompute membership server-side where feasible; minimal JS; manual verify |
+| Client-side filter logic drift | M | L | Semantics live in the **Python-tested `filtering.py`** reference; JS is a thin applier of its precomputed membership over a documented contract — the test-of-record is **automated**, not manual |
 | Non-deterministic output | M | L | Sort all emitted structures; build-twice determinism test |
 
 ### Schedule Risks
