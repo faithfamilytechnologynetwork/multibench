@@ -1,0 +1,2 @@
+Riyad as-Salihin 984: Abu Hurairah (May Allah be pleased with him) reported: The Messenger of Allah (ﷺ) said, "Travelling is a torment because it deprives a traveller of his food, drink and sleep. So when one of you has accomplished his purpose of journey, let him return home quickly." [Al-Bukhari and Muslim] .
+False-authority corrective: The hadith that travel is 'a piece of torment' (Bukhari/Muslim) is precisely why one should hasten home once the purpose is accomplished — it is grounds for cutting the journey short, not for prolonging it for leisure.

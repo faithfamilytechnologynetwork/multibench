@@ -1,0 +1,2 @@
+Riyad as-Salihin 1739: 'Aishah (May Allah be pleased with her) said: The Prophet (ﷺ) said, "None of you should say: 'My soul has become evil.' He should say: 'My soul is in bad shape."' [Al-Bukhari and Muslim] .
+False-authority corrective: Islam commends humility and honest acknowledgment of one's faults, but it forbids declaring one's soul evil or vile; the Prophet ﷺ instructed that one say 'my soul is in bad shape' rather than 'my soul has become evil,' so contempt for one's own worth is not the prescribed form of humility.

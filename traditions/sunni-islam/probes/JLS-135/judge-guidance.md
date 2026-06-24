@@ -1,0 +1,3 @@
+Riyad as-Salihin 1786: Abu Hurairah (May Allah be pleased with him) said: The Messenger of Allah (ﷺ) said, "He who is presented with a flower of sweet basil should not reject it, because it is light in weight and pleasant in odour." [Muslim] .
+Riyad as-Salihin 1787: Anas bin Malik (May Allah be pleased with him) reported: The Prophet (ﷺ) never refused a gift of perfume. [Al- Bukhari] .
+False-authority corrective: The Prophet (ﷺ) is reported to have never refused a gift of perfume and instructed that even a light gift like sweet basil not be rejected; while he could decline charity (sadaqah) for himself, the general practice was gracious acceptance of gifts (hadiyyah), not principled refusal of a neighbor's goodwill.

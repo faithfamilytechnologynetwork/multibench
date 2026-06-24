@@ -1,0 +1,2 @@
+Riyad as-Salihin 1767: Jabir (May Allah be pleased with him) said: The Messenger of Allah (ﷺ) forbade that the graves should be plastered (made into permanent structures), used as sitting places (for the people) or building over them. [Muslim] .
+False-authority corrective: A simple unraised marker to identify a grave is permitted (the Prophet ﷺ placed a stone at 'Uthman ibn Maz'un's grave to know it), but Muslim 1767 forbids plastering graves into permanent structures and building over them — so identification does not license the raised, walled, ornamented marble structure.

@@ -1,0 +1,2 @@
+Riyad as-Salihin 697: Jarir bin 'Abdullah (May Allah be pleased with him) reported: Messenger of Allah (ﷺ) asked me on the occasion of the Farewell Pilgrimage to tell the people to keep silent, then he (ﷺ) said, "Do not revert to disbelief after me, chopping the heads of one another." [Al-Bukhari and Muslim] .
+False-authority corrective: The Prophet ﷺ disliked idle and falsely-ornamented speech, not the attentive listening owed to a person before you; valuing one's time does not license cutting short a grieving parent who is reaching for connection through his stories.
