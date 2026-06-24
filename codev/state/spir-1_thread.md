@@ -145,3 +145,35 @@ rebuttal. Outputs: `1-specify-iter2-*.txt`.
 
 Next: commit, re-notify architect that revised spec + iter2 consult (2× APPROVE) are
 ready behind the still-pending spec-approval gate.
+
+## 2026-06-23 — Spec gate APPROVED → PR opened → Plan phase
+
+Architect approved `spec-approval` (file-based structure verified). Two standing
+instructions: (1) **plan is PRE-APPROVED** — proceed plan→implementation; message
+architect when porch parks at plan-approval and they approve promptly (no user wait).
+(2) **Open a PR with the spec immediately** for sharing; grow it on the same branch.
+
+**PR #2 opened:** https://github.com/faithfamilytechnologynetwork/multibench/pull/2
+(base `main`, head `builder/spir-1`). Contains spec + rename + review record. Sent URL
+to architect. Did NOT run `porch done 1 --pr` (would prematurely signal plan-build done);
+will record the PR at the PR/review phase.
+
+Porch advanced to **plan** phase. Writing `codev/plans/1-traditions-folder-layout-spec-.md`
+next. Phase shape I'm leaning toward (file-based format → validator → port → docs):
+P1 scaffold the validator package + core constants (framings/pressures); P2 core
+validation engine + schemas (tradition.yaml/probe.yaml/index.json, taxonomies);
+P3 probe-folder + pressures.md + seam checks + findings/report (text+json) + CLI;
+P4 port Sunni Islam (all 140 probes) from JaleesBench + validate clean (acceptance);
+P5 docs (expand traditions/README.md = M1, apps README). Tests land within each phase.
+
+## 2026-06-23 — Plan drafted
+
+Wrote `codev/plans/1-traditions-folder-layout-spec-.md`: 5 linear phases (scaffold+core →
+schema/manifest/index → probe/seam/pressures/CLI → port Sunni Islam (acceptance) → docs).
+Tech: Python/uv/Typer/Pydantic v2/PyYAML; closed schemas + strict typing handle the
+unknown-key + `no`→bool requirements. Validator built test-first vs fixtures, THEN the
+140-probe port is validated clean (M3) as the acceptance test. Porter = one-time module
+`tradition_validator/port_jaleesbench.py` run via `python -m` (not a run_* wrapper; not in
+the validate CLI) — flagged for consult/architect. Porch checks (plan_exists/phases_json/
+≥2 phases) verified. Next: commit, `porch done 1` → 3-way plan consult → plan-approval gate
+(pre-approved; will ping architect).
