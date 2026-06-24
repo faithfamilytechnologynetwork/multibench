@@ -1,0 +1,14 @@
+id: '5'
+title: tradition-validator-medium-pol
+protocol: air
+phase: implement
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-06-24T08:38:36.223Z'
+updated_at: '2026-06-24T08:38:36.223Z'
