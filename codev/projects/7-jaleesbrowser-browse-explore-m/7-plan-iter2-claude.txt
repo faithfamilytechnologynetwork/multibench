@@ -1,0 +1,111 @@
+I'll start by reading the actual codebase to verify claims made in the plan, then provide my review.Now let me check the spec file and a few more details to verify plan claims.Good. I now have a thorough understanding of the actual codebase. Let me verify one more thing — the validator's safe-read logic the plan mentions replicating.I now have a comprehensive picture of the actual codebase. Let me deliver my review.
+
+---
+
+## Plan Review: 7-jaleesbrowser-browse-explore-m (Iteration 2)
+
+### Context
+This is the second review iteration. Iteration 1 had Codex REQUEST_CHANGES (3 gaps) and Claude APPROVE. The builder accepted all three Codex gaps and Claude's non-blocking notes, plus folded in architect-directed changes (rename to `multibrowser`, results-ready seams). I verified the builder's claims against the actual codebase.
+
+### Verification Summary
+
+**Claims verified against disk:**
+
+| Claim | Verified? |
+|---|---|
+| `tradition_validator` uses `extra="forbid"` + `strict=True` (justifying I1 vendor decision) | ✅ `_STRICT = ConfigDict(extra="forbid", strict=True, populate_by_name=True)` in `models.py:16` |
+| Validator has `_within_root` containment + `MAX_FILE_BYTES=5MiB` | ✅ `validator.py:33` and `core.py:55` |
+| Flat package layout with `__main__.py` + Typer CLI | ✅ `cli.py` with `@app.command()` decorators |
+| Live data is OLD vocab (`probes/`, `probe.yaml`, `scenario.md`) | ✅ `traditions/sunni-islam/probes/JLS-001/probe.yaml` exists; no `scenarios/` dir |
+| `tradition.yaml` has `probe_id_pattern` (old), not `scenario_id_pattern` (new) | ✅ Line 41: `probe_id_pattern: ^JLS-\d{3}$` |
+| `apps/multibrowser/` doesn't exist yet | ✅ Clean slate |
+| Pressures file uses `## ` headings with the 6 canonical names | ✅ `pressures.md` confirmed: `secularize`, `insistence`, `false_authority`, `good_cause`, `flattery`, `personal_appeal` |
+| `scenario.yaml` (old: `probe.yaml`) has `tags`, `source_locus`, `locus_label`, `identity_signal` | ✅ All fields present |
+
+**The I1 decision is sound.** The validator's `extra="forbid"` + `strict=True` config means a missing/unknown field raises a `ValidationError` — the exact opposite of display-first. Vendoring lean dataclasses is the right call.
+
+### 1. Spec Coverage
+
+**Every spec requirement is covered:**
+
+| Spec Req | Plan Phase | Notes |
+|---|---|---|
+| M1 (discover traditions) | P1 `discover()` | ✅ |
+| M2 (tradition index) | P3 `render_index()` + P4 site output | ✅ |
+| M3 (manifest header) | P3 `render_tradition()` | ✅ |
+| M4 (tradition prose: README/source/guide) | P1 `load_prose()` + P3 render | ✅ Fixed in iter-1 |
+| M5 (taxonomy axes) | P3 tradition template | ✅ |
+| M6 (scenario list, union/ordering, orphan/ghost) | P2 `load_index()` + P3/P4 | ✅ |
+| M7 (filter/slice: OR-within, AND-across) | P4 `filter.js` | ✅ |
+| M8 (scenario detail: turn1, 6 pressures, judge-guidance) | P2 loading + P3 render | ✅ |
+| M9 (prev/next, deep links) | P3 render + P4 site | ✅ |
+| M10 (read-only) | P4 snapshot invariant test | ✅ |
+| M11 (deep-linkable) | P4 output-path scheme | ✅ |
+| S1 (sort by id/source_locus) | P4 `filter.js` | ✅ Fixed in iter-1 |
+| S2 (framings context) | P3 `_framings.html.j2` | ✅ |
+| S3 (filters in URL) | P4 `filter.js` query-string | ✅ |
+| §4.1 results-ready seams | P1/P2/P3 (inert) | ✅ |
+| §8 degradation table (all 7 rows) | P1–P3 across phases | ✅ Stub-tradition made explicit in iter-1 |
+
+**No phase exceeds spec scope.** The plan stays tightly within v1 boundaries.
+
+### 2. Phase Breakdown
+
+**Strengths:**
+- The **data/presentation split** (P1–P2 data, P3 render, P4 build, P5 serve) is clean and testable. The data layer can be fully validated before any HTML exists.
+- Strictly linear dependency chain with each phase independently committable.
+- Phase sizing is reasonable — P4 is the densest but the builder added an intra-phase ordering guide (iter-1 feedback).
+
+**No issues found.** The 5-phase linear decomposition respects dependencies and each phase has clear, testable deliverables.
+
+### 3. Technical Approach
+
+**Sound decisions:**
+- **I1 (vendor dataclasses):** Verified — the validator's `extra="forbid"` would reject unknown keys that a display-first browser must tolerate. The separation also avoids coupling two independent apps' build lifecycles.
+- **I3 (markdown-it-py + nh3):** Good choice. `markdown-it-py` is the Python port of the same family as the reference's `markdown-it`; `nh3` (Rust-backed ammonia successor) is the modern replacement for the deprecated `bleach`.
+- **`constants.py` isolation:** Smart — when #6 merges, the rename is a single-file edit. Verified that `probe_id_pattern`, `probe.yaml`, `scenario.md` are the current names needing mapping.
+- **`safeio.py` containment:** Locally re-implementing `_within_root` and the size cap avoids an import dependency while preserving the same safety properties. The validator's implementation (`path.resolve().relative_to(root.resolve())`) is simple enough that re-implementing it carries minimal risk.
+
+### 4. Testability
+
+**Strong test strategy:**
+- Each phase has explicit unit tests with named test files.
+- Synthetic fixtures (good + malformed variants) are created in P1 and extended in P2.
+- Integration tests at P3 (render a full fixture) and P4 (link integrity, determinism, read-only snapshot).
+- The §8 degradation table's every row maps to a fixture + assertion.
+- Manual verification checkpoints are realistic (REPL inspection, browser eyeballing, local serve).
+
+### 5. Risk Assessment
+
+**Risks are well-identified and mitigated:**
+- **#6 dependency** (the top risk) — handled by fixtures-now, constants isolation, rebase-in-Verify. The plan even flags `scenario.md`→`turn1.md` as the least-obvious rename to confirm.
+- **#8 coordination** — correctly deferred to a seam shape only; no over-building.
+- **`watchfiles` Rust wheel** — kept off the CI path; base `serve` uses stdlib only.
+
+### 6. Iteration 1 Resolution Assessment
+
+All three Codex gaps are concretely addressed:
+1. **Prose loading (M4):** `load_prose()` added to P1 with fixture + test ✅
+2. **S1 sorting:** Added to P4 `filter.js` with sort by `id`/`source_locus` ✅
+3. **Stub-tradition rendering:** Made explicit in P3 with acceptance criterion ✅
+
+Claude's non-blocking notes also folded in cleanly (locus range = min/max inputs, P4 intra-phase ordering, `watchfiles` risk noted).
+
+### Minor Observations (non-blocking)
+
+1. **`normalize_heading()` in `constants.py`** — the plan mentions this function but doesn't specify its signature or exact normalization rule (trim → lowercase → spaces/hyphens → `_`). The spec mentions this normalization and the pressures.md file uses `false_authority` style already, so the builder should be clear on this — but spelling it out in the constants deliverable would help.
+
+2. **`probes/index.json` format mapping** — the plan's `constants.py` says `INDEX="scenarios/index.json"` with the new key, but the current real `index.json` likely has `{schema_version, probes:[…]}`. The plan handles this via the post-rename fixture, which is correct, but the builder should remember the inner array key also renames (`probes`→`scenarios`).
+
+3. **`filter-index.json` size** — for 140 scenarios, the embedded JSON will be small enough to be negligible. Good that the plan doesn't over-engineer pagination.
+
+These are all things a competent builder will handle naturally — none warrant a plan change.
+
+---
+VERDICT: APPROVE
+SUMMARY: All iteration-1 gaps resolved; plan is comprehensive, spec-faithful, technically sound, and verified against the actual codebase — ready for human review.
+CONFIDENCE: HIGH
+---
+
+KEY_ISSUES:
+- None
