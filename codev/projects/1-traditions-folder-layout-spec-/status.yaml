@@ -36,11 +36,12 @@ gates:
     requested_at: '2026-06-24T02:28:14.837Z'
     approved_at: '2026-06-24T05:12:31.068Z'
   verify-approval:
-    status: pending
+    status: approved
     requested_at: '2026-06-24T05:16:14.280Z'
+    approved_at: '2026-06-24T05:56:17.800Z'
 iteration: 1
 build_complete: true
 history: []
 started_at: '2026-06-23T22:32:40.553Z'
-updated_at: '2026-06-24T05:56:16.031Z'
+updated_at: '2026-06-24T05:56:17.800Z'
 pr_ready_for_human: false
