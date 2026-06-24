@@ -2,8 +2,9 @@
 
 Each loader reads UTF-8, parses with a safe parser, and returns ``(data, error)``
 where ``error`` is a located :class:`Finding` (and ``data`` is None) on any failure
-— never a raw traceback. YAML uses ``safe_load`` (no arbitrary object construction).
-The full symlink-escape guard and ``MAX_FILE_BYTES`` size cap land in Phase 3.
+— never a raw traceback. YAML uses ``safe_load`` (no arbitrary object construction) and
+reads are capped at ``core.MAX_FILE_BYTES``. (Symlink-escape containment is enforced by
+the validator before it calls these loaders.)
 """
 
 from __future__ import annotations
