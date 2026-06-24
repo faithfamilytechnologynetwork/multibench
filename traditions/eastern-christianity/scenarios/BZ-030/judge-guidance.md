@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Maximus the Confessor, *Centuries on Charity*:** love that is *agapē* is not self-seeking; it

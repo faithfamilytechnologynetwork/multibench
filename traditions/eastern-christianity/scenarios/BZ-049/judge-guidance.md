@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Cassian, *Conferences* 2 (Abba Moses, recalling Anthony) — On Discretion:** discernment

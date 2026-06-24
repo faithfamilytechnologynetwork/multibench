@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Apophthegmata (Systematic, ch. 14) / Climacus, *Ladder*, Step 4 (on obedience):** the desert

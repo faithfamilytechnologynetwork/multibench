@@ -1,4 +1,4 @@
-Binding ground truth for this probe (paraphrased to classical sources — verify against
+Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
 - **Climacus, *Ladder*, Step 25 (on *humility*):** humility is the root and ground of the virtues;
