@@ -109,7 +109,9 @@ traditions/<id>/
   with a practising {adherent_noun} who wants to live by their faith."*), `guided` (the
   tradition's `guide.md`).
 - **Pressures (6), canonical order:** `secularize`, `insistence`, `false_authority`,
-  `good_cause`, `flattery`, `personal_appeal`. In `pressures.md` each is a `## ` heading,
+  `good_cause`, `flattery`, `personal_appeal`. (Throughout, an **"inline notice"** means a
+  visually distinct warning block rendered *into the HTML page*, never a console log.) In
+  `pressures.md` each is a `## ` heading,
   normalized (trim → lowercase → spaces/hyphens→`_`); content before the first `##` is
   intro/ignored.
 - **Taxonomies** are per-tradition tag axes (e.g. Sunni Islam: `pillars` applies_to
@@ -272,12 +274,19 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
   markdown (each reachable; `guide.md` labeled as the Guided-framing system prompt).
 - **M5.** Show the **taxonomy axes**: for each axis its `description`, `applies_to`, and
   `values` (read from the manifest; never hardcoded).
-- **M6.** Render the **scenario list** (from `scenarios/index.json`, cross-checked against the
-  `scenarios/*/` folders) as a table/list with columns: id, `locus_label`, `source_locus`,
-  `identity_signal`, and per-axis tags.
+- **M6.** Render the **scenario list** as a table/list with columns: id, `locus_label`,
+  `source_locus`, `identity_signal`, and per-axis tags. The list is the **union** of
+  `scenarios/index.json` entries and the `scenarios/*/` folders, **ordered by `index.json`**
+  (the tradition's declared order) with any **orphan folders** (present on disk, absent from
+  the index) appended in id-sorted order. Divergence is surfaced, not fatal (display-first,
+  §8): an **orphan** (folder ∉ index) renders with an inline notice; a **ghost** (index entry
+  with no folder) renders as a stub row carrying an inline notice. The **folder** is
+  authoritative for content; the **index** is authoritative for declared order.
 - **M7. Filter/slice** the scenario list by: each **taxonomy tag** (per axis), **identity_signal**
   (`clean`/`leaky`/`intrinsic`), and **source_locus** (value or range); plus **free-text
-  search** over id / locus_label. Filters are composable (AND across axes). *(This is the
+  search** over id / locus_label. **Filter semantics: OR within a single axis** (a scenario
+  matches if it carries *any* selected value of that axis), **AND across axes** (it must match
+  every axis that has an active selection); free-text search ANDs with the rest. *(This is the
   issue's explicit "filter/slice by taxonomy tags, identity_signal, source locus" requirement.)*
 - **S1.** Sort the scenario list by id or source_locus; show active-filter result counts.
 
@@ -291,7 +300,10 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
   - **Judge-guidance seam:** `judge-guidance.md` rendered (may be collapsible; clearly labeled
     as the judge's binding ground truth).
 - **M9.** Prev/next scenario navigation and a path back to the tradition view; the active
-  scenario is addressable (its own page / deep link).
+  scenario is addressable (its own page / deep link). **Prev/next follows the tradition's
+  default declared order** (the M6 order: `index.json`, then orphan folders) so each static
+  scenario page has stable, deterministic neighbors; filtered/sorted-view navigation is a
+  client-side enhancement layered on top and does not change the canonical page links.
 
 ### 7.4 Universal-core context
 - **S2.** Show the universal framings as context: the **Stated** template instantiated with
@@ -312,16 +324,46 @@ re-pointed at authored content. **MUST** = v1 acceptance; **SHOULD** = strongly 
 
 - **Reading posture = display-first / fail-soft for *content*** (I2). The browser renders an
   imperfect tradition and surfaces defects as inline notices; it never refuses to display
-  parseable content. **Invocation/boundary errors still fail loud** (bad root path, no
-  traditions found, unreadable file) per §3.5. This is the deliberate split from the
-  validator's fail-fast posture, and is consistent with the global "fail at boundaries"
-  principle (a malformed *content* file is data to display, not a broken invocation).
+  parseable content. This is the deliberate split from the validator's fail-fast posture.
+
+- **Degradation scope — what fails loud vs. degrades to a notice** (resolves the Codex/Claude
+  fail-soft-vs-fail-loud question). Failures degrade at the **smallest enclosing unit**;
+  **only invocation-level failures abort the process** (non-zero exit). A *content* file that
+  is unreadable, non-UTF-8, oversized, or malformed is **data to display as a notice**, never
+  a process abort:
+
+  | Failure | Class | Behavior |
+  |---|---|---|
+  | Bad/missing root path; root has **no** `traditions/*/tradition.yaml`; output dir not writable | **Invocation** | Fail loud, non-zero exit, clear message. |
+  | `tradition.yaml` missing / invalid / schema-violating | **Tradition** | Render a tradition **stub page** with a top-of-page notice; still list scenarios from folders/index with whatever metadata is parseable; skip manifest-derived UI (taxonomy filters) with a notice. Do **not** abort the build. |
+  | `scenarios/index.json` missing / invalid | **Tradition** | Fall back to folder globbing for the scenario set, with a notice; declared order is then id-sorted. |
+  | `index.json` ↔ folder divergence (orphan/ghost) | **Scenario** | Union + per-row inline notice (M6). |
+  | `turn1.md` / `judge-guidance.md` / `pressures.md` missing, empty, non-UTF-8, or oversized | **Section** | Render the scenario page; that section shows an inline notice in place of content. |
+  | `pressures.md` missing / extra / duplicate / unrecognized `## ` heading | **Section** | Render the recognized pressures in canonical order; flag the missing/extra ones with an inline notice. |
+  | `scenario.yaml` invalid / unknown tag axis or value | **Scenario** | Render the page with whatever parsed; flag the offending field; an unknown tag is shown but marked. |
+
 - **Data model:** reuse the validator's pydantic schemas as the *shape* reference, but wrap
-  reads so a single bad file degrades to a notice rather than aborting the page. Whether that
-  is an import-dependency on `tradition_validator` or a small vendored read-model is a **Plan**
-  decision (I1); the spec only fixes the *posture*.
-- **Format names isolated** in one module/constants so the post-rename target (and any late
-  #6 adjustment) is a one-file edit (C2).
+  reads so a single bad file degrades to a notice rather than aborting the page (the validator
+  is `extra="forbid"` + `strict=True`, so a tolerant wrapper or a separate lenient read-model
+  is required — not direct strict reuse). Import-dependency on `tradition_validator` vs. a
+  small vendored read-model is a **Plan** decision (I1); the spec fixes only the *posture*.
+
+- **Security / safe rendering** (resolves Codex #5 / Claude path-containment & CDN notes):
+  - **Path containment + size cap.** jaleesbrowser **replicates the validator's containment
+    guard** — reject symlinks and `..` escapes outside the tradition root — and the
+    `MAX_FILE_BYTES` (5 MiB) read cap; an oversized/escaping file is a located notice, not a
+    traceback or a read outside the tree.
+  - **Output escaping.** Template rendering uses **autoescape on**; all authored markdown is
+    rendered through a sanitizing pipeline (raw HTML off + sanitizer) so embedded HTML cannot
+    inject script; any data embedded as JSON (the client filter index) is **safely
+    serialized** (JSON-encoded, `</` escaped) and any query-string filter state restored
+    client-side is **validated and escaped** before use — fail-soft to defaults on bad input.
+  - **Self-contained output.** The generated site references **no external CDN/network**
+    (CSS/JS/fonts are local); it works fully offline. (Non-functional, §10.)
+
+- **Format names isolated** in one module/constants so the post-rename target — including the
+  specific `scenario.md` → `turn1.md` file rename, which is the least obvious of #6's renames
+  and must be confirmed against #6's actual implementation at rebase — is a one-file edit (C2).
 - **No hardcoded taxonomy/axis vocabulary** in the UI shell; axes and values come from the
   manifest (the reference's "genericity lives in the viewer" lesson).
 
@@ -356,22 +398,52 @@ A reviewer can, from a clean checkout (post-#6-rename data, or the synthetic fix
 4. Open any scenario and read — clearly separated — its turn-1 opening, its six pressures in
    canonical order, and its judge-guidance, with its tags/identity_signal/locus shown; a
    malformed scenario renders with an inline notice rather than crashing. *(M8, M9)*
-5. Confirm **nothing under `traditions/` was written** during any operation. *(M10)*
-6. Every view is reachable by a stable link. *(M11)*
+5. Confirm **nothing under `traditions/` was written** during any operation — verified by a
+   **fixture-tree snapshot invariant** (hash every path under the tradition root before and
+   after both `build` and `serve`, assert identical). *(M10)*
+6. Every view is reachable by a stable link, and **all generated inter-page links resolve**
+   (tradition→scenario, prev/next, back-to-index) — no dangling links. *(M11)*
 7. **Tests pass** (`uv --project apps/jaleesbrowser run pytest`): unit tests for the
-   tolerant reader (incl. malformed-content fixtures and Arabic content) and the
-   pressures/index parsing; an integration test that renders a fixture tradition end-to-end
-   and asserts the six-pressure layout, the filter results, and read-only behavior.
+   tolerant reader (incl. malformed-content fixtures — missing/empty/non-UTF-8/oversized
+   section files, an orphan and a ghost scenario, a missing/extra pressure, an unknown tag —
+   and Arabic-bearing content) and the pressures/index parsing; an integration test that
+   renders a fixture tradition end-to-end and asserts the six-pressure layout, the
+   OR-within/AND-across filter results, **link integrity**, the **read-only tree-snapshot
+   invariant**, and that **degraded content surfaces as inline notices** (per the §8 table)
+   rather than crashing.
 8. README documents install, the browse commands, and the #6 rebase note.
 
-**Non-functional:** deterministic output (A: byte-stable build for unchanged input); renders
-a 140-scenario tradition without noticeable lag; no network calls; UTF-8 throughout; no
-secrets/large data committed.
+**Non-functional:** deterministic output (A: byte-stable build for unchanged input); the
+generated site is **fully self-contained — no external CDN/network references** (works
+offline); renders a 140-scenario tradition without noticeable lag; no network calls; UTF-8
+throughout; no secrets/large data committed.
 
 ## 11. Consultation Log
 
-*(Porch runs the 3-way consultation — Codex + Claude per this repo's config; Gemini's
-per-phase consult cannot see the worktree here — after `porch done`. Feedback and the
-resulting spec changes will be recorded here.)*
+*(Porch runs the consultation — Codex + Claude per this repo's config; Gemini's per-phase
+consult cannot see the worktree here — after `porch done`.)*
 
-- _Pending first consultation._
+### Iteration 1 (Codex: REQUEST_CHANGES · Claude: COMMENT — no blockers)
+
+Both reviewers called the spec strong and well-bounded (the §2.1 "not JaleesBench's results
+browser" reframing singled out as the highest-value content), and converged on the same set
+of one-sentence sharpenings. All were incorporated:
+
+| # | From | Change |
+|---|---|---|
+| 1 | Codex (substantive) | **Fail-soft vs fail-loud was internally inconsistent** (§3/§8 both listed "unreadable file"). Resolved with the §8 **degradation-scope table** classifying every failure as invocation (abort) / tradition / scenario / section, and fixing "unreadable content file" to degrade, not abort. |
+| 2 | Codex + Claude | **`index.json` ↔ folder drift** policy: union, index-ordered, orphans appended; orphan/ghost each get an inline notice; folder authoritative for content, index for order (M6, §8). |
+| 3 | Codex | **Prev/next order** defined: tradition default declared order for stable static pages (M9). |
+| 4 | Codex | **Read-only made testable**: fixture-tree snapshot/hash invariant across `build` + `serve` (§10.5, §10.7). |
+| 5 | Codex + Claude | **Output escaping / safe serialization**: autoescape, sanitized markdown, safe JSON embed, validated query-state restore (§8 Security). |
+| 6 | Claude | **Filter semantics**: OR within axis, AND across axes (M7). |
+| 7 | Claude | **Static link-integrity** test target (§10.6, §10.7). |
+| 8 | Claude | **Path-containment + size-cap** explicitly required, not inherited-by-hope (§8 Security). |
+| 9 | Claude | **Self-contained output** (no external CDN) as an explicit non-functional requirement (§10). |
+| 10 | Claude | **"Inline notice"** defined once as a rendered HTML warning, not a console log (§2.4). |
+| 11 | Claude | Noted that **`scenario.md`→`turn1.md`** is #6's least-obvious rename; flagged for confirmation at rebase (§8). |
+
+Deferred to Plan (reviewers agreed these belong there): the `watchfiles`-vs-polling mechanism
+for `serve --watch`; the import-dependency-vs-vendored-read-model choice (I1); the concrete
+markdown-renderer + sanitizer pick (I3). Both reviewers endorsed Approach A over B and the
+post-rename-with-synthetic-fixtures sequencing.

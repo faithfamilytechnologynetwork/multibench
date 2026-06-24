@@ -1,0 +1,12 @@
+---
+VERDICT: REQUEST_CHANGES
+SUMMARY: Strong, well-bounded spec, but it still needs two behavior clarifications around degraded-content handling and index/folder drift before it is builder-ready.
+CONFIDENCE: HIGH
+---
+
+KEY_ISSUES:
+- **Fail-soft vs fail-loud is internally inconsistent for broken scenario files.** §3 says unreadable files should fail loud at the boundary, while §8 says malformed content files are data to display and should degrade to inline notices. The spec needs to explicitly classify cases like missing `turn1.md`, invalid UTF-8 in `judge-guidance.md`, or a permission-denied `pressures.md`: do those kill the whole build/page, skip just that scenario, or render a stub with notices?
+- **`scenarios/index.json` vs `scenarios/*/` drift behavior is not specified tightly enough.** M6 says the list is “cross-checked” against both, but not which source is authoritative for rendering. If the index lists a missing folder, or a folder exists but is absent from the index, the builder needs a defined rule for whether the UI shows the union, intersection, or index order plus warnings.
+- **Prev/next navigation order is ambiguous.** M9 requires prev/next, but does not define whether navigation follows index order, scenario id sort, source-locus sort, or current filtered/sorted view. This affects deep links and testability.
+- **Read-only acceptance is good, but the verification method should be made testable.** The spec should say how to prove M10 in tests for both `build` and `serve` paths (for example, fixture-tree snapshot or mtime/content invariance), so builders do not improvise.
+- **Security requirements are directionally right but could be one notch more explicit.** Since authored markdown and manifest/tag values are rendered into HTML and URL state, require escaping/safe serialization for template variables and embedded JSON/query restoration, not just markdown sanitization.
