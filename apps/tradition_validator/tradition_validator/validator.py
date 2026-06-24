@@ -39,6 +39,14 @@ def _within_root(path: Path, root: Path) -> bool:
         return False
 
 
+def _guard_within(path: Path, root: Path, report: Report) -> bool:
+    """Report + return False if ``path`` escapes ``root`` (applied before every read)."""
+    if not _within_root(path, root):
+        report.error(str(path), "Path escapes the tradition directory (symlink/.. not allowed).")
+        return False
+    return True
+
+
 def list_probe_folders(probes_dir: Path) -> list[str]:
     """Probe folder names under probes/, ignoring dot/system entries (spec §8.2)."""
     if not probes_dir.is_dir():
@@ -153,7 +161,7 @@ def _validate_probe_folder(
     # probe.yaml
     probe_path = folder / "probe.yaml"
     meta: ProbeMeta | None = None
-    if probe_path.is_file():
+    if probe_path.is_file() and _guard_within(probe_path, root, report):
         data, err = load_yaml(probe_path)
         if err:
             report.extend([err])
@@ -177,7 +185,8 @@ def _validate_probe_folder(
             report.error(str(probe_path), f"duplicate probe id '{meta.id}'.", "id")
         seen_ids.add(meta.id)
         if manifest is not None:
-            if not re.compile(manifest.probe_id_pattern).search(meta.id):
+            # fullmatch so an unanchored probe_id_pattern still requires the whole id.
+            if not re.compile(manifest.probe_id_pattern).fullmatch(meta.id):
                 report.error(
                     str(probe_path),
                     f"probe id '{meta.id}' does not match probe_id_pattern "
@@ -222,6 +231,8 @@ def _validate_manifest(tradition_dir: Path, report: Report) -> TraditionManifest
     manifest_path = tradition_dir / "tradition.yaml"
     if not manifest_path.is_file():
         return None  # missing-file already reported by the structure check
+    if not _guard_within(manifest_path, tradition_dir, report):
+        return None
     data, err = load_yaml(manifest_path)
     if err:
         report.extend([err])
@@ -265,6 +276,8 @@ def _validate_index_and_drift(tradition_dir: Path, report: Report) -> None:
 
     if not index_path.is_file():
         return  # missing-file already reported by the structure check
+    if not _guard_within(index_path, tradition_dir, report):
+        return
     data, err = load_json(index_path)
     if err:
         report.extend([err])

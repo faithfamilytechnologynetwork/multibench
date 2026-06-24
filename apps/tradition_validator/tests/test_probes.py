@@ -209,3 +209,36 @@ def test_oversized_file_rejected(valid_tradition: Path, monkeypatch):
     monkeypatch.setattr(core, "MAX_FILE_BYTES", 10)  # tiny cap
     report = validate_tradition(valid_tradition)
     assert find_finding(report, contains="too large", severity="error") is not None
+
+
+def test_duplicate_probe_id(valid_tradition: Path):
+    # T13: a second folder whose probe.yaml claims an already-used id.
+    import json
+
+    write_probe(valid_tradition / "probes" / "JLS-002", "JLS-002")
+    # Point JLS-002's probe.yaml id at JLS-001 (duplicate).
+    p2 = valid_tradition / "probes" / "JLS-002" / "probe.yaml"
+    m = yaml.safe_load(p2.read_text(encoding="utf-8"))
+    m["id"] = "JLS-001"
+    p2.write_text(yaml.safe_dump(m, sort_keys=False), encoding="utf-8")
+    (valid_tradition / "probes" / "index.json").write_text(
+        json.dumps({"schema_version": 1, "probes": ["JLS-001", "JLS-002"]}), encoding="utf-8"
+    )
+    report = validate_tradition(valid_tradition)
+    assert find_finding(report, contains="duplicate probe id", severity="error") is not None
+
+
+def test_symlinked_machine_file_escape_rejected(valid_tradition: Path, tmp_path: Path):
+    # A symlinked probe.yaml pointing outside the tradition must be rejected (N4),
+    # not silently parsed.
+    outside = tmp_path / "evil.yaml"
+    outside.write_text("id: JLS-001\n", encoding="utf-8")
+    target = valid_tradition / "probes" / "JLS-001" / "probe.yaml"
+    target.unlink()
+    try:
+        os.symlink(outside, target)
+    except (OSError, NotImplementedError):
+        import pytest
+        pytest.skip("symlinks not supported on this platform")
+    report = validate_tradition(valid_tradition)
+    assert find_finding(report, contains="escapes the tradition directory", severity="error") is not None
