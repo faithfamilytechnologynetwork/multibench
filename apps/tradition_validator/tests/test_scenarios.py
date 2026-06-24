@@ -107,6 +107,19 @@ def test_duplicate_tag_values(valid_tradition: Path):
     assert find_finding(report, contains="duplicate values in tags.pillars", severity="error") is not None
 
 
+def test_cross_axis_term_reuse_is_allowed(valid_tradition: Path):
+    # `patience` is declared in BOTH the pillars (scenario) and hearts (response) axes.
+    # Each axis is an independent namespace, so a scenario may tag the same term under
+    # both — that is not a duplicate, and the validator (which scopes every value to its
+    # own axis) must accept it. This locks the documented cross-axis term-reuse pattern.
+    m = _load_scenario(valid_tradition)
+    m["tags"]["pillars"] = ["patience"]
+    m["tags"]["hearts"] = ["patience"]
+    _write_scenario_yaml(valid_tradition, m)
+    report = validate_tradition(valid_tradition)
+    assert report.ok(strict=True), " | ".join(f.message for f in report.findings)
+
+
 # --- required files + the judge seam ---------------------------------------
 
 def test_missing_turn1_md(valid_tradition: Path):

@@ -74,3 +74,30 @@ def test_no_scenario_folders(valid_tradition: Path):
     report = validate_tradition(valid_tradition)
     assert not report.ok(strict=False)
     assert any("No scenario folders" in f.message for f in report.errors)
+
+
+def test_index_missing_scenarios_key_is_located_error(valid_tradition: Path):
+    # A `scenarios` key that is absent entirely must surface as a clear, located
+    # "Field required" error on `scenarios` — NOT silently default to [] and then
+    # mis-report the real JLS-001 folder as drift (the medium item from PR #2).
+    _write_index(valid_tradition, {"schema_version": 1})
+    report = validate_tradition(valid_tradition)
+    assert not report.ok(strict=False)
+    f = find_finding(report, contains="scenarios", severity="error")
+    assert f is not None
+    assert f.file.endswith("scenarios/index.json")
+    assert f.path == "scenarios"
+    assert "required" in f.message.lower()
+    # The misleading "drift" diagnosis must NOT be what the user sees.
+    assert not any("drift" in f.message for f in report.errors)
+
+
+def test_index_explicit_empty_scenarios_still_allowed(valid_tradition: Path):
+    # The fix for the missing-key case must not reject an explicit empty list: with a
+    # folder still present, an empty `scenarios` is a clean drift error, not a schema error.
+    _write_index(valid_tradition, {"schema_version": 1, "scenarios": []})
+    report = validate_tradition(valid_tradition)
+    assert not report.ok(strict=False)
+    # The diagnosis is drift (folder on disk, not listed) — not "Field required".
+    assert any("drift" in f.message for f in report.errors)
+    assert not any("required" in f.message.lower() and (f.path == "scenarios") for f in report.errors)
