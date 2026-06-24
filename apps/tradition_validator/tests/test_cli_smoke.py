@@ -72,3 +72,44 @@ def test_validate_missing_probe_folder_fails(tmp_path: Path):
 def test_bad_format_rejected(tmp_path: Path):
     result = runner.invoke(app, ["validate", str(tmp_path), "--format", "xml"])
     assert result.exit_code == 2
+
+
+def test_validate_all_text(tmp_path: Path):
+    # Two traditions: one minimal-valid, one missing files.
+    _make_minimal_tradition(tmp_path)  # creates tmp_path/sunni-islam
+    broken = tmp_path / "broken"
+    broken.mkdir()
+    (broken / "tradition.yaml").write_text("x\n", encoding="utf-8")  # only a manifest
+    result = runner.invoke(app, ["validate-all", str(tmp_path)])
+    assert result.exit_code == 1  # one tradition fails -> overall fail
+    assert "ALL PASS" not in result.output
+    assert "SOME FAILED" in result.output
+
+
+def test_validate_all_json_is_single_valid_document(tmp_path: Path):
+    _make_minimal_tradition(tmp_path)
+    broken = tmp_path / "broken"
+    broken.mkdir()
+    (broken / "tradition.yaml").write_text("x\n", encoding="utf-8")
+    result = runner.invoke(app, ["validate-all", str(tmp_path), "--format", "json"])
+    # Must parse as ONE JSON document, not concatenated objects.
+    payload = json.loads(result.output)
+    assert payload["ok"] is False
+    assert isinstance(payload["traditions"], list)
+    assert len(payload["traditions"]) == 2
+    by_ok = {t["tradition"].split("/")[-1]: t["ok"] for t in payload["traditions"]}
+    assert by_ok["sunni-islam"] is True
+    assert by_ok["broken"] is False
+
+
+def test_validate_all_all_pass(tmp_path: Path):
+    _make_minimal_tradition(tmp_path)
+    result = runner.invoke(app, ["validate-all", str(tmp_path)])
+    assert result.exit_code == 0
+    assert "ALL PASS" in result.output
+
+
+def test_validate_all_no_traditions(tmp_path: Path):
+    result = runner.invoke(app, ["validate-all", str(tmp_path)])
+    assert result.exit_code == 2
+    assert "No traditions found" in result.output

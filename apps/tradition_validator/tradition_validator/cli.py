@@ -8,7 +8,6 @@ the full schema/probe/seam validation engine and a richer findings model.
 from __future__ import annotations
 
 import json
-import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -77,30 +76,41 @@ def _structure_findings(tradition_dir: Path) -> list[Finding]:
     return findings
 
 
-def _report(tradition_dir: Path, findings: list[Finding], fmt: str, strict: bool) -> int:
-    """Render findings and return the process exit code (0 == ok)."""
-    errors = [f for f in findings if f.severity == "error"]
-    warnings = [f for f in findings if f.severity == "warning"]
-    ok = not errors and (not warnings or not strict)
+def _evaluate(tradition_dir: Path, strict: bool) -> tuple[list[Finding], bool]:
+    """Compute findings for one tradition and whether it passes.
 
-    if fmt == "json":
-        payload = {
-            "tradition": str(tradition_dir),
-            "ok": ok,
-            "findings": [asdict(f) for f in findings],
-        }
-        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
-    else:
-        for f in findings:
-            loc = f"  {f.path}" if f.path else ""
-            typer.echo(f"{f.severity.upper():7} {f.file}{loc}\n        {f.message}")
-        status = "PASS" if ok else "FAIL"
-        typer.echo(
-            f"\n{status}  {tradition_dir}  "
-            f"({len(errors)} error(s), {len(warnings)} warning(s))"
-        )
+    ``ok`` is True when there are no errors and (no warnings, or not strict).
+    """
+    findings = _structure_findings(tradition_dir)
+    has_error = any(f.severity == "error" for f in findings)
+    has_warning = any(f.severity == "warning" for f in findings)
+    ok = not has_error and not (strict and has_warning)
+    return findings, ok
 
-    return 0 if ok else 1
+
+def _result_dict(tradition_dir: Path, findings: list[Finding], ok: bool) -> dict:
+    """JSON-serialisable result for one tradition (spec §8.3 shape)."""
+    return {
+        "tradition": str(tradition_dir),
+        "ok": ok,
+        "findings": [asdict(f) for f in findings],
+    }
+
+
+def _render_text(tradition_dir: Path, findings: list[Finding], ok: bool) -> None:
+    errors = sum(1 for f in findings if f.severity == "error")
+    warnings = sum(1 for f in findings if f.severity == "warning")
+    for f in findings:
+        loc = f"  {f.path}" if f.path else ""
+        typer.echo(f"{f.severity.upper():7} {f.file}{loc}\n        {f.message}")
+    status = "PASS" if ok else "FAIL"
+    typer.echo(f"\n{status}  {tradition_dir}  ({errors} error(s), {warnings} warning(s))")
+
+
+def _check_format(fmt: str) -> None:
+    if fmt not in ("text", "json"):
+        typer.echo("Error: --format must be 'text' or 'json'.", err=True)
+        raise typer.Exit(2)
 
 
 @app.command()
@@ -110,11 +120,13 @@ def validate(
     fmt: str = typer.Option("text", "--format", help="Output format: text | json."),
 ) -> None:
     """Validate a single tradition directory."""
-    if fmt not in ("text", "json"):
-        typer.echo("Error: --format must be 'text' or 'json'.", err=True)
-        raise typer.Exit(2)
-    findings = _structure_findings(path)
-    raise typer.Exit(_report(path, findings, fmt, strict))
+    _check_format(fmt)
+    findings, ok = _evaluate(path, strict)
+    if fmt == "json":
+        typer.echo(json.dumps(_result_dict(path, findings, ok), ensure_ascii=False, indent=2))
+    else:
+        _render_text(path, findings, ok)
+    raise typer.Exit(0 if ok else 1)
 
 
 @app.command("validate-all")
@@ -126,9 +138,7 @@ def validate_all(
     fmt: str = typer.Option("text", "--format", help="Output format: text | json."),
 ) -> None:
     """Discover (``*/tradition.yaml``) and validate every tradition."""
-    if fmt not in ("text", "json"):
-        typer.echo("Error: --format must be 'text' or 'json'.", err=True)
-        raise typer.Exit(2)
+    _check_format(fmt)
     if not traditions_dir.is_dir():
         typer.echo(f"Error: not a directory: {traditions_dir}", err=True)
         raise typer.Exit(2)
@@ -138,12 +148,28 @@ def validate_all(
         typer.echo(f"No traditions found under {traditions_dir} (no */tradition.yaml).", err=True)
         raise typer.Exit(2)
 
-    worst = 0
+    results = []
+    all_ok = True
     for manifest in manifests:
         tradition_dir = manifest.parent
-        findings = _structure_findings(tradition_dir)
-        worst = max(worst, _report(tradition_dir, findings, fmt, strict))
-    raise typer.Exit(worst)
+        findings, ok = _evaluate(tradition_dir, strict)
+        all_ok = all_ok and ok
+        results.append((tradition_dir, findings, ok))
+
+    if fmt == "json":
+        # One valid JSON document covering all traditions (not concatenated objects).
+        payload = {
+            "ok": all_ok,
+            "traditions": [_result_dict(td, f, ok) for td, f, ok in results],
+        }
+        typer.echo(json.dumps(payload, ensure_ascii=False, indent=2))
+    else:
+        for td, findings, ok in results:
+            _render_text(td, findings, ok)
+            typer.echo("")
+        typer.echo(f"{'ALL PASS' if all_ok else 'SOME FAILED'}  ({len(results)} tradition(s))")
+
+    raise typer.Exit(0 if all_ok else 1)
 
 
 if __name__ == "__main__":  # pragma: no cover
