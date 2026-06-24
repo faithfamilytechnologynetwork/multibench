@@ -293,3 +293,12 @@ non-empty/no-dup values + applies_to, ProbesIndex), `validator.py` (structure + 
 taxonomy + index⟺folders drift), cli.py rewired to the engine, conftest valid-tradition
 factory. **40 tests pass** (manifest, index/drift, cli smoke). Real stub sunni-islam fails
 gracefully with located errors (ported in Phase 4). Next: `porch done 1` → 2-way consult.
+
+## 2026-06-24 — Phase 2 COMPLETE (2-way) → Phase 3
+
+Phase 2 2-way consult: iter1 codex REQUEST_CHANGES (MEDIUM — extra-folder drift located on
+probes/<id>/ not index.json; tests asserted message substrings not file/path/severity) +
+claude APPROVE. Fixed: drift now located on index.json at `probes` (spec §8.3 contract);
+added `find_finding` helper + tightened drift/id tests to assert severity+file+path. iter2:
+**codex APPROVE + claude APPROVE → phase_2 COMPLETE (clean)**. Now at **phase_3** (probe
+folders, judge seam, pressures.md, prose non-empty, safety).
