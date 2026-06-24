@@ -138,3 +138,24 @@ fetch + caching + rate-limit/token handling, Railway deploy shape.
 
 Plan: re-spec → spec consult (codex+claude) → spec-approval gate (architect brings to user).
 spir-8 (#8) coordination: per architect, do it directly once #8's spec firms up; v1 inert seam stands.
+
+Grounded the GitHub data layer against the REAL repo first: public; recursive git-trees API
+returns the whole tree in ONE call (truncated:false) → clean discovery; raw.githubusercontent
+fetch is off the API rate budget; token→5000/hr (60/hr unauth, fine w/ caching). Wrote the
+new spec: Flask + Jinja2 + gunicorn on Railway; GitHubSource boundary (latest_sha→tree→raw,
+SHA-pinned immutable snapshot); in-memory single-snapshot cache w/ TTL (~60s) → new traditions
+appear w/o redeploy; serve-stale+banner on rate-limit/outage; server-side filtering; SSRF-safe
+(fixed repo, ids validated). Old plan banner-marked SUPERSEDED.
+
+## 2026-06-24 — Re-spec consult: Codex RC (3) fixed, Claude APPROVE → spec-approval gate next
+
+Re-spec consult: **Codex REQUEST_CHANGES** (degradation/drift detail dropped in rewrite;
+framework-decision inconsistency; removals unspecified) + **Claude APPROVE** (4 minor). Both
+verified format+GitHub facts against the live repo. Fixed all: restored a **§5.5 degradation/
+drift table** (startup/GitHub-layer/tradition/scenario/section/snapshot incl. index↔folder
+drift, stub-tradition, incomplete-row filtering); **DECIDED Flask** (closed C1; §5.4/§9 now
+Flask-consistent); specified **removals** (drop from index + 404 on next refresh) and
+**bounded single-snapshot cache** (discard old-SHA data); **source_locus** range inclusive both
+ends, one-sided allowed.
+
+Next: `porch done 7` → expect spec-approval gate (human). Notify architect.

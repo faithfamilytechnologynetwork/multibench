@@ -1,0 +1,104 @@
+I need to review the spec and plan carefully. Let me start by reading the actual files and verifying the claims made in the spec against the real codebase.Now let me read the actual spec file directly to make sure I'm reviewing the real content, not just the prompt's copy:Now I have the full picture. Let me verify one more thing — the tradition_validator's structure, since the spec references it as a sibling pattern:I've verified the spec against the actual codebase. Here's my review.
+
+---
+
+## Specification Review: Spec 7 — multibrowser (live web app, post-pivot)
+
+### Preliminary Note: Architecture Pivot Context
+
+This is a **fundamentally new spec** — not a revision of the prior static-site-generator spec. The builder's rebuttal (iteration 1) addressed concerns about the *old* architecture. The pivot to a live web app reading GitHub at runtime changes the delivery model, data source, hosting, and primary interface. I'm reviewing this spec fresh on its own merits.
+
+The plan on disk is **explicitly superseded** (line 3: "do not implement from it"). That's the correct state — the spec must be approved before the plan is rewritten. No issue there.
+
+---
+
+### 1. Completeness — **Strong**
+
+**Well done:**
+- §2.2's before/after comparison table is excellent for reviewers and builders alike.
+- §2.4 data format is exhaustively documented and **verified against real files** — I confirmed `tradition.yaml`, `scenarios/index.json`, the scenario file layout, and both traditions (sunni-islam: 140 scenarios, eastern-christianity: 100) match exactly.
+- §2.5 GitHub data-layer facts are concrete and operationally useful (rate limits, tree API truncation, raw-content off-budget).
+- §4 out-of-scope is crisp, and §4.1's results-ready seam is well-bounded (three inert seams, no fake data).
+- §7 MUSTs (M1–M10) are specific and testable. The SHOULD/COULD tiers are reasonable.
+- §12 carried-over vs. changed is genuinely helpful.
+
+**Minor gaps:**
+
+- **Deleted traditions.** The spec says new/edited traditions appear within the cache TTL (M7), but doesn't explicitly state what happens when a tradition is *removed* from `main`. It's implicitly handled (the next tree fetch won't contain it → it drops from the index), but a one-line note would remove ambiguity for the builder.
+
+- **Cache eviction.** §5.2 describes an in-memory cache keyed by commit SHA. When the SHA changes, old snapshot data becomes orphaned. On Railway (finite memory), unbounded cache growth across SHA generations is a practical concern, especially under frequent commits. The spec should note that stale-SHA entries are evicted (even just "old snapshots are discarded when a new SHA is confirmed" would suffice). This isn't a plan detail — it's an architectural constraint the builder needs to know about.
+
+- **`source_locus` range filter precision.** M5 says "source_locus (value/range)" and §5.3 shows `locus_min/locus_max` query params. Is the range inclusive on both ends? What about one-sided ranges (only min, only max)? The old plan had "min/max numeric inputs" but the spec could be one sentence more precise. Not blocking — a builder will make the obvious choice (inclusive, one-sided allowed) — but it's a testable acceptance criterion that deserves specification.
+
+### 2. Correctness — **Solid, one minor inconsistency**
+
+- The SHA-pinning + immutable-content-per-SHA caching model is correct and elegant. Reads against `raw.githubusercontent.com/{owner}/{repo}/{sha}/{path}` are immutable and off-budget — verified claim.
+- The `latest_sha()` → TTL → lazy re-fetch model for freshness is sound.
+- Filter semantics (OR-within, AND-across) are stated clearly and consistently across §5.3, §7 M5, and §9.3.
+- The SSRF/traversal mitigation (fixed repo/ref, id-validated-against-discovered-set) is correct.
+
+**Minor inconsistency:** §9 acceptance criterion 7 says "Flask test client" while §6 C1 still lists the framework as an open question ("Flask (rec.) vs FastAPI"). The spec recommends Flask strongly enough that baking it into acceptance criteria is nearly justified, but technically it jumps ahead of the consult's validation. Either close C1 as a baked decision or soften §9.7 to say "the web framework's test client."
+
+### 3. Feasibility — **No blockers**
+
+- Flask/FastAPI + GitHub API + in-memory cache + Railway is a well-trodden, production-proven stack.
+- The corpus size (2 traditions, 240 scenarios) is trivially small — the entire metadata set fits in a few MB of memory.
+- The rate-limit analysis (§2.5) is correct: ~1–2 API calls per TTL window for the SHA check + tree, with all content fetches going through `raw.githubusercontent.com` (off-budget). Even 60/hr unauthenticated is ample.
+- Railway deploy is straightforward for a Python web service.
+
+### 4. Edge Cases & Error Scenarios — **Well-covered**
+
+- §8's resilience model (stale cache + banner → friendly error when cold) is clear.
+- The `truncated: true` tree API fallback is anticipated (N-trunc).
+- Display-first posture is consistent: bad/missing content → inline notice, never crash.
+- `/healthz` independent of GitHub is correct for Railway's health checks.
+- The `ETag`/`If-None-Match` conditional request strategy for polite API usage is good.
+
+**One edge case not addressed:** What if GitHub returns a `truncated: true` tree *today* (e.g., due to a temporary API issue), but the spec says it's currently `false`? The spec handles this via N-trunc as a nice-to-know. Given the corpus is 240 scenarios across ~1500 files, and the tree API truncates at 100k entries, this is correctly low-priority. No action needed.
+
+### 5. Security — **Adequate**
+
+- Fixed repo/ref (never user-derived) → no SSRF.
+- URL path segments validated against the discovered set → no traversal.
+- Markdown sanitized (markdown-it-py + nh3, carried over).
+- Jinja2 autoescape → no template injection.
+- Secrets (GITHUB_TOKEN) via env only.
+- The spec could mention that error pages / banner notices should not leak the token or internal paths, but this is standard practice.
+
+### 6. Testing Strategy — **Appropriate for a spec**
+
+- §9.7 specifies offline tests with `GitHubSource` mocked — correct boundary.
+- Coverage areas listed: tolerant parser, filtering, cache TTL/SHA-invalidation, rate-limit fallback, route handlers.
+- The "freshness demo" (§9.5) and "resilience demo" (§9.6) are acceptance-level demonstrations, not automated tests — appropriate for integration-level concerns.
+
+### 7. Ambiguities — Minor
+
+- **`GET /` "about this benchmark" content.** §5.3 lists the index route's content (per-tradition metadata) but N2 lists an "about this benchmark" panel as nice-to-know. Is the index *just* tradition cards, or does it include introductory text about MultiBench? A builder could interpret either way. Minor — the MUST is the tradition cards; intro text is a COULD.
+
+---
+
+### Summary of Findings
+
+| # | Severity | Issue |
+|---|----------|-------|
+| 1 | Minor | Cache eviction strategy unmentioned — stale SHA data could accumulate in Railway's bounded memory |
+| 2 | Minor | Deleted-tradition behavior implicit but not stated |
+| 3 | Minor | §9.7 assumes Flask while §6 C1 still marks framework as open |
+| 4 | Trivial | `source_locus` range inclusivity/one-sidedness unspecified |
+
+None of these are blocking. A competent builder would make the right call on all four. Items 1–3 could each be fixed with a single sentence.
+
+---
+
+```
+---
+VERDICT: APPROVE
+SUMMARY: High-quality re-spec with sound architecture; four minor clarifications would tighten it but nothing blocks proceeding to human review and plan rewrite.
+CONFIDENCE: HIGH
+---
+KEY_ISSUES:
+- (Minor) Cache eviction for stale SHA snapshots unmentioned — one sentence ("discard old-SHA data on new-SHA confirmation") would close it.
+- (Minor) Deleted-tradition behavior is implicitly correct but not explicitly stated.
+- (Minor) §9.7 references "Flask test client" while §6 C1 still marks the framework choice as open for the consult.
+- (Trivial) source_locus range filter inclusivity/one-sidedness left to builder interpretation.
+```

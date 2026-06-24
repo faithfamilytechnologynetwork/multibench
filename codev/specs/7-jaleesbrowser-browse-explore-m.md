@@ -202,10 +202,12 @@ differ in the web shell.
   for clean per-scenario URLs / deep links and custom prose layout; heavier; diverges from a
   normal deep-linkable web app. **Not recommended.**
 
-**Recommendation: Approach A (Flask).** It honors "keep it relatively simple," gives clean
-deep-linkable routes, and the GitHub-fetch concurrency need is fully met by caching + a small
-thread pool. The 3-way consult is asked to pressure-test A vs B specifically (the real trade-off
-is sync-simplicity vs async-fetch-concurrency).
+**Decision: Approach A — Flask** (confirmed by the consult; neither reviewer advocated FastAPI).
+It honors "keep it relatively simple," gives clean deep-linkable routes, and the GitHub-fetch
+concurrency need is fully met by caching + a small bounded thread pool. **FastAPI+httpx (B)
+remains the documented fallback** if fetch concurrency/latency ever dominates. Acceptance and
+deploy wording (§5.4, §9) are therefore Flask-specific **by decision** (resolves the prior
+§9.7-vs-C1 inconsistency).
 
 ### 5.2 GitHub data layer (fetch + cache + freshness)
 
@@ -225,6 +227,11 @@ mock):
 **Caching & freshness** (the mechanism behind "no redeploy"):
 - An in-memory cache keyed by **commit SHA**. Content fetched per `(sha, path)` is immutable, so
   cached until the SHA changes.
+- **Single live snapshot (bounded memory):** when a new SHA is confirmed, the prior SHA's cached
+  data is **discarded** — the cache holds essentially one snapshot at a time, so memory does not
+  grow across commits on Railway. A consequence: a **removed** tradition/scenario simply isn't in
+  the next tree → it **drops from the index** on refresh and its direct links **404** against the
+  new snapshot (no stale ghosts of deleted content).
 - A short **TTL** (default e.g. 60s, configurable) gates how often `latest_sha()` is re-checked.
   On a request past the TTL, re-check the SHA; if it changed, the new snapshot is used (lazily,
   per accessed tradition) → **new/edited traditions appear within ~TTL, no redeploy**.
@@ -256,16 +263,44 @@ no SSRF.
 
 ### 5.4 Railway deploy shape
 
-A normal web service: start `gunicorn multibrowser.app:app --bind 0.0.0.0:$PORT` (Flask) /
-`uvicorn` (FastAPI); Python deps via `pyproject`/`requirements.txt` (Railway nixpacks
-auto-detects), optionally a `Procfile`/`railway.json`. Config via env: `GITHUB_TOKEN` (optional),
-`MULTIBENCH_REPO` (default `faithfamilytechnologynetwork/multibench`), `MULTIBENCH_REF` (`main`),
-`CACHE_TTL_SECONDS`, `PORT` (Railway-provided). `/healthz` as the health check.
+A normal web service (Flask, per §5.1): start `gunicorn multibrowser.app:app --bind 0.0.0.0:$PORT`.
+Python deps via `pyproject`/`requirements.txt` (Railway nixpacks auto-detects), optionally a
+`Procfile`/`railway.json`. Config via env: `GITHUB_TOKEN` (optional), `MULTIBENCH_REPO` (default
+`faithfamilytechnologynetwork/multibench`), `MULTIBENCH_REF` (`main`), `CACHE_TTL_SECONDS`,
+`PORT` (Railway-provided). `/healthz` as the health check.
+
+### 5.5 Content degradation & drift behavior (display-first — restated for the GitHub-backed app)
+
+This restores the prior spec's degradation contract, adapted to the live/GitHub model (the prior
+review's main clarifications). Failures degrade at the **smallest enclosing unit**; only
+**startup/config** failures fail the process. A *content* file that is missing, non-UTF-8,
+oversized, or malformed is **data to display with an inline notice**, never a crash. GitHub-layer
+failures degrade to stale-cache + banner (§5.2).
+
+| Failure | Class | Behavior |
+|---|---|---|
+| Missing/invalid required env at startup (bad repo/ref) | **Startup** | Fail fast with a clear log; `/healthz` reports unhealthy. |
+| GitHub unreachable / rate-limited (403) / timeout | **GitHub layer** | Serve **stale cache + banner** notice; if no cache, a friendly error page. Never crash; bounded timeouts. |
+| `tradition.yaml` missing / invalid / schema-violating | **Tradition** | Render a **stub tradition page** (top notice); still list scenarios from `index.json`/folders with whatever metadata parses; manifest-derived UI (taxonomy filters) **skipped with a notice**. |
+| `scenarios/index.json` missing / invalid | **Tradition** | Derive the scenario set from the tree's `scenarios/*/` folders instead, with a notice; declared order falls back to id-sorted. |
+| `index.json` ↔ folder **drift** | **Scenario** | Render the **union**, ordered by `index.json` then orphan folders id-sorted; **orphan** (folder ∉ index) and **ghost** (index entry ∉ folders) each get an inline notice. Folder authoritative for content, index for order. |
+| `README.md` / `source.md` / `guide.md` missing / empty / non-UTF-8 | **Tradition** | Render the page; that prose section shows an inline notice. |
+| `turn1.md` / `judge-guidance.md` / `pressures.md` missing / empty / non-UTF-8 / oversized | **Section** | Render the scenario; that section shows an inline notice in place of content. |
+| `pressures.md` missing / extra / duplicate / unrecognized `## ` heading | **Section** | Render the recognized pressures in canonical order; flag missing/extra with a notice. |
+| `scenario.yaml` invalid / unknown axis or value | **Scenario** | Render with whatever parsed; flag the offending field; an unknown tag is shown but marked. |
+| **Removed** tradition/scenario (gone from `main` after refresh) | **Snapshot** | Next refresh omits it → drops from the index; direct links **404** against the new snapshot; old-SHA cache discarded (§5.2). |
+
+**Incomplete rows in filtering** (carried over): a row with missing metadata (ghost / stub) is in
+the list but, having no tags/identity/locus, **cannot satisfy a positive filter** — excluded under
+any active tag/identity/locus filter, present when unfiltered or matched by id search;
+`source_locus`-missing rows sort **last**. Counts and the rendered filtered list both derive from
+the same server-side filter, so they cannot diverge.
 
 ## 6. Open Questions
 
 **Critical:**
-- **C1 — Framework:** Flask (rec.) vs FastAPI. *Spec position: Flask; consult validates.*
+- **C1 — Framework: DECIDED → Flask** (§5.1; confirmed by the consult — neither reviewer
+  advocated FastAPI). FastAPI+httpx documented as the fallback only.
 - **C2 — Fetch strategy:** raw-by-SHA (rec.) vs contents API; lazy per-page vs eager
   whole-tradition warming. *Spec position: raw-by-SHA, lazy-by-page with concurrent metadata fetch.*
 
@@ -296,8 +331,9 @@ auto-detects), optionally a `Procfile`/`railway.json`. Config via env: `GITHUB_T
 - **M4.** Scenario **list** with columns id / locus_label / source_locus / identity_signal /
   per-axis tags.
 - **M5. Filter/slice** the list by taxonomy tag (**OR within axis, AND across axes**),
-  `identity_signal`, and `source_locus` (value/range), plus free-text search; deep-linkable via
-  query string; result counts shown.
+  `identity_signal`, and `source_locus` (a range **inclusive on both ends**; one-sided — only
+  `locus_min` or only `locus_max` — allowed), plus free-text search; deep-linkable via query
+  string; result counts shown.
 - **M6.** Scenario **detail**: turn-1, the six pressures in canonical order, judge-guidance, with
   tags/identity_signal/locus; a malformed scenario renders with an inline notice, not a crash.
 - **M7. Freshness:** a tradition added/edited on `main` appears in the app **without a redeploy**
@@ -368,7 +404,23 @@ for dev; ETag-driven conditional refresh tuning.
 - **Prior consults (Approach A, now invalidated):** the spec went through 2 spec-review rounds
   and the plan through 3; all of that targeted the *static-site* architecture and is superseded
   by this re-spec. Retained in git history; not repeated here.
-- _Pending: first consult on this re-spec._
+
+### Re-spec iteration (Codex: REQUEST_CHANGES · Claude: APPROVE — no blockers)
+
+Both reviewers verified the §2.4 format + §2.5 GitHub facts against the live repo and called the
+architecture sound; they converged on the same clarifications (the rewrite had dropped the prior
+spec's degradation detail). All incorporated:
+
+| # | From | Change |
+|---|---|---|
+| 1 | Codex (substantive) | **Degradation/drift behavior restated** for the GitHub-backed app — new **§5.5 table** (startup / GitHub-layer / tradition / scenario / section / snapshot), incl. index↔folder drift (union, orphan/ghost notices), missing prose, stub-tradition on bad manifest, missing scenario sections, and the incomplete-row filtering rule. |
+| 2 | Codex + Claude | **Framework DECIDED → Flask** (C1 closed; §5.1; §5.4/§9 now consistently Flask). Resolves the §9.7-vs-C1 inconsistency. |
+| 3 | Codex + Claude | **Removals / drift after refresh** specified (§5.2 + §5.5 Snapshot row): a removed tradition/scenario drops from the index and 404s on direct links against the new snapshot. |
+| 4 | Claude | **Cache eviction / bounded memory** (§5.2): single live snapshot — old-SHA data discarded on new-SHA confirmation. |
+| 5 | Claude | **`source_locus` range** inclusivity specified (M5): inclusive both ends; one-sided allowed. |
+
+No blockers; Claude APPROVE, and Codex's REQUEST_CHANGES items are all one-paragraph
+clarifications now folded in.
 
 ## 12. Carried-over vs. changed (quick reference for reviewers)
 
