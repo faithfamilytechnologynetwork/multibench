@@ -2,6 +2,11 @@
 .agent-farm/
 .consult/
 codev/.update-hashes.json
+# porch per-project consult artifacts (rebuttals, context, revision briefs) — intermediate
+# process output, not deliverables (the review distills them; specs/plans/reviews + codev/state/
+# threads are the durable record). status.yaml is porch's own committed state — keep it tracked.
+codev/projects/*/*
+!codev/projects/*/status.yaml
 .builders/
 .architect-role.md
 
