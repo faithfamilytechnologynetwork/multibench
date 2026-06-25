@@ -245,3 +245,54 @@ manifests, Arabic, malformed, drift, pressures normalization); `tsc --noEmit` cl
 clean (no tradition data in bundle). base:'/' set. Committing P1.
 
 Next: P2 GitHub client + TanStack Query data layer (mocked-fetch tests).
+
+## 2026-06-25 — Phases 2 & 3 DONE (45 tests green)
+
+**P2** (data layer): `github.ts` (the one fetch boundary: latestSha/tree[+truncated per-dir
+fallback]/raw[null on 404]; zod-validated; RateLimitError on 403+remaining0 w/ reset; injectable
+fetch; NO token), `queries.ts` (useLatestSha w/ refetchInterval+focus/reconnect; useTree/useRawFile
+staleTime Infinity; derived loaders useTraditions/useTradition[index-missing→folders fallback]/
+useScenario, SHA-keyed, qc.ensureQueryData dedup), `results.ts` (inert loadResults→null seam).
+Tests mock fetch via a `fakeRepo` helper.
+
+**P3** (shell): code-based TanStack Router (createRootRoute/createRoute — **deliberate documented
+deviation from the plan's "file-based"**: avoids the router-plugin codegen/routeTree.gen step,
+keeps routes explicit, fully unit-testable w/ memory history; same lib, same deep links). HeroUI
+v3.2.1 is **provider-less** (no HeroUIProvider; CSS via `@import "@heroui/styles"`). Components:
+Markdown (react-markdown+rehype-sanitize, no raw HTML), Notice/Notices, ErrorBoundary (no blank
+crash), RateLimitBanner (reset time from CORS-exposed headers), Loading, TraditionCard. Routes:
+RootLayout/IndexPage/NotFound + Tradition/Scenario stubs (fleshed P4/P5). main.tsx wires
+ErrorBoundary>QueryClientProvider>RouterProvider.
+
+Verified per phase: `vitest run` (45 pass), `tsc --noEmit` clean, `vite build` clean. Tests are
+fully offline (fetch mocked). Note: real-browser smoke vs live GitHub deferred to P6/verify
+(via run/verify skill). HeroUI v3 API gotchas found: Chip `variant="soft"` (not "flat").
+
+Next: P4 tradition page (manifest header, prose, manifest-driven FilterBar, scenario list +
+filtering.ts + progressive hydration).
+
+## 2026-06-25 — Phases 4, 5, 6 DONE — all 6 implement phases built (70 tests, build green)
+
+**P4** tradition page: `filtering.ts` (pure OR-within/AND-across + identity + locus-range[inclusive,
+one-sided] + free-text + sort[default/id/source_locus, null last]; incomplete-row rules; 16 tests),
+flat repeated-param URL search (`searchParams.ts` + router parse/stringify), manifest-DRIVEN
+FilterBar (handles 2- and 5-axis), progressive hydration (useScenarioMetas via useQueries, skeleton
+rows, "N of total"), prose collapsibles, TaxonomyAxes, unknown-id→404.
+**P5** scenario detail: ScenarioHeader, PressureSection (6 in canonical order, missing→notice),
+judge-guidance collapsible, FramingsPanel (Stated template instantiated w/ adherent_noun),
+ResultsRegion (inert seam — placeholder, no scores in v1), prev/next declared order, unknown-id→404.
+**P6** deploy/docs: Railway `railway.json` (Nixpacks: build `pnpm build`, start `pnpm start`=
+`serve -s dist` w/ SPA fallback — `serve` added as a RUNTIME dep since vite is dev-only & may not be
+at runtime; documented deviation from spec's `vite preview`), `.env.example`, README. base:'/'.
+Removed unused `@tanstack/router-plugin` (code-based routing).
+
+**Real-path verified** (beyond the 70 offline mocked tests): (a) `serve -s dist` + curl deep link
+`/t/sunni-islam/JLS-001` → 200 + index.html (SPA fallback works); (b) a node script replicating the
+exact client-side fetch+parse path against LIVE GitHub → discovers all 5 traditions + their diverse
+axes (the github.ts/parse.ts path is sound end-to-end).
+
+⚠️ **NEXT — porch JS check**: `.codev/config.json` tests-check is still `uv run pytest` (validator).
+multibrowser is vitest. Per architect, I PING them to sort the override before `porch done`. Proposed:
+`tests.command = "uv --project apps/tradition_validator run pytest && pnpm -C apps/multibrowser test"`
+(drop cwd; runs BOTH apps — correct now there are two). Pausing for architect to sort, then porch done
+→ implement consult → PR gate.
