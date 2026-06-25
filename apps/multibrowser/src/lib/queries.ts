@@ -5,7 +5,7 @@
 // does NOT poll) + focus/reconnect. Everything else is keyed by SHA and immutable per SHA
 // (`staleTime: Infinity`), so a new SHA → new keys → automatic refetch on an open page.
 
-import { useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
+import { useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { latestSha, raw, tree, type TreeEntry } from "./github";
 import {
   parseIndex,
@@ -254,6 +254,25 @@ export function useScenarioMeta(sha: string | undefined, tid: string, sid: strin
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadScenarioMeta(qc, sha as string, tid, sid, declaredAxes),
+  });
+}
+
+/** Progressive hydration: one query per scenario's metadata. Results align with `scenarioIds`. */
+export function useScenarioMetas(
+  sha: string | undefined,
+  tid: string,
+  scenarioIds: string[],
+  declaredAxes: string[],
+) {
+  const qc = useQueryClient();
+  return useQueries({
+    queries: scenarioIds.map((sid) => ({
+      queryKey: ["scenarioMeta", REPO, sha, tid, sid],
+      enabled: !!sha,
+      staleTime: Infinity,
+      gcTime: GC_TIME,
+      queryFn: () => loadScenarioMeta(qc, sha as string, tid, sid, declaredAxes),
+    })),
   });
 }
 
