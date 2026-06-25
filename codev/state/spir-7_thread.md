@@ -296,3 +296,23 @@ multibrowser is vitest. Per architect, I PING them to sort the override before `
 `tests.command = "uv --project apps/tradition_validator run pytest && pnpm -C apps/multibrowser test"`
 (drop cwd; runs BOTH apps — correct now there are two). Pausing for architect to sort, then porch done
 → implement consult → PR gate.
+
+## 2026-06-25 — porch test-check = per-builder DISPATCHER; implement per-phase consults
+
+Architect (via codev:architect) ruled porch.checks is GLOBAL with no per-project override → a guarded
+&&-chain would still break Python builders. Swapped to a **dispatcher** `.codev/checks/test.sh`: runs
+the test suite of each top-level app/workflow THIS builder touched (diff vs origin/main), via an
+in-repo registry (tradition_validator→pytest, multibrowser→pnpm test; +1 line per app). Verified:
+my worktree → only vitest; no-app → pass. config.tests.command = `bash .codev/checks/test.sh`.
+
+Implement per-phase consults (codex+claude; 3-iter ceiling each; gemini excluded by config). Real
+improvements landed:
+- **phase_1** (3 iters): tag-VALUE validation vs manifest vocab; flag all missing required manifest
+  fields; flag malformed sub-fields (taxonomy values/maintainers/tag lists/locus_label). converged.
+- **phase_2** (3 iters): bounded 15s fetch timeout (AbortController); refetchOnWindowFocus/Reconnect
+  **"always"**; public useTree/useRawFile hooks + React-Query hook tests. → BOTH APPROVE.
+- **phase_3**: Codex RC on 2 JUSTIFIED deviations, no code change: (a) **HeroUI v3.2.1 is
+  PROVIDER-LESS** (no HeroUIProvider export; only I18nProvider/ToastProvider/useTheme; styling via
+  `@import "@heroui/styles"`; shannon omits it too) — plan's "HeroUIProvider" was v2-era; (b)
+  code-based routing — architect-approved. Rebutted.
+Tests now 78 (green); tsc+build clean throughout. Continuing phases 3-6 → review → PR.
