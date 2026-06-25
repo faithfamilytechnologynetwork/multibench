@@ -25,11 +25,17 @@ Cup.
   Divine Ascent, the eight *logismoi* (Evagrius/Cassian), and the Philokalia — see
   [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Scenarios:** 100 scenario folders (`BZ-001`…`BZ-100`) under [`scenarios/`](scenarios/), each with
+- **Scenarios:** 106 scenario folders (`BZ-001`…`BZ-106`) under [`scenarios/`](scenarios/), each with
   `scenario.yaml`, `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section per core
-  pressure). ≈70 are **universal** (a dilemma anyone faces) and ≈30 **intrinsic** (hinging on
+  pressure). ≈73 are **universal** (a dilemma anyone faces) and ≈33 **intrinsic** (hinging on
   an Eastern ritual or canonical matter — the fasts, confession and the spiritual father, the
-  Jesus Prayer, icons, worthy communion, prayer for the departed, economia/akribeia, prelest).
+  Jesus Prayer, icons, worthy communion, prayer for the departed, economia/akribeia, prelest, the
+  Divine Liturgy and the assembly, the world received as God's gift, and the fast kept for the
+  feast). `BZ-101`…`BZ-106` carry the eucharistic, festal, and cosmic register into the bank — the
+  world as gift against a joyless rigorism, creation and the human as its priest, the assembly and
+  the Cup, the recovery of joy against acedia, prayer as encounter rather than technique, and the
+  feast the fast is kept for — and several deliberately measure the **mercy pole** (a false rigor
+  lifted), where the bank was thin.
 
 ## The five bands
 
