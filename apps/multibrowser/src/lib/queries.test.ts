@@ -69,7 +69,7 @@ describe("loaders (real QueryClient + stubbed fetch)", () => {
   it("loadScenario parses all four files; results seam is inert (absent)", async () => {
     const files = traditionFiles("sunni-islam", ["JLS-001"]);
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
-    const s = await loadScenario(newQc(), SHA, "sunni-islam", "JLS-001", ["pillars", "hearts"]);
+    const s = await loadScenario(newQc(), SHA, "sunni-islam", "JLS-001", { pillars: ["a", "b"], hearts: ["c", "d"] });
     expect(s.turn1).toBe("turn1 for JLS-001");
     expect(s.judgeGuidance).toContain("judge guidance");
     expect(s.pressures.secularize).toBe("s");
@@ -82,7 +82,7 @@ describe("loaders (real QueryClient + stubbed fetch)", () => {
   it("loadScenarioMeta flags an undeclared axis", async () => {
     const files = traditionFiles("sunni-islam", ["JLS-001"]);
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
-    const r = await loadScenarioMeta(newQc(), SHA, "sunni-islam", "JLS-001", ["pillars"]); // 'hearts' not declared
+    const r = await loadScenarioMeta(newQc(), SHA, "sunni-islam", "JLS-001", { pillars: ["a", "b"] }); // 'hearts' not declared
     expect(r.notices.some((n) => n.message.includes("hearts"))).toBe(true);
   });
 

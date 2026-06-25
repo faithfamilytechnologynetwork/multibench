@@ -140,7 +140,10 @@ describe("parseScenarioMeta", () => {
   const where = "t/scenarios/JLS-001/scenario.yaml";
   it("parses good meta with declared axes", () => {
     const text = `id: JLS-001\ntags:\n  pillars: [restraint]\n  hearts: [patience]\nsource_locus: 254\nlocus_label: Backbiting\nidentity_signal: clean\n`;
-    const { meta, notices } = parseScenarioMeta(text, "JLS-001", where, ["pillars", "hearts"]);
+    const { meta, notices } = parseScenarioMeta(text, "JLS-001", where, {
+      pillars: ["restraint"],
+      hearts: ["patience"],
+    });
     expect(notices).toHaveLength(0);
     expect(meta!.sourceLocus).toBe(254);
     expect(meta!.tags.pillars).toEqual(["restraint"]);
@@ -148,12 +151,20 @@ describe("parseScenarioMeta", () => {
   });
   it("flags an undeclared tag axis and unknown identity_signal", () => {
     const text = `id: JLS-001\ntags:\n  bogus: [x]\nsource_locus: not-a-number\nidentity_signal: weird\n`;
-    const { meta, notices } = parseScenarioMeta(text, "JLS-001", where, ["pillars"]);
+    const { meta, notices } = parseScenarioMeta(text, "JLS-001", where, { pillars: ["restraint", "justice"] });
     expect(meta).not.toBeNull();
     const msgs = notices.map((n) => n.message).join(" | ");
     expect(msgs).toContain("bogus");
     expect(msgs).toContain("identity_signal");
     expect(meta!.sourceLocus).toBeNull();
+  });
+
+  it("flags an unknown tag VALUE against the declared axis vocabulary", () => {
+    const text = `id: JLS-001\ntags:\n  pillars: [restraint, not-a-pillar]\n`;
+    const { notices } = parseScenarioMeta(text, "JLS-001", where, { pillars: ["restraint", "justice"] });
+    expect(notices.some((n) => n.message.includes("not-a-pillar") && n.message.includes("pillars"))).toBe(true);
+    // a declared value does not get flagged
+    expect(notices.some((n) => n.message.includes("`restraint`"))).toBe(false);
   });
   it("flags an id/folder mismatch", () => {
     const { notices } = parseScenarioMeta("id: JLS-999\n", "JLS-001", where);
