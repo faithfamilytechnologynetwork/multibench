@@ -1,0 +1,4 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+/* HeroUI theme wiring is added in Phase 3 (app shell). */
