@@ -160,9 +160,9 @@ section must be non-empty; content before the first `## ` heading is ignored.
 against *Riyāḍ al-Ṣāliḥīn*, with 140 scenarios — ported from
 [JaleesBench](https://github.com/iaser-ai/jaleesbench).
 
-[`eastern-christianity/`](eastern-christianity/) (*ByzantineBench*) is a second instantiation:
+[`eastern-christianity/`](eastern-christianity/) (*SynodiaBench*) is a second instantiation:
 the *saving word* judged against the *Apophthegmata Patrum* and the ascetic constellation, with
-100 scenarios. It shows the format carrying a tradition that has **no single-canon source** — each
+106 scenarios. It shows the format carrying a tradition that has **no single-canon source** — each
 scenario's `judge-guidance.md` binds its own anchors — and exercising the taxonomy axes beyond two
 (it declares `passions`, `virtues`, `economia`, and `register`).
 

@@ -25,7 +25,7 @@ directory, not changing the core.** See
 
 - [`traditions/`](traditions/) — pluggable per-tradition modules: **Sunni Islam**
   ([`traditions/sunni-islam/`](traditions/sunni-islam/)) and **Eastern Christianity /
-  *ByzantineBench*** ([`traditions/eastern-christianity/`](traditions/eastern-christianity/)).
+  *SynodiaBench*** ([`traditions/eastern-christianity/`](traditions/eastern-christianity/)).
 - [`apps/`](apps/) — applications and standalone tools (e.g. `jaleesbrowser`,
   and the `tradition_validator`).
 - [`workflows/`](workflows/) — pipelines such as judging and scenario generation.
@@ -37,7 +37,7 @@ The tradition **format** is defined and documented
 ([`apps/tradition_validator/`](apps/tradition_validator/)), and **two traditions** are ported
 into the canonical format and validate clean: **Sunni Islam** (140 scenarios,
 [`traditions/sunni-islam/`](traditions/sunni-islam/)) and **Eastern Christianity /
-*ByzantineBench*** (100 scenarios, [`traditions/eastern-christianity/`](traditions/eastern-christianity/)).
+*SynodiaBench*** (106 scenarios, [`traditions/eastern-christianity/`](traditions/eastern-christianity/)).
 The **harness** (collection, judging, scoring) and a scenario-generation workflow are not yet
 migrated in.
 
