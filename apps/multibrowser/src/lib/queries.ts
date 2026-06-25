@@ -157,7 +157,7 @@ export async function loadScenarioMeta(
   sha: string,
   tid: string,
   sid: string,
-  declaredAxes: string[],
+  declaredAxes: Record<string, readonly string[]>,
 ): Promise<{ meta: ScenarioMeta | null; notices: Notice[] }> {
   const path = sPath(tid, sid, FILE.scenarioMeta);
   const text = await ensureRaw(qc, sha, path);
@@ -172,7 +172,7 @@ export async function loadScenario(
   sha: string,
   tid: string,
   sid: string,
-  declaredAxes: string[],
+  declaredAxes: Record<string, readonly string[]>,
 ): Promise<Scenario> {
   const notices: Notice[] = [];
   const [metaR, turn1R, judgeR, pressuresR] = await Promise.all([
@@ -246,7 +246,7 @@ export function useTradition(sha: string | undefined, id: string) {
   });
 }
 
-export function useScenarioMeta(sha: string | undefined, tid: string, sid: string, declaredAxes: string[]) {
+export function useScenarioMeta(sha: string | undefined, tid: string, sid: string, declaredAxes: Record<string, readonly string[]>) {
   const qc = useQueryClient();
   return useQuery({
     queryKey: ["scenarioMeta", REPO, sha, tid, sid],
@@ -262,7 +262,7 @@ export function useScenarioMetas(
   sha: string | undefined,
   tid: string,
   scenarioIds: string[],
-  declaredAxes: string[],
+  declaredAxes: Record<string, readonly string[]>,
 ) {
   const qc = useQueryClient();
   return useQueries({
@@ -276,7 +276,7 @@ export function useScenarioMetas(
   });
 }
 
-export function useScenario(sha: string | undefined, tid: string, sid: string, declaredAxes: string[]) {
+export function useScenario(sha: string | undefined, tid: string, sid: string, declaredAxes: Record<string, readonly string[]>) {
   const qc = useQueryClient();
   return useQuery({
     queryKey: ["scenario", REPO, sha, tid, sid],

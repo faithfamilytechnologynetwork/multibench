@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useScenarioMetas, useTradition } from "../lib/queries";
 import { filterAndSort, parseSelection, selectionToSearch, type Selection } from "../lib/filtering";
+import { taxonomyValues } from "../lib/model";
 import { asRateLimit } from "../lib/rateLimit";
 import { TraditionHeader } from "../components/TraditionHeader";
 import { TaxonomyAxes } from "../components/TaxonomyAxes";
@@ -28,9 +29,10 @@ export function TraditionPage() {
 
   const taxonomies = tradition?.manifest?.taxonomies ?? {};
   const axisNames = useMemo(() => Object.keys(taxonomies), [taxonomies]);
+  const declaredTax = useMemo(() => taxonomyValues(taxonomies), [taxonomies]);
   const scenarioIds = tradition?.scenarioIds ?? [];
 
-  const metas = useScenarioMetas(sha, traditionId, scenarioIds, axisNames);
+  const metas = useScenarioMetas(sha, traditionId, scenarioIds, declaredTax);
   const selection = useMemo(() => parseSelection(search, axisNames), [search, axisNames]);
 
   const entries: ListRow[] = scenarioIds.map((sid, i) => ({

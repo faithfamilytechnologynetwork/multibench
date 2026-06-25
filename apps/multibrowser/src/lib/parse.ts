@@ -225,7 +225,9 @@ export function parseScenarioMeta(
   text: string,
   folderId: string,
   where: string,
-  declaredAxes?: readonly string[],
+  // axis name -> declared (allowed) values, from the manifest. When provided and non-empty,
+  // both unknown axes AND unknown values are flagged display-first.
+  declaredTaxonomies?: Record<string, readonly string[]>,
 ): { meta: ScenarioMeta | null; notices: Notice[] } {
   const notices: Notice[] = [];
   const { data, notice: yamlErr } = loadYaml(text, where);
@@ -242,13 +244,23 @@ export function parseScenarioMeta(
     );
   }
 
+  const validate = !!declaredTaxonomies && Object.keys(declaredTaxonomies).length > 0;
   const tags: Record<string, string[]> = {};
   if (isRecord(data.tags)) {
     for (const [axis, vals] of Object.entries(data.tags)) {
       const list = Array.isArray(vals) ? vals.filter((x): x is string => typeof x === "string") : [];
       tags[axis] = list;
-      if (declaredAxes && !declaredAxes.includes(axis)) {
-        notices.push(notice("warning", "scenario", where, `Tag axis \`${axis}\` is not declared by the manifest.`));
+      if (validate) {
+        const allowed = declaredTaxonomies![axis];
+        if (!allowed) {
+          notices.push(notice("warning", "scenario", where, `Tag axis \`${axis}\` is not declared by the manifest.`));
+        } else {
+          for (const v of list) {
+            if (!allowed.includes(v)) {
+              notices.push(notice("warning", "scenario", where, `Tag value \`${v}\` is not in the \`${axis}\` vocabulary.`));
+            }
+          }
+        }
       }
     }
   } else if (data.tags !== undefined) {

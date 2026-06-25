@@ -116,3 +116,8 @@ export function notice(severity: Severity, scope: string, where: string, message
 export function emptyPressureMap(pressures: readonly Pressure[]): PressureMap {
   return Object.fromEntries(pressures.map((p) => [p, null])) as PressureMap;
 }
+
+/** Axis name -> declared values, for validating scenario tags against the manifest vocabulary. */
+export function taxonomyValues(taxonomies: Record<string, TaxonomyAxis>): Record<string, string[]> {
+  return Object.fromEntries(Object.entries(taxonomies).map(([k, v]) => [k, v.values]));
+}

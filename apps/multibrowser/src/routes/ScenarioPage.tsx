@@ -1,6 +1,8 @@
+import { useMemo } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLatestSha, useScenario, useTradition } from "../lib/queries";
+import { taxonomyValues } from "../lib/model";
 import { asRateLimit } from "../lib/rateLimit";
 import { ScenarioHeader } from "../components/ScenarioHeader";
 import { PressureSection } from "../components/PressureSection";
@@ -21,9 +23,12 @@ export function ScenarioPage() {
   const sha = shaQ.data;
   const tradQ = useTradition(sha, traditionId);
   const tradition = tradQ.data;
-  const axisNames = tradition?.manifest ? Object.keys(tradition.manifest.taxonomies) : [];
+  const declaredTax = useMemo(
+    () => taxonomyValues(tradition?.manifest?.taxonomies ?? {}),
+    [tradition],
+  );
   const scenarioIds = tradition?.scenarioIds ?? [];
-  const scenQ = useScenario(sha, traditionId, scenarioId, axisNames);
+  const scenQ = useScenario(sha, traditionId, scenarioId, declaredTax);
   const scenario = scenQ.data;
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error) ?? asRateLimit(scenQ.error);
 
