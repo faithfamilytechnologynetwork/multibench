@@ -1,0 +1,79 @@
+import { describe, it, expect, afterEach, vi } from "vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { renderApp } from "../test/renderApp";
+import { fakeFetch, traditionFiles } from "../test/fakeRepo";
+import { REPO } from "../lib/constants";
+import { FilterBar } from "../components/FilterBar";
+import type { TaxonomyAxis } from "../lib/model";
+
+const SHA = "deadbeef";
+
+/** sunni-islam with two scenarios carrying DIFFERENT pillars tags, so filtering is observable. */
+function sunniFiles() {
+  const f = traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]);
+  f["traditions/sunni-islam/scenarios/JLS-001/scenario.yaml"] =
+    "id: JLS-001\ntags: {pillars: [a], hearts: [c]}\nsource_locus: 10\nlocus_label: First\nidentity_signal: clean\n";
+  f["traditions/sunni-islam/scenarios/JLS-002/scenario.yaml"] =
+    "id: JLS-002\ntags: {pillars: [b], hearts: [d]}\nsource_locus: 20\nlocus_label: Second\nidentity_signal: leaky\n";
+  return f;
+}
+
+afterEach(() => vi.unstubAllGlobals());
+
+describe("tradition page", () => {
+  it("renders the header, taxonomy axes, and a scenario row per scenario", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, sunniFiles()));
+    renderApp("/t/sunni-islam");
+    expect(await screen.findByRole("heading", { name: "SUNNI-ISLAM" })).toBeInTheDocument();
+    expect(await screen.findAllByTestId("scenario-row")).toHaveLength(2);
+    // taxonomy axes are rendered from the manifest (pillars + hearts)
+    expect(screen.getByRole("heading", { name: /taxonomies/i })).toBeInTheDocument();
+  });
+
+  it("filters the list by a manifest axis (UI → fewer rows)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, sunniFiles()));
+    renderApp("/t/sunni-islam");
+    expect(await screen.findAllByTestId("scenario-row")).toHaveLength(2);
+    await userEvent.click(screen.getByRole("button", { name: "b", pressed: false }));
+    await waitFor(() => expect(screen.getAllByTestId("scenario-row")).toHaveLength(1));
+  });
+
+  it("is deep-linkable: ?pillars=a loads pre-filtered", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, sunniFiles()));
+    renderApp("/t/sunni-islam?pillars=a");
+    await waitFor(() => expect(screen.getAllByTestId("scenario-row")).toHaveLength(1));
+  });
+
+  it("renders an in-SPA 404 for an unknown tradition id", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, sunniFiles()));
+    renderApp("/t/does-not-exist");
+    expect(await screen.findByText("404")).toBeInTheDocument();
+  });
+});
+
+describe("FilterBar is manifest-driven (handles 5-axis traditions)", () => {
+  it("renders a control group for every declared axis", () => {
+    const axis = (values: string[]): TaxonomyAxis => ({ description: "", appliesTo: "scenario", values });
+    const taxonomies = {
+      middot: axis(["anavah"]),
+      virtues: axis(["emet"]),
+      middle_path: axis(["balance"]),
+      domain: axis(["speech"]),
+      register: axis(["plain"]),
+    };
+    render(
+      <FilterBar
+        taxonomies={taxonomies}
+        selection={{ axes: {}, identity: [], locusMin: null, locusMax: null, q: "", sort: "default" }}
+        onChange={() => {}}
+        total={0}
+        shown={0}
+        loadedAll
+      />,
+    );
+    for (const name of ["middot", "virtues", "middle_path", "domain", "register"]) {
+      expect(screen.getByText(name)).toBeInTheDocument();
+    }
+  });
+});

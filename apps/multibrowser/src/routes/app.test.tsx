@@ -35,7 +35,8 @@ describe("routing", () => {
   it("navigates to a tradition deep link", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
     renderApp("/t/sunni-islam");
-    expect(await screen.findByText(/sunni-islam/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "SUNNI-ISLAM" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Scenarios" })).toBeInTheDocument();
   });
 
   it("renders an in-SPA 404 for an unknown route", async () => {
@@ -49,7 +50,7 @@ describe("routing", () => {
     renderApp("/");
     const card = await screen.findByText("SUNNI-ISLAM");
     await userEvent.click(card);
-    expect(await screen.findByText(/sunni-islam/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Scenarios" })).toBeInTheDocument();
   });
 });
 
