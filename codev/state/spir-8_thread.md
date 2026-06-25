@@ -73,5 +73,15 @@ Drafting `codev/specs/8-workflows-judging-the-judging-.md` now.
   - Added M10–M12, T14–T17.
 - Sittings contract (§5.6) = the collection↔judging seam; report on −1..+1 (§5.8).
 
-Next: commit "[Spec 8] Specification with multi-agent review", then `porch next 8`
-(iter-2 consult or gate).
+Committed `0d0e06f [Spec 8] Specification with multi-agent review`; wrote iter-1 rebuttal
+(`8-specify-iter1-rebuttals.md`); `porch done 8` → re-verify accepted → **spec-approval GATE
+reached**.
+
+### Gate: spec-approval — WAITING FOR HUMAN (2026-06-25)
+- Porch state advanced to gate_pending, but its auto-`git push` failed (non-fast-forward) —
+  expected, because the rebase rewrote history vs the stale remote `builder/spir-8`.
+- Fixed with `git push --force-with-lease origin builder/spir-8` (replaced only my own
+  superseded pre-rebase commits; verified remote 0/0 with local). Porch's future pushes now
+  fast-forward.
+- **STOPPED at spec-approval gate.** Did NOT call `porch approve` (human-only). Architect
+  notified (heads-up + gate-ready). Awaiting `porch approve 8 spec-approval`.
