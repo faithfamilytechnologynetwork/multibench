@@ -16,10 +16,10 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: false
+build_complete: true
 history: []
 started_at: '2026-06-24T06:34:20.093Z'
-updated_at: '2026-06-25T18:13:39.464Z'
+updated_at: '2026-06-25T18:18:20.634Z'
 pr_ready_for_human: false
 force_advanced:
   phase: specify
