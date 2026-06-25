@@ -91,7 +91,7 @@ function parseTaxonomies(
 
 export function parseManifest(
   text: string,
-  where = FILE.manifest,
+  where: string = FILE.manifest,
 ): { manifest: Manifest | null; notices: Notice[] } {
   const notices: Notice[] = [];
   const { data, notice: yamlErr } = loadYaml(text, where);
@@ -154,7 +154,7 @@ export function parseManifest(
 
 export function parseIndex(
   text: string,
-  where = `${FILE.scenariosDir}/${FILE.index}`,
+  where: string = `${FILE.scenariosDir}/${FILE.index}`,
 ): { ids: string[] | null; notices: Notice[] } {
   let data: unknown;
   try {
@@ -181,7 +181,7 @@ export function parseIndex(
 export function resolveScenarioSet(
   indexIds: string[] | null,
   folderIds: string[],
-  where = FILE.scenariosDir,
+  where: string = FILE.scenariosDir,
 ): { ordered: string[]; ghosts: Set<string>; notices: Notice[] } {
   const notices: Notice[] = [];
   const folders = new Set(folderIds);
@@ -277,7 +277,7 @@ export function parseScenarioMeta(
 
 export function parsePressures(
   text: string,
-  where = FILE.pressures,
+  where: string = FILE.pressures,
 ): { pressures: PressureMap; notices: Notice[] } {
   const notices: Notice[] = [];
   const pressures = emptyPressureMap(PRESSURES);
