@@ -13,17 +13,17 @@ plan_phases:
     title: >-
       App shell: providers, TanStack Router, tradition index, shared UI primitives
       (Markdown/Notice/ErrorBoundary/RateLimitBanner/Skeleton)
-    status: in_progress
+    status: complete
   - id: phase_4
     title: 'Tradition page: manifest-driven scenario list + filtering.ts (zod search params) + progressive hydration'
-    status: pending
+    status: in_progress
   - id: phase_5
     title: 'Scenario detail: turn-1, six pressures, judge-guidance, framings + inert results-ready seam'
     status: pending
   - id: phase_6
     title: Railway static deploy config + README + polish; flag the porch JS test-check override
     status: pending
-current_plan_phase: phase_3
+current_plan_phase: phase_4
 gates:
   spec-approval:
     status: approved
@@ -37,8 +37,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -137,7 +137,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-phase_3-iter3-claude.txt
 started_at: '2026-06-24T06:34:20.093Z'
-updated_at: '2026-06-25T20:13:40.423Z'
+updated_at: '2026-06-25T20:13:42.259Z'
 pr_ready_for_human: false
 force_advanced:
   phase: phase_3
