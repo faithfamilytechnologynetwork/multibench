@@ -2,7 +2,18 @@
 // here and are exhaustively unit-tested; the UI is a thin driver. Axis-agnostic: it operates
 // over whatever axes the manifest declares (never hardcoded).
 
+import { z } from "zod";
 import type { ScenarioMeta } from "./model";
+
+/**
+ * Route-boundary search schema (spec/plan: `validateSearch: searchSchema`). Validates the flat
+ * shape — each key maps to a string or string[] — and is **fail-soft**: anything invalid falls
+ * back to an empty record rather than throwing. Per-axis semantic interpretation (which keys are
+ * taxonomy axes vs reserved) is data-dependent and handled in `parseSelection`.
+ */
+export const searchSchema = z
+  .record(z.string(), z.union([z.string(), z.array(z.string())]))
+  .catch({});
 
 export type SortKey = "default" | "id" | "source_locus";
 

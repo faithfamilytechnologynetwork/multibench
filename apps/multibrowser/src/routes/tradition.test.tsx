@@ -31,12 +31,18 @@ describe("tradition page", () => {
     expect(screen.getByRole("heading", { name: /taxonomies/i })).toBeInTheDocument();
   });
 
-  it("filters the list by a manifest axis (UI → fewer rows)", async () => {
+  it("filters the list by a manifest axis: fewer rows, count text, AND URL search params update", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, sunniFiles()));
-    renderApp("/t/sunni-islam");
+    const { router } = renderApp("/t/sunni-islam");
     expect(await screen.findAllByTestId("scenario-row")).toHaveLength(2);
+    await waitFor(() => expect(screen.getByTestId("result-count")).toHaveTextContent("2 of 2"));
+
     await userEvent.click(screen.getByRole("button", { name: "b", pressed: false }));
+
     await waitFor(() => expect(screen.getAllByTestId("scenario-row")).toHaveLength(1));
+    expect(screen.getByTestId("result-count")).toHaveTextContent("1 of 2");
+    // the interaction updated the deep-linkable URL search params
+    expect(router.state.location.searchStr).toContain("pillars=b");
   });
 
   it("is deep-linkable: ?pillars=a loads pre-filtered", async () => {
