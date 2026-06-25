@@ -409,6 +409,20 @@ within a single PR** (per the issue's PR strategy); the PR opens during/after P6
 - **Rebase:** the app doesn't consume local `traditions/` (it fetches GitHub at runtime), so planning
   didn't require a rebase; I'll rebase onto `main` before/at implement and in Verify.
 
+### Implemented deviations from the spec (ARCHITECT-APPROVED, recorded for the PR CMAP)
+- **Railway serve = `serve -s dist -l $PORT`** (not the spec's `vite preview`). `vite` is a
+  *devDependency*, so it may be pruned/absent at runtime; `serve` is a small **runtime** dependency
+  with SPA history fallback — robust for Railway. The spec listed `serve -s dist` as the sanctioned
+  alternative. Verified: `serve -s dist` + a curl'd deep link returns `index.html` (fallback works).
+- **Code-based TanStack Router** (not file-based/router-plugin): avoids the codegen/`routeTree.gen.ts`
+  step, keeps routes explicit, fully unit-testable with a memory history; same library + deep links.
+- **HeroUI v3.2.1 is PROVIDER-LESS** — there is no `HeroUIProvider` export (only
+  `I18nProvider`/`ToastProvider`/`useTheme`); styling comes from `@import "@heroui/styles"`. The
+  plan's "HeroUIProvider" wording was HeroUI-v2-era; the mandated reference `shannon/apps/web` (v3)
+  also mounts no such provider. The wiring is correct for v3.
+All three were explicitly approved by the architect ("Both flagged deviations — code-based routing;
+serve -s dist — are reasonable; I'll review them at the PR integration CMAP").
+
 ## Plan Consultation
 
 **SPA plan consult — Codex: REQUEST_CHANGES · Claude: APPROVE.** Claude APPROVE ("complete spec
