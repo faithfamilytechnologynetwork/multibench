@@ -199,3 +199,23 @@ off-budget raw, browser-bounded concurrency) and DECIDED Railway serve = `vite p
 
 Gate is pending on v2 (porch spec-approval). Notified architect. Awaiting human approval. After
 approval: rewrite the plan for the frontend SPA + set up the JS porch test-check.
+
+## 2026-06-25 — v2 spec APPROVED → SPA plan written (6 phases)
+
+Spec-approval APPROVED (architect: SPA frontend spec, shannon stack). Heads-up: **main now has 5
+traditions** (sunni-islam 140, eastern-christianity 106, judaism 40, buddhism 40, taoism 40), all
+validate-all --strict clean. Queried their axes via gh api (no rebase — SPA reads GitHub at
+runtime, local data unused by the app): **diverse axes 2–5 per tradition** (pillars/hearts;
+passions/virtues/economia/register; middot/virtues/middle_path/domain/register;
+defilements/cultivations/path_factor/middle_way/register; departures/te/pivot/register) — strong
+test of no-hardcoded-axes. Confirmed api.github.com sends ACAO:* and CORS-exposes
+X-RateLimit-Remaining/Reset (banner can show reset time); unauth limit 60.
+
+Plan = 6 linear phases: (1) scaffold + constants + types + tolerant parsers (offline core);
+(2) GitHub client + TanStack Query data layer (mocked-fetch tests); (3) shell + router + index +
+UI primitives; (4) tradition page + filtering.ts (zod search params) + progressive hydration;
+(5) scenario detail + inert results seam; (6) Railway deploy + README + porch-JS-check flag.
+Plan decisions: pnpm, file-based TanStack Router, js-yaml, react-markdown+rehype-sanitize,
+refetchInterval ~5min (NAT-60/hr-aware), vite preview deploy, vitest+testing-library offline.
+
+Next: porch done → plan consult (codex+claude) → plan-approval gate. Rebase onto main at implement.
