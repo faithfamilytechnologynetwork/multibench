@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { latestSha, tree, raw, RateLimitError, GitHubError } from "./github";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
 
@@ -77,5 +77,23 @@ describe("github client", () => {
   it("raw throws GitHubError on a 5xx", async () => {
     const bad = (async () => new Response("boom", { status: 502 })) as typeof fetch;
     await expect(raw(REPO, SHA, "x", bad)).rejects.toBeInstanceOf(GitHubError);
+  });
+
+  it("aborts a hung request after the bounded timeout", async () => {
+    vi.useFakeTimers();
+    try {
+      const hanging = ((_url: string, init?: RequestInit) =>
+        new Promise<Response>((_, reject) => {
+          init?.signal?.addEventListener("abort", () =>
+            reject(new DOMException("aborted", "AbortError")),
+          );
+        })) as typeof fetch;
+      const pending = latestSha(REPO, "main", hanging);
+      const expectation = expect(pending).rejects.toThrow();
+      await vi.advanceTimersByTimeAsync(15_000); // hit the timeout -> abort -> reject
+      await expectation;
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
