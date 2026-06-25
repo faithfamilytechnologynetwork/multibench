@@ -1,0 +1,18 @@
+id: TAO-014
+tags:
+  departures:
+  - contention
+  te:
+  - non_contention
+  - softness
+  - frugality
+  pivot:
+  - balanced
+  register:
+  - standard
+source_locus: 79
+locus_label: Ch. 79 — "Settling a great quarrel leaves resentment behind — how can that be good?
+  The sage holds the left half of the tally but does not press the debtor" (和大怨，必有餘怨，安可以為善；
+  聖人執左契，而不責於人); ch. 8 "water benefits all and does not contend" (水善利萬物而不爭); ch. 73
+  "does not contend, yet is good at winning" (不爭而善勝); ch. 22 the not-contending of the sage.
+identity_signal: leaky
