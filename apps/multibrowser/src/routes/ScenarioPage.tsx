@@ -3,7 +3,7 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLatestSha, useScenario, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
-import { asRateLimit } from "../lib/rateLimit";
+import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { ScenarioHeader } from "../components/ScenarioHeader";
 import { PressureSection } from "../components/PressureSection";
 import { FramingsPanel } from "../components/FramingsPanel";
@@ -32,6 +32,21 @@ export function ScenarioPage() {
   const scenario = scenQ.data;
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error) ?? asRateLimit(scenQ.error);
 
+  if (!tradition && rl) {
+    return (
+      <div className="flex flex-col gap-4">
+        <RateLimitBanner error={rl} />
+        <Notice
+          notice={{
+            severity: "error",
+            scope: "github",
+            where: "GitHub",
+            message: `Couldn't load this scenario — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`,
+          }}
+        />
+      </div>
+    );
+  }
   if (tradQ.isLoading && !tradition) return <CenteredSpinner label="Loading…" />;
   if (tradition === null) return <NotFound what={`Tradition “${traditionId}”`} />;
   if (tradition && !scenarioIds.includes(scenarioId)) {

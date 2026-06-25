@@ -3,7 +3,7 @@ import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useScenarioMetas, useTradition } from "../lib/queries";
 import { filterAndSort, parseSelection, selectionToSearch, type Selection } from "../lib/filtering";
 import { taxonomyValues } from "../lib/model";
-import { asRateLimit } from "../lib/rateLimit";
+import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { TraditionHeader } from "../components/TraditionHeader";
 import { TaxonomyAxes } from "../components/TaxonomyAxes";
 import { FilterBar } from "../components/FilterBar";
@@ -46,6 +46,21 @@ export function TraditionPage() {
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error);
   const onChange = (next: Selection) => navigate({ search: selectionToSearch(next) });
 
+  if (!tradition && rl) {
+    return (
+      <div className="flex flex-col gap-4">
+        <RateLimitBanner error={rl} />
+        <Notice
+          notice={{
+            severity: "error",
+            scope: "github",
+            where: "GitHub",
+            message: `Couldn't load this tradition — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`,
+          }}
+        />
+      </div>
+    );
+  }
   if (tradQ.isLoading && !tradition) {
     return <CenteredSpinner label="Loading tradition…" />;
   }

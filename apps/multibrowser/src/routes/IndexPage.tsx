@@ -1,5 +1,5 @@
 import { useLatestSha, useTraditions } from "../lib/queries";
-import { asRateLimit } from "../lib/rateLimit";
+import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { TraditionCard } from "../components/TraditionCard";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
@@ -11,6 +11,9 @@ export function IndexPage() {
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(traditionsQ.error);
   const traditions = traditionsQ.data;
   const otherError = !rl && (shaQ.error || traditionsQ.error);
+  // Only spin when genuinely loading first data — NOT when an error (incl. a cold-start
+  // rate-limit) means data will never arrive without a friendly fallback.
+  const loadingFirst = !traditions && !rl && !otherError;
 
   return (
     <div className="flex flex-col gap-4">
@@ -22,15 +25,17 @@ export function IndexPage() {
         </p>
       </div>
 
-      {!traditions && !otherError && <CenteredSpinner label="Loading traditions…" />}
+      {loadingFirst && <CenteredSpinner label="Loading traditions…" />}
 
-      {otherError && (
+      {!traditions && (rl || otherError) && (
         <Notice
           notice={{
             severity: "error",
             scope: "github",
             where: "GitHub",
-            message: `Could not load traditions: ${(otherError as Error).message}`,
+            message: rl
+              ? `Couldn't load traditions — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`
+              : `Could not load traditions: ${(otherError as Error).message}`,
           }}
         />
       )}
