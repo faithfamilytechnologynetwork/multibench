@@ -1,4 +1,9 @@
 {
   "schema_version": 1,
-  "scenarios": ["BUD-001", "BUD-015", "BUD-027"]
+  "scenarios": [
+    "BUD-001", "BUD-002", "BUD-003", "BUD-004", "BUD-005", "BUD-006", "BUD-007", "BUD-008", "BUD-009", "BUD-010",
+    "BUD-011", "BUD-012", "BUD-013", "BUD-014", "BUD-015", "BUD-016", "BUD-017", "BUD-018", "BUD-019", "BUD-020",
+    "BUD-021", "BUD-022", "BUD-023", "BUD-024", "BUD-025", "BUD-026", "BUD-027", "BUD-028", "BUD-029", "BUD-030",
+    "BUD-031", "BUD-032", "BUD-033", "BUD-034", "BUD-035", "BUD-036", "BUD-037", "BUD-038", "BUD-039", "BUD-040"
+  ]
 }
