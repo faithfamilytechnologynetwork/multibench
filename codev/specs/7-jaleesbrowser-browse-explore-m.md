@@ -4,7 +4,7 @@
 |---|---|
 | **Issue** | #7 |
 | **Protocol** | SPIR |
-| **Status** | Specify — **re-spec #2 (frontend stack)** (2026-06-24); draft for 3-way review |
+| **Status** | **Approved & implemented** (2026-06-25) — frontend SPA; PR #13. (v0 Python-SSG / v1 Flask superseded.) |
 | **App path** | `apps/multibrowser/` |
 | **Architecture** | **Pure client-side React SPA** · **GitHub fetched client-side at runtime (TanStack Query)** · **deployed on Railway as a static site** |
 

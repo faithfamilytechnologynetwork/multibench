@@ -2,7 +2,7 @@
 
 ## Metadata
 - **ID**: plan-2026-06-25-multibrowser-spa
-- **Status**: draft
+- **Status**: implemented & reviewed (PR #13, 2026-06-25)
 - **Specification**: [codev/specs/7-jaleesbrowser-browse-explore-m.md](../specs/7-jaleesbrowser-browse-explore-m.md) (v2, frontend SPA)
 - **Created**: 2026-06-25
 - **Supersedes**: the Approach-A (Python static-site) plan and the implied Flask plan — both rejected.
