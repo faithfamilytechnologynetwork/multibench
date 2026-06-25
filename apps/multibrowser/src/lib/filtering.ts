@@ -3,6 +3,7 @@
 // over whatever axes the manifest declares (never hardcoded).
 
 import { z } from "zod";
+import { IDENTITY_SIGNALS } from "./constants";
 import type { ScenarioMeta } from "./model";
 
 /**
@@ -57,17 +58,28 @@ function toStr(v: SearchValue): string {
   return s ?? "";
 }
 
-/** Read a flat URL-search record into a normalized Selection, given the tradition's axes. */
-export function parseSelection(search: SearchRecord, axisNames: string[]): Selection {
+/**
+ * Read a flat URL-search record into a normalized Selection, given the tradition's declared
+ * axis vocabularies. **Fail-soft (spec §5.3):** values not in an axis's declared vocabulary,
+ * and identity values not in the canonical set, are DROPPED (not used to filter) so a bad deep
+ * link like `?pillars=bogus` degrades to "no filter" rather than zero rows.
+ */
+export function parseSelection(
+  search: SearchRecord,
+  declaredTaxonomies: Record<string, readonly string[]>,
+): Selection {
   const axes: Record<string, string[]> = {};
-  for (const name of axisNames) {
-    const vals = toArray(search[name]);
+  for (const [name, allowed] of Object.entries(declaredTaxonomies)) {
+    const vals = toArray(search[name]).filter((v) => allowed.includes(v));
     if (vals.length) axes[name] = vals;
   }
+  const identity = toArray(search["identity_signal"]).filter((v) =>
+    (IDENTITY_SIGNALS as readonly string[]).includes(v),
+  );
   const sortRaw = toStr(search["sort"]);
   return {
     axes,
-    identity: toArray(search["identity_signal"]),
+    identity,
     locusMin: toNum(search["locusMin"]),
     locusMax: toNum(search["locusMax"]),
     q: toStr(search["q"]),

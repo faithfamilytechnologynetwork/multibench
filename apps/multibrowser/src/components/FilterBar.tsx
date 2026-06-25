@@ -38,10 +38,11 @@ export interface FilterBarProps {
   onChange: (next: Selection) => void;
   total: number;
   shown: number;
+  loaded: number;
   loadedAll: boolean;
 }
 
-export function FilterBar({ taxonomies, selection, onChange, total, shown, loadedAll }: FilterBarProps) {
+export function FilterBar({ taxonomies, selection, onChange, total, shown, loaded, loadedAll }: FilterBarProps) {
   const set = (patch: Partial<Selection>) => onChange({ ...selection, ...patch });
 
   const toggleAxis = (axis: string, v: string) => {
@@ -105,7 +106,11 @@ export function FilterBar({ taxonomies, selection, onChange, total, shown, loade
 
         <span className="ml-auto text-sm text-default-500" data-testid="result-count">
           {shown} of {total}
-          {!loadedAll && <span className="ml-1 text-default-400">(loading…)</span>}
+          {!loadedAll && (
+            <span className="ml-1 text-default-400" data-testid="loaded-count">
+              (loaded {loaded}/{total}…)
+            </span>
+          )}
         </span>
         {isActive(selection) && (
           <button

@@ -28,12 +28,11 @@ export function TraditionPage() {
   const tradition = tradQ.data;
 
   const taxonomies = tradition?.manifest?.taxonomies ?? {};
-  const axisNames = useMemo(() => Object.keys(taxonomies), [taxonomies]);
   const declaredTax = useMemo(() => taxonomyValues(taxonomies), [taxonomies]);
   const scenarioIds = tradition?.scenarioIds ?? [];
 
   const metas = useScenarioMetas(sha, traditionId, scenarioIds, declaredTax);
-  const selection = useMemo(() => parseSelection(search, axisNames), [search, axisNames]);
+  const selection = useMemo(() => parseSelection(search, declaredTax), [search, declaredTax]);
 
   const entries: ListRow[] = scenarioIds.map((sid, i) => ({
     id: sid,
@@ -41,7 +40,8 @@ export function TraditionPage() {
     loading: metas[i]?.isPending ?? !sha,
   }));
   const visible = filterAndSort(entries, selection);
-  const loadedAll = entries.length > 0 && entries.every((e) => !e.loading);
+  const loaded = entries.filter((e) => !e.loading).length;
+  const loadedAll = entries.length > 0 && loaded === entries.length;
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error);
   const onChange = (next: Selection) => navigate({ search: selectionToSearch(next) });
@@ -119,6 +119,7 @@ export function TraditionPage() {
           onChange={onChange}
           total={scenarioIds.length}
           shown={visible.length}
+          loaded={loaded}
           loadedAll={loadedAll}
         />
         <ScenarioList traditionId={traditionId} rows={visible} />
