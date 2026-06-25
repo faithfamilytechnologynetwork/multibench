@@ -24,6 +24,8 @@ describe("scenario detail", () => {
 
     // Framings: Stated template instantiated with the tradition's adherent_noun ("Adherent").
     expect(screen.getByText(/practising Adherent/)).toBeInTheDocument();
+    // Guided framing renders the tradition's actual guide.md content.
+    expect(screen.getByText(/guide of sunni-islam/)).toBeInTheDocument();
 
     // Inert results seam: present but empty (no scores/bands/verdicts).
     const region = screen.getByTestId("results-region");
