@@ -105,7 +105,7 @@ describe("URL search <-> selection round-trip", () => {
   it("parseSelection separates axes from reserved keys", () => {
     const s = parseSelection(
       { pillars: ["restraint", "justice"], identity_signal: "clean", locusMin: "10", q: "x", sort: "id", unknownAxis: "z" },
-      ["pillars", "hearts"],
+      { pillars: ["restraint", "justice"], hearts: ["patience"] },
     );
     expect(s.axes).toEqual({ pillars: ["restraint", "justice"] }); // unknownAxis ignored (not declared)
     expect(s.identity).toEqual(["clean"]);
@@ -117,7 +117,22 @@ describe("URL search <-> selection round-trip", () => {
     const original = sel({ axes: { pillars: ["a", "b"] }, identity: ["leaky"], locusMax: 50, q: "hi", sort: "source_locus" });
     const search = selectionToSearch(original);
     expect(search).toEqual({ pillars: ["a", "b"], identity_signal: ["leaky"], locusMax: "50", q: "hi", sort: "source_locus" });
-    expect(parseSelection(search, ["pillars"])).toEqual(original);
+    expect(parseSelection(search, { pillars: ["a", "b"] })).toEqual(original);
+  });
+
+  it("drops unknown axis values and identity values fail-soft (spec §5.3)", () => {
+    const s = parseSelection(
+      { pillars: ["restraint", "bogus"], identity_signal: ["clean", "nope"], unknownAxis: "x" },
+      { pillars: ["restraint", "justice"] },
+    );
+    expect(s.axes.pillars).toEqual(["restraint"]); // 'bogus' dropped
+    expect(s.identity).toEqual(["clean"]); // 'nope' dropped
+    expect(Object.keys(s.axes)).toEqual(["pillars"]); // unknownAxis not in the declared map -> ignored
+  });
+
+  it("drops an axis filter whose values are all unknown (no zero-row trap)", () => {
+    const s = parseSelection({ pillars: ["bogus"] }, { pillars: ["restraint"] });
+    expect(s.axes.pillars).toBeUndefined();
   });
   it("isActive reflects whether any filter is set", () => {
     expect(isActive(sel())).toBe(false);

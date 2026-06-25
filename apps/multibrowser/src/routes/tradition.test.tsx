@@ -75,6 +75,7 @@ describe("FilterBar is manifest-driven (handles 5-axis traditions)", () => {
         onChange={() => {}}
         total={0}
         shown={0}
+        loaded={0}
         loadedAll
       />,
     );
