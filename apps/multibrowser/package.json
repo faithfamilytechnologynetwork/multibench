@@ -7,7 +7,8 @@
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
-    "serve": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+    "preview": "vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+    "start": "serve -s dist -l ${PORT:-4173}",
     "test": "vitest run",
     "test:watch": "vitest",
     "check-types": "tsc --noEmit"
@@ -23,6 +24,7 @@
     "react-dom": "^19.2.0",
     "react-markdown": "^10.1.0",
     "rehype-sanitize": "^6.0.0",
+    "serve": "^14.2.4",
     "tailwind-merge": "^3.4.0",
     "zod": "^3.24.4",
     "zustand": "^5.0.8"
@@ -30,7 +32,6 @@
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.0.15",
-    "@tanstack/router-plugin": "^1.141.1",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.5.2",
