@@ -73,12 +73,25 @@ describe("parseManifest", () => {
     ]);
   });
 
-  it("flags missing required fields without throwing", () => {
+  it("flags ALL missing required fields without throwing", () => {
     const { manifest, notices } = parseManifest("id: x\ntaxonomies: {}\n");
     expect(manifest).not.toBeNull();
     const msgs = notices.map((n) => n.message).join(" | ");
     expect(msgs).toContain("display_name");
     expect(msgs).toContain("adherent_noun");
+    expect(msgs).toContain("construct");
+    expect(msgs).toContain("canonical_source"); // missing/malformed
+    expect(msgs).toContain("maintainer");
+    expect(msgs).toContain("scenario_id_pattern");
+  });
+
+  it("flags individually-missing canonical_source sub-fields", () => {
+    const text = "id: x\ndisplay_name: X\nconstruct: c\nadherent_noun: A\nmaintainers: [{name: m}]\nscenario_id_pattern: '^.*$'\ncanonical_source: {title: T}\ntaxonomies: {a: {description: d, applies_to: scenario, values: [v]}}\n";
+    const { notices } = parseManifest(text);
+    const msgs = notices.map((n) => n.message).join(" | ");
+    expect(msgs).toContain("canonical_source.author");
+    expect(msgs).toContain("canonical_source.locus_unit");
+    expect(msgs).not.toContain("canonical_source.title");
   });
 
   it("flags unknown keys but still parses", () => {

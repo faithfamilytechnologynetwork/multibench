@@ -145,6 +145,27 @@ export function parseManifest(
     scenarioIdPattern: asString(data.scenario_id_pattern),
     schemaVersion: typeof data.schema_version === "number" ? data.schema_version : null,
   };
+
+  // Surface the remaining spec-defined required fields display-first (flag, don't silently drop).
+  if (manifest.construct === "") {
+    notices.push(notice("error", "tradition", where, "Manifest missing required `construct`."));
+  }
+  if (!isRecord(data.canonical_source)) {
+    notices.push(notice("error", "tradition", where, "Manifest missing/malformed `canonical_source`."));
+  } else {
+    for (const k of ["title", "author", "locus_unit"] as const) {
+      if (asString(cs[k]) === null) {
+        notices.push(notice("error", "tradition", where, `Manifest missing \`canonical_source.${k}\`.`));
+      }
+    }
+  }
+  if (manifest.maintainers.length === 0) {
+    notices.push(notice("error", "tradition", where, "Manifest needs at least one maintainer."));
+  }
+  if (manifest.scenarioIdPattern === null) {
+    notices.push(notice("error", "tradition", where, "Manifest missing required `scenario_id_pattern`."));
+  }
+
   return { manifest, notices };
 }
 
