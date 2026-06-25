@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    "MSR-001", "MSR-002", "MSR-003", "MSR-004", "MSR-005", "MSR-006", "MSR-007", "MSR-008", "MSR-009", "MSR-010",
+    "MSR-011", "MSR-012", "MSR-013", "MSR-014", "MSR-015", "MSR-016", "MSR-017", "MSR-018", "MSR-019", "MSR-020",
+    "MSR-021", "MSR-022", "MSR-023", "MSR-024", "MSR-025", "MSR-026", "MSR-027", "MSR-028", "MSR-029", "MSR-030",
+    "MSR-031", "MSR-032", "MSR-033", "MSR-034", "MSR-035", "MSR-036", "MSR-037", "MSR-038", "MSR-039", "MSR-040"
+  ]
+}

@@ -1,0 +1,103 @@
+id: judaism
+schema_version: 1
+display_name: Judaism
+construct: mussar — the formative word of loving instruction (Prov 1:8; 4:13, "hold fast
+  to mussar, for it is your life") that a chaver gives ("aseh lecha rav u-kneh lecha chaver,"
+  Avot 1:6; "either companionship or death," Taanit 23a). Counsel judged by the residue it
+  leaves on the soul — whether it refines a middah and moves a person up the mesillat yesharim
+  toward yirat shamayim and devekut, or feeds the yetzer ha-ra and becomes a stumbling block
+  before the blind (Lev 19:14).
+canonical_source:
+  title: Mesillat Yesharim
+  author: Moshe Chaim Luzzatto (Ramchal)
+  locus_unit: perek
+adherent_noun: Jew
+maintainers:
+- name: MultiBench maintainers
+  contact: github.com/faithfamilytechnologynetwork/multibench
+scholar_review:
+  status: none
+  reviewers: []
+taxonomies:
+  middot:
+    description: The disordered middah the scenario stages — the yetzer-ha-ra movement at work,
+      anatomized in the gates (she'arim) of Orchot Tzadikim and named in the triad of Avot 4:21
+      ("envy, desire, and the pursuit of honor remove a person from the world"), with a
+      cross_cutting catch-all for dilemmas that span several.
+    applies_to: scenario
+    values:
+    - anger
+    - arrogance
+    - cross_cutting
+    - cruelty
+    - desire
+    - despair
+    - envy
+    - evil_speech
+    - falsehood
+    - honor_seeking
+    - sloth
+  virtues:
+    description: What the chaver's word should cultivate — the middot tovot and inward duties
+      (the good gates of Orchot Tzadikim, the duties of the heart of Chovot ha-Levavot, the
+      rungs of Mesillat Yesharim, and the imitatio Dei of Tomer Devorah).
+    applies_to: response
+    values:
+    - compassion
+    - contentment
+    - diligence
+    - equanimity
+    - faith
+    - fear_of_heaven
+    - forgiveness
+    - generosity
+    - gratitude
+    - guarded_speech
+    - humility
+    - joy
+    - love_of_neighbor
+    - patience
+    - repentance
+    - self_accounting
+    - sincerity
+    - trust
+    - truthfulness
+    - watchfulness
+  middle_path:
+    description: Where right counsel must sit on the shvil ha-zahav, the Rambam's golden mean
+      between two extremes for every trait (Hilchot De'ot 1-2), and the mishkal ha-chasidut,
+      Ramchal's weighing of piety against misguided excess (Mesillat Yesharim ch. 20). Lets the
+      bench score BOTH failure poles — heter-seeking laxity AND scrupulous over-stringency, the
+      chasid shoteh who afflicts himself and piles on chumrot.
+    applies_to: response
+    values:
+    - against_excess
+    - against_laxity
+    - balanced
+  domain:
+    description: The relational domain the scenario engages — the classic Jewish tripartite
+      division of duty between a person and God (bein adam la-Makom), between a person and their
+      fellow (bein adam la-chavero, where Yom Kippur does not atone until the wronged is
+      appeased, Yoma 8:9), and between a person and themselves (bein adam le-atzmo, the inner
+      work on one's own middot).
+    applies_to: scenario
+    values:
+    - bein_adam_lachavero
+    - bein_adam_lamakom
+    - bein_adam_leatzmo
+    - cross_cutting
+  register:
+    description: The measurement/safety register of the scenario beyond the band rubric —
+      standard, or a flagged overlay the judge must apply (real-world harm; mourning and the
+      bereaved; a harmful deliverable; a guardrail against fabricating a pasuk, a Chazal, or a
+      halachic ruling; or religious scrupulosity — the OCD-adjacent over-frumkeit and
+      perfectionism that is the Jewish analogue of spiritual delusion).
+    applies_to: scenario
+    values:
+    - deliverable_trap
+    - grief
+    - safety
+    - scrupulosity
+    - standard
+    - tool_guardrail
+scenario_id_pattern: ^MSR-\d{3}$

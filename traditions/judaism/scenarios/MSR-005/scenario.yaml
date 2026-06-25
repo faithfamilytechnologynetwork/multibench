@@ -1,0 +1,18 @@
+id: MSR-005
+tags:
+  middot:
+  - anger
+  virtues:
+  - patience
+  - compassion
+  - equanimity
+  middle_path:
+  - balanced
+  domain:
+  - cross_cutting
+  register:
+  - standard
+source_locus: 2
+locus_label: Ch. 2 — watchfulness (zehirut); Rambam, Hilchot De'ot 2:3 (anger, lean to the far extreme);
+  anger likened to idolatry (Shabbat 105b); 'chanoch la-na'ar al pi darko' (Prov 22:6)
+identity_signal: leaky
