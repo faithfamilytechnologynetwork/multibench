@@ -52,3 +52,26 @@ Issue #8. SPIR strict mode. Builder worktree `.builders/spir-8`, branch `builder
   universal band rubric + boundary rules. Generalizes JaleesBench's hardcoded GUIDE.
 
 Drafting `codev/specs/8-workflows-judging-the-judging-.md` now.
+
+### Spec iter-1 review + branch rebase (2026-06-25)
+- **2-way consult** (codex+claude, porch-driven): **Codex REQUEST_CHANGES (HIGH)**,
+  **Claude APPROVE (HIGH)**. Outputs in `codev/projects/8-.../8-specify-iter1-{codex,claude}.txt`.
+- **Big discovery:** Claude verified #6 is **MERGED** (`31620e2`). My worktree was cut pre-#6
+  and was **16 commits behind origin/main** (old vocab `probes/scenario.md/probe.yaml`).
+  → **Rebased `builder/spir-8` onto `origin/main`** (clean, no conflicts; my 3 commits replayed).
+  Worktree now post-rename + has **5 traditions** (buddhism, eastern-christianity, judaism,
+  sunni-islam, taoism). **Heads-up sent to architect.**
+- **Spec revised** to address all feedback:
+  - §5.9 NEW — cell reducer = **mean of judges' normalized scores**; re-judge **overrides**
+    (1 pass); skips/failures/missing = null/excluded (never 0) + coverage reporting. (Codex)
+  - §5.5 — untrusted-transcript / prompt-injection handling. (Codex)
+  - cross-ref typos fixed (§6.6→6.2, §6.3→6.1). (both)
+  - #6 status → merged; rebase noted (§1/3.1/3.3/6.2/8). (Claude)
+  - M8 split into mocked unit check + opt-in `--live` anchoring test. (Claude)
+  - structured-output wording softened to provider-specific schema-constrained output. (Claude)
+  - M7 + T7 now use a **real** second tradition (taoism) instead of a synthetic fixture.
+  - Added M10–M12, T14–T17.
+- Sittings contract (§5.6) = the collection↔judging seam; report on −1..+1 (§5.8).
+
+Next: commit "[Spec 8] Specification with multi-agent review", then `porch next 8`
+(iter-2 consult or gate).
