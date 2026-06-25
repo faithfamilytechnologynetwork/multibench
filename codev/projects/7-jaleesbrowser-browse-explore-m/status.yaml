@@ -11,48 +11,16 @@ gates:
     approved_at: '2026-06-25T18:13:24.027Z'
   plan-approval:
     status: pending
+    requested_at: '2026-06-25T18:26:47.361Z'
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
-history:
-  - iteration: 1
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-plan-iter1-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-plan-iter1-claude.txt
-  - iteration: 2
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-plan-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-plan-iter2-claude.txt
-  - iteration: 3
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-plan-iter3-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-plan-iter3-claude.txt
+iteration: 1
+build_complete: false
+history: []
 started_at: '2026-06-24T06:34:20.093Z'
-updated_at: '2026-06-25T18:26:45.392Z'
+updated_at: '2026-06-25T18:26:47.362Z'
 pr_ready_for_human: false
 force_advanced:
   phase: plan
