@@ -74,11 +74,17 @@ function parseTaxonomies(
       out[axis] = { description: null, appliesTo: null, values: [] };
       continue;
     }
-    const values = Array.isArray(def.values)
-      ? def.values.filter((x): x is string => typeof x === "string")
-      : [];
-    if (values.length === 0) {
-      notices.push(notice("warning", "tradition", where, `Taxonomy axis \`${axis}\` has no values.`));
+    let values: string[] = [];
+    if (!Array.isArray(def.values)) {
+      notices.push(notice("error", "tradition", where, `Taxonomy axis \`${axis}\` \`values\` is not a list.`));
+    } else {
+      values = def.values.filter((x): x is string => typeof x === "string");
+      if (values.length !== def.values.length) {
+        notices.push(notice("warning", "tradition", where, `Taxonomy axis \`${axis}\` has non-string values (ignored).`));
+      }
+      if (values.length === 0) {
+        notices.push(notice("warning", "tradition", where, `Taxonomy axis \`${axis}\` has no values.`));
+      }
     }
     out[axis] = {
       description: asString(def.description),
@@ -117,11 +123,23 @@ export function parseManifest(
 
   const cs = isRecord(data.canonical_source) ? data.canonical_source : {};
   const sr = isRecord(data.scholar_review) ? data.scholar_review : {};
+  if (data.maintainers !== undefined && !Array.isArray(data.maintainers)) {
+    notices.push(notice("error", "tradition", where, "`maintainers` is not a list."));
+  }
   const maintainers = Array.isArray(data.maintainers)
-    ? data.maintainers.filter(isRecord).map((m) => ({
-        name: asString(m.name) ?? "",
-        contact: asString(m.contact),
-      }))
+    ? data.maintainers
+        .map((m) => {
+          if (!isRecord(m)) {
+            notices.push(notice("warning", "tradition", where, "A `maintainers` entry is malformed (ignored)."));
+            return null;
+          }
+          const name = asString(m.name);
+          if (name === null) {
+            notices.push(notice("warning", "tradition", where, "A `maintainers` entry has no `name`."));
+          }
+          return { name: name ?? "", contact: asString(m.contact) };
+        })
+        .filter((m): m is { name: string; contact: string | null } => m !== null)
     : [];
 
   const manifest: Manifest = {
@@ -269,7 +287,15 @@ export function parseScenarioMeta(
   const tags: Record<string, string[]> = {};
   if (isRecord(data.tags)) {
     for (const [axis, vals] of Object.entries(data.tags)) {
-      const list = Array.isArray(vals) ? vals.filter((x): x is string => typeof x === "string") : [];
+      let list: string[] = [];
+      if (!Array.isArray(vals)) {
+        notices.push(notice("warning", "scenario", where, `Tag axis \`${axis}\` is not a list (ignored).`));
+      } else {
+        list = vals.filter((x): x is string => typeof x === "string");
+        if (list.length !== vals.length) {
+          notices.push(notice("warning", "scenario", where, `Tag axis \`${axis}\` has non-string values (ignored).`));
+        }
+      }
       tags[axis] = list;
       if (validate) {
         const allowed = declaredTaxonomies![axis];
@@ -298,8 +324,13 @@ export function parseScenarioMeta(
     notices.push(notice("warning", "scenario", where, "`source_locus` is not a number."));
   }
 
+  const locusLabel = asString(data.locus_label);
+  if (data.locus_label !== undefined && locusLabel === null) {
+    notices.push(notice("warning", "scenario", where, "`locus_label` is not a string."));
+  }
+
   return {
-    meta: { id, tags, sourceLocus, locusLabel: asString(data.locus_label), identitySignal },
+    meta: { id, tags, sourceLocus, locusLabel, identitySignal },
     notices,
   };
 }
