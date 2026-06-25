@@ -1,10 +1,10 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 
-// Build / deploy invariants (the Phase-6 acceptance items), verified from the repo files —
-// no real build/server needed. Run by vitest from apps/multibrowser (the package cwd).
+// Build / deploy invariants (the Phase-6 acceptance items). Some run against the repo files;
+// two run a REAL production build and a REAL static server. Run by vitest from apps/multibrowser.
 
 // Production source only — test files and test/ helpers are NOT bundled by vite build.
 function sourceFiles(dir: string): string[] {
@@ -22,43 +22,69 @@ function sourceFiles(dir: string): string[] {
 }
 
 describe("build / deploy invariants", () => {
+  beforeAll(() => {
+    execSync("pnpm build", { stdio: "ignore" });
+  }, 120_000);
+
   it("NO source module imports tradition data — the corpus is fetched from GitHub at runtime", () => {
     for (const file of sourceFiles("src")) {
       const src = readFileSync(file, "utf8");
-      // no static import that pulls in tradition content (e.g. `../../traditions/...`)
       expect(src, file).not.toMatch(/\bfrom\s+['"][^'"]*\/traditions\//);
-      // and no inlined manifest/scenario yaml literals masquerading as bundled data
       expect(src, file).not.toMatch(/scenario_id_pattern:\s*['"]/);
     }
   });
 
-  it("vite base is '/' (absolute assets so deep links resolve on a root-served host)", () => {
-    const vite = readFileSync("vite.config.ts", "utf8");
-    expect(vite).toMatch(/base:\s*["']\/["']/);
-  });
-
-  it("a REAL production build bakes in NO tradition data and is the SPA entry", () => {
-    execSync("pnpm build", { stdio: "ignore" });
+  it("the REAL production bundle bakes in NO tradition data and is the SPA entry", () => {
     const assetsDir = "dist/assets";
     const js = readdirSync(assetsDir)
       .filter((f) => f.endsWith(".js"))
       .map((f) => readFileSync(join(assetsDir, f), "utf8"))
       .join("\n");
-    // No scenario ids or tradition prose compiled into the bundle — data is fetched at runtime.
     expect(js).not.toMatch(/JLS-\d{3}/);
     expect(js).not.toMatch(/BZ-\d{3}/);
     expect(js).not.toContain("al-jalīs"); // sunni-islam construct text
-    // index.html is the SPA mount point; `serve -s dist` falls back to it for deep links.
     expect(readFileSync("dist/index.html", "utf8")).toContain('id="root"');
-  }, 120_000);
+  });
 
-  it("the start command serves the built dist with SPA history fallback", () => {
+  it("vite base is '/' (absolute assets so deep links resolve on a root-served host)", () => {
+    expect(readFileSync("vite.config.ts", "utf8")).toMatch(/base:\s*["']\/["']/);
+  });
+
+  it("the start command uses serve -s dist (SPA fallback) with serve as a RUNTIME dep", () => {
     const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
       scripts: Record<string, string>;
       dependencies: Record<string, string>;
     };
-    // `serve -s dist` => `-s` is single-page mode (history fallback to index.html)
     expect(pkg.scripts.start).toMatch(/serve\s+-s\s+dist/);
-    expect(pkg.dependencies.serve).toBeDefined(); // a RUNTIME dep (vite is dev-only)
+    expect(pkg.dependencies.serve).toBeDefined();
   });
+
+  it("REAL smoke: the static server returns index.html for a nested deep link (SPA fallback)", async () => {
+    const port = 4199;
+    // Run the actual `start` command (serve -s dist) on a test port.
+    const server = spawn("pnpm", ["start"], {
+      env: { ...process.env, PORT: String(port) },
+      stdio: "ignore",
+    });
+    try {
+      let ready = false;
+      for (let i = 0; i < 60 && !ready; i++) {
+        try {
+          const r = await fetch(`http://localhost:${port}/`);
+          if (r.ok) ready = true;
+        } catch {
+          /* not up yet */
+        }
+        if (!ready) await new Promise((res) => setTimeout(res, 250));
+      }
+      expect(ready, "static server did not start").toBe(true);
+
+      // A nested route that is NOT a real file must fall back to index.html (the SPA shell).
+      const deep = await fetch(`http://localhost:${port}/t/sunni-islam/JLS-001`);
+      expect(deep.status).toBe(200);
+      expect(await deep.text()).toContain('id="root"');
+    } finally {
+      server.kill();
+    }
+  }, 60_000);
 });
