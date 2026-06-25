@@ -19,11 +19,11 @@ plan_phases:
     status: complete
   - id: phase_5
     title: 'Scenario detail: turn-1, six pressures, judge-guidance, framings + inert results-ready seam'
-    status: in_progress
+    status: complete
   - id: phase_6
     title: Railway static deploy config + README + polish; flag the porch JS test-check override
-    status: pending
-current_plan_phase: phase_5
+    status: in_progress
+current_plan_phase: phase_6
 gates:
   spec-approval:
     status: approved
@@ -37,8 +37,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -197,7 +197,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-7/codev/projects/7-jaleesbrowser-browse-explore-m/7-phase_5-iter2-claude.txt
 started_at: '2026-06-24T06:34:20.093Z'
-updated_at: '2026-06-25T20:40:35.073Z'
+updated_at: '2026-06-25T20:40:36.906Z'
 pr_ready_for_human: false
 force_advanced:
   phase: phase_4
