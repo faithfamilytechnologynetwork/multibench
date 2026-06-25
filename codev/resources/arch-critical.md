@@ -11,7 +11,8 @@ and keeps the map in sync with arch.md's top-level sections. -->
 - **Judge seam:** each scenario's `judge-guidance.md` *is* the judge's binding ground truth — there is no separate proof-text corpus; don't reintroduce one.
 - **Framings (unstated/stated/guided) + the six pressures are universal core**, identical across traditions; per-tradition only `adherent_noun`, `guide.md`, and per-scenario `pressures.md`.
 - `apps/tradition_validator/` is the mechanical gate for a tradition before workflows consume it; run from repo root via `uv --project apps/tradition_validator run python -m tradition_validator validate <dir>`.
-- This is a **Python (uv) repo**; porch's implement/review checks are overridden for Python in `.codev/config.json` (`porch.checks`) and per-phase consult is `["codex","claude"]` (`porch.consultation.models`).
+- `apps/multibrowser/` is the team-standard **frontend SPA** (Vite/React19/TS/Tailwind4/HeroUI/TanStack) that **browses the corpus by reading GitHub at runtime** (client-side TanStack Query: git-trees + `raw`, SHA-pinned); deployed on **Railway as a static site**; bakes no tradition data (new traditions appear without redeploy); read-only, display-first.
+- **Multi-language repo** (Python `uv` validator + JS/Vite SPA); porch's implement/review tests-check is a **per-builder dispatcher** `.codev/checks/test.sh` that runs only the suite of each app a builder touched (registry: validator→`uv … pytest`, multibrowser→`pnpm -C apps/multibrowser test`; +1 line/app). Per-phase consult is `["codex","claude"]` (`porch.consultation.models`).
 
 ## Map of arch.md (consult when…)
 - System purpose & shape — consult when orienting to what MultiBench measures and why it is multi-tradition.
