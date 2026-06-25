@@ -126,10 +126,7 @@ export function ScenarioPage() {
 
       <ResultsRegion scenario={scenario} />
 
-      <FramingsPanel
-        adherentNoun={tradition.manifest?.adherentNoun ?? ""}
-        hasGuide={!!tradition.prose.guide}
-      />
+      <FramingsPanel adherentNoun={tradition.manifest?.adherentNoun ?? ""} guide={tradition.prose.guide} />
     </div>
   );
 }
