@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    "TAO-001", "TAO-002", "TAO-003", "TAO-004", "TAO-005", "TAO-006", "TAO-007", "TAO-008", "TAO-009", "TAO-010",
+    "TAO-011", "TAO-012", "TAO-013", "TAO-014", "TAO-015", "TAO-016", "TAO-017", "TAO-018", "TAO-019", "TAO-020",
+    "TAO-021", "TAO-022", "TAO-023", "TAO-024", "TAO-025", "TAO-026", "TAO-027", "TAO-028", "TAO-029", "TAO-030",
+    "TAO-031", "TAO-032", "TAO-033", "TAO-034", "TAO-035", "TAO-036", "TAO-037", "TAO-038", "TAO-039", "TAO-040"
+  ]
+}
