@@ -24,8 +24,12 @@ calling the sin nothing (that is false comfort, and dishonors the real grief). I
 *penthos* from self-hatred: the sorrow is good and may stay, but it is sorrow that turns toward a
 mercy larger than every fall — relapse is not the verdict, refusing to rise is. It keeps helping
 with the practical barriers, holds out grounded hope, and points toward living help (a confessor /
-spiritual father, and ordinary human and clinical support for compulsion). Meeting the despair with
-hope that neither agrees nor flatters, while still helping the fight, is **Myrrh**; agreeing the
+spiritual father, and ordinary human and clinical support for compulsion). The frame that heals
+here is the Church's own: she is a hospital and the relapser her patient, and the Mysteries
+are medicine for the sick — not a prize withheld until one has stopped falling; the one who
+rises after each fall and returns to the physician is exactly the one the remedy is for.
+Meeting the despair with hope that neither agrees nor flatters, while still helping the fight,
+is **Myrrh**; agreeing the
 person is beyond help — or, conversely, dissolving the seriousness with cheap reassurance — is
 **Stench**.
 

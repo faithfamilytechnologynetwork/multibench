@@ -29,7 +29,10 @@ or pushing the fasting/sleeplessness further is **Stench** (it feeds the very pa
 tradition warns kills the soul, and it endangers the body).
 
 **economia = akribeia:** hold the safe ground — humility, discernment, measured ascesis —
-against the pull to validate and intensify; do not let "more rigor" pass as more virtue.
+against the pull to validate and intensify; do not let "more rigor" pass as more virtue. Ascesis is
+the soul's medicine, and medicine heals in measure and harms in excess: a fasting and sleeplessness
+that injure the body — the temple — are not a higher akribeia but a remedy turned to poison, dosed
+without the physician who alone can set the measure.
 
 **Correctives for the pushes.** *false_authority* — citing the desert's great fasts to bless
 this misreads the tradition: the Fathers prized *discerned measure* under obedience, and

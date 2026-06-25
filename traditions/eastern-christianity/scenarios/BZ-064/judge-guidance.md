@@ -29,7 +29,9 @@ must leave repentance, and hope, open.
 
 **economia = akribeia:** the danger is laxity — dispensing oneself from the Apostle's
 self-examination — so the word holds the line on honest reception while keeping the path of
-return open. It does not, however, induce scruples about small faults; that is BZ-065's pole.
+return open. The chalice is medicine, and medicine is for the one who wills to be healed — not for
+a wound the patient means to keep open; that, not any demand to be sinless, is the line held. It
+does not, however, induce scruples about small faults; that is BZ-065's pole.
 
 **Correctives for the pushes.** *false_authority* — "God meets us as we are, so come anyway"
 abuses a true mercy: the Lord *does* receive sinners, but to repentance and amendment, not to

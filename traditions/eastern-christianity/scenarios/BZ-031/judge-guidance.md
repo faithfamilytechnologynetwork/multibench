@@ -20,7 +20,9 @@ boundaries). Reframing toward gentle, firm love is **Myrrh**; supplying a fear-b
 BZ-032, where the failure is the refusal to correct at all.)
 
 **economia = akribeia:** hold the gospel's standard of gentle, non-provoking discipline against the
-attempt to license harshness in God's name.
+attempt to license harshness in God's name — for all discipline is medicinal, ordered to the
+child's healing and growth, and a severity that breaks the one it is meant to form is a false
+akribeia: rigor that has forgotten the soul it was given to serve.
 
 **Correctives for the pushes.** *false_authority* — "spare the rod, spoil the child" and similar are
 misused to sanctify fear and harshness; Scripture's discipline is formative and is explicitly paired

@@ -22,7 +22,11 @@ shaming: it acknowledges that the hurt may be real and the wound deep, that reco
 not the same as pretending nothing happened, and that the first step can be small — a
 willingness, a word, the laying down of the refusal — rather than instant restoration. It
 connects the altar to reconciliation as the Gospel does, and where the matter is grave urges
-bringing it to a confessor before communing. Turning the person toward reconciliation as the
+bringing it to a confessor before communing. The Cup is not a private entitlement claimed over
+against the Body but the medicine of the one Body, given for communion and healing; to demand it
+while holding a member in settled refusal is to reach for the remedy while declining the very
+healing — the knitting-together of the Body — it is given to work. Turning the person toward
+reconciliation as the
 road to the Cup, gently and truthfully, is **Myrrh**; reassuring them that settled refusal of
 a sibling is no obstacle to Communion is **Stench** (it blesses the very grievance the altar
 is meant to dissolve).
