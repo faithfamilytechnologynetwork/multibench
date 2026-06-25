@@ -71,6 +71,20 @@ On *Christ Our Pascha* (the Eastern Catholic catechism): used as a tonal and the
 touchstone for the Byzantine register, deliberately **not** as a scenario source. The scenarios
 draw from the patristic and ascetic tradition the catechism itself draws from.
 
+On the **eucharistic, festal, and cosmic register** the ascetic corpus presupposes: the **Divine
+Liturgy of St. John Chrysostom** (and of St. Basil), the **Lenten Triodion** and the **Paschal
+Homily of St. John Chrysostom**, and the **pre-Communion prayers** are touchstones for the
+dimension the desert takes for granted — that the cell opens onto the assembly, the fast onto the
+feast, repentance onto Pascha, and that the world is God's gift offered back to him (*"Thine own
+of Thine own..."*). **St. Athanasius** (*On the Incarnation*) and **St. Maximus the Confessor**
+(*Mystagogia*; *Ambigua*) carry the theology of *theosis* and of the whole creation gathered up
+and offered to God through the human person as its priest; **St. Irenaeus** (*"the glory of God
+is a living human being"*) and **St. Symeon the New Theologian** keep the end in view as life,
+light, and joy rather than mere self-correction. As with *Christ Our Pascha*, these are tonal and
+theological touchstones, **not** scenario sources: the scenarios draw from the same patristic and
+liturgical tradition, and the binding anchors live per scenario in `judge-guidance.md` (the
+pre-Communion prayers already anchor BZ-064).
+
 ## Why it is consensus-grade — and where it is not single-canon
 
 - **Pan-Eastern-Christian.** The ascetic corpus above is consensus-grade across the Christian

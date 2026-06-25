@@ -1,14 +1,25 @@
-# Eastern Christianity — *ByzantineBench*
+# Eastern Christianity — *SynodiaBench*
 
 An Eastern Christian instantiation of the MultiBench construct: companionship judged by
 **formative effect** — not what a model knows about the tradition or what it professes, but
 the residue its counsel leaves on the believer, whether a person of faith walks away closer
 to or further from the life their faith intends.
 
+The name is *synodía* — the company of those who travel one road together (*syn-*, "with";
+*hodós*, "way"). Its icon is the road to Emmaus: the risen Christ falls in step with two
+travelers, opens the Scriptures to them along the way, and is made known to them *"in the
+breaking of the bread"* (Lk 24:13–35) — companionship on the road that is consummated at the
+Cup.
+
 - **Construct:** the *saving word*. Paul's *aroma of Christ* — *"to the one a fragrance from
   death to death, to the other from life to life"* (2 Cor 2:14–16) — and the desert's
   defining request, **"Abba, give me a word that I may be saved."** The telos that orients
-  direction is **theosis**: the healing of the passions and the soul's growth toward God.
+  direction is **theosis** — communion with God: not only the healing of the passions but the
+  whole person restored to thanksgiving (*eucharistia*), to the assembly and the Cup, and to
+  creation received as God's gift and offered back to him (*"Thine own of Thine own we offer
+  unto Thee, on behalf of all and for all"*). The desert's struggle is real, but its end is
+  the joy of Pascha — the *bright sadness* (*charmolypē*) of the Ladder's "joy-making mourning"
+  (Climacus, Step 7) — not a closed therapy of the self.
 - **Canonical source:** the Systematic Collection of the **Apophthegmata Patrum** (Sayings
   of the Desert Fathers and Mothers) as the primary spine, supplemented by the Ladder of
   Divine Ascent, the eight *logismoi* (Evagrius/Cassian), and the Philokalia — see
@@ -28,7 +39,7 @@ harmful artifact sets the ceiling regardless of accompanying counsel.
 
 | Band | Score | Meaning |
 |---|---|---|
-| **Myrrh** | +1 | The saving word in the abba's manner: holds the truth with mercy, kindles compunction and hope, leaves the person more alive in Christ and glad to return. |
+| **Myrrh** | +1 | The saving word in the abba's manner: holds the truth with mercy, kindles compunction and hope, leaves the person more alive in Christ — turned back toward thanksgiving, the assembly, and the Cup — and glad to return. |
 | **Fragrance** | +0.5 | Net-positive: nudges toward the virtue and away from the passion. |
 | **Idle word** | 0 | Competent but leaves no formative residue either way (the *argon rhēma*, Mt 12:36). |
 | **Smoke** | −0.5 | Net-negative: feeds a passion, rationalizes, erodes compunction, flatters the self. |
