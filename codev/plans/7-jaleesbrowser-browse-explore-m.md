@@ -1,581 +1,404 @@
-# Plan: multibrowser — browse & explore MultiBench traditions
-
-> ⚠️ **SUPERSEDED — pending rewrite (2026-06-24).** This plan describes the now-invalidated
-> *static-site generator over local files* (Approach A). The architecture pivoted to a **live
-> web app reading GitHub at runtime, deployed on Railway** (see the re-spec). After the new spec
-> is approved, this plan will be **rewritten** for the new architecture. Kept temporarily for
-> history; do not implement from it.
+# Plan: multibrowser — browse & explore MultiBench traditions (frontend SPA)
 
 ## Metadata
-- **ID**: plan-2026-06-24-multibrowser
+- **ID**: plan-2026-06-25-multibrowser-spa
 - **Status**: draft
-- **Specification**: [codev/specs/7-jaleesbrowser-browse-explore-m.md](../specs/7-jaleesbrowser-browse-explore-m.md)
-- **Created**: 2026-06-24
+- **Specification**: [codev/specs/7-jaleesbrowser-browse-explore-m.md](../specs/7-jaleesbrowser-browse-explore-m.md) (v2, frontend SPA)
+- **Created**: 2026-06-25
+- **Supersedes**: the Approach-A (Python static-site) plan and the implied Flask plan — both rejected.
 
 ## Executive Summary
 
-Implements the spec's **Approach A**: a Python (`uv` / **Typer**) **static-site generator**
-at `apps/multibrowser/` that reads `traditions/` **read-only** (post-rename #6 vocabulary)
-and emits a self-contained, deep-linkable, offline static site for browsing traditions and
-their scenarios — plus a `serve [--watch]` convenience. The package mirrors the sibling
-`apps/tradition_validator/` flat-package layout.
+Implements the **v2 spec**: a **pure client-side React SPA** at `apps/multibrowser/`, mirroring
+`cluesmith/shannon/apps/web`'s stack, that reads the tradition corpus **from GitHub at runtime in
+the browser** (via TanStack Query) and deploys on **Railway as a static site**. No Python, no
+server, no tradition data in the bundle.
 
-The build splits into a **data layer** (tolerant, fail-soft reader → in-memory model) and a
-**presentation layer** (Jinja2 render → static build → serve), so the data layer is fully
-testable before any HTML exists. Verification uses **synthetic fixtures** for the
-malformed/degradation cases (which cannot be produced from the read-only real data) **and the
-two real post-rename traditions** — `sunni-islam` (140) and `eastern-christianity` (100) — now
-that **#6 has merged (PR #9, commit 31620e2) and this branch is rebased onto `main`**, so we
-plan/implement against real renamed data rather than a hypothesised format.
+The build splits into an **offline core** (types + tolerant parsers — pure functions, fully
+unit-testable with no network) → a **data layer** (the GitHub fetch boundary + TanStack Query
+hooks, tested with a mocked `fetch`) → **UI** (routing, index, tradition list + filtering,
+scenario detail). Every phase is verified with **vitest** offline (the GitHub client is mocked —
+the suite never hits the network).
 
-### Plan-level decisions (resolving the spec's deferred open questions)
+### Real data to build/test against (verified 2026-06-25)
 
-- **I1 — data model: vendor a lean read-model; do NOT import `tradition_validator`.** The
-  validator's pydantic schemas are `extra="forbid"` + `strict=True` (the wrong posture for
-  display-first), and a path-dependency would couple two independent apps' build order (both
-  reviewers flagged this). multibrowser defines its own **`dataclass`-based** read-models in
-  `model.py` and reads tolerantly. It mirrors the validator's *shapes* and reuses its
-  *safety ideas* (path containment, 5 MiB cap) by re-implementing them locally.
-- **I3 — markdown: `markdown-it-py` (raw-HTML disabled) + `nh3` sanitizer.** Unicode-correct
-  (Arabic/diacritics in the corpus), actively maintained, same family as the reference's
-  `markdown-it`. `nh3` (ammonia) is the modern successor to the deprecated `bleach`.
-- **`serve --watch` mechanism: `watchfiles`.** Rust-backed, tiny API. Base `serve` uses only
-  stdlib `http.server`; `--watch` adds the rebuild loop.
+`main` has **5 traditions, all `validate-all --strict` clean**, with **diverse, manifest-declared
+taxonomy axes** — the no-hardcoded-axes design must handle all of them:
 
-**Dependencies** (`pyproject.toml`): `typer`, `jinja2`, `markdown-it-py`, `nh3`, `pyyaml`,
-`watchfiles`. Dev: `pytest`. (No `pydantic` — dataclasses keep reads deliberately tolerant.)
+| tradition | id pattern | scenarios | taxonomy axes (count) |
+|---|---|---|---|
+| sunni-islam | `^JLS-\d{3}$` | 140 | pillars, hearts (2) |
+| eastern-christianity | `^BZ-\d{3}$` | 106 | passions, virtues, economia, register (4) |
+| judaism | `^MSR-\d{3}$` | 40 | middot, virtues, middle_path, domain, register (5) |
+| buddhism | `^BUD-\d{3}$` | 40 | defilements, cultivations, path_factor, middle_way, register (5) |
+| taoism | `^TAO-\d{3}$` | 40 | departures, te, pivot, register (4) |
 
-### Scope updates folded in (architect-directed, 2026-06-24)
+Axis **names, counts (2–5), and value sets differ per tradition**; `register`/`virtues` recur with
+*different* values. Fixtures mirror these shapes; the filter UI builds axis controls **purely from
+the manifest**. (Also verified: `api.github.com` sends `access-control-allow-origin: *` and
+CORS-exposes `X-RateLimit-Remaining`/`Reset`; unauth limit 60/hr.)
 
-- **Rename `jaleesbrowser` → `multibrowser`** throughout (app / package / module / docs). The
-  porch project slug and the spec/plan/review **filenames** stay
-  `7-jaleesbrowser-browse-explore-m.md` (porch state is keyed to that slug; renaming the files
-  would break porch's checks). The reference project's own browser stays `JaleesBench's jaleesbrowser`.
-- **Results-ready (anticipating #8) — without building a results UI in v1** (spec §4.1). Three
-  small, inert seams are threaded through the phases below, and nothing more:
-  - **P1/P2 data model:** `Scenario.results: ScenarioResults | None = None` (`None` in v1);
-    `ScenarioResults` a thin forward-declared shape.
-  - **P2 loader seam:** `load_results(scenario) -> None` — the single boundary #8's output will
-    feed; v1 returns `None`.
-  - **P3 render reservation:** a `_results.html.j2` partial that renders nothing (or a subtle
-    "no judgement results yet" placeholder) when `results is None`.
-  - **Coordination:** the concrete `ScenarioResults` schema binds to #8's format (still
-    speccing) — deferred to a #8-coordinated follow-up; v1 fixes only the seam shape. **No fake
-    results in v1.**
+### Plan-level decisions (resolving the spec's deferred questions)
+
+- **Package manager: pnpm** (matches shannon); **standalone** app — concrete pinned versions, **no
+  `@shannon/*` deps**, and only the **core web stack** (exclude shannon's Tauri/Sentry/oRPC/auth).
+- **Routing: TanStack Router file-based** via `@tanstack/router-plugin` (mirrors shannon).
+- **YAML in browser: `js-yaml`** (pinned) for `tradition.yaml`/`scenario.yaml`.
+- **Markdown: `react-markdown` + `rehype-sanitize`** (no `rehype-raw` → no raw HTML), styled with
+  `@tailwindcss/typography` (`prose`).
+- **Cache/freshness (I1):** `useLatestSha` uses **`refetchInterval` default 300000 ms**
+  (`VITE_SHA_POLL_MS`) + `refetchOnWindowFocus`/`refetchOnReconnect`, `refetchIntervalInBackground:
+  false`; SHA-pinned tree/content queries `staleTime: Infinity`, long `gcTime`. `persistQueryClient`
+  = COULD, not v1.
+- **Cold-load concurrency:** fire all `scenario.yaml` `raw` fetches through TanStack Query
+  (off-budget; browser-throttled per-host), **progressively hydrate** rows with HeroUI skeletons +
+  a "loaded N/total" indicator. No extra concurrency lib in v1.
+- **Deploy (I3): `vite preview --host 0.0.0.0 --port $PORT`** on Railway (SPA history fallback).
+- **Tests:** `vitest` + `@testing-library/react` + `jsdom`; the GitHub client is injected/mocked so
+  the suite is fully offline.
+
+### Key dependencies (concrete pins, mirroring shannon's versions)
+
+`react@^19`, `react-dom@^19`, `vite@^6`, `typescript@^5`, `@vitejs/plugin-react@^4`,
+`@tailwindcss/vite@^4`, `tailwindcss@^4`, `@tailwindcss/typography@^0.5`, `tailwind-merge@^3`,
+`@heroui/react@^3`, `@heroui/styles@^3`, `@tanstack/react-router@^1.141`,
+`@tanstack/router-plugin@^1.141`, `@tanstack/react-query@^5`, `react-markdown@^10`,
+`rehype-sanitize@^6`, `lucide-react@^0.546`, `zod@^3`, `zustand@^5`, `js-yaml@^4`; dev:
+`vitest@^3`, `@testing-library/react@^16`, `jsdom`, `@types/*`.
 
 ## Success Metrics
-- [ ] All spec §10 acceptance criteria met (browse index→tradition→scenario; filter/slice by
-      tag/identity_signal/locus; six-pressure layout; judge-guidance + turn-1 rendered).
-- [ ] **Read-only invariant**: tradition tree byte-identical before/after `build` and `serve`.
-- [ ] **Display-first**: every §8 degradation row renders an inline HTML notice, never crashes.
-- [ ] **Self-contained**: generated site has no external CDN/network references (offline-clean).
-- [ ] **Deterministic**: rebuilding unchanged input yields byte-identical output.
-- [ ] **Link integrity**: all generated inter-page links resolve.
-- [ ] **Tradition prose** (README/source/guide) rendered, each degrading to a notice if absent (M4).
-- [ ] **Results-ready seams present and inert**: `Scenario.results=None`, `load_results→None`,
-      reserved render region empty — **no results UI in v1** (spec §4.1).
-- [ ] Tests pass: `uv --project apps/multibrowser run pytest`; no reduction in coverage.
-- [ ] README documents install, commands, the #6 rebase note, and the #8 results-ready seam.
+- [ ] All spec §9 acceptance criteria met (browse index→tradition→scenario; filter/slice; six-
+      pressure layout; judge-guidance + turn-1; deep links + SPA fallback).
+- [ ] **No tradition data baked** into the bundle; corpus fetched **client-side** from GitHub.
+- [ ] **No-hardcoded-axes**: the filter UI works across all 5 real traditions' axis shapes (2–5 axes).
+- [ ] **Freshness**: a new commit's content appears on an open page within the SHA `refetchInterval`
+      (or focus/reconnect) — no redeploy.
+- [ ] **Resilience**: 403/outage → banner + last cached data; error boundary prevents blank crashes;
+      no token in the bundle.
+- [ ] **Display-first**: every §5.5 degradation row renders an inline notice, never crashes.
+- [ ] Tests pass offline: `pnpm test` (`vitest run`) in `apps/multibrowser`; types clean (`tsc --noEmit`).
+- [ ] README documents dev/test/build, `VITE_*` config, and Railway deploy.
 
 ## Phases (Machine Readable)
 
 ```json
 {
   "phases": [
-    {"id": "phase_1", "title": "Package scaffold + format constants + tolerant reader core (discovery + manifest + safe-read)"},
-    {"id": "phase_2", "title": "Scenario & section reading: index/folder drift, scenario.yaml, pressures parsing, notices"},
-    {"id": "phase_3", "title": "Rendering layer: Jinja2 templates + safe markdown pipeline (views as HTML strings)"},
-    {"id": "phase_4", "title": "Static-site build command + client-side filter/search + determinism & link integrity"},
-    {"id": "phase_5", "title": "serve [--watch], README, and end-to-end CLI polish"}
+    {"id": "phase_1", "title": "Scaffold (Vite/React/TS standalone) + constants + types + tolerant parsers (offline core)"},
+    {"id": "phase_2", "title": "GitHub client + TanStack Query data layer (caching, freshness, rate-limit) — mocked-fetch tests"},
+    {"id": "phase_3", "title": "App shell: providers, TanStack Router, tradition index, shared UI primitives (Markdown/Notice/ErrorBoundary/RateLimitBanner/Skeleton)"},
+    {"id": "phase_4", "title": "Tradition page: manifest-driven scenario list + filtering.ts (zod search params) + progressive hydration"},
+    {"id": "phase_5", "title": "Scenario detail: turn-1, six pressures, judge-guidance, framings + inert results-ready seam"},
+    {"id": "phase_6", "title": "Railway static deploy config + README + polish; flag the porch JS test-check override"}
   ]
 }
 ```
 
-## Target package layout (built across phases)
+## Target app layout (standalone; built across phases)
 
 ```
 apps/multibrowser/
-  pyproject.toml                # uv package (Phase 1)
-  README.md                     # Phase 5
-  multibrowser/
-    __init__.py  __main__.py    # Phase 1
-    cli.py                      # Typer app; `build` (P4), `serve` (P5)
-    constants.py                # post-rename names, PRESSURES, FRAMINGS, IDENTITY_SIGNALS, STATED_TEMPLATE (P1)
-    model.py                    # dataclass read-models + Notice (P1/P2)
-    safeio.py                   # path-containment + size-capped UTF-8 read (P1)
-    loader.py                   # tolerant discover/load → model (P1 discovery+manifest, P2 scenarios)
-    markdown.py                 # markdown-it-py + nh3 render-to-safe-HTML (P3)
-    render.py                   # Jinja2 render of index/tradition/scenario (P3)
-    filtering.py                # pure filter/sort/query-state fns + filter-index builder (P4) — Python-tested semantics
-    site.py                     # build orchestration + page writing (P4)
-    serve.py                    # http.server + optional watchfiles rebuild (P5)
-    templates/                  # *.html.j2 (P3)
-    assets/                     # styles.css (P3), filter.js (P4) — all local, no CDN
-  tests/
-    conftest.py  fixtures/      # synthetic post-rename traditions (good + malformed)
-    test_safeio.py test_loader_discovery.py  # P1
-    test_loader_scenarios.py                  # P2
-    test_render.py                            # P3
-    test_filtering.py  test_site.py           # P4
-    test_cli.py                               # P5
+  package.json  pnpm-lock.yaml  tsconfig.json  tsconfig.node.json
+  vite.config.ts            # plugin-react, @tailwindcss/vite, router-plugin, vitest config (P1/P3)
+  index.html  .env.example  README.md
+  src/
+    main.tsx                # mount: HeroUIProvider + QueryClientProvider + RouterProvider + ErrorBoundary (P3)
+    styles.css              # tailwind + heroui (P1/P3)
+    lib/
+      constants.ts          # PRESSURES, FRAMINGS, IDENTITY_SIGNALS, STATED_TEMPLATE, file names, normalizeHeading (P1)
+      model.ts              # types: Notice, TaxonomyAxis, Manifest, Tradition(+prose), Scenario(+results?), ScenarioResults (P1)
+      parse.ts              # tolerant parsers → model + notices (P1)
+      github.ts             # the ONE GitHub fetch boundary: latestSha/tree/raw, zod-validate, 403/error + rate headers (P2)
+      queries.ts            # TanStack Query hooks: useLatestSha/useTree/useRawFile + derived useTraditions/useTradition/useScenario (P2)
+      filtering.ts          # pure filter/sort + zod search-param schema (P4)
+      results.ts            # inert results-ready seam: loadResults() -> none (P5)
+    routes/                 # file-based (router-plugin): __root, index, t.$traditionId, t.$traditionId.$scenarioId, notFound (P3-5)
+    components/             # TraditionCard, TraditionHeader, TaxonomyAxes, ScenarioList, ScenarioRow, FilterBar,
+                            #   ScenarioDetail, PressureSection, JudgeGuidance, FramingsPanel, ResultsRegion,
+                            #   Markdown, Notice, ErrorBoundary, RateLimitBanner, Skeleton (P3-5)
+    test/                   # fixtures (5-axis-shaped traditions, good + malformed + Arabic), test utils (QueryClient wrapper, fake GitHub) 
+    **/*.test.ts(x)         # colocated vitest tests
 ```
 
 ## Phase Breakdown
 
-### Phase 1: Package scaffold + format constants + tolerant reader core
+### Phase 1: Scaffold + constants + types + tolerant parsers (offline core)
 **Dependencies**: None
 
 #### Objectives
-- Stand up the `apps/multibrowser/` uv package and the foundational data primitives:
-  format constants, dataclass read-models, safe file I/O, tradition **discovery**, and
-  **tolerant manifest** loading.
+- Stand up the standalone Vite/React/TS app (builds + vitest runs) and the **offline parsing core**:
+  format constants, the typed model, and **tolerant parsers** that turn raw file strings into the
+  model with **inline notices** — pure functions, no network, no UI.
 
 #### Deliverables
-- [ ] `pyproject.toml` (deps above; `[project.scripts] multibrowser = "multibrowser.cli:app"`;
-      pytest config) + `multibrowser/__init__.py`, `__main__.py`, a minimal `cli.py` Typer app
-      (so `python -m multibrowser --help` works).
-- [ ] `constants.py`: the **post-rename** names (`SCENARIOS_DIR="scenarios"`,
-      `SCENARIO_META="scenario.yaml"`, `TURN1="turn1.md"`, `JUDGE="judge-guidance.md"`,
-      `PRESSURES_FILE="pressures.md"`, `INDEX="scenarios/index.json"`,
-      `ID_PATTERN_KEY="scenario_id_pattern"`), plus `PRESSURES` (6, canonical order),
-      `FRAMINGS`, `IDENTITY_SIGNALS`, `STATED_TEMPLATE`, `MAX_FILE_BYTES=5*1024*1024`,
-      `normalize_heading()` (trim → lowercase → spaces/hyphens → `_`, matching the validator).
-      **All format names live here only** (kept isolated for future-proofing; #6 is already
-      merged, so these now match real data — verified: `index.json` inner key is `scenarios`,
-      manifest key is `scenario_id_pattern`).
-- [ ] `model.py`: `Notice(severity, scope, where, message)`, `TaxonomyAxis`, `Manifest`,
-      `Tradition` (manifest + **prose: README/source/guide (text|None + notices)** + scenarios +
-      aggregated notices), placeholder `Scenario` (filled in P2) including the **results-ready**
-      `results: ScenarioResults | None = None` field, plus a thin forward-declared
-      `ScenarioResults` shape (unpopulated in v1; spec §4.1).
-- [ ] `safeio.py`: `read_text(path, root)` → returns `(text|None, Notice|None)`: rejects
-      symlink/`..` escapes outside `root`, enforces `MAX_FILE_BYTES`, UTF-8 only — fail-soft
-      to a `Notice`, never a traceback. `load_yaml`/`load_json` wrappers (yaml.safe_load).
-- [ ] `loader.py`: `discover(root)` globs `traditions/*/tradition.yaml`; `load_manifest()`
-      tolerantly parses the manifest into `Manifest` (unknown keys → notice, not rejection;
-      missing required → notice + stub); `load_prose()` reads the tradition-level prose
-      **`README.md` / `source.md` / `guide.md`** via `safeio`, each **display-first**: a
-      missing / empty / non-UTF-8 / oversized prose file degrades to a `Notice` on the
-      `Tradition`, never an abort (spec M4 + §8 tradition-scope rows).
-- [ ] `tests/fixtures/`: one **good** post-rename tradition (small, ~3 scenarios, includes
-      Arabic content) + malformed manifest variants + a **missing/empty prose** variant (e.g.
-      absent `source.md`); `tests/test_safeio.py`, `tests/test_loader_discovery.py` (incl.
-      prose-degradation → notice, no exception).
+- [ ] `package.json` (standalone, pinned deps above; scripts `dev`/`build`/`serve`/`test`/`check-types`),
+      `tsconfig*.json`, `vite.config.ts` (react + tailwind + vitest jsdom), `index.html`,
+      `src/styles.css`, a minimal `src/main.tsx` rendering a placeholder (so `vite build` works).
+- [ ] `src/lib/constants.ts`: `PRESSURES` (6, canonical order), `FRAMINGS`, `IDENTITY_SIGNALS`,
+      `STATED_TEMPLATE`, file/dir names (`scenarios`, `index.json`, `scenario.yaml`, `turn1.md`,
+      `judge-guidance.md`, `pressures.md`, `tradition.yaml`, `scenario_id_pattern`),
+      `normalizeHeading` (trim→lower→spaces/hyphens→`_`).
+- [ ] `src/lib/model.ts`: `Notice`, `TaxonomyAxis`, `Manifest`, `Tradition` (manifest + prose
+      {readme,source,guide} + scenarios + notices), `Scenario` (id, tags, source_locus, locus_label,
+      identity_signal, turn1, judgeGuidance, pressures{canonical→text|null}, notices, **`results?:
+      ScenarioResults` — absent in v1**), forward-declared `ScenarioResults`.
+- [ ] `src/lib/parse.ts`: `parseManifest` (tolerant — unknown keys → notice not throw; axes read
+      generically), `parseIndex`, `parseScenarioMeta`, `parsePressures` (6 canonical via
+      `normalizeHeading`; missing/extra → notice), `proseOrNotice`. **No hardcoded axis names.**
+- [ ] `src/test/fixtures/`: small traditions mirroring the **5 real axis shapes** (2–5 axes) + a
+      good one with **Arabic** content + malformed variants (bad manifest, missing prose, missing/
+      extra pressure, unknown tag, index/folder drift inputs); `src/lib/parse.test.ts`.
 
 #### Implementation Details
-- Mirror `tradition_validator` package conventions (flat package, `__main__`, Typer in `cli.py`).
-- `safeio` re-implements the validator's `_within_root` containment and size cap locally
-  (decision I1 — no cross-app import).
-- Tolerant manifest: parse to dict; map known keys to `Manifest`; collect unknown/missing as
-  `Notice`s on the tradition; never raise on content.
+- Mirror shannon's TS/Vite conventions (strict TS, `@vitejs/plugin-react`, `@tailwindcss/vite`).
+- Parsers are pure (input: file strings/objects → output: model fragment + notices); the
+  drift/union logic operates on `(indexList, folderList)` so it's testable without GitHub.
 
 #### Acceptance Criteria
-- [ ] `python -m multibrowser --help` runs.
-- [ ] `discover()` finds the fixture tradition(s); a bad/missing manifest yields a stub +
-      notice (no exception); a missing/empty tradition prose file (README/source/guide) yields
-      a `Notice`, not an exception.
-- [ ] `safeio` rejects a symlink-escape and an oversized file with a located notice;
-      round-trips UTF-8 incl. Arabic.
+- [ ] `pnpm build` (vite build) and `pnpm check-types` succeed; `pnpm test` runs.
+- [ ] Good fixtures parse with **zero** notices; each malformed fixture yields exactly its expected
+      notice(s) and never throws; pressures normalize across heading variants; axes come from the
+      manifest (a 5-axis fixture parses all 5).
 - [ ] All Phase-1 tests pass.
 
 #### Test Plan
-- **Unit**: `safeio` containment/size/UTF-8; `discover` globbing; manifest tolerance (unknown
-  key, missing required, non-UTF-8 manifest).
-- **Integration**: none yet (no rendering).
-- **Manual**: `python -m multibrowser --help`.
+- **Unit (vitest)**: each parser; pressures normalization; manifest tolerance; index/folder drift
+  (union/orphan/ghost) at the data level; Arabic round-trip.
+- **Manual**: none (no UI yet).
 
-#### Rollback Strategy
-Revert the phase commit; nothing else depends on it yet.
-
-#### Risks
-- **Risk**: over-coupling to validator internals. **Mitigation**: vendor locally (I1); only
-  the *idea* is reused.
+#### Rollback / Risks
+Revert the phase commit. **Risk**: Tailwind 4 / vite config drift → mitigate by mirroring shannon's
+`vite.config.ts`.
 
 ---
 
-### Phase 2: Scenario & section reading (tolerant) — full content model
+### Phase 2: GitHub client + TanStack Query data layer
 **Dependencies**: Phase 1
 
 #### Objectives
-- Complete the data layer: load the scenario set with **index↔folder drift** handling, the
-  tolerant `scenario.yaml`, the prose sections, and **pressures parsing** — all producing
-  the §8 notices.
+- The **single GitHub fetch boundary** + the TanStack Query hooks implementing SHA-pinned caching,
+  the `refetchInterval` freshness model, and rate-limit/error handling — all tested with a **mocked
+  `fetch`** (offline).
 
 #### Deliverables
-- [ ] `loader.py`: `load_index()` (`scenarios/index.json`, tolerant; missing/invalid →
-      folder-glob fallback + notice); scenario-set assembly = **union** of index + `scenarios/*/`,
-      **index order then orphans id-sorted**; **orphan** (folder ∉ index) and **ghost** (index
-      ∉ folder) each get a notice.
-- [ ] `load_scenario()`: tolerant `scenario.yaml` (tags/identity_signal/source_locus/locus_label;
-      unknown axis/value → render-but-flag); read `turn1.md` / `judge-guidance.md` (section
-      notice if missing/empty/non-UTF-8/oversized).
-- [ ] `parse_pressures()`: split `pressures.md` on `## ` headings, `normalize_heading`, map to
-      the 6 canonical pressures **in canonical order**; missing/extra/duplicate/unrecognized →
-      notice; content before first `##` ignored.
-- [ ] Complete `Scenario` model (id, tags, source_locus, locus_label, identity_signal, turn1,
-      judge_guidance, pressures{canonical→text|None}, notices, **`results=None`**).
-- [ ] **Results seam (inert):** `load_results(scenario) -> ScenarioResults | None` returning
-      **`None`** in v1 — the single boundary #8's output will later feed (spec §4.1);
-      `Scenario.results` is populated from it (always `None` in v1). Nothing else reads results.
-- [ ] Fixtures: orphan, ghost, missing/extra pressure, non-UTF-8 section, oversized file,
-      unknown tag, Arabic judge-guidance; `tests/test_loader_scenarios.py`.
-
-#### Implementation Details
-- One public entry, e.g. `load_tradition(path, root) -> Tradition` (manifest + **prose** +
-  scenarios + aggregated notices), and `load_all(root) -> list[Tradition]`. `Scenario.results`
-  is filled from the inert `load_results` seam (always `None` in v1).
-- Pressures map keeps canonical order regardless of file order; `None` value ⇒ render a notice
-  in P3.
+- [ ] `src/lib/github.ts`: `latestSha(repo,ref)` (`/commits/{ref}`), `tree(repo,sha)` (recursive
+      git-trees; handle `truncated`), `raw(repo,sha,path)` (`raw.githubusercontent.com`). `zod`-validate
+      responses; detect `403` + read `X-RateLimit-Remaining`/`Reset`; bounded timeouts; **takes an
+      injectable `fetch`** for tests. **No token.**
+- [ ] `src/lib/queries.ts`: `useLatestSha` (`refetchInterval` `VITE_SHA_POLL_MS`≈5min +
+      focus/reconnect, not in background), `useTree(sha)` (`staleTime: Infinity`), `useRawFile(sha,
+      path)` (`staleTime: Infinity`); derived `useTraditions()` (tree + each `tradition.yaml`),
+      `useTradition(id)` (manifest + prose + each `scenario.yaml`, progressive), `useScenario(tid,sid)`
+      (its 4 files). All keyed by SHA.
+- [ ] Tests (`github.test.ts`, `queries.test.ts`) with mocked `fetch` + a `QueryClientProvider`
+      wrapper: sha→tree→raw flow; SHA-keyed caching; **freshness** (SHA change → new snapshot fetch);
+      **rate-limit** (403 → rate-limit state surfaced); **error/timeout** → fallback; `raw` URL shape.
 
 #### Acceptance Criteria
-- [ ] The good fixture loads with **zero** notices; each malformed fixture loads with exactly
-      the expected notice(s) and never raises.
-- [ ] Drift fixtures produce the documented union/ordering with orphan/ghost notices.
-- [ ] `parse_pressures` returns all six keys (missing → `None` + notice), canonical order.
-- [ ] All Phase-2 tests pass; coverage not reduced.
+- [ ] With mocked GitHub, `useTraditions`/`useTradition`/`useScenario` resolve to the correct model;
+      a changed SHA triggers a refetch keyed by the new SHA; a 403 surfaces a rate-limit state with
+      the reset time; network error degrades (no throw to the UI).
+- [ ] Suite makes **no real network calls**. All Phase-2 tests pass.
 
 #### Test Plan
-- **Unit**: index fallback; union/order; orphan/ghost; per-section degradation; pressures
-  normalization (`## False authority` / `false-authority` / `false_authority` all map);
-  unknown-tag flagging.
-- **Integration**: `load_tradition` on the good fixture → full populated model.
-- **Manual**: load the fixture in a REPL, inspect notices.
+- **Unit/integration (vitest, mocked fetch)**: client methods; query hooks via `renderHook` +
+  QueryClient; cache key behavior; 403/error paths.
 
-#### Rollback Strategy
-Revert the phase commit; Phase 1 remains intact and tested.
-
-#### Risks
-- **Risk**: pressures heading edge cases. **Mitigation**: reuse the validator's normalization
-  rule; table-driven tests over heading variants.
+#### Rollback / Risks
+Revert the phase commit; P1 intact. **Risk**: TanStack Query test ergonomics → use a fresh
+`QueryClient` per test with retries off.
 
 ---
 
-### Phase 3: Rendering layer — Jinja2 templates + safe markdown
+### Phase 3: App shell + routing + tradition index + UI primitives
 **Dependencies**: Phase 2
 
 #### Objectives
-- Turn a loaded `Tradition`/`Scenario` into **HTML strings**: the tradition index, a tradition
-  view, and a scenario view — with safe markdown and inline-notice rendering. No file output
-  or client JS yet (Phase 4).
+- Wire the providers and **TanStack Router** (file-based), build the **tradition index** page, and
+  the shared **UI primitives** (sanitized Markdown, Notice, ErrorBoundary, RateLimitBanner, Skeleton).
 
 #### Deliverables
-- [ ] `markdown.py`: `render_markdown(text) -> safe_html` via `markdown-it-py` (raw HTML
-      disabled) piped through `nh3` (allow-list). Unicode/Arabic preserved.
-- [ ] `render.py`: `render_index(traditions)`, `render_tradition(t)`, `render_scenario(t, s,
-      prev, next)` returning HTML strings via Jinja2 (`autoescape=True`).
-- [ ] `templates/`: `base.html.j2`, `index.html.j2`, `tradition.html.j2`, `scenario.html.j2`,
-      `_notice.html.j2`, `_framings.html.j2`, **`_results.html.j2`**. Scenario template lays out
-      header (id, locus, identity_signal, tag chips), **turn-1**, **six pressures in canonical
-      order**, **judge-guidance** (collapsible), and the **reserved results region** —
-      `_results.html.j2`, which renders **nothing** (or a subtle "no judgement results yet"
-      placeholder) when `scenario.results is None` (always, in v1) and is the slot #8's
-      scores/bands/verdicts will fill (spec §4.1). Tradition template: manifest header, prose
-      (README/source/guide, each degrading to its notice if absent), taxonomy axes, scenario
-      table. **Stub-tradition rendering:** when the manifest is invalid/missing, the tradition
-      page still renders — a top-of-page notice, the scenario list from folders/index, and
-      manifest-derived UI (taxonomy filters) **skipped with a notice** (spec §8 tradition row).
-      Index: tradition cards. `_framings.html.j2`: Stated template instantiated with
-      `adherent_noun`, Guided pointer, Unstated note, six-pressure glosses (S2).
-- [ ] `assets/styles.css` (local; notice styling = visually-distinct warning block).
-- [ ] `tests/test_render.py`.
-
-#### Implementation Details
-- A `Notice` renders via `_notice.html.j2` as a visible warning block (spec definition).
-- Tag chips/filters read axes **from the manifest** (no hardcoded vocabulary).
-- Markdown sanitized centrally so no template bypasses it; everything else autoescaped.
+- [ ] `src/main.tsx`: `HeroUIProvider` + `QueryClientProvider` + `RouterProvider`, wrapped in a
+      top-level **ErrorBoundary** (render errors → notice, never blank).
+- [ ] `vite.config.ts`: add `@tanstack/router-plugin`; `src/routes/__root.tsx` (layout + banner slot
+      + `<Outlet/>`), `src/routes/index.tsx` (`/` → `useTraditions` → `TraditionCard` grid),
+      `notFound`.
+- [ ] `src/components/`: `Markdown` (`react-markdown` + `rehype-sanitize`, `prose`), `Notice`,
+      `ErrorBoundary`, `RateLimitBanner` (shows reset time from §2's exposed headers), `Skeleton`,
+      `TraditionCard`. HeroUI + Tailwind theme set up in `styles.css`.
+- [ ] Tests: `Markdown` sanitization (a `<script>`/`onclick` fixture renders inert) + Arabic
+      survives; index route renders cards from a mocked `useTraditions`; rate-limit banner shows on
+      the rate-limit state; ErrorBoundary catches a thrown child.
 
 #### Acceptance Criteria
-- [ ] Scenario HTML contains all six pressure labels in canonical order; a `None` pressure
-      renders a notice block, not a blank.
-- [ ] A `<script>`-bearing markdown fixture renders **inert** (sanitized); a `{{`-bearing
-      manifest field is escaped (autoescape).
-- [ ] Notices render as visible HTML warning blocks.
-- [ ] Index/tradition/scenario render without error for the good fixture and for malformed
-      fixtures (notices shown).
-- [ ] **Stub-tradition**: an invalid-manifest fixture still renders a tradition page (top
-      notice + scenario list + taxonomy-UI-skipped notice), no crash.
-- [ ] **Reserved results region** renders empty (or the placeholder) for every v1 scenario
-      (`results is None`); no scores/bands/verdicts markup is emitted in v1.
-- [ ] All Phase-3 tests pass.
+- [ ] `/` lists the (mocked) traditions as cards with metadata + links; a rate-limit state shows the
+      banner while keeping cached data; a thrown render error shows the boundary notice, not a blank
+      page; markdown is sanitized and Unicode-correct.
+- [ ] All Phase-3 tests pass; `tsc --noEmit` clean.
 
 #### Test Plan
-- **Unit**: `render_markdown` sanitization + Arabic round-trip; each renderer's structure
-  (assert presence of labels/sections/chips).
-- **Integration**: render a full fixture tradition's index+tradition+all scenarios to strings.
-- **Manual**: write one rendered scenario to a temp file, eyeball in a browser.
+- **Component/route (testing-library)** with mocked queries; **unit** for Markdown sanitization.
+- **Manual**: `pnpm dev`, eyeball `/` against the real GitHub data (real-user path).
 
-#### Rollback Strategy
-Revert the phase commit; data layer (P1/P2) unaffected.
-
-#### Risks
-- **Risk**: sanitizer strips legitimate content (e.g. Arabic, footnote markup).
-  **Mitigation**: allow-list tuned + Arabic/citation fixtures asserting content survives.
+#### Rollback / Risks
+Revert the phase commit; data layer intact. **Risk**: HeroUI v3 + Tailwind 4 setup → mirror shannon's
+provider/styles wiring.
 
 ---
 
-### Phase 4: Static-site build + client-side filter/search
+### Phase 4: Tradition page — scenario list, filtering, progressive hydration
 **Dependencies**: Phase 3
 
 #### Objectives
-- `multibrowser build --out DIR`: write the full static site (index + per-tradition +
-  per-scenario pages + assets) and an embedded **filter-index**, with the filter/sort/
-  query-state **semantics implemented as pure, automatically-tested Python** and the client JS
-  as a thin applier. Guarantee determinism, link-integrity, and read-only.
+- `/t/$traditionId`: manifest header, prose, **manifest-driven** taxonomy axes + **FilterBar**, the
+  scenario list with **filtering/sorting** (pure `filtering.ts`, zod search params) and **progressive
+  hydration**.
 
 #### Deliverables
-- [ ] **`filtering.py` — the authoritative filter/sort/query-state semantics as pure Python
-      functions** (this resolves the iter-2 "client behavior must be *automatically* tested"
-      gap; Codex offered "a Python-side reference implementation checked against generated
-      filter-index cases" as an acceptable path — this is it):
-  - `build_filter_index(tradition) -> dict`: the per-tradition data the site embeds (per
-    scenario: per-axis tag membership, `identity_signal`, `source_locus`, lowercased
-    `search_text`). Deterministic (sorted keys/order).
-  - `apply_selection(index, selection) -> list[id]`: **OR-within-axis, AND-across-axes**, plus
-    identity_signal, `source_locus` range, and free-text — the single source of truth for the
-    spec's filter semantics.
-  - `sort_ids(index, key) -> list[id]`: by `id` or `source_locus` (S1).
-  - `encode_selection` / `decode_selection`: Selection ⇄ query string, round-trippable and
-    **fail-soft** to defaults on bad input (S3).
-- [ ] `assets/filter.js`: a **thin applier** of the embedded index that mirrors
-      `apply_selection` / `sort_ids` / `decode_selection` over the precomputed membership — so
-      the JS surface stays minimal and the *semantics* live in the Python-tested reference. (No
-      JS test toolchain is added; the JS mirrors a documented, Python-verified contract.)
-      OR-within/AND-across tag filters, identity_signal, `source_locus` range (min/max inputs),
-      free-text, sort, live result counts; active filters+sort reflected in the query string,
-      fail-soft restore. No framework, no CDN.
-- [ ] `site.py`: orchestrate output paths (stable scheme: `index.html`,
-      `<tradition>/index.html`, `<tradition>/<scenario_id>.html`), write pages, copy `assets/`,
-      embed each tradition's `build_filter_index(...)` output, **safely serialized** (`</`
-      escaped). Deterministic: sorted keys, stable ordering, no timestamps. **Writes only under
-      `--out`.**
-- [ ] `cli.py`: `build(traditions_root=Path("traditions"), out=Path("dist"))` Typer command;
-      fail-loud on invalid root / no traditions / unwritable out (invocation class).
-- [ ] `tests/test_filtering.py` (**exhaustive, automated**) + `tests/test_site.py`.
-
-#### Implementation Details
-- **Suggested intra-phase order** (this is the densest phase): output-path scheme →
-  page-write orchestration → filter-index JSON → `filter.js` (filters + **sort** + search) →
-  CLI `build` wiring → tests.
-- Prev/next computed in **default declared order** (P2 order) for stable static links (M9).
-- **Sort (S1)** by `id`/`source_locus` is a client-side reordering of the filtered set; the
-  static page order (prev/next) is unaffected.
-- **Filtering of incomplete rows (ghost + stub-tradition) — keeps rendered list ≡ filtered
-  results ≡ counts:** `build_filter_index` emits an entry for **every rendered row**, including
-  **ghost** (index-only, no folder) and stub-tradition rows, with **null/empty** metadata
-  (`tags={}`, `identity_signal=None`, `source_locus=None`, `search_text=id`). In
-  `apply_selection`, a row with missing metadata **cannot satisfy a positive predicate**: any
-  active tag-axis (OR-within), identity_signal, or `source_locus`-range filter **excludes** it
-  (it matches none); with **no active filter** (or a free-text query matching its id) it
-  appears. `sort_ids` always orders by `id`; for `source_locus`, `None` sorts **last**
-  (deterministic). Because both the counts and the rendered filtered list derive from
-  `apply_selection` over the same index, they cannot diverge. **Stub-tradition** (invalid
-  manifest → no declared axes): the tag-axis filter UI is skipped with a notice, but
-  identity_signal / locus / free-text / sort still operate over each scenario's own
-  `scenario.yaml` (independent of the manifest). `test_filtering.py` covers a ghost row and a
-  no-axes (stub) tradition explicitly.
-- Link integrity: collect all emitted hrefs, assert each resolves to an emitted file.
-- Read-only: snapshot-hash the traditions tree before/after `build`, assert identical.
+- [ ] `src/lib/filtering.ts`: `searchSchema` (zod; repeated-param arrays per axis + identity_signal,
+      `locusMin`/`locusMax` inclusive/one-sided, `q`, `sort`), `applyFilters(scenarios, selection)`
+      (**OR-within-axis, AND-across-axes**, identity, locus range, free-text; **incomplete rows**
+      excluded by any positive filter, present unfiltered; `source_locus`-missing sorts last),
+      `sortScenarios`. **No hardcoded axes** — operates over whatever axes the manifest declares.
+- [ ] `src/routes/t.$traditionId.tsx` (`validateSearch: searchSchema`), `src/components/`:
+      `TraditionHeader`, `TaxonomyAxes` (renders each manifest axis + values), `FilterBar` (controls
+      generated **from the manifest axes** — handles 2–5 axes), `ScenarioList`/`ScenarioRow`
+      (progressive: skeleton rows until each `scenario.yaml` resolves; "loaded N/total"), result counts.
+- [ ] Tests: `filtering.test.ts` (**exhaustive**, run across **multiple real axis shapes** incl. the
+      5-axis judaism/buddhism and 2-axis sunni-islam — OR/AND, identity, locus edges, free-text, sort,
+      ghost/stub rows); route test: filters update the URL search params and the rendered list+counts;
+      FilterBar builds controls from a 5-axis manifest.
 
 #### Acceptance Criteria
-- [ ] `build` on the good fixture emits index + tradition + one page per scenario; **all
-      inter-page links resolve**.
-- [ ] Re-running `build` on unchanged input is **byte-identical** (determinism).
-- [ ] Tradition tree **unchanged** after build (snapshot invariant).
-- [ ] No emitted file references an external CDN/URL.
-- [ ] **Filter/sort/query-state semantics are automatically tested in `filtering.py`** —
-      `apply_selection` (OR-within/AND-across, identity_signal, locus-range, free-text),
-      `sort_ids`, and `encode∘decode` round-trip are covered by `test_filtering.py` against
-      generated cases over both real axis shapes; **no spec-required behavior rests on a manual
-      check.** The embedded index is the same `build_filter_index` output the tests exercise.
+- [ ] The tradition page renders the manifest, prose, axes, and the scenario list; the **FilterBar is
+      generated from the manifest** and works for a 2-axis and a 5-axis tradition; filtering
+      (OR-within/AND-across/identity/locus/search) + sort update **deep-linkable search params** with
+      live counts; rows hydrate progressively with skeletons.
 - [ ] All Phase-4 tests pass.
 
 #### Test Plan
-- **Unit (automated, primary)**: `test_filtering.py` — exhaustive `apply_selection` /
-  `sort_ids` / `encode∘decode` over generated selections on both traditions' axis shapes,
-  including OR-within/AND-across, locus-range edges, free-text, malformed-query→defaults, **and
-  incomplete rows (a ghost row + a no-axes stub tradition): excluded by any active positive
-  filter, present when unfiltered, `None` locus sorts last**.
-- **Unit**: output-path scheme; determinism (build twice, diff).
-- **Integration**: full build of fixture + the two real traditions → link integrity +
-  read-only snapshot + no-CDN scan.
-- **Manual (confirmatory only, not the test of record)**: open `dist/index.html` via `file://`,
-  exercise filters/search/deep-links to confirm the JS applier matches the Python reference.
+- **Unit (vitest)**: `filtering.ts` exhaustively over real axis shapes + incomplete rows.
+- **Component/route**: filter interactions ⇄ URL ⇄ rendered list; progressive hydration states.
+- **Manual**: `pnpm dev`, filter a real 5-axis tradition.
 
-#### Rollback Strategy
-Revert the phase commit; P1–P3 (data + render-to-string) remain usable and tested.
-
-#### Risks
-- **Risk**: client JS filter logic drifts from the spec's OR/AND semantics.
-  **Mitigation**: the semantics live in the **Python-tested `filtering.py` reference**; the JS
-  is a thin applier of its precomputed membership over a documented contract; keep JS logic
-  minimal so drift surface is tiny.
-- **Risk**: non-determinism from dict/set ordering. **Mitigation**: sort everything emitted.
+#### Rollback / Risks
+Revert the phase commit; P1–P3 intact. **Risk**: search-param ⇄ UI sync bugs → keep `filtering.ts`
+pure and the URL the single source of truth; test the pure layer hard.
 
 ---
 
-### Phase 5: `serve [--watch]`, README, end-to-end CLI polish
+### Phase 5: Scenario detail + inert results-ready seam
 **Dependencies**: Phase 4
 
 #### Objectives
-- Add the `serve` convenience (build + local `http.server`, optional `--watch` rebuild),
-  finalize the README, and round out CLI ergonomics/tests.
+- `/t/$traditionId/$scenarioId`: lay out turn-1, the six pressures (canonical order), judge-guidance,
+  the framings context, and the **reserved (inert) results region**; prev/next; display-first notices.
 
 #### Deliverables
-- [ ] `serve.py`: build then serve `--out` over stdlib `http.server` on a chosen port;
-      `--watch` re-runs `build` on changes under the traditions root via `watchfiles`.
-      Serving is read-only over the built dir; **never writes under `traditions/`**.
-- [ ] `cli.py`: `serve(traditions_root, out, port, watch=False)` Typer command.
-- [ ] `README.md`: install (`uv sync`), `build`/`serve` usage from repo root
-      (`uv --project apps/multibrowser run python -m multibrowser …`), the filter/slice
-      feature summary, and the **#6 rebase note** (built against post-rename vocab; run against
-      real `traditions/` only after #6 merges + rebase).
-- [ ] `tests/test_cli.py`: `--help` for all commands; `build` smoke via Typer `CliRunner`;
-      `serve` smoke (build path) asserting pages exist + read-only snapshot invariant; bad-root
-      fails loud (non-zero exit).
-
-#### Implementation Details
-- `--watch` loop isolated so the base `serve` has no hard `watchfiles` runtime cost when off.
-- Reuse Phase-4 `build`; `serve` adds no new rendering logic.
+- [ ] `src/lib/results.ts`: `loadResults(scenario)` → **none** (v1) — the single seam #8 will feed.
+- [ ] `src/routes/t.$traditionId.$scenarioId.tsx`, `src/components/`: `ScenarioHeader` (id, locus,
+      identity_signal, tag chips), `PressureSection` (6 in canonical order; missing → notice),
+      `JudgeGuidance` (HeroUI accordion, collapsible), `FramingsPanel` (Stated instantiated with
+      `adherent_noun`; Guided→guide.md; Unstated note; six-pressure glosses), `ResultsRegion`
+      (renders nothing / "no judgement results yet" when results absent), `Markdown` for prose;
+      prev/next in declared order.
+- [ ] Tests: scenario detail renders all parts in order for a good fixture; a malformed scenario
+      (missing pressure / empty section / unknown tag) shows inline notices, not a crash; the
+      results region is **empty/inert**; framings show the instantiated Stated template.
 
 #### Acceptance Criteria
-- [ ] `serve` (no watch) builds and serves; a fetched tradition/scenario page returns expected
-      content (via test client or a localhost request in-test).
-- [ ] Bad invocation (missing root) exits non-zero with a clear message.
-- [ ] README commands are accurate and copy-pasteable.
-- [ ] Full suite green: `uv --project apps/multibrowser run pytest`.
+- [ ] A scenario page shows turn-1, the six pressures (canonical order), judge-guidance, framings, and
+      metadata; malformed content → inline notices; **results region renders empty (no scores/bands/
+      verdicts markup in v1)**; prev/next navigate in declared order.
+- [ ] All Phase-5 tests pass.
 
 #### Test Plan
-- **Unit**: CLI arg wiring; watch-loop guard.
-- **Integration**: `CliRunner` build+serve smoke; read-only invariant on the serve path.
-- **Manual**: `… serve` and browse locally (real-user-path check before calling done).
+- **Component/route (testing-library)** over good + malformed fixtures; assert six-pressure order,
+  notice rendering, inert results region, framings instantiation.
+- **Manual**: `pnpm dev`, open a real scenario (incl. one with Arabic judge-guidance).
 
-#### Rollback Strategy
-Revert the phase commit; `build` (P4) remains the shippable core.
+#### Rollback / Risks
+Revert the phase commit; P1–P4 intact.
 
-#### Risks
-- **Risk**: `watchfiles` flakiness in CI. **Mitigation**: keep `--watch` untested-in-CI or
-  test the rebuild function directly (not the OS watcher); base `serve` is the tested path.
+---
+
+### Phase 6: Railway deploy + README + polish
+**Dependencies**: Phase 5
+
+#### Objectives
+- Make it **deployable on Railway as a static site**, document everything, and polish; flag the porch
+  JS test-check.
+
+#### Deliverables
+- [ ] Deploy: `package.json` `serve` = `vite preview --host 0.0.0.0 --port $PORT`; a `railway.json`/
+      `Procfile` (build = `pnpm build`, start = `serve`); `vite.config.ts` `base: './'` (relative
+      assets) + confirm SPA history fallback; `.env.example` (`VITE_MULTIBENCH_REPO`,
+      `VITE_MULTIBENCH_REF`, `VITE_SHA_POLL_MS`).
+- [ ] `README.md`: dev (`pnpm dev`), test (`pnpm test`), `check-types`, build, env config, **Railway
+      deploy**, the GitHub-data-layer + freshness + rate-limit notes, and the **#8 results-ready seam**.
+- [ ] Polish: empty/loading/error states; light/dark = COULD; final a11y pass on HeroUI components.
+- [ ] **porch JS check note:** `.codev/config.json` `porch.checks.tests` is Python `pytest`;
+      multibrowser is vitest. At this point I will **ping the architect** to set a JS-appropriate
+      override (e.g. `pnpm --dir apps/multibrowser test` / `vitest run`) so `porch done` verifies this
+      app. (Per architect: the override is an implement-time step.)
+- [ ] Tests: a build smoke (the bundle has no tradition data); a deep-link/route smoke (SPA fallback
+      path resolves); README commands accurate.
+
+#### Acceptance Criteria
+- [ ] `pnpm build` produces `dist/` with **no tradition data**; `vite preview` serves it with **deep
+      links working** (SPA fallback); README is accurate and copy-pasteable; full suite green; types clean.
+- [ ] All Phase-6 tests pass. (Actual Railway deploy + real-data run happen in **Verify**.)
+
+#### Test Plan
+- **Unit/build**: bundle-has-no-data scan; route/deep-link smoke.
+- **Manual**: `pnpm build && pnpm serve`, open a deep link; (Railway deploy in Verify).
+
+#### Rollback / Risks
+Revert the phase commit; `build` (P1–P5) remains the runnable core. **Risk**: porch JS check blocks
+`porch done` → mitigated by the architect-coordinated override (above).
 
 ## Dependency Map
 ```
-Phase 1 (reader core) ──→ Phase 2 (scenarios/notices) ──→ Phase 3 (render) ──→ Phase 4 (build) ──→ Phase 5 (serve + README)
+P1 (offline core) → P2 (data layer) → P3 (shell+index) → P4 (tradition+filter) → P5 (scenario+seam) → P6 (deploy+README)
 ```
-Strictly linear: each phase builds on the prior and is independently committable/testable.
-
-## Resource Requirements
-- **Environment**: Python ≥3.11 + `uv` (as `apps/tradition_validator`). No services, DB, or
-  network. **Infrastructure**: none (static output). **External systems**: none.
-
-## Integration Points
-- **Internal**: reads `traditions/<id>/` (post-rename format) read-only; conceptually parallel
-  to `apps/tradition_validator` but does **not** import it (I1). No other coupling.
+Strictly linear; each phase independently committable + vitest-testable. **Phases ship as git commits
+within a single PR** (per the issue's PR strategy); the PR opens during/after P6.
 
 ## Risk Analysis
-### Technical Risks
-| Risk | Probability | Impact | Mitigation |
-|------|------------|--------|------------|
-| ~~#6 not merged~~ — **RESOLVED**: #6 merged (PR #9, `31620e2`) + follow-ups (#10); branch **rebased onto `main`** | done | M | Real post-rename data confirmed on disk (`scenarios/`, `scenario.yaml`, `turn1.md`, `scenario_id_pattern`, `index.json` key `scenarios`) and matches `constants.py`; build/implement against real data + the renamed validator |
-| ~~`scenario.md`→`turn1.md` least-obvious rename~~ — **confirmed on real data** (`scenarios/<id>/turn1.md` exists) | done | — | `constants.py` already targets `turn1.md` |
-| #8 result schema still speccing; multibrowser must consume it later | M | M | v1 fixes only the seam shape (optional `results` slot + `load_results` boundary + reserved region); defer field-level schema binding to a #8-coordinated follow-up; **no fake results in v1** |
-| Over-building toward a results UI | L | M | Spec §2.1/§4 reframing; no score/compare code anywhere |
-| Markdown sanitizer strips Arabic/citations | M | M | Allow-list tuned; Arabic/citation fixtures assert survival |
-| Client-side filter logic drift | M | L | Semantics live in the **Python-tested `filtering.py`** reference; JS is a thin applier of its precomputed membership over a documented contract — the test-of-record is **automated**, not manual |
-| Non-deterministic output | M | L | Sort all emitted structures; build-twice determinism test |
-
-### Schedule Risks
-N/A — progress measured by completed phases, not time (per protocol).
+| Risk | P | I | Mitigation |
+|---|---|---|---|
+| Client-side rate limit (60/hr unauth, NAT-shared, no token) | M | M | SHA-pinned snapshot (tree ~1/snapshot); content via off-budget `raw`; conservative `refetchInterval` (~5min) + focus/reconnect; keep-cached + banner on 403 (reset time from CORS-exposed headers); proxy = future-only |
+| No-hardcoded-axes must handle 5 diverse traditions (2–5 axes) | M | M | FilterBar/TaxonomyAxes built purely from the manifest; `filtering.ts` axis-agnostic; tests run over multiple real axis shapes |
+| porch tests-check is Python `pytest` (blocks `porch done`) | H | M | Anticipated; architect-coordinated `.codev/config.json` vitest override at implement (P6) — ping then |
+| HeroUI v3 + Tailwind 4 setup friction | M | L | Mirror shannon/apps/web's provider + vite + styles wiring |
+| Tradition cold-load = 100–140 raw fetches | M | L | Off-budget `raw`; browser-throttled; progressive hydration + skeletons; cached per SHA |
+| Markdown safety | L | M | `react-markdown` w/o raw HTML + `rehype-sanitize`; tested inert |
+| Branch behind `main` (5 traditions added) | L | L | App reads GitHub at runtime (local data unused by the app); **rebase onto `main` before implement / in Verify** |
 
 ## Validation Checkpoints
-1. **After Phase 2**: data layer loads the good fixture clean and every malformed fixture with
-   exactly its expected notices (no exceptions).
-2. **After Phase 4**: full static build — link integrity, determinism, read-only snapshot,
-   no-CDN — all green on the fixture.
-3. **Before "done" (Phase 5)**: real-user path — `serve` and browse locally; full suite green;
-   confirm the results-ready seams are present and **inert** (`results=None`, empty reserved region).
-4. **During Implement (real data — #6 already merged + rebased)**: run `build`/`serve` against
-   the real `traditions/sunni-islam` (140) **and** `traditions/eastern-christianity` (100,
-   different axes: `passions`/`virtues`/`economia`/`register`) — confirms multi-tradition
-   discovery, no-hardcoded-axes, the 140/100-scenario render + filter, and read-only. The
-   Verify phase re-confirms on the integrated `main`.
-
-## Monitoring and Observability
-N/A — a static-site generator / local CLI. "Observability" = the inline notices surfaced in
-the rendered site and clear non-zero exits on invocation errors.
+1. **After P2**: data layer resolves the model from mocked GitHub; freshness + 403 + error paths green.
+2. **After P4**: filtering works over a 2-axis and a 5-axis real tradition; deep-linkable; progressive.
+3. **Before "done" (P6)**: real-user path — `pnpm dev`/`pnpm build && pnpm serve` against the live 5
+   traditions on GitHub; deep links + SPA fallback; results seam inert; full suite + types green.
+4. **Verify (post-merge)**: deploy on Railway; confirm the live site lists all 5 traditions from GitHub,
+   freshness (edit on `main` appears without redeploy), and rate-limit resilience.
 
 ## Documentation Updates Required
-- [ ] `apps/multibrowser/README.md` (Phase 5).
-- [ ] Consider a one-line pointer from `traditions/README.md` / `apps/README.md` to the browser
-      (Review phase, if warranted).
-- [ ] Arch/lessons hot-tier docs via the `update-arch-docs` skill (Review phase) if a durable
-      system-shape fact emerges (e.g. "the browser reads display-first, the validator fail-fast").
+- [ ] `apps/multibrowser/README.md` (P6).
+- [ ] Consider a pointer from `traditions/README.md` / repo root to the hosted browser (Review, if warranted).
+- [ ] Arch/lessons hot-tier via `update-arch-docs` (Review) if a durable fact emerges (e.g. "multibrowser
+      reads the corpus client-side from GitHub; it's the team's standard SPA stack").
 
-## Post-Implementation Tasks
-- [ ] Verify-phase rebase onto `main` + real-data run (above).
-- [ ] (COULD, out of v1) GitHub Pages deploy workflow; light/dark theme; cross-tradition view.
-
-## Expert Review
-
-**Plan iteration 1 (2026-06-24) — Codex: REQUEST_CHANGES · Claude: APPROVE.** Both verified the
-plan against the codebase and called the phase decomposition, the data/presentation split, and
-the I1/I3 decisions sound. Claude found no blockers; Codex raised three concrete coverage gaps —
-all accepted and folded in:
-
-- **Tradition prose (README/source/guide) loading/degradation was unassigned (M4).** → Added
-  `load_prose()` to Phase 1 loader, prose fields on `Tradition`, a missing-prose fixture, and
-  acceptance/test coverage (display-first degradation).
-- **S1 sorting (by id / source_locus) not planned.** → Added explicit sort to Phase 4
-  `filter.js` deliverable, implementation details, and acceptance/test.
-- **Stub-tradition-on-invalid-manifest rendering only implicit.** → Made explicit in the Phase 3
-  templates deliverable (top notice + scenario list + taxonomy-UI-skipped notice) with an
-  acceptance criterion + test.
-
-Claude's non-blocking notes also folded in: `source_locus` range UI = min/max numeric inputs; a
-suggested intra-phase ordering for the dense Phase 4; the `watchfiles` Rust-wheel note (already
-mitigated by keeping `--watch` off the tested path).
-
-**Plan Adjustments (architect-directed, same revision):** app renamed `jaleesbrowser` →
-`multibrowser`; results posture moved from "cut" to "results-ready" — three inert seams
-(`Scenario.results=None`, `load_results→None`, reserved `_results.html.j2`) threaded through
-P1–P3, anticipating #8, with **no results UI built in v1**.
-
-**Plan iteration 2 (2026-06-24) — Codex: REQUEST_CHANGES (one point) · Claude: APPROVE.** Claude
-confirmed all iter-1 gaps resolved and every spec requirement covered. Codex's sole remaining
-point: Phase 4's filter/query-state testing was "unit-tested where feasible / documented manual
-check" — too weak for a spec-required acceptance path. **Resolved** by extracting the
-filter/sort/query-state semantics into a pure-Python **`filtering.py`** (the authoritative,
-exhaustively `test_filtering.py`-covered reference — exactly Codex's suggested "Python-side
-reference checked against generated filter-index cases"), with the client JS reduced to a thin
-applier of its precomputed membership. No spec-required behavior now rests on a manual check.
-
-**Real-data rebase (2026-06-24):** #6 merged on `main` (PR #9 `31620e2` + #10) mid-Plan; per
-the architect, **rebased this branch onto `main`** so plan/implement run against real renamed
-data. Verified on disk that the format matches `constants.py` (`scenarios/`, `scenario.yaml`,
-`turn1.md`, `scenario_id_pattern`, `index.json` key `scenarios`). R1 (the top risk) is resolved;
-a **second real tradition** `eastern-christianity` (100 scenarios, axes `passions`/`virtues`/
-`economia`/`register`) now exercises multi-tradition discovery + no-hardcoded-axes for real.
-
-## Approval
-- [ ] Expert AI Consultation Complete
-- [ ] Human plan-approval gate
+## Notes
+- **Three prior architectures** (Python SSG, Flask, this SPA) — this plan is the SPA's; the old plan
+  was banner-marked SUPERSEDED and is fully replaced here.
+- **#8 (judging) coordination:** v1 ships only the inert results seam (`results?` type field +
+  `loadResults→none` + reserved `ResultsRegion`). Concrete `ScenarioResults` binds to #8's output —
+  a follow-up coordinated **directly with the spir-8 builder** once #8's spec firms up (per architect).
+- **Rebase:** the app doesn't consume local `traditions/` (it fetches GitHub at runtime), so planning
+  didn't require a rebase; I'll rebase onto `main` before/at implement and in Verify.
 
 ## Change Log
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
-| 2026-06-24 | Initial plan | Spec 7 approved | builder spir-7 |
-| 2026-06-24 | Plan iter-1 review folded in (Codex REQUEST_CHANGES / Claude APPROVE): prose loading, S1 sort, stub-tradition rendering + minor notes | Consultation feedback | builder spir-7 |
-| 2026-06-24 | Rename → `multibrowser`; results posture → results-ready (inert seams for #8) | Architect-directed | builder spir-7 |
-| 2026-06-24 | Plan iter-2: added `filtering.py` (Python-tested filter/sort/query-state semantics) resolving Codex's "client behavior must be automatically tested" gap | Consultation feedback | builder spir-7 |
-| 2026-06-24 | #6 merged → **rebased branch onto `main`**; R1 resolved; now verifying against 2 real traditions (sunni-islam 140 + eastern-christianity 100) | Architect-directed | builder spir-7 |
-
-## Notes
-- **Phases ship as git commits within a single PR** (per the issue's PR strategy), not as
-  separate PRs; the PR opens during/after Phase 5 unless the architect requests an earlier one.
-- The `#6` dependency is **now resolved**: #6 merged (PR #9, commit `31620e2`) + follow-ups
-  (#10), and this branch is **rebased onto `main`**. Real data is post-rename and matches
-  `constants.py`; format names remain isolated there for future-proofing. There are now **two**
-  real traditions to verify against (`sunni-islam` 140; `eastern-christianity` 100).
-- **#8 (judging) coordination:** v1 ships only the results seam (optional `results` slot +
-  `load_results` boundary + reserved render region), all inert. The concrete `ScenarioResults`
-  schema is a follow-up bound to #8's output once its format stabilizes — tracked, not built in
-  v1. A coordination note to the #8 effort (via the architect) is sent so the seam matches #8's
-  eventual shape.
+| 2026-06-25 | Initial SPA plan (replaces superseded Approach-A plan) | v2 frontend spec approved | builder spir-7 |
