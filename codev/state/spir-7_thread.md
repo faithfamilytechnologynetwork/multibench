@@ -219,3 +219,13 @@ Plan decisions: pnpm, file-based TanStack Router, js-yaml, react-markdown+rehype
 refetchInterval ~5min (NAT-60/hr-aware), vite preview deploy, vitest+testing-library offline.
 
 Next: porch done → plan consult (codex+claude) → plan-approval gate. Rebase onto main at implement.
+
+SPA plan consult (run MANUALLY — porch carried the plan-iteration counter to its ceiling from the
+rejected Approach-A plan, so it loops "fix issues" without issuing a consult task; consult reviews
+the current plan file regardless): **Codex REQUEST_CHANGES (2) + Claude APPROVE**. Fixed both:
+(1) `base:'./'` → **`base:'/'`** (relative base breaks deep-link asset loading on a root-served
+SPA); (2) assigned the 3 spec fallbacks to phases+tests — truncated→per-dir (P2), index-missing→
+folders (P2), unknown traditionId/scenarioId→in-SPA 404 (P4/P5). Plan §Plan-Consultation + rebuttal
+recorded.
+
+Next: `porch done 7` → plan-approval gate (force-advance at ceiling). Notify architect.

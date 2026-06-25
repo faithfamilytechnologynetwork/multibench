@@ -1,0 +1,8 @@
+---
+VERDICT: REQUEST_CHANGES
+SUMMARY: Strong, mostly complete plan, but it currently bakes in a likely broken SPA asset-base choice and leaves a few spec-mandated fallback paths under-specified.
+CONFIDENCE: HIGH
+---
+KEY_ISSUES:
+- `vite.config.ts` `base: './'` in Phase 6 is a likely conflict with the plan/spec’s required deep-link behavior. For a root-served SPA with history fallback, relative asset URLs can break on nested routes like `/t/sunni-islam/JLS-001`. The plan should either drop that setting or justify a deployment shape where it is correct.
+- Several required degradation paths are mentioned in the spec but not clearly owned/tested in the phases: at minimum `git-trees truncated:true` fallback, `index.json` missing/invalid → derive scenarios from folders, and unknown tradition/scenario IDs → in-SPA 404 validated against discovered data. These should be assigned to specific phases with explicit tests, not left implicit.

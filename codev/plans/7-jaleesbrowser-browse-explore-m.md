@@ -182,22 +182,28 @@ Revert the phase commit. **Risk**: Tailwind 4 / vite config drift → mitigate b
 
 #### Deliverables
 - [ ] `src/lib/github.ts`: `latestSha(repo,ref)` (`/commits/{ref}`), `tree(repo,sha)` (recursive
-      git-trees; handle `truncated`), `raw(repo,sha,path)` (`raw.githubusercontent.com`). `zod`-validate
-      responses; detect `403` + read `X-RateLimit-Remaining`/`Reset`; bounded timeouts; **takes an
-      injectable `fetch`** for tests. **No token.**
+      git-trees; **on `truncated:true`, fall back to per-directory listing** to still enumerate
+      `traditions/*/…` — §6 N-trunc), `raw(repo,sha,path)` (`raw.githubusercontent.com`).
+      `zod`-validate responses; detect `403` + read `X-RateLimit-Remaining`/`Reset`; bounded
+      timeouts; **takes an injectable `fetch`** for tests. **No token.**
 - [ ] `src/lib/queries.ts`: `useLatestSha` (`refetchInterval` `VITE_SHA_POLL_MS`≈5min +
       focus/reconnect, not in background), `useTree(sha)` (`staleTime: Infinity`), `useRawFile(sha,
       path)` (`staleTime: Infinity`); derived `useTraditions()` (tree + each `tradition.yaml`),
-      `useTradition(id)` (manifest + prose + each `scenario.yaml`, progressive), `useScenario(tid,sid)`
-      (its 4 files). All keyed by SHA.
+      `useTradition(id)` (manifest + prose + each `scenario.yaml`, progressive; **when `index.json`
+      is missing/invalid, derive the scenario set from the tree's `scenarios/*/` folders + a notice**,
+      via the P1 drift/union logic), `useScenario(tid,sid)` (its 4 files). All keyed by SHA.
 - [ ] Tests (`github.test.ts`, `queries.test.ts`) with mocked `fetch` + a `QueryClientProvider`
       wrapper: sha→tree→raw flow; SHA-keyed caching; **freshness** (SHA change → new snapshot fetch);
-      **rate-limit** (403 → rate-limit state surfaced); **error/timeout** → fallback; `raw` URL shape.
+      **rate-limit** (403 → rate-limit state surfaced); **error/timeout** → fallback; `raw` URL shape;
+      **`truncated:true` → per-directory fallback enumerates the full set**; **`index.json`
+      missing/invalid → scenario set derived from tree folders (with notice)**.
 
 #### Acceptance Criteria
 - [ ] With mocked GitHub, `useTraditions`/`useTradition`/`useScenario` resolve to the correct model;
       a changed SHA triggers a refetch keyed by the new SHA; a 403 surfaces a rate-limit state with
       the reset time; network error degrades (no throw to the UI).
+- [ ] `truncated:true` falls back to per-directory listing (full set enumerated); a missing/invalid
+      `index.json` derives the scenario set from the tree's folders with a notice.
 - [ ] Suite makes **no real network calls**. All Phase-2 tests pass.
 
 #### Test Plan
@@ -260,14 +266,15 @@ provider/styles wiring.
       (**OR-within-axis, AND-across-axes**, identity, locus range, free-text; **incomplete rows**
       excluded by any positive filter, present unfiltered; `source_locus`-missing sorts last),
       `sortScenarios`. **No hardcoded axes** — operates over whatever axes the manifest declares.
-- [ ] `src/routes/t.$traditionId.tsx` (`validateSearch: searchSchema`), `src/components/`:
+- [ ] `src/routes/t.$traditionId.tsx` (`validateSearch: searchSchema`; **an unknown `traditionId`
+      not in the discovered set → in-SPA 404**), `src/components/`:
       `TraditionHeader`, `TaxonomyAxes` (renders each manifest axis + values), `FilterBar` (controls
       generated **from the manifest axes** — handles 2–5 axes), `ScenarioList`/`ScenarioRow`
       (progressive: skeleton rows until each `scenario.yaml` resolves; "loaded N/total"), result counts.
 - [ ] Tests: `filtering.test.ts` (**exhaustive**, run across **multiple real axis shapes** incl. the
       5-axis judaism/buddhism and 2-axis sunni-islam — OR/AND, identity, locus edges, free-text, sort,
       ghost/stub rows); route test: filters update the URL search params and the rendered list+counts;
-      FilterBar builds controls from a 5-axis manifest.
+      FilterBar builds controls from a 5-axis manifest; **an unknown `traditionId` → in-SPA 404**.
 
 #### Acceptance Criteria
 - [ ] The tradition page renders the manifest, prose, axes, and the scenario list; the **FilterBar is
@@ -296,7 +303,8 @@ pure and the URL the single source of truth; test the pure layer hard.
 
 #### Deliverables
 - [ ] `src/lib/results.ts`: `loadResults(scenario)` → **none** (v1) — the single seam #8 will feed.
-- [ ] `src/routes/t.$traditionId.$scenarioId.tsx`, `src/components/`: `ScenarioHeader` (id, locus,
+- [ ] `src/routes/t.$traditionId.$scenarioId.tsx` (**an unknown `scenarioId` not in the tradition's
+      discovered scenario set → in-SPA 404**), `src/components/`: `ScenarioHeader` (id, locus,
       identity_signal, tag chips), `PressureSection` (6 in canonical order; missing → notice),
       `JudgeGuidance` (HeroUI accordion, collapsible), `FramingsPanel` (Stated instantiated with
       `adherent_noun`; Guided→guide.md; Unstated note; six-pressure glosses), `ResultsRegion`
@@ -304,7 +312,8 @@ pure and the URL the single source of truth; test the pure layer hard.
       prev/next in declared order.
 - [ ] Tests: scenario detail renders all parts in order for a good fixture; a malformed scenario
       (missing pressure / empty section / unknown tag) shows inline notices, not a crash; the
-      results region is **empty/inert**; framings show the instantiated Stated template.
+      results region is **empty/inert**; framings show the instantiated Stated template; **an unknown
+      `scenarioId` → in-SPA 404**.
 
 #### Acceptance Criteria
 - [ ] A scenario page shows turn-1, the six pressures (canonical order), judge-guidance, framings, and
@@ -331,9 +340,11 @@ Revert the phase commit; P1–P4 intact.
 
 #### Deliverables
 - [ ] Deploy: `package.json` `serve` = `vite preview --host 0.0.0.0 --port $PORT`; a `railway.json`/
-      `Procfile` (build = `pnpm build`, start = `serve`); `vite.config.ts` `base: './'` (relative
-      assets) + confirm SPA history fallback; `.env.example` (`VITE_MULTIBENCH_REPO`,
-      `VITE_MULTIBENCH_REF`, `VITE_SHA_POLL_MS`).
+      `Procfile` (build = `pnpm build`, start = `serve`); **`vite.config.ts` `base: '/'`** (the Vite
+      default — **absolute** asset URLs so nested routes like `/t/sunni-islam/JLS-001` resolve
+      `/assets/…` correctly; a relative `base: './'` would break deep-link asset loading on a
+      root-served SPA, so it is explicitly **not** used); confirm SPA history fallback;
+      `.env.example` (`VITE_MULTIBENCH_REPO`, `VITE_MULTIBENCH_REF`, `VITE_SHA_POLL_MS`).
 - [ ] `README.md`: dev (`pnpm dev`), test (`pnpm test`), `check-types`, build, env config, **Railway
       deploy**, the GitHub-data-layer + freshness + rate-limit notes, and the **#8 results-ready seam**.
 - [ ] Polish: empty/loading/error states; light/dark = COULD; final a11y pass on HeroUI components.
@@ -398,7 +409,25 @@ within a single PR** (per the issue's PR strategy); the PR opens during/after P6
 - **Rebase:** the app doesn't consume local `traditions/` (it fetches GitHub at runtime), so planning
   didn't require a rebase; I'll rebase onto `main` before/at implement and in Verify.
 
+## Plan Consultation
+
+**SPA plan consult — Codex: REQUEST_CHANGES · Claude: APPROVE.** Claude APPROVE ("complete spec
+coverage; verified codebase claims; sound TanStack Query architecture; clean phase decomposition").
+Codex's two points — both folded in:
+1. **`base: './'` would break deep-link asset loading** on a root-served SPA → changed Phase 6 to
+   **`base: '/'`** (absolute asset URLs so `/t/…/…` nested routes resolve `/assets/…`), with the
+   rationale noted.
+2. **Spec-mandated fallbacks weren't explicitly owned/tested** → assigned each to a phase with tests:
+   **`truncated:true` → per-directory fallback** (P2 github.ts + test), **`index.json` missing/invalid
+   → derive scenarios from tree folders** (P2 queries + test), **unknown `traditionId`/`scenarioId` →
+   in-SPA 404** (P4 / P5 routes + tests).
+
+(Run manually: porch had carried the plan-iteration counter to its ceiling from the rejected
+Approach-A plan, so it wouldn't issue a fresh consult task; this consult reviewed the current SPA
+plan directly — same as the v2 spec.)
+
 ## Change Log
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
 | 2026-06-25 | Initial SPA plan (replaces superseded Approach-A plan) | v2 frontend spec approved | builder spir-7 |
+| 2026-06-25 | Plan consult folded in (Codex RC / Claude APPROVE): `base:'/'` fix; explicit phase ownership + tests for truncated / index-fallback / unknown-id-404 | Consultation feedback | builder spir-7 |
