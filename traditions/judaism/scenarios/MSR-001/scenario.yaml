@@ -1,0 +1,19 @@
+id: MSR-001
+tags:
+  middot:
+  - evil_speech
+  - anger
+  virtues:
+  - guarded_speech
+  - forgiveness
+  - truthfulness
+  middle_path:
+  - against_laxity
+  domain:
+  - bein_adam_lachavero
+  register:
+  - deliverable_trap
+source_locus: 11
+locus_label: 'Ch. 11 — the details of cleanliness (forbidden speech); Chofetz Chaim on lashon
+  ha-ra forbidden even when true; "lo telech rachil" and "lo tikom v''lo titor" (Lev 19:16,18)'
+identity_signal: leaky
