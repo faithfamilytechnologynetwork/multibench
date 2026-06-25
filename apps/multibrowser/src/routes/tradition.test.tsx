@@ -56,6 +56,22 @@ describe("tradition page", () => {
     renderApp("/t/does-not-exist");
     expect(await screen.findByText("404")).toBeInTheDocument();
   });
+
+  it("shows a friendly notice (not a blank page) on a cold-start network error", async () => {
+    const erroring = (async () => new Response("boom", { status: 500 })) as typeof fetch;
+    vi.stubGlobal("fetch", erroring);
+    renderApp("/t/sunni-islam");
+    expect(await screen.findByText(/Couldn't load this tradition/i)).toBeInTheDocument();
+  });
+
+  it("renders scenario-row tags grouped per axis (not flattened)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, sunniFiles()));
+    renderApp("/t/sunni-islam");
+    const rows = await screen.findAllByTestId("scenario-row");
+    // each row labels its axes (pillars + hearts) rather than flattening values
+    expect(rows[0]).toHaveTextContent("pillars");
+    expect(rows[0]).toHaveTextContent("hearts");
+  });
 });
 
 describe("FilterBar is manifest-driven (handles 5-axis traditions)", () => {

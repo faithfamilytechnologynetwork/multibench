@@ -42,15 +42,17 @@ export function ScenarioRow({
               {meta.identitySignal}
             </Chip>
           )}
-          <span className="flex flex-wrap gap-1">
-            {Object.values(meta.tags)
-              .flat()
-              .slice(0, 6)
-              .map((t, i) => (
-                <Chip key={`${t}-${i}`} size="sm" variant="soft" color="default">
-                  {t}
-                </Chip>
-              ))}
+          <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            {Object.entries(meta.tags).map(([axis, values]) => (
+              <span key={axis} className="flex flex-wrap items-center gap-1">
+                <span className="text-[10px] font-medium uppercase tracking-wide text-default-400">{axis}</span>
+                {values.map((v) => (
+                  <Chip key={`${axis}-${v}`} size="sm" variant="soft" color="default">
+                    {v}
+                  </Chip>
+                ))}
+              </span>
+            ))}
           </span>
         </>
       ) : (
