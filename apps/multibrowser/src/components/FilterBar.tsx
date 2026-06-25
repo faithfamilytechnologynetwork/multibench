@@ -103,7 +103,7 @@ export function FilterBar({ taxonomies, selection, onChange, total, shown, loade
           </select>
         </label>
 
-        <span className="ml-auto text-sm text-default-500">
+        <span className="ml-auto text-sm text-default-500" data-testid="result-count">
           {shown} of {total}
           {!loadedAll && <span className="ml-1 text-default-400">(loading…)</span>}
         </span>
