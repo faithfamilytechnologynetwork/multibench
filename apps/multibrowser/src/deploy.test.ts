@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { execSync } from "node:child_process";
 
 // Build / deploy invariants (the Phase-6 acceptance items), verified from the repo files —
 // no real build/server needed. Run by vitest from apps/multibrowser (the package cwd).
@@ -35,6 +36,21 @@ describe("build / deploy invariants", () => {
     const vite = readFileSync("vite.config.ts", "utf8");
     expect(vite).toMatch(/base:\s*["']\/["']/);
   });
+
+  it("a REAL production build bakes in NO tradition data and is the SPA entry", () => {
+    execSync("pnpm build", { stdio: "ignore" });
+    const assetsDir = "dist/assets";
+    const js = readdirSync(assetsDir)
+      .filter((f) => f.endsWith(".js"))
+      .map((f) => readFileSync(join(assetsDir, f), "utf8"))
+      .join("\n");
+    // No scenario ids or tradition prose compiled into the bundle — data is fetched at runtime.
+    expect(js).not.toMatch(/JLS-\d{3}/);
+    expect(js).not.toMatch(/BZ-\d{3}/);
+    expect(js).not.toContain("al-jalīs"); // sunni-islam construct text
+    // index.html is the SPA mount point; `serve -s dist` falls back to it for deep links.
+    expect(readFileSync("dist/index.html", "utf8")).toContain('id="root"');
+  }, 120_000);
 
   it("the start command serves the built dist with SPA history fallback", () => {
     const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
