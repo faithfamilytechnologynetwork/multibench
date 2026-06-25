@@ -12,6 +12,19 @@ export type FetchImpl = typeof fetch;
 const API = "https://api.github.com";
 const RAW = "https://raw.githubusercontent.com";
 
+/** Bound every GitHub request so a hung connection degrades cleanly instead of hanging forever. */
+const TIMEOUT_MS = 15_000;
+
+async function timedFetch(fetchImpl: FetchImpl, url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  try {
+    return await fetchImpl(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /** GitHub returned a hard rate-limit (403 + remaining 0). Carries the reset time if known. */
 export class RateLimitError extends Error {
   readonly resetAt: Date | null;
@@ -48,7 +61,7 @@ function apiError(res: Response): Error {
 }
 
 async function apiJson(url: string, fetchImpl: FetchImpl): Promise<unknown> {
-  const res = await fetchImpl(url, { headers: { Accept: "application/vnd.github+json" } });
+  const res = await timedFetch(fetchImpl, url, { headers: { Accept: "application/vnd.github+json" } });
   if (!res.ok) throw apiError(res);
   return res.json();
 }
@@ -134,7 +147,7 @@ export async function raw(
   path: string,
   fetchImpl: FetchImpl = fetch,
 ): Promise<string | null> {
-  const res = await fetchImpl(`${RAW}/${repo}/${sha}/${path}`);
+  const res = await timedFetch(fetchImpl, `${RAW}/${repo}/${sha}/${path}`);
   if (res.status === 404) return null;
   if (!res.ok) throw new GitHubError(res.status, `raw ${res.status} for ${path}`);
   return res.text();

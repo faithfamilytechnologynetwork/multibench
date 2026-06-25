@@ -219,8 +219,11 @@ export function useLatestSha() {
     staleTime: SHA_POLL_MS,
     refetchInterval: SHA_POLL_MS,
     refetchIntervalInBackground: false,
-    refetchOnWindowFocus: true,
-    refetchOnReconnect: true,
+    // "always" (not true): true only refetches when stale, but staleTime == the poll interval,
+    // so a tab refocused within the window would otherwise not refresh. "always" gives the
+    // planned "sooner on focus/reconnect" freshness. It's just the cheap SHA call (raw is off-budget).
+    refetchOnWindowFocus: "always",
+    refetchOnReconnect: "always",
   });
 }
 
