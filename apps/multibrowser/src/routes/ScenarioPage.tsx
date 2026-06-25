@@ -31,28 +31,32 @@ export function ScenarioPage() {
   const scenQ = useScenario(sha, traditionId, scenarioId, declaredTax);
   const scenario = scenQ.data;
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error) ?? asRateLimit(scenQ.error);
+  const otherError = !rl && (shaQ.error || tradQ.error || scenQ.error);
 
-  if (!tradition && rl) {
-    return (
-      <div className="flex flex-col gap-4">
-        <RateLimitBanner error={rl} />
-        <Notice
-          notice={{
-            severity: "error",
-            scope: "github",
-            where: "GitHub",
-            message: `Couldn't load this scenario — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`,
-          }}
-        />
-      </div>
-    );
-  }
+  const errorFallback = (what: string) => (
+    <div className="flex flex-col gap-4">
+      {rl && <RateLimitBanner error={rl} />}
+      <Notice
+        notice={{
+          severity: "error",
+          scope: "github",
+          where: "GitHub",
+          message: rl
+            ? `Couldn't load this ${what} — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`
+            : `Couldn't load this ${what}: ${(otherError as Error).message}`,
+        }}
+      />
+    </div>
+  );
+
+  if (!tradition && (rl || otherError)) return errorFallback("scenario");
   if (tradQ.isLoading && !tradition) return <CenteredSpinner label="Loading…" />;
   if (tradition === null) return <NotFound what={`Tradition “${traditionId}”`} />;
   if (tradition && !scenarioIds.includes(scenarioId)) {
     return <NotFound what={`Scenario “${scenarioId}”`} />;
   }
   if (scenQ.isLoading && !scenario) return <CenteredSpinner label="Loading scenario…" />;
+  if (!scenario && (rl || otherError)) return errorFallback("scenario");
   if (!scenario || !tradition) return null;
 
   const idx = scenarioIds.indexOf(scenarioId);

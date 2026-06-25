@@ -44,18 +44,21 @@ export function TraditionPage() {
   const loadedAll = entries.length > 0 && loaded === entries.length;
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error);
+  const otherError = !rl && (shaQ.error || tradQ.error);
   const onChange = (next: Selection) => navigate({ search: selectionToSearch(next) });
 
-  if (!tradition && rl) {
+  if (!tradition && (rl || otherError)) {
     return (
       <div className="flex flex-col gap-4">
-        <RateLimitBanner error={rl} />
+        {rl && <RateLimitBanner error={rl} />}
         <Notice
           notice={{
             severity: "error",
             scope: "github",
             where: "GitHub",
-            message: `Couldn't load this tradition — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`,
+            message: rl
+              ? `Couldn't load this tradition — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`
+              : `Couldn't load this tradition: ${(otherError as Error).message}`,
           }}
         />
       </div>
