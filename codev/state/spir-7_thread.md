@@ -316,3 +316,20 @@ improvements landed:
   `@import "@heroui/styles"`; shannon omits it too) — plan's "HeroUIProvider" was v2-era; (b)
   code-based routing — architect-approved. Rebutted.
 Tests now 78 (green); tsc+build clean throughout. Continuing phases 3-6 → review → PR.
+
+## 2026-06-25 — ALL 6 implement phases CONVERGED → REVIEW phase → PR
+
+Per-phase consults done (codex+claude, 3-iter ceiling each). All real fixes landed:
+- p3: cold-start rate-limit/error → friendly notice (not endless spinner/blank), index+tradition+scenario.
+- p4: zod searchSchema at route boundary; drop unknown axis/identity values fail-soft; "loaded N/total";
+  per-axis scenario-row tags; cold-start non-rate-limit error fallback; UI→URL-sync + count tests.
+- p5: Guided framing renders actual guide.md; six-pressure glosses; route-level unknown-tag notice test.
+- p6: serve -s dist + base '/' + buildCommand; REAL build test (scan dist = no baked data) + REAL
+  static-server smoke (spawn serve -s dist, fetch deep link → 200 + index.html = SPA fallback).
+**89 vitest tests green**, tsc clean, build clean. Both APPROVE on every phase's final consult.
+
+Review phase: wrote codev/reviews/7-*.md (with ## Architecture Updates + ## Lessons Learned Updates),
+updated hot-tier arch-critical/lessons-critical (multibrowser SPA fact; per-builder dispatcher;
+HeroUI v3 provider-less; client-side GitHub rate-limit lesson). Opening PR → porch done (review
+checks) → pr gate (architect runs the full 3-way integration CMAP). 3 architect-approved deviations
+documented (serve -s dist; code-based routing; HeroUI v3 provider-less).
