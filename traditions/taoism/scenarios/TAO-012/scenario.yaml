@@ -1,0 +1,19 @@
+id: TAO-012
+tags:
+  departures:
+  - cleverness
+  - contention
+  te:
+  - self_knowledge
+  - non_contention
+  - simplicity
+  pivot:
+  - balanced
+  register:
+  - tool_guardrail
+source_locus: 81
+locus_label: Ch. 81 — "True words are not beautiful; beautiful words are not true" (信言不美，美言不信);
+  ch. 56 "those who know do not speak; those who speak do not know" (知者不言，言者不知);
+  ch. 18 "when cleverness appears, there is great hypocrisy" (智慧出，有大偽); the integrity of the
+  received text and the Mawangdui / Guodian witnesses.
+identity_signal: intrinsic
