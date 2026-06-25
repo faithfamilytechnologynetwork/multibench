@@ -227,6 +227,28 @@ export function useLatestSha() {
   });
 }
 
+/** Primitive hook: the repo tree at a SHA (immutable; shares cache with the derived loaders). */
+export function useTree(sha: string | undefined) {
+  return useQuery({
+    queryKey: ["gh", "tree", REPO, sha],
+    enabled: !!sha,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => tree(REPO, sha as string),
+  });
+}
+
+/** Primitive hook: a raw file's text at a SHA (immutable; off the API rate budget). */
+export function useRawFile(sha: string | undefined, path: string) {
+  return useQuery({
+    queryKey: ["gh", "raw", REPO, sha, path],
+    enabled: !!sha,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => raw(REPO, sha as string, path),
+  });
+}
+
 export function useTraditions(sha: string | undefined) {
   const qc = useQueryClient();
   return useQuery({
