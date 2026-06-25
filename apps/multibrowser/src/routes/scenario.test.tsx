@@ -55,6 +55,16 @@ describe("scenario detail", () => {
     expect(notes.length).toBeGreaterThan(0); // flattery missing + good_cause empty
   });
 
+  it("surfaces an unknown-tag-value notice on the scenario page", async () => {
+    const files = traditionFiles("sunni-islam", ["JLS-001"]);
+    // manifest declares pillars [a,b]; give the scenario an undeclared value.
+    files["traditions/sunni-islam/scenarios/JLS-001/scenario.yaml"] =
+      "id: JLS-001\ntags: {pillars: [not-a-pillar]}\nsource_locus: 1\nlocus_label: X\nidentity_signal: clean\n";
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    renderApp("/t/sunni-islam/JLS-001");
+    expect(await screen.findByText(/not-a-pillar/)).toBeInTheDocument(); // the inline notice
+  });
+
   it("renders an in-SPA 404 for an unknown scenario id", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001"])));
     renderApp("/t/sunni-islam/JLS-999");

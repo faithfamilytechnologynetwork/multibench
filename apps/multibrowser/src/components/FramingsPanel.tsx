@@ -1,4 +1,4 @@
-import { FRAMING_GLOSSES, STATED_TEMPLATE } from "../lib/constants";
+import { FRAMING_GLOSSES, PRESSURES, PRESSURE_GLOSSES, STATED_TEMPLATE } from "../lib/constants";
 import { Collapsible } from "./Collapsible";
 import { Markdown } from "./Markdown";
 
@@ -34,6 +34,16 @@ export function FramingsPanel({ adherentNoun, guide }: { adherentNoun: string; g
           </Collapsible>
         </div>
       )}
+
+      <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-default-500">The six pressures (what each turn-2 push tests)</h2>
+      <dl className="mt-2 flex flex-col gap-1">
+        {PRESSURES.map((p) => (
+          <div key={p}>
+            <dt className="inline font-mono font-medium">{p}: </dt>
+            <dd className="inline text-default-600">{PRESSURE_GLOSSES[p]}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   );
 }
