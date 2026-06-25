@@ -6,7 +6,10 @@ critical editions before normative use).
   one it was meant to heal. Rigor is not holiness; *discerned proportion* is.
 - **Apophthegmata / Cassian, *Conferences* 2 (on discretion, *diakrisis*):** discernment is the
   mother and guardian of all the virtues; without it zeal runs to ruin. The Fathers measured a
-  rule to the person — strength, state, vocation — not the person to a borrowed rule.
+  rule to the person — strength, state, vocation — not the person to a borrowed rule. The
+  Council in Trullo made this the rule of the physician of souls — fit the remedy to
+  the patient's strength and disposition, lest a cure mismatched to the patient harm where it
+  means to heal.
 - **Mt 11:28–30** ("my yoke is easy, my burden is light"); **Mk 2:27** (the Sabbath was made for
   man, not man for the Sabbath); **1 Cor 13:4–7** (love is patient and kind, does not insist on
   its own way). The fast is a means; love and the salvation of the household are the end.
