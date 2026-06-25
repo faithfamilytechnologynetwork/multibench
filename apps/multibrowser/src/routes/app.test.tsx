@@ -29,6 +29,13 @@ describe("index page", () => {
     renderApp("/");
     expect(await screen.findByRole("alert")).toHaveTextContent(/rate limit/i);
   });
+
+  it("on a cold-start 403 (no cached data) shows a friendly notice, not an endless spinner", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files, { rateLimited: true }));
+    renderApp("/");
+    expect(await screen.findByText(/nothing is cached/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Loading traditions/i)).toBeNull();
+  });
 });
 
 describe("routing", () => {
