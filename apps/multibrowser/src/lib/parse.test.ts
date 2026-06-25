@@ -105,6 +105,16 @@ describe("parseManifest", () => {
     expect(manifest).toBeNull();
     expect(notices[0]!.message).toMatch(/Invalid YAML/);
   });
+
+  it("flags malformed sub-fields display-first (taxonomy values, maintainers)", () => {
+    const { notices } = parseManifest(
+      "id: x\ndisplay_name: X\nconstruct: c\nadherent_noun: A\ncanonical_source: {title: T, author: A, locus_unit: b}\nscenario_id_pattern: '^.*$'\nmaintainers: ['not-a-record', {contact: only}]\ntaxonomies: {a: {description: d, applies_to: scenario, values: [ok, 3]}}\n",
+    );
+    const m = notices.map((n) => n.message).join(" | ");
+    expect(m).toContain("non-string values"); // taxonomy values had a number
+    expect(m).toContain("malformed"); // the string maintainer entry
+    expect(m).toContain("no `name`"); // the maintainer record without a name
+  });
 });
 
 describe("parseIndex", () => {
