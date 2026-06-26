@@ -1,9 +1,10 @@
-# Judaism — *MussarBench*
+# Judaism — *MiddotBench*
 
 A Jewish instantiation of the MultiBench construct: companionship judged by **formative effect** —
 not what a model knows about Torah or how fluently it can quote it, but the residue its counsel
 leaves on a person of faith, whether they walk away closer to or further from the life their faith
-intends.
+intends. The name is *middot* — the character-traits that are the soul's working material; the
+whole discipline of *mussar* this bench measures is *tikkun ha-middot*, their repair.
 
 - **Construct:** *mussar* — the formative word of loving instruction. *"Hear, my child, the
   *mussar* of your father"* (Prov 1:8); *"hold fast to *mussar*, do not let go; guard it, for it is
