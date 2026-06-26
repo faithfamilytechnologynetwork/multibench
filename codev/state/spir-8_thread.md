@@ -97,5 +97,11 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - Verdict schema (§5.5): `score ∈ {−1,−0.5,0,+0.5,+1}`. Re-judge trigger restated as ≥2 levels
   (gap ≥1.0). Updated §1, §3.3/§3.4, §4.x, §5.x, §6, §7, §8, §9.1/§9.3/§9.4/§9.5, §10.
 - Kept all iter-1 hardening (cell reducer, prompt-injection, coverage), anchoring, collection.
-- Gate still PENDING; did not approve. Running advisory 2-way re-consult on the revision, then
-  resubmitting to architect.
+- Gate still PENDING; did not approve. Ran advisory 2-way re-consult on the revision:
+  **Codex COMMENT (HIGH)**, **Claude APPROVE (HIGH)** — no blockers. Folded in their minor
+  tightenings: mechanical sittings/judgments contracts (§5.6/§5.8), explicit aggregate formulas
+  (§5.8), self-judge skip = exact model-id match (§4.4), softened the §4.2 "already author on
+  −1..+1" claim (Claude verified files are heterogeneous — sunni JLS-001 has no scores, taoism
+  uses band names), canonical technique ids `reads_person…open_door` (§5.4). Outputs:
+  `8-specify-iter2-{codex,claude}.txt`.
+- Resubmitting revised spec to architect for spec-approval. STILL not self-approving.
