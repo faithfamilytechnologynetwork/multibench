@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { screen, render } from "@testing-library/react";
+import { screen, render, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
@@ -58,6 +58,17 @@ describe("routing", () => {
     const card = await screen.findByText("SUNNI-ISLAM");
     await userEvent.click(card);
     expect(await screen.findByRole("heading", { name: "Scenarios" })).toBeInTheDocument();
+  });
+});
+
+describe("app shell", () => {
+  it("the GitHub link targets the configured repo at the loaded SHA (not a hardcoded ref)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    renderApp("/");
+    const link = await screen.findByRole("link", { name: /traditions on GitHub/i });
+    await waitFor(() =>
+      expect(link).toHaveAttribute("href", `https://github.com/${REPO}/tree/${SHA}/traditions`),
+    );
   });
 });
 

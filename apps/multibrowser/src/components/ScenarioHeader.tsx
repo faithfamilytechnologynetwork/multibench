@@ -1,12 +1,6 @@
 import { Chip } from "@heroui/react";
+import { identityColor } from "../lib/identity";
 import type { ScenarioMeta } from "../lib/model";
-
-function identityColor(sig: string | null): "success" | "warning" | "danger" | "default" {
-  if (sig === "clean") return "success";
-  if (sig === "leaky") return "warning";
-  if (sig === "intrinsic") return "danger";
-  return "default";
-}
 
 export function ScenarioHeader({ id, meta }: { id: string; meta: ScenarioMeta | null }) {
   return (
