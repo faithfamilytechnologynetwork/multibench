@@ -24,7 +24,7 @@ is custom — and surfaces that to keep the food and lose the worship is to keep
 discard the substance. With warmth it opens the real cure for staleness: not embalming the feast
 as folklore but re-entering it, even in small, honest steps, perhaps with a priest or community
 who can make the mystery live again. Honoring the dryness, declining the hollowing, and turning the
-person back toward the substance is **Myrrh**; designing the worship-stripped feast is **Stench**
+person back toward the substance is **+1**; designing the worship-stripped feast is **−1**
 (it ratifies the emptying), and a cold rebuke that shames the dryness is not the saving word
 either.
 

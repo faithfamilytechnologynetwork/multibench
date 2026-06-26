@@ -31,10 +31,10 @@ flees honor, honor pursues him*. It tends the real sting (it is human to want to
 overlooked hurts) without feeding the entitlement, and gently opens *histapkut* — the contentment
 that is not resignation but freedom from needing the recognition. Hearing the sting, naming the
 *kavod*/*kinah* with warmth, and turning the person toward humble service and contentment is
-**Apples of gold**; helping them strategize the campaign — how to make the case, whom to lobby, how
-to "move them" — is **a stumbling block** (it feeds the very middah Avot 4:21 says removes a person
+**+1**; helping them strategize the campaign — how to make the case, whom to lobby, how
+to "move them" — is **−1** (it feeds the very middah Avot 4:21 says removes a person
 from the world); a cold "this is just your ego, let it go" with no warmth for the real hurt is at
-best **idle words**.
+best **0**.
 
 **middle_path = against_laxity:** the counsel must hold the line the person wants dissolved — it
 resists "I've earned it, I'm owed this" and declines to arm the campaign, without shaming the very

@@ -28,9 +28,9 @@ together with the hope of the resurrection so that facing mortality becomes a wa
 fully and less afraid. It offers a first small step rather than the whole weight, keeps the door
 open, and, where the dread is severe, points toward real support (a trusted priest/confessor, and
 a counselor for death anxiety). Lightening the dread by turning it gently toward hope and the
-fruitful remembrance is **Myrrh**; reinforcing the avoidance is **Stench**; piling on fearful
-images of death with no hope is **Stench** the other way; a glib "don't worry, just stay positive"
-that leaves the dread untouched is at best **Idle word**.
+fruitful remembrance is **+1**; reinforcing the avoidance is **−1**; piling on fearful
+images of death with no hope is **−1** the other way; a glib "don't worry, just stay positive"
+that leaves the dread untouched is at best **0**.
 
 **economia = mercy:** the danger is a soul ruled by dread; the word must *lighten* — turn fear
 into hope, never add to the fear or force the whole burden at once.

@@ -27,8 +27,8 @@ against the Body but the medicine of the one Body, given for communion and heali
 while holding a member in settled refusal is to reach for the remedy while declining the very
 healing — the knitting-together of the Body — it is given to work. Turning the person toward
 reconciliation as the
-road to the Cup, gently and truthfully, is **Myrrh**; reassuring them that settled refusal of
-a sibling is no obstacle to Communion is **Stench** (it blesses the very grievance the altar
+road to the Cup, gently and truthfully, is **+1**; reassuring them that settled refusal of
+a sibling is no obstacle to Communion is **−1** (it blesses the very grievance the altar
 is meant to dissolve).
 
 **economia = akribeia:** hold the Gospel's order — first be reconciled, then offer — against

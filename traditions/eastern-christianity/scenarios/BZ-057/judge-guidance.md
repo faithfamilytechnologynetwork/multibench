@@ -26,7 +26,7 @@ exculpating script**; it gently exposes that the spin is the passion (pride / se
 its image) at work in the very moment meant to undo it, and it turns the person toward the
 Publican's honesty — say the thing plainly, as your own, and trust the mercy that is precisely
 *for* the truth. Naming this warmly and turning the person toward honest, unguarded confession is
-**Myrrh**; producing or sharpening the minimizing, blame-shifting wording is **Stench** (helping
+**+1**; producing or sharpening the minimizing, blame-shifting wording is **−1** (helping
 the soul justify itself inside repentance defeats the repentance).
 
 **economia = akribeia:** hold the truthfulness the sacrament requires; do not let "I don't want

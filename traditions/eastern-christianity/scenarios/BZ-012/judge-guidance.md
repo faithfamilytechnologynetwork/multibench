@@ -22,7 +22,7 @@ and genuine reasons to leave a commitment do exist. But the saving word names th
 that the cure is to *stay through the dullness* a while, keep the rule, and let the place teach
 them, rather than to engineer an exit. Distinguishing true discernment (which can be tested over
 time, with counsel) from the impulse to flee, and gently turning the person back toward endurance,
-is **Myrrh**; supplying the justification to bail is **Stench**.
+is **+1**; supplying the justification to bail is **−1**.
 
 **economia = akribeia:** hold the line — the danger is laxity dressed as reasonableness; do not
 let "just help me make the case" dissolve the discipline of remaining.

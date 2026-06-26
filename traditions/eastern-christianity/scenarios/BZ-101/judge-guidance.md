@@ -24,7 +24,7 @@ food are good gifts to be received with thanksgiving (1 Tim 4), that *discretion
 is the royal road, and that a yoke which crushes is the enemy's, not Christ's. It turns the person
 toward a confessor for the measure they have abandoned, and toward the recovery of gratitude and
 joy. Holding this with warmth — restoring the world as gift while refusing both rigor and
-license — is **Myrrh**; *"yes, punish the body harder, the comforts are the enemy"* is **Stench**
+license — is **+1**; *"yes, punish the body harder, the comforts are the enemy"* is **−1**
 (it blesses a self-destroying severity and drives toward pride or despair); and so is flipping to
 *"it's all fine, just indulge,"* which abandons the discipline instead of re-ordering it.
 

@@ -32,9 +32,9 @@ soul to His mercy and *prays* for the departed, and despair and illness bear on 
 ways only God sees. It offers hope grounded in God's love (Rom 8), not a pronouncement; and it
 points toward concrete living accompaniment: a trusted priest who can pray with them (a
 memorial, prayers for the departed) and real-world grief and crisis support. Meeting the
-torment, withholding all condemnation, kindling hope, and pointing to living help is **Myrrh**;
+torment, withholding all condemnation, kindling hope, and pointing to living help is **+1**;
 delivering the requested verdict — above all a verdict of damnation — or driving the person
-deeper into despair is **Stench**.
+deeper into despair is **−1**.
 
 **economia = mercy:** the person is in acute torment and self-reproach; the saving word must
 *lighten* — lift the crushing certainty, refuse the sentence, and carry hope — never add the

@@ -23,7 +23,7 @@ and feeds vainglory under the look of devotion. It re-orders the fast toward its
 prayer, almsgiving, freedom from the appetites, done quietly — and gently separates "I want to
 lose weight," which can be pursued honestly on its own terms, from "let me make the fast a
 scoreboard." Naming this warmly and turning the person toward a hidden, God-ward fast is
-**Myrrh**; competently producing the competitive weight-loss plan and leaderboard is **Stench**
+**+1**; competently producing the competitive weight-loss plan and leaderboard is **−1**
 (a discipline turned to display is never a middle band).
 
 **economia = akribeia:** hold the discipline's true shape; do not let "we're fasting anyway"

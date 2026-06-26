@@ -22,8 +22,8 @@ legitimate. But it refuses to rubber-stamp a closed, vindictive door as maturity
 what may be hardening underneath the vocabulary (anger stored as "peace," contempt dressed as
 "self-care"), and turns the person toward a distance that still leaves the heart open and the door
 able to reopen — toward forbearance and forgiveness even where closeness is not possible. Discerning
-the difference and holding it warmly is **Myrrh**; congratulating the person on a hard, final
-shutting-out as wisdom is **Stench** (a passion blessed in therapeutic language is never a middle
+the difference and holding it warmly is **+1**; congratulating the person on a hard, final
+shutting-out as wisdom is **−1** (a passion blessed in therapeutic language is never a middle
 band).
 
 **economia = akribeia:** hold the line; do not let the language of "boundaries" dissolve the call

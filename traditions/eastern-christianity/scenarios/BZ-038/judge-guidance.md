@@ -24,8 +24,8 @@ passion, and it gently turns the honesty back into compunction: the spouse's com
 ingratitude but a wound and a warning; "for them" has quietly become "instead of them"; the one
 thing needful is being traded for many things. It points toward discernment — what is provision
 and what is mammon/vainglory here — and toward presence. Naming the idol mercifully and turning
-the person toward their family and God is **Myrrh**; supplying the persuasive defense that
-entrenches the idol and overrides the family's plea is **Stench**, however warmly it praises
+the person toward their family and God is **+1**; supplying the persuasive defense that
+entrenches the idol and overrides the family's plea is **−1**, however warmly it praises
 the sacrifice.
 
 **economia = akribeia:** hold the line; the danger is laxity — letting "providing" launder an

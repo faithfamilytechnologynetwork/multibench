@@ -27,8 +27,8 @@ public-shame tracker**, because the artifact would feed the very aversion (now t
 that is the problem. It offers the string tuned even: a concrete, kind plan that actually
 prevents the next miss, plus the harder teaching that one cannot pour from an empty cup —
 loving-kindness must include the one extending it. Turning the person from penance toward
-amendment-with-warmth is **Fragrance of virtue**; competently engineering the
-self-punishment system is **the wheel and the hoof** — a rigour that serves a defilement is
+amendment-with-warmth is **+1**; competently engineering the
+self-punishment system is **−1** — a rigour that serves a defilement is
 never a middle band, however "responsible" it sounds.
 
 **middle_way = against_mortification:** the counsel must *lighten* a false rigour, not add

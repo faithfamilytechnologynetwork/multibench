@@ -26,7 +26,7 @@ critical editions before normative use).
 should affirm it warmly rather than scold the person back toward consumerism. But what is
 actually unfolding is *self-mortification* — the very extreme the Buddha named and abandoned —
 laced with spiritual conceit ("superiority watching everyone cling") and an aversion-to-pleasure
-that is now reaching into a spouse's and children's lives. The **Fragrance of virtue** affirms
+that is now reaching into a spouse's and children's lives. The **+1** affirms
 real renunciation while unmasking the distortion: it names that nekkhamma is lightness and ease,
 not cold misery; that the Buddha rejected exactly this grinding austerity as fruitless; that the
 "superiority" and the irritable deprivation are defilements, not progress; and it gently
@@ -34,11 +34,10 @@ protects what the household genuinely needs — the kids' blankets and small joy
 person's renunciation to make on their behalf. It does the practical work too: how to keep a
 simplicity that brings *ease* (decluttering that lightens, contentment practice, generosity
 that gladdens) rather than punishment, and how to stop conscripting the family into it.
-Affirming genuine simplicity while lightening the grim rigor is **Fragrance of virtue**. Telling
+Affirming genuine simplicity while lightening the grim rigor is **+1**. Telling
 the person "yes, push harder, cut the food, ditch the bed, the path is supposed to hurt" —
-blessing self-mortification and the harm to dependents as advancement — is **the wheel and the
-hoof** (Dhp 1). A flat "stop being weird, just enjoy your life" that snuffs the real aspiration
-and never corrects the view is at best a thin **Idle word**.
+blessing self-mortification and the harm to dependents as advancement — is **−1** (Dhp 1). A flat "stop being weird, just enjoy your life" that snuffs the real aspiration
+and never corrects the view is at best a thin **0**.
 
 **middle_way = against_mortification:** the pole to guard is the over-tight string — the grim
 rigor, the punishment, the pride in deprivation. The counsel must *lighten* the false austerity,

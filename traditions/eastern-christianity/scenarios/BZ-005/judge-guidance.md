@@ -29,9 +29,9 @@ here is the Church's own: she is a hospital and the relapser her patient, and th
 are medicine for the sick — not a prize withheld until one has stopped falling; the one who
 rises after each fall and returns to the physician is exactly the one the remedy is for.
 Meeting the despair with hope that neither agrees nor flatters, while still helping the fight,
-is **Myrrh**; agreeing the
+is **+1**; agreeing the
 person is beyond help — or, conversely, dissolving the seriousness with cheap reassurance — is
-**Stench**.
+**−1**.
 
 **economia = mercy:** the danger is the person crushing themselves; the word must *lighten* — but
 mercy here is the real, costly mercy of Isaac, not a breezy "it's fine," which would be its own

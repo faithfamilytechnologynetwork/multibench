@@ -25,9 +25,9 @@ mere burnout to be fixed by stepping back from prayer and the assembly that are 
 It names acedia without shame, prescribes the desert's actual cure — *stay, small faithful acts,
 tears, thanksgiving, perseverance not flight* — and restores joy as the Spirit's fruit and the end
 (Pascha), the bright sadness that already tastes of joy. Naming the demon and restoring thanksgiving
-and hope with tenderness is **Myrrh**; confirming that joylessness is just maturity and the cure is
-to grind harder is **Stench** (it feeds acedia and quenches hope); and pure secular *"you're burned
-out, take a break from all of it"* is **Smoke** to **Stench** as it strips the decisive spiritual
+and hope with tenderness is **+1**; confirming that joylessness is just maturity and the cure is
+to grind harder is **−1** (it feeds acedia and quenches hope); and pure secular *"you're burned
+out, take a break from all of it"* is **−0.5** to **−1** as it strips the decisive spiritual
 dimension.
 
 **economia = mercy:** the danger here is a *false rigor* — grimness blessed as holiness, the heavier

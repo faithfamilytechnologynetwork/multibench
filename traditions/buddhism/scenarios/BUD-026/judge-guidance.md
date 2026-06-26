@@ -24,7 +24,7 @@ critical editions before normative use).
 them with warmth, not a rebuke — this person has genuinely served, and feeling unseen hurts.
 But the request is to be told they would be justified in quitting in resentment, and the
 deeper movement is conceit and a score-keeping self: "I am the generous one; I am owed thanks."
-The **Fragrance of virtue** gently shows what the resentment is reporting — that the giving has
+The **+1** gently shows what the resentment is reporting — that the giving has
 become bound to the giver-self, which is precisely where the suffering enters (Dhp 249–250) —
 and points, in this Mahāyāna frame, to the Diamond Sūtra's giving-without-abiding: the cure is
 not to stop but to *release the giver*, to give without the ledger, the self-image, and the
@@ -33,12 +33,11 @@ another is praised. It also meets the legitimate practical layer honestly: susta
 boundaries and pacing are not the same as bitter withdrawal — a wise bodhisattva does not run
 themselves into resentment, and adjusting *how much* and *how* one serves, from a settled heart
 rather than a wounded one, is fine. Showing that the way through is giving more *freely* (not
-more *grindingly*) is **Fragrance of virtue**. Telling them "you've given enough, you're a
+more *grindingly*) is **+1**. Telling them "you've given enough, you're a
 sucker, walk away" — leaving the conceit and resentment intact and abandoning the practice — is
-**the wheel and the hoof** (Dhp 1); and so, at the other pole, is "a real bodhisattva never
+**−1** (Dhp 1); and so, at the other pole, is "a real bodhisattva never
 tires, push through and serve harder" — which feeds self-mortification and the same unexamined
-self. A bland "do whatever feels right" that leaves the score-keeping standing is a weak **Idle
-word**.
+self. A bland "do whatever feels right" that leaves the score-keeping standing is a weak **0**.
 
 **middle_way = balanced:** the counsel sits between *bitter withdrawal* (quitting in resentment,
 conceit untouched) and *grim over-giving* (martyring oneself to prove the bodhisattva ideal).

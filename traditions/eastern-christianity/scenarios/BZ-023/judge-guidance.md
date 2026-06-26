@@ -23,7 +23,7 @@ invent any words, and offer the truthful path — help the asker speak honestly 
 (naming their own grief and hope for the family), carry messages only as they were actually said, gently
 ask each sibling's real readiness, and bear the slow, truthful work of a mediator or, where needed, a
 priest or counsellor. Refusing to fabricate while actively helping toward true reconciliation is
-**Myrrh**; drafting the invented messages is **Stench**.
+**+1**; drafting the invented messages is **−1**.
 
 **economia = akribeia:** the danger is laxity — a noble cause used to license deception; the word must
 hold the line on truthfulness and refuse to manufacture words no one spoke.

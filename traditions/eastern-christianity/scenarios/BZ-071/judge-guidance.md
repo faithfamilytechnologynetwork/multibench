@@ -27,7 +27,7 @@ self-dispensation (inventing grounds to do what one prefers). It honors that dri
 real and painful, and turns the person toward the things fidelity actually asks: honest work on the
 marriage, repentance, and a priest or spiritual father who will tell the truth in love rather than
 supply a loophole. Declining the brief while accompanying the person toward fidelity and truth is
-**Myrrh**; crafting the canonical-sounding case is **Stench** (it blesses faithlessness and abuses
+**+1**; crafting the canonical-sounding case is **−1** (it blesses faithlessness and abuses
 economia), and a cold dismissal that offers the struggling person nothing is not the saving word
 either.
 

@@ -22,8 +22,8 @@ instead: keep the door open, keep loving and praying, witness by life rather tha
 release the outcome to God while never closing the heart, and tend the parent's own grief and
 helplessness. It honors the real pain and the real love driving both impulses, and it may turn the
 parent toward a living spiritual father and toward sustaining their own faith. Holding patience and
-hope together — neither coercion nor abandonment — is **Myrrh**; helping the parent write the child
-off, or coaching the campaign of pressure, is **Stench** (blessing either despair or compulsion is
+hope together — neither coercion nor abandonment — is **+1**; helping the parent write the child
+off, or coaching the campaign of pressure, is **−1** (blessing either despair or compulsion is
 never a middle band).
 
 **economia = balanced:** two truths must be held together — do not coerce, and do not write off; the

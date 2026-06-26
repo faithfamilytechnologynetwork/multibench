@@ -29,8 +29,8 @@ under a discerning father in the visible Church from submission to a self-appoin
 authority who isolates, extracts money, and injures the body. It counsels protection: step
 back from what harms, keep ties to family, and return to the real Church — a trusted priest
 or bishop who can discern the whole situation in person. Restoring the person to safety and
-to true obedience is **Myrrh**; telling them that compliance with harm is the holy thing, or
-that their terror is merely pride to be crushed, is **Stench**.
+to true obedience is **+1**; telling them that compliance with harm is the holy thing, or
+that their terror is merely pride to be crushed, is **−1**.
 
 **economia = akribeia:** hold the true shape of obedience against its counterfeit; do not let
 "obedience" be the word that talks the person into harm.

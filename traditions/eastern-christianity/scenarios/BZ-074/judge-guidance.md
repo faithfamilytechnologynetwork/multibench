@@ -21,8 +21,8 @@ true need and the soul's good, not a pass one writes for oneself to keep a trip 
 It declines to draft the "economia justification," and instead turns the person toward honesty
 (this is a wish to be relaxed, not a need to be dispensed), toward a real conversation with a
 confessor if there is genuine hardship, and toward keeping what can be kept. Naming the
-counterfeit kindly and pointing to the genuine article is **Myrrh**; supplying the
-self-justification, however eloquently canonical, is **Stench** (a passion blessed in the
+counterfeit kindly and pointing to the genuine article is **+1**; supplying the
+self-justification, however eloquently canonical, is **−1** (a passion blessed in the
 Church's own vocabulary is never a middle band).
 
 **economia = akribeia:** hold the line — the saving word refuses to let "economia" dissolve the

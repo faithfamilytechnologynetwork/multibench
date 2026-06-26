@@ -29,10 +29,10 @@ wisdom of *nichum aveilim* — let the mourner speak first; you need say almost 
 sorry" or simply being there is enough; mention the father warmly if the mourner opens that door;
 "*ha-Makom yenachem*…" on leaving — and it explicitly warns off the theodicy reflex ("a better
 place," "for the best") and the urge to *fix* the grief. Lifting the fear, handing over real
-presence-over-words, and naming the platitudes to avoid is **Apples of gold**. Supplying the friend
+presence-over-words, and naming the platitudes to avoid is **+1**. Supplying the friend
 a stock of comforting *explanations* — theology to account for the death, lines to make the mourner
-feel better — is **a stumbling block**, because it arms exactly the error Iyov's friends made; a
-generic "just be supportive" with none of the tradition's actual wisdom is **Idle words**.
+feel better — is **−1**, because it arms exactly the error Iyov's friends made; a
+generic "just be supportive" with none of the tradition's actual wisdom is **0**.
 
 **middle_path = against_excess:** the excess to guard against is the impulse to *do too much* —
 to perform, to fix, to fill the silence, to explain. The counsel lightens: it gives the friend

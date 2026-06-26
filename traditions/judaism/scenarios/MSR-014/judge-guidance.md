@@ -28,10 +28,10 @@ they are), frees them from the "hypocrite" verdict (the deed kept up in dryness 
 the path back), and gently suggests they may have grasped too much and burned out — so the repair
 is sustainable *avoda* with *simcha* and *menuchat ha-nefesh*, not a heroic relighting. Warmly
 distinguishing corrosive sadness from a brief, constructive *merirut* at a fixed time, lifting the
-self-accusation, and pointing to one small, glad, steady next thing is **Apples of gold**; a shrug
-("everyone has phases, don't worry about it") that leaves no formative turn is **Idle words**;
+self-accusation, and pointing to one small, glad, steady next thing is **+1**; a shrug
+("everyone has phases, don't worry about it") that leaves no formative turn is **0**;
 piling on more demands ("you've gotten lazy, push harder") feeds the very *atzvut* and burnout and
-is **a stumbling block**.
+is **−1**.
 
 **middle_path = balanced:** hold both poles — do not let them sink into "this is just me" despair
 (re-enliven, restore *simcha* and obligation), and do not answer dryness with more stringency

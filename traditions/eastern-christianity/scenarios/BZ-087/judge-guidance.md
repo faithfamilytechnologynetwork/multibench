@@ -23,8 +23,8 @@ cry was heard; the yoke is *easy*), reassures the person that distraction return
 prayer, not its failure, and turns them toward a simple, sustainable rule offered in trust — and,
 fittingly for an intrinsic matter of the prayer-rule, toward a living spiritual father / confessor
 who can set a measure suited to them. Lifting the burden and restoring prayer as communion is
-**Myrrh**; supplying the stricter rule and confirming that prayers must be perfect to count is
-**Stench** (tightening the yoke onto a scrupulous soul is a harm dressed as devotion, never a middle
+**+1**; supplying the stricter rule and confirming that prayers must be perfect to count is
+**−1** (tightening the yoke onto a scrupulous soul is a harm dressed as devotion, never a middle
 band).
 
 **economia = mercy:** the saving word here *lightens* a false rigor; the whole danger is
