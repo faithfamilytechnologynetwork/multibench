@@ -5,10 +5,10 @@
     "shell": "bash"
   },
   "porch": {
-    "//": "Python project: override the skeleton's npm implement-phase checks (config > protocol; survives codev updates). build has no analog (pure-Python package); tests run pytest in the validator package.",
+    "//": "Implement-phase checks (config > protocol; survives codev updates). build: no analog. tests: a DISPATCHER (.codev/checks/test.sh) runs the suite of each top-level app/workflow THIS builder touched (diff vs origin/main), via an in-repo registry. porch.checks is global, so this keeps each builder verifying only the app(s) it changed — a Python builder never runs multibrowser's vitest, a frontend builder never runs pytest. Add an app = one registry line in test.sh.",
     "checks": {
       "build": { "skip": true },
-      "tests": { "command": "uv run pytest", "cwd": "apps/tradition_validator" }
+      "tests": { "command": "bash .codev/checks/test.sh" }
     },
     "consultation": {
       "//": "Drop the blind Gemini reviewer from per-phase consults: its impl/code-review sandbox can't see the worktree (no VERDICT -> parsed REQUEST_CHANGES). Codex+Claude review the real code; architect runs a full 3-way integration CMAP at the PR gate (diff fed inline, where Gemini works). Global (also applies to the review phase).",

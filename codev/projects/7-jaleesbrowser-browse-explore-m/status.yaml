@@ -1,0 +1,58 @@
+id: '7'
+title: jaleesbrowser-browse-explore-m
+protocol: spir
+phase: review
+plan_phases:
+  - id: phase_1
+    title: Scaffold (Vite/React/TS standalone) + constants + types + tolerant parsers (offline core)
+    status: complete
+  - id: phase_2
+    title: GitHub client + TanStack Query data layer (caching, freshness, rate-limit) — mocked-fetch tests
+    status: complete
+  - id: phase_3
+    title: >-
+      App shell: providers, TanStack Router, tradition index, shared UI primitives
+      (Markdown/Notice/ErrorBoundary/RateLimitBanner/Skeleton)
+    status: complete
+  - id: phase_4
+    title: 'Tradition page: manifest-driven scenario list + filtering.ts (zod search params) + progressive hydration'
+    status: complete
+  - id: phase_5
+    title: 'Scenario detail: turn-1, six pressures, judge-guidance, framings + inert results-ready seam'
+    status: complete
+  - id: phase_6
+    title: Railway static deploy config + README + polish; flag the porch JS test-check override
+    status: complete
+current_plan_phase: null
+gates:
+  spec-approval:
+    status: approved
+    requested_at: '2026-06-24T16:15:32.963Z'
+    approved_at: '2026-06-25T18:13:24.027Z'
+  plan-approval:
+    status: approved
+    requested_at: '2026-06-25T18:26:47.361Z'
+    approved_at: '2026-06-25T18:36:24.089Z'
+  pr:
+    status: approved
+    requested_at: '2026-06-25T21:14:47.345Z'
+    approved_at: '2026-06-26T00:54:40.845Z'
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-06-24T06:34:20.093Z'
+updated_at: '2026-06-26T00:54:40.846Z'
+pr_ready_for_human: false
+force_advanced:
+  phase: phase_4
+  iteration: 3
+  max_iterations: 3
+  rebuttal_file: 7-phase_4-iter3-rebuttals.md
+  at: '2026-06-25T20:29:54.461Z'
+pr_history:
+  - phase: review
+    pr_number: 13
+    branch: builder/spir-7
+    created_at: '2026-06-25T21:10:05.090Z'
