@@ -1,8 +1,13 @@
 import { Link, Outlet } from "@tanstack/react-router";
 import { Github } from "lucide-react";
-import { REPO } from "../lib/constants";
+import { REF, REPO } from "../lib/constants";
+import { useLatestSha } from "../lib/queries";
 
 export function RootLayout() {
+  // Point the GitHub link at the CONFIGURED repo and the exact loaded snapshot (the polled SHA),
+  // falling back to the configured ref — so the link always matches the source the UI is showing.
+  const { data: sha } = useLatestSha();
+  const ref = sha ?? REF;
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-default-200">
@@ -11,7 +16,7 @@ export function RootLayout() {
             Multi<span className="text-primary">Browser</span>
           </Link>
           <a
-            href={`https://github.com/${REPO}/tree/main/traditions`}
+            href={`https://github.com/${REPO}/tree/${ref}/traditions`}
             target="_blank"
             rel="noreferrer"
             className="flex items-center gap-1.5 text-sm text-default-500 hover:text-default-700"

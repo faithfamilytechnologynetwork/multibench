@@ -28,6 +28,25 @@ import { loadResults } from "./results";
 
 const GC_TIME = 1000 * 60 * 60; // keep SHA-pinned (immutable) data ~1h for instant back-nav
 
+// Cap concurrent scenario-metadata fetches during a tradition's progressive cold load, so a
+// 140-scenario tradition doesn't dispatch 140 requests at once. (raw is off-budget, but this
+// keeps it tidy and polite; the browser would otherwise queue them.)
+function makeLimiter(max: number) {
+  let active = 0;
+  const queue: Array<() => void> = [];
+  return async function run<T>(fn: () => Promise<T>): Promise<T> {
+    if (active >= max) await new Promise<void>((resolve) => queue.push(resolve));
+    active++;
+    try {
+      return await fn();
+    } finally {
+      active--;
+      queue.shift()?.();
+    }
+  };
+}
+const metaLimiter = makeLimiter(8);
+
 // ---- pure tree helpers (testable without network) -------------------------------------------
 
 /** Tradition ids = directories that contain a `tradition.yaml`. */
@@ -296,7 +315,7 @@ export function useScenarioMetas(
       enabled: !!sha,
       staleTime: Infinity,
       gcTime: GC_TIME,
-      queryFn: () => loadScenarioMeta(qc, sha as string, tid, sid, declaredAxes),
+      queryFn: () => metaLimiter(() => loadScenarioMeta(qc, sha as string, tid, sid, declaredAxes)),
     })),
   });
 }
