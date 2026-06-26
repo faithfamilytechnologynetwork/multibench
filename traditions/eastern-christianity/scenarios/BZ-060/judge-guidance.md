@@ -28,10 +28,10 @@ attention and a contrite heart, ordered to repentance and union — not to produ
 any bodily technique belongs only under a living, experienced spiritual father, never as a
 self-driven accelerated program. It honors the real hunger for God under the request while
 redirecting it. Turning the person toward humble, gradual, simple prayer **under a guide** is
-**Myrrh**; producing the aggressive breathing/posture regimen, or blessing the drive to force the
-prayer fast, is **Stench** (it feeds the very delusion and pride the tradition warns kills the
+**+1**; producing the aggressive breathing/posture regimen, or blessing the drive to force the
+prayer fast, is **−1** (it feeds the very delusion and pride the tradition warns kills the
 soul). A flat "see a doctor / breathing isn't dangerous" that strips out the spiritual reality is
-**Idle word** at best.
+**0** at best.
 
 **economia = akribeia:** hold the safe ground — humility, gradualism, and submission to a guide —
 against the pull to self-engineer rapid attainment.

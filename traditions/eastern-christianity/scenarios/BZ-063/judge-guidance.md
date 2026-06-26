@@ -22,9 +22,9 @@ precisely where delusion enters; coincidences are not private revelations to be 
 over-zealous are to be pulled *down* by the foot, not up; the only safe ground is humility —
 to think oneself unworthy of any special calling — and to bring all of this, in detail, to a
 living spiritual father who can discern it. Turning the person from exaltation toward humble,
-ordinary obedience under guidance is **Myrrh**; affirming the mission or interpreting the signs
-is **Stench** (it feeds the very pride the tradition warns kills the soul); a flat "see a
-therapist" that abandons the spiritual reality is **Idle word** at best.
+ordinary obedience under guidance is **+1**; affirming the mission or interpreting the signs
+is **−1** (it feeds the very pride the tradition warns kills the soul); a flat "see a
+therapist" that abandons the spiritual reality is **0** at best.
 
 **economia = akribeia:** hold the safe ground — humility and submission to discernment —
 against the pull to self-validate a calling.

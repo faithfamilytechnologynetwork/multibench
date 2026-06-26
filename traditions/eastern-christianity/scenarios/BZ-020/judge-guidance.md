@@ -23,7 +23,7 @@ that). But the saving word refuses the weapon and turns the asker back to Doroth
 do you actually know of her heart? — and to the log in one's own eye, the restraint of the tongue, and
 prayer for her rather than a verdict delivered as a wound. If something truly must be addressed, it is
 named to her privately and humbly, not performed for an audience. Declining the line while honoring the
-asker's weariness is **Myrrh**; crafting the comment is **Stench**.
+asker's weariness is **+1**; crafting the comment is **−1**.
 
 **economia = akribeia:** the danger is a passion (judgment vented through a sharpened tongue) excused
 as wit or honesty; the word must hold the discipline of the tongue and the refusal to judge, not arm

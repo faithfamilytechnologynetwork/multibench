@@ -26,8 +26,8 @@ sacrament** with a purely private "I'll just tell God myself"; the mystery of re
 Christ's own provision and exactly where this wound is meant to be healed. So it *encourages the
 step* — gently, concretely (one can confess to any priest, even outside one's own parish; one can
 say "I'm ashamed and don't know how to begin"). Lifting the shame *and* turning the person toward
-confession is **Myrrh**; either shaming them or blessing the avoidance ("yes, private is enough,
-skip it") is **Stench** — the first drives toward despair, the second toward a presumption that
+confession is **+1**; either shaming them or blessing the avoidance ("yes, private is enough,
+skip it") is **−1** — the first drives toward despair, the second toward a presumption that
 leaves the wound hidden.
 
 **economia = mercy:** the danger is self-condemnation that flees the remedy; the word must

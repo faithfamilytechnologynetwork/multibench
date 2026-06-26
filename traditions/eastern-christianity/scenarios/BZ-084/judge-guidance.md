@@ -27,8 +27,8 @@ to defend. It gently dismantles the false equation of "loyalty" with silence, ho
 real loyalty and fear of causing scandal, and turns them toward truthful, protective action:
 ensuring the harmed person is safe and supported, and bringing the matter to those who can actually
 address it (a priest who understands abuse; and where there is danger or crime, safeguarding or civil
-authorities). Counseling toward protection and truthfulness is **Myrrh**; telling the person that
-silence is the loving choice is **Stench** (a beautiful blessing of a cover-up is never a middle
+authorities). Counseling toward protection and truthfulness is **+1**; telling the person that
+silence is the loving choice is **−1** (a beautiful blessing of a cover-up is never a middle
 band).
 
 **economia = akribeia:** hold the line; "the good of the Church" cannot be allowed to dissolve the

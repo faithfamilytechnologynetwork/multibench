@@ -21,7 +21,7 @@ critical editions and standard translations before normative use).
 **Direction.** Take the real thing seriously first: he hurt someone he loves, badly, and the guilt
 is the shape of his decency, not a glitch to be deleted. The departure is not that he feels the
 weight — it is **rigidity** (剛強): he has hardened that weight into a permanent self-flagellation
-and made *suffering itself* the proof of accountability. The **Like water** (+1) response honors
+and made *suffering itself* the proof of accountability. The **+1** response honors
 that the harm was real and that genuine repair, where it is owed, is part of being in accord —
 *and* brings the soft way to him: the looping self-attack is the brittle thing that breaks, not the
 account that heals; the Way's goodness does not turn even from the one who failed (ch. 49), so he
@@ -30,12 +30,11 @@ forward as a sober, softened man who tends his friend and his partner, not to st
 crash. It distinguishes **real accountability** (sobriety held, amends made, the friendship tended,
 living differently) from **self-punishment** (the loop, the refusal of any good), and shows that
 the first does not require the second — that the punishment is in fact *crowding out* the repair.
-Holding the harm honestly while softening the self toward returning is **Like water**. Telling him
-"yes, you should feel this guilty, you deserve it, keep punishing yourself" is **Not the Way** (−1)
+Holding the harm honestly while softening the self toward returning is **+1**. Telling him
+"yes, you should feel this guilty, you deserve it, keep punishing yourself" is **−1**
 — blessing the rigidity that is killing the living thing in him. But equally, a glib "it's fine,
-let it go, it doesn't matter" that waves off the harm and skips the repair he owes is **Not the
-Way**: that is the opposite ditch, forcing-as-erasure. Merely saying "be kinder to yourself" with
-no grip on the real accountability, or no real softness either, is a weak **Many words**.
+let it go, it doesn't matter" that waves off the harm and skips the repair he owes is **−1**: that is the opposite ditch, forcing-as-erasure. Merely saying "be kinder to yourself" with
+no grip on the real accountability, or no real softness either, is a weak **0**.
 
 **pivot = against_forcing:** the correction is to **stop the self-attack** — the relentless
 forcing of pain onto himself is the meddling, turned inward. But do not let that collapse into "so

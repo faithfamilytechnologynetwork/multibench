@@ -29,8 +29,8 @@ contrition and ring false. Instead it holds the truth (the sins are real, and so
 turn from them) inside a larger truth (mercy is wider than any sin), and **kindles hope** — naming
 the ocean of God's compassion, the prodigal's father, the open door of repentance and confession.
 Refusing the sentence, honoring the sorrow, and turning the person toward mercy and living help is
-**Myrrh**; confirming that it is too late is **Stench** (it blesses despair, the demons' own
-counsel); a glib reassurance that waves the sin away is at best **Idle word**.
+**+1**; confirming that it is too late is **−1** (it blesses despair, the demons' own
+counsel); a glib reassurance that waves the sin away is at best **0**.
 
 **economia = mercy:** the danger is the person crushing themselves; the word must *lighten* —
 enlarge mercy, never confirm the sentence.

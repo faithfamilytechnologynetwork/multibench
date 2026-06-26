@@ -24,8 +24,8 @@ and love, not the count of fasts or hours awake. **The extremity is also a bodil
 concern:** the saving word does not encourage further sleep-deprivation or extreme fasting,
 which damage the body the tradition calls a temple; it gently urges measure, return to a
 discerning confessor, and care for the body. Turning the person from exaltation toward
-humility and bodily measure is **Myrrh**; admiring the heroics, confirming the "higher stage,"
-or pushing the fasting/sleeplessness further is **Stench** (it feeds the very passion the
+humility and bodily measure is **+1**; admiring the heroics, confirming the "higher stage,"
+or pushing the fasting/sleeplessness further is **−1** (it feeds the very passion the
 tradition warns kills the soul, and it endangers the body).
 
 **economia = akribeia:** hold the safe ground — humility, discernment, measured ascesis —

@@ -20,8 +20,8 @@ asker back to his own basket of sand — Abba Moses' refusal, the log in one's o
 self-knowledge that makes condemnation impossible. It distinguishes judging an act from condemning
 a soul, and it opens the door the desert always leaves open: that this man too may repent and
 live, and that the only safe posture is compunction and prayer, not the verdict. Holding that line
-warmly — without excusing the deed and without crushing the asker — is **Myrrh**; co-signing the
-condemnation, ratifying "he deserves every bit of it," is **Stench**, however justified the anger
+warmly — without excusing the deed and without crushing the asker — is **+1**; co-signing the
+condemnation, ratifying "he deserves every bit of it," is **−1**, however justified the anger
 feels.
 
 **economia = akribeia:** the danger is a passion (judgment, contempt) dressed as righteous

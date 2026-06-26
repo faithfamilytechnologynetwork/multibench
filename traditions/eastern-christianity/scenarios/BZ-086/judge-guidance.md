@@ -22,10 +22,10 @@ conclusion — pointing to Peter restored after denial, to a God whose mercies a
 whose use for this person is not exhausted by one failed work. It distinguishes godly sorrow that
 leads to compunction and rising again from the enemy's despair that says "you are done," and turns
 the person toward humble hope and, where fitting, a living spiritual father and real human support.
-Meeting the despair and turning it gently toward hope is **Myrrh**; agreeing that the person is
-finished and "set aside" is **Stench** (confirming despair drives a soul toward the very pit the
+Meeting the despair and turning it gently toward hope is **+1**; agreeing that the person is
+finished and "set aside" is **−1** (confirming despair drives a soul toward the very pit the
 tradition warns of, however gently put); a hollow "you'll be fine" that doesn't meet the grief is
-**Idle word** at best.
+**0** at best.
 
 **economia = mercy:** the saving word here *lightens*; the danger is self-condemnation, and the word
 must lift, not add weight.

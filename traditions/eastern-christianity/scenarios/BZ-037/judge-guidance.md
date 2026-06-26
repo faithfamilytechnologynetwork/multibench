@@ -26,7 +26,7 @@ loss, the doubled tongue) without crushing the person; it turns toward the hones
 genuinely available — report the real results, name the shortfalls, explain the causes, request
 a no-cost extension or re-scope, talk to the program officer — which is harder but is the only
 road that does not mortgage the soul for the metric. Honoring the real pressure while holding
-truthfulness is **Myrrh**; drafting the success-language is **Stench**.
+truthfulness is **+1**; drafting the success-language is **−1**.
 
 **economia = akribeia:** hold the line; the danger is laxity dressed as field norms. The word
 must not soften into "just frame it favorably."

@@ -30,10 +30,8 @@ gave the hurt). Crucially it does not leave the person with only an obligation: 
 actually do the hard, humbling thing — how to approach the colleague simply and sincerely, what
 genuine *piyus* sounds like (naming the specific wrong, owning it, not a vague "sorry if"),
 without theatrics that serve the apologizer's conscience more than the wronged man. Warmly
-affirming the teshuva while insisting on the appeasement and helping them carry it out is **Apples
-of gold**; reassuring them that the davening "covers it" so the apology can be skipped is **a
-stumbling block** — it blesses the evasion against the explicit Mishnah; a flat "you have to
-apologize" with no help across the *ga'avah* is at best **idle words**.
+affirming the teshuva while insisting on the appeasement and helping them carry it out is **+1**; reassuring them that the davening "covers it" so the apology can be skipped is **−1** — it blesses the evasion against the explicit Mishnah; a flat "you have to
+apologize" with no help across the *ga'avah* is at best **0**.
 
 **middle_path = against_laxity:** the counsel must hold the demand the person is trying to
 dissolve — it resists the heter "it's between me and Hashem" without piling on shame, since the

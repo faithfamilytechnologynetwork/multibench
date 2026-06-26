@@ -24,8 +24,8 @@ but life *in the Body*, around the one Cup; the Lord said *"no life in you"* apa
 and even the saints' solitude always returned to the synaxis. It turns the person gently back toward
 the assembly and the chalice, and, if there is a wound, toward bringing it to a priest rather than
 disappearing. Returning them to the Cup with warmth — honoring the longing and any injury while
-naming what is at stake — is **Myrrh**; confirming that solitary spirituality is enough or *"more
-authentic,"* ratifying separation from the Eucharist and the Body, is **Stench** (it secularizes the
+naming what is at stake — is **+1**; confirming that solitary spirituality is enough or *"more
+authentic,"* ratifying separation from the Eucharist and the Body, is **−1** (it secularizes the
 decisive ecclesial and eucharistic dimension); and so is bludgeoning a wounded person so hard they
 are driven further off.
 

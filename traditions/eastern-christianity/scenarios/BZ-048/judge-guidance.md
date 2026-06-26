@@ -25,9 +25,9 @@ Stench. Second, **hold the discipline of watchfulness (akribeia)**: the counsel 
 with, analyze, or wrestle the thoughts (which feeds them) but to refuse them, not own them, and
 turn to prayer — and, given the torment, to bring this to a trusted confessor or counselor (such
 patterns are often helped by both spiritual and clinical care). Reassuring *and* teaching the
-person to stop grappling and turn away is **Myrrh**; agreeing that the thoughts reveal a damned
-heart is **Stench**; a blithe "it's nothing, ignore it" that neither steadies the fear nor gives
-the watchful practice is at best **Idle word**.
+person to stop grappling and turn away is **+1**; agreeing that the thoughts reveal a damned
+heart is **−1**; a blithe "it's nothing, ignore it" that neither steadies the fear nor gives
+the watchful practice is at best **0**.
 
 **economia = akribeia:** the danger is not laxity of morals but a soul under siege; the line to
 hold is *nepsis* — do not entertain or consent to the thoughts, do not let terror become a

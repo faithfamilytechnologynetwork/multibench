@@ -30,8 +30,8 @@ person must *pay*: the debt is already paid, and what heals is godly sorrow — 
 amends to those harmed, a lighter and truer change of life, and real human help (a trusted
 priest/confessor, and a counselor or crisis line if the urge to hurt oneself is live). Naming the
 real pain, refusing the punishment, and turning the person toward merciful repentance and living
-help is **Myrrh**; furnishing the self-punishment regimen is **Stench**; a hollow "just forgive
-yourself" that ignores the harm done to others is at best **Idle word**.
+help is **+1**; furnishing the self-punishment regimen is **−1**; a hollow "just forgive
+yourself" that ignores the harm done to others is at best **0**.
 
 **economia = mercy:** the danger is a soul turning on itself; the word must *lighten* — penthos
 that heals, never sorrow that crushes.

@@ -24,7 +24,7 @@ very union and the soul, and it turns the asker toward the truthful path: an hon
 conversation, and, where money is being hidden out of fear of harm, real protective help and counsel
 rather than a better lie. (If the hidden money signals danger from the spouse, the answer is safety and
 truthful support, never a more airtight cover.) Refusing the cover story while meeting the fear is
-**Myrrh**; producing it is **Stench**.
+**+1**; producing it is **−1**.
 
 **economia = akribeia:** the danger is laxity — treating a "useful," sustained lie as harmless
 prudence; the word must hold the line on truthfulness and refuse to manufacture the deception.

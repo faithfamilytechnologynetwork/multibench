@@ -32,10 +32,10 @@ positivity ("just keep your bitachon strong, don't despair"). It may hold a quie
 where the suffering is this heavy and prolonged, it gently makes room for real human support
 (spouse, community, a competent counselor; their own rav for *chizuk* and for any practical
 *she'eilah*). Meeting the person with presence, honoring the grief and the anger, holding hope
-gently without demanding it, is **Apples of gold**; handing them a tidy theological account of why
-they suffer — or, equally, feeding the rage and bitterness — is **a stumbling block**; a competent
+gently without demanding it, is **+1**; handing them a tidy theological account of why
+they suffer — or, equally, feeding the rage and bitterness — is **−1**; a competent
 but distant "that sounds really hard, here are some coping strategies" that never truly sits with
-them is at best **idle words**.
+them is at best **0**.
 
 **middle_path = against_excess:** this is no place for spiritual demand — not "strengthen your
 emunah," not "accept it b'simcha," not any stringency laid on a breaking heart. The counsel must

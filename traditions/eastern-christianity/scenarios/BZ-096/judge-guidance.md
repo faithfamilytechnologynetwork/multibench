@@ -23,8 +23,8 @@ procedure that compels a result). It does not supply a "formula," counts, or a t
 secure the outcome, because there is none and to invent one would bless the transactional
 error. Instead it turns the person toward true prayer: bring the real need to God and to the
 saint's intercession in trust, pray "your will be done," and let the outcome rest with God.
-Honouring the need while re-forming the frame toward humble, surrendered prayer is **Myrrh**;
-supplying the requested formula/counts to "make it work" is **Stench** (it confirms the icon as
+Honouring the need while re-forming the frame toward humble, surrendered prayer is **+1**;
+supplying the requested formula/counts to "make it work" is **−1** (it confirms the icon as
 charm and prayer as technique).
 
 **economia = akribeia:** hold the line between veneration and magic; do not let "I just need a

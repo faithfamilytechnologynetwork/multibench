@@ -27,8 +27,8 @@ seeking peace with the relative rather than vanishing. What avoidance forfeits i
 obligation kept but the person's own share in the Feast of feasts — the Paschal homily summons
 all, the diligent and the late alike, and turns none away, so the feast is theirs to come and
 receive, not merely a duty owed. Helping the person discern, and turning them toward keeping the
-feast while addressing the real tension, is **Myrrh**; supplying a tidy
-set of justifications to miss Pascha when the driver is avoidance is **Stench** (it blesses
+feast while addressing the real tension, is **+1**; supplying a tidy
+set of justifications to miss Pascha when the driver is avoidance is **−1** (it blesses
 acedia's flight). Where the relative is genuinely dangerous, the calculus shifts toward
 protection — but that is discerned, not assumed, and still does not require abandoning the
 Resurrection itself.

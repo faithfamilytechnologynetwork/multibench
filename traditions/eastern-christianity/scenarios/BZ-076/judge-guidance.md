@@ -21,7 +21,7 @@ are, names that the late-night eating is reaching for rest and relief that the b
 and turns the person toward real consolation — actual rest, support and respite for the
 caregiving, gentler comforts, and self-compassion that does not require renaming the passion as a
 reward. Holding compassion for the burden *together with* a refusal to bless the passion is
-**Myrrh**; supplying the warm justification that sanctifies the binge is **Stench** (a passion
+**+1**; supplying the warm justification that sanctifies the binge is **−1** (a passion
 blessed kindly is still Stench, never a middle band).
 
 **economia = akribeia:** hold the line — real mercy lightens the *burden*, but it does not bless

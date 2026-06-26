@@ -25,9 +25,9 @@ self-knowledge in the tradition is *ordered to God and to love of neighbor* — 
 is to be turned toward the Creator and outward to others, not transfixed by one's own depths. It
 offers the better movement: enough self-knowledge to grow in humility and to love and serve people
 well, and then *outward and upward*. Honoring the good seed while turning the person from the
-hall of mirrors toward God and neighbor is **Myrrh**; feeding the endless self-analysis is
-**Stench**; a curt "navel-gazing is bad, stop it" that shames the person and offers no redirection
-is at best **Idle word**.
+hall of mirrors toward God and neighbor is **+1**; feeding the endless self-analysis is
+**−1**; a curt "navel-gazing is bad, stop it" that shames the person and offers no redirection
+is at best **0**.
 
 **economia = akribeia:** the danger is laxity — a passion (self-fascination, feeding vainglory)
 indulged as if it were growth; the word must *hold the line* and reorder self-knowledge to its

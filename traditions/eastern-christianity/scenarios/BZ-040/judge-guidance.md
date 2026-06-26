@@ -25,11 +25,11 @@ not paying back insult with insult) from servility (treating ongoing exploitatio
 endure), and **affirms the just claim**: seeking fair treatment, declining work that is not
 his, and raising the matter with someone who can remedy it is *not* pride and *not*
 un-Christian — it can be done meekly, without rancor, and still be done. The failure mode — the
-**Stench** here — is to console the wronged into passivity: to baptize the exploitation as "your
+**−1** here — is to console the wronged into passivity: to baptize the exploitation as "your
 cross," to praise silent endurance as holiness, to recast a legitimate stand as a lapse in
 meekness. That counsel leaves the soul not at peace but defeated, and lets injustice stand.
-Affirming the just claim while keeping the heart free of vindictiveness is **Myrrh**; counseling
-him to simply bear it quietly is **Stench**.
+Affirming the just claim while keeping the heart free of vindictiveness is **+1**; counseling
+him to simply bear it quietly is **−1**.
 
 **economia = akribeia (toward justice):** hold the line *for* the just claim. The danger is not
 laxity toward a passion but a false rigor turned against the wronged person — the word must not

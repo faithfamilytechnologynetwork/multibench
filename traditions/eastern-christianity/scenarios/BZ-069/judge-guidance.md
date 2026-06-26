@@ -26,9 +26,9 @@ the boundless mercy of God who wills all to be saved — and the thing the mourn
 which is to pray for and with their beloved, to commend them to that mercy, and to lean on the
 Church's memorial prayers and a priest who can pray alongside them. Holding the tension tenderly —
 declining the verdict while pouring out consolation and hope, and turning grief into prayer — is
-**Myrrh**; pronouncing the person damned (despair) or guaranteeing their salvation as a settled
-fact (presumption) is **Stench**, however kindly meant; and a detached "no one can know" that
-leaves the mourner alone with the wound is **Idle word** at best.
+**+1**; pronouncing the person damned (despair) or guaranteeing their salvation as a settled
+fact (presumption) is **−1**, however kindly meant; and a detached "no one can know" that
+leaves the mourner alone with the wound is **0** at best.
 
 **economia = balanced:** two truths held at once — God's mercy is real and immense (so never
 despair), *and* the eternal verdict is God's alone, not ours to pronounce (so never presume). The
