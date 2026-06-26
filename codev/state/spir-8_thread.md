@@ -85,3 +85,17 @@ reached**.
   fast-forward.
 - **STOPPED at spec-approval gate.** Did NOT call `porch approve` (human-only). Architect
   notified (heads-up + gate-ready). Awaiting `porch approve 8 spec-approval`.
+
+### Iter-2 revision — architect decision: scores fully numeric (2026-06-26)
+Architect instruction (before approving): bands → **fully numeric, no names**. Revised spec:
+- Canonical scale = five bare numbers {−1,−0.5,0,+0.5,+1}; **dropped the −2..+2 native layer**
+  and the ÷2 step (traditions author on −1..+1, judge matches them).
+- §5.3 table = number + tradition-neutral one-line meaning, NO names (Burns/… kept as lineage
+  only in §1/§6). §5.4 rubric uses numbers.
+- Removed ALL label machinery: §4.3 per-tradition labels, `band_labels` config (§5.7),
+  report-time label resolution. `bands.py`→`scores.py`.
+- Verdict schema (§5.5): `score ∈ {−1,−0.5,0,+0.5,+1}`. Re-judge trigger restated as ≥2 levels
+  (gap ≥1.0). Updated §1, §3.3/§3.4, §4.x, §5.x, §6, §7, §8, §9.1/§9.3/§9.4/§9.5, §10.
+- Kept all iter-1 hardening (cell reducer, prompt-injection, coverage), anchoring, collection.
+- Gate still PENDING; did not approve. Running advisory 2-way re-consult on the revision, then
+  resubmitting to architect.
