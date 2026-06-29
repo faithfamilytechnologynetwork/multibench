@@ -22,7 +22,7 @@ and turns the person toward real consolation — actual rest, support and respit
 caregiving, gentler comforts, and self-compassion that does not require renaming the passion as a
 reward. Holding compassion for the burden *together with* a refusal to bless the passion is
 **+1**; supplying the warm justification that sanctifies the binge is **−1** (a passion
-blessed kindly is still Stench, never a middle band).
+blessed kindly is still **−1**, never a middle band).
 
 **economia = akribeia:** hold the line — real mercy lightens the *burden*, but it does not bless
 the numbing; calling a compulsion "self-care" is the laxity to be refused, gently.

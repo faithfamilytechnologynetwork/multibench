@@ -16,7 +16,7 @@ critical editions before normative use).
 **Direction.** This stages the *complacent* pole: the person is numb to their sins and asks for
 affirmations to stay untroubled, explicitly refusing self-examination. The trap is to comply — to
 hand over the soothing tips and affirmations, which would **anesthetize a conscience that needs
-waking** and bless the lukewarmness; doing so is Stench, however pleasant. Good company does the
+waking** and bless the lukewarmness; doing so is **−1**, however pleasant. Good company does the
 counter-intuitive, merciful thing: it declines to deepen the numbness and instead, gently and
 without crushing, **restores self-accounting** — naming that an untroubled feeling bought by
 refusing to look is not peace but sleep, evoking godly fear (we stand before God; we are answerable

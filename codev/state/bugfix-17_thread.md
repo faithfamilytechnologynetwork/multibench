@@ -86,3 +86,35 @@ governance scope, not band-name scope. BUT my regression test lives under apps/t
 so the porch tests-dispatcher runs the whole suite and these 2 will block `porch done`.
 Notifying architect for guidance (regenerate the mirror, or fix on main + rebase) before
 advancing. Not bypassing the check, not skipping the governance tests.
+
+## PR phase
+
+Architect unblocked (chose: fix on main + rebase): local main got 3242371 (mirror regen).
+Rebased onto local main (clean), force-pushed builder/bugfix-17, full suite green, porch done
+fix→pr, opened **PR #18** (base main; 3242371 rides along since origin/main lacks it — expected).
+
+### CMAP (3-way PR review)
+- **gemini: APPROVE**
+- **codex: REQUEST_CHANGES** — incomplete fix; composite bold labels `**Stench regardless of
+  accompanying counsel**` (17 EC files) survived the exact-token regex; regression test had the
+  same gap.
+- **claude: COMMENT** — same finding, ~29 residual EC scoring uses (composite-bolded +
+  unbolded "doing so is Stench"); confirmed buddhism/taoism/judaism residuals are correctly-kept
+  teaching imagery.
+
+Both right — my investigate-phase miss: I dismissed the line-wrapped probe hits as mis-paired
+`**`, but `**Stench regardless of …**` are real composite labels. Addressed (not rebutted):
+
+### Pass-2 fix (addresses REQUEST_CHANGES)
+- EC: 16 composite `**Stench regardless of …**` → `**−1 regardless of …**`; `**Idle word /
+  Smoke**` → `**0 / −0.5**`; 12 unbolded "is/at/are Stench" → `**−1**`. 29 replacements / 24 files.
+- taoism TAO-012: `The −1 "Not the Way" outcome` → `The −1 outcome` (redundant band-name label
+  on a numbered outcome — distinct from the ch.8/76 *teaching* quotes, which stay).
+- Verified zero stench/smoke remain in EC; remaining band-ish words are all teaching imagery
+  (EC Mt 12:36 "idle word", judaism dust/light concepts, buddhism "wholesome energy"/Dhp-54
+  quotes, taoism "like water"/"hard and stiff" ch.8/76 quotes) — exactly what CMAP confirmed
+  to keep.
+- **Strengthened regression test**: added `test_no_scoring_only_band_terms_remain` — EC's coined
+  scoring-only terms (Stench/Smoke), which have no teaching usage, must not appear at all
+  (catches composite-bolded + unbolded). Kept exact-bold-token check for all names. Confirmed it
+  FAILS pre-pass-2, passes post. Full suite **103 passed**; `validate-all --strict` ALL PASS.

@@ -7,7 +7,16 @@ taoism Like water/.../Not the Way — embedded as **bolded** scoring labels in e
 README band table and across every ``judge-guidance.md``. They were normalized to
 bare numbers on the canonical scale (−1, −0.5, 0, +0.5, +1). This test fails if any
 band-name scoring label reappears in a tradition's ``README.md`` or any
-``judge-guidance.md``.
+``judge-guidance.md``, in either form:
+
+1. a band name as an exact **bold token** (``**Stench**``, ``**Like water**``,
+   ``**Apples of gold**``); and
+2. a coined, pejorative scoring-ONLY term (EC's ``Stench`` / ``Smoke``) used anywhere —
+   bolded, embedded in a longer bold span (``**Stench regardless of accompanying
+   counsel**``, ``**Idle word / Smoke**``), or unbolded in prose ("doing so is Stench").
+   These have no teaching usage, so every occurrence is a scoring label. (The positive
+   bands Myrrh/Fragrance double as the tradition's aroma-of-Christ imagery, so they are
+   guarded only as exact bold tokens, per rule 1.)
 
 Genuine teaching imagery — the ``construct:`` in ``tradition.yaml``, ``guide.md`` ("be
 like water", the perfume-seller, the myrrh), ``source.md``, ``turn1.md``,
@@ -51,6 +60,24 @@ def _band_label_pattern() -> re.Pattern[str]:
 
 PATTERN = _band_label_pattern()
 
+# Coined, pejorative scoring-ONLY terms per tradition: words a tradition uses *only* as a
+# negative band, never as teaching imagery (verified across the corpus). Any occurrence —
+# bolded, embedded in a longer bold span, or bare in prose — is a scoring label. This catches
+# the composite/unbolded forms rule 1 (exact bold token) misses. Only EC has such terms; its
+# positive bands (Myrrh/Fragrance) are aroma-of-Christ imagery and are NOT listed here.
+SCORING_ONLY_TERMS = {
+    "eastern-christianity": ("Stench", "Smoke"),
+}
+
+
+def _scoring_only_pattern(terms: tuple[str, ...]) -> re.Pattern[str]:
+    alts = "|".join(re.escape(t) for t in terms)
+    return re.compile(rf"\b(?:{alts})\b", re.IGNORECASE)
+
+
+def _tradition_of(f: Path) -> str:
+    return f.relative_to(TRADITIONS).parts[0]
+
 
 _BANDS_SECTION = re.compile(r"^##\s+The five bands\b.*?(?=^##\s|\Z)", re.MULTILINE | re.DOTALL)
 
@@ -88,6 +115,30 @@ def test_no_band_name_scoring_labels_remain():
         "Tradition-specific band NAMES used as scoring labels must be bare numbers "
         f"(−1, −0.5, 0, +0.5, +1). Found {len(violations)}:\n  "
         + "\n  ".join(violations[:40])
+        + ("\n  ..." if len(violations) > 40 else "")
+    )
+
+
+@pytest.mark.skipif(not TRADITIONS.is_dir(), reason="traditions/ not present")
+def test_no_scoring_only_band_terms_remain():
+    """Coined scoring-only band terms (EC Stench/Smoke) must not appear at all — this catches
+    the composite-bolded (``**Stench regardless of …**``, ``**Idle word / Smoke**``) and
+    unbolded ("doing so is Stench") scoring uses that rule 1's exact-token match misses."""
+    violations: list[str] = []
+    for f in _scanned_files():
+        terms = SCORING_ONLY_TERMS.get(_tradition_of(f))
+        if not terms:
+            continue
+        pat = _scoring_only_pattern(terms)
+        text = _scan_text(f)
+        for m in pat.finditer(text):
+            rel = f.relative_to(REPO_ROOT)
+            a, b = max(0, m.start() - 30), min(len(text), m.end() + 20)
+            ctx = re.sub(r"\s+", " ", text[a:b]).strip()
+            violations.append(f"{rel}: …{ctx}…")
+    assert not violations, (
+        "Coined scoring-only band terms must be bare numbers, not the band name. "
+        f"Found {len(violations)}:\n  " + "\n  ".join(violations[:40])
         + ("\n  ..." if len(violations) > 40 else "")
     )
 
