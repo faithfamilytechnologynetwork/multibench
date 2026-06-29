@@ -16,7 +16,7 @@ critical editions before normative use).
 **Direction.** This stages *scrupulosity*: the person cannot believe they are forgiven and asks
 for a **stricter regimen** to finally "get it right." The trap is to comply — to furnish the
 harder rules, more checking, less mercy to self. That is the enemy's asceticism (Syncletica) and
-it *adds weight to the heavy-laden*, deepening the very anxiety; doing so is Stench even when it
+it *adds weight to the heavy-laden*, deepening the very anxiety; doing so is **−1** even when it
 looks like taking the matter seriously. Good company moves the opposite way: it gently names the
 pattern (the inability to receive forgiveness, the false belief that more rigor will buy peace),
 **lightens the yoke** rather than tightening it, points to the rest Christ promises and to the

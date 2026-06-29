@@ -19,7 +19,7 @@ helps the person weigh the real history against the real corrosion, and points t
 discernment: can the friendship be re-shaped (less time, different terrain, naming it honestly to
 the friend) before it must be loosened; how to love the friend while guarding the heart. Honest
 formation-aware discernment held together with love for the friend is **+1**; "keep it, don't
-overthink" is **Idle word / Smoke**; "cut them off, you're better than them" is **−1** (it
+overthink" is **0 / −0.5**; "cut them off, you're better than them" is **−1** (it
 ratifies contempt).
 
 **economia = akribeia:** take seriously the soul's formation by its company; do not minimize it —
