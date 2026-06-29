@@ -23,7 +23,8 @@ and keeps the map in sync with arch.md's top-level sections. -->
 - **Judge seam:** each scenario's `judge-guidance.md` *is* the judge's binding ground truth — there is no separate proof-text corpus; don't reintroduce one.
 - **Framings (unstated/stated/guided) + the six pressures are universal core**, identical across traditions; per-tradition only `adherent_noun`, `guide.md`, and per-scenario `pressures.md`.
 - `apps/tradition_validator/` is the mechanical gate for a tradition before workflows consume it; run from repo root via `uv --project apps/tradition_validator run python -m tradition_validator validate <dir>`.
-- This is a **Python (uv) repo**; porch's implement/review checks are overridden for Python in `.codev/config.json` (`porch.checks`) and per-phase consult is `["codex","claude"]` (`porch.consultation.models`).
+- `apps/multibrowser/` is the team-standard **frontend SPA** (Vite/React19/TS/Tailwind4/HeroUI/TanStack) that **browses the corpus by reading GitHub at runtime** (client-side TanStack Query: git-trees + `raw`, SHA-pinned); deployed on **Railway as a static site**; bakes no tradition data (new traditions appear without redeploy); read-only, display-first.
+- **Multi-language repo** (Python `uv` validator + JS/Vite SPA); porch's implement/review tests-check is a **per-builder dispatcher** `.codev/checks/test.sh` that runs only the suite of each app a builder touched (registry: validator→`uv … pytest`, multibrowser→`pnpm -C apps/multibrowser test`; +1 line/app). Per-phase consult is `["codex","claude"]` (`porch.consultation.models`).
 
 ## Map of arch.md (consult when…)
 - System purpose & shape — consult when orienting to what MultiBench measures and why it is multi-tradition.
@@ -46,7 +47,9 @@ MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sec
 - "It compiled" / "tests pass" is not "it works" — verify the real user path before calling it done.
 - When stuck (2 failed hypotheses or ~30 min), get an outside perspective instead of guessing.
 - Derive a data format from the **real reference data**, not its docs — load-bearing details (e.g. the embedded judge anchor) only show up there.
-- **Python (uv) repo:** porch's default implement/review checks are npm and hard-block `porch done`; the `.codev/config.json` `porch.checks` override (build skip, tests=`uv run pytest` with `cwd`) is already in place — keep it.
+- **Multi-app porch tests-check:** `porch.checks` is global, so a hardcoded/guarded `&&`-chain breaks builders lacking another app's toolchain (and `&&`/`||` masks real failures). Use the **per-builder dispatcher** `.codev/checks/test.sh` — run only the touched app's suite via a registry. Keep it.
+- **HeroUI v3 is provider-less** — there is no `HeroUIProvider` (only I18nProvider/ToastProvider/useTheme); wire styling via `@import "@heroui/styles"`, don't add a v2-era provider.
+- **A client-side GitHub data layer** is unauthenticated (60/hr per IP, may be NAT-shared, no safe token): SHA-pin the tree (≈1 call/snapshot), fetch content via `raw` (off the API budget), poll the commit SHA gently (`refetchInterval`; `staleTime` alone does NOT poll), serve stale + a banner on 403.
 - **Gemini's per-phase impl/code consult can't see the worktree here** (no verdict → blocks unanimity); per-phase consult is `["codex","claude"]` — do full 3-way only where the diff is fed inline (the PR integration CMAP).
 - Porch only re-extracts plan phases at the plan→implement transition; adding a phase mid-implement needs `porch rollback <id> plan` + plan re-approval.
 
