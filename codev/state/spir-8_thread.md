@@ -213,4 +213,11 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   self-judge skip (T5), panel×scope keying (M3), resume (T9), failure counted (M12), re-judge on
   disagreement (T4/T16/M10) + no-rejudge-on-agreement, creds fail-loud (T10), claude-only subjects.
   **70 tests pass.**
-- Next: commit, `porch done 8` → phase_3 consult.
+- Phase_3 consult: **Codex REQUEST_CHANGES** (Gemini auth only GEMINI_API_KEY not Vertex SA;
+  self-judge skips not durably recorded), **Claude COMMENT** (Gemini thinking not wired;
+  parse_verdict empty-direction inconsistency). Fixed all four:
+  - providers: Gemini auth = Vertex SA (ADC) OR GEMINI_API_KEY (`_gemini_has_creds`/`_gemini_client`);
+    wired Gemini thinking (`ThinkingConfig(thinking_budget=-1)` when judge.thinking).
+  - judge: record skips → `skipped.jsonl` + `load_skips`; `parse_verdict` requires non-empty direction.
+  - tests updated (gemini cred = all 3 vars; skip-recording; empty-direction reject). **71 pass.**
+- Next: commit, rebuttal, re-verify (iter2) → Phase 4.

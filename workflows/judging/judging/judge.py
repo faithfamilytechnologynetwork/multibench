@@ -61,8 +61,8 @@ def parse_verdict(raw: object) -> dict:
         raise ValueError(f"verdict is not a JSON object: {raw!r}")
     score = validate_score(raw.get("score"))
     direction = raw.get("direction", "")
-    if not isinstance(direction, str):
-        raise ValueError("verdict 'direction' must be a string")
+    if not isinstance(direction, str) or not direction.strip():
+        raise ValueError("verdict missing a non-empty 'direction'")
     rationale = raw.get("rationale", "")
     if not isinstance(rationale, str) or not rationale.strip():
         raise ValueError("verdict missing a non-empty 'rationale'")
@@ -118,11 +118,15 @@ def _judge_pass(
     config: Config,
     judge_fn: JudgeFn,
     targets: Iterable[tuple[dict, JudgeSpec, str]] | None = None,
+    skips_path: Path | None = None,
 ) -> tuple[int, int, int]:
     """Run a judging pass, appending records to ``out_path``. Returns
-    ``(written, failed, skipped_self)``. ``targets`` overrides the cell set (re-judge)."""
+    ``(written, failed, skipped_self)``. ``targets`` overrides the cell set (re-judge);
+    ``skips_path`` (if given) durably records skipped self-judgments (audit trail, T5/M3)."""
     tradition = load_tradition(tradition_dir)
     done = {judgment_key(j) for j in _read_jsonl(out_path)}
+    skip_done = {judgment_key(j) for j in _read_jsonl(skips_path)} if skips_path else set()
+    new_skips: list[dict] = []
     scenarios: dict[str, Any] = {}
     written = failed = skipped = 0
 
@@ -140,6 +144,19 @@ def _judge_pass(
         for s, judge, scope in gen:
             if should_skip(judge.model, s["subject"]):
                 skipped += 1
+                if skips_path is not None:
+                    sk = {
+                        "subject": s["subject"],
+                        "scenario_id": s["scenario_id"],
+                        "pressure": s["pressure"],
+                        "framing": s["framing"],
+                        "judge": judge.model,
+                        "scope": scope,
+                        "reason": "self_judge",
+                    }
+                    if judgment_key(sk) not in skip_done:
+                        new_skips.append(sk)
+                        skip_done.add(judgment_key(sk))
                 continue
             rec_key = "|".join(
                 [s["subject"], s["scenario_id"], s["pressure"], s["framing"], judge.model, scope]
@@ -162,6 +179,11 @@ def _judge_pass(
             fh.flush()
             done.add(rec_key)
             written += 1
+
+    if skips_path is not None and new_skips:
+        with skips_path.open("a") as sf:
+            for sk in new_skips:
+                sf.write(json.dumps(sk) + "\n")
     return written, failed, skipped
 
 
@@ -195,6 +217,11 @@ def _disagreement_targets(
     return targets
 
 
+def load_skips(results_dir: str | Path) -> list[dict]:
+    """Recorded self-judgment skips — the audit trail the report's coverage uses (T5/M3)."""
+    return _read_jsonl(Path(results_dir) / "skipped.jsonl")
+
+
 def load_judgments(results_dir: str | Path) -> list[dict]:
     """Base judgments overlaid with re-judge overrides (v2 wins, by key) — spec §5.9."""
     rd = Path(results_dir)
@@ -222,7 +249,9 @@ def judge_all(
     sittings = _read_jsonl(Path(sittings_path))
 
     base = rd / "judgments.jsonl"
-    written, failed, skipped = _judge_pass(sittings, tradition_dir, base, config, judge_fn)
+    written, failed, skipped = _judge_pass(
+        sittings, tradition_dir, base, config, judge_fn, skips_path=rd / "skipped.jsonl"
+    )
 
     # One re-judge pass over >=2-level disagreement cells, overriding by key (v2 file).
     targets = _disagreement_targets(base, sittings, config)

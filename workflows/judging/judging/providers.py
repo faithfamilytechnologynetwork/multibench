@@ -170,14 +170,39 @@ def _anthropic_judge(
     return _retry(call, retries)
 
 
+def _gemini_has_creds() -> bool:
+    """Gemini auth per spec N4: a Vertex service account **or** GEMINI_API_KEY."""
+    return bool(
+        os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")  # Vertex service account (ADC)
+        or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI")
+    )
+
+
+def _gemini_client():
+    from google import genai
+
+    if os.environ.get("GEMINI_API_KEY"):
+        return genai.Client()  # Gemini Developer API
+    # Vertex AI: service account via ADC (GOOGLE_APPLICATION_CREDENTIALS) / configured project.
+    return genai.Client(
+        vertexai=True,
+        project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
+        location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+    )
+
+
 def _gemini_judge(
     judge: JudgeSpec, parts: tuple[str, str, str], schema: dict, retries: int
 ) -> tuple[dict, dict]:
-    _require_env("GEMINI_API_KEY")
-    from google import genai
+    if not _gemini_has_creds():
+        raise ProviderError(
+            "no Gemini credential: set GEMINI_API_KEY, or a Vertex service account "
+            "(GOOGLE_APPLICATION_CREDENTIALS + GOOGLE_CLOUD_PROJECT) — spec N4"
+        )
     from google.genai import types
 
-    client = genai.Client()  # reads GEMINI_API_KEY
+    client = _gemini_client()
     prompt = "\n\n".join(parts)
     safety = None
     if judge.safety_off:
@@ -192,11 +217,15 @@ def _gemini_judge(
                 "HARM_CATEGORY_DANGEROUS_CONTENT",
             )
         ]
-    config = types.GenerateContentConfig(
-        response_mime_type="application/json",
-        response_schema=schema,
-        safety_settings=safety,
-    )
+    config_kwargs: dict[str, Any] = {
+        "response_mime_type": "application/json",
+        "response_schema": schema,
+        "safety_settings": safety,
+    }
+    if judge.thinking:
+        # Dynamic thinking — the model decides the budget (thinking-on, §5.7).
+        config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=-1)
+    config = types.GenerateContentConfig(**config_kwargs)
 
     def call() -> tuple[dict, dict]:
         resp = client.models.generate_content(
