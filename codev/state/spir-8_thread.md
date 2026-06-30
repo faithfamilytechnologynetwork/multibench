@@ -225,4 +225,9 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `_read_sittings` validates the INPUT upfront — missing file / invalid JSON / missing required
   fields / empty turns → `JudgeInputError` located by file:line; output files keep resume
   semantics. +3 tests. **74 pass.**
-- Next: rebuttal, re-verify (iter3) → expect converge → Phase 4.
+- Phase_3 iter3: **Codex REQUEST_CHANGES** (judgment `tradition` from optional sitting field →
+  could be null; sitting validation didn't check non-empty strings), **Claude APPROVE**. Fixed:
+  `_record` writes authoritative `tradition.id`; `_read_sittings` rejects non-string/empty
+  subject/scenario_id/pressure/framing. +4 tests. **78 pass.** (iter-3 ceiling → porch
+  force-advances; fixes committed first; PR CMAP is final review.)
+- **phase_3 ✓** → **phase_4: minimal Claude collector.**
