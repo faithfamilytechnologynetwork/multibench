@@ -178,6 +178,17 @@ def build_report(
         "exact_pct": (exact / len(multi)) if multi else None,
         "within_one_pct": (within_one / len(multi)) if multi else None,
     }
+    # Per-scenario agreement (exact% over that scenario's >=2-judge cells) + worst (§5.8 #3).
+    scen_cells: dict[str, list[list[float]]] = defaultdict(list)
+    for cell, scores in by_cell.items():
+        if len(scores) >= 2:
+            scen_cells[cell[1]].append(scores)
+    scenario_agreement = {
+        sid: sum(1 for v in cl if max(v) == min(v)) / len(cl) for sid, cl in scen_cells.items()
+    }
+    worst = min(scenario_agreement, key=lambda s: scenario_agreement[s], default=None)
+    agreement["worst_scenario"] = worst
+    agreement["worst_scenario_exact_pct"] = scenario_agreement.get(worst) if worst else None
 
     # 4. Breakdowns by DECLARED taxonomy axes (generic — any tradition, M7); unstated, full.
     taxonomies: dict[str, dict[str, dict[str, float | None]]] = {}
@@ -289,6 +300,7 @@ def build_report(
         "taxonomies": taxonomies,
         "techniques": techniques,
         "by_scenario": by_scenario,
+        "scenario_agreement": scenario_agreement,
         "cost": cost,
     }
 
@@ -337,6 +349,11 @@ def render_markdown(rep: dict) -> str:
     a = rep["agreement"]
     L += ["## Inter-judge agreement", ""]
     L.append(f"- Exact: {_pct(a['exact_pct'])} · Within one level: {_pct(a['within_one_pct'])} ({a['cells']} cells with ≥2 judges)")
+    if a.get("worst_scenario"):
+        L.append(
+            f"- Worst scenario for agreement: {a['worst_scenario']} "
+            f"({_pct(a['worst_scenario_exact_pct'])} exact)"
+        )
     L.append("")
 
     # Taxonomy breakdowns
@@ -354,10 +371,17 @@ def render_markdown(rep: dict) -> str:
         L.append(row(t, lambda s, t=t: _pct(rep["techniques"][s].get(t))))
     L.append("")
 
-    # Per-scenario results (Unstated, after pressure) — §5.8 #5
-    L += ["## By scenario (Unstated, after pressure)", "", "| Scenario | " + " | ".join(subjects) + " |", "|---|" + "---|" * len(subjects)]
+    # Per-scenario results (Unstated, after pressure) + agreement — §5.8 #5
+    L += [
+        "## By scenario (Unstated, after pressure)",
+        "",
+        "| Scenario | " + " | ".join(subjects) + " | Agreement |",
+        "|---|" + "---|" * (len(subjects) + 1),
+    ]
     for sid in sorted(rep["by_scenario"]):
-        L.append("| " + sid + " | " + " | ".join(_fmt(rep["by_scenario"][sid].get(s)) for s in subjects) + " |")
+        scores = " | ".join(_fmt(rep["by_scenario"][sid].get(s)) for s in subjects)
+        agr = _pct(rep["scenario_agreement"].get(sid))
+        L.append(f"| {sid} | {scores} | {agr} |")
     L.append("")
 
     # Cost — §5.8 #6

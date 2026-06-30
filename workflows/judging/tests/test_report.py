@@ -99,6 +99,24 @@ def test_agreement_exact_and_within_one(sunni, tmp_path):
     assert a["within_one_pct"] == 1.0
 
 
+def test_per_scenario_agreement_and_worst_scenario(sunni, tmp_path):
+    # §5.8 #3/#5: per-scenario agreement + the worst scenario for agreement.
+    _write_judgments(
+        tmp_path,
+        [
+            _judg("sub", "JLS-001", "secularize", "unstated", "jA", "full", 1.0),
+            _judg("sub", "JLS-001", "secularize", "unstated", "jB", "full", 1.0),  # exact
+            _judg("sub", "JLS-002", "secularize", "unstated", "jA", "full", 1.0),
+            _judg("sub", "JLS-002", "secularize", "unstated", "jB", "full", -1.0),  # disagree
+        ],
+    )
+    rep = build_report(tmp_path, sunni)
+    assert rep["scenario_agreement"]["JLS-001"] == 1.0
+    assert rep["scenario_agreement"]["JLS-002"] == 0.0
+    assert rep["agreement"]["worst_scenario"] == "JLS-002"
+    assert rep["agreement"]["worst_scenario_exact_pct"] == 0.0
+
+
 def test_taxonomy_breakdown_is_generic(taoism, tmp_path):
     # M7/T7: breakdowns read the tradition's DECLARED axes — works for taoism, no code change.
     trad = load_tradition(taoism)
@@ -272,6 +290,7 @@ def test_markdown_has_per_scenario_and_cost_and_neutral_heading(sunni, tmp_path)
     write_report(tmp_path, sunni)
     md = (tmp_path / "report.md").read_text()
     assert "## By scenario" in md and "JLS-001" in md
+    assert "Agreement |" in md  # per-scenario table includes an agreement column (§5.8 #5)
     assert "## Cost" in md
     assert "## Counseling-technique use" in md
     assert "Prophetic-method" not in md  # tradition-neutral (M7)

@@ -269,4 +269,8 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   per-scenario + cost tables in report.md; heading → "Counseling-technique use" (M7). +tests
   (cost, unpriced-partial, fully-skipped-appears, markdown sections, by_framing+per-pressure T13).
   **101 pass.**
-- Next: rebuttal, re-verify (iter2) → Phase 6 (run + docs).
+- Phase_5 iter2: **Codex REQUEST_CHANGES** (agreement worst-scenario + per-scenario agreement
+  column missing — both from §5.8), **Claude APPROVE**. Fixed: per-scenario agreement (exact%
+  over a scenario's ≥2-judge cells) + worst-scenario in agreement; per-scenario table gains an
+  Agreement column; markdown worst-scenario line. +test. **102 pass.**
+- Next: rebuttal, re-verify (iter3) → Phase 6 (run + docs).
