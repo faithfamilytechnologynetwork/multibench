@@ -64,12 +64,12 @@ def subject_complete(
     context_prefix: str | None,
     messages: list[dict],
     retries: int = 2,
-) -> tuple[str, dict]:
-    """Ordinary conversational completion for a subject. Returns ``(text, usage)``.
+) -> tuple[str, dict, int]:
+    """Ordinary conversational completion for a subject. Returns ``(text, usage, attempts)``.
 
     ``context_prefix`` (the framing text) is folded onto the top of EVERY user turn —
     never a system prompt; no subject gets a privileged channel (§4.5). ``messages``
-    holds the clean scenario turns.
+    holds the clean scenario turns. ``attempts`` is the 1-based try that succeeded (audit).
     """
     if subject.provider == "anthropic":
         return _anthropic_subject(subject, context_prefix, messages, retries)
@@ -95,28 +95,33 @@ def _fold(messages: list[dict], context_prefix: str | None) -> list[dict]:
 
 def _anthropic_subject(
     subject: SubjectSpec, context_prefix: str | None, messages: list[dict], retries: int
-) -> tuple[str, dict]:
+) -> tuple[str, dict, int]:
     _require_env("ANTHROPIC_API_KEY")
     import anthropic
 
     client = anthropic.Anthropic()
     folded = _fold(messages, context_prefix)
-
-    def call() -> tuple[str, dict]:
-        kwargs: dict[str, Any] = {
-            "model": subject.model,
-            "max_tokens": subject.max_tokens,
-            "messages": folded,
-        }
-        if subject.thinking:
-            kwargs["thinking"] = {"type": "adaptive"}
-        resp = client.messages.create(**kwargs)
-        text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        if not text.strip():
-            raise RuntimeError("empty subject response")
-        return text.strip(), _anthropic_usage(resp)
-
-    return _retry(call, retries)
+    # Inline retry so we can report the 1-based attempt that succeeded (sittings audit, §5.6).
+    last: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            kwargs: dict[str, Any] = {
+                "model": subject.model,
+                "max_tokens": subject.max_tokens,
+                "messages": folded,
+            }
+            if subject.thinking:
+                kwargs["thinking"] = {"type": "adaptive"}
+            resp = client.messages.create(**kwargs)
+            text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
+            if not text.strip():
+                raise RuntimeError("empty subject response")
+            return text.strip(), _anthropic_usage(resp), attempt + 1
+        except Exception as e:  # noqa: BLE001 — transient API/transport; retry then fail
+            last = e
+            if attempt < retries:
+                time.sleep(_BACKOFF_BASE_SECONDS * (attempt + 1))
+    raise ProviderError(f"subject call failed after {retries + 1} attempts: {last}")
 
 
 # --- Judge seam -------------------------------------------------------------

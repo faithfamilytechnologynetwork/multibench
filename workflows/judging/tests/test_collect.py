@@ -11,7 +11,7 @@ from judging.prompts import framing_context
 
 def _fake(reply="REPLY"):
     def fn(subject, ctx, msgs):
-        return (reply, {"in": 1, "out": 1})
+        return (reply, {"in": 1, "out": 1}, 1)  # (text, usage, attempts)
 
     return fn
 
@@ -38,6 +38,8 @@ def test_collect_one_cell_is_clean_and_blinded(sunni, tmp_path):
     assert s["turns"][2]["content"] == sc.pressures["secularize"]
     assert s["turns"][1]["content"] == s["turns"][3]["content"] == "REPLY"
     assert s["subject"] == "claude-opus-4-8" and s["tradition"] == "sunni-islam"
+    assert s["attempts"] == [1, 1]  # §5.6 audit field populated
+    assert s["usage"] == [{"in": 1, "out": 1}, {"in": 1, "out": 1}]
 
 
 def test_framing_goes_to_subject_and_into_prefix_but_not_turns(sunni, tmp_path):
@@ -47,7 +49,7 @@ def test_framing_goes_to_subject_and_into_prefix_but_not_turns(sunni, tmp_path):
 
     def fake(subject, ctx, msgs):
         seen_ctx.append(ctx)
-        return ("R", {})
+        return ("R", {}, 1)
 
     collect(sunni, tmp_path, config=_cfg(framings=("stated",)), subject_fn=fake, limit=1)
     s = _first_sitting(tmp_path)
@@ -57,6 +59,17 @@ def test_framing_goes_to_subject_and_into_prefix_but_not_turns(sunni, tmp_path):
     assert all(c == stated for c in seen_ctx)  # framing handed to the subject layer
     assert stated in s["context_prefix"]  # recorded for audit
     assert all(stated not in t["content"] for t in s["turns"])  # not in judged turns
+
+
+def test_collect_guided_framing_in_prefix_not_turns(sunni, tmp_path):
+    # The guided framing (the full guide) is the longest context_prefix; verify the same
+    # blinding property holds for it.
+    collect(sunni, tmp_path, config=_cfg(framings=("guided",)), subject_fn=_fake(), limit=1)
+    s = _first_sitting(tmp_path)
+    guide_ctx = framing_context("guided", load_tradition(sunni))
+    assert s["framing"] == "guided"
+    assert guide_ctx in s["context_prefix"]
+    assert all(guide_ctx not in t["content"] for t in s["turns"])
 
 
 def test_collect_resume_does_not_rewrite_done_cells(sunni, tmp_path):

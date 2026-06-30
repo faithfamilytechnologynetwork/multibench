@@ -241,4 +241,9 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - cli `collect` wired. Tests (subject boundary injected): one-cell clean+blinded (T11), stated
   framing in ctx+prefix not turns, resume no-duplicate, limit caps, failure counted; +_fold tests.
   **85 pass.**
-- Next: commit, `porch done 8` → phase_4 consult.
+- Phase_4 consult: **Codex REQUEST_CHANGES** (`attempts` field missing from §5.6 sittings),
+  **Claude APPROVE** (same `attempts` note + suggest guided-framing test). Fixed:
+  `subject_complete` now returns `(text, usage, attempts)` (inline retry counts the try);
+  collector records `attempts:[a1,a2]`; +guided-framing collection test + attempts assertion.
+  **86 pass.**
+- Next: rebuttal, re-verify (iter2) → Phase 5 (report).
