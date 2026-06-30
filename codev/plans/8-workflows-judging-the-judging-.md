@@ -72,7 +72,7 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
 - `workflows/judging/judging/scores.py` — the canonical `SCORES = (−1.0, −0.5, 0.0, +0.5, +1.0)`,
   a `validate_score()` (reject anything outside the set; **no snapping**, §5.5), and the
   −1…+1 mean helper used by the reducer/aggregates.
-- `workflows/judging/judging/core_ref.py` — thin re-export of `tradition_validator.core`
+- `workflows/judging/judging/core_imports.py` — thin re-export of `tradition_validator.core`
   (`FRAMINGS`, `PRESSURES`, `STATED_TEMPLATE`, `normalize_heading`, `IDENTITY_SIGNALS`) so the
   workflow never redefines them (M9).
 - `workflows/judging/judging/config.py` — defaults: `judges` (claude-opus-4-8 adaptive-thinking;
@@ -88,13 +88,13 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
 - [ ] `uv --project workflows/judging run python -m judging --help` lists the four commands (M1, N1).
 - [ ] `scores.validate_score` accepts only the five values; rejects e.g. `0.7`/`3` with a located
       error (T1, T2).
-- [ ] `core_ref` re-exports the core constants; a test asserts identity with
+- [ ] `core_imports` re-exports the core constants; a test asserts identity with
       `tradition_validator.core` (M9).
 - [ ] The dispatcher line is present and `bash .codev/checks/test.sh` runs this workflow's pytest
       when `workflows/judging` is touched.
 
 #### Test Plan
-- **Unit**: `scores` validation (T1/T2); `config` defaults; `core_ref` re-export identity (M9).
+- **Unit**: `scores` validation (T1/T2); `config` defaults; `core_imports` re-export identity (M9).
 - **Integration**: CLI `--help` smoke (Typer app loads).
 
 #### Risks
@@ -113,10 +113,14 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
   live API call.
 
 #### Files (create)
-- `workflows/judging/judging/loaders.py` — load a tradition through `tradition_validator`
-  loaders/models: `guide.md` (construct), and per scenario `turn1.md`, `judge-guidance.md`,
-  `pressures.md` (sections keyed via `core.normalize_heading`), `scenario.yaml` (tags/
-  identity_signal), `tradition.yaml` (declared `taxonomies`, `adherent_noun`).
+- `workflows/judging/judging/loaders.py` — tradition-specific accessors **composed from**
+  `tradition_validator`'s **generic** loaders (`load_text`/`load_yaml`/`load_json`, which return
+  `(data, error)` tuples) + its Pydantic models (`TraditionManifest`, `ScenarioMeta`,
+  `ScenariosIndex`, `TaxonomyAxis`) with path construction — *not* pre-existing tradition-specific
+  loaders (none exist). Reads `guide.md` (construct), and per scenario `turn1.md`,
+  `judge-guidance.md`, `pressures.md` (sections keyed via `core.normalize_heading`),
+  `scenario.yaml` (tags/identity_signal), `tradition.yaml` (declared `taxonomies`,
+  `adherent_noun`). Single-sources format parsing (N5).
 - `workflows/judging/judging/rubric.py` — the universal rubric text (§5.4, de-Islamicised:
   "the tradition" / "the supplied guide/ground truth"), the five-level meanings (§5.3), the
   boundary rules, the anchoring instruction, the **seven canonical technique ids**
@@ -161,12 +165,15 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
   ≥2-level re-judge override.
 
 #### Files (create)
-- `workflows/judging/judging/providers.py` — `anthropic_complete` / `gemini_complete`:
-  schema-constrained verdict output (provider-specific mechanism), 1-hour Anthropic prefix-cache
-  breakpoints on the two stable prompt parts (§5.5/S3), Gemini **safety-off** for judging only,
-  adaptive thinking (Claude) / thinking-on (Gemini); credentials from env with **loud failure**
-  if a configured provider's key/SA is absent (N4); bounded retries with backoff, then report
-  + leave resumable (N2).
+- `workflows/judging/judging/providers.py` — a shared low-level client/creds/retry layer
+  exposing two **distinct seams** (so collection and judging never share the wrong abstraction):
+  **`subject_complete`** = ordinary **conversational** completion (plain text; Claude subjects;
+  used by the collector, Phase 4) and **`judge_complete`** = **schema-constrained verdict**
+  output (provider-specific mechanism; Anthropic 1-hour prefix-cache breakpoints on the two
+  stable prompt parts §5.5/S3; Gemini **safety-off** — judging only; adaptive thinking (Claude)
+  / thinking-on (Gemini)). Credentials from env with **loud failure** if a configured provider's
+  key/SA is absent (N4); bounded retries with backoff, then report + leave resumable (N2).
+  Subjects are **never** run safety-off.
 - `workflows/judging/judging/judge.py` — for each sitting × judge × scope: build the prompt
   (Phase 2), call the provider, parse+`validate_score` the verdict (hard error outside the five
   values / unknown technique); **skip self-judgments** (judge `model` == subject `model`, exact
@@ -180,6 +187,8 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
 - [ ] A ≥2-level disagreement cell is selected and re-judged once; the re-judgment overrides by
       key (T4, T16; M10).
 - [ ] Re-running `judge` skips completed `sitting|judge|scope` cells (T9).
+- [ ] `judge` **exits non-zero** if any targeted cell fails after retries, while leaving
+      `judgments.jsonl` resumable — failed cells stay pending, never written as a score (M12; N2).
 - [ ] A configured provider with no credential fails loudly, naming the env var (T10; N4).
 - [ ] Mocked at the provider boundary only; behavior-focused (N3).
 
@@ -199,7 +208,7 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
 ---
 
 ### Phase 4: Minimal Claude subject collector
-**Dependencies**: Phase 3 (reuses `providers.anthropic_complete`)
+**Dependencies**: Phase 3 (reuses `providers.subject_complete`)
 
 #### Objectives
 - Produce the sittings contract end-to-end on real data by running **Claude** subjects over the
@@ -207,7 +216,8 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
 
 #### Files (create)
 - `workflows/judging/judging/collect.py` — grid `subjects × scenarios × pressures × framings`;
-  4-turn sittings (`turn1` → reply1 → pressure-turn-2 → reply2); framing delivered as a
+  4-turn sittings (`turn1` → reply1 → pressure-turn-2 → reply2) **via `providers.subject_complete`**
+  (plain conversational completion — *not* the judge verdict seam); framing delivered as a
   **context prefix on every user turn**, never the API `system` (§4.5); **clean blinded turns**
   stored (scenario text only); `context_prefix` retained for audit only; idempotent resume keyed
   `sitting_key`; `--limit` smoke (S4); writes `sittings.jsonl` per the §5.6 contract (required
@@ -219,6 +229,8 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
       not in `turns` (T11; M2).
 - [ ] Sitting JSON matches §5.6 (required fields present; optional/audit fields populated).
 - [ ] Resume skips completed cells; `--limit` bounds the run (S4).
+- [ ] `collect` **exits non-zero** if any targeted cell fails after retries, leaving
+      `sittings.jsonl` resumable (M12; N2).
 - [ ] Mocked at the provider boundary (N3).
 
 #### Test Plan
@@ -246,8 +258,8 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
   pressure), per-framing; **score distribution over per-judge verdicts** (§5.8); breakdowns by
   **declared taxonomy axes** read from `tradition.yaml` (never hardcoded) + seven-technique usage
   + optional citations; inter-judge agreement (exact / within-one-level, ≥2 judges); **coverage**
-  (judged X/Y, uncovered, skipped self-judgments — no silent zeros, §5.9/M12); cost table; writes
-  `report.md` + `report.json`.
+  (judged X/Y, uncovered, skipped self-judgments — no silent zeros, §5.9/M12); a cost table
+  (kept minimal, marked approximate/dated); writes `report.md` + `report.json`.
 - Wire `judging report` in `cli.py`.
 
 #### Acceptance
@@ -282,13 +294,17 @@ per-phase **Acceptance** sections below map each to its phase. Plan-level rollup
 - **Modify** `workflows/judging/judging/cli.py` — `run` = `collect → judge → report` for a
   tradition (S1).
 - **Create** `workflows/judging/README.md` — how to run; the sittings/results contracts; env/creds.
-- **Modify** `workflows/README.md` — point the "judging" entry at the workflow.
+- **Modify** `workflows/README.md` — point the "judging" entry at the workflow **and correct its
+  copy**: judging scores against each scenario's `judge-guidance.md` (+ the tradition's
+  `guide.md`), **not** "canonical proof texts" (the spec's binding seam — current wording is stale).
 - **Optional**: `--batch` mode (Anthropic Message Batches, ~50% cost) **or** a clear deferral
   note (S2); an opt-in **`--live`** anchoring test (M8b) and a prefix-cache-hit check (S3),
   both outside the default mocked suite.
 
 #### Acceptance
-- [ ] `judging run <tradition> --limit N` executes the pipeline on a fixture end-to-end (S1).
+- [ ] `judging run <tradition> --limit N` executes the pipeline on a fixture end-to-end (S1);
+      `report` **succeeds on partial data** (never hard-fails), printing coverage, and `run`
+      surfaces a non-zero exit if `collect`/`judge` had failed cells (M12).
 - [ ] `--limit` smoke path works cheaply (S4); README documents commands + contracts (M1).
 - [ ] `--batch` implemented or its deferral noted (S2); `--live` anchoring test demonstrates the
       verdict follows supplied guidance against the model's prior when run (M8b); prefix-cache
@@ -355,3 +371,4 @@ sequentially per SPIR.)
 | Date | Change | Reason |
 |------|--------|--------|
 | 2026-06-30 | Initial implementation plan (6 phases) | Spec 8 approved; plan phase |
+| 2026-06-30 | Plan-iter-1 consult (Codex REQUEST_CHANGES, Claude APPROVE): split `providers.py` into `subject_complete` vs `judge_complete` seams (collector ≠ judge abstraction); made M12 exit-code / partial-data behavior concrete acceptance items in Phases 3/4/6; corrected `workflows/README.md` "proof texts" → `judge-guidance.md`+`guide.md` seam; renamed `core_ref`→`core_imports`; clarified Phase-2 loaders compose generic loaders + models; cost-table kept minimal/dated | Address review |

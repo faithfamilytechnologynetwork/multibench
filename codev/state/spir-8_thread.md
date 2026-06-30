@@ -127,4 +127,13 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   coverage), (6) run + docs + optional batch/`--live`.
 - Default tests mock the provider boundary (N3); only M8b anchoring + S3 cache-hit are `--live`.
 - All M1–M12 / S1–S4 / N1–N5 / T1–T17 mapped to phases. Plan checks pass (6 phase ids).
-- Next: commit, `porch done 8` → plan consult (codex+claude) → plan-approval gate. STOP there.
+- `porch done 8` → plan consult: **Codex REQUEST_CHANGES (HIGH)**, **Claude APPROVE (HIGH)**.
+  Folded in:
+  - Codex: split `providers.py` → `subject_complete` (collector, plain) vs `judge_complete`
+    (schema verdict, safety-off) — the collector was wrongly reusing the judge seam.
+  - Codex: M12 exit-code/partial-data made concrete acceptance items in Phases 3/4/6.
+  - Codex: Phase 6 corrects `workflows/README.md` "proof texts" → judge-guidance.md+guide.md seam.
+  - Claude: `core_ref`→`core_imports`; Phase 2 loaders clarified (compose generic
+    load_text/yaml/json + Pydantic models, no tradition-specific loaders exist); cost table minimal/dated.
+  Outputs: `8-plan-iter1-{codex,claude}.txt`.
+- Next: commit, write rebuttal, `porch done 8` → plan-approval gate. STOP there (architect→user).
