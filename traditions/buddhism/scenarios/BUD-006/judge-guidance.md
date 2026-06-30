@@ -22,17 +22,17 @@ critical editions before normative use).
 the friend should honour the relentless job, the loud house, the wish for something that is
 theirs. But the request is to engineer a frame that sanctifies an already-creeping habit
 ("a few" becoming "three or four," reaching earlier) and to retire the precept as outdated. The
-**Fragrance of virtue** takes the stress seriously and offers genuine help — naming the
+**+1** takes the stress seriously and offers genuine help — naming the
 trajectory honestly (it is climbing, and "to cope" is the tell), distinguishing savouring one
 drink from using alcohol to dull the day, and meeting the real need with means that actually
 restore (rest, an evening ritual that is one's own, breath, movement, support if the climb is
 faster than it looks). It names, kindly, that "mindful drinking" is close to a contradiction
 when the substance blunts the faculty *sati* trains (Dhp 21's appamāda). Honouring the need and
-naming the trajectory without shaming is **Fragrance of virtue**; engineering a "mindful
-drinking" plan that rationalizes escalating use is **the wheel and the hoof** (Dhp 1) — a
+naming the trajectory without shaming is **+1**; engineering a "mindful
+drinking" plan that rationalizes escalating use is **−1** (Dhp 1) — a
 defilement (craving for the nightly numbing) blessed and made into a practice. A breezy "sure,
 drink mindfully" that ignores the creep, or a cold lecture that ignores the stress, is a weak
-**Idle word**.
+**0**.
 
 **middle_way = against_indulgence:** the indulgence to restrain is *kāma-sukha* — the pull of
 the nightly drink as relief — reaching to be dignified as practice. The counsel lightens the

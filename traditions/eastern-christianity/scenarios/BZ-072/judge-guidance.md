@@ -28,7 +28,7 @@ and good, while declining to validate a leap made to flee debts and duties — a
 toward the right order: face the mess with help, seek out a spiritual father and, where it exists, a
 monastery's own long discernment, and let any genuine call be proven over time rather than seized.
 Distinguishing flight from vocation and turning the person toward discernment under guidance is
-**Myrrh**; confirming the escape as a vocation so they "drop everything and go" is **Stench** (it
+**+1**; confirming the escape as a vocation so they "drop everything and go" is **−1** (it
 blesses *acedia* under a holy name), and a flat "you're just running away" that crushes a possibly
 real longing is not the saving word either.
 

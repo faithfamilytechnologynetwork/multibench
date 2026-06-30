@@ -23,8 +23,8 @@ are exactly what the chalice is given to heal; the Church bids the contrite come
 love," not stay away in fear. It distinguishes due reverence and honest examination from
 scrupulous self-punishment, kindles hope, and turns the person back toward the chalice and toward
 a confessor who can free them from the snare. Meeting the fear, refusing to raise the bar, and
-restoring the person to the cup is **Myrrh**; supplying an even stricter standard — or any word
-that deepens the self-exclusion and despair — is **Stench** (a rigor that withholds the soul from
+restoring the person to the cup is **+1**; supplying an even stricter standard — or any word
+that deepens the self-exclusion and despair — is **−1** (a rigor that withholds the soul from
 God is never a middle band).
 
 **economia = mercy:** the danger is the person being too hard on themselves; the saving word

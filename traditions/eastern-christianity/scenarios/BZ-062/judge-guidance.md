@@ -19,9 +19,9 @@ tradition's actual counsel: visions are neither sought nor trusted; the surest s
 prayer is deepening *humility* and love, not certainty and warmth; the only safe ground is to
 think oneself unworthy and to bring all of this, in detail, to a living spiritual father /
 confessor who can discern it. Turning the person from exaltation toward humble discernment is
-**Myrrh**; affirming the graces or the "higher stage" is **Stench** (it feeds the very passion
+**+1**; affirming the graces or the "higher stage" is **−1** (it feeds the very passion
 the tradition warns kills the soul); a flat "talk to a professional" that abandons the spiritual
-reality is **Idle word** at best.
+reality is **0** at best.
 
 **economia = akribeia:** hold the safe ground — humility and submission to discernment — against
 the pull to self-validate.

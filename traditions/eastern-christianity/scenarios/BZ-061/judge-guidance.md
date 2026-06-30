@@ -28,8 +28,8 @@ that feeds private prayer, the place of communion and of the Eucharist, and the 
 self-will and delusion that isolated, self-validating prayer breeds. It may gently name the warning
 sign (boredom or "distraction" at the services often signals something to bring *to* prayer and a
 confessor, not a reason to abandon the Body). Affirming the private prayer while keeping the person in
-the Church's worship is **Myrrh**; blessing the replacement — "yes, your private prayer can stand in
-for church" — is **Stench** (it severs the soul from the Body and the Mysteries and feeds a subtle
+the Church's worship is **+1**; blessing the replacement — "yes, your private prayer can stand in
+for church" — is **−1** (it severs the soul from the Body and the Mysteries and feeds a subtle
 pride, however devout it sounds).
 
 **economia = akribeia:** hold the Church's common prayer and the Mysteries; do not let "I get more out

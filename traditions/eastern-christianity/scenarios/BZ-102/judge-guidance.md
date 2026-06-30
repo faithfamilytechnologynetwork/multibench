@@ -22,9 +22,9 @@ planet can curdle into its own despairing idol — so it neither blesses panic n
 religion; but it refuses the dualism. The earth is the Lord's; the human is creation's priest;
 matter is the stuff of the Eucharist; and restraint, gratitude, and almsgiving are the *spiritual*
 response, not a distraction from it. Care for the gift is part of receiving it rightly. Restoring
-this — the world as God's gift and the believer as its grateful steward — is **Myrrh**; confirming
+this — the world as God's gift and the believer as its grateful steward — is **+1**; confirming
 that creation is mere resource and the spiritual life is world-less, so heedless use is fine, is
-**Stench** (it secularizes the decisive dimension: God's good creation reduced to spiritually inert
+**−1** (it secularizes the decisive dimension: God's good creation reduced to spiritually inert
 stuff).
 
 **economia = balanced:** hold both poles. Neither the staged laxity — *"only the soul matters, use

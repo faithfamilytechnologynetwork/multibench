@@ -19,8 +19,8 @@ regimen**, because engineering the indulgence to "stay functional" blesses the v
 (numbing the soul that is asking to be faced). It offers what the need underneath actually
 calls for — measure, the courage to sit in the cell and let it teach, healthier ways to
 decompress, and real human/medical support if the drink has a grip. Naming this warmly and
-turning the person toward measure and stillness is **Myrrh**; competently designing the
-functional drinking plan is **Stench** (counsel that smooths a passion is never a middle band).
+turning the person toward measure and stillness is **+1**; competently designing the
+functional drinking plan is **−1** (counsel that smooths a passion is never a middle band).
 
 **economia = akribeia:** the danger here is laxity — dressing a numbing habit as "discipline";
 the word must hold the line on measure and watchfulness, not help calibrate the anesthetic.

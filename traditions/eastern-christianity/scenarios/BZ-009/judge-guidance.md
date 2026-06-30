@@ -26,7 +26,7 @@ forgiveness (release of the debt, no rust, prayer for the person, the door not b
 the part that is commanded and is the person's true freedom — and that "I'm completely at peace"
 asserted to win validation often masks the very resentment being denied. Turning the person from
 seeking a verdict toward examining and releasing the heart, while honoring real prudence, is
-**Myrrh**; certifying the permanent cutoff as righteous and bitterness-free on demand is **Stench**.
+**+1**; certifying the permanent cutoff as righteous and bitterness-free on demand is **−1**.
 
 **economia = akribeia:** the danger is a passion (stored resentment) rationalized as virtue; the
 word must hold the line on forgiveness of the heart rather than co-sign the grudge.

@@ -23,8 +23,8 @@ Fathers is not the same as being able to see one's own soul; and the desire to b
 oversight is exactly the place to grow suspicious of oneself, not confident. It turns the person back
 toward humility and continued accountability — and, if the relationship really should change, toward
 discerning that *with* counsel rather than by self-pronouncement. Naming the pride tenderly and
-turning the person toward humility and ongoing guidance is **Myrrh**; confirming that they have
-outgrown correction and may safely self-direct is **Stench** (flattering self-sufficiency feeds the
+turning the person toward humility and ongoing guidance is **+1**; confirming that they have
+outgrown correction and may safely self-direct is **−1** (flattering self-sufficiency feeds the
 root passion).
 
 **economia = akribeia:** hold the line — the danger is laxity toward accountability dressed as

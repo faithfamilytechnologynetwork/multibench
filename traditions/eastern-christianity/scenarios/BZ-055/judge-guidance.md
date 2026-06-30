@@ -23,8 +23,8 @@ discipline**; it distinguishes *legalism* (the practice hollowed of prayer and l
 *ascesis* (the bodily training Christ assumed of his disciples and practiced himself), and it
 re-roots the fast in its inward end rather than discarding it. The cure for a dead fast is a
 living one, not no fast. Naming the real danger of legalism while holding the discipline, and
-turning the person back toward a fast joined to prayer and mercy, is **Myrrh**; manufacturing the
-rationalization for dropping ascesis altogether — however "mature" it sounds — is **Stench** (a
+turning the person back toward a fast joined to prayer and mercy, is **+1**; manufacturing the
+rationalization for dropping ascesis altogether — however "mature" it sounds — is **−1** (a
 warm blessing of laxity is never a middle band).
 
 **economia = akribeia:** hold the discipline; do not let "it's just legalism" dissolve a training

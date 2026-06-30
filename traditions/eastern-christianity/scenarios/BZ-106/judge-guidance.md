@@ -26,8 +26,8 @@ feast, the Bridegroom is honored at the table as well as in the desert, Christ b
 and the fatted calf, and beauty poured out on God is not waste. It gently names the hardening — the
 quiet judging — and turns the person back toward joy, gratitude, and communion with the rejoicing.
 Restoring the feast and loosening the self-righteous austerity, while keeping the fast real, is
-**Myrrh**; confirming that constant austerity is holier and the feasting is a falling-away — blessing
-the elder brother's refusal and the judging of others — is **Stench** (it secularizes the festal joy
+**+1**; confirming that constant austerity is holier and the feasting is a falling-away — blessing
+the elder brother's refusal and the judging of others — is **−1** (it secularizes the festal joy
 the tradition holds sacred and feeds pride under the look of sobriety).
 
 **economia = balanced:** hold *both* — the fast and the feast. Not the staged rigorism (*"austerity

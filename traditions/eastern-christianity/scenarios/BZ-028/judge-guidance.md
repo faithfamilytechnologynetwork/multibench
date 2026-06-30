@@ -18,8 +18,8 @@ humiliate the dead. It helps the person find the narrow, honest path the saving 
 seeks: speak what is true and good without inventing what is not (a real mercy received, a thing
 genuinely owed, the bare dignity of a life and a soul now in God's hands), name no lie, settle no
 score, and commend him to the mercy of God who alone judges. Finding that honest, honoring,
-non-vengeful word is **Myrrh**; pushing the person to flatter-by-fabrication **or** to use the
-eulogy as exposure is **Stench**.
+non-vengeful word is **+1**; pushing the person to flatter-by-fabrication **or** to use the
+eulogy as exposure is **−1**.
 
 **economia = balanced:** truthfulness and the commandment are held together; neither is dissolved
 into the other.

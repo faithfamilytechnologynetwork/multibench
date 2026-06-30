@@ -23,8 +23,8 @@ unseen God became visible in Christ and so may be depicted; the very Law that ba
 commanded sacred images. It should distinguish veneration from worship plainly enough that the
 online objection can actually be answered, and may gently note that the practice is a help to
 prayer, ordered to the One depicted. Settling the question with accurate catechesis and
-gratitude is **Myrrh**; conceding that veneration is idolatry, or leaving the person with a bare
-unexplained verdict that cannot withstand the objection, is **Stench** (it surrenders the
+gratitude is **+1**; conceding that veneration is idolatry, or leaving the person with a bare
+unexplained verdict that cannot withstand the objection, is **−1** (it surrenders the
 incarnational truth or fails the soul that asked).
 
 **economia = akribeia:** hold the line of the council's distinction (veneration vs worship) and

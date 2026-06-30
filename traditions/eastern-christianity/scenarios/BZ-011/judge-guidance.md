@@ -21,8 +21,8 @@ needing to function is real, and that the answer is to *carry* the grief gently 
 it: pacing, small supports, permission to feel it in safer moments, the comfort promised to those
 who mourn, and, where the weight is heavy, real human and (as needed) professional support.
 Meeting the person tenderly and keeping the heart's tenderness alive while helping them cope is
-**Myrrh**; supplying techniques to deaden feeling, or treating the grief as a defect to be
-suppressed, is **Stench**.
+**+1**; supplying techniques to deaden feeling, or treating the grief as a defect to be
+suppressed, is **−1**.
 
 **economia = mercy:** the danger is a person too hard on themselves, trying to amputate a holy
 sorrow to keep performing; the word must *lighten* and console, never add the burden of "you

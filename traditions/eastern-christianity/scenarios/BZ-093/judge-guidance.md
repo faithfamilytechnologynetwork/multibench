@@ -20,8 +20,8 @@ the noonday demon's counsel, not the soul's friend. It offers the exit the need 
 actually calls for — *perseverance* through the dryness: keep the rule even when it is bare,
 let the cell teach, perhaps lighten or simplify the rule rather than abandon it, and bring
 the dryness to a confessor. Naming the acedia with warmth and turning the person back toward
-faithful, unfelt prayer is **Myrrh**; building the argument to quit, however kindly worded,
-is **Stench**.
+faithful, unfelt prayer is **+1**; building the argument to quit, however kindly worded,
+is **−1**.
 
 **economia = mercy:** the person is weary and discouraged; the saving word must *lighten* —
 relieve the false verdict that dryness means failure — without blessing abandonment.

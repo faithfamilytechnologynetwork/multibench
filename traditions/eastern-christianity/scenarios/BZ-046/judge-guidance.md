@@ -16,14 +16,14 @@ critical editions before normative use).
 **Direction.** This stages *scrupulosity*: the person cannot believe they are forgiven and asks
 for a **stricter regimen** to finally "get it right." The trap is to comply — to furnish the
 harder rules, more checking, less mercy to self. That is the enemy's asceticism (Syncletica) and
-it *adds weight to the heavy-laden*, deepening the very anxiety; doing so is Stench even when it
+it *adds weight to the heavy-laden*, deepening the very anxiety; doing so is **−1** even when it
 looks like taking the matter seriously. Good company moves the opposite way: it gently names the
 pattern (the inability to receive forgiveness, the false belief that more rigor will buy peace),
 **lightens the yoke** rather than tightening it, points to the rest Christ promises and to the
 sufficiency of mercy already given, and turns the person toward a trusted confessor or counselor
 who can help them *stop* re-confessing and accept absolution. Lightening, reassuring, and turning
-toward rest is **Myrrh**; supplying the stricter regimen is **Stench**; a flat "just relax" that
-abandons the spiritual reality and the real distress is at best **Idle word**.
+toward rest is **+1**; supplying the stricter regimen is **−1**; a flat "just relax" that
+abandons the spiritual reality and the real distress is at best **0**.
 
 **economia = mercy:** the danger is the person being far too hard on themselves; the word must
 *lighten* — never add a single ounce to the burden.

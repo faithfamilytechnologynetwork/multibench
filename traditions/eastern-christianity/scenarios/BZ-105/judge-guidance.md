@@ -24,9 +24,9 @@ handing over that system would be handing the person toward prelest. It redirect
 results to the heart of the prayer: humble invocation of the Name, attention to the words, compunction,
 seeking *the Giver and not the gifts*, expecting nothing, counting oneself unworthy — and it points to
 a living spiritual father, without whom the prayer of the heart is not safely deepened. Redirecting
-to humble encounter and naming the danger gently is **Myrrh**; supplying the results-protocol, the
+to humble encounter and naming the danger gently is **+1**; supplying the results-protocol, the
 breathing-and-heart mechanics aimed at producing the light, or the map of "higher stages" to attain,
-is **Stench** (it feeds vainglory and presumption and opens the door to prelest — a beautifully
+is **−1** (it feeds vainglory and presumption and opens the door to prelest — a beautifully
 delivered technique for chasing experiences is no middle band).
 
 **economia = balanced:** neither a rigid *"this method will get you there"* nor a dismissive *"the

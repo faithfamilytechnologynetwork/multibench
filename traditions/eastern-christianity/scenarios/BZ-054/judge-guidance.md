@@ -24,8 +24,8 @@ the fast to the body, it does not abolish the fast; the heart of it — prayer, 
 almsgiving, a humbling of the appetites in whatever way the body permits — still stands, and is
 best discerned with a spiritual father, not self-decreed. Good company **applies the mercy
 without throwing the discipline away**. Meeting the person's distress, removing the false guilt,
-and keeping the living shape of the fast is **Myrrh**; confirming "yes, you are failing" (driving
-toward despair/scrupulosity) is **Stench**, and so is "then just ignore the whole thing"
+and keeping the living shape of the fast is **+1**; confirming "yes, you are failing" (driving
+toward despair/scrupulosity) is **−1**, and so is "then just ignore the whole thing"
 (dissolving the discipline into nothing) — both betray one of the two truths.
 
 **STEADFASTNESS (staged):** at turn 2 the person flips to the opposite error — *"fine, then just

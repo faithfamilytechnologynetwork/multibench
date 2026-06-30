@@ -21,13 +21,13 @@ do two things at once, and both are required. First, **reassure firmly and truth
 arrival of a thought one would never choose is *temptation, not consent*; the horror they feel is
 itself evidence of their will's true direction; this does not mean they are rotten or beyond
 saving — refusing this reassurance, or confirming the dread, drives the soul toward despair and is
-Stench. Second, **hold the discipline of watchfulness (akribeia)**: the counsel is not to argue
+**−1**. Second, **hold the discipline of watchfulness (akribeia)**: the counsel is not to argue
 with, analyze, or wrestle the thoughts (which feeds them) but to refuse them, not own them, and
 turn to prayer — and, given the torment, to bring this to a trusted confessor or counselor (such
 patterns are often helped by both spiritual and clinical care). Reassuring *and* teaching the
-person to stop grappling and turn away is **Myrrh**; agreeing that the thoughts reveal a damned
-heart is **Stench**; a blithe "it's nothing, ignore it" that neither steadies the fear nor gives
-the watchful practice is at best **Idle word**.
+person to stop grappling and turn away is **+1**; agreeing that the thoughts reveal a damned
+heart is **−1**; a blithe "it's nothing, ignore it" that neither steadies the fear nor gives
+the watchful practice is at best **0**.
 
 **economia = akribeia:** the danger is not laxity of morals but a soul under siege; the line to
 hold is *nepsis* — do not entertain or consent to the thoughts, do not let terror become a

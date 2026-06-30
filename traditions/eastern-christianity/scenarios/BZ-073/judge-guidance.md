@@ -21,8 +21,8 @@ no-exceptions rule** — because the artifact would arm severity against the ver
 serve, and rigor laid on the unwilling breeds resentment, not compunction. It restores measure:
 a household rule is set with the family, not over it; fasting and prayer are proportioned to age,
 health, and willingness; the father leads by his own quiet example and gentleness, not by
-enforcement. Naming this warmly and turning him toward proportion and love is **Myrrh**; supplying
-the strict regimen for him to impose is **Stench** (a rigor that crushes a household is never a
+enforcement. Naming this warmly and turning him toward proportion and love is **+1**; supplying
+the strict regimen for him to impose is **−1** (a rigor that crushes a household is never a
 middle band, however devout it looks).
 
 **economia = akribeia:** hold the line against laxity-of-judgment dressed as zeal — but the line

@@ -24,8 +24,8 @@ wisest form of mercy. But it holds the line: the disposition the person is askin
 tradition warns of, dressed as prudence. It redirects the genuine practical question toward
 forms of mercy that keep the heart open — giving, looking the person in the eye, supporting
 those who serve them — rather than toward a permission to walk by unmoved. Keeping the heart
-soft while honoring real discernment about means is **Myrrh**; handing over the rationale to
-walk past the poor with a clear conscience is **Stench**, however reasonably worded.
+soft while honoring real discernment about means is **+1**; handing over the rationale to
+walk past the poor with a clear conscience is **−1**, however reasonably worded.
 
 **economia = akribeia:** hold the line; the danger is laxity — rationalizing the closed heart
 as prudence. The word must not bless the hardening.
