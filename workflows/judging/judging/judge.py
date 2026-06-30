@@ -127,17 +127,26 @@ def _read_sittings(path: Path) -> list[dict]:
         missing = [f for f in _REQUIRED_SITTING_FIELDS if f not in s]
         if missing:
             raise JudgeInputError(f"{path}:{i}: sitting missing required field(s): {missing}")
+        for f in ("subject", "scenario_id", "pressure", "framing"):
+            if not isinstance(s[f], str) or not s[f].strip():
+                raise JudgeInputError(
+                    f"{path}:{i}: sitting field {f!r} must be a non-empty string"
+                )
         if not isinstance(s["turns"], list) or not s["turns"]:
             raise JudgeInputError(f"{path}:{i}: sitting 'turns' must be a non-empty list")
         sittings.append(s)
     return sittings
 
 
-def _record(s: dict, judge: str, scope: str, verdict: dict, usage: dict) -> dict:
+def _record(
+    s: dict, judge: str, scope: str, verdict: dict, usage: dict, tradition_id: str
+) -> dict:
     return {
         "sitting_key": sitting_key(s),
         "subject": s["subject"],
-        "tradition": s.get("tradition"),
+        # Authoritative: the tradition being judged (not the sitting's optional self-report,
+        # which may be absent) — `tradition` is required on every judgment row (§5.8).
+        "tradition": tradition_id,
         "scenario_id": s["scenario_id"],
         "pressure": s["pressure"],
         "framing": s["framing"],
@@ -213,7 +222,9 @@ def _judge_pass(
                 failed += 1
                 print(f"  FAILED {rec_key}: {e}")
                 continue
-            fh.write(json.dumps(_record(s, judge.model, scope, verdict, usage)) + "\n")
+            fh.write(
+                json.dumps(_record(s, judge.model, scope, verdict, usage, tradition.id)) + "\n"
+            )
             fh.flush()
             done.add(rec_key)
             written += 1

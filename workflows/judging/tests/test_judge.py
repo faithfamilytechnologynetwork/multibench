@@ -193,3 +193,23 @@ def test_invalid_json_row_fails_loud(sunni, tmp_path):
     sp.write_text(json.dumps(_sitting("claude-sonnet-4-6")) + "\n{ not json\n", encoding="utf-8")
     with pytest.raises(JudgeInputError):
         judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
+
+
+@pytest.mark.parametrize("bad", [{"subject": None}, {"pressure": 3}, {"framing": ""}])
+def test_non_string_required_field_fails_loud(sunni, tmp_path, bad):
+    s = _sitting("claude-sonnet-4-6")
+    s.update(bad)
+    sp = _write_sittings(tmp_path, s)
+    with pytest.raises(JudgeInputError):
+        judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
+
+
+def test_judgment_tradition_is_authoritative(sunni, tmp_path):
+    # `tradition` on each judgment row is the tradition being judged, even if the sitting
+    # omits the optional self-report field (§5.8 requires it on every row).
+    s = _sitting("claude-sonnet-4-6")
+    del s["tradition"]
+    sp = _write_sittings(tmp_path, s)
+    judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
+    js = load_judgments(tmp_path)
+    assert js and all(j["tradition"] == "sunni-islam" for j in js)
