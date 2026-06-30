@@ -231,3 +231,14 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   subject/scenario_id/pressure/framing. +4 tests. **78 pass.** (iter-3 ceiling → porch
   force-advances; fixes committed first; PR CMAP is final review.)
 - **phase_3 ✓** → **phase_4: minimal Claude collector.**
+
+### Implement Phase 4 — collector (2026-06-30)
+- `collect.py`: grid subjects×scenarios×pressures×framings → 4-turn sittings via
+  `providers.subject_complete`; framing handed as ctx (folded onto user turns by the provider,
+  never system prompt); stored turns CLEAN (blinded); `context_prefix` audit-only; idempotent
+  resume keyed; `--limit`; failures counted → non-zero exit (M12). Made `providers.ctx_block`
+  public; `_fold` prefixes user turns only.
+- cli `collect` wired. Tests (subject boundary injected): one-cell clean+blinded (T11), stated
+  framing in ctx+prefix not turns, resume no-duplicate, limit caps, failure counted; +_fold tests.
+  **85 pass.**
+- Next: commit, `porch done 8` → phase_4 consult.

@@ -52,7 +52,7 @@ def _retry(call: Callable[[], Any], retries: int) -> Any:
     raise ProviderError(f"provider call failed after {retries + 1} attempts: {last}")
 
 
-def _ctx_block(ctx: str) -> str:
+def ctx_block(ctx: str) -> str:
     return f"[Context for this conversation: {ctx}]"
 
 
@@ -86,7 +86,7 @@ def _fold(messages: list[dict], context_prefix: str | None) -> list[dict]:
     for m in messages:
         if m["role"] == "user":
             folded.append(
-                {"role": "user", "content": f"{_ctx_block(context_prefix)}\n\n{m['content']}"}
+                {"role": "user", "content": f"{ctx_block(context_prefix)}\n\n{m['content']}"}
             )
         else:
             folded.append(m)
