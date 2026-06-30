@@ -1,7 +1,7 @@
 id: '8'
 title: workflows-judging-the-judging-
 protocol: spir
-phase: specify
+phase: plan
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -16,7 +16,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-06-30T20:51:08.360Z'
+updated_at: '2026-06-30T20:55:30.747Z'
