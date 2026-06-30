@@ -189,4 +189,8 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - Phase_2 iter2: **Codex REQUEST_CHANGES** (transcript must be LAST per §5.5; my output-spec
   followed it), **Claude APPROVE**. Fixed: output spec now precedes the `<transcript>` block
   which ends the prompt; +assertion (transcript last). 51 pass.
-- Next: rebuttal, re-verify (iter3) → Phase 3 (providers + judge).
+- Phase_2 iter3: **Codex REQUEST_CHANGES** (transcript breakout: a turn with literal
+  `</transcript>` could escape the block), **Claude APPROVE**. Fixed: `_defang_transcript`
+  splits the delimiter with a zero-width space; +regression test (only one real closing tag,
+  at end). 52 pass.
+- Next: rebuttal, re-verify (iter4) → expect unanimous → Phase 3.
