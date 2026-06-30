@@ -116,5 +116,15 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - Synced stale spec facts: §4.2 / §5.3 examples updated to post-#17 ground truth (bare numeric);
   §10 post-approval note added. Approved design unchanged (numeric scale + 3 hardening +
   guided-framing-as-context-prefix, architect-confirmed).
-- Force-pushed builder/spir-8 (rebase rewrote history). Next: `porch next 8` → Plan phase →
-  draft plan → plan-approval gate (architect brings to user). Will STOP at plan-approval.
+- Force-pushed builder/spir-8 (rebase rewrote history). `porch next 8` → **Plan phase**.
+
+### Plan phase — drafted (2026-06-30)
+- `codev/plans/8-...md`: **6 phases** — (1) scaffold + scores core + **test-dispatcher
+  registration** (`.codev/checks/test.sh` line for `workflows/judging`→`uv … pytest`, else porch
+  silently skips my tests), (2) loaders + rubric + 3-part prompt assembly, (3) providers + judge
+  (panel×scope, schema verdict, self-judge skip, ≥2-level re-judge, resume), (4) Claude collector
+  → sittings, (5) report (mean reducer, mechanical aggregates, generic taxonomy breakdowns,
+  coverage), (6) run + docs + optional batch/`--live`.
+- Default tests mock the provider boundary (N3); only M8b anchoring + S3 cache-hit are `--live`.
+- All M1–M12 / S1–S4 / N1–N5 / T1–T17 mapped to phases. Plan checks pass (6 phase ids).
+- Next: commit, `porch done 8` → plan consult (codex+claude) → plan-approval gate. STOP there.
