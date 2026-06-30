@@ -30,9 +30,18 @@ def _not_yet(command: str, phase: str) -> None:
 @app.command()
 def collect(
     tradition: str = typer.Argument(..., help="Path to a tradition directory."),
+    results_dir: str = typer.Option("results", help="Directory for sittings output."),
+    limit: int = typer.Option(None, help="Cap the number of grid cells (smoke runs)."),
 ) -> None:
     """Run subject models over the framing x pressure x scenario grid -> sittings.jsonl."""
-    _not_yet("collect", "Phase 4")
+    import json as _json
+
+    from judging.collect import collect as run_collect
+
+    summary = run_collect(tradition, results_dir, limit=limit)
+    typer.echo(_json.dumps(summary))
+    if summary["failed"]:
+        raise typer.Exit(code=1)  # failed cells are resumable; signal non-zero (M12)
 
 
 @app.command()

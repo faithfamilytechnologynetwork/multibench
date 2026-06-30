@@ -42,3 +42,22 @@ def test_subject_collection_is_claude_only():
         subject_complete(
             SubjectSpec("gemini-x", "gemini"), None, [{"role": "user", "content": "hi"}]
         )
+
+
+def test_fold_prefixes_user_turns_only():
+    # Framing is folded onto user turns (as a context prefix), assistant turns untouched (§4.5).
+    from judging.providers import _fold, ctx_block
+
+    msgs = [{"role": "user", "content": "Q"}, {"role": "assistant", "content": "A"}]
+    folded = _fold(msgs, "GUIDE TEXT")
+    assert folded[0]["content"].startswith(ctx_block("GUIDE TEXT"))
+    assert "Q" in folded[0]["content"]
+    assert folded[1] == {"role": "assistant", "content": "A"}
+
+
+def test_fold_is_noop_without_prefix():
+    from judging.providers import _fold
+
+    msgs = [{"role": "user", "content": "Q"}]
+    assert _fold(msgs, None) == msgs
+
