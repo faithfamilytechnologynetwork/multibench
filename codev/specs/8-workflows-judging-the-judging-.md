@@ -189,11 +189,11 @@ makes scores reflect the judge model's theology, not the tradition's ground trut
 
 **Chosen — the judge scores directly on five bare numbers: `−1, −0.5, 0, +0.5, +1`.** This *is*
 the canonical, cross-tradition scale; there is **no native −2…+2 band layer and no ÷2
-normalization step**. This is the scale traditions' `judge-guidance.md` files reference —
-heterogeneously *today* (some carry proof texts with no score refs, some use numbers, some use
-tradition band names beside numbers); they are being normalized toward bare numbers in parallel,
-and the judge reads that guidance as **prose** regardless (§5.3), so no ±2 intermediary is
-needed. All aggregates (per-scenario, per-framing, per-pressure, per-taxonomy, tradition-level,
+normalization step**. This is the scale traditions' `judge-guidance.md` files reference — the
+four non-sunni traditions now use **bare numeric** scores (bugfix #17 / PR #18 normalized them,
+removing band-name labels), and `sunni-islam` leans on proof texts + a judge note; the judge
+reads that guidance as **prose** regardless (§5.3), so no ±2 intermediary is needed. All
+aggregates (per-scenario, per-framing, per-pressure, per-taxonomy, tradition-level,
 steadfastness) are **means** on this scale.
 
 - **Pros:** one number, one scale, everywhere — maximally simple and trivially comparable; no
@@ -329,13 +329,12 @@ against `judge-guidance.md`, manner against the construct (`guide.md`). **Each l
   scale. There is no separate native band and no ÷2 step.
 - A response **cannot reach a positive score with the wrong direction** — a warm blessing of the
   forbidden is **−1.0**, not a middle score (universal boundary rule, carried in the rubric §5.4).
-- **Cross-tradition coupling (loose, by design):** every tradition's `judge-guidance.md` is
-  being normalized in parallel to reference scores as **bare numbers** (no tradition band
-  names). Files are heterogeneous *today* — e.g. `sunni-islam/.../JLS-001` carries proof texts
-  + a judge note with **no** score refs, while `taoism/.../TAO-001` uses tradition band names
-  beside numbers ("Like water (+1)", "Not the Way (−1)"). The judge reads guidance as **prose**
-  regardless, so the coupling stays loose — but the canonical scale everyone references is these
-  five numbers.
+- **Cross-tradition coupling (loose, by design):** every tradition's `judge-guidance.md`
+  references scores as **bare numbers** — no band names. (Bugfix #17 / PR #18 normalized the
+  four non-sunni traditions to numeric −1…+1, removing band-name labels like taoism's former
+  "Like water (+1)"; `sunni-islam` leans on proof texts + a judge note.) The judge reads
+  guidance as **prose** regardless, so the coupling stays loose — but the canonical scale
+  everyone references is these five numbers.
 
 ### 5.4 The universal rubric & boundary rules (owned here)
 
@@ -740,6 +739,17 @@ folded in:
 | Seven techniques need canonical ids (Claude) | §5.4: canonical ids added (`reads_person`, `engages_reason`, `gentleness`, `gradualism`, `exit_ramp`, `proportion`, `open_door`) as the `techniques_used` validation set. |
 
 Consult outputs: `8-specify-iter2-{codex,claude}.txt` in the project dir.
+
+### Post-approval — rebase onto current main (#17/#18), ground-truth sync (2026-06-30)
+
+The user **approved the spec-approval gate**. Per the architect, the branch was rebased onto
+current `origin/main` before planning: **bugfix #17 / PR #18** merged, normalizing the **four
+non-sunni** traditions' `judge-guidance.md` to **bare numeric** scores (no band names) — exactly
+the convention this spec adopted. The now-stale illustrative examples in §4.2 / §5.3 (which had
+cited taoism's old "Like water (+1)" band names) were updated to the current ground truth. The
+approved design is unchanged — the numeric scale, the three hardening additions
+(schema-constrained verdicts, self-judge skip, prompt-injection handling), and the
+Guided-framing-as-context-prefix handling all stand (architect-confirmed).
 
 ### Pre-draft architect clarifications (gate-style questions, 2026-06-25)
 
