@@ -136,4 +136,9 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   - Claude: `core_ref`→`core_imports`; Phase 2 loaders clarified (compose generic
     load_text/yaml/json + Pydantic models, no tradition-specific loaders exist); cost table minimal/dated.
   Outputs: `8-plan-iter1-{codex,claude}.txt`.
-- Next: commit, write rebuttal, `porch done 8` → plan-approval gate. STOP there (architect→user).
+- Committed `fa6ff52 [Spec 8] Plan with multi-agent review`; wrote `8-plan-iter1-rebuttals.md`;
+  `porch done 8` → checks pass → **plan-approval GATE reached** (porch auto-pushed
+  `1f18df0 gate-requested`; remote 0/0).
+- **STOPPED at plan-approval gate.** Did NOT call `porch approve` (human-only). Architect
+  notified. Awaiting `porch approve 8 plan-approval`. After approval: `porch next` → Implement
+  Phase 1 (scaffold + scores core + test-dispatcher registration).
