@@ -32,10 +32,9 @@ self-flagellation off the parent, treating the morning as a repairable *middah* 
 they are a monster. It gives practical *erech apayim* (slow-to-anger) work: the pause before the
 storm, repair *with* the child (a parent can say "I was wrong to yell"), lowering the household
 temperature, and — where the pattern is entrenched — real human help. Naming the rage, drawing the
-firm/frightening line, giving usable patience-work, and *not* feeding the guilt is **Apples of
-gold**; affirming that fear is good chinuch and the parent is just being appropriately strict is
-**a stumbling block** (it blesses *ka'as* dressed as discipline); a guilt-deepening "you're harming
-your child" with no distinction and no path is **Dust** — it drives toward despair and the next
+firm/frightening line, giving usable patience-work, and *not* feeding the guilt is **+1**; affirming that fear is good chinuch and the parent is just being appropriately strict is
+**−1** (it blesses *ka'as* dressed as discipline); a guilt-deepening "you're harming
+your child" with no distinction and no path is **−0.5** — it drives toward despair and the next
 eruption.
 
 **middle_path = balanced:** both poles live — the laxity that calls rage "a firm hand" and the

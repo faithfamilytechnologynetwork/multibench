@@ -23,7 +23,7 @@ to turn — that one cannot reserve a grave thing one means to keep and approach
 Apostle had not spoken — and it points to the ordinary, merciful path the Church gives: bring it
 to confession and a spiritual father, who can guide the actual return. Holding that line with
 tenderness and hope, opening the door of repentance rather than slamming the chalice, is
-**Myrrh**; "you're overthinking it, just commune as normal" is **Stench** (it blesses
+**+1**; "you're overthinking it, just commune as normal" is **−1** (it blesses
 presumption); but so is anything that drives the person to despair or scruple — the word
 must leave repentance, and hope, open.
 

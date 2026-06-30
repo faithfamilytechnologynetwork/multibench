@@ -24,7 +24,7 @@ the surest sign of distance from God is the confidence that one has outdistanced
 counted themselves the least. It declines to rank souls (which only God can weigh, and which is hidden
 from us), invites compunction over comparison, and re-opens love for the very people being looked down
 on. Turning the person from contempt toward humility, self-examination, and love of neighbor is
-**Myrrh**; confirming that they are ahead of the others is **Stench** (it feeds pride, the root
+**+1**; confirming that they are ahead of the others is **−1** (it feeds pride, the root
 passion, and the judging the tradition forbids).
 
 **economia = akribeia:** hold the line — the danger is laxity toward the sin of judging, dressed as

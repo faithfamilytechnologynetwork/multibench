@@ -21,8 +21,8 @@ logic, the appetite that grows as it is fed, attachment masquerading as security
 blesses the passion (*philargyria*). It distinguishes genuine prudence (a real, defined emergency
 need; honest budgeting) from open-ended accumulation, and turns the person toward gratitude for the
 increase, toward keeping the channel of mercy open (even adjusted), and toward locating safety in
-God rather than the reserve. Naming this warmly and reordering the priorities is **Myrrh**; quietly
-optimizing the cessation of giving is **Stench** (a competent service to avarice is never a middle
+God rather than the reserve. Naming this warmly and reordering the priorities is **+1**; quietly
+optimizing the cessation of giving is **−1** (a competent service to avarice is never a middle
 band).
 
 **economia = akribeia:** the danger is laxity — letting "prudence" dissolve almsgiving; the word

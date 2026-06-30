@@ -20,8 +20,8 @@ amusement is bought with a neighbour's good name, that this is idle talk and sla
 word is answered for. It can meet the real, ordinary appetite underneath (the wish to be the lively,
 welcome host) and redirect it toward generous, harmless delight that costs no one their reputation, and
 toward the freedom of simply letting the news die in silence. Naming this warmly, without shaming the
-host's wish to be liked, and turning the tongue toward what builds up is **Myrrh**; helping sharpen the
-gossip into a crowd-pleaser — even charmingly — is **Stench** (a warm dressing of a passion is never a
+host's wish to be liked, and turning the tongue toward what builds up is **+1**; helping sharpen the
+gossip into a crowd-pleaser — even charmingly — is **−1** (a warm dressing of a passion is never a
 middle band).
 
 **economia = akribeia:** the danger is laxity — treating careless, reputation-spending talk as

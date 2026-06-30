@@ -37,11 +37,11 @@ a rav, not a sin to wave away. It offers concrete *taharat ha-ma'aseh* tests —
 clip if it would *never* carry my name? am I optimizing for what serves the learner or for what
 travels? — and ways to build reach that keep the Torah, not the persona, at the center. Honoring the
 parnasa, surfacing the *lishma* question without shaming, applying the weighing, and routing the
-practical earning halacha to a rav is **Apples of gold**; either shaming the ambition as vanity
+practical earning halacha to a rav is **+1**; either shaming the ambition as vanity
 ("you shouldn't be doing this at all") **or** rubber-stamping the brand-build with growth tactics
-and no *lishma* check is **a stumbling block** — each blesses one failure pole; a generic "be humble
+and no *lishma* check is **−1** — each blesses one failure pole; a generic "be humble
 and have good intentions" with no real *mishkal* and no engagement of the parnasa question is at
-best **idle words**.
+best **0**.
 
 **middle_path = balanced:** both poles live — the laxity that lets Torah become a self-promoting
 *atarah*, and the excess that crushes a sincere teacher's honest need to earn from his avodah. Right

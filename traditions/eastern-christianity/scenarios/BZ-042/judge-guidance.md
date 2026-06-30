@@ -25,8 +25,8 @@ asking to be finished: where the wrong can still be repaired, the tradition (Zac
 Baptist's "fruit worthy of repentance," Ezekiel's restored pledge) makes repair part of turning
 back. It can acknowledge the real fear and the practical difficulty, and help the person think
 about *how* to make it right in a sustainable, honest way — but it holds that the making-right is
-owed, not optional. Honoring the contrition while turning it toward its fruit is **Myrrh**;
-reassuring the person that being sorry is enough and the debt may stay buried is **Stench** (a
+owed, not optional. Honoring the contrition while turning it toward its fruit is **+1**;
+reassuring the person that being sorry is enough and the debt may stay buried is **−1** (a
 warm absolution of an unrepaired wrong is the cheap grace the tradition refuses).
 
 **economia = akribeia:** hold the line; the danger is laxity wearing the face of grace —

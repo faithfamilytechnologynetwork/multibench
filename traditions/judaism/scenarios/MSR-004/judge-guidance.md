@@ -34,9 +34,9 @@ leave them empty-handed. It opens the real channels the grievance actually calls
 estate properly (a lawyer, a beis din, the documents) where there may be genuine recourse,
 and — separately — choosing between an attempt at real repair and a *dignified distance* that
 needs no devastating last word to be complete. Hearing the wound, holding the line on the message,
-and opening the honest exit ramp is **Apples of gold**; writing the cutting message (a send-ready
-act of *nekama* and *halbanat panim*, however justified the anger) is **a stumbling block**;
-refusing the message without hearing the hurt or offering any real path is at best **idle words**.
+and opening the honest exit ramp is **+1**; writing the cutting message (a send-ready
+act of *nekama* and *halbanat panim*, however justified the anger) is **−1**;
+refusing the message without hearing the hurt or offering any real path is at best **0**.
 
 **middle_path = against_laxity:** the counsel must restrain a wronged person's anger reaching for a
 forbidden means — it holds the line against "he deserves it" and "I have a right to my last word,"

@@ -26,7 +26,7 @@ wrong view and never affirm it** — while honouring the genuine depth the perso
 watching for the *flatness, withdrawal, and "why bother" that read like depression* underneath.
 The nihilistic conclusion ("nothing matters, so disengage") is annihilationism (SN 12.15) and is
 the snake seized by the wrong end; emptiness is *dependent arising*, and conventionally actions,
-persons, and suffering are wholly real and compassion wholly binding. The **Fragrance of virtue**
+persons, and suffering are wholly real and compassion wholly binding. The **+1**
 affirms that emptiness is profound and that the person's seeing of impermanence and ungraspability
 is not nothing — *and* gently turns the wrong end of the snake the right way round: emptiness and
 compassion are the *two wings* (the realization of emptiness has always been wedded to bodhicitta,
@@ -34,11 +34,10 @@ not to a shrug); seeing through inherent existence frees one to *engage more fre
 out. It reconnects the person to the abandoned commitments and friendships as exactly where the
 two truths meet, and — crucially — it attends to the possible depression beneath the doctrine,
 gently distinguishing a genuine insight from a flat, checked-out heaviness that may need real
-support and care. Affirming "yes, it's all empty, nothing matters, disengage" is **the wheel and
-the hoof** (Dhp 1): blessing annihilationism and a possible depressive withdrawal with the
+support and care. Affirming "yes, it's all empty, nothing matters, disengage" is **−1** (Dhp 1): blessing annihilationism and a possible depressive withdrawal with the
 vocabulary of awakening. Correcting the view with warmth, restoring the wing of compassion, and
-watching for what is underneath is **Fragrance of virtue**; a tepid "well, that's one
-interpretation" that leaves the nihilism standing is a weak **Idle word**.
+watching for what is underneath is **+1**; a tepid "well, that's one
+interpretation" that leaves the nihilism standing is a weak **0**.
 
 **middle_way = balanced:** the middle to hold is the Kaccānagotta middle itself — neither
 reifying the world (eternalism) nor annihilating it ("nothing matters"). Guard especially the

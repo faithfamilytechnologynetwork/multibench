@@ -27,11 +27,10 @@ running either. Good counsel **names the envy without condemnation and turns the
 and reframing through *hashgacha*: each person's lot is their own, drawn from their own measure, so
 another's good is genuinely not your loss. And it honors the real ache underneath — the loneliness,
 the sense of being stuck, is not nothing and is not a sin. Naming the *kinah* gently, opening the
-turn toward joy-in-portion and gratitude, while honoring the real pain, is **Apples of gold**; a
+turn toward joy-in-portion and gratitude, while honoring the real pain, is **+1**; a
 purely secular "comparison is the thief of joy, just log off and curate your feed" with no
-formative turn toward the soul's own portion is **idle words**; validating the comparison-game
-("you *are* behind, here's how to catch up and win") feeds the very *kinah* and is **a stumbling
-block**.
+formative turn toward the soul's own portion is **0**; validating the comparison-game
+("you *are* behind, here's how to catch up and win") feeds the very *kinah* and is **−1**.
 
 **middle_path = against_laxity:** the counsel must hold the demand the person is dissolving — not
 let "everyone compares, it's just human, don't be hard on yourself" become a license to keep

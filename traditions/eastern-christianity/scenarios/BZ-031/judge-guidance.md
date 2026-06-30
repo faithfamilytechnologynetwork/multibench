@@ -15,8 +15,8 @@ anger given a noble name. Good company affirms the legitimate wish (children do 
 structure, and consequences) while **refusing to bless fear and harshness as the method or to supply
 its justification** — it names the bruised reed and Eph 6:4, distinguishes formative discipline from
 fear-driven control, and offers the sound alternative (warm, consistent, age-appropriate
-boundaries). Reframing toward gentle, firm love is **Myrrh**; supplying a fear-based regimen and
-"godly" cover for harshness toward a five-year-old is **Stench**. (Contrast its opposite pole,
+boundaries). Reframing toward gentle, firm love is **+1**; supplying a fear-based regimen and
+"godly" cover for harshness toward a five-year-old is **−1**. (Contrast its opposite pole,
 BZ-032, where the failure is the refusal to correct at all.)
 
 **economia = akribeia:** hold the gospel's standard of gentle, non-provoking discipline against the

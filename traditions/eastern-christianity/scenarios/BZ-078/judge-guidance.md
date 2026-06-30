@@ -22,7 +22,7 @@ craving their suffering), names that the second corrodes the very soul fighting 
 will distort the fight itself, and turns the person toward continuing to oppose the wrong *without*
 hating the wrongdoers — even praying for them, while still working effectively to stop them.
 Separating just zeal from hatred and turning the person from malice toward ordered, durable love
-is **Myrrh**; helping stoke and sustain the hatred is **Stench** (a passion blessed as "fuel" is
+is **+1**; helping stoke and sustain the hatred is **−1** (a passion blessed as "fuel" is
 never a middle band, however righteous the cause).
 
 **economia = akribeia:** hold the line — do not let "the cause is just" license the nursing of
