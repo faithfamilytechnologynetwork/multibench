@@ -36,6 +36,13 @@ JudgeFn = Callable[[JudgeSpec, tuple[str, str, str]], tuple[dict, dict]]
 
 _JKEY = ("subject", "scenario_id", "pressure", "framing", "judge", "scope")
 
+# Fields the judge depends on in each sitting (spec §5.6 "Required").
+_REQUIRED_SITTING_FIELDS = ("subject", "scenario_id", "pressure", "framing", "turns")
+
+
+class JudgeInputError(Exception):
+    """The sittings input file is missing or malformed (fail-loud, spec N2)."""
+
 
 def sitting_key(s: dict) -> str:
     return f"{s['subject']}|{s['scenario_id']}|{s['pressure']}|{s['framing']}"
@@ -90,9 +97,40 @@ def _default_judge_fn(config: Config) -> JudgeFn:
 
 
 def _read_jsonl(path: Path) -> list[dict]:
+    """Read an OUTPUT jsonl (judgments/skips): a missing file is an empty list (resume)."""
     if not path.exists():
         return []
     return [json.loads(line) for line in path.read_text().splitlines() if line.strip()]
+
+
+def _read_sittings(path: Path) -> list[dict]:
+    """Read + validate the INPUT sittings file, failing loud on missing/malformed (spec N2).
+
+    Unlike the output files, a missing sittings file is an error (not "zero work"). Each row
+    must be a JSON object carrying the §5.6 required fields with a non-empty ``turns`` list,
+    so the judging loop never blows up on a raw ``KeyError`` mid-run. Errors are located by
+    file:line.
+    """
+    if not path.exists():
+        raise JudgeInputError(f"{path}: sittings file not found")
+    sittings: list[dict] = []
+    for i, raw in enumerate(path.read_text().splitlines(), start=1):
+        line = raw.strip()
+        if not line:
+            continue
+        try:
+            s = json.loads(line)
+        except json.JSONDecodeError as e:
+            raise JudgeInputError(f"{path}:{i}: invalid JSON: {e}") from e
+        if not isinstance(s, dict):
+            raise JudgeInputError(f"{path}:{i}: sitting is not a JSON object")
+        missing = [f for f in _REQUIRED_SITTING_FIELDS if f not in s]
+        if missing:
+            raise JudgeInputError(f"{path}:{i}: sitting missing required field(s): {missing}")
+        if not isinstance(s["turns"], list) or not s["turns"]:
+            raise JudgeInputError(f"{path}:{i}: sitting 'turns' must be a non-empty list")
+        sittings.append(s)
+    return sittings
 
 
 def _record(s: dict, judge: str, scope: str, verdict: dict, usage: dict) -> dict:
@@ -246,7 +284,7 @@ def judge_all(
     judge_fn = judge_fn or _default_judge_fn(config)
     rd = Path(results_dir)
     rd.mkdir(parents=True, exist_ok=True)
-    sittings = _read_jsonl(Path(sittings_path))
+    sittings = _read_sittings(Path(sittings_path))
 
     base = rd / "judgments.jsonl"
     written, failed, skipped = _judge_pass(

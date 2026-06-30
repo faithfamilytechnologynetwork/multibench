@@ -220,4 +220,9 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
     wired Gemini thinking (`ThinkingConfig(thinking_budget=-1)` when judge.thinking).
   - judge: record skips → `skipped.jsonl` + `load_skips`; `parse_verdict` requires non-empty direction.
   - tests updated (gemini cred = all 3 vars; skip-recording; empty-direction reject). **71 pass.**
-- Next: commit, rebuttal, re-verify (iter2) → Phase 4.
+- Phase_3 iter2: **Codex REQUEST_CHANGES** (missing sittings file silently empty; required
+  sitting fields used before validation → raw KeyError), **Claude APPROVE**. Fixed:
+  `_read_sittings` validates the INPUT upfront — missing file / invalid JSON / missing required
+  fields / empty turns → `JudgeInputError` located by file:line; output files keep resume
+  semantics. +3 tests. **74 pass.**
+- Next: rebuttal, re-verify (iter3) → expect converge → Phase 4.
