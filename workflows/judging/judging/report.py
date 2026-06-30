@@ -23,6 +23,41 @@ from judging.scores import SCORES, mean
 
 _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 
+# USD per million tokens (input, output). Approximate, dated — a config constant the operator
+# updates as provider prices change (spec §5.8 #6: "small, clearly-dated price table").
+PRICES_DATED = "2026-06 (approximate — update PRICES as prices change)"
+PRICES: dict[str, tuple[float, float]] = {
+    "claude-opus-4-8": (5.00, 25.00),
+    "claude-sonnet-4-6": (3.00, 15.00),
+    "claude-haiku-4-5": (1.00, 5.00),
+    "gemini-3.5-flash": (1.50, 9.00),
+}
+
+
+def _add_usage(acc: dict, u: dict) -> None:
+    for k in ("in", "out", "cache_write", "cache_read"):
+        acc[k] = acc.get(k, 0) + (u.get(k, 0) or 0)
+
+
+def _usage_cost(model: str, tok: dict) -> float | None:
+    """USD for accumulated usage, or ``None`` if the model has no listed price.
+
+    1h-cache writes bill ~2x input, reads ~0.1x (Anthropic); non-cache models just use in/out.
+    """
+    if model not in PRICES:
+        return None
+    pi, po = PRICES[model]
+    return (
+        tok.get("in", 0) * pi
+        + tok.get("out", 0) * po
+        + tok.get("cache_write", 0) * pi * 2.0
+        + tok.get("cache_read", 0) * pi * 0.1
+    ) / 1e6
+
+
+def _tokens_in(tok: dict) -> int:
+    return tok.get("in", 0) + tok.get("cache_write", 0) + tok.get("cache_read", 0)
+
 
 def _cell(j: dict) -> tuple:
     return (j["subject"], j["scenario_id"], j["pressure"], j["framing"], j["scope"])
@@ -80,10 +115,18 @@ def build_report(
     sittings = _read_sittings(rd / "sittings.jsonl")
     tradition = load_tradition(tradition_dir)
 
-    subjects = sorted({j["subject"] for j in judgments})
+    # Union of judged + collected + skipped, so a subject/scenario that produced only skips or
+    # zero successful judgments still appears in the report (null/excluded, never hidden — M12).
+    subjects = sorted(
+        {j["subject"] for j in judgments}
+        | {st["subject"] for st in sittings}
+        | {sk["subject"] for sk in skips}
+    )
     judges = sorted({j["judge"] for j in judgments})
     cs = _cell_scores(judgments)
-    scen_ids = sorted({j["scenario_id"] for j in judgments})
+    scen_ids = sorted(
+        {j["scenario_id"] for j in judgments} | {st["scenario_id"] for st in sittings}
+    )
 
     # Per-scenario tags for taxonomy breakdowns (read each scenario's declared tags).
     tags: dict[str, dict[str, list[str]]] = {}
@@ -195,6 +238,39 @@ def build_report(
     judged_keys = {judgment_key(j) for j in judgments}
     uncovered = sorted(expected - judged_keys)
 
+    # 8. Cost: collection (subject usage in sittings) + judging (judge usage in judgments).
+    subj_tok: dict[str, dict] = defaultdict(dict)
+    for st in sittings:
+        for u in st.get("usage") or []:
+            _add_usage(subj_tok[st["subject"]], u)
+    judge_tok: dict[str, dict] = defaultdict(dict)
+    for j in judgments:
+        if j.get("usage"):
+            _add_usage(judge_tok[j["judge"]], j["usage"])
+    cost_rows: list[dict] = []
+    total_usd = 0.0
+    fully_priced = True
+    for stage, toks in (("collection", subj_tok), ("judging", judge_tok)):
+        for model, tok in sorted(toks.items()):
+            usd = _usage_cost(model, tok)
+            fully_priced = fully_priced and usd is not None
+            total_usd += usd or 0.0
+            cost_rows.append(
+                {
+                    "stage": stage,
+                    "model": model,
+                    "tokens_in": _tokens_in(tok),
+                    "tokens_out": tok.get("out", 0),
+                    "usd": usd,
+                }
+            )
+    cost = {
+        "rows": cost_rows,
+        "total_usd": total_usd,
+        "fully_priced": fully_priced,
+        "prices_dated": PRICES_DATED,
+    }
+
     return {
         "tradition": tradition.id,
         "subjects": subjects,
@@ -213,6 +289,7 @@ def build_report(
         "taxonomies": taxonomies,
         "techniques": techniques,
         "by_scenario": by_scenario,
+        "cost": cost,
     }
 
 
@@ -271,11 +348,27 @@ def render_markdown(rep: dict) -> str:
             L.append(row(value, lambda s, ps=per_subject: _fmt(ps.get(s))))
         L.append("")
 
-    # Techniques
-    L += ["## Prophetic-method / counseling-technique use (% of judgments)", "", "| | " + " | ".join(subjects) + " |", "|---|" + "---|" * len(subjects)]
+    # Techniques (tradition-neutral heading — M7)
+    L += ["## Counseling-technique use (% of judgments)", "", "| | " + " | ".join(subjects) + " |", "|---|" + "---|" * len(subjects)]
     for t in TECHNIQUE_IDS:
         L.append(row(t, lambda s, t=t: _pct(rep["techniques"][s].get(t))))
     L.append("")
+
+    # Per-scenario results (Unstated, after pressure) — §5.8 #5
+    L += ["## By scenario (Unstated, after pressure)", "", "| Scenario | " + " | ".join(subjects) + " |", "|---|" + "---|" * len(subjects)]
+    for sid in sorted(rep["by_scenario"]):
+        L.append("| " + sid + " | " + " | ".join(_fmt(rep["by_scenario"][sid].get(s)) for s in subjects) + " |")
+    L.append("")
+
+    # Cost — §5.8 #6
+    cost = rep["cost"]
+    L += ["## Cost", "", "| Stage | Model | Tokens in | Tokens out | USD |", "|---|---|---|---|---|"]
+    for r in cost["rows"]:
+        usd = "—" if r["usd"] is None else f"${r['usd']:.2f}"
+        L.append(f"| {r['stage']} | {r['model']} | {r['tokens_in']:,} | {r['tokens_out']:,} | {usd} |")
+    note = "" if cost["fully_priced"] else " (partial — unpriced model(s) present)"
+    L.append(f"| **total** | | | | **${cost['total_usd']:.2f}**{note} |")
+    L += ["", f"*Prices per Mtok, {cost['prices_dated']}.*", ""]
 
     return "\n".join(L) + "\n"
 
