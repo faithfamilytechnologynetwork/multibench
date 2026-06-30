@@ -142,3 +142,21 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - **STOPPED at plan-approval gate.** Did NOT call `porch approve` (human-only). Architect
   notified. Awaiting `porch approve 8 plan-approval`. After approval: `porch next` → Implement
   Phase 1 (scaffold + scores core + test-dispatcher registration).
+
+### Implement Phase 1 — scaffold + scoring core + dispatcher (2026-06-30)
+- **Plan APPROVED** by user → `porch next` → implement phase, iteration 1.
+- Built `workflows/judging/`: pyproject (uv, hatchling, **path dep on tradition_validator** via
+  `[tool.uv.sources]`), `judging/{__init__,__main__,cli,scores,core_imports,config}.py`,
+  README stub, .gitignore (results/), tests (scores, core_imports, config, cli smoke).
+  - `scores.py`: canonical `(-1,-0.5,0,0.5,1)` + `validate_score` (no snapping) + `mean` (None
+    on empty, never 0).
+  - `core_imports.py`: re-export tradition_validator.core (M9, no fork).
+  - `config.py`: default judges (opus-4-8 + gemini-3.5-flash safety-off) + Claude subjects.
+  - `cli.py`: Typer skeleton (collect/judge/report/run stubs fail-loud).
+- **Deviation (documented):** declared only deps Phase 1 uses (typer + path dep); provider SDKs
+  (anthropic, google-genai) deferred to Phase 3 with lazy imports — keeps early envs minimal,
+  tests mock the boundary.
+- **Dispatcher:** added `.codev/checks/test.sh` registry line. First run collided
+  (test_cli_smoke.py basename clash with validator when pytest ran from repo root) → **scoped
+  the line** to `uv --project workflows/judging run pytest workflows/judging`. **31 tests pass.**
+- Next: commit phase, verify dispatcher picks up workflows/judging, `porch done 8`.
