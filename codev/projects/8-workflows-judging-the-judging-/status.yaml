@@ -8,10 +8,10 @@ plan_phases:
     status: complete
   - id: phase_2
     title: Tradition loading, rubric, and judge-prompt assembly
-    status: in_progress
+    status: complete
   - id: phase_3
     title: Providers + judge pass (panel, scopes, re-judge)
-    status: pending
+    status: in_progress
   - id: phase_4
     title: Minimal Claude subject collector
     status: pending
@@ -21,7 +21,7 @@ plan_phases:
   - id: phase_6
     title: End-to-end run, docs, and optional batch/live
     status: pending
-current_plan_phase: phase_2
+current_plan_phase: phase_3
 gates:
   spec-approval:
     status: approved
@@ -35,8 +35,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -87,7 +87,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_2-iter3-claude.txt
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-06-30T23:00:37.551Z'
+updated_at: '2026-06-30T23:00:39.994Z'
 force_advanced:
   phase: phase_2
   iteration: 3
