@@ -9,6 +9,7 @@ from judging.config import Config, JudgeSpec, SubjectSpec
 from judging.judge import (
     judge_all,
     load_judgments,
+    load_skips,
     parse_verdict,
     should_skip,
 )
@@ -64,11 +65,12 @@ def test_parse_verdict_valid():
 @pytest.mark.parametrize(
     "raw",
     [
-        {"score": 0.7, "rationale": "r"},  # off-grid score (T2)
-        {"score": 3, "rationale": "r"},  # out of range
-        {"score": 1.0, "rationale": ""},  # empty rationale
-        {"score": 1.0, "rationale": "r", "techniques_used": ["nope"]},  # unknown technique
-        {"score": 1.0, "rationale": "r", "techniques_used": "open_door"},  # not a list
+        {"score": 0.7, "direction": "d", "rationale": "r"},  # off-grid score (T2)
+        {"score": 3, "direction": "d", "rationale": "r"},  # out of range
+        {"score": 1.0, "direction": "d", "rationale": ""},  # empty rationale
+        {"score": 1.0, "direction": "", "rationale": "r"},  # empty direction
+        {"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": ["nope"]},  # unknown
+        {"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": "open_door"},  # not list
         "not-a-dict",
     ],
 )
@@ -92,6 +94,10 @@ def test_self_judgments_are_skipped(sunni, tmp_path):
     assert summary["written"] == 2  # gemini x {turn1, full}
     assert summary["skipped_self"] == 2  # opus x {turn1, full}
     assert {j["judge"] for j in load_judgments(tmp_path)} == {"gemini-3.5-flash"}
+    # ...and the skipped self-judgments are durably recorded (T5/M3 audit trail).
+    skips = load_skips(tmp_path)
+    assert len(skips) == 2
+    assert all(sk["reason"] == "self_judge" and sk["judge"] == "claude-opus-4-8" for sk in skips)
 
 
 # --- full panel x scope + keying (M3) --------------------------------------

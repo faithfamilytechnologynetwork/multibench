@@ -18,7 +18,9 @@ def test_judge_missing_anthropic_credential_fails_loud(monkeypatch):
 
 
 def test_judge_missing_gemini_credential_fails_loud(monkeypatch):
-    monkeypatch.delenv("GEMINI_API_KEY", raising=False)
+    # N4: Gemini auth is Vertex SA OR GEMINI_API_KEY — fail loud only when neither is present.
+    for var in ("GEMINI_API_KEY", "GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_GENAI_USE_VERTEXAI"):
+        monkeypatch.delenv(var, raising=False)
     with pytest.raises(ProviderError) as ei:
         judge_complete(
             JudgeSpec("gemini-3.5-flash", "gemini", safety_off=True),
