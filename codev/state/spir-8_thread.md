@@ -246,4 +246,19 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `subject_complete` now returns `(text, usage, attempts)` (inline retry counts the try);
   collector records `attempts:[a1,a2]`; +guided-framing collection test + attempts assertion.
   **86 pass.**
-- Next: rebuttal, re-verify (iter2) → Phase 5 (report).
+- Phase_4 iter2: **Codex APPROVE + Claude APPROVE** (unanimous) → phase_4 done.
+
+### Implement Phase 5 — report (2026-06-30)
+- `report.py`: `build_report` — cell reducer (mean of present judges, overlay v2); mechanical
+  headline (unstated/full), steadfastness (full−turn1, +per-pressure), per-framing; score
+  distribution over per-judge verdicts; inter-judge agreement (exact/within-one-level, ≥2);
+  **generic taxonomy breakdowns** from declared axes (M7, works on taoism); seven-technique
+  usage; per-scenario; **coverage** (expected vs judged, uncovered, skipped_self — no silent
+  zeros). `render_markdown` + `write_report` (report.md + report.json). Computable from partial/
+  empty data (never hard-fails).
+- cli `report <tradition> --results-dir` wired (reads all artifacts from results_dir —
+  documented deviation from the plan's 3-positional-arg sketch; consistent with collect/judge).
+- Tests: reducer/headline (T15), steadfastness (T13), distribution basis, single-judge no
+  agreement (T12), agreement math, **generic taxonomy on taoism** (T7/M7), coverage uncovered
+  (M12), skips counted, write files, empty-partial. **96 pass.**
+- Next: commit, `porch done 8` → phase_5 consult.
