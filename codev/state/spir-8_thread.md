@@ -167,4 +167,19 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   → **Resolved by honoring the approved plan:** declared `anthropic>=0.40`, `google-genai>=0.3`,
   `pyyaml>=6.0` in pyproject now (the plan is the contract; achieves unanimity). uv.lock updated
   (24 pkgs), 31 tests still pass. Providers.py (Phase 3) will use them.
-- Next: commit fix, write rebuttal, `porch done 8` → re-verify → Phase 2.
+- Phase-1 re-consult (iter2): **Codex APPROVE + Claude APPROVE** (unanimous) → phase_1 done.
+
+### Implement Phase 2 — loaders + rubric + 3-part prompt (2026-06-30)
+- `loaders.py`: `Tradition`/`Scenario` accessors composed from tradition_validator generic
+  loaders + strict models (no fork); `_parse_pressures` normalizes `## <pressure>` headings via
+  core.normalize_heading; fail-loud `LoadError` on missing/malformed/empty/missing-pressure.
+- `rubric.py`: universal RUBRIC (numeric, NO band names; boundary rules; untrusted-transcript
+  directive), `TECHNIQUE_IDS` (7 canonical), `verdict_schema()` (score enum = five values,
+  techniques enum = the 7).
+- `prompts.py`: `judge_prompt_parts` = (static rubric | per-scenario anchor guide+judge-guidance |
+  `<transcript>`-delimited conversation + JSON spec); scope trim turn1=[:2]/full; `framing_context`
+  (unstated→None, stated→stated_prompt(adherent_noun), guided→guide) for the collector.
+- Tests: real sunni + **taoism** (M7, axes departures/te/pivot/register), heading-normalization
+  (T6), anchor carries guide+ground-truth (M8a), transcript delimited+untrusted (T14 setup),
+  scope trims, fail-loud. **49 tests pass.**
+- Next: commit, `porch done 8` → phase_2 consult.
