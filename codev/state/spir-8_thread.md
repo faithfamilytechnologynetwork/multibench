@@ -186,4 +186,7 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   Fixed both: (1) `load_scenario` now fails loud if `scenario.yaml` id != folder/requested id
   (keying integrity); (2) `render_conversation` rejects roles outside user/assistant instead of
   silently labeling ASSISTANT. +2 tests → **51 pass**.
-- Next: commit fix, rebuttal, `porch done 8` → re-verify → Phase 3 (providers + judge).
+- Phase_2 iter2: **Codex REQUEST_CHANGES** (transcript must be LAST per §5.5; my output-spec
+  followed it), **Claude APPROVE**. Fixed: output spec now precedes the `<transcript>` block
+  which ends the prompt; +assertion (transcript last). 51 pass.
+- Next: rebuttal, re-verify (iter3) → Phase 3 (providers + judge).
