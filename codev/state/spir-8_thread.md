@@ -193,4 +193,11 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `</transcript>` could escape the block), **Claude APPROVE**. Fixed: `_defang_transcript`
   splits the delimiter with a zero-width space; +regression test (only one real closing tag,
   at end). 52 pass.
-- Next: rebuttal, re-verify (iter4) → expect unanimous → Phase 3.
+- Phase_2 reached porch's **iter-3 safety ceiling** → porch **force-advanced** to phase_3
+  (`13b1962`). My defang fix (`6089f17`) is committed BEFORE the advance, so phase_2 completed
+  WITH it; 52 tests pass. NB: per-phase consult caps at 3 rounds; the architect's PR integration
+  CMAP (full 3-way) is the authoritative final review — all 3 codex points (id-match, role
+  validation, transcript-last, delimiter-defang) are implemented + tested regardless.
+- **phase_1 ✓, phase_2 ✓** (porch). Now **phase_3: providers + judge pass.**
+
+### Implement Phase 3 — providers + judge (in progress)
