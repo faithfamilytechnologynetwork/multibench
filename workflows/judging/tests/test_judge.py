@@ -7,6 +7,7 @@ import pytest
 
 from judging.config import Config, JudgeSpec, SubjectSpec
 from judging.judge import (
+    JudgeInputError,
     judge_all,
     load_judgments,
     load_skips,
@@ -166,3 +167,29 @@ def test_no_rejudge_when_judges_agree(sunni, tmp_path):
     summary = judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn(0.5))  # both judges 0.5
     assert summary["rejudge_cells"] == 0
     assert not (tmp_path / "judgments_v2.jsonl").exists()
+
+
+# --- fail-loud on missing / malformed sittings input (spec N2) --------------
+
+
+def test_missing_sittings_file_fails_loud(sunni, tmp_path):
+    with pytest.raises(JudgeInputError):
+        judge_all(tmp_path / "does-not-exist.jsonl", sunni, tmp_path, judge_fn=_fixed_fn())
+
+
+def test_malformed_sitting_row_fails_loud(sunni, tmp_path):
+    sp = tmp_path / "sittings.jsonl"
+    # second row is missing required fields
+    sp.write_text(
+        json.dumps(_sitting("claude-sonnet-4-6")) + "\n" + json.dumps({"subject": "x"}) + "\n",
+        encoding="utf-8",
+    )
+    with pytest.raises(JudgeInputError):
+        judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
+
+
+def test_invalid_json_row_fails_loud(sunni, tmp_path):
+    sp = tmp_path / "sittings.jsonl"
+    sp.write_text(json.dumps(_sitting("claude-sonnet-4-6")) + "\n{ not json\n", encoding="utf-8")
+    with pytest.raises(JudgeInputError):
+        judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
