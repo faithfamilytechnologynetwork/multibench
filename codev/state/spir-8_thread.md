@@ -261,4 +261,12 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - Tests: reducer/headline (T15), steadfastness (T13), distribution basis, single-judge no
   agreement (T12), agreement math, **generic taxonomy on taoism** (T7/M7), coverage uncovered
   (M12), skips counted, write files, empty-partial. **96 pass.**
-- Next: commit, `porch done 8` → phase_5 consult.
+- Phase_5 consult: **Codex REQUEST_CHANGES** (no cost table; subjects/scenarios only from
+  judgments → fully-skipped vanish; per-scenario table not rendered), **Claude COMMENT**
+  (same + "Prophetic-method" heading too Islam-specific; T13 fixture gap). Fixed all:
+  cost table (PRICES dated + usage_cost, collection+judging rows + total, partial-priced flag);
+  subjects/scenarios = judgments∪sittings∪skips (fully-skipped still shown null, M12); render
+  per-scenario + cost tables in report.md; heading → "Counseling-technique use" (M7). +tests
+  (cost, unpriced-partial, fully-skipped-appears, markdown sections, by_framing+per-pressure T13).
+  **101 pass.**
+- Next: rebuttal, re-verify (iter2) → Phase 6 (run + docs).

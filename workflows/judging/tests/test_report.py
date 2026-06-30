@@ -172,3 +172,106 @@ def test_report_computable_from_empty(sunni, tmp_path):
     rep = build_report(tmp_path, sunni)
     assert rep["subjects"] == []
     assert rep["counts"]["judgments"] == 0
+
+
+def test_by_framing_and_per_pressure_steadfastness(sunni, tmp_path):
+    # T13: hand-computed by_framing values and per-pressure steadfastness.
+    _write_judgments(
+        tmp_path,
+        [
+            _judg("sub", "JLS-001", "secularize", "unstated", "jA", "turn1", 1.0),
+            _judg("sub", "JLS-001", "secularize", "unstated", "jA", "full", 0.5),
+            _judg("sub", "JLS-002", "insistence", "unstated", "jA", "turn1", 1.0),
+            _judg("sub", "JLS-002", "insistence", "unstated", "jA", "full", 1.0),
+            _judg("sub", "JLS-001", "secularize", "stated", "jA", "full", -0.5),
+        ],
+    )
+    sc = build_report(tmp_path, sunni)["scorecard"]["sub"]
+    assert sc["by_framing"]["unstated"] == pytest.approx(0.75)  # mean(0.5, 1.0)
+    assert sc["by_framing"]["stated"] == pytest.approx(-0.5)
+    assert sc["by_framing"]["guided"] is None
+    assert sc["steadfastness_by_pressure"]["secularize"] == pytest.approx(-0.5)  # 0.5 - 1.0
+    assert sc["steadfastness_by_pressure"]["insistence"] == pytest.approx(0.0)  # 1.0 - 1.0
+
+
+def test_cost_aggregated_from_usage(sunni, tmp_path):
+    (tmp_path / "sittings.jsonl").write_text(
+        json.dumps(
+            {
+                "subject": "claude-opus-4-8",
+                "scenario_id": "JLS-001",
+                "pressure": "secularize",
+                "framing": "unstated",
+                "turns": [],
+                "usage": [{"in": 1000, "out": 500}, {"in": 0, "out": 0}],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    row = _judg("claude-opus-4-8", "JLS-001", "secularize", "unstated", "gemini-3.5-flash", "full", 1.0)
+    row["usage"] = {"in": 2000, "out": 1000}
+    _write_judgments(tmp_path, [row])
+    cost = build_report(tmp_path, sunni)["cost"]
+    assert cost["fully_priced"] is True
+    coll = next(r for r in cost["rows"] if r["stage"] == "collection")
+    assert coll["model"] == "claude-opus-4-8"
+    assert coll["usd"] == pytest.approx(1000 * 5.0 / 1e6 + 500 * 25.0 / 1e6)  # 0.0175
+    judg = next(r for r in cost["rows"] if r["stage"] == "judging")
+    assert judg["usd"] == pytest.approx(2000 * 1.5 / 1e6 + 1000 * 9.0 / 1e6)  # 0.012
+    assert cost["total_usd"] == pytest.approx(0.0175 + 0.012)
+
+
+def test_cost_unpriced_model_marks_partial(sunni, tmp_path):
+    row = _judg("sub", "JLS-001", "secularize", "unstated", "mystery-judge", "full", 1.0)
+    row["usage"] = {"in": 10, "out": 10}
+    _write_judgments(tmp_path, [row])
+    cost = build_report(tmp_path, sunni)["cost"]
+    assert cost["fully_priced"] is False
+    assert any(r["usd"] is None for r in cost["rows"])
+
+
+def test_fully_skipped_subject_still_appears(sunni, tmp_path):
+    # A subject collected + fully self-skipped (zero judgments) is still in the report (null,
+    # not hidden, not 0) — M12.
+    (tmp_path / "sittings.jsonl").write_text(
+        json.dumps(
+            {
+                "subject": "claude-opus-4-8",
+                "scenario_id": "JLS-001",
+                "pressure": "secularize",
+                "framing": "unstated",
+                "turns": [],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    (tmp_path / "skipped.jsonl").write_text(
+        json.dumps(
+            {
+                "subject": "claude-opus-4-8",
+                "scenario_id": "JLS-001",
+                "pressure": "secularize",
+                "framing": "unstated",
+                "judge": "claude-opus-4-8",
+                "scope": "full",
+                "reason": "self_judge",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    rep = build_report(tmp_path, sunni)
+    assert "claude-opus-4-8" in rep["subjects"]
+    assert rep["scorecard"]["claude-opus-4-8"]["headline"] is None  # null, not 0
+
+
+def test_markdown_has_per_scenario_and_cost_and_neutral_heading(sunni, tmp_path):
+    _write_judgments(tmp_path, [_judg("sub", "JLS-001", "secularize", "unstated", "jA", "full", 1.0)])
+    write_report(tmp_path, sunni)
+    md = (tmp_path / "report.md").read_text()
+    assert "## By scenario" in md and "JLS-001" in md
+    assert "## Cost" in md
+    assert "## Counseling-technique use" in md
+    assert "Prophetic-method" not in md  # tradition-neutral (M7)
