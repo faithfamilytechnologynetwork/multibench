@@ -39,9 +39,18 @@ def collect(
 def judge(
     sittings: str = typer.Argument(..., help="Path to a sittings.jsonl file."),
     tradition: str = typer.Argument(..., help="Path to the tradition directory."),
+    results_dir: str = typer.Option("results", help="Directory for judgments output."),
 ) -> None:
-    """Score each sitting with the judge panel -> judgments.jsonl."""
-    _not_yet("judge", "Phase 3")
+    """Score each sitting with the judge panel -> judgments.jsonl (+ re-judge overrides)."""
+    import json as _json
+
+    from judging.judge import judge_all
+
+    summary = judge_all(sittings, tradition, results_dir)
+    typer.echo(_json.dumps(summary))
+    if summary["failed"]:
+        # Failed cells are left pending (resumable) but the run signals non-zero (M12).
+        raise typer.Exit(code=1)
 
 
 @app.command()
