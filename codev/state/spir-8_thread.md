@@ -159,4 +159,12 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - **Dispatcher:** added `.codev/checks/test.sh` registry line. First run collided
   (test_cli_smoke.py basename clash with validator when pytest ran from repo root) → **scoped
   the line** to `uv --project workflows/judging run pytest workflows/judging`. **31 tests pass.**
-- Next: commit phase, verify dispatcher picks up workflows/judging, `porch done 8`.
+- Committed `[Phase: scaffold]`; dispatcher verified (detects workflows/judging, 31 pass);
+  `porch done 8` → tests-check pass → impl consult (phase_1).
+- **Phase-1 consult:** Codex **REQUEST_CHANGES** (my pyproject deferred anthropic/google-genai/
+  pyyaml — a deviation from the approved plan which lists them in Phase 1), Claude **APPROVE**
+  (endorsed the deferral, else flawless). Reviewers split on the deviation.
+  → **Resolved by honoring the approved plan:** declared `anthropic>=0.40`, `google-genai>=0.3`,
+  `pyyaml>=6.0` in pyproject now (the plan is the contract; achieves unanimity). uv.lock updated
+  (24 pkgs), 31 tests still pass. Providers.py (Phase 3) will use them.
+- Next: commit fix, write rebuttal, `porch done 8` → re-verify → Phase 2.

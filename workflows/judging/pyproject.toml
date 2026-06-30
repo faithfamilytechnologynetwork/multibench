@@ -6,6 +6,9 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "typer>=0.12",
+    "anthropic>=0.40",
+    "google-genai>=0.3",
+    "pyyaml>=6.0",
     "tradition_validator",
 ]
 
@@ -20,9 +23,9 @@ build-backend = "hatchling.build"
 packages = ["judging"]
 
 # Single-source the universal core + format loaders: depend on the validator
-# package by path (spec/issue: "don't fork divergently"). Provider SDKs
-# (anthropic, google-genai) are added in Phase 3 — the phase that uses them —
-# to keep earlier phases' environments minimal.
+# package by path (spec/issue: "don't fork divergently"). The provider SDKs
+# (anthropic, google-genai) are declared up front per the approved plan; they are
+# used by providers.py in Phase 3 (the judge/subject completion seams).
 [tool.uv.sources]
 tradition_validator = { path = "../../apps/tradition_validator", editable = true }
 
