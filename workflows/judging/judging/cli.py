@@ -64,12 +64,22 @@ def judge(
 
 @app.command()
 def report(
-    sittings: str = typer.Argument(..., help="Path to a sittings.jsonl file."),
-    judgments: str = typer.Argument(..., help="Path to a judgments.jsonl file."),
     tradition: str = typer.Argument(..., help="Path to the tradition directory."),
+    results_dir: str = typer.Option(
+        "results", help="Directory holding sittings.jsonl / judgments.jsonl (+ v2/skipped)."
+    ),
 ) -> None:
-    """Aggregate judgments -> per-scenario results + report.md / report.json."""
-    _not_yet("report", "Phase 5")
+    """Aggregate judgments -> per-scenario results + report.md / report.json.
+
+    Reads everything from --results-dir (where collect/judge wrote their outputs); computable
+    from partial data (never hard-fails).
+    """
+    import json as _json
+
+    from judging.report import write_report
+
+    summary = write_report(results_dir, tradition)
+    typer.echo(_json.dumps(summary))
 
 
 @app.command()
