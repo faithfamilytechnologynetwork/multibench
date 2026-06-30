@@ -200,4 +200,17 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   validation, transcript-last, delimiter-defang) are implemented + tested regardless.
 - **phase_1 ✓, phase_2 ✓** (porch). Now **phase_3: providers + judge pass.**
 
-### Implement Phase 3 — providers + judge (in progress)
+### Implement Phase 3 — providers + judge (2026-06-30)
+- `providers.py`: two seams — `subject_complete` (anthropic-only, plain conversational, folds
+  framing prefix onto user turns) + `judge_complete` (anthropic: output_config json_schema +
+  1h prefix-cache on rubric/anchor + adaptive thinking; gemini: response_schema + safety-off).
+  Lazy SDK imports; fail-loud creds (`_require_env`); bounded retries (`_retry`).
+- `judge.py`: `parse_verdict` (validate score off-grid→error, techniques⊆7, non-empty rationale);
+  `should_skip` (exact model-id self-judge); `judge_all` (panel×scope, idempotent resume keyed,
+  failures left pending + counted → exit nonzero M12); one-pass re-judge over ≥1.0-gap cells →
+  `judgments_v2.jsonl`; `load_judgments` overlays v2 over base by key.
+- cli `judge` wired. Tests (provider boundary injected, no live API): parse_verdict valid/reject,
+  self-judge skip (T5), panel×scope keying (M3), resume (T9), failure counted (M12), re-judge on
+  disagreement (T4/T16/M10) + no-rejudge-on-agreement, creds fail-loud (T10), claude-only subjects.
+  **70 tests pass.**
+- Next: commit, `porch done 8` → phase_3 consult.
