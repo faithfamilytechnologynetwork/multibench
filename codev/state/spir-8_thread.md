@@ -105,3 +105,16 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   uses band names), canonical technique ids `reads_person…open_door` (§5.4). Outputs:
   `8-specify-iter2-{codex,claude}.txt`.
 - Resubmitting revised spec to architect for spec-approval. STILL not self-approving.
+
+### spec-approval APPROVED → Plan phase (2026-06-30)
+- **User approved** spec-approval gate (`55185cb chore(porch): 8 spec-approval gate-approved`).
+- Architect: rebase onto current main first — **bugfix #17 / PR #18** merged → the 4 non-sunni
+  traditions now use **bare numeric** scores in judge-guidance.md (no band names). My branch was
+  9 ahead / **137 behind** origin/main.
+- **Rebased onto origin/main** (clean; 9 commits replayed; now 9/0). Verified taoism TAO-001 no
+  longer has "Like water (+1)" band labels; core.py exports intact; 5 traditions present.
+- Synced stale spec facts: §4.2 / §5.3 examples updated to post-#17 ground truth (bare numeric);
+  §10 post-approval note added. Approved design unchanged (numeric scale + 3 hardening +
+  guided-framing-as-context-prefix, architect-confirmed).
+- Force-pushed builder/spir-8 (rebase rewrote history). Next: `porch next 8` → Plan phase →
+  draft plan → plan-approval gate (architect brings to user). Will STOP at plan-approval.
