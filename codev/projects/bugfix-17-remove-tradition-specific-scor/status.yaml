@@ -1,7 +1,7 @@
 id: bugfix-17
 title: remove-tradition-specific-scor
 protocol: bugfix
-phase: pr
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -13,5 +13,5 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-26T17:28:17.723Z'
-updated_at: '2026-06-30T18:54:00.842Z'
+updated_at: '2026-06-30T18:54:12.219Z'
 pr_ready_for_human: false
