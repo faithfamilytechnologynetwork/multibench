@@ -147,6 +147,11 @@ def load_scenario(tradition_dir: str | Path, scenario_id: str) -> Scenario:
     """Load one scenario's turn-1, ground truth, pressures, and metadata."""
     sdir = Path(tradition_dir) / "scenarios" / scenario_id
     meta = _yaml_model(sdir / "scenario.yaml", ScenarioMeta)
+    if meta.id != scenario_id:
+        raise LoadError(
+            f"{sdir / 'scenario.yaml'}: scenario id mismatch — folder/requested "
+            f"{scenario_id!r} != scenario.yaml id {meta.id!r} (would corrupt keying)"
+        )
     turn1 = _text(sdir / "turn1.md")
     judge_guidance = _text(sdir / "judge-guidance.md")
     pressures = _parse_pressures(sdir / "pressures.md")

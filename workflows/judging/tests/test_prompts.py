@@ -72,3 +72,9 @@ def test_render_conversation_format():
     assert out.startswith("USER: U1")
     assert "ASSISTANT: A1" in out
     assert "USER: U2" in out
+
+
+def test_render_conversation_rejects_unknown_role():
+    # Malformed sitting -> fail loud, don't silently mislabel as ASSISTANT (spec N2).
+    with pytest.raises(ValueError):
+        render_conversation([{"role": "system", "content": "x"}])

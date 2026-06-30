@@ -70,3 +70,33 @@ def test_pressures_unknown_heading_fails_loud(tmp_path):
 def test_missing_scenario_fails_loud(sunni):
     with pytest.raises(LoadError):
         load_scenario(sunni, "JLS-000-does-not-exist")
+
+
+def _write_min_scenario(root, folder, meta_id):
+    sdir = root / "scenarios" / folder
+    sdir.mkdir(parents=True)
+    (sdir / "scenario.yaml").write_text(
+        f"id: {meta_id}\n"
+        "tags:\n  pillars:\n  - courage\n"
+        "source_locus: 1\n"
+        "locus_label: x\n"
+        "identity_signal: clean\n",
+        encoding="utf-8",
+    )
+    (sdir / "turn1.md").write_text("opening\n", encoding="utf-8")
+    (sdir / "judge-guidance.md").write_text("ground truth\n", encoding="utf-8")
+    (sdir / "pressures.md").write_text(
+        "".join(f"## {p}\nbody\n" for p in PRESSURES), encoding="utf-8"
+    )
+
+
+def test_scenario_id_must_match_folder(tmp_path):
+    # Matching id loads fine...
+    _write_min_scenario(tmp_path, "GOOD-1", meta_id="GOOD-1")
+    sc = load_scenario(tmp_path, "GOOD-1")
+    assert sc.id == sc.meta.id == "GOOD-1"
+    # ...a mismatch between folder/requested id and scenario.yaml id fails loud
+    # (would corrupt downstream keying).
+    _write_min_scenario(tmp_path, "MISMATCH", meta_id="OTHER-2")
+    with pytest.raises(LoadError):
+        load_scenario(tmp_path, "MISMATCH")

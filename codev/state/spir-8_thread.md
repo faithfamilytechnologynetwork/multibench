@@ -182,4 +182,8 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - Tests: real sunni + **taoism** (M7, axes departures/te/pivot/register), heading-normalization
   (T6), anchor carries guide+ground-truth (M8a), transcript delimited+untrusted (T14 setup),
   scope trims, fail-loud. **49 tests pass.**
-- Next: commit, `porch done 8` → phase_2 consult.
+- Phase_2 consult: **Codex REQUEST_CHANGES** (2 fail-fast gaps), **Claude APPROVE**.
+  Fixed both: (1) `load_scenario` now fails loud if `scenario.yaml` id != folder/requested id
+  (keying integrity); (2) `render_conversation` rejects roles outside user/assistant instead of
+  silently labeling ASSISTANT. +2 tests → **51 pass**.
+- Next: commit fix, rebuttal, `porch done 8` → re-verify → Phase 3 (providers + judge).

@@ -43,7 +43,15 @@ def render_conversation(turns: Sequence[dict]) -> str:
     """Render sitting turns as ``USER:`` / ``ASSISTANT:`` blocks (clean text only)."""
     lines: list[str] = []
     for t in turns:
-        speaker = "USER" if t["role"] == "user" else "ASSISTANT"
+        role = t["role"]
+        if role == "user":
+            speaker = "USER"
+        elif role == "assistant":
+            speaker = "ASSISTANT"
+        else:  # malformed sitting — fail loud, don't silently mislabel (spec N2)
+            raise ValueError(
+                f"invalid turn role {role!r}: expected 'user' or 'assistant'"
+            )
         lines.append(f"{speaker}: {t['content']}")
     return "\n\n".join(lines)
 
