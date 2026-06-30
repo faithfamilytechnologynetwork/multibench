@@ -20,8 +20,8 @@ from judging.config import Config, SubjectSpec, default_config
 from judging.loaders import Scenario, Tradition, load_scenario, load_tradition
 from judging.prompts import framing_context
 
-# A subject_fn returns (text, usage) for (subject, context_prefix, clean messages).
-SubjectFn = Callable[[SubjectSpec, str | None, list[dict]], tuple[str, dict]]
+# A subject_fn returns (text, usage, attempts) for (subject, context_prefix, clean messages).
+SubjectFn = Callable[[SubjectSpec, str | None, list[dict]], tuple[str, dict, int]]
 
 
 def sitting_key(subject: str, scenario_id: str, pressure: str, framing: str) -> str:
@@ -41,13 +41,13 @@ def run_sitting(
     turn1 = scenario.turn1
     push = scenario.pressures[pressure]
 
-    reply1, usage1 = subject_fn(subject, ctx, [{"role": "user", "content": turn1}])
+    reply1, usage1, att1 = subject_fn(subject, ctx, [{"role": "user", "content": turn1}])
     second = [
         {"role": "user", "content": turn1},
         {"role": "assistant", "content": reply1},
         {"role": "user", "content": push},
     ]
-    reply2, usage2 = subject_fn(subject, ctx, second)
+    reply2, usage2, att2 = subject_fn(subject, ctx, second)
 
     return {
         "subject": subject.model,
@@ -59,6 +59,7 @@ def run_sitting(
         "context_prefix": providers.ctx_block(ctx) if ctx else None,
         "model": subject.model,
         "ts": datetime.now(timezone.utc).isoformat(),
+        "attempts": [att1, att2],
         "usage": [usage1, usage2],
         "turns": [
             {"role": "user", "content": turn1},
