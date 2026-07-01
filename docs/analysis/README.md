@@ -15,3 +15,7 @@ Standalone analysis artifacts for MultiBench.
   bishops at once: how it was run, the assessment, the tradition- and scenario-level changes
   applied, the confirmed citation corrections, and **recommendations for the other traditions and
   future ultracode runs.**
+- **[ultracode-audit-rationale.md](./ultracode-audit-rationale.md)** — a one-page rationale to share
+  with collaborators: why the *SynodiaBench* revisions were necessary, why a multi-agent ("ultracode")
+  audit surfaced them when a single-model max-effort pass did not, and what a rerun across all
+  traditions buys us (comparability + recurring error classes).
