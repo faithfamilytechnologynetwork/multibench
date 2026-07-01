@@ -30,6 +30,22 @@ pattern, gotcha, or constraint.
   with no string coercion give precise, located errors almost for free and catch typos a permissive
   parser would silently swallow.
 
+## Testing LLM pipelines
+
+- **Put the provider call behind an injectable seam.** A multi-stage LLM pipeline (collect →
+  judge → report) is fully testable with *zero* live API calls if each stage takes an optional
+  `subject_fn` / `judge_fn` (default = the real provider, tests pass a fake returning canned
+  `(text, usage, attempts)` / `(verdict, usage)`). The whole end-to-end path — grid, resume,
+  re-judge, coverage, cost, non-zero-exit-on-failure — then runs deterministically in CI.
+- **Gate costly/credentialed tests behind an opt-in flag, don't just skip them.** A pytest
+  `--live` option (`pytest_addoption` + a `pytest_collection_modifyitems` hook that skips
+  `@mark.live` unless `--live` is passed) keeps real-API tests out of the default suite while
+  keeping them runnable and discoverable. Add `skipif(no creds)` so they degrade cleanly.
+- **Verify a judge anchors to its *supplied* guidance, not its own prior, with a flip test.**
+  Score the same fixed transcript twice, changing only the guidance so the two rewards are
+  opposite; assert the verdict moves with the guidance. This is the real test that "the seam is
+  the ground truth" — a judge that ignored guidance would score both identically.
+
 ## Verification discipline
 
 - **"It compiled" / "tests pass" is not "it works."** Verify the real user path before calling
