@@ -22,7 +22,7 @@ def test_each_subcommand_has_help():
         assert result.exit_code == 0, f"{command} --help failed"
 
 
-def test_unimplemented_command_fails_loudly():
-    # A stub must not silently succeed — it exits non-zero (spec N2).
+def test_bad_input_fails_loudly():
+    # No silent success: a command given missing input exits non-zero (spec N2).
     result = runner.invoke(app, ["judge", "sittings.jsonl", "traditions/x"])
     assert result.exit_code != 0

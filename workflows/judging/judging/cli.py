@@ -1,9 +1,9 @@
 """Typer CLI for the judging workflow: ``collect`` | ``judge`` | ``report`` | ``run``.
 
-Phase 1 wires the command surface (so ``--help`` lists everything and the package
-is runnable); each command is implemented in the phase that owns it: ``judge`` →
-Phase 3, ``collect`` → Phase 4, ``report`` → Phase 5, ``run`` → Phase 6. Until
-then, invoking a command fails loudly with a non-zero exit (no silent no-op).
+``collect`` runs subjects over the grid → ``sittings.jsonl``; ``judge`` scores those with the
+panel → ``judgments.jsonl``; ``report`` aggregates → ``report.md`` / ``report.json``; ``run``
+is the end-to-end pipeline (collect → judge → report). Failed cells are resumable and make the
+command exit non-zero (M12).
 """
 
 from __future__ import annotations
@@ -19,12 +19,6 @@ app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
 )
-
-
-def _not_yet(command: str, phase: str) -> None:
-    """Fail loudly for a not-yet-implemented command (no silent degrade, spec N2)."""
-    typer.echo(f"judging {command}: not yet implemented (lands in {phase}).", err=True)
-    raise typer.Exit(code=1)
 
 
 @app.command()
@@ -85,6 +79,20 @@ def report(
 @app.command()
 def run(
     tradition: str = typer.Argument(..., help="Path to a tradition directory."),
+    results_dir: str = typer.Option("results", help="Directory for all pipeline outputs."),
+    limit: int = typer.Option(None, help="Cap the number of grid cells (smoke runs)."),
 ) -> None:
-    """End-to-end: collect -> judge -> report for a tradition."""
-    _not_yet("run", "Phase 6")
+    """End-to-end: collect -> judge -> report for a tradition.
+
+    Runs the three stages against --results-dir. ``report`` always runs (never hard-fails), so
+    partial results + coverage are written even if some cells failed; exits non-zero when
+    collect or judge left failed (resumable) cells (M12).
+    """
+    import json as _json
+
+    from judging.pipeline import run_pipeline
+
+    summary = run_pipeline(tradition, results_dir, limit=limit)
+    typer.echo(_json.dumps(summary))
+    if summary["failed"]:
+        raise typer.Exit(code=1)  # failed cells are resumable; signal non-zero (M12)
