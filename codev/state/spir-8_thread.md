@@ -312,4 +312,16 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `config.py::load_config` (YAML, fail-loud, validated vs universal core) + `--config` on all four
   commands; `report` uses the supplied config for correct coverage. +17 tests (**124 pass**, 2
   live-skipped). Updated README (Configuration section), review doc (PR round + §5.7), arch.md.
-- Next: re-run PR consult (iter2) on the fix → pr gate → STOP for architect approval (no merge).
+- Porch advanced straight to the **pr gate** (review consult is single-pass, not the 3-iter
+  implement loop). Surfaced it (`porch gate 8`); STOPPED for human approval.
+- **pr gate APPROVED** by the user; architect's 3-way integration CMAP: Gemini+Claude APPROVE
+  (HIGH, no blockers), codex 3-way hung (stopped) but the builder-side codex already caught the
+  two §5.7 issues (fixed). **PR #20 MERGED** (merge commit `2afc35a`, 2 parents, not squash);
+  **issue #8 CLOSED** (auto via `Closes #8`).
+
+## Verify phase — 2026-07-01
+- Post-merge integration sanity check on `origin/main`: pipeline.py/config.py/README/review all
+  present; dispatcher registry line present; `workflows/README.md` stale "proof texts" copy gone;
+  **124 tests pass** (2 live-skipped) against the integrated tree.
+- Real acceptance = the architect's live 5-scenarios-per-tradition run (needs creds). Signalled
+  `porch done` → verify-approval gate; architect approves after the live run. Builder work done.
