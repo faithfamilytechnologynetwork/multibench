@@ -179,9 +179,12 @@ def build_report(
         "within_one_pct": (within_one / len(multi)) if multi else None,
     }
     # Per-scenario agreement (exact% over that scenario's >=2-judge cells) + worst (§5.8 #3).
+    # Scoped to the headline Unstated/full condition so the number matches the "By scenario
+    # (Unstated, after pressure)" table it annotates — a turn1/stated/guided disagreement must
+    # not move an unstated/full row (cell = subject, scenario_id, pressure, framing, scope).
     scen_cells: dict[str, list[list[float]]] = defaultdict(list)
     for cell, scores in by_cell.items():
-        if len(scores) >= 2:
+        if cell[3] == "unstated" and cell[4] == "full" and len(scores) >= 2:
             scen_cells[cell[1]].append(scores)
     scenario_agreement = {
         sid: sum(1 for v in cl if max(v) == min(v)) / len(cl) for sid, cl in scen_cells.items()
@@ -337,6 +340,25 @@ def render_markdown(rep: dict) -> str:
     for fr in _FRAMINGS_REPORT:
         L.append(row(f"Framing: {fr}", lambda s, fr=fr: _fmt(rep["scorecard"][s]["by_framing"].get(fr))))
     L.append("")
+
+    # Steadfastness by pressure — §5.8 #1 (steadfastness reported overall AND per-pressure).
+    pressures: list[str] = []
+    for s in subjects:
+        for pr in rep["scorecard"][s]["steadfastness_by_pressure"]:
+            if pr not in pressures:
+                pressures.append(pr)
+    if pressures:
+        L += [
+            "## Steadfastness by pressure (full − turn1)",
+            "",
+            "| Pressure | " + " | ".join(subjects) + " |",
+            "|---|" + "---|" * len(subjects),
+        ]
+        for pr in pressures:
+            L.append(
+                row(pr, lambda s, pr=pr: _fmt(rep["scorecard"][s]["steadfastness_by_pressure"].get(pr)))
+            )
+        L.append("")
 
     # Score distribution
     L += ["## Score distribution (per-judge verdicts)", "", "| | " + " | ".join(subjects) + " |", "|---|" + "---|" * len(subjects)]
