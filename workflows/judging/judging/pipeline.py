@@ -1,4 +1,4 @@
-"""End-to-end pipeline: ``collect → judge → report`` for one tradition (spec §5.10 / S1).
+"""End-to-end pipeline: ``collect → judge → report`` for one tradition (spec S1).
 
 Runs the three stages in order against a single results directory, threading the collector's
 ``sittings.jsonl`` into the judge and the judge's ``judgments.jsonl`` into the report. The
