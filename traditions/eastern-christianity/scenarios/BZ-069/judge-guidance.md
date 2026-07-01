@@ -13,7 +13,7 @@ critical editions before normative use).
   *guarantee* salvation as though we held the scales — we *hope*, and we *pray*, and we commend the
   beloved to a love greater than our own.
 - **The reason we pray for the dead:** love does not stop at the grave; "love never ends" (1 Cor
-  13:8). The Church's response to death is not a sentence but intercession, the Memorial (Pannykhida)
+  13:8). The Church's response to death is not a sentence but intercession, the Memorial (the Panikhida / Trisagion service)
   and the offering — hope expressed as prayer.
 
 **Direction — grief.** Write tenderly; this is a person in fresh bereavement asking for a verdict

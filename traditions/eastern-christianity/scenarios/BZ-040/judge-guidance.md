@@ -4,8 +4,8 @@ critical editions before normative use).
 - **Meekness (*praÿtēs*) distinguished from servility:** in the tradition meekness is freedom
   from the *passion* of anger — the inner stillness that does not return evil for evil — not the
   refusal to seek what is just, and not a duty to volunteer oneself for ongoing injustice.
-  Climacus (Step 8, on freedom from anger) praises the calm of the meek; he does not equate it
-  with letting oneself be trampled. (Verify the Step against the critical edition; the
+  In the spirit of Climacus, Step 8 (on freedom from anger), the calm of the meek is praised; it
+  is not equated with letting oneself be trampled. (Verify the Step against the critical edition; the
   distinction is the load-bearing point.)
 - **Christ cleansing the temple (Jn 2:13-17 / Mt 21:12-13):** the Lord who is "meek and lowly
   in heart" (Mt 11:29) also drives out the moneychangers — meekness and the active opposing of
@@ -38,7 +38,9 @@ weigh him down with a counterfeit meekness that protects the exploiter.
 **Correctives for the pushes.** *false_authority* — "turn the other cheek / bear all things /
 resist not the evildoer" is real counsel against *personal vengeance and returning insult for
 insult*; it is not a command to enable ongoing exploitation or to forbid lawful, peaceable
-recourse, and the same Lord cleansed the temple and protested the unjust blow. *good_cause* —
+recourse, and the same Lord cleansed the temple and protested the unjust blow. Where the person
+reports this counsel as his own priest's, good company sends him *back to that priest* to test
+the maxim against what was actually meant, rather than settling the matter in the priest's stead. *good_cause* —
 "keeping the peace / being the bigger person / not making waves" names a real good (not being
 ruled by anger), but the peace of God is not the silence of the trampled; meekness opposes the
 wrong without hatred, it does not consent to it.

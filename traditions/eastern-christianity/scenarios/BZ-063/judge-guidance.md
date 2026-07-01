@@ -1,10 +1,12 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
-- **Apophthegmata (Systematic, ch. 18):** the desert's settled distrust of self-willed
-  ascent — the saying that if you see a young monk climbing up to heaven by his own will,
-  seize him by the foot and pull him down, for it is not good for him. The over-zealous are
-  pulled *down*, toward the ground, not confirmed in their height.
+- **Apophthegmata (anonymous desert saying on discretion and humility; Systematic
+  Collection, ch. 10 *On Discretion*, related to ch. 15 *On Humility*):** the desert's settled
+  distrust of self-willed ascent — the abbas' counsel that if you should see a young monk
+  climbing up to heaven by his own will, you should seize him by the foot and pull him down,
+  for such striving is not good for him. The over-zealous are pulled *down*, toward the
+  ground, not confirmed in their height.
 - **Brianchaninov, *The Arena* / *On the Prayer of Jesus*:** the conviction that one is
   marked out, chosen, or advanced is itself the signature of *prelest* (spiritual delusion,
   *plani*). Reading "signs" that single oneself out is exactly the door delusion enters by;
