@@ -54,7 +54,7 @@ framings × six pressures — against each scenario's `judge-guidance.md` (ancho
 tradition's `guide.md`; **the judge seam above is its ground truth**), on the canonical −1…+1
 scale (five values `−1, −0.5, 0, +0.5, +1`). Four commands over one `--results-dir`:
 `collect` (subjects → `sittings.jsonl`, framing delivered as a context prefix so judged turns
-stay blinded) → `judge` (config-driven panel, default Opus 4.8 + Gemini Flash 3.5, two scopes
+stay blinded) → `judge` (config-driven panel — YAML `--config` overrides defaults — default Opus 4.8 + Gemini Flash 3.5, two scopes
 `turn1`/`full`, one re-judge pass over ≥2-level disagreements, self-judgments skipped) →
 `report` (per-scenario + aggregate scorecard, agreement, generic taxonomy breakdowns from the
 tradition's *declared* axes, coverage, cost) → `run` (end-to-end). Failed cells are resumable

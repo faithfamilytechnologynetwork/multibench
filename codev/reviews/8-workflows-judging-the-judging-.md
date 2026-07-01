@@ -33,6 +33,9 @@ Delivered across 6 plan phases; **107 tests pass, 2 opt-in `--live` tests** (exc
 - [x] **M5** Cost aggregation (dated price table, collection + judging, partial-priced flag).
 - [x] **M6** Canonical −1…+1 five-value scale; no band names anywhere (per the architect's fully-
   numeric decision).
+- [x] **§5.7 config-driven** — all commands take `--config <file.yaml>` (fail-loud YAML override of
+  judges/subjects/framings/pressures/scopes/retries); `report` uses the supplied config for correct
+  coverage. (Added in the PR review round — see Consultation Feedback.)
 - [x] **M7** Generalizes with no code change — taxonomy breakdowns read the tradition's *declared*
   axes; verified on both `sunni-islam` and `taoism` fixtures.
 - [x] **M8** Judge anchored to `guide.md` + `judge-guidance.md` (M8a prompt assembly; M8b live
@@ -200,6 +203,21 @@ full 3-way integration CMAP runs at the PR gate.
 ### Implement Phase 6 — End-to-end run + docs (Round 1) — Codex APPROVE, Claude APPROVE
 #### Codex — No concerns (APPROVE).
 #### Claude — APPROVE; one cosmetic note (an invented "spec §5.10" reference). **Addressed**: removed it.
+
+### Review Phase — PR consult (Round 1) — Codex REQUEST_CHANGES, Claude APPROVE
+#### Codex
+- **Concern**: §5.7 says the config is overridable by a config file and/or CLI flags, but the CLI
+  only accepted `tradition`/`results_dir`/`limit` — the panel/subjects/framings/etc. were fixed to
+  `default_config()` unless a caller imported Python internals, missing the config-driven contract.
+  **Addressed**: added `config.py::load_config` (YAML, fail-loud, validated against the universal
+  core) and threaded a `--config <file.yaml>` option through all four commands.
+- **Concern**: `build_report()` reconstructs expected coverage from `config.judges`/`config.scopes`
+  defaulting to `default_config()`, so a standalone `report` against artifacts made with a
+  non-default panel/scope reports wrong `expected_cells`/`uncovered` — a real user-facing bug once
+  the CLI couldn't pass the original config. **Addressed**: the same `--config` flows into `report`;
+  a regression test asserts coverage tracks the supplied config (1 judge × 1 scope → 1 expected,
+  not the default 4). README instructs passing the same `--config` to `report`.
+#### Claude — No concerns (APPROVE).
 
 ## Architecture Updates
 
