@@ -1,7 +1,7 @@
 id: '8'
 title: workflows-judging-the-judging-
 protocol: spir
-phase: implement
+phase: review
 plan_phases:
   - id: phase_1
     title: Scaffold + scoring core + test-dispatcher registration
@@ -20,8 +20,8 @@ plan_phases:
     status: complete
   - id: phase_6
     title: End-to-end run, docs, and optional batch/live
-    status: in_progress
-current_plan_phase: phase_6
+    status: complete
+current_plan_phase: null
 gates:
   spec-approval:
     status: approved
@@ -36,7 +36,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -171,7 +171,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_5-iter3-claude.txt
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-01T00:09:38.680Z'
+updated_at: '2026-07-01T00:14:03.015Z'
 force_advanced:
   phase: phase_5
   iteration: 3
