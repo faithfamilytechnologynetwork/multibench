@@ -17,11 +17,11 @@ plan_phases:
     status: complete
   - id: phase_5
     title: 'Report: per-scenario results + aggregates'
-    status: in_progress
+    status: complete
   - id: phase_6
     title: End-to-end run, docs, and optional batch/live
-    status: pending
-current_plan_phase: phase_5
+    status: in_progress
+current_plan_phase: phase_6
 gates:
   spec-approval:
     status: approved
@@ -35,8 +35,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -171,7 +171,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_5-iter3-claude.txt
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-01T00:02:58.162Z'
+updated_at: '2026-07-01T00:02:59.999Z'
 force_advanced:
   phase: phase_5
   iteration: 3
