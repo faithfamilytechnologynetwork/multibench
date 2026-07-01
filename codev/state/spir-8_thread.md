@@ -304,5 +304,12 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - Cold-doc updates (hot tiers at cap): `arch.md` +"The judging workflow" section + fixed the
   workflows layout bullet; `lessons-learned.md` +"Testing LLM pipelines" (injectable seams,
   --live gating, judge guidance-flip anchoring test).
-- Next: open the PR (`Closes #8`) → signal PR_READY (porch done) → architect runs integration
-  CMAP + pr gate. Do NOT merge (architect handles integration).
+- Opened **PR #20** (`Closes #8`). Ran builder-side 2-way PR consult.
+- PR consult iter1: **Codex REQUEST_CHANGES**, **Claude APPROVE**. Two legit §5.7 points:
+  (1) config-driven contract not exposed on the CLI (panel/subjects/framings fixed to defaults
+  unless importing internals); (2) `report` recomputed coverage from `default_config()` → wrong
+  `expected_cells` for artifacts made with a non-default panel/scope. **Both fixed:** added
+  `config.py::load_config` (YAML, fail-loud, validated vs universal core) + `--config` on all four
+  commands; `report` uses the supplied config for correct coverage. +17 tests (**124 pass**, 2
+  live-skipped). Updated README (Configuration section), review doc (PR round + §5.7), arch.md.
+- Next: re-run PR consult (iter2) on the fix → pr gate → STOP for architect approval (no merge).

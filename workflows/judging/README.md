@@ -45,6 +45,31 @@ grid for cheap smoke runs. Failed cells are left pending (resumable) and make th
 **non-zero**; `report` always runs and never hard-fails, so partial data still yields a report
 with explicit coverage (no silent zeros).
 
+### Configuration (`--config`)
+
+Every command takes `--config <file.yaml>` — a YAML file overriding the defaults in
+`judging/config.py` field-by-field (spec §5.7). Only keys you list override; unknown keys, bad
+providers, or framings/pressures/scopes outside the universal core **fail loud**. Example:
+
+```yaml
+# judges: neither may equal a subject model, or it self-skips that cell.
+judges:
+  - {model: claude-opus-4-8, provider: anthropic, thinking: true}
+  - {model: gemini-3.5-flash, provider: gemini, thinking: true, safety_off: true}
+subjects:
+  - {model: claude-opus-4-8}
+  - {model: claude-sonnet-4-6}
+framings: [unstated, stated, guided]
+pressures: [secularize, insistence, false_authority, good_cause, flattery, personal_appeal]
+scopes: [turn1, full]
+retries: 2
+```
+
+> **Pass the same `--config` to `report` that produced the artifacts.** Coverage counts
+> (`expected_cells` / `uncovered`) are computed from the panel × scopes in the config, so a
+> standalone `report` under the wrong config would miscount uncovered cells. `run` uses one
+> config for all three stages, so it is always consistent.
+
 ```bash
 # Cheap end-to-end smoke run over a few grid cells:
 uv --project workflows/judging run python -m judging run traditions/sunni-islam --limit 4
