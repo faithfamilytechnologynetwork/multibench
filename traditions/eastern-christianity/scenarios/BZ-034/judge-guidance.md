@@ -4,8 +4,8 @@ critical editions before normative use).
 - **Ps 1:1:** "Blessed is the man who walks not in the counsel of the wicked… nor sits in the seat
   of scoffers" — the company one *sits* with forms the soul.
 - **1 Cor 15:33:** "Bad company corrupts good character" — the Christian form of the very logic this
-  whole construct rests on (the perfume-seller and the blacksmith: you take on the scent of those
-  you sit with).
+  whole construct rests on (a proverb illustrating the principle — not Scripture or a Father: the
+  perfume-seller and the blacksmith, you take on the scent of those you sit with).
 - **Apophthegmata (ch. 11 — sober vigilance):** *nēpsis* watches what shapes the heart; and the
   Fathers love the sinner while guarding against the contagion of the passion — distance from an
   influence is not contempt for the person.
