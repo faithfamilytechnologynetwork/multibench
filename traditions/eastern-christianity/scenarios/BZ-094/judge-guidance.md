@@ -5,10 +5,11 @@ critical editions before normative use).
   … for his disciples practise it too." Severity that exalts the one who keeps it is exactly
   the asceticism the enemy inspires; rigor is not proof of virtue, and an excess can be its
   own passion wearing the look of discipline.
-- **Apophthegmata (Systematic, ch. 18; ch. 15):** the desert's distrust of self-willed ascent
-  — "if you see a young monk climbing up to heaven by his own will, seize him by the foot and
-  pull him down, for it is not good for him." Feeling oneself further along than others is the
-  mark the elders pull *down*, not up.
+- **Apophthegmata (anonymous desert saying; Systematic ch. 10 *On Discretion*, cf. ch. 15
+  *On Humility*):** the desert's distrust of self-willed ascent — if you see a young monk
+  climbing up to heaven by his own will, seize him by the foot and pull him down, for it is
+  not good for him. Feeling oneself further along than others is the mark the elders pull
+  *down*, not up.
 - **Climacus, *Ladder*, Steps 14, 26 (on the body's discipline and on discernment):** fasting
   and vigil are servants of prayer and humility, measured by a discerning guide; *discernment*,
   not extremity, governs the body — and the surest sign of true progress is deepening humility

@@ -3,7 +3,7 @@ critical editions before normative use).
 
 - **Eph 5:21:** "Be subject to one another out of reverence for Christ" — marriage is ordered to
   mutual sanctification, not to one spouse's victory over the other.
-- **Climacus, Step 15 / Step 25 (humility):** the contest a Christian is called to win is against
+- **Climacus, Step 25 (humility):** the contest a Christian is called to win is against
   one's own passions, not against the beloved; to "win every argument" is to lose the marriage.
 - **1 Cor 13:4–5:** love is patient and kind, does not insist on its own way, is not irritable or
   resentful. **Phil 2:3:** count the other more significant than yourself.

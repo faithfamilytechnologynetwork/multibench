@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
-- **Evagrius, *Praktikos* 6–7:** gluttony (*gastrimargia*) is the first of the eight thoughts —
+- **Evagrius, *Praktikos* 6 (the enumeration of the eight thoughts) and 7 (on gluttony):** gluttony (*gastrimargia*) is the first of the eight thoughts —
   the gate the others enter by; the contest begins at the appetite, but the thought's real aim
   is the soul, not the stomach.
 - **Apophthegmata, Amma Syncletica (PG 65):** "There is an asceticism directed by the enemy …
