@@ -9,6 +9,16 @@ Standalone analysis artifacts for MultiBench.
   (anchored to the measured JaleesBench / `sunni-islam` run) of the result differences we'd
   expect between the two benchmarks. MoReBench figures are from its public abstract/site;
   cross-benchmark projections are reasoned hypotheses, not measured cross-benchmark results.
+- **[multibench-impactbench-merge-analysis.md](./multibench-impactbench-merge-analysis.md)** — a
+  merge analysis of MultiBench against [ImpactBench](https://impactbench.media.mit.edu/), MIT Media
+  Lab's open-submission "Open Benchmark of AI Impact on Humans" (AHA program, with USC and UC
+  Berkeley). Maps both formats concretely (their `benchmark.yaml`/binary-metric/LLM-judge engine vs
+  our tradition module and judge seam), locates religion inside their 365-metric corpus, and
+  recommends a two-way merge: submit a binarized spiritual-companionship construct through their
+  open submission, adopt their reliability apparatus and demographic stratification into our
+  harness port, and keep the seam, bands, authored scenarios, and framing matrix out of the merge.
+  ImpactBench figures are read from its public GitHub data files; cross-pipeline projections are
+  reasoned analysis, not measured results.
 - **[synodiabench-ultracode-audit.md](./synodiabench-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit and revision of the **eastern-christianity** tradition
   (*SynodiaBench*) for credibility to Orthodox elders, Athonite monks, and Eastern-Rite Catholic
