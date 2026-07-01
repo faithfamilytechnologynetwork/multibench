@@ -33,6 +33,7 @@ gates:
     approved_at: '2026-06-30T22:23:07.180Z'
   pr:
     status: pending
+    requested_at: '2026-07-01T00:28:36.475Z'
   verify-approval:
     status: pending
 iteration: 1
@@ -171,10 +172,11 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_5-iter3-claude.txt
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-01T00:19:15.110Z'
+updated_at: '2026-07-01T00:28:36.475Z'
 force_advanced:
   phase: phase_5
   iteration: 3
   max_iterations: 3
   rebuttal_file: 8-phase_5-iter3-rebuttals.md
   at: '2026-07-01T00:02:58.161Z'
+pr_ready_for_human: true
