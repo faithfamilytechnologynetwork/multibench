@@ -1,4 +1,4 @@
-"""End-to-end pipeline (spec §5.10 / S1, M12): collect → judge → report, fully mocked.
+"""End-to-end pipeline (spec S1, M12): collect → judge → report, fully mocked.
 
 The provider seams are injected (no live API). Covers the happy path (report artifacts land
 on partial data), the --limit bound (S4), and the M12 non-zero-exit contract when cells fail.
