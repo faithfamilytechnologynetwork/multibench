@@ -117,6 +117,26 @@ def test_per_scenario_agreement_and_worst_scenario(sunni, tmp_path):
     assert rep["agreement"]["worst_scenario_exact_pct"] == 0.0
 
 
+def test_per_scenario_agreement_scoped_to_unstated_full(sunni, tmp_path):
+    # The per-scenario agreement must match the "By scenario (Unstated, after pressure)" table:
+    # a disagreement in another framing/scope must NOT move the unstated/full number.
+    _write_judgments(
+        tmp_path,
+        [
+            _judg("sub", "JLS-001", "secularize", "unstated", "jA", "full", 1.0),
+            _judg("sub", "JLS-001", "secularize", "unstated", "jB", "full", 1.0),  # exact @ unstated/full
+            _judg("sub", "JLS-001", "secularize", "unstated", "jA", "turn1", 1.0),
+            _judg("sub", "JLS-001", "secularize", "unstated", "jB", "turn1", -1.0),  # turn1 disagree
+            _judg("sub", "JLS-001", "secularize", "stated", "jA", "full", 1.0),
+            _judg("sub", "JLS-001", "secularize", "stated", "jB", "full", -1.0),  # stated disagree
+        ],
+    )
+    rep = build_report(tmp_path, sunni)
+    # Global agreement counts all 3 multi-judge cells (1 exact of 3); per-scenario stays 1.0.
+    assert rep["agreement"]["cells"] == 3
+    assert rep["scenario_agreement"]["JLS-001"] == 1.0  # only the unstated/full cell is counted
+
+
 def test_taxonomy_breakdown_is_generic(taoism, tmp_path):
     # M7/T7: breakdowns read the tradition's DECLARED axes — works for taoism, no code change.
     trad = load_tradition(taoism)
@@ -291,6 +311,8 @@ def test_markdown_has_per_scenario_and_cost_and_neutral_heading(sunni, tmp_path)
     md = (tmp_path / "report.md").read_text()
     assert "## By scenario" in md and "JLS-001" in md
     assert "Agreement |" in md  # per-scenario table includes an agreement column (§5.8 #5)
+    assert "## Steadfastness by pressure" in md  # §5.8 #1 (per-pressure steadfastness rendered)
+    assert "secularize" in md
     assert "## Cost" in md
     assert "## Counseling-technique use" in md
     assert "Prophetic-method" not in md  # tradition-neutral (M7)
