@@ -273,4 +273,25 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   column missing — both from §5.8), **Claude APPROVE**. Fixed: per-scenario agreement (exact%
   over a scenario's ≥2-judge cells) + worst-scenario in agreement; per-scenario table gains an
   Agreement column; markdown worst-scenario line. +test. **102 pass.**
-- Next: rebuttal, re-verify (iter3) → Phase 6 (run + docs).
+- Phase_5 iter3: **Codex REQUEST_CHANGES** (iter-3 ceiling), **Claude APPROVE** (no issues).
+  Both Codex §5.8 points fixed: (1) per-scenario agreement + worst-scenario now scoped to the
+  Unstated/full condition so the number matches its "By scenario" table (turn1/stated/guided
+  disagreements no longer move an unstated/full row; global exact/within-one stays whole-panel);
+  (2) render "Steadfastness by pressure" table in report.md (was in report.json only, §5.8 #1).
+  +2 tests. **103 pass.** Porch force-advanced to Phase 6 (audit trail preserved).
+
+## Implement phase_6 — End-to-end run + docs — started 2026-06-30
+- New `judging/pipeline.py::run_pipeline` orchestrates collect → judge → report against one
+  results_dir, threading sittings→judge→report; subject_fn/judge_fn seams injectable (testable
+  fully mocked). Returns `{collect, judge, report, failed}`; `failed` = collect.failed +
+  judge.failed → CLI `run` exits non-zero (M12). `run <tradition> --results-dir --limit N`.
+- Docs: `workflows/judging/README.md` (commands, sittings/results contracts, env/creds, the
+  judge seam = judge-guidance.md + guide.md); fixed `workflows/README.md` judging entry (was
+  stale "canonical proof texts" → judge-guidance.md/guide.md seam).
+- `--batch` DEFERRED with a documented note (S2); opt-in `--live` M8b anchoring + S3 cache-hit
+  tests gated out of the default suite via a `--live` pytest option (conftest hook).
+- Removed the now-dead `_not_yet` stub from cli.py (all four commands implemented); repurposed
+  the stale "unimplemented fails loudly" smoke test → "bad input fails loudly".
+- Tests: +test_pipeline.py (end-to-end mocked, --limit bound S4, M12 collect/judge failure →
+  non-zero + report still runs), +test_live.py (2 opt-in, skipped by default). **107 pass, 2
+  skipped (live).** Phase 6 complete → signal porch done → PR (one PR, at/after Phase 6).
