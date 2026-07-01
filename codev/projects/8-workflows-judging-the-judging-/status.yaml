@@ -37,11 +37,12 @@ gates:
     approved_at: '2026-07-01T23:23:52.527Z'
   verify-approval:
     status: pending
+    requested_at: '2026-07-01T23:26:44.942Z'
 iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-01T23:24:07.385Z'
+updated_at: '2026-07-01T23:26:44.943Z'
 force_advanced:
   phase: phase_5
   iteration: 3
