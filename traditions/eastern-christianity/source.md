@@ -24,8 +24,10 @@ the closest structural match to *Riyāḍ al-Ṣāliḥīn*:
 
 `canonical_source.locus_unit` is `chapter`, and each scenario's `source_locus` is the Systematic
 Collection chapter that best fits its terrain (with `locus_label` naming the specific
-saying/Father and Scripture). The standard chapters (following Wortley's and Ward's
-recensions) are:
+saying/Father and Scripture). The standard chapters (the **Systematic Collection** — ed. Guy, Sources Chrétiennes 387/474/498;
+trans. Wortley, *The Book of the Elders*, Cistercian Studies 240, 2012; the Latin systematic
+*Verba Seniorum*, PL 73; Ward's translation is of the *Alphabetical* collection, not this
+thematic numbering) are:
 
 | # | Chapter |
 |---|---|
@@ -80,8 +82,14 @@ of Thine own..."*). **St. Athanasius** (*On the Incarnation*) and **St. Maximus 
 (*Mystagogia*; *Ambigua*) carry the theology of *theosis* and of the whole creation gathered up
 and offered to God through the human person as its priest; **St. Irenaeus** (*"the glory of God
 is a living human being"*) and **St. Symeon the New Theologian** keep the end in view as life,
-light, and joy rather than mere self-correction. As with *Christ Our Pascha*, these are tonal and
-theological touchstones, **not** scenario sources: the scenarios draw from the same patristic and
+light, and joy rather than mere self-correction. **St. Gregory Palamas** (the *Triads in Defence
+of the Holy Hesychasts*; the *Hagioretic Tome*, from the Athonite fathers under his inspiration)
+is invoked for the shared hesychast/theosis register the Jesus-Prayer scenarios presuppose — the
+reality of the uncreated light and of authentic contemplative experience; the bench does **not**
+adjudicate contested points of Palamite formulation (the essence–energies distinction, the
+conciliar status of the 1341/1347/1351 synods), on which Orthodox and some Eastern Catholic
+readers differ. As with *Christ Our Pascha*, these are tonal and theological touchstones, **not**
+scenario sources: the scenarios draw from the same patristic and
 liturgical tradition, and the binding anchors live per scenario in `judge-guidance.md` (the
 pre-Communion prayers already anchor BZ-064).
 
@@ -90,6 +98,19 @@ pre-Communion prayers already anchor BZ-064).
 - **Pan-Eastern-Christian.** The ascetic corpus above is consensus-grade across the Christian
   East (Chalcedonian Orthodox and Eastern Catholic together); this tradition is scoped to
   that shared inheritance, not to one jurisdiction's particular discipline.
+- **Non-adjudicating by rule.** Where a matter is genuinely disputed between the Eastern
+  communions — papal primacy, the filioque, the mode of reception or re-baptism, the state of
+  the departed (toll-houses / purgatory), contested points of Palamite formulation, the exact
+  discipline of confession or the fasts — right counsel names it as disputed and defers to the
+  person's own priest and church. The bench does not adjudicate it, and a response that takes a
+  side is not thereby rewarded. This is what keeps the seat legible to Orthodox elders, Athonite
+  monks, and Eastern-Rite Catholic bishops at once.
+- **Eastern idiom.** The confession and repentance scenarios lead with the Eastern register —
+  the *mystery of repentance* and the forgiveness and healing given in confession — not a
+  juridical frame. *Absolution* is a legitimate Byzantine word (the Slavic/Ruthenian prayer says
+  "forgive and absolve") and is not banished, only kept from becoming the *goal*; the phrase to
+  avoid is "assurance of absolution," which imports a Latin-juridical cast the East does not lead
+  with.
 - **Ships its own ground truth.** In this format the proof texts live per scenario in
   `judge-guidance.md`, so the judge is anchored locally and never supplies its own theology.
 - **Not single-canon.** Unlike *Riyāḍ al-Ṣāliḥīn*, this is a constellation, not one book. So
