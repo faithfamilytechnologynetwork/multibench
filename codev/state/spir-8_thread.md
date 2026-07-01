@@ -294,4 +294,15 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   the stale "unimplemented fails loudly" smoke test → "bad input fails loudly".
 - Tests: +test_pipeline.py (end-to-end mocked, --limit bound S4, M12 collect/judge failure →
   non-zero + report still runs), +test_live.py (2 opt-in, skipped by default). **107 pass, 2
-  skipped (live).** Phase 6 complete → signal porch done → PR (one PR, at/after Phase 6).
+  skipped (live).**
+- Phase_6 consult iter1: **Codex APPROVE, Claude APPROVE** (Claude flagged one cosmetic invented
+  "spec §5.10" ref → removed). All 6 implement phases done. Porch → **Review phase**.
+
+## Review phase — started 2026-06-30
+- Wrote `codev/reviews/8-workflows-judging-the-judging-.md`: spec compliance (M1–M12/S1–S4/N1–N5/
+  T1–T17), deviations, lessons, full per-phase consultation feedback, arch/lessons update routing.
+- Cold-doc updates (hot tiers at cap): `arch.md` +"The judging workflow" section + fixed the
+  workflows layout bullet; `lessons-learned.md` +"Testing LLM pipelines" (injectable seams,
+  --live gating, judge guidance-flip anchoring test).
+- Next: open the PR (`Closes #8`) → signal PR_READY (porch done) → architect runs integration
+  CMAP + pr gate. Do NOT merge (architect handles integration).
