@@ -34,8 +34,23 @@ seam, and one issue cut across all three:
 |---|---|
 | Athonite / Palamite | BZ-062 was quotable as "luminous experience is by definition delusion" — the wrong side of the council that vindicated hesychasm; Palamas unnamed. |
 | Orthodox elders | Citation hygiene — a cluster of misattributions (a Ladder step, an LXX/Hebrew inversion, an Evagrius range, a recension conflation) that read as carelessness to those who know the Ladder by heart. |
-| Eastern-Rite Catholic bishops | A mild Latin-juridical tilt ("assurance of absolution"); the non-adjudication rule honored but never *stated* as a contract. |
+| Eastern-Rite Catholic bishops | The non-adjudication rule was honored but never *stated* as a contract. (The audit's persona also flagged a "Latin-juridical tilt" here — **that framing was wrong; see the correction below.**) |
 | **All three** | The **safety overlay** existed only as per-scenario boilerplate — no home in `tradition.yaml`/README/guide, and the Guided prompt never stated the crisis boundary. |
+
+### Correction (post-audit, from an Eastern Catholic reader)
+
+The Eastern-Catholic-bishop persona in the audit reproduced an **outside caricature**: it read the
+confession scenarios as having a "Latin-juridical tilt" that an Eastern Catholic reader would want
+corrected. A reader who is himself Eastern Catholic corrected this: **there is no juridical tie in
+Eastern Catholic spirituality — that is a common Orthodox *criticism* of Eastern Catholics, not the
+reality.** Eastern Catholic core spirituality *is* Orthodox (the therapeutic/healing register of
+confession is shared, not a point of difference), and by the *"both lungs"* principle an Eastern
+Catholic may also legitimately draw on Western Christian practice. The genuine, register-level point
+survives (a bench scoped to the shared Eastern inheritance should not lead with "assurance of
+absolution" as the *goal*), but it is **shared-Eastern**, not an Eastern-Catholic failing. The
+`source.md` idiom note and recommendation 6 below were revised accordingly. Lesson for the personas:
+a lens built to *represent* an audience can still import that audience's *critics'* framing — a real
+member of the audience is the correction, and their word overrides the persona.
 
 ## Changes applied
 
@@ -132,9 +147,15 @@ For sunni-islam, buddhism, judaism, taoism, and secular-sage:
    (Sunni madhhabs / Salafi–traditionalist; Theravāda/Mahāyāna/Vajrayāna; Orthodox/Conservative/
    Reform authority; religious vs. philosophical Daoism) — "name it as disputed and defer; taking a
    side is not rewarded."
-6. **Watch for idiom leakage from a dominant sibling** (EC's Latin-juridical "assurance of
-   absolution"; watch for Protestant "personal relationship", Western-therapeutic "boundaries",
-   etc.) exactly where the tradition's own idiom diverges even when the substance agrees.
+6. **Watch for idiom leakage from a dominant sibling** — a Latin-scholastic "assurance of
+   absolution" foregrounded in an Eastern confession scenario, a Protestant "personal
+   relationship", a Western-therapeutic "boundaries" — exactly where the tradition's own idiom
+   diverges even when the substance agrees. **But do not confuse a register issue with a
+   confessional one**: the therapeutic idiom of confession is shared across the Christian East, so
+   "off-register" here is off for Orthodox and Eastern Catholic *alike* — not a mark of one
+   communion (see the correction above). And beware the deeper trap the EC case exposed — a persona
+   importing its audience's *critics'* caricature; validate contested persona reads against a real
+   member of that audience.
 
 ## Recommendations for future ultracode runs
 

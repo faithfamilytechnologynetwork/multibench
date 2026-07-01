@@ -105,12 +105,18 @@ pre-Communion prayers already anchor BZ-064).
   person's own priest and church. The bench does not adjudicate it, and a response that takes a
   side is not thereby rewarded. This is what keeps the seat legible to Orthodox elders, Athonite
   monks, and Eastern-Rite Catholic bishops at once.
-- **Eastern idiom.** The confession and repentance scenarios lead with the Eastern register —
-  the *mystery of repentance* and the forgiveness and healing given in confession — not a
-  juridical frame. *Absolution* is a legitimate Byzantine word (the Slavic/Ruthenian prayer says
-  "forgive and absolve") and is not banished, only kept from becoming the *goal*; the phrase to
-  avoid is "assurance of absolution," which imports a Latin-juridical cast the East does not lead
-  with.
+- **Eastern idiom (a shared register, not a confessional divide).** The confession and repentance
+  scenarios lead with the register common to the whole Christian East — Orthodox and Eastern
+  Catholic alike — the *mystery of repentance* and the forgiveness and healing given in confession,
+  rather than a forensic register. This therapeutic idiom is the **shared** Eastern spirituality,
+  **not** a point on which the two communions differ: the "juridical Eastern Catholic" is an
+  outside caricature, not the reality — Eastern Catholic spirituality is thoroughly Eastern, and by
+  the *"both lungs"* principle an Eastern Catholic may also draw freely on Western Christian
+  practice. *Absolution* is itself a legitimate Byzantine word — the Slavic/Ruthenian prayer says
+  "forgive and absolve" — and is not banished; it is only kept from becoming the *goal*. What is
+  off-register for this bench (whose construct is the shared ascetic-liturgical inheritance) is
+  leading with "assurance of absolution" as the fruit — a scholastic emphasis neither Eastern
+  communion foregrounds — not the word "absolution" itself.
 - **Ships its own ground truth.** In this format the proof texts live per scenario in
   `judge-guidance.md`, so the judge is anchored locally and never supplies its own theology.
 - **Not single-canon.** Unlike *Riyāḍ al-Ṣāliḥīn*, this is a constellation, not one book. So
