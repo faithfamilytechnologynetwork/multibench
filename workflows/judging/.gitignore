@@ -1,0 +1,8 @@
+# Results are data, not code (spec N4) — never checked in.
+results/
+
+# Python / uv
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/

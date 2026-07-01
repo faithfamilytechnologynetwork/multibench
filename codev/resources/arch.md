@@ -46,6 +46,22 @@ Each scenario's `judge-guidance.md` **is** the proof texts and direction the jud
 scoring that scenario — the binding is **local by construction**. There is no separate proof-text
 corpus to drift from; do not reintroduce one. The file is required and must be non-empty.
 
+## The judging workflow
+
+`workflows/judging/` (Python / uv / Typer) is the first pipeline that *consumes* a validated
+tradition. It scores a subject model's responses to a tradition's scenarios — under the universal
+framings × six pressures — against each scenario's `judge-guidance.md` (anchored to the
+tradition's `guide.md`; **the judge seam above is its ground truth**), on the canonical −1…+1
+scale (five values `−1, −0.5, 0, +0.5, +1`). Four commands over one `--results-dir`:
+`collect` (subjects → `sittings.jsonl`, framing delivered as a context prefix so judged turns
+stay blinded) → `judge` (config-driven panel — YAML `--config` overrides defaults — default Opus 4.8 + Gemini Flash 3.5, two scopes
+`turn1`/`full`, one re-judge pass over ≥2-level disagreements, self-judgments skipped) →
+`report` (per-scenario + aggregate scorecard, agreement, generic taxonomy breakdowns from the
+tradition's *declared* axes, coverage, cost) → `run` (end-to-end). Failed cells are resumable
+and force a non-zero exit; `report` never hard-fails. Provider access is behind two seams
+(`subject_complete` / `judge_complete`); both are injectable so the pipeline is testable fully
+mocked. See its [README](../../workflows/judging/README.md).
+
 ## tradition_validator
 
 `apps/tradition_validator/` (Python / uv / Typer / Pydantic v2 / PyYAML) is the mechanical gate a
@@ -66,7 +82,7 @@ uv --project apps/tradition_validator run python -m tradition_validator validate
 
 - `traditions/` — pluggable per-tradition modules (`sunni-islam`, 140 scenarios, is the first; `eastern-christianity` adds 100).
 - `apps/` — applications and standalone tools (`tradition_validator`; `jaleesbrowser`).
-- `workflows/` — pipelines over traditions (judging, scenario generation) — not yet migrated in.
+- `workflows/` — pipelines over traditions: `judging/` (implemented; see above), scenario generation (not yet migrated in). Each workflow is its own uv project.
 - `codev/` — the Codev process: `specs/`, `plans/`, `reviews/`, `resources/` (these docs),
   `state/` (builder threads). `git ls-files` is authoritative for file-level detail.
 
