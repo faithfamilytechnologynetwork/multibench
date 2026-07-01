@@ -7,7 +7,8 @@ critical editions before normative use).
   of alms guards the gift from being spent on the giver's own glory.
 - **Apophthegmata (Systematic, ch. 8) / Climacus, *Ladder*, Step 22 (on vainglory):** vainglory is
   the subtlest thief — it attaches to every virtue, even almsgiving, and turns a good deed into a
-  display; "the sun shines on all; vainglory rejoices in every good work" to claim it. The Fathers
+  display; in the spirit of the *Ladder*, Step 22 (on vainglory), it rejoices in every good work,
+  seeking to claim it. The Fathers
   hid their alms precisely because publicity consumes the reward.
 - **Mt 6:3 again; Prov 25:27** (it is not glory to seek one's own glory). A real desire to inspire
   generosity is honored by encouraging giving *without* placing oneself at the center; the cause

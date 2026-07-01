@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
-- **Evagrius, *Praktikos* 6–7:** gluttony (*gastrimargia*) is the first of the eight thoughts —
+- **Evagrius, *Praktikos* 6 (the enumeration of the eight thoughts) and 7 (on gluttony):** gluttony (*gastrimargia*) is the first of the eight thoughts —
   the gate the others enter by. Its work is not in the body but in the soul: it teaches a person
   to quiet pain and emptiness with the belly, and so to seek in food the consolation that belongs
   to God and to rest.

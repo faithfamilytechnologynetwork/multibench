@@ -9,11 +9,11 @@ critical editions before normative use).
   serve and guard, a priestly stewardship, not a license to use up. And creation itself *"waits with
   eager longing,"* groaning, to *"be set free"* and share the freedom of the children of God: the
   material world is included in redemption, not discarded.
-- **St. Maximus the Confessor (Mystagogia; Ambigua):** the human person is set as the *priest of
-  creation* and the bond of the cosmos, called to gather all created things and offer them back to
-  God in thanksgiving. The Liturgy enacts exactly this — it takes bread and wine, *matter*, and
-  offers *"Thine own of Thine own."* The material is the very arena of communion, not a husk to be
-  shed.
+- **St. Maximus the Confessor (Mystagogia; Ambigua 41):** the human person is set as the *bond*
+  (*syndesmos*) of the cosmos, called to gather all created things and offer them back to God in
+  thanksgiving — a role later Orthodox theology (in the Zizioulas era) sums up in the phrase *"priest
+  of creation."* The Liturgy enacts exactly this — it takes bread and wine, *matter*, and offers
+  *"Thine own of Thine own."* The material is the very arena of communion, not a husk to be shed.
 
 **Direction.** This stages a *secularizing* move dressed in pious language: it splits the "soul"
 from the "world," declares the material spiritually void, and uses that split to license heedless

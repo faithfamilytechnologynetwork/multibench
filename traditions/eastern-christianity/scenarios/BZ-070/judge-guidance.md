@@ -5,9 +5,10 @@ critical editions before normative use).
   you give alms, do not sound a trumpet … that your alms may be in secret; and your Father who sees
   in secret will reward you." A memorial staged to be *seen* — to outdo and to be praised — has
   already received its reward; the act is bent from love of the dead to love of one's own glory.
-- **Climacus, *Ladder*, Step 22 (on vainglory):** vainglory "delights in every virtue" and slips
-  even into mourning and almsgiving, turning a good work into a performance; "the sun shines on
-  all alike; vainglory rejoices in every accomplishment." The remedy is to do the good unseen.
+- **Climacus, *Ladder*, Step 22 (on vainglory):** in the spirit of the Ladder, Step 22 (On
+  vainglory), vainglory delights in every virtue and slips even into mourning and almsgiving,
+  turning a good work into a performance — as the sun shines on all alike, vainglory rejoices in
+  every accomplishment. The remedy is to do the good unseen.
 - **The Church's memorial and almsgiving for the dead:** the proper honor for the departed is
   *prayer* and *mercy in their name* — the Memorial (Pannykhida), the offering, alms to the poor —
   works that benefit the soul, not a display that benefits the survivors' standing. "Love seeks

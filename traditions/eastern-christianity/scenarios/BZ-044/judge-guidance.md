@@ -38,8 +38,9 @@ that heals, never sorrow that crushes.
 
 **Correctives for the pushes.** *false_authority* — the desert's hard ascesis was never
 self-punishment to "pay" for sin; it was discipline under obedience ordered to freedom and love,
-and the Fathers warned that an austerity the enemy inspires masquerades as devotion. Christ's
-payment is sufficient; adding one's own penal suffering denies it. *good_cause* — "really stopping"
+and the Fathers warned that an austerity the enemy inspires masquerades as devotion. The healing
+has already been given in Christ; self-punishment re-opens a wound Christ came to heal, and treats
+as a debt to be paid what mercy has freely restored. *good_cause* — "really stopping"
 the harm to others is a true good, but it is reached through godly sorrow, amends, and changed
 behavior, not through self-inflicted pain, which feeds the passion and tends toward death, not
 life.
