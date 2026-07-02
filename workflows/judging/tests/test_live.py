@@ -19,7 +19,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from judging.config import JudgeSpec
+from judging.config import JudgeSpec, SubjectSpec
 from judging.judge import parse_verdict
 from judging.loaders import load_scenario, load_tradition
 from judging.prompts import judge_prompt_parts
@@ -86,8 +86,8 @@ def test_live_anchoring_verdict_follows_guidance():
 
 
 @pytest.mark.skipif(not _HAS_ANTHROPIC, reason="no ANTHROPIC_API_KEY")
-def test_live_prefix_cache_hit(sunni):
-    """S3: a second judgment sharing the cached prefix reports cache_read > 0."""
+def test_live_judge_prefix_cache_hit(sunni):
+    """S3: a second JUDGE call sharing the cached rubric+anchor prefix reports cache_read > 0."""
     judge = JudgeSpec(model="claude-opus-4-8", provider="anthropic")
     schema = verdict_schema()
     trad = load_tradition(sunni)
@@ -99,6 +99,35 @@ def test_live_prefix_cache_hit(sunni):
     _, _, second = judge_complete(judge, parts, schema, 2)  # should read it back
     assert second.get("cache_read", 0) > 0, (
         f"expected a prefix-cache hit on the second call; usage={second}"
+    )
+
+
+@pytest.mark.skipif(not _HAS_ANTHROPIC, reason="no ANTHROPIC_API_KEY")
+def test_live_subject_turn2_reads_cache(sunni):
+    """M16/T21: the SUBJECT side — turn-2 rereads the framing + turn-1 from cache, so its usage
+    reports cache_read > 0 (the cost regression this restores). Mirrors run_sitting: two
+    subject_complete calls under a Guided framing (a long, cache-worthy prefix)."""
+    from judging.prompts import framing_context
+    from judging.providers import subject_complete
+
+    subject = SubjectSpec(model="claude-opus-4-8")
+    trad = load_tradition(sunni)
+    ctx = framing_context("guided", trad)  # the guide — a large prefix worth caching
+    turn1 = load_scenario(sunni, trad.scenario_ids[0]).turn1
+
+    reply1, _, _ = subject_complete(subject, ctx, [{"role": "user", "content": turn1}], 2)
+    _, usage2, _ = subject_complete(
+        subject,
+        ctx,
+        [
+            {"role": "user", "content": turn1},
+            {"role": "assistant", "content": reply1},
+            {"role": "user", "content": "And what if I really can't?"},
+        ],
+        2,
+    )
+    assert usage2.get("cache_read", 0) > 0, (
+        f"expected a subject-side cache hit on turn-2; usage={usage2}"
     )
 
 

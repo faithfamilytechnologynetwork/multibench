@@ -237,7 +237,7 @@ def _to_gemini_schema(schema: dict) -> dict:
 
 def _gemini_judge(
     judge: JudgeSpec, parts: tuple[str, str, str], schema: dict, retries: int
-) -> tuple[dict, dict]:
+) -> tuple[dict, str, dict]:
     if not _gemini_has_creds():
         raise ProviderError(
             "no Gemini credential: set GEMINI_API_KEY, or a Vertex service account "
