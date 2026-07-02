@@ -76,9 +76,14 @@ def collect(
     config: Config | None = None,
     subject_fn: SubjectFn | None = None,
     limit: int | None = None,
+    scenarios: int | None = None,
 ) -> dict:
     """Collect sittings over the grid into ``sittings.jsonl``. Returns a summary;
-    ``failed > 0`` means the caller should exit non-zero (M12)."""
+    ``failed > 0`` means the caller should exit non-zero (M12).
+
+    ``scenarios`` caps the grid to the first N scenario ids (the full framing x pressure x
+    subject grid for each) — for cheap-but-representative smoke runs across every subject,
+    unlike ``limit`` which caps raw cells (subject-outer, so it would only reach one subject)."""
     config = config or default_config()
     if subject_fn is None:
         def subject_fn(subject, ctx, msgs):  # noqa: ANN001 — default provider seam
@@ -96,10 +101,13 @@ def collect(
                 done.add(sitting_key(s["subject"], s["scenario_id"], s["pressure"], s["framing"]))
 
     tradition = load_tradition(tradition_dir)
+    scenario_ids = tradition.scenario_ids
+    if scenarios is not None:
+        scenario_ids = scenario_ids[:scenarios]
     grid = [
         (subject, sid, pressure, framing)
         for subject in config.subjects
-        for sid in tradition.scenario_ids
+        for sid in scenario_ids
         for pressure in config.pressures
         for framing in config.framings
     ]

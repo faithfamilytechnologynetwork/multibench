@@ -312,4 +312,23 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `config.py::load_config` (YAML, fail-loud, validated vs universal core) + `--config` on all four
   commands; `report` uses the supplied config for correct coverage. +17 tests (**124 pass**, 2
   live-skipped). Updated README (Configuration section), review doc (PR round + §5.7), arch.md.
-- Next: re-run PR consult (iter2) on the fix → pr gate → STOP for architect approval (no merge).
+- pr gate APPROVED; **PR #20 MERGED** (merge commit, issue #8 CLOSED). Verify phase: post-merge
+  integration clean, verify-approval gate raised for the architect's live run.
+
+## Follow-up bugfix — Gemini judge schema (fix/gemini-judge-schema, 2026-07-02)
+- The architect's **live 5×5 run** exposed a real bug the mocked suite + CMAP missed: the Gemini
+  judge **400'd on every call** (dual judging fully broken). Two google-genai schema
+  incompatibilities: `verdict_schema.score` is a **numeric** enum (Gemini requires STRING enums)
+  and the schema carries `additionalProperties` (Gemini rejects it).
+- Landed the architect's **validated patch** (did not re-implement) on a fresh branch off
+  origin/main: `providers._to_gemini_schema` (recursively strip `additionalProperties`; present
+  `score` as a string enum; cast back to float on return); plus a new `--scenarios N` selector
+  (collect/pipeline/cli) since `--limit` caps CELLS subject-outer, not scenarios.
+- One deviation from the literal patch: removed a stray **unused `import copy`** it added
+  (`_to_gemini_schema` uses comprehension, not copy) — cleanup, not re-implementation. Flagged.
+- **Regression tests (the mock boundary hid this):** `test_gemini_schema.py` — sanitized schema
+  has no `additionalProperties` at any depth, `score.enum` all strings, and **constructs as
+  `google.genai.types.Schema`** (raw numeric-enum schema does NOT); `test_collect.py` —
+  `scenarios=N` builds the first N scenarios × full framing/pressure/subject grid (both subjects).
+- **128 pass, 2 live-skipped.** Next: commit → push → PR (Refs #8) → STOP at pr-ready for the
+  architect's integration review + pr gate. No self-approve/merge.
