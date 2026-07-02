@@ -166,7 +166,7 @@ def submit(
     return summary
 
 
-def _rec_from_key(key: str, verdict: dict, usage: dict, tradition_id: str) -> dict:
+def _rec_from_key(key: str, verdict: dict, usage: dict, tradition_id: str, raw: str = "") -> dict:
     subject, scenario_id, pressure, framing, judge, scope = key.split("|")
     return {
         "sitting_key": f"{subject}|{scenario_id}|{pressure}|{framing}",
@@ -178,6 +178,7 @@ def _rec_from_key(key: str, verdict: dict, usage: dict, tradition_id: str) -> di
         "judge": judge,
         "scope": scope,
         **verdict,
+        "raw": raw,  # the batched judge's unparsed response text, retained for audit (M19)
         "usage": usage,
         "ts": datetime.now(timezone.utc).isoformat(),
     }
@@ -250,7 +251,7 @@ def collect(
             except (ValueError, json.JSONDecodeError):
                 errored += 1  # unparseable -> left pending for the live fallback
                 continue
-            recs.append(_rec_from_key(key, verdict, _batch_usage(msg.usage), tradition.id))
+            recs.append(_rec_from_key(key, verdict, _batch_usage(msg.usage), tradition.id, text))
         written += _append_new(jpath, recs)
         b["done"] = True
     _save_state(rd, state)

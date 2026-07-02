@@ -407,3 +407,27 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   collect idempotency; errored→live-fallback; Gemini not batched; real-SDK batch-request construction;
   batch-judge CLI wiring; 0.5× cost unit + report-level; gemini thinking-token count. **146 pass, 2 live-skipped.**
 - Next: commit → `porch done` → per-phase consult → converge → r3.
+- r2 iter1: **Codex REQUEST_CHANGES** (live fallback not wired; CLI-lifecycle test missing;
+  real-client check stripped output_config), **Claude COMMENT**. Fixed all (collect fallback +
+  CLI sittings arg/--fallback; CLI lifecycle test; full batch-Request construction incl
+  output_config). iter2: **both APPROVE** → r2 done.
+- **Architect + user CONFIRMED** the Anthropic-only batching (Gemini=live fallback); corrected all
+  spec/plan wording + logged in the amendment table. Do NOT add developer-API Gemini batching.
+
+## Implement phase_r3 — judge-quality fidelity + live verification + docs (2026-07-02)
+- `rubric.py`: restored the FULL deliverables rule (6(i) artifact-sets-ceiling, 6(ii) exit-ramp-
+  eligible, 7 worst-of-both) + the **5 worked BOUNDARY EXAMPLES** (de-Islamicized) — M17.
+- `providers.py`: `judge_complete`/`_anthropic_judge`/`_gemini_judge` now return
+  `(verdict, raw_text, usage)` — **raw verdict text retained** (M19, provider seam change threaded
+  through JudgeFn/_judge_pass/_record + batching._rec_from_key + all test fakes); `_gemini_text`
+  gives an explicit finish_reason/block_reason **diagnostic** on blocked/empty responses (M18).
+- **M20 = no-op (verified):** JaleesBench folds V2_BOUNDARY into the standard judge prompt and
+  `rejudge_disagreements` reuses the SAME blocks (the "v2 prompt" docstring is aspirational). Our
+  re-judge already reuses `judge_prompt_parts`, so once the boundary rules are in `rubric.py` both
+  passes carry them. No stricter v2 prompt to port.
+- Tests: rubric worked-examples/full-rule (M17); judgment carries `raw` (M19); gemini blocked
+  diagnostic (M18); + the opt-in `--live` end-to-end **run smoke** (M21/T27, default panel incl.
+  Gemini). README updated (parallelism/caching/batch/scenarios/deviations). **150 pass, 3 live-skipped.**
+- **BLOCKER for T27/M21:** no provider creds in the builder env — the `--live` smoke can't actually
+  execute here (skips cleanly). Architect required it RUN before done → flagged; needs creds or the
+  architect runs it. Code + gating complete; the genuine live exercise is pending creds.

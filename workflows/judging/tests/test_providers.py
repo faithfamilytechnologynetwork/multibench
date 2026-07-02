@@ -111,6 +111,26 @@ def test_subject_request_constructs_via_real_anthropic_params():
     assert all("cache_control" not in b for b in msgs[2]["content"])
 
 
+def test_gemini_text_raises_clear_diagnostic_on_blocked_response():
+    # M18: a blocked/empty Gemini response yields a clear located error (finish_reason /
+    # block_reason), not an opaque json.loads failure.
+    from types import SimpleNamespace
+
+    from judging.providers import ProviderError, _gemini_text
+
+    blocked = SimpleNamespace(
+        text=None,
+        candidates=[SimpleNamespace(finish_reason="SAFETY")],
+        prompt_feedback=SimpleNamespace(block_reason="OTHER"),
+    )
+    with pytest.raises(ProviderError) as ei:
+        _gemini_text(blocked)
+    msg = str(ei.value)
+    assert "SAFETY" in msg and "OTHER" in msg  # diagnostic surfaces both signals
+    # And a good response passes through unchanged.
+    assert _gemini_text(SimpleNamespace(text='{"score": 1.0}')) == '{"score": 1.0}'
+
+
 def test_gemini_usage_counts_thinking_tokens():
     # M18: thinking is ON, so thoughts_token_count is counted as output (else cost undercounts).
     from types import SimpleNamespace

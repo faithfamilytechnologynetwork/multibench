@@ -115,10 +115,12 @@ Amended-spec criteria are the acceptance bar; per-phase **Acceptance** maps each
   and make the cost model **batch-aware** and **Gemini-thinking-aware**.
 
 #### Files
-- **Create** `batching.py` — port JaleesBench `batching.py`: submit an **Anthropic Message Batch**
-  + a **Gemini batch job** for the pending cells; a `batch_state.json` manifest keyed like
-  `judgments` for idempotency; on collect, write verdicts (parsed/validated exactly like the live
-  path) and mark the manifest; anything a batch leaves pending falls back to the **live `judge`**.
+- **Create** `batching.py` — port JaleesBench `batching.py`: submit **Anthropic Message Batches**
+  for the pending cells; a `batch_state.json` manifest keyed like `judgments` for idempotency; on
+  collect, write verdicts (parsed/validated exactly like the live path) and mark the manifest;
+  anything a batch leaves pending falls back to the **live `judge`**. **Gemini is NOT batched** —
+  Vertex has no developer file-batch (matches JaleesBench `batching.py:120-127`; its line-4
+  docstring is stale — derive from code, not docs), so Gemini judge cells go to the live fallback.
 - **Modify** `cli.py` — add `batch-judge submit` and `batch-judge collect` (share config/`--config`).
 - **Modify** `providers.py` — `_gemini_usage` counts `thoughts_token_count` (JaleesBench
   `providers.py:120-122`); add the batch submit/poll helpers used by `batching.py`.
@@ -133,9 +135,10 @@ Amended-spec criteria are the acceptance bar; per-phase **Acceptance** maps each
       lower-level helpers: CLI-level tests exercise the command wiring and the `batch_state.json`
       **manifest lifecycle** (submit writes it; collect consumes + updates it; re-collect is a
       no-op). Extends the existing `tests/test_cli_smoke.py` coverage.
-- [ ] **Real-client construction (M21):** a **default-suite** test builds the batch **submit
-      payload** for each provider via the real client's params and asserts it constructs without
-      error (the anti-mock-boundary check for the new batch path).
+- [ ] **Real-client construction (M21):** a **default-suite** test builds the **Anthropic** batch
+      request (incl the `output_config` schema field) via the real SDK batch-request type and
+      asserts it constructs without error and bites on a bad request (anti-mock check; Gemini is
+      not batched, so there is no Gemini batch payload to validate here).
 - [ ] `report` cost is batch-aware (0.5× batch rows) and counts Gemini `thoughts_token_count`
       (M18-cost); unpriced-model handling still graceful.
 

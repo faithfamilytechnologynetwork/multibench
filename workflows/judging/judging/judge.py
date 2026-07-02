@@ -33,8 +33,9 @@ from judging.scores import validate_score
 # >=2 levels apart on the five-value scale == a score gap of >= 1.0 (spec §5.9).
 REJUDGE_GAP = 1.0
 
-# A judge_fn returns (raw_verdict_dict, usage_dict) for one (judge, prompt-parts).
-JudgeFn = Callable[[JudgeSpec, tuple[str, str, str]], tuple[dict, dict]]
+# A judge_fn returns (raw_verdict_dict, raw_text, usage_dict) for one (judge, prompt-parts).
+# ``raw_text`` is the judge's unparsed response, retained on every judgment for audit (M19).
+JudgeFn = Callable[[JudgeSpec, tuple[str, str, str]], tuple[dict, str, dict]]
 
 _JKEY = ("subject", "scenario_id", "pressure", "framing", "judge", "scope")
 
@@ -92,7 +93,7 @@ def parse_verdict(raw: object) -> dict:
 def _default_judge_fn(config: Config) -> JudgeFn:
     schema = verdict_schema()
 
-    def fn(judge: JudgeSpec, parts: tuple[str, str, str]) -> tuple[dict, dict]:
+    def fn(judge: JudgeSpec, parts: tuple[str, str, str]) -> tuple[dict, str, dict]:
         return providers.judge_complete(judge, parts, schema, config.retries)
 
     return fn
@@ -141,7 +142,8 @@ def _read_sittings(path: Path) -> list[dict]:
 
 
 def _record(
-    s: dict, judge: str, scope: str, verdict: dict, usage: dict, tradition_id: str
+    s: dict, judge: str, scope: str, verdict: dict, usage: dict, tradition_id: str,
+    raw: str = "",
 ) -> dict:
     return {
         "sitting_key": sitting_key(s),
@@ -155,6 +157,7 @@ def _record(
         "judge": judge,
         "scope": scope,
         **verdict,
+        "raw": raw,  # the judge's unparsed response text, retained for audit/debug (M19)
         "usage": usage,
         "ts": datetime.now(timezone.utc).isoformat(),
     }
@@ -237,8 +240,8 @@ def _judge_pass(
             s, judge, scope, rec_key = item
             try:
                 parts = judge_prompt_parts(tradition, _scenario(s["scenario_id"]), s["turns"], scope)
-                raw, usage = judge_fn(judge, parts)
-                verdict = parse_verdict(raw)
+                raw_verdict, raw_text, usage = judge_fn(judge, parts)
+                verdict = parse_verdict(raw_verdict)
             except Exception as e:  # noqa: BLE001 — report, leave pending (resumable), exit nonzero
                 with write_lock:
                     counters["failed"] += 1
@@ -246,7 +249,10 @@ def _judge_pass(
                 return
             with write_lock:
                 fh.write(
-                    json.dumps(_record(s, judge.model, scope, verdict, usage, tradition.id)) + "\n"
+                    json.dumps(
+                        _record(s, judge.model, scope, verdict, usage, tradition.id, raw_text)
+                    )
+                    + "\n"
                 )
                 fh.flush()
                 counters["written"] += 1

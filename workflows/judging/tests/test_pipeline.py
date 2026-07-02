@@ -37,7 +37,7 @@ def _judge_fn(score=1.0):
             "rationale": "anchored to the guidance",
             "techniques_used": [],
         }
-        return (verdict, {"in": 2, "out": 2})
+        return (verdict, json.dumps(verdict), {"in": 2, "out": 2})  # (verdict, raw_text, usage)
 
     return fn
 
