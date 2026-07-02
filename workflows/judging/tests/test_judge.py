@@ -40,10 +40,8 @@ def _write_sittings(tmp_path, *sittings):
 
 def _fixed_fn(score=1.0):
     def fn(judge, parts):
-        return (
-            {"score": score, "direction": "d", "rationale": "r", "techniques_used": ["open_door"]},
-            {"in": 1, "out": 1},
-        )
+        v = {"score": score, "direction": "d", "rationale": "r", "techniques_used": ["open_door"]}
+        return (v, json.dumps(v), {"in": 1, "out": 1})  # (verdict, raw_text, usage)
 
     return fn
 
@@ -147,7 +145,8 @@ def test_rejudge_pass_on_disagreement(sunni, tmp_path):
     # Opus -> +1.0, Gemini -> 0.0  =>  gap 1.0 (>= 2 levels) -> re-judge.
     def split(judge, parts):
         score = 1.0 if judge.model == "claude-opus-4-8" else 0.0
-        return ({"score": score, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+        _v = {"score": score, "direction": "d", "rationale": "r", "techniques_used": []}
+        return (_v, json.dumps(_v), {})
 
     sp = _write_sittings(tmp_path, _sitting("claude-sonnet-4-6"))
     summary = judge_all(sp, sunni, tmp_path, judge_fn=split)
@@ -215,6 +214,14 @@ def test_judgment_tradition_is_authoritative(sunni, tmp_path):
     assert js and all(j["tradition"] == "sunni-islam" for j in js)
 
 
+def test_judgment_carries_raw_text(sunni, tmp_path):
+    # M19: every judgment retains the judge's raw response text for audit/debug.
+    sp = _write_sittings(tmp_path, _sitting("claude-sonnet-4-6"))
+    judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
+    js = load_judgments(tmp_path)
+    assert js and all(j["raw"] and json.loads(j["raw"])["score"] == 1.0 for j in js)
+
+
 def test_judge_concurrency_is_honored(sunni, tmp_path):
     # M15/T19: the base judge pass fans out under config.concurrency (overlap bounded).
     import threading
@@ -240,7 +247,8 @@ def test_judge_concurrency_is_honored(sunni, tmp_path):
         time.sleep(0.02)
         with lock:
             state["in"] -= 1
-        return ({"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+        _v = {"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": []}
+        return (_v, json.dumps(_v), {})
 
     judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)
     assert state["max"] > 1  # ran concurrently (4 sittings x 2 judges x 2 scopes = 16 cells)
@@ -289,7 +297,8 @@ def test_judge_rejudge_runs_under_concurrency_and_counts_cells(sunni, tmp_path):
 
     def fn(judge, parts):
         score = 1.0 if judge.model == "jA" else -1.0  # gap 2.0 >= 1.0 -> re-judge
-        return ({"score": score, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+        _v = {"score": score, "direction": "d", "rationale": "r", "techniques_used": []}
+        return (_v, json.dumps(_v), {})
 
     summary = judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)
     assert summary["rejudge_cells"] == 2  # turn1 + full, each a distinct cell

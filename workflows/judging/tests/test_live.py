@@ -13,6 +13,7 @@ Run with credentials + the flag::
 Every test skips cleanly when its credentials are absent (never a hard failure, N4).
 """
 
+import json
 import os
 from types import SimpleNamespace
 
@@ -77,8 +78,8 @@ def test_live_anchoring_verdict_follows_guidance():
     """M8b: flipping ONLY the guidance flips the verdict — the judge anchors to guidance."""
     judge = JudgeSpec(model="claude-opus-4-8", provider="anthropic")
     schema = verdict_schema()
-    rewarded, _ = judge_complete(judge, _parts_with_guidance(_REWARD_STEADFAST), schema, 2)
-    punished, _ = judge_complete(judge, _parts_with_guidance(_REWARD_COMPLIANCE), schema, 2)
+    rewarded, _, _ = judge_complete(judge, _parts_with_guidance(_REWARD_STEADFAST), schema, 2)
+    punished, _, _ = judge_complete(judge, _parts_with_guidance(_REWARD_COMPLIANCE), schema, 2)
     hi = parse_verdict(rewarded)["score"]
     lo = parse_verdict(punished)["score"]
     assert hi > lo, f"verdict did not track supplied guidance: rewarded={hi}, punished={lo}"
@@ -94,8 +95,34 @@ def test_live_prefix_cache_hit(sunni):
     scen = load_scenario(sunni, sid)
     parts = judge_prompt_parts(trad, scen, _TURNS, "full")
 
-    _, first = judge_complete(judge, parts, schema, 2)  # writes the prefix cache
-    _, second = judge_complete(judge, parts, schema, 2)  # should read it back
+    _, _, first = judge_complete(judge, parts, schema, 2)  # (verdict, raw, usage) — writes cache
+    _, _, second = judge_complete(judge, parts, schema, 2)  # should read it back
     assert second.get("cache_read", 0) > 0, (
         f"expected a prefix-cache hit on the second call; usage={second}"
     )
+
+
+_HAS_GEMINI = bool(
+    os.environ.get("GEMINI_API_KEY")
+    or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI")
+)
+
+
+@pytest.mark.skipif(not (_HAS_ANTHROPIC and _HAS_GEMINI), reason="needs Anthropic + Gemini creds")
+def test_live_run_smoke_end_to_end(sunni, tmp_path):
+    """M21/T27: the ANTI-MOCK smoke — a tiny real `run` (2 scenarios, default panel incl. the
+    Gemini judge) end-to-end against real creds, producing a report. This is the check that would
+    have caught the Gemini-400 + the cost regressions; it MUST be run before the work is done.
+    Cheap: 2 scenarios x 6 pressures x 3 framings x 2 subjects is bounded by --scenarios."""
+    from judging.pipeline import run_pipeline
+
+    summary = run_pipeline(sunni, tmp_path, scenarios=1)  # 1 scenario = smallest real grid
+    assert (tmp_path / "sittings.jsonl").exists()
+    assert (tmp_path / "judgments.jsonl").exists()
+    assert (tmp_path / "report.md").exists() and (tmp_path / "report.json").exists()
+    rep = json.loads((tmp_path / "report.json").read_text())
+    assert rep["tradition"] == "sunni-islam"
+    assert rep["counts"]["judgments"] > 0  # real verdicts landed
+    # Both default judges actually produced verdicts (this is what the mock boundary hid).
+    assert any("gemini" in j for j in rep["judges"]), f"no gemini verdicts: judges={rep['judges']}"

@@ -143,12 +143,13 @@ def _anthropic_subject(
 
 def judge_complete(
     judge: JudgeSpec, parts: tuple[str, str, str], schema: dict, retries: int = 2
-) -> tuple[dict, dict]:
-    """Schema-constrained verdict from one judge. Returns ``(raw_verdict, usage)``.
+) -> tuple[dict, str, dict]:
+    """Schema-constrained verdict from one judge. Returns ``(raw_verdict, raw_text, usage)``.
 
-    ``parts`` = (static rubric, per-scenario anchor, conversation+spec). Anthropic sets
-    1-hour prefix-cache breakpoints on the two stable parts; Gemini runs safety-off when
-    the judge is configured that way (judging only).
+    ``raw_text`` is the judge's unparsed response text, retained on every judgment for
+    audit/debug (M19). ``parts`` = (static rubric, per-scenario anchor, conversation+spec).
+    Anthropic sets 1-hour prefix-cache breakpoints on the two stable parts; Gemini runs
+    safety-off when the judge is configured that way (judging only).
     """
     if judge.provider == "anthropic":
         return _anthropic_judge(judge, parts, schema, retries)
@@ -159,7 +160,7 @@ def judge_complete(
 
 def _anthropic_judge(
     judge: JudgeSpec, parts: tuple[str, str, str], schema: dict, retries: int
-) -> tuple[dict, dict]:
+) -> tuple[dict, str, dict]:
     _require_env("ANTHROPIC_API_KEY")
     import anthropic
 
@@ -173,7 +174,7 @@ def _anthropic_judge(
         {"type": "text", "text": tail},
     ]
 
-    def call() -> tuple[dict, dict]:
+    def call() -> tuple[dict, str, dict]:
         kwargs: dict[str, Any] = {
             "model": judge.model,
             "max_tokens": judge.max_tokens,
@@ -184,7 +185,7 @@ def _anthropic_judge(
             kwargs["thinking"] = {"type": "adaptive"}
         resp = client.messages.create(**kwargs)
         text = "".join(b.text for b in resp.content if getattr(b, "type", None) == "text")
-        return json.loads(text), _anthropic_usage(resp)
+        return json.loads(text), text, _anthropic_usage(resp)
 
     return _retry(call, retries)
 
@@ -270,18 +271,42 @@ def _gemini_judge(
         config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=-1)
     config = types.GenerateContentConfig(**config_kwargs)
 
-    def call() -> tuple[dict, dict]:
+    def call() -> tuple[dict, str, dict]:
         resp = client.models.generate_content(
             model=judge.model, contents=prompt, config=config
         )
-        verdict = json.loads(resp.text)
+        text = _gemini_text(resp)  # explicit blocked/empty diagnostic (M18)
+        verdict = json.loads(text)
         # Gemini returns `score` as a string enum member ("0.5"); restore the numeric
         # type the rest of the pipeline (validate_score) expects.
         if isinstance(verdict.get("score"), str):
             verdict["score"] = float(verdict["score"])
-        return verdict, _gemini_usage(resp)
+        return verdict, text, _gemini_usage(resp)
 
     return _retry(call, retries)
+
+
+def _gemini_text(resp: Any) -> str:
+    """Extract the response text, failing LOUD on a blocked/empty response (M18).
+
+    A bare ``json.loads(resp.text)`` on a safety-blocked or truncated Gemini response gives an
+    opaque error; instead surface ``finish_reason`` / prompt-block feedback so the failure is
+    diagnosable (and, being a ProviderError, is not silently retried into the same wall)."""
+    text = getattr(resp, "text", None)
+    if text and text.strip():
+        return text
+    # No usable text — build a located diagnostic from whatever the SDK exposes.
+    reason = None
+    candidates = getattr(resp, "candidates", None) or []
+    if candidates:
+        reason = getattr(candidates[0], "finish_reason", None)
+    feedback = getattr(resp, "prompt_feedback", None)
+    blocked = getattr(feedback, "block_reason", None) if feedback else None
+    raise ProviderError(
+        "gemini judge returned no text "
+        f"(finish_reason={reason!r}, prompt_block_reason={blocked!r}) — "
+        "likely a safety block or truncation"
+    )
 
 
 # --- Usage extraction (best-effort; defensive) ------------------------------

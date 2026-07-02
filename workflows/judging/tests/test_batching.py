@@ -179,7 +179,8 @@ def test_collect_live_fallback_judges_pending_cells(sunni, tmp_path):
     batches.created = submit_batches.created
 
     def live_judge(judge, parts):  # the injected live judge fills what the batch left pending
-        return ({"score": -0.5, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+        v = {"score": -0.5, "direction": "d", "rationale": "r", "techniques_used": []}
+        return (v, json.dumps(v), {})  # (verdict, raw_text, usage)
 
     c = collect(
         sunni, tmp_path, config=_cfg(), client=_client(batches),

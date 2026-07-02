@@ -532,8 +532,9 @@ A config object (defaults in `config.py`, overridable by a config file and/or CL
   a dead field), `retries`, `results_dir`.
 - **Execution selectors (CLI):** `--limit` (cap raw cells), `--scenarios N` (cap to the first N
   scenarios over the full framing×pressure×subject grid — the representative smoke selector),
-  and the **batch** path (`batch-judge submit|collect`; Anthropic Message Batches + Gemini batch
-  job at 0.5× price with a `batch_state.json` manifest and live-`judge` fallback).
+  and the **batch** path (`batch-judge submit|collect`; **Anthropic** Message Batches at 0.5×
+  price with a `batch_state.json` manifest and live-`judge` fallback; **Gemini is not batched** —
+  its cells go to the live `judge`).
 
 *(There is no band-label config — scores are bare numbers, §4.3.)*
 
@@ -918,6 +919,7 @@ providers+prompts / report+cost) produced the authoritative remediation ledger (
 |---|---|
 | Parallel collection + judging (base + re-judge) | §4.6, §4.7; wire the dead `config.concurrency`; cell-major interleave. **M13, M15** (was implicit / serial). |
 | Batch judging + live fallback + 0.5× cost | §4.6, §5.7, §5.8; **S2 → M14** (no longer deferrable). |
+| **Batch = Anthropic-only; Gemini = live fallback** (2026-07-02, user-confirmed) | Corrected the "+ Gemini batch job" wording in §4.6/§5.7/§5.8/M14: JaleesBench `batching.py:120-127` batches Anthropic Message Batches only (Vertex has no developer file-batch), leaving Gemini to the live `judge`; its line-4 docstring is stale — derive from code. Developer-API Gemini batching explicitly NOT added. |
 | Subject-side prompt caching | §4.6; **S3 → M16**. |
 | Full deliverables rubric + 5 worked examples | §5.4; **M17** (v1 compressed it). |
 | Gemini thinking-token cost, blocked diagnostic, schema sanitization | §5.5, §5.8; **M18**. |
