@@ -245,3 +245,53 @@ def test_judge_concurrency_is_honored(sunni, tmp_path):
     judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)
     assert state["max"] > 1  # ran concurrently (4 sittings x 2 judges x 2 scopes = 16 cells)
     assert state["max"] <= 4  # bounded by config.concurrency
+
+
+def _judgment_keys(results_dir):
+    return {
+        (j["subject"], j["scenario_id"], j["pressure"], j["framing"], j["judge"], j["scope"], j["score"])
+        for j in load_judgments(results_dir)
+    }
+
+
+def test_judge_parallel_output_set_equivalent_to_serial(sunni, tmp_path):
+    # Same SET of judgments regardless of concurrency (M15); line order may differ.
+    sittings = [
+        _sitting("subj", pressure=p, framing=f)
+        for p in ("secularize", "insistence")
+        for f in ("unstated", "stated")
+    ]
+    judges = (JudgeSpec("jA", "anthropic"), JudgeSpec("jB", "anthropic"))
+    subs = (SubjectSpec("subj"),)
+    serial_dir, par_dir = tmp_path / "serial", tmp_path / "par"
+    serial_dir.mkdir()
+    par_dir.mkdir()
+    judge_all(
+        str(_write_sittings(serial_dir, *sittings)), sunni, serial_dir,
+        config=Config(judges=judges, subjects=subs, concurrency=1), judge_fn=_fixed_fn(),
+    )
+    judge_all(
+        str(_write_sittings(par_dir, *sittings)), sunni, par_dir,
+        config=Config(judges=judges, subjects=subs, concurrency=6), judge_fn=_fixed_fn(),
+    )
+    assert _judgment_keys(serial_dir) == _judgment_keys(par_dir)
+
+
+def test_judge_rejudge_runs_under_concurrency_and_counts_cells(sunni, tmp_path):
+    # M15 + rejudge_cells fix: a >=2-level disagreement re-judges under concurrency; the count is
+    # over the FULL cell key (both scopes disagree -> 2 distinct cells, not collapsed to 1).
+    sp = _write_sittings(tmp_path, _sitting("subj"))
+    cfg = Config(
+        judges=(JudgeSpec("jA", "anthropic"), JudgeSpec("jB", "anthropic")),
+        subjects=(SubjectSpec("subj"),),
+        concurrency=4,
+    )
+
+    def fn(judge, parts):
+        score = 1.0 if judge.model == "jA" else -1.0  # gap 2.0 >= 1.0 -> re-judge
+        return ({"score": score, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+
+    summary = judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)
+    assert summary["rejudge_cells"] == 2  # turn1 + full, each a distinct cell
+    assert summary["rejudged"] >= 1
+    assert (tmp_path / "judgments_v2.jsonl").exists()

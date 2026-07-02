@@ -80,17 +80,47 @@ def test_subject_messages_caches_turn1_even_without_framing():
     assert blocks[0]["cache_control"] == {"type": "ephemeral"}
 
 
-def test_subject_messages_construct_as_anthropic_params():
-    # Real-client construction (M21, anti-mock): the built user turns are valid Anthropic
-    # message params (content-block lists the SDK accepts), not just arbitrary dicts.
+def test_subject_request_constructs_via_real_anthropic_params():
+    # Real-client construction (M21, anti-mock, subject path): validate the ACTUAL create-kwargs
+    # through the REAL anthropic SDK param types (`MessageCreateParams`) — not a hand-checked
+    # dict. This catches request-shape drift (model/max_tokens/messages). NOTE: the SDK's request
+    # TypedDicts are permissive on nested `cache_control`, so the exhaustive wire guarantee (the
+    # API actually accepting the cache blocks) is the r3 `--live` smoke; here we also assert the
+    # structural cache contract explicitly.
+    import pydantic
+    from anthropic import types as atypes
+
     from judging.providers import _subject_messages
 
-    out = _subject_messages([{"role": "user", "content": "Q"}], "CTX")
-    for msg in out:
-        assert msg["role"] in ("user", "assistant")
-        if isinstance(msg["content"], list):
-            for b in msg["content"]:
-                assert b["type"] == "text" and isinstance(b["text"], str)
-                if "cache_control" in b:
-                    assert b["cache_control"]["type"] == "ephemeral"
+    msgs = _subject_messages(
+        [
+            {"role": "user", "content": "Q1"},
+            {"role": "assistant", "content": "A1"},
+            {"role": "user", "content": "Q2"},
+        ],
+        "CTX",
+    )
+    kwargs = {"model": "claude-opus-4-8", "max_tokens": 1024, "messages": msgs}
+    # Goes through the real SDK's request param model (rejects e.g. a missing model/max_tokens).
+    pydantic.TypeAdapter(atypes.MessageCreateParams).validate_python(kwargs)
+    # Reference the real SDK cache-control symbol (catches an SDK rename of the cache type).
+    assert atypes.CacheControlEphemeralParam(type="ephemeral", ttl="1h")["type"] == "ephemeral"
+    # Structural cache contract: breakpoints on the FIRST user turn only.
+    assert msgs[0]["content"][0]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert msgs[0]["content"][1]["cache_control"] == {"type": "ephemeral"}
+    assert all("cache_control" not in b for b in msgs[2]["content"])
+
+
+def test_subject_request_missing_required_field_is_rejected_by_sdk():
+    # Prove the real-SDK validation actually bites (anti-mock): a request missing max_tokens fails.
+    import pydantic
+    from anthropic import types as atypes
+
+    from judging.providers import _subject_messages
+
+    msgs = _subject_messages([{"role": "user", "content": "Q"}], None)
+    with pytest.raises(pydantic.ValidationError):
+        pydantic.TypeAdapter(atypes.MessageCreateParams).validate_python(
+            {"model": "claude-opus-4-8", "messages": msgs}  # no max_tokens
+        )
 

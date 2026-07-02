@@ -346,6 +346,13 @@ def judge_all(
         "written": written,
         "failed": failed + rfailed,
         "skipped_self": skipped,
-        "rejudge_cells": len({(t[0]["scenario_id"], t[2]) for t in targets}) if targets else 0,
+        # Distinct hot cells = the FULL cell key (subject, scenario_id, pressure, framing, scope);
+        # collapsing to (scenario_id, scope) would undercount when cells share a scenario/scope.
+        "rejudge_cells": len(
+            {
+                (t[0]["subject"], t[0]["scenario_id"], t[0]["pressure"], t[0]["framing"], t[2])
+                for t in targets
+            }
+        ),
         "rejudged": rewritten,
     }
