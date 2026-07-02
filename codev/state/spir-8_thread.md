@@ -458,6 +458,19 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - **PR #25 OPEN** (Refs #8): https://github.com/faithfamilytechnologynetwork/multibench/pull/25 —
   r1+r2+r3, 150 pass + architect's live 3/3. PR body surfaces both infra blockers. Over to the
   architect's 3-way integration CMAP + pr gate. NOT self-approving/merging. (afx send still down.)
+- **Integration CMAP (architect, on PR #25):** **Claude APPROVE** (HIGH, no blockers); **Gemini
+  COMMENT** — its lone issue (ValueError from `resp.text` bypassing the M18 diagnostic) **REFUTED**
+  by the architect (google-genai `_get_text` returns None on empty/blocked; my fall-through is
+  correct — the raise was legacy `google-generativeai`); **Codex CMAP** hit the same vendored-binary
+  ENOENT (workspace infra, being handled).
+- CMAP cleanup done: fixed the stale `providers.py` module docstring (2-tuple → 3-tuple seam
+  returns). 150 pass. Pushed.
+- **porch STILL BLOCKED at implement/r3/iter2 → "Run remaining consultations (codex)".** `check`/
+  `done` pass (build complete) but `next` won't advance to the pr gate without the codex verdict,
+  which can't run (binary missing). Per architect: reported, NOT patching the global package or
+  `.codev/config.json`. **Needs the architect to repair codev (restore the 0.130.0 vendored codex)
+  so the r3 codex consult completes → porch advances to review/pr gate**, OR to advance r3 another
+  way. Handing off — this is the one thing standing between here and the pr gate.
 
 - r3 iter2 re-consult: **Claude APPROVE (no issues).** **Codex BLOCKED — vendored binary missing:**
   `@cluesmith/codev/node_modules/@openai/codex-darwin-arm64/vendor/.../codex/` is EMPTY
