@@ -436,6 +436,26 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   JUDGE path not SUBJECT) + **Claude COMMENT** (`_gemini_judge` annotation). Fixed: added
   `test_live_subject_turn2_reads_cache` (M16/T21, subject turn-2 cache_read>0); annotation →
   `tuple[dict,str,dict]`. **150 pass, 4 live-skipped.**
+## ⚠️ STATUS 2026-07-02 (afx send is DOWN — reading this thread is how to reach me)
+- **Two infra blockers, both the architect's domain, neither fixable by me:**
+  1. **codex consult binary missing** — codev's vendored `@openai/codex` (expects **0.130.0** native
+     aarch64) has an EMPTY binary dir; PATH `codex` is **0.139.0** (a JS wrapper, wrong version +
+     wrong kind) → NOT a safe drop-in. codev install needs repair (`npm rebuild`/reinstall) to
+     restore per-phase codex consults. I did NOT patch global node_modules (shared infra) or
+     fabricate a codex verdict.
+  2. **`afx send architect` fails** — "Cannot resolve canonical builder id for worktree 'spir-8' …
+     no matching builder row in global.db" (issue #1094). I cannot proactively message the
+     architect; this thread + the PR body are my only channel out.
+- **Live suite: architect ran it, 3/3 PASSED incl. T27 (36-sitting grid, real dual-judge incl.
+  Gemini) — M21 satisfied** (evidence: `8-live-verification-evidence.md`).
+- **Decision (per architect's explicit "finish consult, porch done, open the single PR"):** opening
+  the PR now. r1+r2 fully consulted & converged (codex+claude APPROVE); r3 has Claude APPROVE +
+  both codex-iter1 points addressed; the only open r3 item is the codex-iter2 verdict, blocked by
+  the missing binary — and the architect runs the full 3-way CMAP (incl. codex) at the pr gate.
+- **Porch desync note:** porch is mechanically parked at implement/phase_r3/iter2 ("Run remaining
+  consultations (codex)") awaiting the codex verdict it can't get. To reconcile: repair codev →
+  the codex consult completes → `porch done`/advance; or accept r3 on Claude-APPROVE + pr-gate CMAP.
+
 - r3 iter2 re-consult: **Claude APPROVE (no issues).** **Codex BLOCKED — vendored binary missing:**
   `@cluesmith/codev/node_modules/@openai/codex-darwin-arm64/vendor/.../codex/` is EMPTY
   (first attempt EPIPE, retry `spawn codex ENOENT`). codex ran fine through r3-iter1, so it broke
