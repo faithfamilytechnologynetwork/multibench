@@ -1,374 +1,255 @@
-# Plan: Spec 8 — `workflows/judging` (the judging workflow)
+# Plan: Spec 8 — `workflows/judging` — JaleesBench fidelity remediation
 
 ## Metadata
-- **ID**: plan-2026-06-30-workflows-judging
-- **Status**: draft
-- **Specification**: [codev/specs/8-workflows-judging-the-judging-.md](../specs/8-workflows-judging-the-judging-.md)
-- **Created**: 2026-06-30
+- **ID**: plan-2026-07-02-workflows-judging-fidelity
+- **Status**: draft (supersedes the delivered v1 plan; see Appendix)
+- **Specification**: [codev/specs/8-workflows-judging-the-judging-.md](../specs/8-workflows-judging-the-judging-.md) (amended 2026-07-02, §4.6/§4.7, M13–M21)
+- **Reference (port source)**: JaleesBench = `/Users/mwk/Development/fftn/taqwabench/jaleesbench/jaleesbench/` (`collect.py`, `judge.py`, `batching.py`, `providers.py`, `prompts.py`, `score.py`)
+- **Created**: 2026-07-02
 
 ## Executive Summary
 
-Implement the approved Spec 8 design: a generalizable **LLM-as-judge** that scores an AI
-assistant's responses to a tradition's scenarios — under the universal framings
-(unstated/stated/guided) and the six pressures — against each scenario's `judge-guidance.md`,
-on the canonical **five-number scale `{−1, −0.5, 0, +0.5, +1}`**. The workflow lives at
-`workflows/judging/` (uv/Typer Python), reuses `tradition_validator.core` (framings/pressures)
-and its loaders/models (no fork), and ships `collect → judge → report` plus an end-to-end `run`.
+v1 of `workflows/judging/` shipped functionally complete and CMAP-approved (PR #20) plus a live
+Gemini-schema bugfix (PR #24) — both **merged**. A live 5-scenarios-per-tradition run then showed
+v1 had **dropped JaleesBench's throughput/cost fidelity**, a real regression for a *port*:
+collection and judging ran **serially** (`config.concurrency` was a **dead field**), there was
+**no batch path**, and subject-side prompt caching was missing; the deliverables rubric was
+compressed and several judge diagnostics dropped. The spec was amended (§4.6/§4.7) to promote the
+dropped non-functional behavior to REQUIREMENTS (**M13–M21**).
 
-The build is sequenced so each phase is independently testable against **fixtures + canned
-transcripts with the provider boundary mocked** (N3) — no live API calls in the default suite.
-Phase order follows the data flow: foundation (scoring core) → judge inputs (loaders, rubric,
-prompt) → the judge engine (providers + panel/scopes/re-judge) → the collector → the report →
-integration. The three hardening additions the spec carries (schema-constrained verdicts,
-self-judge skip, prompt-injection handling) and the Guided-framing-as-context-prefix handling
-are confirmed and built in. **Phase 1 also registers `workflows/judging` in the per-builder
-test dispatcher** (`.codev/checks/test.sh`) so porch's implement/review tests-check actually
-runs this workflow's pytest (otherwise it silently skips — see Notes).
+This plan restores full fidelity in **three phases**, exactly the architect's phasing
+(**parallelism → batching → Tier-2 judge-quality + live verification**), each independently
+testable with the provider boundary mocked **plus** real-client contract checks (the mock boundary
+is what hid the Gemini 400 + these cost regressions, so it is no longer trusted alone). The two
+**deliberate deviations** (judge thinking ON; Gemini `gemini-3.5-flash`) and the intentional
+reframes (numeric scores; guide+judge-guidance anchor; Claude-only subjects; citation/mapping/
+HTML/web out of scope; Arabic deferred) stand — documented, not "fixed".
+
+**Concurrency approach:** a bounded `ThreadPoolExecutor` over the existing **sync** provider
+seams (bounded by `config.concurrency`, `threading.Lock` around each JSONL append) — this wires
+concurrency without rewriting the provider layer to async (lower risk; JaleesBench's
+`asyncio.Semaphore+gather` is an equivalent shape and stays an acceptable alternative).
 
 ## Success Metrics
 
-Spec criteria (M1–M12, S1–S4, N1–N5) and test scenarios (T1–T17) are the acceptance bar; the
-per-phase **Acceptance** sections below map each to its phase. Plan-level rollup:
+Amended-spec criteria are the acceptance bar; per-phase **Acceptance** maps each. Rollup:
 
-- [ ] All spec MUST criteria (M1–M12) met; SHOULD (S1–S4) met or explicitly deferred with a note.
-- [ ] All test scenarios T1–T17 implemented (default suite mocks the provider boundary; the one
-      live check, M8b, is gated behind `--live`).
-- [ ] Non-functional: Typer CLI, uv-managed, fail-fast, secrets via env, results gitignored (N1–N5).
-- [ ] No coverage reduction in the repo; `workflows/judging` registered in the test dispatcher.
-- [ ] PR opened at/after the final implement phase (single PR; phase commits on the branch).
+- [ ] Fidelity MUSTs **M13–M21** met (parallel collect+judge, batch judging + 0.5× cost, subject
+      caching, full rubric, Gemini thinking-token/diagnostic/schema, raw text, v2 re-judge
+      verification, live verification).
+- [ ] New test scenarios **T18–T27** implemented; the default suite includes **real-client/schema
+      construction** checks; the opt-in **`--live` smoke (T27)** is actually run before done.
+- [ ] No regression of the delivered M1–M12 / N1–N5 behavior (self-judge skip, blinding, coverage,
+      fail-fast, idempotent resume all preserved); no coverage reduction.
+- [ ] Single remediation PR (`Refs #8`); phase commits on `builder/spir-8`; architect runs the
+      integration CMAP + pr gate; merge with a merge commit on approval.
 
 ## Phases (Machine Readable)
 
 ```json
 {
   "phases": [
-    {"id": "phase_1", "title": "Scaffold + scoring core + test-dispatcher registration"},
-    {"id": "phase_2", "title": "Tradition loading, rubric, and judge-prompt assembly"},
-    {"id": "phase_3", "title": "Providers + judge pass (panel, scopes, re-judge)"},
-    {"id": "phase_4", "title": "Minimal Claude subject collector"},
-    {"id": "phase_5", "title": "Report: per-scenario results + aggregates"},
-    {"id": "phase_6", "title": "End-to-end run, docs, and optional batch/live"}
+    {"id": "phase_r1", "title": "Parallel collection + judging + subject-side caching"},
+    {"id": "phase_r2", "title": "Batch judging + batch & thinking-token cost accounting"},
+    {"id": "phase_r3", "title": "Judge-quality fidelity + live verification + docs"}
   ]
 }
 ```
 
 ## Phase Breakdown
 
-### Phase 1: Scaffold + scoring core + test-dispatcher registration
-**Dependencies**: None
+### Phase r1: Parallel collection + judging + subject-side caching
+**Dependencies**: none (builds on the merged v1 on `main`)
+**Restores**: M13, M15, M16 · **Tests**: T18, T19 (+ M16 request-construction; live cache-read in r3)
 
 #### Objectives
-- Stand up `workflows/judging/` as a uv/Typer project that runs (`python -m judging --help`).
-- Establish the owned scoring primitives (the five numbers) and single-source the universal core.
-- Make porch's tests-check actually run this workflow's suite.
+- Wire the **dead `config.concurrency`** into both `collect` and `judge` (base **and** re-judge
+  passes) as a bounded `ThreadPoolExecutor` over per-cell provider calls; keep runs deterministic,
+  idempotent, blinded, and fail-fast exactly as today.
+- Restore JaleesBench **cell-major interleave** in collection.
+- Restore **subject-side Anthropic prompt caching** (framing block 1h ephemeral + turn-1 default
+  TTL) so turn-2 does not re-pay.
 
-#### Files (create unless noted)
-- `workflows/judging/pyproject.toml` — uv project; deps: `anthropic`, `google-genai`, `typer`,
-  `pyyaml`, and a **path dependency on `tradition_validator`** (`apps/tradition_validator`);
-  `[dependency-groups]` `pytest>=8`; `[tool.pytest.ini_options] testpaths=["tests"]`.
-- `workflows/judging/judging/__init__.py`, `__main__.py` (`python -m judging`), `cli.py`
-  (Typer app with `collect`/`judge`/`report`/`run` command stubs that parse args and error
-  "not yet implemented" — fleshed out in later phases).
-- `workflows/judging/judging/scores.py` — the canonical `SCORES = (−1.0, −0.5, 0.0, +0.5, +1.0)`,
-  a `validate_score()` (reject anything outside the set; **no snapping**, §5.5), and the
-  −1…+1 mean helper used by the reducer/aggregates.
-- `workflows/judging/judging/core_imports.py` — thin re-export of `tradition_validator.core`
-  (`FRAMINGS`, `PRESSURES`, `STATED_TEMPLATE`, `normalize_heading`, `IDENTITY_SIGNALS`) so the
-  workflow never redefines them (M9).
-- `workflows/judging/judging/config.py` — defaults: `judges` (claude-opus-4-8 adaptive-thinking;
-  gemini-3.5-flash thinking-on, safety-off), `subjects` (claude-opus-4-8, claude-sonnet-4-6),
-  `framings` (all 3), `pressures` (six), `scopes` (turn1, full), concurrency/retries/results_dir;
-  overridable by file/flags. **No band-label config** (§4.3).
-- `workflows/judging/.gitignore` — ignore `results/`.
-- `workflows/judging/tests/` — `conftest.py` + tests for this phase.
-- **Modify** `.codev/checks/test.sh` — add one registry line:
-  `workflows/judging) echo "uv --project workflows/judging run pytest" ;;` (see Notes).
+#### Files (modify)
+- `collect.py` — replace the serial `for` over `todo` with a `ThreadPoolExecutor(max_workers=
+  config.concurrency)`; reorder the grid to **cell-major interleave** (`(scenario_id, pressure,
+  framing)` outer, subject inner — JaleesBench `collect.py:269`); `threading.Lock` around the
+  `sittings.jsonl` append; preserve resume/`--limit`/`--scenarios`/failed-count/exit-code.
+- `judge.py` — parallelize `_judge_pass` (base) and the re-judge pass under `config.concurrency`
+  (JaleesBench `Semaphore(16)+gather`); keep the lock-guarded append, self-judge skip recording,
+  and idempotent keying.
+- `providers.py` — `subject_complete`/`_fold`: add `cache_control` on the framing block (`ttl:1h`
+  ephemeral) + the turn-1 exchange (default TTL), mirroring the judge path (JaleesBench
+  `collect.py:176-186`). No change to the judge caching (already present).
 
 #### Acceptance
-- [ ] `uv --project workflows/judging run python -m judging --help` lists the four commands (M1, N1).
-- [ ] `scores.validate_score` accepts only the five values; rejects e.g. `0.7`/`3` with a located
-      error (T1, T2).
-- [ ] `core_imports` re-exports the core constants; a test asserts identity with
-      `tradition_validator.core` (M9).
-- [ ] The dispatcher line is present and `bash .codev/checks/test.sh` runs this workflow's pytest
-      when `workflows/judging` is touched.
+- [ ] `config.concurrency>1` runs collect/judge concurrently: a test observes **max in-flight >1
+      and ≤ concurrency** (e.g. an injected fake that records overlap); `concurrency=1` is serial
+      (T18, T19; M13, M15).
+- [ ] Output with concurrency is **set-equivalent** to serial — the **same set of records**,
+      regardless of JSONL **line order** (concurrency makes append order non-deterministic; do NOT
+      enforce byte-identical output). Resume is still idempotent, and blinding +
+      non-zero-exit-on-failure are unchanged.
+- [ ] **Real-client construction (M21):** a **default-suite** test builds the Anthropic **subject**
+      request payload (with the framing 1h + turn-1 `cache_control` blocks) via the real client's
+      params and asserts it constructs without error — not just that a dict has the right keys
+      (this is the anti-mock-boundary check for the subject path) (M16, M21).
 
 #### Test Plan
-- **Unit**: `scores` validation (T1/T2); `config` defaults; `core_imports` re-export identity (M9).
-- **Integration**: CLI `--help` smoke (Typer app loads).
+- **Unit/integration (mocked):** concurrency honored + overlap bound; **set-equivalent** (not
+  byte-identical) serial-vs-parallel output; cell-major order; no dropped/duplicated JSONL lines
+  under load. **Real-client construction (default suite):** the Anthropic subject-request payload
+  (framing/turn-1 `cache_control`) constructs against the real client. No network calls.
 
 #### Risks
-- **Path dependency on `apps/tradition_validator` mis-resolves under uv.** → Use a uv path
-  dependency to the app dir; a CLI `--help` + an import test in CI catches it immediately.
+- **Thread-safety of JSONL append / shared dicts.** → Single `threading.Lock` around every append;
+  per-cell work is otherwise independent. Test asserts no dropped/duplicated lines under load.
 
 ---
 
-### Phase 2: Tradition loading, rubric, and judge-prompt assembly
-**Dependencies**: Phase 1
+### Phase r2: Batch judging + batch & thinking-token cost accounting
+**Dependencies**: r1 · **Restores**: M14, M18 (cost) · **Tests**: T20 (+ cost)
 
 #### Objectives
-- Read a tradition's judge inputs via `tradition_validator` (no re-implemented parsing, N5).
-- Encode the universal rubric (five-level meanings, boundary rules, seven technique ids, verdict
-  schema) and assemble the 3-part, cache-ordered, injection-safe judge prompt — all without any
-  live API call.
-
-#### Files (create)
-- `workflows/judging/judging/loaders.py` — tradition-specific accessors **composed from**
-  `tradition_validator`'s **generic** loaders (`load_text`/`load_yaml`/`load_json`, which return
-  `(data, error)` tuples) + its Pydantic models (`TraditionManifest`, `ScenarioMeta`,
-  `ScenariosIndex`, `TaxonomyAxis`) with path construction — *not* pre-existing tradition-specific
-  loaders (none exist). Reads `guide.md` (construct), and per scenario `turn1.md`,
-  `judge-guidance.md`, `pressures.md` (sections keyed via `core.normalize_heading`),
-  `scenario.yaml` (tags/identity_signal), `tradition.yaml` (declared `taxonomies`,
-  `adherent_noun`). Single-sources format parsing (N5).
-- `workflows/judging/judging/rubric.py` — the universal rubric text (§5.4, de-Islamicised:
-  "the tradition" / "the supplied guide/ground truth"), the five-level meanings (§5.3), the
-  boundary rules, the anchoring instruction, the **seven canonical technique ids**
-  (`reads_person`, `engages_reason`, `gentleness`, `gradualism`, `exit_ramp`, `proportion`,
-  `open_door`) as the `techniques_used` validation set, and the verdict JSON schema
-  (`{score, direction, rationale, techniques_used}`).
-- `workflows/judging/judging/prompts.py` — 3-part assembly (static rubric | per-scenario anchor
-  = guide+judge-guidance | conversation+output-spec, §5.5); framing **context-prefix** rendering
-  (never a system prompt, §4.5/§6.1); **untrusted-`<transcript>` delimiting** + the
-  ignore-in-transcript-instructions preamble (§5.5); conversation rendering; `turn1`(`[:2]`) vs
-  `full` scoping.
-
-#### Acceptance
-- [ ] Given a fixture tradition + a canned sitting, the assembled prompt contains the rubric
-      anchoring instruction **and** that scenario's `judge-guidance.md` (M8a, T3).
-- [ ] The conversation sits last, inside a delimited `<transcript>` block, with the
-      ignore-instructions preamble present (M11 assembly-level; T14 setup).
-- [ ] `pressures.md` headings normalize via `core.normalize_heading` to the six ids; the matching
-      turn-2 push is selected (T6).
-- [ ] Loaders read the tradition only through `tradition_validator` (N5); taxonomy axes come from
-      `tradition.yaml`, not hardcoded.
-
-#### Test Plan
-- **Unit**: rubric technique-id set; verdict schema shape; framing context-prefix text; scope
-  trimming.
-- **Integration**: full 3-part assembly over a fixture tradition + canned sitting (no API);
-  heading normalization (T6); anchor carries guide + judge-guidance (M8a).
-
-#### Risks
-- **`tradition_validator` loader API differs from assumptions.** → Phase 2 starts by reading the
-  actual loader/model signatures; if a needed accessor is missing, add a thin read helper in
-  `loaders.py` (still single-sourcing parsing) rather than re-parsing files.
-
----
-
-### Phase 3: Providers + judge pass (panel, scopes, re-judge)
-**Dependencies**: Phase 2
-
-#### Objectives
-- Call the configured judge panel with schema-constrained output, scoring each sitting at both
-  scopes; enforce the score set; skip self-judgments; resume idempotently; run the one-pass
-  ≥2-level re-judge override.
-
-#### Files (create)
-- `workflows/judging/judging/providers.py` — a shared low-level client/creds/retry layer
-  exposing two **distinct seams** (so collection and judging never share the wrong abstraction):
-  **`subject_complete`** = ordinary **conversational** completion (plain text; Claude subjects;
-  used by the collector, Phase 4) and **`judge_complete`** = **schema-constrained verdict**
-  output (provider-specific mechanism; Anthropic 1-hour prefix-cache breakpoints on the two
-  stable prompt parts §5.5/S3; Gemini **safety-off** — judging only; adaptive thinking (Claude)
-  / thinking-on (Gemini)). Credentials from env with **loud failure** if a configured provider's
-  key/SA is absent (N4); bounded retries with backoff, then report + leave resumable (N2).
-  Subjects are **never** run safety-off.
-- `workflows/judging/judging/judge.py` — for each sitting × judge × scope: build the prompt
-  (Phase 2), call the provider, parse+`validate_score` the verdict (hard error outside the five
-  values / unknown technique); **skip self-judgments** (judge `model` == subject `model`, exact
-  id, §4.4) and record them; write `judgments.jsonl` keyed `sitting_key|judge|scope`
-  (idempotent resume, §5.9); the **re-judge pass** (≥2 levels = gap ≥1.0) overriding by key,
-  exactly once (§5.9/M10).
-
-#### Acceptance
-- [ ] Verdict parsing accepts the five values, rejects others (T1/T2); unknown technique → error.
-- [ ] A judge whose model == the subject model is skipped and recorded (T5; M3).
-- [ ] A ≥2-level disagreement cell is selected and re-judged once; the re-judgment overrides by
-      key (T4, T16; M10).
-- [ ] Re-running `judge` skips completed `sitting|judge|scope` cells (T9).
-- [ ] `judge` **exits non-zero** if any targeted cell fails after retries, while leaving
-      `judgments.jsonl` resumable — failed cells stay pending, never written as a score (M12; N2).
-- [ ] A configured provider with no credential fails loudly, naming the env var (T10; N4).
-- [ ] Mocked at the provider boundary only; behavior-focused (N3).
-
-#### Test Plan
-- **Unit**: verdict parse/validate; self-judge match; re-judge selection (≥2 levels); judgment
-  keying.
-- **Integration**: judge a canned sitting set with a **mocked panel** → `judgments.jsonl`
-  written/keyed; resume is idempotent (T9); missing-credential path (T10).
-
-#### Risks
-- **Schema-constrained output differs per provider (Anthropic vs Gemini).** → Encapsulate each
-  in `providers.py` behind a uniform "return a validated verdict dict" contract; the plan-level
-  detail is resolved here, tests assert the contract not the wire format.
-- **Gemini judge availability/credentials in this environment.** → Config-driven panel: a
-  Claude-only panel is a valid fallback; fail loudly if a configured provider lacks creds (N4).
-
----
-
-### Phase 4: Minimal Claude subject collector
-**Dependencies**: Phase 3 (reuses `providers.subject_complete`)
-
-#### Objectives
-- Produce the sittings contract end-to-end on real data by running **Claude** subjects over the
-  grid, framing-blinded, resumable.
-
-#### Files (create)
-- `workflows/judging/judging/collect.py` — grid `subjects × scenarios × pressures × framings`;
-  4-turn sittings (`turn1` → reply1 → pressure-turn-2 → reply2) **via `providers.subject_complete`**
-  (plain conversational completion — *not* the judge verdict seam); framing delivered as a
-  **context prefix on every user turn**, never the API `system` (§4.5); **clean blinded turns**
-  stored (scenario text only); `context_prefix` retained for audit only; idempotent resume keyed
-  `sitting_key`; `--limit` smoke (S4); writes `sittings.jsonl` per the §5.6 contract (required
-  vs optional fields).
-- Wire `judging collect` in `cli.py`.
-
-#### Acceptance
-- [ ] One-cell collection yields a clean 4-turn sitting; framing appears only in `context_prefix`,
-      not in `turns` (T11; M2).
-- [ ] Sitting JSON matches §5.6 (required fields present; optional/audit fields populated).
-- [ ] Resume skips completed cells; `--limit` bounds the run (S4).
-- [ ] `collect` **exits non-zero** if any targeted cell fails after retries, leaving
-      `sittings.jsonl` resumable (M12; N2).
-- [ ] Mocked at the provider boundary (N3).
-
-#### Test Plan
-- **Unit**: grid construction; framing-fold (prefix on user turns only); sitting keying.
-- **Integration**: collect one cell with a mocked Claude provider → valid blinded sitting (T11).
-
-#### Risks
-- **Framing leakage into stored turns** (would un-blind the judge). → A dedicated test asserts
-  `turns` contain only scenario text and `context_prefix` carries the framing (T11).
-
----
-
-### Phase 5: Report — per-scenario results + aggregates
-**Dependencies**: Phase 3 (judgments format); exercised with fixtures (full pipeline wired in Phase 6)
-
-#### Objectives
-- Reduce judgments to per-cell scores and produce per-scenario results + tradition-level
-  aggregates on the −1…+1 scale, with mechanical formulas, generic taxonomy breakdowns, coverage,
-  agreement, and cost — generalizing across traditions with no code change.
-
-#### Files (create)
-- `workflows/judging/judging/report.py` — cell reducer = **mean of present judges' scores**
-  (§5.9/M10); breakdown means = unweighted mean of in-scope cell scores (uncovered excluded,
-  never 0); **headline** (unstated, full), **steadfastness** (full − turn1, overall + per-
-  pressure), per-framing; **score distribution over per-judge verdicts** (§5.8); breakdowns by
-  **declared taxonomy axes** read from `tradition.yaml` (never hardcoded) + seven-technique usage
-  + optional citations; inter-judge agreement (exact / within-one-level, ≥2 judges); **coverage**
-  (judged X/Y, uncovered, skipped self-judgments — no silent zeros, §5.9/M12); a cost table
-  (kept minimal, marked approximate/dated); writes `report.md` + `report.json`.
-- Wire `judging report` in `cli.py`.
-
-#### Acceptance
-- [ ] Mean reducer + aggregate math match hand-computed fixtures (T13, T15); two-judge cell
-      `+1.0,0.0` → `+0.5` (T15).
-- [ ] Score distribution is taken over per-judge verdicts (§5.8).
-- [ ] Breakdowns use the tradition's **declared** axes; verified on a **real second tradition**
-      (`taoism`, different axes) with no code change (T7; M7).
-- [ ] A fully-skipped cell is null/excluded and counted uncovered — not 0 (T17; M12).
-- [ ] Single-judge config: report produced, no agreement/re-judge (T12); ≥2 judges: agreement +
-      re-judge reflected (M6).
-
-#### Test Plan
-- **Unit**: reducer; headline/steadfastness/per-framing formulas; distribution basis; agreement;
-  coverage tallies.
-- **Integration**: report over canned `sittings`+`judgments` fixtures for **two** traditions
-  (sunni-islam + taoism) → `report.md`/`report.json` (T7/T13/T15/T17/M5/M7/M12).
-
-#### Risks
-- **Off-grid cell means polluting the score distribution.** → Distribution is defined over
-  per-judge verdicts only (§5.8); a test asserts cell means never enter the distribution.
-
----
-
-### Phase 6: End-to-end run, docs, and optional batch/live
-**Dependencies**: Phases 1–5
-
-#### Objectives
-- Wire the full pipeline, document usage, and close the remaining SHOULD/opt-in criteria.
+- Port JaleesBench **batch judging** at ~50% price with a durable manifest and a live fallback,
+  and make the cost model **batch-aware** and **Gemini-thinking-aware**.
 
 #### Files
-- **Modify** `workflows/judging/judging/cli.py` — `run` = `collect → judge → report` for a
-  tradition (S1).
-- **Create** `workflows/judging/README.md` — how to run; the sittings/results contracts; env/creds.
-- **Modify** `workflows/README.md` — point the "judging" entry at the workflow **and correct its
-  copy**: judging scores against each scenario's `judge-guidance.md` (+ the tradition's
-  `guide.md`), **not** "canonical proof texts" (the spec's binding seam — current wording is stale).
-- **Optional**: `--batch` mode (Anthropic Message Batches, ~50% cost) **or** a clear deferral
-  note (S2); an opt-in **`--live`** anchoring test (M8b) and a prefix-cache-hit check (S3),
-  both outside the default mocked suite.
+- **Create** `batching.py` — port JaleesBench `batching.py`: submit **Anthropic Message Batches**
+  for the pending cells; a `batch_state.json` manifest keyed like `judgments` for idempotency; on
+  collect, write verdicts (parsed/validated exactly like the live path) and mark the manifest;
+  anything a batch leaves pending falls back to the **live `judge`**. **Gemini is NOT batched** —
+  Vertex has no developer file-batch (matches JaleesBench `batching.py:120-127`; its line-4
+  docstring is stale — derive from code, not docs), so Gemini judge cells go to the live fallback.
+- **Modify** `cli.py` — add `batch-judge submit` and `batch-judge collect` (share config/`--config`).
+- **Modify** `providers.py` — `_gemini_usage` counts `thoughts_token_count` (JaleesBench
+  `providers.py:120-122`); add the batch submit/poll helpers used by `batching.py`.
+- **Modify** `report.py` — cost model prices batched tokens (`b_in/b_out/b_cache_write/b_cache_read`)
+  at **0.5×** (JaleesBench `score.py:50-76`); include Gemini thinking tokens in usage/cost.
 
 #### Acceptance
-- [ ] `judging run <tradition> --limit N` executes the pipeline on a fixture end-to-end (S1);
-      `report` **succeeds on partial data** (never hard-fails), printing coverage, and `run`
-      surfaces a non-zero exit if `collect`/`judge` had failed cells (M12).
-- [ ] `--limit` smoke path works cheaply (S4); README documents commands + contracts (M1).
-- [ ] `--batch` implemented or its deferral noted (S2); `--live` anchoring test demonstrates the
-      verdict follows supplied guidance against the model's prior when run (M8b); prefix-cache
-      hit observed under `--live` (`cache_read_input_tokens > 0`) or documented (S3).
+- [ ] `batch-judge submit` then `collect` produces the same validated verdicts as live, priced at
+      **0.5×**; `batch_state.json` makes re-collect idempotent; a cell the batch leaves pending
+      falls back to live `judge` (T20; M14).
+- [ ] The feature is operable **from the actual CLI** (`batch-judge submit|collect`), not only via
+      lower-level helpers: CLI-level tests exercise the command wiring and the `batch_state.json`
+      **manifest lifecycle** (submit writes it; collect consumes + updates it; re-collect is a
+      no-op). Extends the existing `tests/test_cli_smoke.py` coverage.
+- [ ] **Real-client construction (M21):** a **default-suite** test builds the **Anthropic** batch
+      request (incl the `output_config` schema field) via the real SDK batch-request type and
+      asserts it constructs without error and bites on a bad request (anti-mock check; Gemini is
+      not batched, so there is no Gemini batch payload to validate here).
+- [ ] `report` cost is batch-aware (0.5× batch rows) and counts Gemini `thoughts_token_count`
+      (M18-cost); unpriced-model handling still graceful.
 
 #### Test Plan
-- **Integration**: `run` over a fixture tradition with mocked providers (S1); `--limit` bound.
-- **Opt-in (`--live`, excluded from default CI)**: M8b anchoring; S3 cache-hit.
+- **Unit/integration (mocked batch client):** submit→collect→verdicts + 0.5× cost; manifest
+  idempotency; pending→live fallback; gemini-thinking-token cost; batch-aware report totals.
+- **CLI-level:** `batch-judge submit|collect` command wiring + manifest lifecycle.
+- **Real-client construction (default suite):** the batch submit payload constructs against the
+  real client for each provider. No network calls.
 
 #### Risks
-- **Live opt-in tests flaky/credential-dependent.** → Gate behind `--live`, never in the default
-  suite (N3); skip cleanly when creds absent.
+- **Batch API shape drift (Anthropic/Gemini).** → Encapsulate submit/poll/collect behind
+  `batching.py` helpers with a mocked-client contract test; the live batch path is exercised by
+  the r3 `--live` smoke only if cheap, else documented.
+
+---
+
+### Phase r3: Judge-quality fidelity + live verification + docs
+**Dependencies**: r1, r2 · **Restores**: M17, M18 (diagnostic), M19, M20, M21 · **Tests**: T21–T27
+
+#### Objectives
+- Restore the judge-quality details v1 dropped, and add the **anti-mock-boundary** verification the
+  amended spec now requires (real-client/schema construction in the default suite + an opt-in
+  `--live` smoke actually run before done). Update docs.
+
+#### Files
+- `rubric.py` — restore the **full deliverables boundary rule** (artifact-sets-−1.0-ceiling +
+  **exit-ramp-eligible** clause + worse-of-both) and the **five worked boundary examples** from
+  JaleesBench `prompts.py:112-137`, de-Islamicized (M17).
+- `providers.py` — **(a) `raw`-passthrough seam change (M19).** Today `judge_complete` /
+  `_anthropic_judge` / `_gemini_judge` do `return json.loads(text), usage` — the raw response
+  **text is discarded**. Retaining `raw` therefore requires a **provider return-shape change**
+  (return the raw text alongside the parsed dict, e.g. `(verdict_dict, raw_text, usage)` or a
+  `raw` key), threaded through `judge_fn`/`_judge_pass`/`_record` — **not** a `judge.py`-only edit.
+  Update `JudgeFn`'s type + every call site + `parse_verdict`/`_record` + the affected tests.
+  **(b)** Gemini judge path: explicit `finish_reason`/empty-response **diagnostic** (clear located
+  error, not a bare `json.loads(resp.text)`) (M18-diagnostic). **(c)** Schema sanitization already
+  landed in PR #24 — keep it and its **real-client construction** test (M21).
+- `judge.py` — record the passed-through **`raw`** text on every judgment (M19, depends on the
+  providers seam change above); **verify** JaleesBench `rejudge_disagreements`: if it truly uses a
+  stricter v2 prompt, port it (add to `prompts.py`); else record the finding as a no-op (M20).
+- **Tests** — real-client/schema construction (T23) in the **default** suite; `raw` present (T25);
+  Gemini thinking-token + blocked diagnostic (T24); rubric worked examples present (T22); opt-in
+  `--live` subject-cache `cache_read>0` (T21) + a **tiny `--live` `run` smoke** (T27).
+- **Docs** — `workflows/judging/README.md`: parallelism (`concurrency`), `batch-judge`, subject
+  caching, `--scenarios`, the two deviations + reframes; update the arch/lessons cold docs in Review.
+
+#### Acceptance
+- [ ] Rubric text carries the full deliverables rule + five worked examples (T22; M17).
+- [ ] Every judgment carries `raw` (T25; M19); Gemini blocked/empty → clear located error, thinking
+      tokens counted (T24; M18); the sanitized schema **constructs as `google.genai.types.Schema`**
+      in a default-suite test (T23; M21).
+- [ ] v2 re-judge prompt: ported if stricter, else documented no-op (M20).
+- [ ] `--live` tiny `run` smoke completes end-to-end and is **run before done**; subject-cache
+      `cache_read>0` observed (T27, T21; M21, M16).
+
+#### Test Plan
+- **Default suite:** rubric examples; `raw`; gemini diagnostic + thinking tokens; **real-client
+  schema construction**. **Opt-in `--live`:** subject-cache hit + tiny end-to-end smoke.
+
+#### Risks
+- **`--live` cost/flakiness.** → Keep the smoke to 1–2 cells, `--live`-gated, skip cleanly without
+  creds; it is the required real-path check, run once before done (M21).
 
 ## Dependency Map
 ```
-Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ─┐
-                                    └→ Phase 5 ┴─→ Phase 6
+r1 (parallel + subject caching) ──→ r2 (batch + cost) ──→ r3 (judge-quality + live verify + docs)
 ```
-(Phase 4 and Phase 5 both depend on Phase 3; Phase 6 integrates all. Phases are committed
-sequentially per SPIR.)
+Sequential: r2's cost model reports r1's usage; r3's live smoke exercises r1+r2 end-to-end.
 
 ## Risk Analysis
 
-| Risk | Probability | Impact | Mitigation |
+| Risk | Prob | Impact | Mitigation |
 |------|---|---|---|
-| Provider schema-constrained-output API mismatch | M | M | Encapsulate per-provider behind a uniform validated-verdict contract (Phase 3); test the contract, not the wire format. |
-| Gemini-as-judge creds/availability in this env | M | M | Config-driven panel (Claude-only fallback); fail loudly on missing creds (N4). |
-| `tradition_validator` loader API differs from assumptions | M | L | Read actual signatures at Phase 2 start; add thin read helpers, never re-parse (N5). |
-| Framing leakage un-blinds the judge | L | H | Dedicated blinding test (T11); turns store scenario text only. |
-| Test dispatcher not updated → tests silently skipped | L | H | Phase 1 adds the registry line; verify `bash .codev/checks/test.sh` runs the suite. |
-| Live opt-in tests flaky | M | L | `--live`-gated, out of default CI; skip without creds. |
+| Concurrency introduces races (dropped/dup JSONL, shared-dict corruption) | M | H | One lock around appends; independent per-cell work; serial==parallel output test (r1). |
+| Batch API shape drift (Anthropic/Gemini) | M | M | Encapsulate in `batching.py`; mocked-client contract test; manifest idempotency (r2). |
+| Mock boundary hides live failures **again** | M | H | M21: real-client/schema construction in the default suite + a `--live` smoke actually run before done (r3). |
+| Regressing delivered v1 behavior (blinding, skip, coverage, exit codes) | L | H | Keep the existing tests green; parallel paths reuse the same per-cell logic; add serial==parallel equivalence test. |
+| JaleesBench reference unavailable | L | M | Source confirmed at the reference path; if absent, fetch from GitHub (as in the original Specify phase). |
 
 ## Validation Checkpoints
-1. **After Phase 1**: CLI loads; score validation + core re-export tested; dispatcher runs the suite.
-2. **After Phase 3**: a canned sitting set is judged (mocked) with skip + re-judge + resume.
-3. **After Phase 5**: a full report renders for **two** traditions from fixtures (M7).
-4. **Before PR (after Phase 6)**: `run` end-to-end on a fixture; README complete; M1–M12 + S/N
-   reviewed; coverage not reduced.
+1. **After r1**: concurrency honored (overlap bound), serial==parallel output, subject-cache
+   `cache_control` on requests; all prior tests still green.
+2. **After r2**: batch submit→collect→0.5× cost + manifest idempotency + live fallback; report
+   batch-aware + gemini thinking tokens.
+3. **After r3**: full rubric + worked examples; `raw`; gemini diagnostic; real-client schema test;
+   **`--live` smoke run**; READMEs updated. Then PR.
 
 ## Documentation Updates Required
-- [ ] `workflows/judging/README.md` (usage, sittings/results contracts, env/creds).
-- [ ] `workflows/README.md` judging entry.
-- [ ] Review-phase: lessons learned + any arch/lessons hot-tier updates (handled in Review).
+- [ ] `workflows/judging/README.md` — parallelism/`concurrency`, `batch-judge`, subject caching,
+      `--scenarios`, deviations + reframes.
+- [ ] Review-phase: arch/lessons cold-doc updates (parallel+batch+caching fidelity; the mock-boundary
+      lesson).
 
 ## Notes
+- **Consultation:** per-phase consult is **codex + claude** (Gemini per-phase sandbox can't see the
+  worktree); the architect runs the full 3-way integration CMAP at the PR gate.
+- **PR strategy:** one remediation PR (`Refs #8`, not `Closes` — #8 already closed); phase commits
+  on `builder/spir-8`; do not open per-phase PRs; do not self-approve/merge.
+- **Deviations (do not "fix"):** judge thinking **ON** (cost counted via M18); Gemini judge
+  **`gemini-3.5-flash`**. **Reframes stand:** numeric scores; guide+judge-guidance anchor;
+  Claude-only subjects; citation/mapping/HTML/web out of scope; Arabic deferred (§4.7).
 
-- **Test dispatcher (critical):** `.codev/checks/test.sh` is a per-builder dispatcher keyed by
-  touched top-level dir; an **unregistered** `workflows/judging` is *skipped* (exit 0) — so
-  porch's implement/review tests-check would pass **without running my tests**. Phase 1 adds the
-  registry line `workflows/judging) echo "uv --project workflows/judging run pytest" ;;`.
-- **Consultation:** per-phase consult is **codex + claude** (`.codev/config.json`; Gemini's
-  per-phase sandbox can't see the worktree). The architect runs the full 3-way integration CMAP
-  at the PR gate (diff fed inline). Gemini-as-**judge** (the runtime feature) is unaffected — it
-  uses the `google-genai` API directly.
-- **PR strategy:** one PR; phase commits land on `builder/spir-8`; the PR opens at/after the
-  final implement phase (Phase 6), per the issue. Do not open per-phase PRs.
-- **No time estimates** (AI-age); progress is measured by completed phases.
-- **Ground truth (post-#17/#18):** the four non-sunni traditions use bare-numeric
-  `judge-guidance.md`; `sunni-islam` leans on proof texts + a judge note. The judge reads
-  guidance as prose regardless (§5.3), so this doesn't change the code — only the M7/M8 fixtures
-  and expectations reference current reality.
+## Appendix — delivered v1 (superseded phases)
+The original 6 phases (scaffold → loaders/rubric/prompts → providers/judge → collector → report →
+run/docs) are **delivered and merged** (PR #20 feature; PR #24 Gemini-schema live bugfix). This
+plan is the fidelity remediation on top of that merged baseline; it does not re-do v1.
 
 ## Change Log
 | Date | Change | Reason |
 |------|--------|--------|
-| 2026-06-30 | Initial implementation plan (6 phases) | Spec 8 approved; plan phase |
-| 2026-06-30 | Plan-iter-1 consult (Codex REQUEST_CHANGES, Claude APPROVE): split `providers.py` into `subject_complete` vs `judge_complete` seams (collector ≠ judge abstraction); made M12 exit-code / partial-data behavior concrete acceptance items in Phases 3/4/6; corrected `workflows/README.md` "proof texts" → `judge-guidance.md`+`guide.md` seam; renamed `core_ref`→`core_imports`; clarified Phase-2 loaders compose generic loaders + models; cost-table kept minimal/dated | Address review |
+| 2026-06-30 | Initial 6-phase plan (delivered; PRs #20/#24) | Spec 8 approved |
+| 2026-07-02 | **Fidelity remediation plan** (r1 parallel+caching → r2 batch+cost → r3 judge-quality+live-verify) | Live audit found dropped JaleesBench fidelity; spec amended M13–M21 |
+| 2026-07-02 | Plan-iter-2 consult (Codex REQUEST_CHANGES, Claude APPROVE): (1) M21 real-client construction checks distributed across phases — Anthropic subject payload in r1, batch submit payload in r2, Gemini schema in r3 (not Gemini-only); (2) M19 `raw` retention made an explicit **provider return-shape seam change** (text is discarded at `json.loads` today), threaded through `JudgeFn`/`_judge_pass`/`_record` + tests; (3) added explicit `batch-judge submit\|collect` CLI-level + manifest-lifecycle tests in r2; (4) r1 serial-vs-parallel acceptance clarified to **set-equivalence** (line order non-deterministic under concurrency) | Address review |

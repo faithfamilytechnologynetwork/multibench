@@ -39,11 +39,38 @@ uv --project workflows/judging run python -m judging --help
 | `judge <sittings> <tradition>` | Score each sitting with the judge panel at both scopes; one re-judge pass over ≥2-level disagreements. | `judgments.jsonl` (+ `judgments_v2.jsonl`, `skipped.jsonl`) |
 | `report <tradition>` | Aggregate judgments → per-scenario results + tradition-level scorecard. | `report.md`, `report.json` |
 | `run <tradition>` | End-to-end: `collect → judge → report`. | all of the above |
+| `batch-judge submit <sittings> <tradition>` | Submit pending Anthropic-judge cells as Message Batches (~50% cost). | `batch_state.json` |
+| `batch-judge collect <sittings> <tradition>` | Poll batches → verdicts (batch-priced); live-judge everything still pending. | `judgments.jsonl` |
 
-All commands read/write a single `--results-dir` (default `results/`). `--limit N` caps the
-grid for cheap smoke runs. Failed cells are left pending (resumable) and make the command exit
+All commands read/write a single `--results-dir` (default `results/`). `--limit N` caps to the
+first N raw grid cells (an arbitrary slice of the cell-major order — it may cut a scenario off
+mid-grid); `--scenarios N` caps to the first N **whole scenarios** over the full
+framing × pressure × subject sub-grid — the representative smoke that keeps each scenario complete
+across every subject. Failed cells are left pending (resumable) and make the command exit
 **non-zero**; `report` always runs and never hard-fails, so partial data still yields a report
 with explicit coverage (no silent zeros).
+
+### Parallelism, caching & cost
+
+- **Parallel** — `collect` and `judge` (base + re-judge) run concurrency-bounded parallel over
+  their per-cell provider calls, bounded by `concurrency` in the config (default 8); collection
+  interleaves cell-major so concurrency spreads across subjects. Set `concurrency: 1` for a strictly
+  serial run.
+- **Prompt caching** — the Anthropic **judge** caches the rubric + per-scenario anchor (1h); the
+  Anthropic **subject** caches the framing block (1h) + turn-1 so turn-2 doesn't re-pay. (Verify
+  under `--live`: `usage.cache_read_input_tokens > 0`.)
+- **Batch judging** — `batch-judge submit` then `batch-judge collect` judges via **Anthropic
+  Message Batches at ~50% price** (a `batch_state.json` manifest makes it idempotent). **Gemini is
+  not batched** (Vertex has no developer file-batch — matches JaleesBench); its cells fall to the
+  **live `judge`**, which `batch-judge collect` runs automatically as the fallback (`--no-fallback`
+  to collect batch results only). The report prices batched tokens at 0.5× and counts Gemini
+  thinking tokens.
+
+```bash
+# Batch the judging grid (~50% cost), then collect + live-judge the rest:
+uv --project workflows/judging run python -m judging batch-judge submit out/sittings.jsonl traditions/sunni-islam --results-dir out
+uv --project workflows/judging run python -m judging batch-judge collect out/sittings.jsonl traditions/sunni-islam --results-dir out
+```
 
 ### Configuration (`--config`)
 
@@ -107,7 +134,8 @@ One JSON object per line, keyed `subject|scenario_id|pressure|framing|judge|scop
 | `direction`, `rationale` | the judge's short justification |
 | `techniques_used` | subset of the seven counseling-technique ids |
 | `judge`, `scope` | judge model id; `turn1` (baseline) or `full` (after pressure) |
-| `usage` | judge token usage (incl. cache read/write) |
+| `raw` | the judge's unparsed response text (audit/debug) |
+| `usage` | judge token usage (`in`/`out`/cache; `batch: true` for batched cells, priced 0.5×) |
 
 `judgments_v2.jsonl` holds re-judge overrides (applied by key, v2 wins); `skipped.jsonl`
 records self-judgments (a judge never scores its own subject's output).
@@ -134,14 +162,23 @@ uv --project workflows/judging run pytest workflows/judging          # default (
 uv --project workflows/judging run pytest workflows/judging -m live --live   # opt-in live tests
 ```
 
-The default suite mocks every provider (deterministic, no network, no credentials). The opt-in
-**`--live`** tests call real APIs and are excluded from CI: `test_live_anchoring_...` shows the
-verdict follows the *supplied* guidance (flipping only the guidance flips the score), and
-`test_live_prefix_cache_hit` shows the shared rubric/anchor prefix is cache-read on a repeat
-judgment. They skip cleanly when credentials are absent.
+The default suite mocks every provider (deterministic, no network, no credentials) **and** adds
+real-client contract checks (it builds the actual Anthropic subject/batch request objects and the
+Gemini response schema through the real SDK types — the mock boundary alone hid a Gemini bug once).
+The opt-in **`--live`** tests call real APIs and are excluded from CI: anchoring (flipping only the
+guidance flips the score), the prefix-cache hit, and a tiny end-to-end **`run` smoke** across the
+default panel. They skip cleanly when credentials are absent — but the live smoke should be run
+before trusting a real judging run.
 
-## Not yet implemented
+## Deviations from JaleesBench (intentional)
 
-- **`--batch` (Anthropic Message Batches, ~50% cost)** is **deferred** — the judging grid is a
-  natural batch workload, but the default path is synchronous per-cell (resumable). Batch mode
-  is a future cost optimization, not a correctness gap.
+This workflow is a faithful port of JaleesBench's judging pipeline, with two deliberate,
+user-approved deviations (documented in the spec, §4.7):
+
+- **Judge thinking is ON** (JaleesBench judged without it). An enhancement; its cost is counted
+  (Gemini `thoughts_token_count` is included in usage).
+- **Gemini judge = `gemini-3.5-flash`** (JaleesBench used a different Gemini model).
+
+Reframes carried from the earlier design: numeric scores (no band names), the
+`guide.md` + `judge-guidance.md` anchor (no separate proof-text corpus), Claude-only subjects, and
+citation/HTML/web-export left out of scope.
