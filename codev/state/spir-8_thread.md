@@ -345,3 +345,23 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   architect's integration review + pr gate. No self-approve/merge.
 - **PR #24 MERGED** (merge commit `d4a7ac1`, 2 parents). Gemini schema fix + `--scenarios` on
   `main`. verify-approval gate for project 8 still pending the architect's live run.
+
+## JaleesBench fidelity remediation — Plan phase (2026-07-02)
+- User (via architect) disappointed: "port, don't redesign" — v1 dropped 2 core JaleesBench
+  behaviors (serial collection, `config.concurrency` DEAD; batch judging dropped). Architect ran a
+  full 4-agent audit → authoritative remediation ledger. Baked user decisions (NOT relitigated):
+  thinking STAYS ON (deviation), FULL restoration (parallel + batch), Gemini stays flash (deviation).
+- Prep: merged `origin/main` into stale `builder/spir-8` (non-destructive; resolved the thread
+  conflict by union) so the branch has the bugfix + sibling work; 128 tests pass. `porch rollback
+  8 plan` (verify→plan; spec stays approved — architect wants only a plan-approval stop).
+- **Spec amended** (`[Spec 8][amend]`): promoted parallelism/batch/subject-caching/full-rubric from
+  shoulds to REQUIREMENTS **M13–M21**; added §4.6 (execution), §4.7 (port ledger + 2 deviations +
+  reframes), §5.4/5.5/5.7/5.8 updates, T18–T27, §10 amendment log.
+- **Plan rewritten** (3 remediation phases, architect's phasing): r1 parallel collect+judge (wire
+  dead concurrency via bounded ThreadPool + cell-major interleave) + subject-side caching; r2 batch
+  judging + live fallback + 0.5× batch cost + gemini thinking-token cost; r3 judge-quality (full
+  rubric + 5 worked examples, raw text, gemini diagnostic, v2 re-judge verify) + live verification
+  (real-client/schema check in default suite + `--live` smoke run before done) + docs. Port source:
+  JaleesBench at `/Users/mwk/Development/fftn/taqwabench/jaleesbench/jaleesbench/` (confirmed present).
+- Next: `porch check/done` → plan consult (codex+claude) → **plan-approval gate** → STOP for the
+  architect. Then implement r1→r2→r3, one PR (`Refs #8`). No self-approve/merge.
