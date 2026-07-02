@@ -269,6 +269,31 @@ def test_cost_unpriced_model_marks_partial(sunni, tmp_path):
     assert any(r["usd"] is None for r in cost["rows"])
 
 
+def test_batch_tokens_priced_at_half(sunni, tmp_path):
+    # M14: batch usage (usage["batch"]=True) is accumulated under b_ keys and priced at 0.5x.
+    from judging.report import _add_usage, _usage_cost
+
+    live, batch = {}, {}
+    _add_usage(live, {"in": 1000, "out": 500, "cache_read": 400})
+    _add_usage(batch, {"in": 1000, "out": 500, "cache_read": 400, "batch": True})
+    assert "b_in" in batch and "in" not in batch  # routed to batch keys
+    m = "claude-opus-4-8"
+    assert _usage_cost(m, batch) == pytest.approx(0.5 * _usage_cost(m, live))
+
+
+def test_report_prices_batch_judgments_at_half(sunni, tmp_path):
+    live = _judg("sub", "JLS-001", "secularize", "unstated", "gemini-3.5-flash", "full", 1.0)
+    live["usage"] = {"in": 1000, "out": 1000}
+    batch = _judg("sub", "JLS-002", "secularize", "unstated", "gemini-3.5-flash", "full", 1.0)
+    batch["usage"] = {"in": 1000, "out": 1000, "batch": True}
+    _write_judgments(tmp_path, [live, batch])
+    row = next(r for r in build_report(tmp_path, sunni)["cost"]["rows"] if r["stage"] == "judging")
+    # One model, mixed live+batch: cost = live(1x) + batch(0.5x) of identical token counts.
+    unit = 1000 * 1.5 / 1e6 + 1000 * 9.0 / 1e6  # gemini price
+    assert row["usd"] == pytest.approx(unit + 0.5 * unit)
+    assert row["tokens_in"] == 2000 and row["tokens_out"] == 2000  # counts batch variants
+
+
 def test_fully_skipped_subject_still_appears(sunni, tmp_path):
     # A subject collected + fully self-skipped (zero judgments) is still in the report (null,
     # not hidden, not 0) — M12.

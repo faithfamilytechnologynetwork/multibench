@@ -266,10 +266,13 @@ contract is defined so a sibling can add providers later without changing the ju
   The Anthropic **subject** path MUST likewise cache the framing block (1-hour ephemeral) + the
   turn-1 exchange (default TTL) so turn-2 does not re-pay for the framing/turn-1 tokens (this
   was present in JaleesBench, absent in v1). Gemini caches prefixes implicitly.
-- **Batch judging (required).** A **batch** path judges via Anthropic Message Batches + a Gemini
-  batch job at **~50% price**, with a `batch_state.json` manifest for idempotency and the **live
-  `judge` as the fallback** for anything a batch leaves pending. Exposed as a
-  `batch-judge submit|collect` CLI. The cost model MUST account batched tokens at **0.5×**.
+- **Batch judging (required).** A **batch** path judges via **Anthropic Message Batches** at
+  **~50% price**, with a `batch_state.json` manifest for idempotency and the **live `judge` as the
+  fallback** for anything a batch leaves pending. Exposed as a `batch-judge submit|collect` CLI.
+  The cost model MUST account batched tokens at **0.5×**. **Gemini is not batched** — Google's
+  batch API is Vertex GCS/BigQuery-based (no developer file-batch), so (matching JaleesBench's
+  `batching.py`) Gemini judge cells fall to the live `judge` (the idempotent keys make the two
+  paths compose). Batching Gemini via the developer-API batch is a possible future extension.
 - **Schema-constrained verdicts** (provider-specific; §5.5) so score/direction/rationale come
   back guaranteed-valid (improving on JaleesBench's hand-rolled JSON parsing). Note: Gemini's
   schema is stricter than JSON Schema — it rejects `additionalProperties` and requires **string**
@@ -288,9 +291,10 @@ A 4-agent audit (collect / judge+batch / providers+prompts / report+cost) compar
 1. **Parallel collection** — `asyncio.Semaphore(concurrency) + gather`; wire the dead
    `config.concurrency`; cell-major interleave (§4.6).
 2. **Parallel judging** — base pass **and** re-judge pass fan out under `config.concurrency`.
-3. **Batch judging** — Anthropic Message Batches + Gemini batch job at 0.5× price;
-   `batch_state.json` manifest; live `judge` fallback; `batch-judge submit|collect` CLI; batch
-   cost accounting (§4.6, §5.8).
+3. **Batch judging** — **Anthropic Message Batches** at 0.5× price; `batch_state.json` manifest;
+   live `judge` fallback; `batch-judge submit|collect` CLI; batch cost accounting (§4.6, §5.8).
+   **Gemini is not batched** (Vertex has no developer file-batch — matches JaleesBench); its cells
+   go to the live `judge`.
 4. **Subject-side prompt caching** — framing block (1h ephemeral) + turn-1 on the Anthropic
    subject path (§4.6).
 5. **Gemini thinking-token accounting** — thinking is ON, so `thoughts_token_count` MUST be
@@ -717,10 +721,11 @@ needed.
   provider calls, bounded by `config.concurrency` (**wired, not dead**), with a lock around the
   JSONL append and **cell-major interleave** ordering. A test asserts `config.concurrency` is
   honored (e.g. observed max in-flight ≤ concurrency; and >1 with concurrency>1).
-- **M14. Batch judging + live fallback + batch cost.** A batch path judges via Anthropic Message
-  Batches + a Gemini batch job at **0.5× price**, with a `batch_state.json` manifest for
-  idempotency and the live `judge` as the fallback for anything left pending; exposed via
-  `batch-judge submit|collect`. The cost model prices batched tokens at 0.5×.
+- **M14. Batch judging + live fallback + batch cost.** A batch path judges via **Anthropic Message
+  Batches** at **0.5× price**, with a `batch_state.json` manifest for idempotency and the live
+  `judge` as the fallback for anything left pending; exposed via `batch-judge submit|collect`. The
+  cost model prices batched tokens at 0.5×. **Gemini is not batched** (Vertex has no developer
+  file-batch — matches JaleesBench); its cells fall to the live `judge`.
 - **M15. Parallel judging.** Both the base judge pass **and** the re-judge pass fan out under
   `config.concurrency` (JaleesBench `Semaphore(16)+gather`).
 - **M16. Subject-side prompt caching.** The Anthropic subject path caches the framing block

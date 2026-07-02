@@ -386,3 +386,24 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   set-equivalence (no dup/loss); judge concurrency honored; `_subject_messages` cache-breakpoint
   contract + real-client-shape check (M21 subject path). **133 pass, 2 live-skipped.**
 - Next: commit → `porch done` → per-phase consult (codex+claude) → converge → r2.
+- r1 iter1: **Codex REQUEST_CHANGES** (3: weak anthropic real-client check; judge concurrency
+  base-only; `rejudge_cells` collapsed to (scenario,scope)), **Claude APPROVE**. Fixed all
+  (real-SDK MessageCreateParams validation + reject-test; judge set-equivalence + re-judge-under-
+  concurrency; rejudge_cells over the FULL cell key). iter2: **both APPROVE** → r1 done.
+
+## Implement phase_r2 — batch judging + batch/thinking cost (2026-07-02)
+- **Fidelity call (flagged to architect):** JaleesBench `batching.py` batches **Anthropic only**;
+  Gemini is NOT batched (Vertex has no developer file-batch) → Gemini cells go to the live `judge`
+  fallback. So the faithful port = Anthropic Message Batches @0.5× + Gemini live-fallback. Corrected
+  the spec's "+ Gemini batch job" wording (§4.6/§4.7/M14) to match the reference.
+- New `batching.py`: `submit` (pending Anthropic-judge cells → Message Batches mirroring the live
+  request: 2 cached blocks + `output_config` schema + thinking; `batch_state.json` manifest,
+  in-flight-manifest exclusion) + `collect` (poll → succeeded verdicts written with `usage.batch=True`;
+  errored/unparseable left pending → live fallback; idempotent append). Injectable `client` for tests.
+- `cli.py`: `batch-judge submit|collect` sub-app. `report.py`: batch-aware cost (`b_` keys @0.5×,
+  `_tokens_in/_out` include batch variants). `providers._gemini_usage`: counts `thoughts_token_count`
+  (M18 — thinking is ON so cost was undercounted).
+- Tests (`test_batching.py` + report/providers): submit→manifest→collect batch-priced; submit &
+  collect idempotency; errored→live-fallback; Gemini not batched; real-SDK batch-request construction;
+  batch-judge CLI wiring; 0.5× cost unit + report-level; gemini thinking-token count. **146 pass, 2 live-skipped.**
+- Next: commit → `porch done` → per-phase consult → converge → r3.

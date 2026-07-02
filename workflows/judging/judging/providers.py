@@ -303,7 +303,10 @@ def _gemini_usage(resp: Any) -> dict:
     u = getattr(resp, "usage_metadata", None)
     if u is None:
         return {}
+    # Thinking is ON (a deliberate deviation from JaleesBench, §4.7) — count `thoughts_token_count`
+    # as output tokens (it is billed as output); omitting it under-reports cost (M18).
     return {
         "in": getattr(u, "prompt_token_count", 0) or 0,
-        "out": getattr(u, "candidates_token_count", 0) or 0,
+        "out": (getattr(u, "candidates_token_count", 0) or 0)
+        + (getattr(u, "thoughts_token_count", 0) or 0),
     }
