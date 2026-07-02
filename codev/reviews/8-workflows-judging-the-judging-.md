@@ -219,6 +219,40 @@ full 3-way integration CMAP runs at the PR gate.
   not the default 4). README instructs passing the same `--config` to `report`.
 #### Claude — No concerns (APPROVE).
 
+## Remediation — JaleesBench fidelity (2026-07-02, PR #25)
+
+After v1 merged, a live 5×5 run exposed that v1 had dropped JaleesBench's throughput/cost
+fidelity ("port, don't redesign"): serial collection/judging (`config.concurrency` was a **dead
+field**), no batch path, no subject-side caching; plus a compressed deliverables rubric and dropped
+judge diagnostics. The spec was **amended** (§4.6/§4.7, MUSTs **M13–M21**) and the fix delivered in
+3 phases via **PR #25** (`Refs #8`). Deliberate deviations documented (judge thinking ON; Gemini
+`gemini-3.5-flash`); Anthropic-only batching confirmed against the reference (Gemini → live fallback).
+
+### Remediation consultation feedback (per-phase codex + claude)
+- **Plan (r-plan)** — Codex REQUEST_CHANGES / Claude APPROVE: distribute M21 real-client checks per
+  phase; make M19 `raw` an explicit provider-seam change; add batch-CLI/manifest tests; clarify r1
+  set-equivalence. All **addressed**.
+- **r1 (parallel + caching)** — Codex REQUEST_CHANGES → APPROVE / Claude APPROVE: strengthened the
+  Anthropic real-client check (real SDK param model + reject-test), added judge re-judge/
+  set-equivalence tests, **fixed a real `rejudge_cells` miscount** (collapsed cell key). Converged.
+- **r2 (batch + cost)** — Codex REQUEST_CHANGES → APPROVE / Claude COMMENT: **wired the live-judge
+  fallback** into `collect` + CLI, added CLI manifest-lifecycle tests, validated the full batch
+  `Request` (incl `output_config`). Converged.
+- **r3 (judge-quality + live verify)** — Codex REQUEST_CHANGES → APPROVE / Claude APPROVE: added the
+  **subject-side** live cache test (T21) and fixed the `_gemini_judge` return annotation; the codex
+  point that the new live test hadn't been *observed* was closed by the architect's **live 4/4 run**
+  (M16/T21 subject `cache_read>0` observed live). Converged.
+- **Integration CMAP (architect, on PR #25):** Claude APPROVE; Gemini COMMENT **refuted** (the M18
+  fall-through is correct — google-genai `_get_text` returns None, not raises); Codex via CMAP hit a
+  workspace codex-binary issue (repaired mid-review; per-phase codex then APPROVED).
+
+### Live verification evidence (M21/T27)
+Architect-run (no creds in the builder env), 2026-07-02, exit 0: `pytest -m live --live` → **4/4
+PASSED** — anchoring; judge prefix-cache hit; **subject turn-2 `cache_read>0` (M16)**; **T27
+end-to-end `run` smoke** over a 36-sitting grid with real dual-judge verdicts incl. Gemini. The
+mock boundary alone had hidden a live-only Gemini bug in v1; the default suite now also carries
+real-client contract checks. (See `codev/projects/8-.../8-live-verification-evidence.md`.)
+
 ## Architecture Updates
 
 Routed to the **cold** archive (`codev/resources/arch.md`) — the judging workflow is a subsystem/
@@ -230,6 +264,12 @@ reference detail, not an always-on invariant, and the hot tier is at its cap:
 
 No **hot** (`arch-critical.md`) change: the always-on judge-seam fact already covers the binding
 ground truth that a future builder must know up front; the workflow's mechanics are on-demand.
+
+**Remediation update (2026-07-02):** extended the `arch.md` "The judging workflow" section with the
+now-real non-functional shape — concurrency-bounded parallel collect/judge (`config.concurrency`),
+the Anthropic-only batch path (`batch-judge`, 0.5×, `batch_state.json`, live fallback; Gemini not
+batched), both-sides Anthropic prompt caching, and the default-suite real-client contract checks +
+`--live` smoke. Cold, not hot — subsystem mechanics.
 
 ## Lessons Learned Updates
 
@@ -246,11 +286,24 @@ No **hot** (`lessons-critical.md`) change: the always-on "Gemini per-phase consu
 worktree" and "verify the real user path" lessons already cover the cross-cutting rules this
 project reinforced.
 
+**Remediation update (2026-07-02):** strengthened the cold "Testing LLM pipelines" lesson with the
+**mock-boundary-hides-live-bugs** rule (add real-client contract checks to the default suite +
+actually run the `--live` smoke; a newly-added live test isn't verified until observed green), and
+added a new **"Porting fidelity"** section (a "port" carries non-functional behavior — parallelism/
+batch/caching/cost — as MUSTs, not extras; a config field you add is a promise; derive the port from
+the reference's *code*, not its docstrings — JaleesBench's stale "batches Gemini" docstring vs. its
+Anthropic-only code). Cold, not hot.
+
 ## Flaky Tests
-No flaky tests encountered. The default suite is deterministic (all providers mocked); the two
-`--live` tests are opt-in and credential-gated, excluded from CI.
+No flaky tests encountered. The default suite is deterministic (all providers mocked); the opt-in
+`--live` tests are credential-gated and excluded from CI.
 
 ## Follow-up Items
-- **`--batch` mode** (Anthropic Message Batches, ~50% cost) — deferred cost optimization.
 - **Multi-provider collection** (GPT/Gemini/etc. as subjects) — a sibling workflow.
 - Consider promoting the price table to a small config file if provider prices churn often.
+- **Developer-API Gemini batching** — explicitly *not* done (faithful to JaleesBench: Vertex has no
+  developer file-batch, so Gemini judges live). A possible future extension if Gemini gains a usable
+  batch API here.
+- **Infra (not code):** the codev vendored `@openai/codex` binary went missing mid-remediation
+  (architect applied a reversible symlink; a clean `npm` reinstall is the proper fix). `afx send`
+  from this builder intermittently failed to resolve its builder id (issue #1094).

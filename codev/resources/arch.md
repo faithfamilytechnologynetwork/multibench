@@ -60,7 +60,14 @@ stay blinded) → `judge` (config-driven panel — YAML `--config` overrides def
 tradition's *declared* axes, coverage, cost) → `run` (end-to-end). Failed cells are resumable
 and force a non-zero exit; `report` never hard-fails. Provider access is behind two seams
 (`subject_complete` / `judge_complete`); both are injectable so the pipeline is testable fully
-mocked. See its [README](../../workflows/judging/README.md).
+mocked. **`collect` and `judge` run concurrency-bounded parallel** (`config.concurrency`, bounded
+`ThreadPoolExecutor`, cell-major interleave). A **batch** path (`batch-judge submit|collect`)
+judges via **Anthropic Message Batches at ~50%** with a `batch_state.json` manifest and the live
+`judge` as fallback (**Gemini is not batched** — Vertex has no developer file-batch; matches
+JaleesBench). Anthropic prompt caching on both the judge (rubric+anchor) and subject (framing +
+turn-1) sides. Because the mocked suite once hid a live-only provider bug, the default suite also
+runs **real-client contract checks** (build the real SDK request/schema objects) + an opt-in
+`--live` smoke. See its [README](../../workflows/judging/README.md).
 
 ## tradition_validator
 
