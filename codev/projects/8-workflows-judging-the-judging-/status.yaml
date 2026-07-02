@@ -5,14 +5,14 @@ phase: implement
 plan_phases:
   - id: phase_r1
     title: Parallel collection + judging + subject-side caching
-    status: in_progress
+    status: complete
   - id: phase_r2
     title: Batch judging + batch & thinking-token cost accounting
-    status: pending
+    status: in_progress
   - id: phase_r3
     title: Judge-quality fidelity + live verification + docs
     status: pending
-current_plan_phase: phase_r1
+current_plan_phase: phase_r2
 gates:
   spec-approval:
     status: approved
@@ -26,8 +26,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     build_output: ''
@@ -53,7 +53,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r1-iter1-claude.txt
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-02T17:25:15.781Z'
+updated_at: '2026-07-02T17:29:34.492Z'
 force_advanced:
   phase: phase_5
   iteration: 3
