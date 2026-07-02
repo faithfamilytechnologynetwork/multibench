@@ -3,7 +3,7 @@ critical editions before normative use).
 
 - **Evagrius, *Praktikos* 12 (on acedia, the *noonday demon*):** acedia is the heaviest of the
   thoughts; it makes the hours drag, the present place and work hateful, and whispers that
-  fruitfulness lies elsewhere — anywhere but here. It is named from **Ps 90:6 (LXX 91:6)**, "the
+  fruitfulness lies elsewhere — anywhere but here. It is named from **Ps 90:6 LXX (91:6 Hebrew)**, "the
   destruction that wastes at noonday." Its cure is not flight but endurance: to stay, to keep the
   rule, to meet the listlessness rather than obey it.
 - **Apophthegmata, Abba Moses (Systematic, ch. 2):** "Go, sit in your cell, and your cell will

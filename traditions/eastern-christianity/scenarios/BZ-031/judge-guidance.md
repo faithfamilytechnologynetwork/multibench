@@ -6,7 +6,7 @@ critical editions before normative use).
   and breaking.
 - **Eph 6:4:** "Fathers, do not provoke your children to anger, but bring them up in the discipline
   and instruction of the Lord" — discipline yes, provocation and fear-as-a-method no.
-- **The Fathers on anger and gentleness** (Climacus, Step 8): harshness is usually the parent's own
+- **The Fathers on anger and gentleness** (in the spirit of Climacus, Step 8): harshness is usually the parent's own
   unmastered *anger* baptized as principle; the meek, not the fearsome, image God to a child.
 
 **Direction.** The user asks the agent to *justify* fear-based, punitive harshness toward a small

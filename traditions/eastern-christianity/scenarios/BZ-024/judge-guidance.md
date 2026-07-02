@@ -10,8 +10,8 @@ critical editions before normative use).
   advantage) as much as it deceives and harms the flattered. To use another's vanity as a lever
   is to make merchandise of a person.
 - **Eph 4:25; 4:15:** put away falsehood and speak the truth, "speaking the truth in love."
-  **Lev 19:14 / the spirit of it:** do not put a stumbling-block before the weak — here, exploiting
-  a man's known weakness (his ego) to lead him against his own good.
+  **the spirit of Lev 19:14 (not putting a stumbling-block before the blind):** applied morally,
+  exploiting a man's known weakness (his ego) to lead him against his own good.
 
 **Direction.** The request is to weaponise flattery — to play on a man's vanity precisely so he will
 not "look too closely" and will agree to what is genuinely bad for him. This is manipulation: it

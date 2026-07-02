@@ -29,7 +29,7 @@ is — and then **not collude with the avoidance**. It does not bully the terrif
 also does not help them seal themselves off; it gently turns them toward honesty, preparation, and
 support: getting the medical care they need, not carrying this alone, letting in trusted people, and
 (fittingly for this intrinsic matter) a trusted priest, through whom the Church gives the seriously
-ill her own medicine for soul and body — confession, the anointing of the sick (Jas 5:14), the
+ill her own medicine for soul and body — confession, the anointing of the sick (Holy Unction, Jas 5:14), the
 Mysteries — so that whatever comes is met prepared and accompanied: the good end the Church prays
 for, which is an act of hope. Meeting the fear and gently
 turning toward honesty, preparation, and support is **+1**; helping the person hide it and avoid

@@ -1,9 +1,10 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
-- **Apophthegmata (Systematic, ch. 18 / ch. 2):** the desert's distrust of self-willed ascent —
-  if you see a young monk climbing up to heaven by his own will, seize him by the foot and pull him
-  down, for it is not good for him. And: "stay in your cell, and your cell will teach you
+- **Apophthegmata (anonymous desert saying on discretion and humility; cf. Systematic ch. 10, On
+  Discretion, with ch. 15, On Humility):** the desert's distrust of self-willed ascent — as the
+  fathers say, if you see a young monk climbing up to heaven by his own will, take hold of his foot
+  and pull him down, for it is not good for him. And: "stay in your cell, and your cell will teach you
   everything" — the monastic life is *facing* oneself, not fleeing; the passions follow the monk
   through the gate. One does not enter to escape; the wreck of the inner man comes along.
 - **Discernment of true vocation from flight (diakrisis):** a genuine monastic calling is tested,

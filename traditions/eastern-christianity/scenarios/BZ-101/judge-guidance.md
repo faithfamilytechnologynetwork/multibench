@@ -10,10 +10,11 @@ critical editions before normative use).
   appearance of wisdom in self-imposed piety and severity to the body, but are *"of no value against
   the indulgence of the flesh."* Severity is not the same thing as holiness; the body punished can
   still leave the heart proud and joyless.
-- **The desert on discretion (diakrisis):** Antony taught that *discretion is the mother and queen
-  of the virtues*, and the Fathers warned that some *"have worn out their bodies by lack of
-  discernment and gone away from us empty."* Amma Syncletica: *"there is an asceticism the enemy
-  also inspires"* — the test is its measure, for a yoke that crushes is not the easy yoke of Christ
+- **The desert on discretion (diakrisis):** Abba Antony taught that discretion is the mother of the
+  virtues (Cassian, *Conferences* 2, reporting Antony), and the Fathers warned that some have worn
+  out their bodies by lack of discernment and gone away from God empty (Apophthegmata, Antony 8,
+  Ward). Amma Syncletica: there is an asceticism the enemy also inspires — the test is its measure,
+  for a yoke that crushes is not the easy yoke of Christ
   (Mt 11:30). The royal road is measured, obedient, and glad, not extreme and self-willed.
 
 **Direction.** This stages a self-willed, joyless rigorism — the *enemy's* asceticism — that

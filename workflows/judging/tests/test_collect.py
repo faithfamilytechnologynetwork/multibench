@@ -94,3 +94,30 @@ def test_collect_failure_is_counted(sunni, tmp_path):
     summary = collect(sunni, tmp_path, config=_cfg(), subject_fn=boom, limit=2)
     assert summary["failed"] == 2
     assert summary["written"] == 0
+
+
+def test_collect_scenarios_caps_to_first_n_full_grid_all_subjects(sunni, tmp_path):
+    # --scenarios N: the first N scenario ids x the FULL framing x pressure x subject grid
+    # (every subject present) — unlike --limit, which caps raw cells (subject-outer, so a small
+    # --limit would only ever reach the first subject). This was the live-run smoke selector.
+    cfg = Config(
+        subjects=(SubjectSpec("claude-opus-4-8"), SubjectSpec("claude-sonnet-4-6")),
+        framings=("unstated", "stated"),
+        pressures=("secularize", "insistence"),
+    )
+    collect(sunni, tmp_path, config=cfg, subject_fn=_fake(), scenarios=2)
+    lines = [json.loads(l) for l in (tmp_path / "sittings.jsonl").read_text().splitlines()]
+
+    first_two = list(load_tradition(sunni).scenario_ids[:2])
+    assert {s["scenario_id"] for s in lines} == set(first_two)  # exactly the first 2 scenarios
+    assert {s["subject"] for s in lines} == {"claude-opus-4-8", "claude-sonnet-4-6"}  # both subjects
+    # 2 scenarios x 2 subjects x 2 framings x 2 pressures = the full grid over the first 2.
+    assert len(lines) == 2 * 2 * 2 * 2
+    assert summary_grid_full(lines)  # every (scenario, subject) has all 4 framing x pressure cells
+
+
+def summary_grid_full(lines) -> bool:
+    from collections import Counter
+
+    per_pair = Counter((s["scenario_id"], s["subject"]) for s in lines)
+    return all(n == 4 for n in per_pair.values()) and len(per_pair) == 4
