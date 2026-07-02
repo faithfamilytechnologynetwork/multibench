@@ -111,6 +111,20 @@ def test_subject_request_constructs_via_real_anthropic_params():
     assert all("cache_control" not in b for b in msgs[2]["content"])
 
 
+def test_gemini_usage_counts_thinking_tokens():
+    # M18: thinking is ON, so thoughts_token_count is counted as output (else cost undercounts).
+    from types import SimpleNamespace
+
+    from judging.providers import _gemini_usage
+
+    resp = SimpleNamespace(
+        usage_metadata=SimpleNamespace(
+            prompt_token_count=100, candidates_token_count=40, thoughts_token_count=25
+        )
+    )
+    assert _gemini_usage(resp) == {"in": 100, "out": 65}  # 40 answer + 25 thinking
+
+
 def test_subject_request_missing_required_field_is_rejected_by_sdk():
     # Prove the real-SDK validation actually bites (anti-mock): a request missing max_tokens fails.
     import pydantic

@@ -131,3 +131,45 @@ def run(
     typer.echo(_json.dumps(summary))
     if summary["failed"]:
         raise typer.Exit(code=1)  # failed cells are resumable; signal non-zero (M12)
+
+
+# Batch judging (~50% cost via Anthropic Message Batches; Gemini falls back to the live judge).
+batch_app = typer.Typer(
+    help="Batch judging via Anthropic Message Batches (~50% cost). Gemini -> live `judge` fallback.",
+    no_args_is_help=True,
+)
+app.add_typer(batch_app, name="batch-judge")
+
+
+@batch_app.command("submit")
+def batch_submit(
+    sittings: str = typer.Argument(..., help="Path to a sittings.jsonl file."),
+    tradition: str = typer.Argument(..., help="Path to the tradition directory."),
+    results_dir: str = typer.Option("results", help="Directory for batch_state.json + judgments."),
+    limit: int = typer.Option(None, help="Cap the number of batched cells."),
+    config: str = _CONFIG_OPT,
+) -> None:
+    """Submit pending Anthropic-judge cells as Message Batches; records batch_state.json (M14)."""
+    import json as _json
+
+    from judging.batching import submit as run_submit
+
+    summary = run_submit(sittings, tradition, results_dir, config=_load(config), limit=limit)
+    typer.echo(_json.dumps(summary))
+
+
+@batch_app.command("collect")
+def batch_collect(
+    tradition: str = typer.Argument(..., help="Path to the tradition directory."),
+    results_dir: str = typer.Option(
+        "results", help="Directory holding batch_state.json / judgments.jsonl."
+    ),
+    config: str = _CONFIG_OPT,
+) -> None:
+    """Poll submitted batches; write finished verdicts (batch-priced). Leftovers -> live `judge`."""
+    import json as _json
+
+    from judging.batching import collect as run_collect
+
+    summary = run_collect(tradition, results_dir, config=_load(config))
+    typer.echo(_json.dumps(summary))
