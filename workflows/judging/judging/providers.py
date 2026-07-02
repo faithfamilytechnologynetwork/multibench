@@ -79,18 +79,32 @@ def subject_complete(
     )
 
 
-def _fold(messages: list[dict], context_prefix: str | None) -> list[dict]:
-    if not context_prefix:
-        return messages
-    folded = []
+def _subject_messages(messages: list[dict], context_prefix: str | None) -> list[dict]:
+    """Anthropic subject messages: fold the framing onto **every** user turn (as a context
+    prefix, never a system prompt — §4.5) and set prompt-cache breakpoints on the **first** user
+    turn only (M16, mirroring JaleesBench `collect.py`): the framing block is a **1h ephemeral**
+    breakpoint (shared by every sitting of this framing) and turn-1's question is a **default-TTL**
+    ephemeral breakpoint, so the turn-2 call rereads the framing + turn-1 from cache instead of
+    re-paying. Assistant turns are untouched. User turns become content-block lists."""
+    out: list[dict] = []
+    first_user = True
     for m in messages:
-        if m["role"] == "user":
-            folded.append(
-                {"role": "user", "content": f"{ctx_block(context_prefix)}\n\n{m['content']}"}
-            )
-        else:
-            folded.append(m)
-    return folded
+        if m["role"] != "user":
+            out.append(m)
+            continue
+        blocks: list[dict] = []
+        if context_prefix:
+            fb: dict = {"type": "text", "text": ctx_block(context_prefix)}
+            if first_user:
+                fb["cache_control"] = {"type": "ephemeral", "ttl": "1h"}
+            blocks.append(fb)
+        q: dict = {"type": "text", "text": m["content"]}
+        if first_user:
+            q["cache_control"] = {"type": "ephemeral"}  # default TTL — turn-2 rereads turn-1
+        blocks.append(q)
+        out.append({"role": "user", "content": blocks})
+        first_user = False
+    return out
 
 
 def _anthropic_subject(
@@ -100,7 +114,7 @@ def _anthropic_subject(
     import anthropic
 
     client = anthropic.Anthropic()
-    folded = _fold(messages, context_prefix)
+    folded = _subject_messages(messages, context_prefix)
     # Inline retry so we can report the 1-based attempt that succeeded (sittings audit, §5.6).
     last: Exception | None = None
     for attempt in range(retries + 1):
