@@ -210,8 +210,14 @@ def collect(
     results_dir: str | Path,
     config: Config | None = None,
     client: Any = None,
+    sittings_path: str | Path | None = None,
+    judge_fn: Any = None,
+    fallback: bool = False,
 ) -> dict:
-    """Poll open batches; write succeeded verdicts (batch-priced); leave errors to live fallback."""
+    """Poll open batches; write succeeded verdicts (batch-priced); then (``fallback``) live-judge
+    everything still pending — the live judge IS the fallback (M14). Batch errors, unparseable
+    results, Gemini cells, and anything unsubmitted are picked up live. The fallback is guarded on
+    ``open_batches == 0`` so a cell still in flight in a batch is never double-judged live."""
     config = config or default_config()
     rd = Path(results_dir)
     state = _load_state(rd)
@@ -248,4 +254,15 @@ def collect(
         written += _append_new(jpath, recs)
         b["done"] = True
     _save_state(rd, state)
-    return {"written": written, "errored": errored, "open_batches": open_batches}
+
+    summary = {"written": written, "errored": errored, "open_batches": open_batches}
+    if fallback and open_batches == 0 and sittings_path is not None:
+        from judging.judge import judge_all
+
+        live = judge_all(sittings_path, tradition_dir, rd, config=config, judge_fn=judge_fn)
+        summary["live"] = {
+            "written": live["written"],
+            "failed": live["failed"],
+            "skipped_self": live["skipped_self"],
+        }
+    return summary

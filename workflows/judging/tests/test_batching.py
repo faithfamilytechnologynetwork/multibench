@@ -147,11 +147,12 @@ def test_gemini_cells_are_not_batched(sunni, tmp_path):
     assert s["gemini_pending"] == 2  # the Gemini cells go to the live judge, not the batch
 
 
-def test_batch_request_constructs_via_real_anthropic_params(sunni):
-    # Real-client construction (M21, anti-mock, batch path): the batch request's params validate
-    # through the real anthropic SDK request model.
+def test_batch_request_constructs_via_real_anthropic_batch_request_type(sunni):
+    # Real-client construction (M21, anti-mock, batch path): the FULL batch request (incl the
+    # load-bearing output_config schema field + cache_control blocks) validates through the real
+    # anthropic SDK batch-request model, and that validation bites (a bad request is rejected).
     import pydantic
-    from anthropic import types as atypes
+    from anthropic.types.messages import batch_create_params as bcp
 
     trad = load_tradition(sunni)
     scen = load_scenario(sunni, "JLS-001")
@@ -160,14 +161,62 @@ def test_batch_request_constructs_via_real_anthropic_params(sunni):
         verdict_schema(),
     )
     assert req["custom_id"] == "a000000"
-    params = {k: v for k, v in req["params"].items() if k != "output_config"}  # newer field, not in the TypedDict
-    pydantic.TypeAdapter(atypes.MessageCreateParams).validate_python(params)
+    assert "output_config" in req["params"]  # the load-bearing schema field IS validated below
+    ta = pydantic.TypeAdapter(bcp.Request)
+    ta.validate_python(req)  # constructs against the real SDK batch-request type (incl output_config)
+    with pytest.raises(pydantic.ValidationError):  # and it bites
+        ta.validate_python({"custom_id": "x", "params": {"model": "m"}})  # missing max_tokens/messages
 
 
-def test_batch_judge_cli_wiring(sunni, tmp_path):
-    # CLI-level: the batch-judge sub-app + its subcommands are wired and load.
-    assert runner.invoke(app, ["batch-judge", "--help"]).exit_code == 0
-    for sub in ("submit", "collect"):
-        r = runner.invoke(app, ["batch-judge", sub, "--help"])
-        assert r.exit_code == 0, f"batch-judge {sub} --help failed"
-        assert "results-dir" in r.output
+def test_collect_live_fallback_judges_pending_cells(sunni, tmp_path):
+    # M14/T20: a cell the batch errors on is picked up by the LIVE judge via collect(fallback=True).
+    sp = _write_sittings(tmp_path, _sitting())
+    submit_batches = _FakeBatches()
+    submit(str(sp), sunni, tmp_path, config=_cfg(), client=_client(submit_batches))
+    manifest = json.loads((tmp_path / "batch_state.json").read_text())["anthropic"][0]["manifest"]
+    err_cid = sorted(manifest)[0]
+    batches = _FakeBatches(outcomes={err_cid: ("errored", None)})
+    batches.created = submit_batches.created
+
+    def live_judge(judge, parts):  # the injected live judge fills what the batch left pending
+        return ({"score": -0.5, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+
+    c = collect(
+        sunni, tmp_path, config=_cfg(), client=_client(batches),
+        sittings_path=str(sp), judge_fn=live_judge, fallback=True,
+    )
+    assert c["errored"] == 1 and c["live"]["written"] == 1  # the errored cell judged live
+    rows = [json.loads(l) for l in (tmp_path / "judgments.jsonl").read_text().splitlines()]
+    keys = {judgment_key(r) for r in rows}
+    assert manifest[err_cid] in keys  # now resolved (by the live fallback)
+    assert len(rows) == 2  # one batch-priced + one live
+
+
+def test_batch_judge_cli_lifecycle(sunni, tmp_path, monkeypatch):
+    # CLI-level (M14): submit + collect through the actual Typer commands drive batch_state.json's
+    # lifecycle + idempotent re-collect. The Anthropic client is injected via the client factory;
+    # --no-fallback avoids a live judge call in this offline test.
+    import judging.batching as batching
+
+    sp = _write_sittings(tmp_path, _sitting())
+    batches = _FakeBatches()
+    monkeypatch.setattr(batching, "_anthropic_client", lambda client: _client(batches))
+
+    r = runner.invoke(app, ["batch-judge", "submit", str(sp), str(sunni), "--results-dir", str(tmp_path)])
+    assert r.exit_code == 0, r.output
+    assert (tmp_path / "batch_state.json").exists()
+    assert json.loads(r.output)["submitted"] == 2
+
+    r = runner.invoke(
+        app, ["batch-judge", "collect", str(sp), str(sunni), "--results-dir", str(tmp_path), "--no-fallback"]
+    )
+    assert r.exit_code == 0, r.output
+    assert json.loads(r.output)["written"] == 2
+    state = json.loads((tmp_path / "batch_state.json").read_text())
+    assert state["anthropic"][0]["done"] is True  # manifest lifecycle: batch marked done
+    # Idempotent re-collect: nothing new written.
+    r2 = runner.invoke(
+        app, ["batch-judge", "collect", str(sp), str(sunni), "--results-dir", str(tmp_path), "--no-fallback"]
+    )
+    assert json.loads(r2.output)["written"] == 0
+    assert len((tmp_path / "judgments.jsonl").read_text().splitlines()) == 2

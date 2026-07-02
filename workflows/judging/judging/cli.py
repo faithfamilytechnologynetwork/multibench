@@ -160,16 +160,26 @@ def batch_submit(
 
 @batch_app.command("collect")
 def batch_collect(
+    sittings: str = typer.Argument(..., help="Path to sittings.jsonl (drives the live fallback)."),
     tradition: str = typer.Argument(..., help="Path to the tradition directory."),
     results_dir: str = typer.Option(
         "results", help="Directory holding batch_state.json / judgments.jsonl."
     ),
+    fallback: bool = typer.Option(
+        True, help="After collecting, live-judge every still-pending cell (batch errors, Gemini)."
+    ),
     config: str = _CONFIG_OPT,
 ) -> None:
-    """Poll submitted batches; write finished verdicts (batch-priced). Leftovers -> live `judge`."""
+    """Poll submitted batches; write finished verdicts (batch-priced); then the live `judge` is the
+    fallback for everything still pending (M14). ``--no-fallback`` collects batch results only."""
     import json as _json
 
     from judging.batching import collect as run_collect
 
-    summary = run_collect(tradition, results_dir, config=_load(config))
+    summary = run_collect(
+        tradition, results_dir, config=_load(config), sittings_path=sittings, fallback=fallback
+    )
     typer.echo(_json.dumps(summary))
+    live = summary.get("live") or {}
+    if live.get("failed"):
+        raise typer.Exit(code=1)  # live-fallback failures are resumable -> non-zero (M12)
