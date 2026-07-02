@@ -5,8 +5,8 @@ never share the wrong abstraction (a judge wants a schema-constrained verdict an
 for Gemini, safety-off; a subject wants an ordinary conversational completion and is
 NEVER run safety-off):
 
-- ``subject_complete(subject, context_prefix, messages)`` -> ``(text, usage)``
-- ``judge_complete(judge, parts, schema)`` -> ``(raw_verdict, usage)``
+- ``subject_complete(subject, context_prefix, messages)`` -> ``(text, usage, attempts)``
+- ``judge_complete(judge, parts, schema)`` -> ``(raw_verdict, raw_text, usage)``
 
 SDKs are imported **lazily** inside each provider branch, so importing this module is
 cheap and unit tests can mock at the seam without the SDK present. A missing credential
