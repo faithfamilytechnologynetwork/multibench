@@ -1,26 +1,8 @@
 id: '8'
 title: workflows-judging-the-judging-
 protocol: spir
-phase: verify
-plan_phases:
-  - id: phase_1
-    title: Scaffold + scoring core + test-dispatcher registration
-    status: complete
-  - id: phase_2
-    title: Tradition loading, rubric, and judge-prompt assembly
-    status: complete
-  - id: phase_3
-    title: Providers + judge pass (panel, scopes, re-judge)
-    status: complete
-  - id: phase_4
-    title: Minimal Claude subject collector
-    status: complete
-  - id: phase_5
-    title: 'Report: per-scenario results + aggregates'
-    status: complete
-  - id: phase_6
-    title: End-to-end run, docs, and optional batch/live
-    status: complete
+phase: plan
+plan_phases: []
 current_plan_phase: null
 gates:
   spec-approval:
@@ -28,21 +10,16 @@ gates:
     requested_at: '2026-06-25T18:51:37.003Z'
     approved_at: '2026-06-30T20:51:08.359Z'
   plan-approval:
-    status: approved
-    requested_at: '2026-06-30T21:05:15.334Z'
-    approved_at: '2026-06-30T22:23:07.180Z'
+    status: pending
   pr:
-    status: approved
-    requested_at: '2026-07-01T00:28:36.475Z'
-    approved_at: '2026-07-01T23:23:52.527Z'
+    status: pending
   verify-approval:
     status: pending
-    requested_at: '2026-07-01T23:26:44.942Z'
 iteration: 1
 build_complete: false
 history: []
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-01T23:26:44.943Z'
+updated_at: '2026-07-02T16:52:38.447Z'
 force_advanced:
   phase: phase_5
   iteration: 3
