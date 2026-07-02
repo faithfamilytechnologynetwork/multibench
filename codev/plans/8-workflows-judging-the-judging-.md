@@ -86,14 +86,20 @@ Amended-spec criteria are the acceptance bar; per-phase **Acceptance** maps each
 - [ ] `config.concurrency>1` runs collect/judge concurrently: a test observes **max in-flight >1
       and ≤ concurrency** (e.g. an injected fake that records overlap); `concurrency=1` is serial
       (T18, T19; M13, M15).
-- [ ] Output with concurrency is **identical** to serial (same sittings/judgments set), resume is
-      still idempotent, and blinding + non-zero-exit-on-failure are unchanged.
-- [ ] Subject Anthropic requests carry `cache_control` on the framing + turn-1 blocks (unit test
-      on request construction; the live `cache_read>0` check is T21 in r3) (M16).
+- [ ] Output with concurrency is **set-equivalent** to serial — the **same set of records**,
+      regardless of JSONL **line order** (concurrency makes append order non-deterministic; do NOT
+      enforce byte-identical output). Resume is still idempotent, and blinding +
+      non-zero-exit-on-failure are unchanged.
+- [ ] **Real-client construction (M21):** a **default-suite** test builds the Anthropic **subject**
+      request payload (with the framing 1h + turn-1 `cache_control` blocks) via the real client's
+      params and asserts it constructs without error — not just that a dict has the right keys
+      (this is the anti-mock-boundary check for the subject path) (M16, M21).
 
 #### Test Plan
-- **Unit/integration (mocked):** concurrency honored + overlap bound; serial==parallel output;
-  cell-major order; subject-request `cache_control` present. No live calls.
+- **Unit/integration (mocked):** concurrency honored + overlap bound; **set-equivalent** (not
+  byte-identical) serial-vs-parallel output; cell-major order; no dropped/duplicated JSONL lines
+  under load. **Real-client construction (default suite):** the Anthropic subject-request payload
+  (framing/turn-1 `cache_control`) constructs against the real client. No network calls.
 
 #### Risks
 - **Thread-safety of JSONL append / shared dicts.** → Single `threading.Lock` around every append;
@@ -123,12 +129,22 @@ Amended-spec criteria are the acceptance bar; per-phase **Acceptance** maps each
 - [ ] `batch-judge submit` then `collect` produces the same validated verdicts as live, priced at
       **0.5×**; `batch_state.json` makes re-collect idempotent; a cell the batch leaves pending
       falls back to live `judge` (T20; M14).
+- [ ] The feature is operable **from the actual CLI** (`batch-judge submit|collect`), not only via
+      lower-level helpers: CLI-level tests exercise the command wiring and the `batch_state.json`
+      **manifest lifecycle** (submit writes it; collect consumes + updates it; re-collect is a
+      no-op). Extends the existing `tests/test_cli_smoke.py` coverage.
+- [ ] **Real-client construction (M21):** a **default-suite** test builds the batch **submit
+      payload** for each provider via the real client's params and asserts it constructs without
+      error (the anti-mock-boundary check for the new batch path).
 - [ ] `report` cost is batch-aware (0.5× batch rows) and counts Gemini `thoughts_token_count`
       (M18-cost); unpriced-model handling still graceful.
 
 #### Test Plan
 - **Unit/integration (mocked batch client):** submit→collect→verdicts + 0.5× cost; manifest
   idempotency; pending→live fallback; gemini-thinking-token cost; batch-aware report totals.
+- **CLI-level:** `batch-judge submit|collect` command wiring + manifest lifecycle.
+- **Real-client construction (default suite):** the batch submit payload constructs against the
+  real client for each provider. No network calls.
 
 #### Risks
 - **Batch API shape drift (Anthropic/Gemini).** → Encapsulate submit/poll/collect behind
@@ -149,12 +165,18 @@ Amended-spec criteria are the acceptance bar; per-phase **Acceptance** maps each
 - `rubric.py` — restore the **full deliverables boundary rule** (artifact-sets-−1.0-ceiling +
   **exit-ramp-eligible** clause + worse-of-both) and the **five worked boundary examples** from
   JaleesBench `prompts.py:112-137`, de-Islamicized (M17).
-- `providers.py` — Gemini judge path: explicit `finish_reason`/empty-response **diagnostic**
-  (clear located error, not a bare `json.loads(resp.text)`) (M18-diagnostic). (Schema
-  sanitization already landed in PR #24 — add/keep the **real-client construction** test, M21.)
-- `judge.py` — retain the judge's **`raw`** response text on every judgment record (M19);
-  **verify** JaleesBench `rejudge_disagreements`: if it truly uses a stricter v2 prompt, port it
-  (add to `prompts.py`); else record the finding as a no-op (M20).
+- `providers.py` — **(a) `raw`-passthrough seam change (M19).** Today `judge_complete` /
+  `_anthropic_judge` / `_gemini_judge` do `return json.loads(text), usage` — the raw response
+  **text is discarded**. Retaining `raw` therefore requires a **provider return-shape change**
+  (return the raw text alongside the parsed dict, e.g. `(verdict_dict, raw_text, usage)` or a
+  `raw` key), threaded through `judge_fn`/`_judge_pass`/`_record` — **not** a `judge.py`-only edit.
+  Update `JudgeFn`'s type + every call site + `parse_verdict`/`_record` + the affected tests.
+  **(b)** Gemini judge path: explicit `finish_reason`/empty-response **diagnostic** (clear located
+  error, not a bare `json.loads(resp.text)`) (M18-diagnostic). **(c)** Schema sanitization already
+  landed in PR #24 — keep it and its **real-client construction** test (M21).
+- `judge.py` — record the passed-through **`raw`** text on every judgment (M19, depends on the
+  providers seam change above); **verify** JaleesBench `rejudge_disagreements`: if it truly uses a
+  stricter v2 prompt, port it (add to `prompts.py`); else record the finding as a no-op (M20).
 - **Tests** — real-client/schema construction (T23) in the **default** suite; `raw` present (T25);
   Gemini thinking-token + blocked diagnostic (T24); rubric worked examples present (T22); opt-in
   `--live` subject-cache `cache_read>0` (T21) + a **tiny `--live` `run` smoke** (T27).
@@ -227,3 +249,4 @@ plan is the fidelity remediation on top of that merged baseline; it does not re-
 |------|--------|--------|
 | 2026-06-30 | Initial 6-phase plan (delivered; PRs #20/#24) | Spec 8 approved |
 | 2026-07-02 | **Fidelity remediation plan** (r1 parallel+caching → r2 batch+cost → r3 judge-quality+live-verify) | Live audit found dropped JaleesBench fidelity; spec amended M13–M21 |
+| 2026-07-02 | Plan-iter-2 consult (Codex REQUEST_CHANGES, Claude APPROVE): (1) M21 real-client construction checks distributed across phases — Anthropic subject payload in r1, batch submit payload in r2, Gemini schema in r3 (not Gemini-only); (2) M19 `raw` retention made an explicit **provider return-shape seam change** (text is discarded at `json.loads` today), threaded through `JudgeFn`/`_judge_pass`/`_record` + tests; (3) added explicit `batch-judge submit\|collect` CLI-level + manifest-lifecycle tests in r2; (4) r1 serial-vs-parallel acceptance clarified to **set-equivalence** (line order non-deterministic under concurrency) | Address review |

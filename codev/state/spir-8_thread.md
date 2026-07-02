@@ -363,5 +363,12 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   rubric + 5 worked examples, raw text, gemini diagnostic, v2 re-judge verify) + live verification
   (real-client/schema check in default suite + `--live` smoke run before done) + docs. Port source:
   JaleesBench at `/Users/mwk/Development/fftn/taqwabench/jaleesbench/jaleesbench/` (confirmed present).
-- Next: `porch check/done` → plan consult (codex+claude) → **plan-approval gate** → STOP for the
-  architect. Then implement r1→r2→r3, one PR (`Refs #8`). No self-approve/merge.
+- Plan consult iter2 (porch inherited the original plan-iter1 codex-RC across the rollback, so it
+  started at iter2): **Codex REQUEST_CHANGES, Claude APPROVE** — all plan-tightening, no design
+  changes. Fixed: (1) M21 real-client construction checks distributed per phase — Anthropic subject
+  payload (r1), batch submit payload (r2), Gemini schema (r3); (2) M19 `raw` retention made an
+  explicit **provider return-shape seam change** (raw text discarded at `json.loads` today); (3)
+  `batch-judge submit|collect` CLI + manifest-lifecycle tests explicit in r2; (4) r1 serial-vs-
+  parallel = **set-equivalence** (line order non-deterministic).
+- Next: rebuttal done → `porch done/next` → iter-3 re-consult → **plan-approval gate** → STOP for
+  the architect. Then implement r1→r2→r3, one PR (`Refs #8`). No self-approve/merge.
