@@ -486,3 +486,5 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   4-test live suite** (creds-gated); judge-side cache hit already passed live (same mechanism).
   **Holding porch at r3/iter2** — not force-advancing past a real unverified item. Next: 4/4 live
   result → record evidence → re-consult codex (expect APPROVE) → pr gate.
+
+- **Live suite 4/4 PASSED (architect, 384s, exit 0):** anchoring, judge prefix-cache, **NEW test_live_subject_turn2_reads_cache (M16/T21 subject cache_read>0 OBSERVED live)**, T27 smoke. Codex's iter2 RC point is satisfied. Re-consulting codex → pr gate.
