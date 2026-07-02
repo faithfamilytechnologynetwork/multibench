@@ -429,5 +429,17 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   diagnostic (M18); + the opt-in `--live` end-to-end **run smoke** (M21/T27, default panel incl.
   Gemini). README updated (parallelism/caching/batch/scenarios/deviations). **150 pass, 3 live-skipped.**
 - **BLOCKER for T27/M21:** no provider creds in the builder env — the `--live` smoke can't actually
-  execute here (skips cleanly). Architect required it RUN before done → flagged; needs creds or the
-  architect runs it. Code + gating complete; the genuine live exercise is pending creds.
+  execute here (skips cleanly). Architect required it RUN before done → flagged; **architect is
+  running the full live suite against this worktree with real creds** (option a) and will return
+  pass/fail as verification evidence. Done gated on that.
+- r3 iter1: **Codex REQUEST_CHANGES** (live smoke not run [→ architect running it]; T21 tested the
+  JUDGE path not SUBJECT) + **Claude COMMENT** (`_gemini_judge` annotation). Fixed: added
+  `test_live_subject_turn2_reads_cache` (M16/T21, subject turn-2 cache_read>0); annotation →
+  `tuple[dict,str,dict]`. **150 pass, 4 live-skipped.**
+- r3 iter2 re-consult: **Claude APPROVE (no issues).** **Codex BLOCKED — vendored binary missing:**
+  `@cluesmith/codev/node_modules/@openai/codex-darwin-arm64/vendor/.../codex/` is EMPTY
+  (first attempt EPIPE, retry `spawn codex ENOENT`). codex ran fine through r3-iter1, so it broke
+  recently — a codev package-integrity issue affecting ALL codev consults, not just me. Standalone
+  `codex` 0.139.0 IS on PATH but the wrapper invokes the vendored one. NOT reinstalling the global
+  package unilaterally (shared infra). Flagged to architect for a decision (fix install / accept on
+  Claude-APPROVE + addressed codex-iter1 points / other).
