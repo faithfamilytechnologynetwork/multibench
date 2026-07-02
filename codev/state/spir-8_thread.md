@@ -455,6 +455,9 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - **Porch desync note:** porch is mechanically parked at implement/phase_r3/iter2 ("Run remaining
   consultations (codex)") awaiting the codex verdict it can't get. To reconcile: repair codev →
   the codex consult completes → `porch done`/advance; or accept r3 on Claude-APPROVE + pr-gate CMAP.
+- **PR #25 OPEN** (Refs #8): https://github.com/faithfamilytechnologynetwork/multibench/pull/25 —
+  r1+r2+r3, 150 pass + architect's live 3/3. PR body surfaces both infra blockers. Over to the
+  architect's 3-way integration CMAP + pr gate. NOT self-approving/merging. (afx send still down.)
 
 - r3 iter2 re-consult: **Claude APPROVE (no issues).** **Codex BLOCKED — vendored binary missing:**
   `@cluesmith/codev/node_modules/@openai/codex-darwin-arm64/vendor/.../codex/` is EMPTY
