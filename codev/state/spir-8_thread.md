@@ -479,3 +479,10 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `codex` 0.139.0 IS on PATH but the wrapper invokes the vendored one. NOT reinstalling the global
   package unilaterally (shared infra). Flagged to architect for a decision (fix install / accept on
   Claude-APPROVE + addressed codex-iter1 points / other).
+- **codex REPAIRED by architect** (symlinked brew codex into codev vendor path, reversible). Re-ran
+  r3 iter2 codex → **REQUEST_CHANGES** on ONE fair point: the new M16/T21 subject-side live cache
+  test was added *after* the architect's 3-test live run, so its live `cache_read>0` isn't OBSERVED
+  yet (r3 requires it). Codex cleared everything else in r3. **Asked architect to re-run the updated
+  4-test live suite** (creds-gated); judge-side cache hit already passed live (same mechanism).
+  **Holding porch at r3/iter2** — not force-advancing past a real unverified item. Next: 4/4 live
+  result → record evidence → re-consult codex (expect APPROVE) → pr gate.
