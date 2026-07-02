@@ -21,7 +21,14 @@ Four Typer commands over one `--results-dir`:
   → `report.md` / `report.json`.
 - **`run`** — end-to-end `collect → judge → report`.
 
-Delivered across 6 plan phases; **107 tests pass, 2 opt-in `--live` tests** (excluded from CI).
+Delivered in two stages: **v1** (6 plan phases, PRs #20/#24 — merged) and the **JaleesBench
+fidelity remediation** (3 phases r1–r3, PR #25 — see the Remediation section below) that restored
+parallel collection/judging, batch judging, subject-side caching, and the full judge rubric.
+Current state: **150 tests pass + 4 opt-in `--live` tests** (excluded from CI; architect-run 4/4),
+plus real-client contract checks in the default suite. `collect`/`judge` run concurrency-bounded
+parallel; a `batch-judge submit|collect` path judges via Anthropic Message Batches at ~50%.
+*(The per-phase compliance tables immediately below describe the v1 baseline; the Remediation
+section covers M13–M21 and the current numbers.)*
 
 ## Spec Compliance
 

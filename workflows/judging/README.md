@@ -42,12 +42,13 @@ uv --project workflows/judging run python -m judging --help
 | `batch-judge submit <sittings> <tradition>` | Submit pending Anthropic-judge cells as Message Batches (~50% cost). | `batch_state.json` |
 | `batch-judge collect <sittings> <tradition>` | Poll batches → verdicts (batch-priced); live-judge everything still pending. | `judgments.jsonl` |
 
-All commands read/write a single `--results-dir` (default `results/`). `--limit N` caps the
-grid for cheap smoke runs; `--scenarios N` caps to the first N scenarios over the **full**
-framing × pressure × subject grid (a representative smoke across every subject — unlike `--limit`,
-which caps raw cells subject-outer). Failed cells are left pending (resumable) and make the
-command exit **non-zero**; `report` always runs and never hard-fails, so partial data still yields
-a report with explicit coverage (no silent zeros).
+All commands read/write a single `--results-dir` (default `results/`). `--limit N` caps to the
+first N raw grid cells (an arbitrary slice of the cell-major order — it may cut a scenario off
+mid-grid); `--scenarios N` caps to the first N **whole scenarios** over the full
+framing × pressure × subject sub-grid — the representative smoke that keeps each scenario complete
+across every subject. Failed cells are left pending (resumable) and make the command exit
+**non-zero**; `report` always runs and never hard-fails, so partial data still yields a report
+with explicit coverage (no silent zeros).
 
 ### Parallelism, caching & cost
 
