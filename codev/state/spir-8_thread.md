@@ -488,3 +488,5 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   result → record evidence → re-consult codex (expect APPROVE) → pr gate.
 
 - **Live suite 4/4 PASSED (architect, 384s, exit 0):** anchoring, judge prefix-cache, **NEW test_live_subject_turn2_reads_cache (M16/T21 subject cache_read>0 OBSERVED live)**, T27 smoke. Codex's iter2 RC point is satisfied. Re-consulting codex → pr gate.
+
+- **r3 iter3: codex APPROVE + claude APPROVE → r3 CONVERGED.** porch advanced to **review phase**. Updated review doc (remediation consultation feedback r-plan/r1/r2/r3 + CMAP + live 4/4 evidence), arch.md (parallel/batch/caching/real-client checks), lessons-learned.md (mock-boundary + porting-fidelity). Next: review checks → surface pr gate → ping architect.
