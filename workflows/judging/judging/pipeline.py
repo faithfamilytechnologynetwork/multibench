@@ -25,6 +25,7 @@ def run_pipeline(
     subject_fn: SubjectFn | None = None,
     judge_fn: JudgeFn | None = None,
     limit: int | None = None,
+    scenarios: int | None = None,
 ) -> dict:
     """Collect, judge, then report for ``tradition_dir`` into ``results_dir``.
 
@@ -36,7 +37,9 @@ def run_pipeline(
     config = config or default_config()
     rd = Path(results_dir)
 
-    collected = collect(tradition_dir, rd, config=config, subject_fn=subject_fn, limit=limit)
+    collected = collect(
+        tradition_dir, rd, config=config, subject_fn=subject_fn, limit=limit, scenarios=scenarios
+    )
     judged = judge_all(
         rd / "sittings.jsonl", tradition_dir, rd, config=config, judge_fn=judge_fn
     )
