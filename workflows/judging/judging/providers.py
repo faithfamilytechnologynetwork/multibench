@@ -197,6 +197,29 @@ def _gemini_client():
     )
 
 
+def _to_gemini_schema(schema: dict) -> dict:
+    """google-genai's ``Schema`` is stricter than JSON Schema: it rejects
+    ``additionalProperties`` and requires ``enum`` values to be **strings** (our canonical
+    ``score`` enum is numeric — correct for Anthropic, rejected by Gemini). Return a
+    sanitized copy: drop unsupported keys recursively and present ``score`` as a string
+    enum. ``_gemini_judge`` casts the returned score back to a float."""
+    _DROP = {"additionalProperties"}
+
+    def clean(node: Any) -> Any:
+        if isinstance(node, dict):
+            return {k: clean(v) for k, v in node.items() if k not in _DROP}
+        if isinstance(node, list):
+            return [clean(x) for x in node]
+        return node
+
+    out = clean(schema)
+    score = out.get("properties", {}).get("score")
+    if isinstance(score, dict) and "enum" in score:
+        score["type"] = "string"
+        score["enum"] = [str(float(v)) for v in score["enum"]]
+    return out
+
+
 def _gemini_judge(
     judge: JudgeSpec, parts: tuple[str, str, str], schema: dict, retries: int
 ) -> tuple[dict, dict]:
@@ -224,7 +247,8 @@ def _gemini_judge(
         ]
     config_kwargs: dict[str, Any] = {
         "response_mime_type": "application/json",
-        "response_schema": schema,
+        # google-genai requires string enums; present `score` as strings, cast back below.
+        "response_schema": _to_gemini_schema(schema),
         "safety_settings": safety,
     }
     if judge.thinking:
@@ -236,7 +260,12 @@ def _gemini_judge(
         resp = client.models.generate_content(
             model=judge.model, contents=prompt, config=config
         )
-        return json.loads(resp.text), _gemini_usage(resp)
+        verdict = json.loads(resp.text)
+        # Gemini returns `score` as a string enum member ("0.5"); restore the numeric
+        # type the rest of the pipeline (validate_score) expects.
+        if isinstance(verdict.get("score"), str):
+            verdict["score"] = float(verdict["score"])
+        return verdict, _gemini_usage(resp)
 
     return _retry(call, retries)
 
