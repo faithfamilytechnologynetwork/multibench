@@ -312,8 +312,19 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `config.py::load_config` (YAML, fail-loud, validated vs universal core) + `--config` on all four
   commands; `report` uses the supplied config for correct coverage. +17 tests (**124 pass**, 2
   live-skipped). Updated README (Configuration section), review doc (PR round + §5.7), arch.md.
-- pr gate APPROVED; **PR #20 MERGED** (merge commit, issue #8 CLOSED). Verify phase: post-merge
-  integration clean, verify-approval gate raised for the architect's live run.
+- Porch advanced straight to the **pr gate** (review consult is single-pass, not the 3-iter
+  implement loop). Surfaced it (`porch gate 8`); STOPPED for human approval.
+- **pr gate APPROVED** by the user; architect's 3-way integration CMAP: Gemini+Claude APPROVE
+  (HIGH, no blockers), codex 3-way hung (stopped) but the builder-side codex already caught the
+  two §5.7 issues (fixed). **PR #20 MERGED** (merge commit `2afc35a`, 2 parents, not squash);
+  **issue #8 CLOSED** (auto via `Closes #8`).
+
+## Verify phase — 2026-07-01
+- Post-merge integration sanity check on `origin/main`: pipeline.py/config.py/README/review all
+  present; dispatcher registry line present; `workflows/README.md` stale "proof texts" copy gone;
+  **124 tests pass** (2 live-skipped) against the integrated tree.
+- Real acceptance = the architect's live 5-scenarios-per-tradition run (needs creds). Signalled
+  `porch done` → verify-approval gate; architect approves after the live run. Builder work done.
 
 ## Follow-up bugfix — Gemini judge schema (fix/gemini-judge-schema, 2026-07-02)
 - The architect's **live 5×5 run** exposed a real bug the mocked suite + CMAP missed: the Gemini
@@ -332,3 +343,152 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   `scenarios=N` builds the first N scenarios × full framing/pressure/subject grid (both subjects).
 - **128 pass, 2 live-skipped.** Next: commit → push → PR (Refs #8) → STOP at pr-ready for the
   architect's integration review + pr gate. No self-approve/merge.
+- **PR #24 MERGED** (merge commit `d4a7ac1`, 2 parents). Gemini schema fix + `--scenarios` on
+  `main`. verify-approval gate for project 8 still pending the architect's live run.
+
+## JaleesBench fidelity remediation — Plan phase (2026-07-02)
+- User (via architect) disappointed: "port, don't redesign" — v1 dropped 2 core JaleesBench
+  behaviors (serial collection, `config.concurrency` DEAD; batch judging dropped). Architect ran a
+  full 4-agent audit → authoritative remediation ledger. Baked user decisions (NOT relitigated):
+  thinking STAYS ON (deviation), FULL restoration (parallel + batch), Gemini stays flash (deviation).
+- Prep: merged `origin/main` into stale `builder/spir-8` (non-destructive; resolved the thread
+  conflict by union) so the branch has the bugfix + sibling work; 128 tests pass. `porch rollback
+  8 plan` (verify→plan; spec stays approved — architect wants only a plan-approval stop).
+- **Spec amended** (`[Spec 8][amend]`): promoted parallelism/batch/subject-caching/full-rubric from
+  shoulds to REQUIREMENTS **M13–M21**; added §4.6 (execution), §4.7 (port ledger + 2 deviations +
+  reframes), §5.4/5.5/5.7/5.8 updates, T18–T27, §10 amendment log.
+- **Plan rewritten** (3 remediation phases, architect's phasing): r1 parallel collect+judge (wire
+  dead concurrency via bounded ThreadPool + cell-major interleave) + subject-side caching; r2 batch
+  judging + live fallback + 0.5× batch cost + gemini thinking-token cost; r3 judge-quality (full
+  rubric + 5 worked examples, raw text, gemini diagnostic, v2 re-judge verify) + live verification
+  (real-client/schema check in default suite + `--live` smoke run before done) + docs. Port source:
+  JaleesBench at `/Users/mwk/Development/fftn/taqwabench/jaleesbench/jaleesbench/` (confirmed present).
+- Plan consult iter2 (porch inherited the original plan-iter1 codex-RC across the rollback, so it
+  started at iter2): **Codex REQUEST_CHANGES, Claude APPROVE** — all plan-tightening, no design
+  changes. Fixed: (1) M21 real-client construction checks distributed per phase — Anthropic subject
+  payload (r1), batch submit payload (r2), Gemini schema (r3); (2) M19 `raw` retention made an
+  explicit **provider return-shape seam change** (raw text discarded at `json.loads` today); (3)
+  `batch-judge submit|collect` CLI + manifest-lifecycle tests explicit in r2; (4) r1 serial-vs-
+  parallel = **set-equivalence** (line order non-deterministic).
+- **plan-approval APPROVED by the user.** `porch done` → implement phase; porch re-extracted the
+  3 remediation phases (r1/r2/r3). Implementing r1→r2→r3, one PR (`Refs #8`). No self-approve/merge.
+
+## Implement phase_r1 — parallel collect+judge + subject caching (2026-07-02)
+- `collect.py`: cell-major interleave (scenario/pressure/framing outer, subject inner) + bounded
+  `ThreadPoolExecutor(max_workers=config.concurrency)` over per-cell calls, lock-guarded JSONL
+  append + scenario cache; concurrency=1 stays serial; resume/limit/scenarios/exit-code preserved.
+- `judge.py`: classify self-judge skips first (no API), then fan out the base + re-judge passes
+  under `config.concurrency` (same lock pattern).
+- `providers.py`: replaced `_fold` with `_subject_messages` — folds framing onto EVERY user turn
+  (blinding, §4.5) but sets cache breakpoints on the FIRST user turn only (framing 1h ephemeral +
+  turn-1 default TTL), mirroring JaleesBench `collect.py` so turn-2 rereads turn-1 from cache (M16).
+- Tests: collect concurrency honored (max in-flight >1, ≤N) + concurrency=1 serial + parallel
+  set-equivalence (no dup/loss); judge concurrency honored; `_subject_messages` cache-breakpoint
+  contract + real-client-shape check (M21 subject path). **133 pass, 2 live-skipped.**
+- Next: commit → `porch done` → per-phase consult (codex+claude) → converge → r2.
+- r1 iter1: **Codex REQUEST_CHANGES** (3: weak anthropic real-client check; judge concurrency
+  base-only; `rejudge_cells` collapsed to (scenario,scope)), **Claude APPROVE**. Fixed all
+  (real-SDK MessageCreateParams validation + reject-test; judge set-equivalence + re-judge-under-
+  concurrency; rejudge_cells over the FULL cell key). iter2: **both APPROVE** → r1 done.
+
+## Implement phase_r2 — batch judging + batch/thinking cost (2026-07-02)
+- **Fidelity call (flagged to architect):** JaleesBench `batching.py` batches **Anthropic only**;
+  Gemini is NOT batched (Vertex has no developer file-batch) → Gemini cells go to the live `judge`
+  fallback. So the faithful port = Anthropic Message Batches @0.5× + Gemini live-fallback. Corrected
+  the spec's "+ Gemini batch job" wording (§4.6/§4.7/M14) to match the reference.
+- New `batching.py`: `submit` (pending Anthropic-judge cells → Message Batches mirroring the live
+  request: 2 cached blocks + `output_config` schema + thinking; `batch_state.json` manifest,
+  in-flight-manifest exclusion) + `collect` (poll → succeeded verdicts written with `usage.batch=True`;
+  errored/unparseable left pending → live fallback; idempotent append). Injectable `client` for tests.
+- `cli.py`: `batch-judge submit|collect` sub-app. `report.py`: batch-aware cost (`b_` keys @0.5×,
+  `_tokens_in/_out` include batch variants). `providers._gemini_usage`: counts `thoughts_token_count`
+  (M18 — thinking is ON so cost was undercounted).
+- Tests (`test_batching.py` + report/providers): submit→manifest→collect batch-priced; submit &
+  collect idempotency; errored→live-fallback; Gemini not batched; real-SDK batch-request construction;
+  batch-judge CLI wiring; 0.5× cost unit + report-level; gemini thinking-token count. **146 pass, 2 live-skipped.**
+- Next: commit → `porch done` → per-phase consult → converge → r3.
+- r2 iter1: **Codex REQUEST_CHANGES** (live fallback not wired; CLI-lifecycle test missing;
+  real-client check stripped output_config), **Claude COMMENT**. Fixed all (collect fallback +
+  CLI sittings arg/--fallback; CLI lifecycle test; full batch-Request construction incl
+  output_config). iter2: **both APPROVE** → r2 done.
+- **Architect + user CONFIRMED** the Anthropic-only batching (Gemini=live fallback); corrected all
+  spec/plan wording + logged in the amendment table. Do NOT add developer-API Gemini batching.
+
+## Implement phase_r3 — judge-quality fidelity + live verification + docs (2026-07-02)
+- `rubric.py`: restored the FULL deliverables rule (6(i) artifact-sets-ceiling, 6(ii) exit-ramp-
+  eligible, 7 worst-of-both) + the **5 worked BOUNDARY EXAMPLES** (de-Islamicized) — M17.
+- `providers.py`: `judge_complete`/`_anthropic_judge`/`_gemini_judge` now return
+  `(verdict, raw_text, usage)` — **raw verdict text retained** (M19, provider seam change threaded
+  through JudgeFn/_judge_pass/_record + batching._rec_from_key + all test fakes); `_gemini_text`
+  gives an explicit finish_reason/block_reason **diagnostic** on blocked/empty responses (M18).
+- **M20 = no-op (verified):** JaleesBench folds V2_BOUNDARY into the standard judge prompt and
+  `rejudge_disagreements` reuses the SAME blocks (the "v2 prompt" docstring is aspirational). Our
+  re-judge already reuses `judge_prompt_parts`, so once the boundary rules are in `rubric.py` both
+  passes carry them. No stricter v2 prompt to port.
+- Tests: rubric worked-examples/full-rule (M17); judgment carries `raw` (M19); gemini blocked
+  diagnostic (M18); + the opt-in `--live` end-to-end **run smoke** (M21/T27, default panel incl.
+  Gemini). README updated (parallelism/caching/batch/scenarios/deviations). **150 pass, 3 live-skipped.**
+- **BLOCKER for T27/M21:** no provider creds in the builder env — the `--live` smoke can't actually
+  execute here (skips cleanly). Architect required it RUN before done → flagged; **architect is
+  running the full live suite against this worktree with real creds** (option a) and will return
+  pass/fail as verification evidence. Done gated on that.
+- r3 iter1: **Codex REQUEST_CHANGES** (live smoke not run [→ architect running it]; T21 tested the
+  JUDGE path not SUBJECT) + **Claude COMMENT** (`_gemini_judge` annotation). Fixed: added
+  `test_live_subject_turn2_reads_cache` (M16/T21, subject turn-2 cache_read>0); annotation →
+  `tuple[dict,str,dict]`. **150 pass, 4 live-skipped.**
+## ⚠️ STATUS 2026-07-02 (afx send is DOWN — reading this thread is how to reach me)
+- **Two infra blockers, both the architect's domain, neither fixable by me:**
+  1. **codex consult binary missing** — codev's vendored `@openai/codex` (expects **0.130.0** native
+     aarch64) has an EMPTY binary dir; PATH `codex` is **0.139.0** (a JS wrapper, wrong version +
+     wrong kind) → NOT a safe drop-in. codev install needs repair (`npm rebuild`/reinstall) to
+     restore per-phase codex consults. I did NOT patch global node_modules (shared infra) or
+     fabricate a codex verdict.
+  2. **`afx send architect` fails** — "Cannot resolve canonical builder id for worktree 'spir-8' …
+     no matching builder row in global.db" (issue #1094). I cannot proactively message the
+     architect; this thread + the PR body are my only channel out.
+- **Live suite: architect ran it, 3/3 PASSED incl. T27 (36-sitting grid, real dual-judge incl.
+  Gemini) — M21 satisfied** (evidence: `8-live-verification-evidence.md`).
+- **Decision (per architect's explicit "finish consult, porch done, open the single PR"):** opening
+  the PR now. r1+r2 fully consulted & converged (codex+claude APPROVE); r3 has Claude APPROVE +
+  both codex-iter1 points addressed; the only open r3 item is the codex-iter2 verdict, blocked by
+  the missing binary — and the architect runs the full 3-way CMAP (incl. codex) at the pr gate.
+- **Porch desync note:** porch is mechanically parked at implement/phase_r3/iter2 ("Run remaining
+  consultations (codex)") awaiting the codex verdict it can't get. To reconcile: repair codev →
+  the codex consult completes → `porch done`/advance; or accept r3 on Claude-APPROVE + pr-gate CMAP.
+- **PR #25 OPEN** (Refs #8): https://github.com/faithfamilytechnologynetwork/multibench/pull/25 —
+  r1+r2+r3, 150 pass + architect's live 3/3. PR body surfaces both infra blockers. Over to the
+  architect's 3-way integration CMAP + pr gate. NOT self-approving/merging. (afx send still down.)
+- **Integration CMAP (architect, on PR #25):** **Claude APPROVE** (HIGH, no blockers); **Gemini
+  COMMENT** — its lone issue (ValueError from `resp.text` bypassing the M18 diagnostic) **REFUTED**
+  by the architect (google-genai `_get_text` returns None on empty/blocked; my fall-through is
+  correct — the raise was legacy `google-generativeai`); **Codex CMAP** hit the same vendored-binary
+  ENOENT (workspace infra, being handled).
+- CMAP cleanup done: fixed the stale `providers.py` module docstring (2-tuple → 3-tuple seam
+  returns). 150 pass. Pushed.
+- **porch STILL BLOCKED at implement/r3/iter2 → "Run remaining consultations (codex)".** `check`/
+  `done` pass (build complete) but `next` won't advance to the pr gate without the codex verdict,
+  which can't run (binary missing). Per architect: reported, NOT patching the global package or
+  `.codev/config.json`. **Needs the architect to repair codev (restore the 0.130.0 vendored codex)
+  so the r3 codex consult completes → porch advances to review/pr gate**, OR to advance r3 another
+  way. Handing off — this is the one thing standing between here and the pr gate.
+
+- r3 iter2 re-consult: **Claude APPROVE (no issues).** **Codex BLOCKED — vendored binary missing:**
+  `@cluesmith/codev/node_modules/@openai/codex-darwin-arm64/vendor/.../codex/` is EMPTY
+  (first attempt EPIPE, retry `spawn codex ENOENT`). codex ran fine through r3-iter1, so it broke
+  recently — a codev package-integrity issue affecting ALL codev consults, not just me. Standalone
+  `codex` 0.139.0 IS on PATH but the wrapper invokes the vendored one. NOT reinstalling the global
+  package unilaterally (shared infra). Flagged to architect for a decision (fix install / accept on
+  Claude-APPROVE + addressed codex-iter1 points / other).
+- **codex REPAIRED by architect** (symlinked brew codex into codev vendor path, reversible). Re-ran
+  r3 iter2 codex → **REQUEST_CHANGES** on ONE fair point: the new M16/T21 subject-side live cache
+  test was added *after* the architect's 3-test live run, so its live `cache_read>0` isn't OBSERVED
+  yet (r3 requires it). Codex cleared everything else in r3. **Asked architect to re-run the updated
+  4-test live suite** (creds-gated); judge-side cache hit already passed live (same mechanism).
+  **Holding porch at r3/iter2** — not force-advancing past a real unverified item. Next: 4/4 live
+  result → record evidence → re-consult codex (expect APPROVE) → pr gate.
+
+- **Live suite 4/4 PASSED (architect, 384s, exit 0):** anchoring, judge prefix-cache, **NEW test_live_subject_turn2_reads_cache (M16/T21 subject cache_read>0 OBSERVED live)**, T27 smoke. Codex's iter2 RC point is satisfied. Re-consulting codex → pr gate.
+
+- **r3 iter3: codex APPROVE + claude APPROVE → r3 CONVERGED.** porch advanced to **review phase**. Updated review doc (remediation consultation feedback r-plan/r1/r2/r3 + CMAP + live 4/4 evidence), arch.md (parallel/batch/caching/real-client checks), lessons-learned.md (mock-boundary + porting-fidelity). Next: review checks → surface pr gate → ping architect.
+
+- **Review phase: refreshed the stale-v1 PR consult on the remediated branch → Codex COMMENT (non-blocking; fixed the --limit README note + stale v1 Summary numbers; commit-hygiene explained), Claude APPROVE.** porch reached the **pr gate** (PENDING human approval). Pinged architect. NOT self-approving.

@@ -1,25 +1,16 @@
 id: '8'
 title: workflows-judging-the-judging-
 protocol: spir
-phase: verify
+phase: review
 plan_phases:
-  - id: phase_1
-    title: Scaffold + scoring core + test-dispatcher registration
+  - id: phase_r1
+    title: Parallel collection + judging + subject-side caching
     status: complete
-  - id: phase_2
-    title: Tradition loading, rubric, and judge-prompt assembly
+  - id: phase_r2
+    title: Batch judging + batch & thinking-token cost accounting
     status: complete
-  - id: phase_3
-    title: Providers + judge pass (panel, scopes, re-judge)
-    status: complete
-  - id: phase_4
-    title: Minimal Claude subject collector
-    status: complete
-  - id: phase_5
-    title: 'Report: per-scenario results + aggregates'
-    status: complete
-  - id: phase_6
-    title: End-to-end run, docs, and optional batch/live
+  - id: phase_r3
+    title: Judge-quality fidelity + live verification + docs
     status: complete
 current_plan_phase: null
 gates:
@@ -29,19 +20,78 @@ gates:
     approved_at: '2026-06-30T20:51:08.359Z'
   plan-approval:
     status: approved
-    requested_at: '2026-06-30T21:05:15.334Z'
-    approved_at: '2026-06-30T22:23:07.180Z'
+    requested_at: '2026-07-02T17:09:31.502Z'
+    approved_at: '2026-07-02T17:11:15.392Z'
   pr:
     status: approved
-    requested_at: '2026-07-01T00:28:36.475Z'
-    approved_at: '2026-07-01T23:23:52.527Z'
+    requested_at: '2026-07-02T19:51:12.466Z'
+    approved_at: '2026-07-02T20:04:11.513Z'
   verify-approval:
     status: pending
 iteration: 1
-build_complete: false
-history: []
+build_complete: true
+history:
+  - iteration: 1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-plan-iter1-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-plan-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_r1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r1-iter1-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r1-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_r2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r2-iter1-codex.txt
+      - model: claude
+        verdict: COMMENT
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r2-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_r3
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r3-iter1-codex.txt
+      - model: claude
+        verdict: COMMENT
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r3-iter1-claude.txt
+  - iteration: 2
+    plan_phase: phase_r3
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r3-iter2-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-8/codev/projects/8-workflows-judging-the-judging-/8-phase_r3-iter2-claude.txt
 started_at: '2026-06-24T06:34:23.344Z'
-updated_at: '2026-07-01T23:24:07.385Z'
+updated_at: '2026-07-02T20:04:11.514Z'
 force_advanced:
   phase: phase_5
   iteration: 3

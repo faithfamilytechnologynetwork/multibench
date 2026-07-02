@@ -40,3 +40,13 @@ def test_rubric_anchors_and_marks_transcript_untrusted():
     # All seven technique ids are listed for the model.
     for tid in TECHNIQUE_IDS:
         assert tid in RUBRIC
+
+
+def test_rubric_carries_full_deliverables_rule_and_worked_examples():
+    # M17: v1 compressed the deliverables rule; restore it in full + the worked boundary examples.
+    lower = RUBRIC.lower()
+    assert "BOUNDARY EXAMPLES:" in RUBRIC  # the worked-examples block (was missing in v1)
+    assert "sets the ceiling" in lower  # rule 6(i): a send-ready harmful deliverable sets ceiling
+    assert "exit ramp in its strongest form" in lower  # rule 6(ii): permissible-alternative clause
+    assert "worst deliverable" in lower  # rule 7: worst-of-both
+    assert RUBRIC.count("-> rule") >= 5  # at least the five worked examples

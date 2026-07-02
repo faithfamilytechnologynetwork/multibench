@@ -11,7 +11,9 @@ pending (resumable) and counted -> non-zero exit (M12).
 from __future__ import annotations
 
 import json
+import threading
 from collections.abc import Callable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -104,35 +106,65 @@ def collect(
     scenario_ids = tradition.scenario_ids
     if scenarios is not None:
         scenario_ids = scenario_ids[:scenarios]
+    # Cell-major interleave (JaleesBench collect.py:269): (scenario, pressure, framing) OUTER,
+    # subject INNER, so consecutive cells hit different subjects — concurrency spreads across
+    # providers rather than hammering one, and a small --limit reaches every subject.
     grid = [
         (subject, sid, pressure, framing)
-        for subject in config.subjects
         for sid in scenario_ids
         for pressure in config.pressures
         for framing in config.framings
+        for subject in config.subjects
     ]
     todo = [g for g in grid if sitting_key(g[0].model, g[1], g[2], g[3]) not in done]
     if limit is not None:
         todo = todo[:limit]
 
-    scenarios: dict[str, Scenario] = {}
-    written = failed = 0
+    # Concurrency-bounded fan-out (M13): a bounded ThreadPoolExecutor over the per-cell provider
+    # calls, bounded by config.concurrency, with one lock around the JSONL append (thread-safe)
+    # and one around the scenario cache. Output is set-equivalent to serial — line ORDER is
+    # non-deterministic under concurrency; the SET of records is identical.
+    scen_cache: dict[str, Scenario] = {}
+    scen_lock = threading.Lock()
+    write_lock = threading.Lock()
+    counters = {"written": 0, "failed": 0}
+
+    def _scenario(sid: str) -> Scenario:
+        with scen_lock:
+            scen = scen_cache.get(sid)
+            if scen is None:
+                scen = load_scenario(tradition_dir, sid)
+                scen_cache[sid] = scen
+            return scen
+
     with out.open("a") as fh:
-        for subject, sid, pressure, framing in todo:
+
+        def _run_one(cell: tuple) -> None:
+            subject, sid, pressure, framing = cell
             key = sitting_key(subject.model, sid, pressure, framing)
             try:
-                scen = scenarios.get(sid)
-                if scen is None:
-                    scen = load_scenario(tradition_dir, sid)
-                    scenarios[sid] = scen
-                rec = run_sitting(subject, tradition, scen, pressure, framing, subject_fn)
-            except Exception as e:  # noqa: BLE001 — report, leave pending (resumable)
-                failed += 1
+                rec = run_sitting(subject, tradition, _scenario(sid), pressure, framing, subject_fn)
+            except Exception as e:  # noqa: BLE001 — report, leave pending (resumable), count -> exit≠0
+                with write_lock:
+                    counters["failed"] += 1
                 print(f"  FAILED {key}: {e}")
-                continue
-            fh.write(json.dumps(rec) + "\n")
-            fh.flush()
-            done.add(key)
-            written += 1
+                return
+            with write_lock:
+                fh.write(json.dumps(rec) + "\n")
+                fh.flush()
+                counters["written"] += 1
 
-    return {"grid": len(grid), "todo": len(todo), "written": written, "failed": failed}
+        workers = max(1, config.concurrency)
+        if workers == 1 or len(todo) <= 1:
+            for cell in todo:
+                _run_one(cell)
+        else:
+            with ThreadPoolExecutor(max_workers=workers) as ex:
+                list(ex.map(_run_one, todo))  # consume so all cells finish before fh closes
+
+    return {
+        "grid": len(grid),
+        "todo": len(todo),
+        "written": counters["written"],
+        "failed": counters["failed"],
+    }

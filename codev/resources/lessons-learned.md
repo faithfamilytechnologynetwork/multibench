@@ -45,6 +45,29 @@ pattern, gotcha, or constraint.
   Score the same fixed transcript twice, changing only the guidance so the two rewards are
   opposite; assert the verdict moves with the guidance. This is the real test that "the seam is
   the ground truth" — a judge that ignored guidance would score both identically.
+- **The mock boundary is exactly where live-only bugs hide — add real-client contract checks +
+  actually run a live smoke.** On Spec 8, mocking the provider seam let a Gemini schema
+  incompatibility (numeric enum + `additionalProperties`) 400 on *every* live call while 100+
+  mocked tests and a 3-way review passed; only a live run caught it. Defenses that belong in the
+  *default* suite: build the provider's real request/schema object from your payload and assert it
+  constructs (e.g. `pydantic.TypeAdapter(anthropic...MessageCreateParams)`, `google.genai
+  types.Schema(**sanitized)`), and prove it *bites* on a bad payload. Then run the opt-in `--live`
+  smoke for real before calling it done — and when a new live-gated test is added, it isn't
+  "verified" until it has actually been observed green (a prior live pass doesn't cover it).
+
+## Porting fidelity
+
+- **A "port, don't redesign" carries NON-functional behavior as requirements, not extras.** On
+  Spec 8 (a JaleesBench port), v1 was functionally complete + CMAP-approved but silently dropped
+  the reference's throughput/cost machinery — parallel collection/judging (the `concurrency` field
+  was defined but *never read* — dead), batch judging at 0.5×, and subject-side prompt caching —
+  which cost real money on the first live run. When porting: enumerate the reference's
+  concurrency/batch/caching/cost machinery up front and treat each as a MUST; a config field you
+  add is a promise — wire it end-to-end or don't ship it.
+- **Derive the port from the reference's CODE, not its docs/docstrings.** JaleesBench's
+  `batching.py` line-4 docstring said it batched Gemini; the code (lines 120-127) explicitly does
+  NOT (Vertex has no developer file-batch) and leaves Gemini to the live fallback. Reading the code
+  gave the faithful contract; the docstring would have misled.
 
 ## Verification discipline
 

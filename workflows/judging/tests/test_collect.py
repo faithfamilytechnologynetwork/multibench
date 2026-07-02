@@ -121,3 +121,65 @@ def summary_grid_full(lines) -> bool:
 
     per_pair = Counter((s["scenario_id"], s["subject"]) for s in lines)
     return all(n == 4 for n in per_pair.values()) and len(per_pair) == 4
+
+
+def _overlap_fn(state, lock, delay=0.02):
+    import time
+
+    def fn(subject, ctx, msgs):
+        with lock:
+            state["in"] += 1
+            state["max"] = max(state["max"], state["in"])
+        time.sleep(delay)
+        with lock:
+            state["in"] -= 1
+        return ("R", {"in": 1, "out": 1}, 1)
+
+    return fn
+
+
+def _big_cfg(concurrency):
+    return Config(
+        subjects=(SubjectSpec("claude-opus-4-8"), SubjectSpec("claude-sonnet-4-6")),
+        framings=("unstated", "stated"),
+        pressures=("secularize", "insistence"),
+        concurrency=concurrency,
+    )
+
+
+def test_collect_concurrency_is_honored(sunni, tmp_path):
+    # M13/T18: with concurrency>1, provider calls actually overlap, bounded by concurrency.
+    import threading
+
+    state, lock = {"in": 0, "max": 0}, threading.Lock()
+    collect(sunni, tmp_path, config=_big_cfg(4), subject_fn=_overlap_fn(state, lock), scenarios=2)
+    assert state["max"] > 1  # ran concurrently, not serially
+    assert state["max"] <= 4  # bounded by config.concurrency
+
+
+def test_collect_concurrency_1_is_serial(sunni, tmp_path):
+    import threading
+
+    state, lock = {"in": 0, "max": 0}, threading.Lock()
+    collect(sunni, tmp_path, config=_big_cfg(1), subject_fn=_overlap_fn(state, lock), scenarios=1)
+    assert state["max"] == 1  # concurrency=1 => strictly serial
+
+
+def test_collect_parallel_output_is_set_equivalent_to_serial(sunni, tmp_path):
+    # Same SET of sittings regardless of concurrency; line ORDER may differ (M13). No dup/loss.
+    import threading
+
+    def keys(d):
+        lines = [json.loads(l) for l in (d / "sittings.jsonl").read_text().splitlines()]
+        ks = [sk(s) for s in lines]
+        assert len(ks) == len(set(ks)), "duplicate/lost lines under concurrency"
+        return set(ks)
+
+    def sk(s):
+        return f"{s['subject']}|{s['scenario_id']}|{s['pressure']}|{s['framing']}"
+
+    serial_dir, par_dir = tmp_path / "serial", tmp_path / "par"
+    st, lock = {"in": 0, "max": 0}, threading.Lock()
+    collect(sunni, serial_dir, config=_big_cfg(1), subject_fn=_overlap_fn(st, lock, 0), scenarios=2)
+    collect(sunni, par_dir, config=_big_cfg(6), subject_fn=_overlap_fn(st, lock, 0), scenarios=2)
+    assert keys(serial_dir) == keys(par_dir)

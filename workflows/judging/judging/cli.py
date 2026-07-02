@@ -131,3 +131,55 @@ def run(
     typer.echo(_json.dumps(summary))
     if summary["failed"]:
         raise typer.Exit(code=1)  # failed cells are resumable; signal non-zero (M12)
+
+
+# Batch judging (~50% cost via Anthropic Message Batches; Gemini falls back to the live judge).
+batch_app = typer.Typer(
+    help="Batch judging via Anthropic Message Batches (~50% cost). Gemini -> live `judge` fallback.",
+    no_args_is_help=True,
+)
+app.add_typer(batch_app, name="batch-judge")
+
+
+@batch_app.command("submit")
+def batch_submit(
+    sittings: str = typer.Argument(..., help="Path to a sittings.jsonl file."),
+    tradition: str = typer.Argument(..., help="Path to the tradition directory."),
+    results_dir: str = typer.Option("results", help="Directory for batch_state.json + judgments."),
+    limit: int = typer.Option(None, help="Cap the number of batched cells."),
+    config: str = _CONFIG_OPT,
+) -> None:
+    """Submit pending Anthropic-judge cells as Message Batches; records batch_state.json (M14)."""
+    import json as _json
+
+    from judging.batching import submit as run_submit
+
+    summary = run_submit(sittings, tradition, results_dir, config=_load(config), limit=limit)
+    typer.echo(_json.dumps(summary))
+
+
+@batch_app.command("collect")
+def batch_collect(
+    sittings: str = typer.Argument(..., help="Path to sittings.jsonl (drives the live fallback)."),
+    tradition: str = typer.Argument(..., help="Path to the tradition directory."),
+    results_dir: str = typer.Option(
+        "results", help="Directory holding batch_state.json / judgments.jsonl."
+    ),
+    fallback: bool = typer.Option(
+        True, help="After collecting, live-judge every still-pending cell (batch errors, Gemini)."
+    ),
+    config: str = _CONFIG_OPT,
+) -> None:
+    """Poll submitted batches; write finished verdicts (batch-priced); then the live `judge` is the
+    fallback for everything still pending (M14). ``--no-fallback`` collects batch results only."""
+    import json as _json
+
+    from judging.batching import collect as run_collect
+
+    summary = run_collect(
+        tradition, results_dir, config=_load(config), sittings_path=sittings, fallback=fallback
+    )
+    typer.echo(_json.dumps(summary))
+    live = summary.get("live") or {}
+    if live.get("failed"):
+        raise typer.Exit(code=1)  # live-fallback failures are resumable -> non-zero (M12)

@@ -35,28 +35,47 @@ PRICES: dict[str, tuple[float, float]] = {
 
 
 def _add_usage(acc: dict, u: dict) -> None:
+    # Batch-API usage (usage["batch"] is truthy) accumulates under `b_`-prefixed keys so the cost
+    # model can price it at 0.5x (JaleesBench score.py). Live usage uses the bare keys.
+    pre = "b_" if u.get("batch") else ""
     for k in ("in", "out", "cache_write", "cache_read"):
-        acc[k] = acc.get(k, 0) + (u.get(k, 0) or 0)
+        acc[pre + k] = acc.get(pre + k, 0) + (u.get(k, 0) or 0)
 
 
 def _usage_cost(model: str, tok: dict) -> float | None:
     """USD for accumulated usage, or ``None`` if the model has no listed price.
 
     1h-cache writes bill ~2x input, reads ~0.1x (Anthropic); non-cache models just use in/out.
+    ``b_``-prefixed tokens are **batch-API** tokens, billed at **0.5x** the corresponding rate
+    (spec §5.8 / M14; JaleesBench score.py).
     """
     if model not in PRICES:
         return None
     pi, po = PRICES[model]
-    return (
+    full = (
         tok.get("in", 0) * pi
         + tok.get("out", 0) * po
         + tok.get("cache_write", 0) * pi * 2.0
         + tok.get("cache_read", 0) * pi * 0.1
-    ) / 1e6
+    )
+    batch = (
+        tok.get("b_in", 0) * pi
+        + tok.get("b_out", 0) * po
+        + tok.get("b_cache_write", 0) * pi * 2.0
+        + tok.get("b_cache_read", 0) * pi * 0.1
+    )
+    return (full + 0.5 * batch) / 1e6
 
 
 def _tokens_in(tok: dict) -> int:
-    return tok.get("in", 0) + tok.get("cache_write", 0) + tok.get("cache_read", 0)
+    return sum(
+        tok.get(k, 0)
+        for k in ("in", "cache_write", "cache_read", "b_in", "b_cache_write", "b_cache_read")
+    )
+
+
+def _tokens_out(tok: dict) -> int:
+    return tok.get("out", 0) + tok.get("b_out", 0)
 
 
 def _cell(j: dict) -> tuple:
@@ -274,7 +293,7 @@ def build_report(
                     "stage": stage,
                     "model": model,
                     "tokens_in": _tokens_in(tok),
-                    "tokens_out": tok.get("out", 0),
+                    "tokens_out": _tokens_out(tok),
                     "usd": usd,
                 }
             )

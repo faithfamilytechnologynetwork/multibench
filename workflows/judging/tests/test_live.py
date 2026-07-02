@@ -13,12 +13,13 @@ Run with credentials + the flag::
 Every test skips cleanly when its credentials are absent (never a hard failure, N4).
 """
 
+import json
 import os
 from types import SimpleNamespace
 
 import pytest
 
-from judging.config import JudgeSpec
+from judging.config import JudgeSpec, SubjectSpec
 from judging.judge import parse_verdict
 from judging.loaders import load_scenario, load_tradition
 from judging.prompts import judge_prompt_parts
@@ -77,16 +78,16 @@ def test_live_anchoring_verdict_follows_guidance():
     """M8b: flipping ONLY the guidance flips the verdict — the judge anchors to guidance."""
     judge = JudgeSpec(model="claude-opus-4-8", provider="anthropic")
     schema = verdict_schema()
-    rewarded, _ = judge_complete(judge, _parts_with_guidance(_REWARD_STEADFAST), schema, 2)
-    punished, _ = judge_complete(judge, _parts_with_guidance(_REWARD_COMPLIANCE), schema, 2)
+    rewarded, _, _ = judge_complete(judge, _parts_with_guidance(_REWARD_STEADFAST), schema, 2)
+    punished, _, _ = judge_complete(judge, _parts_with_guidance(_REWARD_COMPLIANCE), schema, 2)
     hi = parse_verdict(rewarded)["score"]
     lo = parse_verdict(punished)["score"]
     assert hi > lo, f"verdict did not track supplied guidance: rewarded={hi}, punished={lo}"
 
 
 @pytest.mark.skipif(not _HAS_ANTHROPIC, reason="no ANTHROPIC_API_KEY")
-def test_live_prefix_cache_hit(sunni):
-    """S3: a second judgment sharing the cached prefix reports cache_read > 0."""
+def test_live_judge_prefix_cache_hit(sunni):
+    """S3: a second JUDGE call sharing the cached rubric+anchor prefix reports cache_read > 0."""
     judge = JudgeSpec(model="claude-opus-4-8", provider="anthropic")
     schema = verdict_schema()
     trad = load_tradition(sunni)
@@ -94,8 +95,63 @@ def test_live_prefix_cache_hit(sunni):
     scen = load_scenario(sunni, sid)
     parts = judge_prompt_parts(trad, scen, _TURNS, "full")
 
-    _, first = judge_complete(judge, parts, schema, 2)  # writes the prefix cache
-    _, second = judge_complete(judge, parts, schema, 2)  # should read it back
+    _, _, first = judge_complete(judge, parts, schema, 2)  # (verdict, raw, usage) — writes cache
+    _, _, second = judge_complete(judge, parts, schema, 2)  # should read it back
     assert second.get("cache_read", 0) > 0, (
         f"expected a prefix-cache hit on the second call; usage={second}"
     )
+
+
+@pytest.mark.skipif(not _HAS_ANTHROPIC, reason="no ANTHROPIC_API_KEY")
+def test_live_subject_turn2_reads_cache(sunni):
+    """M16/T21: the SUBJECT side — turn-2 rereads the framing + turn-1 from cache, so its usage
+    reports cache_read > 0 (the cost regression this restores). Mirrors run_sitting: two
+    subject_complete calls under a Guided framing (a long, cache-worthy prefix)."""
+    from judging.prompts import framing_context
+    from judging.providers import subject_complete
+
+    subject = SubjectSpec(model="claude-opus-4-8")
+    trad = load_tradition(sunni)
+    ctx = framing_context("guided", trad)  # the guide — a large prefix worth caching
+    turn1 = load_scenario(sunni, trad.scenario_ids[0]).turn1
+
+    reply1, _, _ = subject_complete(subject, ctx, [{"role": "user", "content": turn1}], 2)
+    _, usage2, _ = subject_complete(
+        subject,
+        ctx,
+        [
+            {"role": "user", "content": turn1},
+            {"role": "assistant", "content": reply1},
+            {"role": "user", "content": "And what if I really can't?"},
+        ],
+        2,
+    )
+    assert usage2.get("cache_read", 0) > 0, (
+        f"expected a subject-side cache hit on turn-2; usage={usage2}"
+    )
+
+
+_HAS_GEMINI = bool(
+    os.environ.get("GEMINI_API_KEY")
+    or os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+    or os.environ.get("GOOGLE_GENAI_USE_VERTEXAI")
+)
+
+
+@pytest.mark.skipif(not (_HAS_ANTHROPIC and _HAS_GEMINI), reason="needs Anthropic + Gemini creds")
+def test_live_run_smoke_end_to_end(sunni, tmp_path):
+    """M21/T27: the ANTI-MOCK smoke — a tiny real `run` (2 scenarios, default panel incl. the
+    Gemini judge) end-to-end against real creds, producing a report. This is the check that would
+    have caught the Gemini-400 + the cost regressions; it MUST be run before the work is done.
+    Cheap: 2 scenarios x 6 pressures x 3 framings x 2 subjects is bounded by --scenarios."""
+    from judging.pipeline import run_pipeline
+
+    summary = run_pipeline(sunni, tmp_path, scenarios=1)  # 1 scenario = smallest real grid
+    assert (tmp_path / "sittings.jsonl").exists()
+    assert (tmp_path / "judgments.jsonl").exists()
+    assert (tmp_path / "report.md").exists() and (tmp_path / "report.json").exists()
+    rep = json.loads((tmp_path / "report.json").read_text())
+    assert rep["tradition"] == "sunni-islam"
+    assert rep["counts"]["judgments"] > 0  # real verdicts landed
+    # Both default judges actually produced verdicts (this is what the mock boundary hid).
+    assert any("gemini" in j for j in rep["judges"]), f"no gemini verdicts: judges={rep['judges']}"
