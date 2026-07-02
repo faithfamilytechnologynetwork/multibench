@@ -48,6 +48,9 @@ def collect(
     tradition: str = typer.Argument(..., help="Path to a tradition directory."),
     results_dir: str = typer.Option("results", help="Directory for sittings output."),
     limit: int = typer.Option(None, help="Cap the number of grid cells (smoke runs)."),
+    scenarios: int = typer.Option(
+        None, help="Cap to the first N scenarios (full grid each; smoke across all subjects)."
+    ),
     config: str = _CONFIG_OPT,
 ) -> None:
     """Run subject models over the framing x pressure x scenario grid -> sittings.jsonl."""
@@ -55,7 +58,9 @@ def collect(
 
     from judging.collect import collect as run_collect
 
-    summary = run_collect(tradition, results_dir, config=_load(config), limit=limit)
+    summary = run_collect(
+        tradition, results_dir, config=_load(config), limit=limit, scenarios=scenarios
+    )
     typer.echo(_json.dumps(summary))
     if summary["failed"]:
         raise typer.Exit(code=1)  # failed cells are resumable; signal non-zero (M12)
@@ -107,6 +112,9 @@ def run(
     tradition: str = typer.Argument(..., help="Path to a tradition directory."),
     results_dir: str = typer.Option("results", help="Directory for all pipeline outputs."),
     limit: int = typer.Option(None, help="Cap the number of grid cells (smoke runs)."),
+    scenarios: int = typer.Option(
+        None, help="Cap to the first N scenarios (full grid each; smoke across all subjects)."
+    ),
     config: str = _CONFIG_OPT,
 ) -> None:
     """End-to-end: collect -> judge -> report for a tradition.
@@ -119,7 +127,7 @@ def run(
 
     from judging.pipeline import run_pipeline
 
-    summary = run_pipeline(tradition, results_dir, config=_load(config), limit=limit)
+    summary = run_pipeline(tradition, results_dir, config=_load(config), limit=limit, scenarios=scenarios)
     typer.echo(_json.dumps(summary))
     if summary["failed"]:
         raise typer.Exit(code=1)  # failed cells are resumable; signal non-zero (M12)
