@@ -44,20 +44,53 @@ def test_subject_collection_is_claude_only():
         )
 
 
-def test_fold_prefixes_user_turns_only():
-    # Framing is folded onto user turns (as a context prefix), assistant turns untouched (§4.5).
-    from judging.providers import _fold, ctx_block
+def test_subject_messages_fold_and_cache_breakpoints():
+    # Framing is folded onto EVERY user turn (§4.5); cache breakpoints are on the FIRST user
+    # turn only (M16): framing block = 1h ephemeral, turn-1 question = default-TTL ephemeral;
+    # assistant turns untouched.
+    from judging.providers import _subject_messages, ctx_block
 
-    msgs = [{"role": "user", "content": "Q"}, {"role": "assistant", "content": "A"}]
-    folded = _fold(msgs, "GUIDE TEXT")
-    assert folded[0]["content"].startswith(ctx_block("GUIDE TEXT"))
-    assert "Q" in folded[0]["content"]
-    assert folded[1] == {"role": "assistant", "content": "A"}
+    msgs = [
+        {"role": "user", "content": "Q1"},
+        {"role": "assistant", "content": "A1"},
+        {"role": "user", "content": "Q2"},
+    ]
+    out = _subject_messages(msgs, "GUIDE TEXT")
+    # First user turn: [framing(1h cache), question(default cache)].
+    t1 = out[0]["content"]
+    assert t1[0]["text"] == ctx_block("GUIDE TEXT")
+    assert t1[0]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert t1[1]["text"] == "Q1"
+    assert t1[1]["cache_control"] == {"type": "ephemeral"}
+    # Assistant turn untouched.
+    assert out[1] == {"role": "assistant", "content": "A1"}
+    # Second user turn: framing still present (blinding design) but NO cache_control anywhere.
+    t2 = out[2]["content"]
+    assert t2[0]["text"] == ctx_block("GUIDE TEXT")
+    assert all("cache_control" not in b for b in t2)
 
 
-def test_fold_is_noop_without_prefix():
-    from judging.providers import _fold
+def test_subject_messages_caches_turn1_even_without_framing():
+    # Unstated framing (no prefix): still cache turn-1's question so turn-2 rereads it (M16).
+    from judging.providers import _subject_messages
 
-    msgs = [{"role": "user", "content": "Q"}]
-    assert _fold(msgs, None) == msgs
+    out = _subject_messages([{"role": "user", "content": "Q"}], None)
+    blocks = out[0]["content"]
+    assert [b["text"] for b in blocks] == ["Q"]  # no framing block prepended
+    assert blocks[0]["cache_control"] == {"type": "ephemeral"}
+
+
+def test_subject_messages_construct_as_anthropic_params():
+    # Real-client construction (M21, anti-mock): the built user turns are valid Anthropic
+    # message params (content-block lists the SDK accepts), not just arbitrary dicts.
+    from judging.providers import _subject_messages
+
+    out = _subject_messages([{"role": "user", "content": "Q"}], "CTX")
+    for msg in out:
+        assert msg["role"] in ("user", "assistant")
+        if isinstance(msg["content"], list):
+            for b in msg["content"]:
+                assert b["type"] == "text" and isinstance(b["text"], str)
+                if "cache_control" in b:
+                    assert b["cache_control"]["type"] == "ephemeral"
 

@@ -370,5 +370,19 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
   explicit **provider return-shape seam change** (raw text discarded at `json.loads` today); (3)
   `batch-judge submit|collect` CLI + manifest-lifecycle tests explicit in r2; (4) r1 serial-vs-
   parallel = **set-equivalence** (line order non-deterministic).
-- Next: rebuttal done → `porch done/next` → iter-3 re-consult → **plan-approval gate** → STOP for
-  the architect. Then implement r1→r2→r3, one PR (`Refs #8`). No self-approve/merge.
+- **plan-approval APPROVED by the user.** `porch done` → implement phase; porch re-extracted the
+  3 remediation phases (r1/r2/r3). Implementing r1→r2→r3, one PR (`Refs #8`). No self-approve/merge.
+
+## Implement phase_r1 — parallel collect+judge + subject caching (2026-07-02)
+- `collect.py`: cell-major interleave (scenario/pressure/framing outer, subject inner) + bounded
+  `ThreadPoolExecutor(max_workers=config.concurrency)` over per-cell calls, lock-guarded JSONL
+  append + scenario cache; concurrency=1 stays serial; resume/limit/scenarios/exit-code preserved.
+- `judge.py`: classify self-judge skips first (no API), then fan out the base + re-judge passes
+  under `config.concurrency` (same lock pattern).
+- `providers.py`: replaced `_fold` with `_subject_messages` — folds framing onto EVERY user turn
+  (blinding, §4.5) but sets cache breakpoints on the FIRST user turn only (framing 1h ephemeral +
+  turn-1 default TTL), mirroring JaleesBench `collect.py` so turn-2 rereads turn-1 from cache (M16).
+- Tests: collect concurrency honored (max in-flight >1, ≤N) + concurrency=1 serial + parallel
+  set-equivalence (no dup/loss); judge concurrency honored; `_subject_messages` cache-breakpoint
+  contract + real-client-shape check (M21 subject path). **133 pass, 2 live-skipped.**
+- Next: commit → `porch done` → per-phase consult (codex+claude) → converge → r2.

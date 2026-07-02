@@ -213,3 +213,35 @@ def test_judgment_tradition_is_authoritative(sunni, tmp_path):
     judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
     js = load_judgments(tmp_path)
     assert js and all(j["tradition"] == "sunni-islam" for j in js)
+
+
+def test_judge_concurrency_is_honored(sunni, tmp_path):
+    # M15/T19: the base judge pass fans out under config.concurrency (overlap bounded).
+    import threading
+    import time
+
+    sittings = [
+        _sitting("subj", pressure=p, framing=f)
+        for p in ("secularize", "insistence")
+        for f in ("unstated", "stated")
+    ]
+    sp = _write_sittings(tmp_path, *sittings)
+    cfg = Config(
+        judges=(JudgeSpec("jA", "anthropic"), JudgeSpec("jB", "anthropic")),
+        subjects=(SubjectSpec("subj"),),
+        concurrency=4,
+    )
+    state, lock = {"in": 0, "max": 0}, threading.Lock()
+
+    def fn(judge, parts):
+        with lock:
+            state["in"] += 1
+            state["max"] = max(state["max"], state["in"])
+        time.sleep(0.02)
+        with lock:
+            state["in"] -= 1
+        return ({"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": []}, {})
+
+    judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)
+    assert state["max"] > 1  # ran concurrently (4 sittings x 2 judges x 2 scopes = 16 cells)
+    assert state["max"] <= 4  # bounded by config.concurrency

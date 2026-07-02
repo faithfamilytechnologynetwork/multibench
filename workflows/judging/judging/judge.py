@@ -15,8 +15,10 @@ never written as a real score.
 from __future__ import annotations
 
 import json
+import threading
 from collections import defaultdict
 from collections.abc import Callable, Iterable
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -174,11 +176,12 @@ def _judge_pass(
     done = {judgment_key(j) for j in _read_jsonl(out_path)}
     skip_done = {judgment_key(j) for j in _read_jsonl(skips_path)} if skips_path else set()
     new_skips: list[dict] = []
-    scenarios: dict[str, Any] = {}
-    written = failed = skipped = 0
+    scen_cache: dict[str, Any] = {}
+    scen_lock = threading.Lock()
+    skipped = 0
 
     if targets is None:
-        gen = (
+        gen: Iterable[tuple[dict, JudgeSpec, str]] = (
             (s, judge, scope)
             for s in sittings
             for judge in config.judges
@@ -187,53 +190,80 @@ def _judge_pass(
     else:
         gen = targets
 
+    # Classify first: self-judge skips (no API call) are recorded here; the remaining cells
+    # become parallel work items. Cells already in `done` (resume) are dropped.
+    work: list[tuple[dict, JudgeSpec, str, str]] = []
+    for s, judge, scope in gen:
+        if should_skip(judge.model, s["subject"]):
+            skipped += 1
+            if skips_path is not None:
+                sk = {
+                    "subject": s["subject"],
+                    "scenario_id": s["scenario_id"],
+                    "pressure": s["pressure"],
+                    "framing": s["framing"],
+                    "judge": judge.model,
+                    "scope": scope,
+                    "reason": "self_judge",
+                }
+                if judgment_key(sk) not in skip_done:
+                    new_skips.append(sk)
+                    skip_done.add(judgment_key(sk))
+            continue
+        rec_key = "|".join(
+            [s["subject"], s["scenario_id"], s["pressure"], s["framing"], judge.model, scope]
+        )
+        if rec_key in done:
+            continue
+        work.append((s, judge, scope, rec_key))
+
+    def _scenario(sid: str) -> Any:
+        with scen_lock:
+            scen = scen_cache.get(sid)
+            if scen is None:
+                scen = load_scenario(tradition_dir, sid)
+                scen_cache[sid] = scen
+            return scen
+
+    # Concurrency-bounded fan-out (M15): bounded ThreadPoolExecutor over the per-cell provider
+    # calls, bounded by config.concurrency, with one lock around the JSONL append. Output is
+    # set-equivalent to serial (line order is non-deterministic under concurrency).
+    write_lock = threading.Lock()
+    counters = {"written": 0, "failed": 0}
+
     with out_path.open("a") as fh:
-        for s, judge, scope in gen:
-            if should_skip(judge.model, s["subject"]):
-                skipped += 1
-                if skips_path is not None:
-                    sk = {
-                        "subject": s["subject"],
-                        "scenario_id": s["scenario_id"],
-                        "pressure": s["pressure"],
-                        "framing": s["framing"],
-                        "judge": judge.model,
-                        "scope": scope,
-                        "reason": "self_judge",
-                    }
-                    if judgment_key(sk) not in skip_done:
-                        new_skips.append(sk)
-                        skip_done.add(judgment_key(sk))
-                continue
-            rec_key = "|".join(
-                [s["subject"], s["scenario_id"], s["pressure"], s["framing"], judge.model, scope]
-            )
-            if rec_key in done:
-                continue
+
+        def _run_one(item: tuple[dict, JudgeSpec, str, str]) -> None:
+            s, judge, scope, rec_key = item
             try:
-                scen = scenarios.get(s["scenario_id"])
-                if scen is None:
-                    scen = load_scenario(tradition_dir, s["scenario_id"])
-                    scenarios[s["scenario_id"]] = scen
-                parts = judge_prompt_parts(tradition, scen, s["turns"], scope)
+                parts = judge_prompt_parts(tradition, _scenario(s["scenario_id"]), s["turns"], scope)
                 raw, usage = judge_fn(judge, parts)
                 verdict = parse_verdict(raw)
             except Exception as e:  # noqa: BLE001 — report, leave pending (resumable), exit nonzero
-                failed += 1
+                with write_lock:
+                    counters["failed"] += 1
                 print(f"  FAILED {rec_key}: {e}")
-                continue
-            fh.write(
-                json.dumps(_record(s, judge.model, scope, verdict, usage, tradition.id)) + "\n"
-            )
-            fh.flush()
-            done.add(rec_key)
-            written += 1
+                return
+            with write_lock:
+                fh.write(
+                    json.dumps(_record(s, judge.model, scope, verdict, usage, tradition.id)) + "\n"
+                )
+                fh.flush()
+                counters["written"] += 1
+
+        workers = max(1, config.concurrency)
+        if workers == 1 or len(work) <= 1:
+            for item in work:
+                _run_one(item)
+        else:
+            with ThreadPoolExecutor(max_workers=workers) as ex:
+                list(ex.map(_run_one, work))  # consume so all cells finish before fh closes
 
     if skips_path is not None and new_skips:
         with skips_path.open("a") as sf:
             for sk in new_skips:
                 sf.write(json.dumps(sk) + "\n")
-    return written, failed, skipped
+    return counters["written"], counters["failed"], skipped
 
 
 def _cell(j: dict) -> tuple:
