@@ -58,7 +58,7 @@ HTML with light/dark theming + table-view twins, HTML path imports no matplotlib
   a declared extra **and** in the dev group (so CI exercises `--figures`); the isolation
   requirement is at *import* time (lazy), which is honored and tested.
 
-## Documentation Updates
+## Architecture Updates
 
 Applied via the `update-arch-docs` skill (hot/cold two-tier discipline):
 
