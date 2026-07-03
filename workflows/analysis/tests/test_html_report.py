@@ -66,8 +66,9 @@ def test_is_full_html5_document(rendered):
 
 def test_sections_present(rendered):
     for heading in ("tradition gradient", "framing staircase", "Steadfastness by pressure",
-                    "Score distributions", "Technique profile", "Judge agreement"):
+                    "Score distributions", "Judge agreement"):
         assert heading in rendered
+    assert "Technique profile" not in rendered  # dropped from the seam (issue #28)
 
 
 # --- T6: self-contained (no external asset loads) ----------------------------

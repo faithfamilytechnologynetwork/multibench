@@ -18,7 +18,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from html import escape
 
-from analysis.aggregate import TECHNIQUE_IDS, TraditionAggregate
+from analysis.aggregate import TraditionAggregate
 from analysis.colors import MINOR_REFS, heatmap_color, on_color, score_color
 from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.stats import TraditionStats
@@ -335,32 +335,6 @@ def _distribution_table(pairs) -> str:
     return f'<table><thead><tr><th>tradition</th><th>subject</th>{head}</tr></thead><tbody>{"".join(body)}</tbody></table>'
 
 
-def _technique_html(pairs, subjects) -> str:
-    # Pooled per-subject rate across traditions (mean of per-tradition rates).
-    agg_rates: dict[str, dict[str, list[float]]] = {s: {t: [] for t in TECHNIQUE_IDS} for s in subjects}
-    for agg, _ in pairs:
-        for s in agg.subjects:
-            for t in TECHNIQUE_IDS:
-                v = agg.techniques[s].get(t)
-                if v is not None:
-                    agg_rates[s][t].append(v)
-    rows = []
-    for t in TECHNIQUE_IDS:
-        cells = []
-        for s in subjects:
-            vals = agg_rates[s][t]
-            rate = sum(vals) / len(vals) if vals else None
-            pct = 0 if rate is None else round(rate * 100)
-            bar = (
-                f'<div class="meter"><div class="meter-fill" style="width:{pct}%"></div></div>'
-                f'<span class="meter-num">{_fpct(rate)}</span>'
-            )
-            cells.append(f"<td>{bar}</td>")
-        rows.append(f"<tr><th>{esc(t)}</th>{''.join(cells)}</tr>")
-    head = "".join(f"<th>{esc(s)}</th>" for s in subjects)
-    return f'<table class="tech"><thead><tr><th>technique</th>{head}</tr></thead><tbody>{"".join(rows)}</tbody></table>'
-
-
 def _agreement_table(pairs) -> str:
     body = []
     for agg, _ in pairs:
@@ -458,19 +432,17 @@ def render_report(
         section("5", "Scenario spotlights",
                 "Per-scenario headline (unstated, after pressure) — where a tradition's gradient comes from.",
                 "", _spotlight_table(pairs, subjects)),
-        section("6", "Technique profile",
-                "Share of a subject's judgments citing each counseling technique, pooled across traditions.",
-                _technique_html(pairs, subjects), ""),
-        section("7", "Judge agreement",
+        section("6", "Judge agreement",
                 "Inter-judge exact / within-one-step agreement and the lowest-agreement scenario per tradition.",
                 "", _agreement_table(pairs)),
-        section("8", "Cost", "Total spend across the run.", "", _cost_table(pairs, totals)),
-        '<section><h2><span class="num">9</span> Read this as a pilot</h2><ul class="caveats">'
+        section("7", "Cost", "Total spend across the run.", "", _cost_table(pairs, totals)),
+        '<section><h2><span class="num">8</span> Read this as a pilot</h2><ul class="caveats">'
         '<li><b>Five scenarios per tradition.</b> Every CI here is a bootstrap over just five '
         'scenario clusters, so intervals are wide and routinely cross zero — treat each value as '
         'directional, not settled.</li>'
-        '<li><b>Judge asymmetry.</b> A judge never scores its own subject, so one subject may be '
-        'scored by a single judge and another by two.</li>'
+        '<li><b>Self-judgment bias.</b> Every configured judge scores every sitting, including '
+        'conversations its own model produced — a judge may be lenient toward its own outputs. '
+        '(Pre-#28 runs skipped self-judgments instead, leaving an asymmetric panel.)</li>'
         '<li><b>Scenario mix.</b> Each tradition\'s five scenarios differ, so part of a cross-tradition '
         'gap can be scenario mix rather than the subject.</li></ul></section>',
         f'<footer>{esc(_SCALE_NOTE)} · Generated from judging run artifacts; numbers reproduce each '
@@ -524,8 +496,6 @@ thead th,tbody th{background:var(--tile)}tbody th{text-align:left}
 tr.total th,tr.total td{font-weight:bold}
 .tablev{margin-top:8px}.tablev summary{cursor:pointer;color:var(--accent);font-family:system-ui,sans-serif;font-size:13px}
 .tablev>table{overflow-x:auto;display:block}
-.meter{display:inline-block;width:120px;height:9px;background:var(--empty);border-radius:5px;vertical-align:middle;overflow:hidden}
-.meter-fill{height:100%;background:var(--accent)}.meter-num{margin-left:6px;font-size:12px}
 .caveats{color:var(--ink);font-size:15px}.caveats li{margin:.35em 0}
 footer{margin-top:2.5em;padding-top:1em;border-top:1px solid var(--rule);color:var(--muted);font-size:12px}
 </style>"""

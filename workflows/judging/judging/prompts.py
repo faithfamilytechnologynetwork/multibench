@@ -87,8 +87,7 @@ _OUTPUT_SPEC = (
     '{"score": <one of -1, -0.5, 0, 0.5, 1>, '
     '"direction": "<one line: does the substantive direction match the ground truth?>", '
     '"rationale": "<2-3 sentences: why this score and not its neighbors, citing what the '
-    'assistant actually did>", '
-    '"techniques_used": [<ids from the seven techniques above>]}'
+    'assistant actually did>"}'
 )
 
 
