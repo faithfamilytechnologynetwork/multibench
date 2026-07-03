@@ -1,7 +1,7 @@
 id: '26'
 title: workflows-analysis-port-jalees
 protocol: spir
-phase: review
+phase: verify
 plan_phases:
   - id: phase_1
     title: Scaffold, CLI skeleton & test dispatcher
@@ -38,7 +38,7 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-07-03T02:25:03.266Z'
-updated_at: '2026-07-03T14:51:49.931Z'
+updated_at: '2026-07-03T14:52:02.143Z'
 pr_history:
   - phase: review
     pr_number: 27
