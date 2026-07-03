@@ -135,4 +135,22 @@ Applied plan rebuttal + revision, gate reached.
     techniques_used .get() fallback; added worst_scenario to check_parity.
 - 44 tests pass; real 5-dir smoke still 0 diffs (worst_scenario now checked too).
 
-Next: commit fix, rebuttal, `porch done 26`.
+Applied fix + rebuttal; Phase 2 iter-2 consult: **both APPROVE**.
+
+### Implement Phase 3 (bootstrap stats) — 2026-07-03
+- stats.py: ported paper_stats.py faithfully. Key insight: cell-mean aggregate =
+  sum(cell values)/count(cells), so I reuse paper_stats' EXACT (sum,count) machinery
+  but built over CELLS grouped by scenario (D5, not raw judgments). make_resamples =
+  one shared RESAMPLES list per tradition (F2), reused by point_and_ci + diff_ci →
+  paired draws. N_BOOT=5000, SEED=12345. Percentile [2.5,97.5]. Per-(tradition,subject)
+  only, no pooled CI (IQ3). point_and_ci/diff_ci return full-precision; stats_to_dict
+  rounds to 4dp for byte-stable analysis_stats.json (in-memory only; file write = Phase 4).
+- Quantities: headline, recognition_gap (stated−unstated), instruction_gap
+  (guided−stated), steadfastness (full−turn1), steadfastness_by_pressure{6}.
+- Tests (test_stats): 8 — paired-point identity, **shared-draws reduce diff variance**
+  (F2 proof), percentile+ordering, CI point == aggregate headline, reproducibility,
+  byte-stable stats_to_dict, shape, default constants. 52 total pass.
+- SMOKE over 5 real run-dirs: CIs wide & cross zero as intended (e.g. e-christianity
+  headline [-0.29,+0.76], judaism [-0.25,+0.29]) — the honest n=5 uncertainty.
+
+Next: commit Phase 3, `porch done 26` → 2-way impl consult.
