@@ -131,3 +131,33 @@ def test_stats_to_dict_shape(buddhism_agg):
 def test_default_constants():
     assert N_BOOT == 5000
     assert SEED == 12345
+
+
+# --- sparse-slice robustness (no NaN on zero-count draws) ---------------------
+
+def test_sparse_slice_never_produces_nan():
+    # A slice with cells in only 1 of 5 scenarios (a partial run's uncovered cells).
+    # Draws that pick only the four empty scenarios must be skipped, not divided by 0.
+    sc = (np.array([1.0, 0.0, 0.0, 0.0, 0.0]), np.array([2.0, 0.0, 0.0, 0.0, 0.0]))
+    resamples = make_resamples(5, n_boot=1000, seed=SEED)
+    # Force at least one all-empty draw into the list to exercise the skip path.
+    resamples.append(np.array([1, 2, 3, 4, 1]))  # none is scenario 0 -> zero count
+    ci = point_and_ci(sc, resamples)
+    assert ci is not None
+    assert all(np.isfinite(x) for x in ci)
+    assert ci[1] <= ci[0] <= ci[2]
+
+
+def test_sparse_diff_never_produces_nan():
+    a = (np.array([1.0, 0.0, 0.0, 0.0, 0.0]), np.array([2.0, 0.0, 0.0, 0.0, 0.0]))
+    b = (np.array([0.0, 0.5, 0.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0, 0.0, 0.0]))
+    resamples = make_resamples(5, n_boot=1000, seed=SEED)
+    ci = diff_ci(a, b, resamples)
+    assert ci is not None
+    assert all(np.isfinite(x) for x in ci)
+    assert ci[1] <= ci[0] <= ci[2]
+
+
+def test_all_empty_slice_returns_none():
+    empty = (np.zeros(5), np.zeros(5))
+    assert point_and_ci(empty, make_resamples(5, n_boot=10, seed=SEED)) is None

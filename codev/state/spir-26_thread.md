@@ -153,4 +153,13 @@ Applied fix + rebuttal; Phase 2 iter-2 consult: **both APPROVE**.
 - SMOKE over 5 real run-dirs: CIs wide & cross zero as intended (e.g. e-christianity
   headline [-0.29,+0.76], judaism [-0.25,+0.29]) — the honest n=5 uncertainty.
 
-Next: commit Phase 3, `porch done 26` → 2-way impl consult.
+### Phase 3 consult (Codex + Claude), 2026-07-03
+- **Claude APPROVE**; **Codex REQUEST_CHANGES** (HIGH): div-by-zero → NaN when a
+  bootstrap draw picks only zero-cell scenarios for a SPARSE slice (partial run's
+  uncovered cells). Dense fixtures don't trigger it but a partial real run could.
+- Fix: skip draws where the slice (or either diff term) has 0 cells in the resampled
+  scenarios — preserves shared draws (F2), never NaN; degenerate [p,p,p] if no draw
+  covers (can't happen when point exists). +3 sparse-slice regression tests. 55 pass;
+  real 5-dir stats serialize with no NaN.
+
+Next: commit fix, rebuttal, `porch done 26`.
