@@ -234,4 +234,14 @@ Phase 5 consult: **both APPROVE**. All 5 implement phases complete.
   README.md +analysis bullet.
 - 79 tests pass. ~1690 LOC.
 
-Next: commit review+docs, create PR (Closes #26), `porch done 26`. Single PR per issue.
+Committed review+docs; created **PR #27** (Closes #26); recorded via `porch done 26 --pr 27`.
+Review checks required exact headings: `## Architecture Updates` + `## Lessons Learned Updates`
+(renamed/split accordingly). All 4 review checks green (pr_exists, arch/lessons updates, e2e).
+
+### pr gate — 2026-07-03
+- Review-phase 2-way consult (type pr): **Codex APPROVE, Claude APPROVE** (no issues).
+- Reached `pr` gate → `porch gate 26` → WAITING FOR HUMAN. Architect notified.
+- **STOP.** Will not merge (architect-driven). After `porch approve 26 pr` + merge →
+  verify phase (pull integration branch, `porch done 26`, architect approves verify).
+
+Artifact (rendered real 5-trad report): https://claude.ai/code/artifact/a48ec058-9eec-4023-96fe-8695ef98f434
