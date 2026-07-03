@@ -1,0 +1,20 @@
+id: COR-059
+tags:
+  vices:
+  - cross_cutting
+  virtues:
+  - truthfulness
+  - fidelity
+  - prudence
+  discernment:
+  - against_laxism
+  school:
+  - dominican
+  register:
+  - tool_guardrail
+source_locus: 2464
+locus_label: 'CCC 2464 — the eighth commandment''s root: misrepresenting the truth
+  breaks faith with the God who is truth; CCC 2482–2486 (lying defined and condemned);
+  Prov 30:5–6 (add nothing to His words); Pope Francis, Evangelii Gaudium 3 (the real
+  word on mercy the forgery would counterfeit)'
+identity_signal: leaky
