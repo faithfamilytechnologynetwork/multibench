@@ -42,6 +42,28 @@ def test_shows_ci_whiskers_and_gap_columns(rendered):
     assert "recognition (S−U)" in rendered and "instruction (G−S)" in rendered
 
 
+def test_steadfastness_cis_displayed():
+    # M4: steadfastness CIs must be displayed, not just computed. The heatmap table twin
+    # renders each cell as "point [lo, hi]" and the SVG cells carry the CI on hover.
+    from analysis.html_report import _fci
+
+    agg = aggregate_tradition(load_run_dir(FIX / "buddhism"))
+    st = compute_tradition_stats(agg, n_boot=300, seed=12345)
+    html = render_report([agg], [st])
+    s = agg.subjects[0]
+    pooled_ci = _fci(st.per_subject[s].steadfastness)
+    assert pooled_ci in html, "pooled steadfastness CI must appear in the report"
+    # a per-pressure steadfastness CI too
+    some_pressure_ci = _fci(next(iter(st.per_subject[s].steadfastness_by_pressure.values())))
+    assert some_pressure_ci in html
+
+
+def test_is_full_html5_document(rendered):
+    assert rendered.startswith("<!DOCTYPE html>")
+    assert '<meta charset="utf-8"/>' in rendered
+    assert "<title>" in rendered and "</html>" in rendered
+
+
 def test_sections_present(rendered):
     for heading in ("tradition gradient", "framing staircase", "Steadfastness by pressure",
                     "Score distributions", "Technique profile", "Judge agreement"):

@@ -199,14 +199,20 @@ def _staircase_svg(agg: TraditionAggregate, subjects: list[str]) -> str:
     return f'<svg viewBox="0 0 {w:.0f} {h:.0f}" class="sm" role="img" aria-label="Framing staircase {esc(agg.tradition)}">{"".join(body)}</svg>'
 
 
+def _steadfastness_ci(st: TraditionStats, subject: str, col: str) -> list | None:
+    ss = st.per_subject[subject]
+    return ss.steadfastness if col == "pooled" else ss.steadfastness_by_pressure.get(col)
+
+
 def _heatmap_svg(pairs: list[tuple[TraditionAggregate, TraditionStats]]) -> str:
     cols = list(PRESSURES) + ["pooled"]
-    rows: list[tuple[str, str, dict, float | None]] = []
-    for agg, _ in pairs:
+    # (tradition, subject, point-by-col dict, stats) — points drive the color, CIs the tooltip.
+    rows: list[tuple[str, str, dict, float | None, TraditionStats]] = []
+    for agg, st in pairs:
         for s in agg.subjects:
             sc = agg.scorecard[s]
-            rows.append((agg.tradition, s, sc["steadfastness_by_pressure"], sc["steadfastness"]))
-    values = [v for _, _, bp, pooled in rows for v in list(bp.values()) + [pooled] if v is not None]
+            rows.append((agg.tradition, s, sc["steadfastness_by_pressure"], sc["steadfastness"], st))
+    values = [v for _, _, bp, pooled, _ in rows for v in list(bp.values()) + [pooled] if v is not None]
     vmax = max((abs(v) for v in values), default=1.0) or 1.0
 
     cell_w, cell_h = 74.0, 30.0
@@ -217,14 +223,19 @@ def _heatmap_svg(pairs: list[tuple[TraditionAggregate, TraditionStats]]) -> str:
     for c, col in enumerate(cols):
         cx = label_w + cell_w * c + cell_w / 2.0
         body.append(f'<text x="{cx:.1f}" y="{head_h - 14:.1f}" class="hm-col">{esc(col[:9])}</text>')
-    for r, (trad, subj, bp, pooled) in enumerate(rows):
+    for r, (trad, subj, bp, pooled, st) in enumerate(rows):
         ry = head_h + cell_h * r
         body.append(f'<text x="{label_w - 8:.1f}" y="{ry + cell_h / 2 + 4:.1f}" class="hm-row">{esc(trad)} · {esc(subj)}</text>')
         for c, col in enumerate(cols):
             v = pooled if col == "pooled" else bp.get(col)
             cx = label_w + cell_w * c
             fill = "var(--empty)" if v is None else heatmap_color(v, vmax)
-            body.append(f'<rect x="{cx:.1f}" y="{ry:.1f}" width="{cell_w - 2:.1f}" height="{cell_h - 2:.1f}" fill="{fill}"/>')
+            ci = _steadfastness_ci(st, subj, col)
+            tip = f"{trad} · {subj} · {col}: {_fci(ci)}"
+            body.append(
+                f'<rect x="{cx:.1f}" y="{ry:.1f}" width="{cell_w - 2:.1f}" height="{cell_h - 2:.1f}" '
+                f'fill="{fill}"><title>{esc(tip)}</title></rect>'
+            )
             if v is not None:
                 txt = on_color(v, vmax)
                 body.append(f'<text x="{cx + cell_w / 2:.1f}" y="{ry + cell_h / 2 + 4:.1f}" class="hm-val" fill="{txt}">{v:+.2f}</text>')
@@ -264,10 +275,15 @@ def _details(summary: str, table_html: str) -> str:
 
 
 def _scorecard_table(pairs, subjects) -> str:
+    # Header and body iterate the SAME global subject list (columns stay aligned even if a
+    # tradition is missing a subject — "—" fills the gap).
     head = "".join(f"<th>{esc(s)}</th>" for s in subjects)
     body = []
     for agg, st in pairs:
-        cells = "".join(f"<td>{_fci(st.per_subject[s].headline)}</td>" for s in agg.subjects)
+        cells = "".join(
+            f"<td>{_fci(st.per_subject[s].headline) if s in st.per_subject else '—'}</td>"
+            for s in subjects
+        )
         body.append(f"<tr><th>{esc(agg.tradition)}</th>{cells}</tr>")
     return f'<table><thead><tr><th>tradition</th>{head}</tr></thead><tbody>{"".join(body)}</tbody></table>'
 
@@ -292,18 +308,19 @@ def _staircase_table(pairs) -> str:
 
 
 def _heatmap_table(pairs) -> str:
+    # Table twin carries the steadfastness bootstrap CIs (M4): point [lo, hi] per cell.
     cols = list(PRESSURES) + ["pooled"]
     head = "".join(f"<th>{esc(c)}</th>" for c in cols)
     body = []
-    for agg, _ in pairs:
+    for agg, st in pairs:
         for s in agg.subjects:
-            sc = agg.scorecard[s]
-            cells = "".join(
-                f"<td>{_fnum(sc['steadfastness'] if c == 'pooled' else sc['steadfastness_by_pressure'].get(c))}</td>"
-                for c in cols
-            )
+            cells = "".join(f"<td>{_fci(_steadfastness_ci(st, s, c))}</td>" for c in cols)
             body.append(f"<tr><th>{esc(agg.tradition)}</th><td>{esc(s)}</td>{cells}</tr>")
-    return f'<table><thead><tr><th>tradition</th><th>subject</th>{head}</tr></thead><tbody>{"".join(body)}</tbody></table>'
+    return (
+        '<table><thead><tr><th>tradition</th><th>subject</th>' + head
+        + "</tr></thead><tbody>" + "".join(body)
+        + "</tbody></table>"
+    )
 
 
 def _distribution_table(pairs) -> str:
@@ -364,7 +381,7 @@ def _spotlight_table(pairs, subjects) -> str:
     body = []
     for agg, _ in pairs:
         for sid in agg.scenario_ids:
-            cells = "".join(f"<td>{_fnum(agg.by_scenario[sid].get(s))}</td>" for s in agg.subjects)
+            cells = "".join(f"<td>{_fnum(agg.by_scenario[sid].get(s))}</td>" for s in subjects)
             body.append(f"<tr><th>{esc(agg.tradition)}</th><td>{esc(sid)}</td>{cells}</tr>")
     return f'<table><thead><tr><th>tradition</th><th>scenario</th>{head}</tr></thead><tbody>{"".join(body)}</tbody></table>'
 
@@ -430,9 +447,10 @@ def render_report(
                 _details("Table view — framing + gap CIs", _staircase_table(pairs))),
         section("3", "Steadfastness by pressure",
                 "Change from first response to after-pressure (unstated). Red = degraded, green = "
-                "held or improved; the pooled column is the overall steadfastness.",
+                "held or improved; the pooled column is the overall steadfastness. Bootstrap 95% "
+                "CIs are in the table view (and on cell hover).",
                 _heatmap_svg(pairs),
-                _details("Table view — steadfastness", _heatmap_table(pairs))),
+                _details("Table view — steadfastness point [95% CI]", _heatmap_table(pairs))),
         section("4", "Score distributions",
                 "How each subject's per-judge verdicts spread across the five values.",
                 _distribution_svg(pairs),
@@ -459,7 +477,13 @@ def render_report(
         f'tradition\'s report.json.</footer>',
         "</main>",
     ]
-    return _CSS + "".join(parts)
+    body = "".join(parts)
+    return (
+        "<!DOCTYPE html>\n"
+        '<html lang="en">\n<head>\n<meta charset="utf-8"/>\n'
+        '<meta name="viewport" content="width=device-width, initial-scale=1"/>\n'
+        f"<title>{esc(title)}</title>\n{_CSS}\n</head>\n<body>\n{body}\n</body>\n</html>\n"
+    )
 
 
 _CSS = """<style>

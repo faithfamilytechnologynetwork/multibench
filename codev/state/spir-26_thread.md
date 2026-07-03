@@ -185,4 +185,21 @@ Applied fix + rebuttal; Phase 3 iter-2 consult: **both APPROVE**.
 - SMOKE: generated real 5-tradition report — 43KB self-contained, all sections,
   whiskers, 0 NaN, matplotlib NOT imported by report path. Verified real user path.
 
-Next: commit Phase 4, `porch done 26` → 2-way impl consult; publish visual artifact.
+Committed Phase 4 (b3b9eee); published visual artifact.
+
+### Phase 4 consult (Codex + Claude), 2026-07-03
+- **Claude APPROVE**; **Codex REQUEST_CHANGES** (HIGH). Both flagged the same core gap.
+  Fixed:
+  - **Steadfastness CIs now displayed** (M4): heatmap table twin renders each cell as
+    "point [lo,hi]" (per-pressure + pooled) from Phase-3 stats; SVG cells carry the CI
+    on <title> hover. (was point-only.)
+  - **Full HTML5 document** now: <!DOCTYPE>/<html lang>/<head><meta charset utf-8>+
+    viewport+<title></head><body>. Fixes non-ASCII (−1…+1 en-dash/ellipsis) garble +
+    tab title. Kept SVG xmlns-free so no `://` (self-contained assertion holds).
+  - **Column alignment**: _scorecard_table + _spotlight_table now iterate the GLOBAL
+    subjects list for BOTH header and body ('—' fallback) — no silent misalignment.
+  - +2 tests (steadfastness CI displayed; full-doc skeleton). 73 pass.
+- SMOKE: real 5-trad report 50KB, full doc, charset, steadfastness CIs, self-contained.
+  Artifact refreshed (same URL).
+
+Next: commit fixes, rebuttal, `porch done 26`.
