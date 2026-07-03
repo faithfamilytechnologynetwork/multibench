@@ -114,6 +114,16 @@ there with a reason.
 - **Self-contained HTML.** No external CSS/JS/CDN/`<img>`; inline `<style>` + inline
   SVG + optional inline `<script>` only (matches the pilot's house style). The HTML
   report must open offline as a single file.
+- **Output injection safety (security).** All artifact-derived text — tradition /
+  subject / judge / scenario ids, `rationale`, `direction`, transcript excerpts,
+  any `raw` string ever surfaced — is **untrusted, model-produced content** and
+  MUST be HTML-escaped before embedding in an HTML/SVG text or attribute context.
+  Untrusted text MUST NEVER be interpolated into an inline `<script>` context.
+  Any data the inline chart script needs is **numeric / whitelisted values
+  serialized as JSON** (with `<`/`&`/`</script` neutralized), never free-form
+  artifact prose; free text appears only in escaped HTML text nodes. (This tool is
+  otherwise offline — no network, no secrets — so this is the one real security
+  surface: HTML/SVG/script injection via judge-produced strings.)
 - **Fail fast, no fallbacks** (global rule). If a run-dir is missing a required
   artifact, or a `judgments.jsonl` row lacks a required key, or a numeric score is
   off the five-value grid, **fail loudly** with a clear error naming the file —
@@ -218,6 +228,21 @@ Structural facts the parser must respect:
 - **Cluster unit.** `scenario_id` (5 per tradition; tradition-specific prefixes
   `BUD-/BZ-/MSR-/JLS-/TAO-`). No dedicated `cluster` field exists.
 
+**Validation rules (fail-fast, applied by `loaders.py`):**
+
+| Condition | Disposition |
+|---|---|
+| A required artifact (`report.json`, `judgments.jsonl`) missing from a run-dir | **Error**, naming the dir |
+| Required judgment key absent, or `score` off the five-value grid, or `score` read from `raw` instead of top-level | **Error**, naming file + line |
+| **Two run-dirs with the same `report.json.tradition` id** | **Error** (each run-dir must be a distinct tradition) |
+| `tradition` or `subjects` in a `judgments.jsonl` row disagreeing with its run-dir's `report.json` | **Error** (inconsistent metadata) |
+| **Duplicate base identity** `(sitting_key, judge, scope)` in `judgments.jsonl` | **Error** (upstream should never emit two verdicts for one identity) |
+| **Duplicate override key** in `judgments_v2.jsonl` | **Tolerated**: last row wins (dict-overlay semantics, matching `score.py`'s `load_judgments`) — documented, not an error |
+| **Empty `judgments_v2.jsonl`** (file present, zero rows) | **Valid**: no-op overlay |
+| `judgments_v2.jsonl` / `skipped.jsonl` absent entirely | **Valid**: treated as empty (a run with no re-judges / no skips) |
+| Absent `(subject, judge)` pair explained by a `skipped.jsonl` self-skip | **Not an error** (expected asymmetry) |
+| Unrecognized files in the run-dir (`batch_state.json`, `report.md`, `config.yaml`, `*.md`) | **Ignored** — the loader requires only the named artifacts; it does not fail on extra files |
+
 ### 4.2 The cell reducer & aggregation (matching `report.json`)
 
 To keep the port's point estimates **numerically identical** to the upstream
@@ -231,7 +256,9 @@ spec's cell reducer (§5.9 of Spec 8), not JaleesBench's raw-judgment pooling:
    in-scope **cell** values; uncovered cells are excluded, never counted as 0.
    - `headline` = mean cell score at `framing=unstated, scope=full`.
    - `by_framing[f]` = mean cell score at `framing=f, scope=full`.
-   - `steadfastness` = headline(full) − mean(unstated, turn1).
+   - `steadfastness` = `mean(unstated, full) − mean(unstated, turn1)` (i.e.
+     headline minus the same aggregate taken at `scope=turn1`; both at
+     `framing=unstated`).
    - `steadfastness_by_pressure[p]` = mean(unstated, p, full) − mean(unstated, p, turn1).
 
 This is a **deliberate deviation** from `paper_stats.py`'s count-weighted pooling
@@ -273,6 +300,17 @@ Quantities that get CIs (minimum): per-tradition-per-subject **headline**;
 that will routinely cross zero — that is the honest point of adaptation #4, not a
 bug. The report frames every value as directional (mirrors the pilot's §10) and
 the caveats section states the n=5 limitation explicitly.
+
+**Cross-tradition pooling is per-tradition only (IQ3 resolved).** Every required
+CI is computed **within a single tradition's own 5-scenario cluster set** — the
+scorecard headline CIs, the recognition/instruction-gap CIs, and the steadfastness
+CIs are each a per-(tradition, subject) quantity bootstrapped over that tradition's
+5 scenarios. **No pooled / cross-tradition / "field-mean" row carries a CI in v1.**
+If a field-mean point value is shown at all, it is a plain point estimate with no
+interval (or omitted). This removes the one place the cluster design was
+ambiguous: there is no need to define how to combine draws across traditions,
+because no required output does so. A pooled cross-tradition CI is deferred to a
+later spec (§7.4, NQ-level).
 
 ### 4.4 The colormap & numeric-scale reframe
 
@@ -354,11 +392,25 @@ workflows/analysis/
 
 `report` command signature (Typer):
 ```
-analysis report RUN_DIR... [--out PATH] [--figures/--no-figures]
+analysis report RUN_DIR... [--out DIR] [--figures/--no-figures]
                            [--n-boot 5000] [--seed 12345] [--fig-format pdf,png]
 ```
 Heavy imports (matplotlib) deferred inside the command body so `--help` and the
 HTML path stay import-light (judging's convention).
+
+**Output contract (fixed, so every builder produces the same layout):**
+`--out` is a **directory** (default `./analysis-out`), created if absent. Written
+files, with fixed names:
+
+| Path | When | Contents |
+|---|---|---|
+| `<out>/report.html` | always | the self-contained HTML report |
+| `<out>/analysis_stats.json` | always | computed point + CI values (the `paper_stats.json` analogue) |
+| `<out>/figures/<name>.<ext>` | `--figures` | matplotlib figures; `<name>` = the fixed figure id (`scorecard`, `framing`, `steadfastness`, `distribution`), `<ext>` per `--fig-format` (default both `pdf` and `png`) |
+
+Regeneration **overwrites** the above files in place (idempotent; a re-run over the
+same inputs+seed yields byte-identical output). The tool does not delete unrelated
+files in `<out>`. `--fig-format` accepts a comma list drawn from `{pdf, png}`.
 
 ### 4.7 JaleesBench fidelity — the port ledger
 
@@ -388,6 +440,35 @@ HTML path stay import-light (judging's convention).
 | D7 | **matplotlib introduced** as a dependency (isolated to this uv project, deferred import) | issue asks for optional PNG/PDF figures; repo had none |
 | D8 | Drop JaleesBench-specific sections: scripture/citation classes (`clean`/`leaky`/`intrinsic`), Ansari case study, reasoning-mode, pillars/hearts breakdowns | MultiBench-general; per-tradition `taxonomies` are non-uniform (§9.4 out of scope) |
 
+### 4.8 Test fixtures & reproducibility (what CI may rely on)
+
+The reference inputs are **not** available to CI or to sibling builders:
+`tmp/judging-runs/20260702/` is git-ignored (run-artifact territory), and the
+JaleesBench port sources live in an external repo referenced by absolute path.
+Tests therefore MUST NOT depend on either. Instead:
+
+- **Committed miniature fixture run-dirs** ship under
+  `workflows/analysis/tests/fixtures/` — a small set (≥2 traditions) of run-dirs,
+  each a real-shaped `report.json` + `judgments.jsonl` + `judgments_v2.jsonl` +
+  `skipped.jsonl`, reduced to ~2 scenarios × both subjects × a couple of
+  framings/pressures. These are small text files (analogous data to the real
+  artifacts, not large JSON), safe to commit.
+- **The fixture's `report.json` must be internally consistent with its
+  `judgments.jsonl`** — ideally generated by running the real `workflows/judging`
+  `report` command over a tiny collected+judged set, then trimmed — so the
+  **point-estimate parity self-check (M3 / T3)** is a genuine cross-check of the
+  port's aggregation against the trusted upstream aggregator, and runs in CI
+  without the git-ignored data.
+- **Malformed-input fixtures** (a row missing a key, an off-grid score, a
+  duplicate base identity, a cross-metadata mismatch) back the fail-fast tests
+  (T1). These can be tiny inline strings or one-line files.
+- The full five-tradition `20260702` run is a **manual/local smoke** target only
+  (run when the artifacts are present locally), never a CI dependency.
+
+This mirrors `workflows/judging`'s testing posture (no reliance on run artifacts;
+integration coverage from committed data), adapted to the fact that `analysis`
+consumes run-dirs rather than tradition modules.
+
 ---
 
 ## 5. Open questions
@@ -405,10 +486,10 @@ matplotlib last so it is trivially deferrable.
 - **IQ2 — scenario spotlight transcripts.** Reading `sittings.jsonl` for verbatim
   excerpts is SHOULD, not MUST; the `by_scenario` table (from `report.json`) is the
   MUST. Default: table in v1, transcript excerpts optional.
-- **IQ3 — cross-tradition CI on pooled quantities.** Some numbers (e.g. a
-  "field-mean" row) pool across traditions; the resampling then draws within each
-  tradition's own 5-scenario cluster set and combines. Default per §4.3; flagged
-  for review since it is the one place the cluster design must be stated precisely.
+- **IQ3 — RESOLVED (§4.3).** Cross-tradition pooling carries no CI in v1; every
+  required CI is per-(tradition, subject) over that tradition's 5 clusters. No
+  cross-tradition draw-combination rule is needed. A pooled cross-tradition CI is
+  deferred to a later spec.
 
 ### Nice-to-know
 - **NQ1** — a `--json` side-output of the computed stats (the analogue of
@@ -456,9 +537,20 @@ matplotlib last so it is trivially deferrable.
 - **M6** — Scores are numeric only; **no band name** appears in any output. The
   colormap maps numeric −1…+1 via `TwoSlopeNorm` (F3, D1/D2).
 - **M7** — Fail-fast: a missing required artifact, a missing required judgment key,
-  or an off-grid score raises a clear error naming the file; no silent default.
+  an off-grid score, a duplicate base identity, a cross-metadata mismatch, or a
+  duplicate tradition id across run-dirs raises a clear error naming the file; no
+  silent default (§4.1 validation table).
 - **M8** — `.codev/checks/test.sh` gains the `workflows/analysis` registry line so
   the dispatcher runs its pytest suite for a builder that touches it.
+- **M9** — **Output-injection safe:** all artifact-derived text is HTML-escaped in
+  the rendered report and never interpolated into an inline `<script>` context
+  (§3.3 security constraint).
+- **M10** — **Fixed output contract:** `analysis report ... --out DIR` writes
+  `report.html` + `analysis_stats.json` (+ `figures/…` under `--figures`) with the
+  fixed names in §4.6; regeneration overwrites idempotently.
+- **M11** — **Fixture-backed CI:** the always-on tests run over committed
+  miniature fixture run-dirs (§4.8) with no dependency on `tmp/judging-runs/` or
+  the external JaleesBench sources.
 
 ### 7.2 Functional (SHOULD)
 
@@ -491,22 +583,36 @@ matplotlib last so it is trivially deferrable.
 
 ### 7.5 Test scenarios
 
-- **T1 (parse + validate)** — a tiny fixture run-dir (1–2 scenarios, both subjects,
-  a couple framings/pressures) loads; a malformed row (missing key / off-grid
-  score / `raw`-only) raises; a `skipped.jsonl` self-skip does not.
+- **T1 (parse + validate)** — a committed fixture run-dir (§4.8) loads; each
+  fail-fast condition in the §4.1 table raises (missing key, off-grid score,
+  duplicate base identity, cross-metadata mismatch, duplicate tradition id), while
+  a `skipped.jsonl` self-skip, an empty/absent `judgments_v2.jsonl`, and an extra
+  file like `batch_state.json` do **not** raise.
 - **T2 (v2 overlay)** — a base judgment overridden by a v2 row yields the v2 score,
   vote count unchanged.
-- **T3 (cell reducer / point-estimate parity)** — over a real `20260702` run-dir,
+- **T3 (cell reducer / point-estimate parity)** — over the committed fixture
+  run-dir (whose `report.json` was produced by the real judging aggregator, §4.8),
   recomputed headline/by_framing/steadfastness/techniques/agreement match
-  `report.json` to ≤1e−9 (M3).
+  `report.json` to ≤1e−9 (M3). Optionally, when `tmp/judging-runs/20260702/` is
+  present locally, the same parity check runs over all five real run-dirs as a
+  manual smoke.
 - **T4 (bootstrap correctness)** — `diff_ci(a,b)` point == `point_a − point_b`;
   paired draws (shared `RESAMPLES`) give smaller diff variance than independent
   draws on a fixture; CI is `[2.5,97.5]` percentile; reproducible under fixed seed.
 - **T5 (numeric-only)** — rendered HTML/text contains no band-name string
   (Burns/Sparks/Inert/Scent/Perfume); `score_color(-1|0|1)` returns the expected
   red/grey/green endpoints.
-- **T6 (self-contained HTML)** — output HTML has no `http(s)://` asset refs, no
-  `<img src>`, no `<script src>`; opens as one file.
+- **T6 (self-contained HTML)** — the rendered HTML has no external **asset**
+  references: no `src=`/`href=` on `<img>`, `<script>`, `<link>`, `<source>`
+  pointing at an `http(s)://` or protocol-relative URL, and no `<script src>` /
+  `<link rel=stylesheet href>`. (In-page anchors and any deliberate informational
+  hyperlinks are allowed; the check targets asset loads, not all URLs.) Opens as
+  one file offline.
+- **T6b (injection safety)** — a fixture whose `rationale`/`direction`/scenario id
+  contains `</script>`, `<img onerror=…>`, and `&`/`<`/`>` renders into the report
+  as escaped text (the payload appears literally, not as live markup) and never
+  inside a `<script>` context; a substring assertion proves the raw payload is not
+  present unescaped (M9).
 - **T7 (figures, sk-if-absent)** — with matplotlib available, `--figures` writes
   both `.pdf` and `.png`; test skips cleanly if matplotlib is not installed.
 - **T8 (CLI smoke)** — `analysis --help` and `analysis report --help` exit 0 without
@@ -525,4 +631,37 @@ artifacts), the port-source algorithms (`band_color`/`band_axis`,
 (`crosstrad-report.html` is hand-built inline SVG; no matplotlib in repo; uv
 projects standalone). Findings drove §4 and the port ledger §4.7.
 
-_(Porch will run 3-way spec consultation next; feedback recorded here.)_
+### Iteration 1 — 2-way spec review (Codex, Claude), 2026-07-02
+
+Per-phase consult set is `["codex", "claude"]` (Gemini can't see this worktree,
+[[gemini-consult-empty-sandbox]]).
+
+- **Claude — APPROVE** (HIGH). Verified every structural claim against the real
+  artifacts and the JaleesBench sources; called the port ledger exemplary. Minors:
+  `batch_state.json` not listed as ignored; T6 URL check possibly too broad; empty
+  `judgments_v2.jsonl` should be stated valid; steadfastness formula clarity.
+- **Codex — REQUEST_CHANGES** (HIGH). Strong/implementable but needs builder-safety
+  detail: (1) fixture/source availability — `tmp/` git-ignored, JaleesBench
+  external; state what CI may rely on; (2) HTML/SVG escaping requirement for
+  untrusted artifact text; (3) precise output file/dir contract; (4) validation
+  edge cases (duplicate tradition ids, cross-metadata mismatch, duplicate v2/base
+  keys); (5) resolve IQ3 pooled-CI in the spec.
+
+**Changes applied (this revision):**
+- §3.3 — added the **output-injection-safety** security constraint (escape all
+  artifact text; never into `<script>`). New criterion **M9**, test **T6b**.
+- §4.1 — added the **validation-rules table** (duplicate tradition id, cross-metadata
+  mismatch, duplicate base identity → errors; duplicate v2 key last-wins; empty/absent
+  v2 & skipped valid; extra files ignored). New criterion **M7** (expanded), test **T1**.
+- §4.2 — clarified `steadfastness = mean(unstated,full) − mean(unstated,turn1)`.
+- §4.3 — **resolved IQ3**: per-tradition CIs only; no pooled/field-mean CI in v1.
+- §4.6 — added the **fixed output contract** (`--out DIR`; `report.html`,
+  `analysis_stats.json`, `figures/<name>.<ext>`; idempotent overwrite). New **M10**.
+- §4.8 (new) — **test fixtures & reproducibility**: committed miniature fixture
+  run-dirs; parity self-check runs on the fixture (real `20260702` only a local
+  smoke); no CI dependence on `tmp/` or external sources. New **M11**; T3 repointed.
+- §7.5 — refined **T6** to target asset loads (not all URLs); added **T6b**, **T1**
+  edge cases.
+
+_(Porch drives the next step; if a second consultation iteration is requested,
+feedback lands below.)_

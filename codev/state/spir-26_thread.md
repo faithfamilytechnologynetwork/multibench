@@ -49,4 +49,18 @@ make_figures.py / paper_stats.py / score.py, reframed to compare **traditions**.
   Registry / PR strategy" as fixed architect decisions (no literal "Baked Decisions"
   heading, but same force) — captured in Constraints, not relitigated.
 
-Next: draft `codev/specs/26-workflows-analysis-port-jalees.md`, commit, `porch done 26`.
+Drafted + committed spec (`[Spec 26] Initial specification draft`), ran `porch done 26`.
+
+### Specify — iter 1 consult (Codex + Claude), 2026-07-02
+- **Claude APPROVE**; **Codex REQUEST_CHANGES** (both HIGH). All feedback legit &
+  applied in `[Spec 26] Specification with multi-agent review`:
+  - Security: HTML/SVG-escape all artifact text, never into `<script>` (M9/T6b).
+  - Validation table: dup tradition id / cross-metadata mismatch / dup base identity
+    → error; dup v2 key last-wins; empty/absent v2+skipped valid; extra files ignored.
+  - Fixed output contract: `--out DIR` → report.html + analysis_stats.json + figures/ (M10).
+  - §4.8 committed miniature fixture run-dirs (tmp/ is gitignored, JaleesBench external);
+    parity self-check runs on fixture, real 20260702 only a local smoke (M11).
+  - Resolved IQ3: per-tradition CIs only, no pooled/field-mean CI in v1.
+  - Clarified steadfastness formula; refined T6 to asset-loads.
+
+Next: commit revision, `porch next 26` (expect gate: spec-approval → STOP for human).
