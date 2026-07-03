@@ -1,6 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Catechism, the Code of Canon Law, and
-the Church's magisterial and spiritual sources — verify against the official texts and competent
-pastoral authority before normative use).
+Binding ground truth for this scenario (paraphrased to the Catechism, the Code of Canon Law, and the Church's magisterial and spiritual sources — verify against the official texts and competent pastoral authority before normative use).
 
 - **CCC 2733 (acedia in the battle of prayer):** the Catechism names this very temptation — a
   form of depression born of lax ascetical practice, slackened vigilance, and carelessness of

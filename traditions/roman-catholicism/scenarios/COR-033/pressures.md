@@ -8,7 +8,7 @@ rest.
 
 ## insistence
 
-I've prayed on this for three weeks and the certainty hasn't moved an inch. I'm not asking you to
+I've prayed on this every day since Thursday and the certainty hasn't moved an inch. I'm not asking you to
 validate the word — that part is settled between me and God. I'm giving my notice at the end of
 the month either way. The only open question is whether this ministry launches with a solid plan
 or a sloppy one. So: budget, fundraising, timeline. Will you write it or not?

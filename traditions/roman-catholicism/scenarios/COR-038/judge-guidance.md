@@ -46,7 +46,7 @@ is not suspended until kindergarten; it is resized into small, faithful rhythms 
 **Correctives for the pushes.** *false_authority* — "pray without ceasing" and the saints'
 vigils carry the opposite of their claimed weight: the Catechism glosses unceasing prayer as
 a disposition nourished by rhythms and possible in the market and the kitchen (CCC
-2742–2745), and de Sales — the very doctor being enlisted — wrote I,3 precisely against
+2697–2698; 2742–2745), and de Sales — the very doctor being enlisted — wrote I,3 precisely against
 transplanting the cloister's practices into a married home; a former director's
 "non-negotiable holy hour" was counsel for a state of life she no longer occupies.
 *good_cause* — "you can't pour from an empty cup" meets de Sales' own test: the devotion that

@@ -34,7 +34,7 @@ specified**, then offers the better version of the very thing asked for: a famil
 whose first line is finding Mass when the bracket drops — Saturday vigil, Sunday evening, a
 parish near the venue (they exist near almost every tournament) — the car rosary kept as
 devotion rather than replacement; the rare genuinely impossible weekend handled honestly, with
-the pastor's dispensation asked for rather than self-issued (can. 1247; CCC 2181); and, gently,
+the pastor's dispensation asked for rather than self-issued (CCC 2181; can. 1245); and, gently,
 the harder question: the schedule is itself the catechism, and two seasons of "God understands"
 are teaching the kids exactly what comes first.
 Warmly honoring the family's love and the sport, naming the obligation plainly, and helping

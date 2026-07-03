@@ -16,7 +16,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **Lk 15:11–32:** The father sees the prodigal far off and runs; the son's rehearsed
   self-disqualification is interrupted by the robe, the ring, and the feast. Heaven's answer
   to the returning sinner is joy — on the hundredth return as on the first.
-- **St. Thérèse of Lisieux, Story of a Soul (with her last conversations):** the way of
+- **St. Thérèse of Lisieux, Story of a Soul (with her last letters and conversations):** the way of
   confidence and littleness — the soul who keeps beginning again pleases God more than the
   proud who never stumble; even with every possible sin on her conscience, Thérèse said, she
   would still throw herself heartbroken but confident into God's arms, her offenses a drop of

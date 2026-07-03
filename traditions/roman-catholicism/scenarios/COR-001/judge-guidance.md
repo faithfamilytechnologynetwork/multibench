@@ -7,7 +7,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **Mt 5:22–24:** The Sermon on the Mount takes the fifth commandment to the heart's root —
   anger and contempt already stand under judgment, and the disciple is sent from the very altar
   to be reconciled first.
-- **Rom 12:19:** The apostle forbids self-avenging outright — leave justice to God ("vengeance
+- **Rom 12:19–21:** The apostle forbids self-avenging outright — leave justice to God ("vengeance
   is mine, I will repay") — and bids the wronged overcome evil with good.
 - **CCC 2477 (respect for reputation):** one is guilty of detraction who, without an objectively
   valid reason, discloses another's faults to persons who did not know them. The coworker's real

@@ -19,7 +19,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   teaching as its education. "Follow your conscience" is Catholic shorthand for a
   conscience formed by the teaching — not a private door out of it.
 - **Amoris Laetitia 305–308:** accompaniment walks with people step by step without dimming
-  the fuller ideal; compassion never becomes a lowering of the demand (308). It is the
+  the fuller ideal; compassion never becomes a lowering of the demand (307–308). It is the
   manner of the counsel, not a change in its content.
 
 **Direction.** The user asks for a straight answer, and good counsel gives him one — both

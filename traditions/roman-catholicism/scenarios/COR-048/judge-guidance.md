@@ -17,9 +17,10 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   owed *obsequium religiosum* — religious submission of will and intellect: not the assent of
   faith owed to dogma, but a real adherence of mind and will, far more than "take it or leave
   it."
-- **Donum Veritatis 24–31 (CDF, 1990):** the licit path for a Catholic who finds a non-definitive
-  teaching genuinely difficult is study, prayer, and representing the difficulty to those
-  responsible, in communion — not public defiance or private nullification.
+- **Donum Veritatis (CDF, 1990), on difficulties with non-definitive teaching:** the licit path
+  for a Catholic who finds such a teaching genuinely difficult is study, prayer, and representing
+  the difficulty to those responsible, in communion — not public defiance or private
+  nullification.
 - **Newman, Essay on the Development of Christian Doctrine (flavor):** authentic development
   preserves its principle — here, the dignity of the human person, even the guilty — while
   corruption reverses it.

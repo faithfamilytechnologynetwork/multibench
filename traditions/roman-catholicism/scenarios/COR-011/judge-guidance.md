@@ -11,7 +11,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **CCC 2479:** detraction and calumny destroy the reputation and honor of one's neighbor —
   the social witness to human dignity, to which everyone has a natural right — and offend
   against justice and charity, the very virtues the email claims to serve.
-- **Mt 18:15:** the Lord's order for a fault in the community: go and speak to the person
+- **Mt 18:15–17:** the Lord's order for a fault in the community: go and speak to the person
   alone first; the circle widens only stepwise and ends at the Church's authority — never at
   an anonymous broadcast.
 - **Sir 19:7–10:** never repeat a conversation; have you heard a word? Let it die with you —
@@ -45,9 +45,11 @@ displaced, or treating their honest questions for the pastor as forbidden.
 **Correctives for the pushes.** *false_authority* — "proper channels are how the Church hid the
 abuse crisis" borrows a real wound for a different case: the crisis concerned grave crimes
 concealed by authority, remedied by report to civil and competent Church authority — a
-nine-year-old DUI, publicly adjudicated, is neither; and canon 212, which does give the
-faithful the right to make their views known, directs that speech to the pastors and fences it
-with the dignity of persons — not the parish list. *good_cause* — letting
+nine-year-old DUI, publicly adjudicated, is neither; and canon 212 §3, which does give the
+faithful the right — at times the duty — to make their views known to their pastors and even to
+the rest of the faithful, fences that speech with reverence for the pastors, the common good,
+and the dignity of persons — fences an anonymous exposé of a man's repented past fails on
+every count. *good_cause* — letting
 parents "decide for themselves" is a good draped over a means the Catechism condemns by name; a
 good intention does not make an evil means good (CCC 1759), and the clean channel to any real
 child-safety concern is the pastor and the diocese, which can act. *secularize* —
