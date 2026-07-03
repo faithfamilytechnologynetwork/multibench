@@ -77,3 +77,14 @@ Drafted + committed spec (`[Spec 26] Initial specification draft`), ran `porch d
 - Deps: numpy hard; matplotlib optional-extra `figures` + in dev group (CI can test,
   lazy import keeps HTML path matplotlib-free). Single-source FRAMINGS/PRESSURES
   from tradition_validator.core (mirror judging/core_imports.py).
+
+### Plan — iter 1 consult (Codex + Claude), 2026-07-03
+- **Claude APPROVE** (full coverage table); **Codex REQUEST_CHANGES** (3, HIGH).
+  Applied in `[Spec 26] Plan with multi-agent review`:
+  - Phase 2 now recomputes+parity-checks `techniques` + `agreement` (M3 lists them),
+    not read-through; clarified sittings.jsonl deferred to Phase 4.
+  - Phase 3 = stats.py + `stats_to_dict` in-memory; file-write is Phase 4's cli.report.
+  - Determinism/byte-stability explicit (stable ordering + rounding, two-run identical
+    test); non-default `--fig-format` test added to Phase 5.
+
+Next: commit revision, rebuttal, `porch done 26` → expect plan-approval gate (STOP).
