@@ -167,7 +167,7 @@ def aggregate_tradition(run) -> TraditionAggregate:
     tech_count: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
     for j in judgments:
         tech_total[j["subject"]] += 1
-        for t in j.get("techniques_used", []):
+        for t in j["techniques_used"]:  # presence guaranteed by the loader's validation
             tech_count[j["subject"]][t] += 1
     techniques = {
         s: {
@@ -247,6 +247,15 @@ def check_parity(agg: TraditionAggregate, tol: float = 1e-9) -> list[str]:
 
     for k in ("cells", "exact_pct", "within_one_pct"):
         cmp(f"agreement[{k}]", agg.agreement[k], rep["agreement"][k])
+    cmp("agreement[worst_scenario_exact_pct]",
+        agg.agreement["worst_scenario_exact_pct"],
+        rep["agreement"].get("worst_scenario_exact_pct"))
+    if agg.agreement["worst_scenario"] != rep["agreement"].get("worst_scenario"):
+        diffs.append(
+            f"{agg.tradition}: agreement[worst_scenario]: recomputed "
+            f"{agg.agreement['worst_scenario']!r} != report.json "
+            f"{rep['agreement'].get('worst_scenario')!r}"
+        )
     for sid, v in agg.scenario_agreement.items():
         cmp(f"scenario_agreement[{sid}]", v, rep["scenario_agreement"].get(sid))
 
