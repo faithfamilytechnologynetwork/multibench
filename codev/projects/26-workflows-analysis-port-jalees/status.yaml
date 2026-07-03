@@ -5,10 +5,10 @@ phase: implement
 plan_phases:
   - id: phase_1
     title: Scaffold, CLI skeleton & test dispatcher
-    status: in_progress
+    status: complete
   - id: phase_2
     title: Loaders, validation, aggregation & parity self-check
-    status: pending
+    status: in_progress
   - id: phase_3
     title: Scenario-cluster bootstrap statistics
     status: pending
@@ -18,7 +18,7 @@ plan_phases:
   - id: phase_5
     title: Optional matplotlib figures
     status: pending
-current_plan_phase: phase_1
+current_plan_phase: phase_2
 gates:
   spec-approval:
     status: approved
@@ -33,7 +33,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-07-03T02:25:03.266Z'
-updated_at: '2026-07-03T04:48:44.104Z'
+updated_at: '2026-07-03T04:50:44.760Z'
