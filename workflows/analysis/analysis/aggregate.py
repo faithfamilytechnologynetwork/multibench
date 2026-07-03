@@ -107,7 +107,15 @@ def aggregate_tradition(run) -> TraditionAggregate:
     judgments = run.judgments
     subjects = run.subjects
     cs = cell_scores(judgments)
-    scenario_ids = sorted({j["scenario_id"] for j in judgments})
+    # Scenario universe = the bootstrap cluster set. Derive it from the run's `by_scenario`
+    # (upstream keys it by judgments ∪ sittings — the full *expected* coverage), unioned with
+    # judged scenarios. A scenario that was collected but produced ZERO judgments (a partial
+    # run) must NOT silently vanish, or the scenario-cluster bootstrap resamples over too few
+    # clusters and understates every CI (CMAP finding, PR #27). Such a scenario carries no
+    # cells, so it dilutes resamples (widening CIs) exactly as it should.
+    scenario_ids = sorted(
+        set(run.report.get("by_scenario", {})) | {j["scenario_id"] for j in judgments}
+    )
 
     # 1. Scorecard — headline (unstated, full), steadfastness (full − turn1), per-framing.
     scorecard: dict[str, dict] = {}
