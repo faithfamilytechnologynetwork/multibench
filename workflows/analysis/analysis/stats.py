@@ -97,28 +97,50 @@ def _est(sc: SumCount, idx: np.ndarray) -> float:
     return s[idx].sum() / c[idx].sum()
 
 
+def _nonempty(sc: SumCount, idx: np.ndarray) -> bool:
+    """True iff the resampled scenarios contribute ≥1 cell to this slice."""
+    return sc[1][idx].sum() > 0
+
+
+def _ci_from_boots(point: float, boots: list[float]) -> CI:
+    if not boots:  # no draw covered the slice — degenerate but finite (never NaN)
+        return [point, point, point]
+    lo, hi = np.percentile(np.array(boots), [2.5, 97.5])
+    return [point, float(lo), float(hi)]
+
+
 def point_and_ci(sc: SumCount, resamples: list[np.ndarray]) -> CI | None:
-    """(point, lo, hi) for one cell-mean slice; ``None`` if the slice has no cells."""
+    """(point, lo, hi) for one cell-mean slice; ``None`` if the slice has no cells.
+
+    A resampled draw that happens to pick only zero-cell scenarios is **skipped**
+    (not divided by zero) — with a scenario cluster of 5, a sparse slice (from a
+    partial run's uncovered cells) can otherwise produce a zero-count draw and a
+    NaN bound. Skipping keeps the shared draws intact (F2) and never emits NaN.
+    """
     p = _point(sc)
     if p is None:
         return None
-    boots = np.array([_est(sc, idx) for idx in resamples])
-    lo, hi = np.percentile(boots, [2.5, 97.5])
-    return [p, float(lo), float(hi)]
+    boots = [_est(sc, idx) for idx in resamples if _nonempty(sc, idx)]
+    return _ci_from_boots(p, boots)
 
 
 def diff_ci(sc_a: SumCount, sc_b: SumCount, resamples: list[np.ndarray]) -> CI | None:
     """(point, lo, hi) for (mean_a − mean_b), **paired** on the same resampled scenarios.
 
     Uses the shared ``resamples`` for both terms per draw so the difference's CI
-    reflects the correlation between a and b (F2). ``None`` if either slice is empty.
+    reflects the correlation between a and b (F2). A draw where *either* slice has no
+    cells in the resampled scenarios is skipped (see ``point_and_ci``) — never NaN.
+    ``None`` if either slice is empty overall.
     """
     pa, pb = _point(sc_a), _point(sc_b)
     if pa is None or pb is None:
         return None
-    boots = np.array([_est(sc_a, idx) - _est(sc_b, idx) for idx in resamples])
-    lo, hi = np.percentile(boots, [2.5, 97.5])
-    return [pa - pb, float(lo), float(hi)]
+    boots = [
+        _est(sc_a, idx) - _est(sc_b, idx)
+        for idx in resamples
+        if _nonempty(sc_a, idx) and _nonempty(sc_b, idx)
+    ]
+    return _ci_from_boots(pa - pb, boots)
 
 
 @dataclass(frozen=True)
