@@ -40,3 +40,8 @@ Decisions:
   targets now include self-judge cells like everything else.
 
 Next: porch check → done → PR with review in body.
+
+## 2026-07-03 — PR gate
+
+- PR #29 created (review in body, per AIR). porch: pr gate registered, waiting
+  for human approval. Architect notified via afx send.
