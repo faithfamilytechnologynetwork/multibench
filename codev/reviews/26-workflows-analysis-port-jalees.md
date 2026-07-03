@@ -71,15 +71,29 @@ Applied via the `update-arch-docs` skill (hot/cold two-tier discipline):
   analysis workflows — consult when…" — fixing a pre-existing omission and covering the
   new section. No new HOT *fact* (the sibling judging workflow is cold-only too; kept the
   cap clean).
-- **`codev/resources/lessons-learned.md`** (COLD, "## Porting fidelity"): added four
-  durable lessons — parity-as-real-cross-check (regenerate fixtures via the upstream
-  aggregator); re-express a ported statistic so the reference machinery ports verbatim
-  (cell-mean = sum/count → reuse `(sum,count)` bootstrap; keep shared draws; guard the
-  small-N zero-count edge); import-isolate a heavy optional dep and prove it with a
-  subprocess test; a JS-free static-SVG report is injection-safe by construction.
 - **`workflows/README.md`**: added the `analysis` bullet.
 - **`workflows/analysis/README.md`**: invocation, output contract, module map, fixtures
   provenance.
+
+## Lessons Learned Updates
+
+Added to `codev/resources/lessons-learned.md` (COLD, "## Porting fidelity") — four durable,
+cross-spec engineering lessons (routed COLD, not HOT: the sibling judging workflow is cold-only
+too, keeping the hot cap clean):
+
+- **Parity as a real cross-check.** When a consumer must match an upstream aggregator, make the
+  parity test compare two independent implementations — regenerate fixtures via the *actual*
+  upstream aggregator (then trim), and reuse the upstream's exact reducer rather than re-deriving
+  it, or the numbers drift.
+- **Re-express a ported statistic so the reference machinery ports verbatim.** The cell-mean
+  aggregate is `sum(cell values)/count(cells)`, so JaleesBench's `(sum,count)` cluster-bootstrap
+  code ports unchanged — built over cells grouped by scenario (D5). Keep the shared resample-draw
+  list for paired diffs; guard the small-N zero-count edge (skip the draw, don't divide by zero).
+- **Import-isolate a heavy optional dependency and prove it with a subprocess test.** matplotlib
+  is imported only inside the `--figures` branch; a subprocess asserts `import analysis.cli` leaves
+  it out of `sys.modules` (an in-process check is polluted by sibling test modules).
+- **A JS-free static-SVG report is injection-safe by construction** — no `<script>` context exists,
+  so untrusted model-produced strings can't reach one; one `esc()` chokepoint seals the surface.
 
 ## Lessons Learned
 
