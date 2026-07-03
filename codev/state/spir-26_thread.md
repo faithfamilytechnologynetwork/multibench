@@ -63,4 +63,17 @@ Drafted + committed spec (`[Spec 26] Initial specification draft`), ran `porch d
   - Resolved IQ3: per-tradition CIs only, no pooled/field-mean CI in v1.
   - Clarified steadfastness formula; refined T6 to asset-loads.
 
-Next: commit revision, `porch next 26` (expect gate: spec-approval → STOP for human).
+### spec-approval — APPROVED by human (2026-07-03)
+- Both IQ defaults accepted: matplotlib = final deferrable phase behind `--figures`;
+  spotlights = table, transcripts optional. Architect suggested phasing = my IQ1.
+
+### Plan — started 2026-07-03
+- 5 phases (scaffold-first walking skeleton, then architect's 4):
+  1. Scaffold + CLI skeleton + dispatcher registry line (walking skeleton).
+  2. Loaders + validation + aggregation (cell reducer) + parity self-check (≤1e-9).
+  3. Bootstrap stats (shared RESAMPLES, point_and_ci/diff_ci) + analysis_stats.json.
+  4. HTML report (colors.py + html_report.py, inline SVG, escaping, CIs shown).
+  5. matplotlib figures (figures.py, saveboth PDF+PNG) — LAST, deferrable.
+- Deps: numpy hard; matplotlib optional-extra `figures` + in dev group (CI can test,
+  lazy import keeps HTML path matplotlib-free). Single-source FRAMINGS/PRESSURES
+  from tradition_validator.core (mirror judging/core_imports.py).
