@@ -144,8 +144,14 @@ dispatcher line is isolated — no other project is affected.
       v2+skipped, extra files).
 - [ ] `analysis/aggregate.py` — cell reducer (mean over present judges per
       `(subject,scenario_id,pressure,framing,scope)`) and cross-tradition
-      aggregates: headline, by_framing, steadfastness (+by_pressure), technique
-      rates, agreement (from `report.json`), score_distribution, by_scenario.
+      aggregates, **all recomputed from `judgments.jsonl` (+v2)** so each is
+      parity-checkable against `report.json` (M3): headline, by_framing,
+      steadfastness (+by_pressure), **per-subject technique rates** (fraction of a
+      subject's judgments listing each of the 7 `techniques_used`), **inter-judge
+      agreement** (exact / within-one over judge pairs on cells with ≥2 judges,
+      + worst-scenario), score_distribution, by_scenario, scenario_agreement.
+      `sittings.jsonl` is **not** loaded here — it is only needed for optional
+      spotlight transcripts (S2) and is deferred to Phase 4.
 - [ ] `workflows/analysis/tests/fixtures/` — ≥2 committed miniature run-dirs
       (real-shaped `report.json`+`judgments.jsonl`+`judgments_v2.jsonl`+
       `skipped.jsonl`, ~2 scenarios × both subjects × a couple framings/pressures;
@@ -165,8 +171,11 @@ dispatcher line is isolated — no other project is affected.
   steadfastness are what the ≤1e−9 self-check compares against `report.json`.
 
 #### Acceptance Criteria
-- [ ] Over each fixture run-dir, recomputed headline/by_framing/steadfastness/
-      steadfastness_by_pressure match its `report.json` to ≤1e−9 (M3/T3).
+- [ ] Over each fixture run-dir, **every** recomputed aggregate the spec names —
+      headline, by_framing, steadfastness, steadfastness_by_pressure, **technique
+      rates, and inter-judge agreement (exact/within-one)** — matches its
+      `report.json` to ≤1e−9 (M3/T3). (Display-only fields read straight from
+      `report.json` — cost, prices — are not recomputed.)
 - [ ] Every §4.1 fail-fast condition raises a clear, file-naming error; tolerated
       conditions (dup-v2, empty/absent v2+skipped, extra files, self-skips) do not
       (M5/M7/T1).
@@ -209,8 +218,14 @@ Revert the phase commit; Phase 1 skeleton remains functional.
       `diff_ci(cells_a, cells_b)` returning `[point, lo, hi]` via
       `np.percentile(boots, [2.5, 97.5])`; cluster resampling over the tradition's
       `scenario_id` set.
-- [ ] Wire the stats into the aggregate result object; emit `analysis_stats.json`
-      (the `paper_stats.json` analogue) — the point+CI values (S3).
+- [ ] `stats_to_dict(result)` — a **deterministic serializer** producing the
+      `analysis_stats.json` payload (the `paper_stats.json` analogue): traditions
+      in input-arg order, subjects/framings/pressures in canonical core order
+      (`core_imports`), CI triples `[point, lo, hi]` rounded to a fixed precision,
+      stable key order. **In-memory only in this phase** — the on-disk write of
+      `<out>/analysis_stats.json` is performed by `cli.report` in Phase 4 (this
+      phase's shippable deliverable is `stats.py` + `stats_to_dict`, exercised
+      directly by unit tests, not a CLI file-write).
 - [ ] `tests/test_stats.py`.
 
 #### Implementation Details
@@ -224,7 +239,10 @@ Revert the phase commit; Phase 1 skeleton remains functional.
   guided−stated) and steadfastness (full−turn1) are paired per draw.
 - **CIs are per-(tradition, subject)** only; no pooled/cross-tradition CI (IQ3
   resolved, spec §4.3).
-- Determinism: same inputs + `--seed` → identical stats.
+- **Determinism / byte-stability** (spec §7.3): same inputs + `--seed` → identical
+  stats; `stats_to_dict` fixes ordering (traditions by arg order; subjects/
+  framings/pressures by canonical core order) and rounds CI floats to a fixed
+  precision, so `json.dumps(..., indent=2)` is byte-stable across runs.
 
 #### Acceptance Criteria
 - [ ] `diff_ci(a,b)` point == `point_and_ci(a)[0] − point_and_ci(b)[0]` (paired).
@@ -232,7 +250,9 @@ Revert the phase commit; Phase 1 skeleton remains functional.
       a fixture (F2 verified) (T4).
 - [ ] 95% CI = `[2.5, 97.5]` percentile of the 5000-value bootstrap; reproducible
       under a fixed seed (T4).
-- [ ] `analysis_stats.json` written with per-tradition-per-subject point+CI values.
+- [ ] `stats_to_dict` returns per-tradition-per-subject point+CI values with stable
+      ordering; two calls on the same inputs+seed produce an identical dict
+      (determinism, T4).
 
 #### Test Plan
 - **Unit**: T4 (paired-point identity; paired vs independent variance; percentile
@@ -297,10 +317,12 @@ Revert the phase commit; Phases 1–2 remain functional (aggregates without CIs)
 - [ ] No band-name string appears in output; `score_color(-1|0|1)` returns the
       expected red/grey/green endpoints (M6/T5).
 - [ ] Report shows CI whiskers on the scorecard and CI columns on the gap table.
+- [ ] **Byte-stable**: two runs over the same inputs + seed produce identical
+      `report.html` and `analysis_stats.json` (deterministic ordering + rounding).
 
 #### Test Plan
 - **Unit**: T5 (numeric-only + color endpoints), T6 (self-contained asset check),
-  T6b (injection escaping).
+  T6b (injection escaping); byte-stability (two renders → identical bytes).
 - **Integration**: render over committed fixtures; assert required sections present
   and CI values wired from Phase 3.
 - **Manual**: open the generated `report.html` in a browser; compare figures to
@@ -352,7 +374,8 @@ Revert the phase commit; Phases 1–3 deliver loaders/aggregates/stats + JSON.
 - [ ] No band-name label in any figure; colormap endpoints match `score_color`.
 
 #### Test Plan
-- **Unit**: T7 (figures written; skip-if-absent).
+- **Unit**: T7 (figures written; skip-if-absent); a **non-default `--fig-format`**
+  (e.g. `png` only) writes only the requested format(s).
 - **Integration**: `--figures` over a fixture; assert file existence + non-empty.
 - **Manual**: eyeball a rendered PNG against the pilot/paper conventions.
 
@@ -428,10 +451,27 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 
 - [ ] Review phase: lessons learned + PR.
 
 ## Expert Review
-**Date**: (pending — porch runs 2-way plan consultation next)
+**Date**: 2026-07-03
 **Model(s)**: codex, claude (per `porch.consultation.models`)
-**Key Feedback**: _to be recorded here after consultation._
-**Plan Adjustments**: _to be recorded here._
+**Key Feedback**:
+- **Codex — REQUEST_CHANGES** (HIGH): (1) Phase 2 parity must cover `techniques`
+  and `agreement` (spec M3/T3), not treat them as read-through; (2) Phase 3 vs 4
+  emission boundary for `analysis_stats.json` is ambiguous; (3) minor — call out
+  deterministic/byte-stable ordering + a non-default `--fig-format` test.
+- **Claude — APPROVE** (HIGH): full spec-criterion→phase coverage table; conventions
+  verified against the repo; minors overlapping Codex — `sittings.jsonl` loader
+  timing, stats emission timing, `workflows/README.md` line.
+
+**Plan Adjustments** (this revision):
+- **Phase 2** now **recomputes technique rates and inter-judge agreement from
+  judgments** and parity-checks them ≤1e−9 (M3/T3); clarified `sittings.jsonl` is
+  deferred to Phase 4 (S2 transcripts only).
+- **Phase 3** deliverable clarified: `stats.py` + a deterministic `stats_to_dict`
+  serializer, **in-memory only**; the on-disk `analysis_stats.json` write is
+  Phase 4's `cli.report`.
+- **Determinism/byte-stability** made explicit in Phases 3 & 4 (stable ordering +
+  fixed rounding; two-run byte-identical test); **non-default `--fig-format` test**
+  added to Phase 5.
 
 ## Approval
 - [ ] Expert AI Consultation Complete (codex + claude)
@@ -441,6 +481,7 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
 | 2026-07-03 | Initial implementation plan | Spec 26 approved; architect phasing | spir-26 |
+| 2026-07-03 | Plan with multi-agent review | Codex REQUEST_CHANGES (techniques/agreement parity; P3/P4 emission boundary; determinism + fig-format test) + Claude APPROVE | spir-26 |
 
 ## Notes
 - **PR strategy** (spec §3.4.8): all five phases ship as git commits within a
