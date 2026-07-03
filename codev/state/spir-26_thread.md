@@ -202,4 +202,25 @@ Committed Phase 4 (b3b9eee); published visual artifact.
 - SMOKE: real 5-trad report 50KB, full doc, charset, steadfastness CIs, self-contained.
   Artifact refreshed (same URL).
 
-Next: commit fixes, rebuttal, `porch done 26`.
+Applied fixes + rebuttal; Phase 4 iter-2 consult: **both APPROVE**.
+(porch flow note: don't hardcode --context path; run `porch next` to get the exact
+consult command — iter-2 here had NO --context flag.)
+
+### Implement Phase 5 (matplotlib figures) — 2026-07-03
+- figures.py: ported make_figures.py. BAND_CMAP from colors.STOPS (single-sourced),
+  band_color via TwoSlopeNorm(-1,0,1), band_axis ref lines, saveboth (dual PDF+PNG
+  dpi150), serif house style. Figures: scorecard (dot+CI errorbars), framing
+  small-multiples, steadfastness heatmap (TwoSlopeNorm(-vmax,0,vmax) auto-contrast),
+  distribution stacked bars. No ×0.5 (D1), no band names (D2). matplotlib imported
+  ONLY here; cli._emit_figures lazy-imports it (fail-loud if extra missing).
+- cli --figures → <out>/figures/<name>.<ext> per --fig-format.
+- Tests (test_figures 6, skip-if-absent via importorskip): both formats, non-default
+  fig-format, bad-format rejected, colormap endpoints match score_color (center ±2 for
+  matplotlib 256-LUT quantization), CLI figures dir, HTML path matplotlib-free (subproc).
+  Fixed test_cli_smoke matplotlib-isolation to run in a SUBPROCESS (was polluted by
+  test_figures importing matplotlib at collection). 79 pass.
+- SMOKE: real 5-trad --figures wrote 8 files (4×PDF+PNG). Visually verified scorecard
+  (diverging colors + wide n=5 CIs) and steadfastness heatmap (auto-contrast, divider) —
+  faithful ports. Both rendering paths work on real data.
+
+Next: commit Phase 5, `porch done 26` → final 2-way impl consult → Review phase.

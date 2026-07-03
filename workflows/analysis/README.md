@@ -12,9 +12,10 @@ It is a faithful port of JaleesBench's `html_report.py` / `make_figures.py` /
 
 ## Status
 
-Scaffold (Phase 1). The `report` command is wired end-to-end over the following
-phases: loaders + aggregation (Phase 2) → bootstrap stats (Phase 3) → HTML report
-(Phase 4) → optional matplotlib figures (Phase 5).
+Complete. `analysis report <run-dir>...` loads N judging run-dirs, reproduces each
+`report.json`'s point estimates (≤1e−9), computes scenario-cluster bootstrap 95%
+CIs, and writes a self-contained HTML report + `analysis_stats.json`; `--figures`
+adds matplotlib PNG/PDF publication figures.
 
 ## Invocation
 

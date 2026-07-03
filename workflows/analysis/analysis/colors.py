@@ -14,9 +14,11 @@ position. ``heatmap_color`` applies the source's auto-contrast norm
 from __future__ import annotations
 
 # The seven diverging stops (identical to make_figures.py's BAND_CMAP), evenly spaced.
-_STOPS: tuple[str, ...] = (
+# Public so the matplotlib figures (Phase 5) build the SAME colormap — one source of truth.
+STOPS: tuple[str, ...] = (
     "#9E1B32", "#D6604D", "#F4A582", "#D9D2C5", "#A6D49A", "#5AAE61", "#1B7837",
 )
+_STOPS = STOPS
 
 # Reference lines on the numeric axis (the port of band_axis, spec §4.4): dashed grey
 # at the ±0.5 marks, solid grey at neutral 0. No band-name labels.

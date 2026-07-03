@@ -106,9 +106,27 @@ def report(
 
 
 def _emit_figures(aggregates, all_stats, out_dir, fig_format) -> None:
-    """Matplotlib PNG/PDF figures are wired in the figures phase (deferred import there)."""
-    typer.echo(
-        "note: --figures (matplotlib PNG/PDF) is added in a later phase; "
-        "wrote HTML + stats only.",
-        err=True,
-    )
+    """Render matplotlib PNG/PDF figures under ``<out>/figures``.
+
+    matplotlib is imported **only here** (lazily), so the default HTML path never loads
+    it (spec §7.3). Missing matplotlib fails loud with a clear install hint (fail-fast).
+    """
+    from pathlib import Path
+
+    try:
+        from analysis.figures import emit_figures
+    except ImportError as e:  # the optional 'figures' extra is not installed
+        typer.echo(
+            "--figures needs matplotlib; install the 'figures' extra, e.g. "
+            "`uv --project workflows/analysis sync --extra figures`.",
+            err=True,
+        )
+        raise typer.Exit(code=3) from e
+
+    formats = [f.strip() for f in fig_format.split(",") if f.strip()]
+    try:
+        written = emit_figures(aggregates, all_stats, Path(out_dir) / "figures", formats)
+    except ValueError as e:  # bad --fig-format
+        typer.echo(f"figure error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+    typer.echo(f"wrote {len(written)} figure files to {Path(out_dir) / 'figures'}", err=True)
