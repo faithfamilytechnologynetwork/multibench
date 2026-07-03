@@ -69,6 +69,30 @@ turn-1) sides. Because the mocked suite once hid a live-only provider bug, the d
 runs **real-client contract checks** (build the real SDK request/schema objects) + an opt-in
 `--live` smoke. See its [README](../../workflows/judging/README.md).
 
+## The analysis workflow
+
+`workflows/analysis/` (Python / uv / Typer) is the pipeline that *consumes* judging output for
+cross-tradition analysis — a port of JaleesBench's report/figure/stats tooling, reframed so the
+comparison axis is the **tradition** (subjects nested). It reads N judging `--results-dir`s (one
+per tradition), **read-only**, and emits a **self-contained HTML report** + **scenario-cluster
+bootstrap 95% CIs** + optional matplotlib figures. One command from the repo root:
+
+```bash
+uv --project workflows/analysis run python -m analysis report <run-dir>... [--figures]
+```
+
+Load-bearing properties: it **reproduces each `report.json`'s point estimates to ≤1e−9** by
+recomputing from `judgments.jsonl` (+ the `judgments_v2` overlay) with the same cell reducer as
+judging (§5.9: a cell = mean of present judges; aggregates = unweighted mean of in-scope cells).
+On top it adds the piece the hand-built pilot lacked — a **cluster bootstrap** (5000 resamples,
+resampling unit = the scenario cluster, one shared draw list reused for point *and* paired-diff
+CIs so gaps/steadfastness get correct paired intervals); with 5 scenarios/tradition the CIs are
+wide and honest. Scores are numeric −1…+1 with **no band names** (the ported `band_color` keeps
+the diverging colormap but drops JaleesBench's ×0.5 rescale). The HTML report is **JavaScript-free
+static inline SVG** (every artifact string escaped through one chokepoint → injection-safe by
+construction); **matplotlib is import-isolated** behind `--figures` so the default path never loads
+it. See its [README](../../workflows/analysis/README.md).
+
 ## tradition_validator
 
 `apps/tradition_validator/` (Python / uv / Typer / Pydantic v2 / PyYAML) is the mechanical gate a
@@ -89,7 +113,7 @@ uv --project apps/tradition_validator run python -m tradition_validator validate
 
 - `traditions/` — pluggable per-tradition modules (`sunni-islam`, 140 scenarios, is the first; `eastern-christianity` adds 100).
 - `apps/` — applications and standalone tools (`tradition_validator`; `jaleesbrowser`).
-- `workflows/` — pipelines over traditions: `judging/` (implemented; see above), scenario generation (not yet migrated in). Each workflow is its own uv project.
+- `workflows/` — pipelines over traditions: `judging/` (scores runs) and `analysis/` (cross-tradition report/CIs/figures over judging output) — both implemented, see above; scenario generation not yet migrated in. Each workflow is its own uv project.
 - `codev/` — the Codev process: `specs/`, `plans/`, `reviews/`, `resources/` (these docs),
   `state/` (builder threads). `git ls-files` is authoritative for file-level detail.
 
