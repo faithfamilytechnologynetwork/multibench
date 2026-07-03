@@ -66,12 +66,49 @@ def report(
     ),
 ) -> None:
     """Render a cross-tradition analysis report from N judging run-dirs."""
-    # Scaffold phase (phase_1): the report pipeline is wired in later phases
-    # (loaders/aggregation → stats → HTML → figures). Fail loudly rather than
-    # emit a misleading empty report.
+    import json as _json
+    from pathlib import Path
+
+    from analysis.aggregate import aggregate_tradition
+    from analysis.html_report import render_report
+    from analysis.loaders import AnalysisInputError, load_corpus
+    from analysis.stats import compute_tradition_stats, stats_to_dict
+
+    try:
+        runs = load_corpus(list(run_dirs))
+    except AnalysisInputError as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    aggregates = [aggregate_tradition(r) for r in runs]
+    all_stats = [compute_tradition_stats(a, n_boot=n_boot, seed=seed) for a in aggregates]
+
+    out_dir = Path(out)
+    out_dir.mkdir(parents=True, exist_ok=True)
+    report_path = out_dir / "report.html"
+    stats_path = out_dir / "analysis_stats.json"
+    report_path.write_text(render_report(aggregates, all_stats), encoding="utf-8")
+    stats_path.write_text(_json.dumps(stats_to_dict(all_stats), indent=2) + "\n", encoding="utf-8")
+
+    if figures:
+        _emit_figures(aggregates, all_stats, out_dir, fig_format)
+
     typer.echo(
-        "analysis report: not implemented yet — the loaders/aggregation, "
-        "bootstrap, and HTML rendering land in subsequent phases.",
+        _json.dumps(
+            {
+                "out": str(out_dir),
+                "traditions": [a.tradition for a in aggregates],
+                "report": str(report_path),
+                "stats": str(stats_path),
+            }
+        )
+    )
+
+
+def _emit_figures(aggregates, all_stats, out_dir, fig_format) -> None:
+    """Matplotlib PNG/PDF figures are wired in the figures phase (deferred import there)."""
+    typer.echo(
+        "note: --figures (matplotlib PNG/PDF) is added in a later phase; "
+        "wrote HTML + stats only.",
         err=True,
     )
-    raise typer.Exit(code=1)

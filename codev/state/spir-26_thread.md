@@ -162,4 +162,27 @@ Applied fix + rebuttal; Phase 2 iter-2 consult: **both APPROVE**.
   covers (can't happen when point exists). +3 sparse-slice regression tests. 55 pass;
   real 5-dir stats serialize with no NaN.
 
-Next: commit fix, rebuttal, `porch done 26`.
+Applied fix + rebuttal; Phase 3 iter-2 consult: **both APPROVE**.
+
+### Implement Phase 4 (HTML report) — 2026-07-03
+- Design decision: **NO JavaScript** — all charts are static inline SVG computed in
+  Python, native <title> tooltips, single esc() chokepoint → injection-safe by
+  construction (M9 trivially satisfied: no <script> context exists).
+- colors.py: score_color (ported band_color, TwoSlopeNorm(-1,0,1) linear, no ×0.5,
+  no band names), heatmap_color (auto-contrast -vmax..vmax), on_color, axis refs.
+- html_report.py: full self-contained report (inline CSS light/dark). Sections:
+  scorecard SVG (CI whiskers), framing-staircase small-multiples SVG, steadfastness
+  heatmap SVG (tradition×subject rows × 6 pressures + pooled), score-dist stacked
+  bars SVG, scenario spotlights table, technique meter bars, judge agreement, cost,
+  n=5 caveats. Each figure has a <details> table twin. All artifact text esc()'d.
+- cli.report wired: load_corpus → aggregate → stats → render → write report.html +
+  analysis_stats.json (fixed contract, idempotent overwrite). --figures deferred to
+  Phase 5 (prints note). Deferred imports keep HTML path matplotlib-free.
+- Tests (test_colors 6 + test_html_report 10): 71 total pass. T5 no band names +
+  color endpoints; T6 self-contained (no ://, <script>, <img>, src/href); T6b
+  injection (payload in tradition renders escaped); determinism/byte-stable; CLI
+  contract + idempotent + fail-loud.
+- SMOKE: generated real 5-tradition report — 43KB self-contained, all sections,
+  whiskers, 0 NaN, matplotlib NOT imported by report path. Verified real user path.
+
+Next: commit Phase 4, `porch done 26` → 2-way impl consult; publish visual artifact.
