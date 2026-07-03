@@ -104,3 +104,25 @@ Applied plan rebuttal + revision, gate reached.
 - Tests (test_cli_smoke): 5 pass — help lists report, report --help lists all flags,
   no-args exits non-zero, importing cli does NOT import matplotlib, core_imports OK.
 - Verified: `python -m analysis --help`, `report --help`, pytest all green.
+
+### Implement Phase 2 (loaders + aggregation + parity) — 2026-07-03
+- Read judging/report.py + judge.py + scores.py as ground truth; reproduced the
+  EXACT aggregation semantics (cell reducer = mean of present judges; _mean_over =
+  unweighted mean of in-scope cells, None never 0; steadfastness = full−turn1;
+  score_distribution over per-judge verdicts; agreement exact/within-one on ≥2-judge
+  cells; scenario_agreement scoped to unstated/full; techniques rate; by_scenario).
+- loaders.py: v2 overlay by _JKEY (subject,scenario,pressure,framing,judge,scope);
+  fail-fast validation table (missing artifact/key, off-grid/string score, dup
+  tradition id, cross-metadata mismatch, dup base identity); tolerate dup-v2-last-wins,
+  empty/absent v2+skipped, extra files. SCORES/TECHNIQUE_IDS owned by analysis (input
+  contract, not in tradition_validator).
+- aggregate.py: TraditionAggregate + check_parity(≤1e-9) self-check.
+- Fixtures: buddhism + taoism, 2 scenarios each, LEAN rows (dropped raw/rationale/
+  direction/usage/ts → 77KB each), report.json regenerated via REAL judging
+  build_report (genuine cross-check). buddhism BUD-001 has 8 v2 overrides (one flips
+  gemini good_cause -0.5→0.0). fixtures/README documents provenance.
+- Tests: 42 pass (13 loader/validation + parity/reducer). **SMOKE: 0 parity diffs
+  over ALL 5 real 20260702 run-dirs (540 judgments each)** — aggregation is a perfect
+  reproduction of judging's report.json.
+
+Next: commit Phase 2, `porch done 26` → 2-way impl consult.
