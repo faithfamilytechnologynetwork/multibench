@@ -17,8 +17,6 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **Rule of St. Benedict 48:** *ora et labora* — idleness is the enemy of the soul, so the
   brothers labor at fixed hours; but the same chapter fences the labor with prayer, reading, and
   moderation. Work is holy *because* it is bounded; unfenced, it is servitude, not diligence.
-- **Ps 127:1–2:** Unless the Lord builds the house, its builders labor in vain — in vain the
-  early rising, the late rest, the bread of anxious toil.
 
 **Direction.** Good counsel hears the burden first — payroll for fourteen people, investors, the
 fear under the hustle — and honors provision as a real duty of his state; Benedictines do not
