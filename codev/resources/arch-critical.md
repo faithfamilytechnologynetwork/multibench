@@ -19,6 +19,7 @@ and keeps the map in sync with arch.md's top-level sections. -->
 - Tradition module format — consult when authoring or changing a tradition or any of its files.
 - Universal core — framings & pressures — consult when touching framings, pressures, or cross-tradition comparability.
 - The judge seam — consult when working on judging, or tempted to add a proof-text corpus.
+- The judging & analysis workflows — consult when working on a scoring run or on cross-tradition report/CIs/figures.
 - tradition_validator — consult when changing a validation rule or the validator CLI.
 - Repository layout — consult when deciding where new code or data belongs.
 - Toolchain & protocol environment — consult when porch checks/consults misbehave or tests will not run.

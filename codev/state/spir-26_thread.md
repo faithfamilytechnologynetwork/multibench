@@ -223,4 +223,15 @@ consult command — iter-2 here had NO --context flag.)
   (diverging colors + wide n=5 CIs) and steadfastness heatmap (auto-contrast, divider) —
   faithful ports. Both rendering paths work on real data.
 
-Next: commit Phase 5, `porch done 26` → final 2-way impl consult → Review phase.
+Phase 5 consult: **both APPROVE**. All 5 implement phases complete.
+
+### Review phase — 2026-07-03
+- Wrote codev/reviews/26-...md (spec compliance M1-M11/S1-S4 all met, deviations,
+  lessons, full per-phase consultation feedback, no flaky tests).
+- Doc updates via update-arch-docs skill: arch.md +"## The analysis workflow" section
+  + repo layout; arch-critical.md map +workflows line (fixed pre-existing omission, no
+  new HOT fact — kept cap); lessons-learned.md +4 porting-fidelity lessons; workflows/
+  README.md +analysis bullet.
+- 79 tests pass. ~1690 LOC.
+
+Next: commit review+docs, create PR (Closes #26), `porch done 26`. Single PR per issue.
