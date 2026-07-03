@@ -70,6 +70,36 @@ def test_cell_reducer_averages_present_judges_only():
     assert cs[("claude-opus-4-8", "X-1", "secularize", "unstated", "full")] == -0.5
 
 
+def test_partial_run_uncovered_scenario_stays_in_cluster_set():
+    # CMAP finding (PR #27): a scenario that was collected but produced ZERO judgments
+    # (present in report.json's by_scenario — upstream keys it by judgments ∪ sittings —
+    # but absent from judgments.jsonl) must remain in the bootstrap cluster set, else the
+    # cluster count is understated and the CIs are too tight.
+    import copy
+    import dataclasses
+
+    from analysis.stats import compute_tradition_stats
+
+    run = load_run_dir(FIX / "buddhism")
+    judged = sorted({j["scenario_id"] for j in run.judgments})
+    assert set(run.report["by_scenario"]) == set(judged)  # fixture is a full run
+
+    # Simulate a partial run: an extra collected-but-unjudged scenario in by_scenario only.
+    report = copy.deepcopy(run.report)
+    report["by_scenario"]["BUD-900"] = {s: None for s in run.subjects}
+    partial = dataclasses.replace(run, report=report)
+
+    agg = aggregate_tradition(partial)
+    assert "BUD-900" in agg.scenario_ids
+    assert len(agg.scenario_ids) == len(judged) + 1
+    assert agg.by_scenario["BUD-900"] == {s: None for s in run.subjects}
+
+    # The bootstrap now resamples over the fuller cluster set (N+1), not the judged-only set.
+    st = compute_tradition_stats(agg, n_boot=50, seed=12345)
+    assert len(agg.scenario_ids) == len(st.scenario_ids)
+    assert "BUD-900" in st.scenario_ids
+
+
 def test_techniques_and_agreement_are_recomputed():
     # Guard that these are genuinely recomputed (not read through) — the parity check
     # would still pass if they were read through, so assert they came from judgments.

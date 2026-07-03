@@ -245,3 +245,14 @@ Review checks required exact headings: `## Architecture Updates` + `## Lessons L
   verify phase (pull integration branch, `porch done 26`, architect approves verify).
 
 Artifact (rendered real 5-trad report): https://claude.ai/code/artifact/a48ec058-9eec-4023-96fe-8695ef98f434
+
+### Integration CMAP iteration — 2026-07-03
+- Architect's 3-way CMAP: Gemini/Claude APPROVE, Codex REQUEST_CHANGES (1, architect-confirmed):
+  aggregate.py scenario_ids from judgments only → partial run drops zero-judgment scenario →
+  bootstrap over N−1 clusters → understated CIs. Upstream uses sittings.
+- Fix: scenario_ids = sorted(report.by_scenario keys ∪ judged) — by_scenario is upstream's
+  full expected coverage (judgments ∪ sittings), already in report.json (no sittings-load
+  needed). Zero-judgment scenario stays (no cells → widens resamples, correct). +partial-run
+  test. 80 pass. Real 5 dirs: N=5 unchanged, 0 diffs (full runs unaffected — only partial
+  runs change). One iteration, not a redesign.
+- Next: commit+push (PR #27), re-run 2-way delta consult, re-request pr gate.

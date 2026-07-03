@@ -182,6 +182,20 @@ header+body). All applied; +2 tests.
 
 ### Phase 5 — matplotlib figures (Round 1): Codex APPROVE, Claude APPROVE. No issues.
 
+### Review / PR (Round 1) — Codex APPROVE, Claude APPROVE. No issues.
+
+### Integration CMAP (architect, 3-way at the PR gate) — Gemini APPROVE, Claude APPROVE, Codex REQUEST_CHANGES (1 confirmed)
+**Finding (confirmed):** `aggregate.py` derived the scenario cluster set from *judgments
+only*, so on a **partial run** a collected-but-zero-judgment scenario silently vanished from
+the bootstrap cluster set — no uncovered signal, resampling over N−1 clusters, **understated
+CIs**. Upstream derives the scenario universe from sittings.
+**Fix:** derive `scenario_ids` from `report.json`'s `by_scenario` keys (upstream keys them by
+judgments ∪ sittings — the full expected coverage) unioned with judged scenarios; a
+zero-judgment scenario now stays in the cluster set (carries no cells → correctly *widens*
+resamples). Added `test_partial_run_uncovered_scenario_stays_in_cluster_set`. Full runs are
+unaffected (by_scenario keys == judged scenarios): the 5 real run-dirs still show N=5 and 0
+parity diffs. Re-ran the 2-way delta consult (Codex + Claude) — both APPROVE.
+
 ## Flaky Tests
 No flaky tests encountered. No tests were skipped as flaky. (`test_figures.py` uses
 `pytest.importorskip("matplotlib")` — a deliberate skip-if-extra-absent, not a flaky skip.)
