@@ -4,9 +4,9 @@ A Roman Catholic instantiation of the MultiBench construct: companionship judged
 effect** — not what a model knows about the faith or how fluently it can quote the Catechism, but
 the residue its counsel leaves on a person of faith, whether they walk away closer to or further
 from the life their faith intends. The name is *cor ad cor loquitur* — **heart speaks to heart** —
-the motto St. John Henry Newman took from St. Francis de Sales, patron saint of spiritual
-directors: the word of counsel that does not lecture at a soul but speaks to it, heart to heart,
-and leaves it nearer to God.
+the cardinal's motto of St. John Henry Newman, long associated with the spirit of St. Francis de
+Sales, the great master of heart-to-heart spiritual direction: the word of counsel that does not
+lecture at a soul but speaks to it, heart to heart, and leaves it nearer to God.
 
 - **Construct:** the **accompanying friend** of the Church's own art of accompaniment — the one who
   *"removes his sandals before the sacred ground of the other"* (Evangelii Gaudium 169) and walks at
@@ -22,15 +22,21 @@ and leaves it nearer to God.
   Canon Law, the social and moral encyclicals, the Spiritual Exercises of St. Ignatius, and the
   counsel classics of the schools — see [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Scenarios:** 60 scenario folders (`COR-001`…`COR-060`) under [`scenarios/`](scenarios/), each
+- **Scenarios:** 76 scenario folders (`COR-001`…`COR-076`) under [`scenarios/`](scenarios/), each
   with `scenario.yaml`, `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section per core
-  pressure). A majority stage a dilemma anyone faces (the capital sins in ordinary dress — anger,
-  envy, avarice, acedia, lust, pride, despair, presumption); a substantial minority are
-  **intrinsic** — hinging on a Catholic matter (confession and the seal, the Eucharist and worthy
-  reception, Sunday and the precepts, marriage and annulment, the moral encyclicals, discernment
-  of spirits, scrupulosity, alleged private revelation, the duties of one's state in life). The
-  bank deliberately measures **both** discernment poles — the laxism that dissolves the demand
-  *and* the rigorism that crushes the person — in roughly comparable numbers.
+  pressure). By deliberate design a majority (≈46) are **intrinsic** — hinging on a Catholic
+  matter (confession and the seal, the Eucharist and worthy reception, Sunday and the precepts,
+  marriage in its real cases — annulment, convalidation, disparity of cult, the divorced and
+  remarried — the moral and social encyclicals, the beginning and end of life, discernment of
+  spirits, scrupulosity, alleged private revelation, the charisms, and the duties of one's state
+  in life), since the tradition's differentiating terrain is exactly its magisterial and
+  sacramental specificity; the remaining ≈30 (clean or leaky) stage the capital sins in ordinary
+  dress — anger, envy, avarice, acedia, lust, pride, despair, presumption — and preserve the
+  unstated-framing axis. The bank measures **both** discernment poles: ≈29 scenarios hold the
+  line against laxism (the accommodation that dissolves the demand), ≈19 against rigorism (the
+  severity that crushes the person), and ≈28 `balanced` scenarios carry both edges at once —
+  rigorist failure is further staged inside many balanced scenarios via a severe third party
+  whose false demand the counsel must lift.
 
 ## The five bands
 
