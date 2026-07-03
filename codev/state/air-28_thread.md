@@ -45,3 +45,12 @@ Next: porch check → done → PR with review in body.
 
 - PR #29 created (review in body, per AIR). porch: pr gate registered, waiting
   for human approval. Architect notified via afx send.
+
+## 2026-07-03 — CMAP doc round
+
+- CMAP on PR #29: code unanimously sound; doc drift flagged. Fixed:
+  workflows/judging/README.md updated to post-#28 contract (verdict fields,
+  judge command outputs, config self-judge note, judgments table); fixtures
+  README notes the pre-#28 format is intentional regression coverage; spec 8
+  (§4.4, §5.4) and plan 8 got addendum blocks pointing to #28 — historical text
+  untouched per architect ruling.
