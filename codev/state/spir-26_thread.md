@@ -125,4 +125,14 @@ Applied plan rebuttal + revision, gate reached.
   over ALL 5 real 20260702 run-dirs (540 judgments each)** — aggregation is a perfect
   reproduction of judging's report.json.
 
-Next: commit Phase 2, `porch done 26` → 2-way impl consult.
+### Phase 2 consult (Codex + Claude), 2026-07-03
+- **Claude APPROVE**; **Codex REQUEST_CHANGES** (3, HIGH). Fixed:
+  - v2 is override-ONLY: a v2 row with no matching base identity now RAISES (was
+    silently inserting). Verified 0 orphan v2 keys across all real+fixture data, so
+    safe + correct ("never adds a vote", M5).
+  - Load skipped.jsonl into TraditionRun.skips (parsed/represented, M5) — was ignored.
+  - Tests: +v2-orphan-rejected, +skips-parsed. Claude minors: dropped dead
+    techniques_used .get() fallback; added worst_scenario to check_parity.
+- 44 tests pass; real 5-dir smoke still 0 diffs (worst_scenario now checked too).
+
+Next: commit fix, rebuttal, `porch done 26`.

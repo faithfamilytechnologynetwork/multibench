@@ -37,6 +37,7 @@ _REQUIRED_JUDGMENT_KEYS: tuple[str, ...] = (
 _REPORT = "report.json"
 _JUDGMENTS = "judgments.jsonl"
 _JUDGMENTS_V2 = "judgments_v2.jsonl"
+_SKIPPED = "skipped.jsonl"
 
 
 class AnalysisInputError(Exception):
@@ -65,6 +66,7 @@ class TraditionRun:
     judges: list[str]
     report: dict
     judgments: list[dict]  # base overlaid with v2 (v2 wins by _JKEY)
+    skips: list[dict]  # recorded self-judgment skips (expected absences, M5); audit-only
 
 
 def _key(row: dict) -> tuple:
@@ -133,13 +135,31 @@ def load_run_dir(path: str | Path) -> TraditionRun:
             )
         by_key[k] = row
 
-    # v2 overrides (optional) — v2 wins by identity key; duplicate v2 keys are tolerated
-    # (last wins), an absent/empty file is a valid no-op overlay (spec §4.1).
+    # v2 overrides (optional) — v2 is an **override only**: a v2 row must reference an
+    # existing base judgment (it "never adds a vote", spec §4.1 / M5); duplicate v2 keys
+    # are tolerated (last wins); an absent/empty file is a valid no-op overlay.
     v2_path = p / _JUDGMENTS_V2
     if v2_path.is_file():
         for lineno, row in _iter_jsonl(v2_path):
-            _validate_row(row, tradition, subjects, f"{v2_path}:{lineno}")
-            by_key[_key(row)] = row  # override (or insert) — dup-v2 last-wins, tolerated
+            where = f"{v2_path}:{lineno}"
+            _validate_row(row, tradition, subjects, where)
+            k = _key(row)
+            if k not in by_key:
+                raise AnalysisInputError(
+                    f"{where}: v2 override {dict(zip(_JKEY, k))} references no base "
+                    f"judgment (v2 overrides only — it never adds a vote)"
+                )
+            by_key[k] = row  # override; dup-v2 last-wins, tolerated
+
+    # Self-judgment skips (optional): parsed and represented as expected absences (M5),
+    # not aggregated. An absent/empty file is valid (a run with no skips).
+    skip_path = p / _SKIPPED
+    skips: list[dict] = []
+    if skip_path.is_file():
+        for lineno, row in _iter_jsonl(skip_path):
+            if not isinstance(row, dict):
+                raise AnalysisInputError(f"{skip_path}:{lineno}: skip row is not a JSON object")
+            skips.append(row)
 
     return TraditionRun(
         path=p,
@@ -148,6 +168,7 @@ def load_run_dir(path: str | Path) -> TraditionRun:
         judges=judges,
         report=report,
         judgments=list(by_key.values()),
+        skips=skips,
     )
 
 

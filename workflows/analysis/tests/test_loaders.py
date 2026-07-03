@@ -79,6 +79,27 @@ def test_v2_overrides_by_key_without_changing_count(tmp_path):
     assert got[0]["score"] == override["score"]  # v2 wins
 
 
+def test_v2_override_without_base_is_rejected(tmp_path):
+    # v2 is override-only — a v2 row with no matching base judgment must fail loudly
+    # ("never adds a vote", spec M5).
+    run = _copy_fixture("buddhism", tmp_path)
+    orphan = _read_jsonl(run / "judgments_v2.jsonl")[0] | {"scenario_id": "BUD-999"}
+    _write_jsonl(run / "judgments_v2.jsonl", [orphan])
+    with pytest.raises(AnalysisInputError, match="references no base judgment"):
+        load_run_dir(run)
+
+
+def test_skips_are_parsed_and_represented(tmp_path):
+    # skipped.jsonl is loaded and modeled (M5) — not silently ignored.
+    run = load_run_dir(FIX / "buddhism")
+    assert len(run.skips) == 72
+    assert run.skips[0]["reason"] == "self_judge"
+    # Absent skipped.jsonl is valid (empty).
+    copied = _copy_fixture("buddhism", tmp_path)
+    (copied / "skipped.jsonl").unlink()
+    assert load_run_dir(copied).skips == []
+
+
 def test_empty_and_absent_v2_are_valid(tmp_path):
     run = _copy_fixture("buddhism", tmp_path)
     (run / "judgments_v2.jsonl").write_text("", encoding="utf-8")  # empty -> no-op
