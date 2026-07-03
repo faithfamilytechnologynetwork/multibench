@@ -494,3 +494,8 @@ Architect instruction (before approving): bands → **fully numeric, no names**.
 - **Review phase: refreshed the stale-v1 PR consult on the remediated branch → Codex COMMENT (non-blocking; fixed the --limit README note + stale v1 Summary numbers; commit-hygiene explained), Claude APPROVE.** porch reached the **pr gate** (PENDING human approval). Pinged architect. NOT self-approving.
 
 - **pr gate APPROVED (user). PR #25 MERGED** — merge commit `8fa4d26` (2 parents, not squash); issue #8 already closed (no action). **Verify phase:** post-merge integration on origin/main clean (batching/parallel collect+judge/raw text/full rubric all present; 150 pass against merged tree). Surfacing the verify-approval gate — **architect approves it after their full live 5-tradition re-run** (they own verify-approval + cleanup). NOT self-approving.
+
+## COMPLETE — 2026-07-03
+- **verify-approval APPROVED (user).** Architect's live 5x5 run passed clean: **900/900 sittings, 2700 judgments, uncovered=0, ~$100.** porch phase = **verified**. SPIR protocol complete for Spec 8.
+- Delivered: v1 judging workflow (PRs #20/#24) + JaleesBench fidelity remediation (PR #25, r1 parallel / r2 batch@0.5x / r3 judge-quality+live-verify). All merged to main via merge commits. 150 tests + 4 --live.
+- Builder finished. Worktree clean; nothing uncommitted. Handing off to architect for `afx cleanup`.
