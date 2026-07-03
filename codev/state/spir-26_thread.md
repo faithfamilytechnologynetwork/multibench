@@ -87,4 +87,20 @@ Drafted + committed spec (`[Spec 26] Initial specification draft`), ran `porch d
   - Determinism/byte-stability explicit (stable ordering + rounding, two-run identical
     test); non-default `--fig-format` test added to Phase 5.
 
-Next: commit revision, rebuttal, `porch done 26` → expect plan-approval gate (STOP).
+Applied plan rebuttal + revision, gate reached.
+
+### plan-approval — APPROVED by human (2026-07-03)
+- Implement 1→5, single PR (Closes #26), no self-approve/merge. Local smoke over
+  tmp/judging-runs/20260702/* runs in architect's env if worktree lacks artifacts
+  (they exist at main-checkout path; worktree tmp/ is gitignored).
+
+### Implement Phase 1 (scaffold) — 2026-07-03
+- Created workflows/analysis uv project mirroring judging: pyproject (typer, numpy,
+  tradition_validator path; matplotlib as `figures` extra + dev group), __init__/
+  __main__/cli.py (report subcommand, all flags, body deferred to Phase 4; added
+  `@app.callback()` so `report` stays a NAMED subcommand — single-command Typer
+  apps otherwise collapse it), core_imports (FRAMINGS/PRESSURES), README, .gitignore,
+  uv.lock. Added dispatcher registry line for workflows/analysis (+1).
+- Tests (test_cli_smoke): 5 pass — help lists report, report --help lists all flags,
+  no-args exits non-zero, importing cli does NOT import matplotlib, core_imports OK.
+- Verified: `python -m analysis --help`, `report --help`, pytest all green.
