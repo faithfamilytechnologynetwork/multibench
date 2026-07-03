@@ -1,9 +1,24 @@
 id: '26'
 title: workflows-analysis-port-jalees
 protocol: spir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: Scaffold, CLI skeleton & test dispatcher
+    status: in_progress
+  - id: phase_2
+    title: Loaders, validation, aggregation & parity self-check
+    status: pending
+  - id: phase_3
+    title: Scenario-cluster bootstrap statistics
+    status: pending
+  - id: phase_4
+    title: Self-contained HTML report
+    status: pending
+  - id: phase_5
+    title: Optional matplotlib figures
+    status: pending
+current_plan_phase: phase_1
 gates:
   spec-approval:
     status: approved
@@ -18,7 +33,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-07-03T02:25:03.266Z'
-updated_at: '2026-07-03T04:44:28.131Z'
+updated_at: '2026-07-03T04:44:39.872Z'
