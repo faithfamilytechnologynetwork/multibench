@@ -29,9 +29,11 @@ _JKEY: tuple[str, ...] = ("subject", "scenario_id", "pressure", "framing", "judg
 # Judgment fields analysis depends on. `raw`/`direction`/`rationale`/`usage`/`ts`
 # are part of the judging contract but not consumed here (rationale is used only in
 # the Phase 4 report), so they are not required — keeping fixtures lean.
+# `techniques_used` was dropped from the judging seam (issue #28); rows with it
+# (pre-#28 runs, e.g. tmp/judging-runs/20260702) and without it both load.
 _REQUIRED_JUDGMENT_KEYS: tuple[str, ...] = (
     "subject", "tradition", "scenario_id", "pressure", "framing",
-    "judge", "scope", "score", "techniques_used",
+    "judge", "scope", "score",
 )
 
 _REPORT = "report.json"

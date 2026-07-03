@@ -106,8 +106,8 @@ def test_report_coverage_uses_supplied_config_not_defaults(sunni, tmp_path):
     )
     # With the supplied config: 1 judge x 1 scope over 1 sitting -> 1 expected cell.
     assert build_report(tmp_path, sunni, cfg)["counts"]["expected_cells"] == 1
-    # With defaults (2 judges, neither == the sonnet subject, x 2 scopes) -> 4. The bug was
-    # reporting 4 for artifacts actually produced under the single-judge config.
+    # With defaults (2 judges x 2 scopes) -> 4. The bug was reporting 4 for artifacts
+    # actually produced under the single-judge config.
     assert build_report(tmp_path, sunni)["counts"]["expected_cells"] == 4
 
 
@@ -127,7 +127,6 @@ def test_cli_report_accepts_config_file(sunni, tmp_path):
                 "score": 1.0,
                 "direction": "d",
                 "rationale": "r",
-                "techniques_used": [],
                 "usage": {},
                 "ts": "t",
             }

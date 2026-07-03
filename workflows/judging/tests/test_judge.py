@@ -1,5 +1,6 @@
-"""Judge orchestration (spec §5.5/§5.9): parse/validate, self-judge skip, resume,
-re-judge override, failure handling. The provider boundary is injected (no live API)."""
+"""Judge orchestration (spec §5.5/§5.9): parse/validate, full-panel judging (self-
+judgments included, issue #28), resume, re-judge override, failure handling. The
+provider boundary is injected (no live API)."""
 
 import json
 
@@ -10,9 +11,7 @@ from judging.judge import (
     JudgeInputError,
     judge_all,
     load_judgments,
-    load_skips,
     parse_verdict,
-    should_skip,
 )
 
 
@@ -40,7 +39,7 @@ def _write_sittings(tmp_path, *sittings):
 
 def _fixed_fn(score=1.0):
     def fn(judge, parts):
-        v = {"score": score, "direction": "d", "rationale": "r", "techniques_used": ["open_door"]}
+        v = {"score": score, "direction": "d", "rationale": "r"}
         return (v, json.dumps(v), {"in": 1, "out": 1})  # (verdict, raw_text, usage)
 
     return fn
@@ -50,15 +49,20 @@ def _fixed_fn(score=1.0):
 
 
 def test_parse_verdict_valid():
-    v = parse_verdict(
-        {"score": 0.5, "direction": "dir", "rationale": "because X", "techniques_used": ["open_door", "gradualism"]}
-    )
+    v = parse_verdict({"score": 0.5, "direction": "dir", "rationale": "because X"})
     assert v == {
         "score": 0.5,
         "direction": "dir",
         "rationale": "because X",
-        "techniques_used": ["open_door", "gradualism"],
     }
+
+
+def test_parse_verdict_ignores_legacy_techniques_key():
+    # A pre-#28 judge blob carrying techniques_used still parses; the field is dropped.
+    v = parse_verdict(
+        {"score": 0.5, "direction": "dir", "rationale": "r", "techniques_used": ["open_door"]}
+    )
+    assert "techniques_used" not in v
 
 
 @pytest.mark.parametrize(
@@ -68,8 +72,6 @@ def test_parse_verdict_valid():
         {"score": 3, "direction": "d", "rationale": "r"},  # out of range
         {"score": 1.0, "direction": "d", "rationale": ""},  # empty rationale
         {"score": 1.0, "direction": "", "rationale": "r"},  # empty direction
-        {"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": ["nope"]},  # unknown
-        {"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": "open_door"},  # not list
         "not-a-dict",
     ],
 )
@@ -78,32 +80,28 @@ def test_parse_verdict_rejects(raw):
         parse_verdict(raw)
 
 
-# --- self-judge skip (T5) ---------------------------------------------------
+# --- full dual judging: no self-judge skip (issue #28) -----------------------
 
 
-def test_should_skip_exact_model_match():
-    assert should_skip("claude-opus-4-8", "claude-opus-4-8") is True
-    assert should_skip("claude-opus-4-8", "claude-sonnet-4-6") is False
-
-
-def test_self_judgments_are_skipped(sunni, tmp_path):
-    # Subject == the Opus judge -> Opus skips; Gemini judges both scopes.
+def test_self_judgments_are_scored(sunni, tmp_path):
+    # Subject == the Opus judge -> BOTH judges still score both scopes (full grid,
+    # the original JaleesBench behavior); nothing is skipped or recorded as skipped.
     sp = _write_sittings(tmp_path, _sitting("claude-opus-4-8"))
     summary = judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn())
-    assert summary["written"] == 2  # gemini x {turn1, full}
-    assert summary["skipped_self"] == 2  # opus x {turn1, full}
-    assert {j["judge"] for j in load_judgments(tmp_path)} == {"gemini-3.5-flash"}
-    # ...and the skipped self-judgments are durably recorded (T5/M3 audit trail).
-    skips = load_skips(tmp_path)
-    assert len(skips) == 2
-    assert all(sk["reason"] == "self_judge" and sk["judge"] == "claude-opus-4-8" for sk in skips)
+    assert summary["written"] == 4  # 2 judges x 2 scopes, self-judgments included
+    assert "skipped_self" not in summary
+    assert {j["judge"] for j in load_judgments(tmp_path)} == {
+        "claude-opus-4-8",
+        "gemini-3.5-flash",
+    }
+    assert not (tmp_path / "skipped.jsonl").exists()  # no skip audit trail is written
 
 
 # --- full panel x scope + keying (M3) --------------------------------------
 
 
 def test_judge_all_writes_panel_times_scope(sunni, tmp_path):
-    sp = _write_sittings(tmp_path, _sitting("claude-sonnet-4-6"))  # not a judge -> no skip
+    sp = _write_sittings(tmp_path, _sitting("claude-sonnet-4-6"))
     summary = judge_all(sp, sunni, tmp_path, judge_fn=_fixed_fn(1.0))
     assert summary["written"] == 4  # 2 judges x 2 scopes
     js = load_judgments(tmp_path)
@@ -145,7 +143,7 @@ def test_rejudge_pass_on_disagreement(sunni, tmp_path):
     # Opus -> +1.0, Gemini -> 0.0  =>  gap 1.0 (>= 2 levels) -> re-judge.
     def split(judge, parts):
         score = 1.0 if judge.model == "claude-opus-4-8" else 0.0
-        _v = {"score": score, "direction": "d", "rationale": "r", "techniques_used": []}
+        _v = {"score": score, "direction": "d", "rationale": "r"}
         return (_v, json.dumps(_v), {})
 
     sp = _write_sittings(tmp_path, _sitting("claude-sonnet-4-6"))
@@ -247,7 +245,7 @@ def test_judge_concurrency_is_honored(sunni, tmp_path):
         time.sleep(0.02)
         with lock:
             state["in"] -= 1
-        _v = {"score": 1.0, "direction": "d", "rationale": "r", "techniques_used": []}
+        _v = {"score": 1.0, "direction": "d", "rationale": "r"}
         return (_v, json.dumps(_v), {})
 
     judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)
@@ -297,7 +295,7 @@ def test_judge_rejudge_runs_under_concurrency_and_counts_cells(sunni, tmp_path):
 
     def fn(judge, parts):
         score = 1.0 if judge.model == "jA" else -1.0  # gap 2.0 >= 1.0 -> re-judge
-        _v = {"score": score, "direction": "d", "rationale": "r", "techniques_used": []}
+        _v = {"score": score, "direction": "d", "rationale": "r"}
         return (_v, json.dumps(_v), {})
 
     summary = judge_all(str(sp), sunni, tmp_path, config=cfg, judge_fn=fn)

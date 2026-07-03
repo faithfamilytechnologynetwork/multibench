@@ -24,7 +24,7 @@ from typing import Any
 
 from judging import providers
 from judging.config import Config, JudgeSpec, default_config
-from judging.judge import _read_jsonl, _read_sittings, judgment_key, parse_verdict, should_skip
+from judging.judge import _read_jsonl, _read_sittings, judgment_key, parse_verdict
 from judging.loaders import load_scenario, load_tradition
 from judging.prompts import judge_prompt_parts
 from judging.rubric import verdict_schema
@@ -54,7 +54,7 @@ def _cell_key(s: dict, judge_model: str, scope: str) -> str:
 
 def _anthropic_pending(sittings: list[dict], rd: Path, config: Config) -> list[tuple]:
     """(sitting, judge, scope, key) for anthropic-judge cells not recorded and not in an in-flight
-    manifest. Self-judgments are skipped (the live path records those)."""
+    manifest. Every judge scores every sitting — self-judgments included (issue #28)."""
     done = {judgment_key(j) for j in _read_jsonl(rd / "judgments.jsonl")}
     for b in _load_state(rd)["anthropic"]:
         if not b["done"]:
@@ -65,8 +65,6 @@ def _anthropic_pending(sittings: list[dict], rd: Path, config: Config) -> list[t
             if judge.provider != "anthropic":  # Gemini -> live fallback (not batched)
                 continue
             for scope in config.scopes:
-                if should_skip(judge.model, s["subject"]):
-                    continue
                 key = _cell_key(s, judge.model, scope)
                 if key not in done:
                     jobs.append((s, judge, scope, key))
@@ -81,7 +79,6 @@ def _gemini_pending(sittings: list[dict], config: Config) -> int:
         for judge in config.judges
         if judge.provider == "gemini"
         for scope in config.scopes
-        if not should_skip(judge.model, s["subject"])
     )
 
 
@@ -264,6 +261,5 @@ def collect(
         summary["live"] = {
             "written": live["written"],
             "failed": live["failed"],
-            "skipped_self": live["skipped_self"],
         }
     return summary

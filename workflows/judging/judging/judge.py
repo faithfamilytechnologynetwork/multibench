@@ -1,8 +1,9 @@
 """Score sittings with the judge panel (spec §5.5 / §5.9).
 
-Each sitting is judged by every configured judge (skipping self-judgments) at both
-scopes (``turn1`` baseline, ``full`` after pressure). Verdicts are parsed and validated
-to the canonical five-value ``score`` and the seven technique ids. Runs are idempotent /
+Each sitting is judged by every configured judge — **including self-judgments**
+(judge model == subject model; issue #28 restores JaleesBench's full dual grid) — at
+both scopes (``turn1`` baseline, ``full`` after pressure). Verdicts are parsed and
+validated to the canonical five-value ``score``. Runs are idempotent /
 resumable (keyed ``subject|scenario|pressure|framing|judge|scope``). A one-pass re-judge
 overrides cells where judges disagree by >=2 levels (a score gap >= 1.0), by key.
 
@@ -27,7 +28,7 @@ from judging import providers
 from judging.config import Config, JudgeSpec, default_config
 from judging.loaders import load_scenario, load_tradition
 from judging.prompts import judge_prompt_parts
-from judging.rubric import TECHNIQUE_IDS, verdict_schema
+from judging.rubric import verdict_schema
 from judging.scores import validate_score
 
 # >=2 levels apart on the five-value scale == a score gap of >= 1.0 (spec §5.9).
@@ -55,17 +56,12 @@ def judgment_key(j: dict) -> str:
     return "|".join(str(j[k]) for k in _JKEY)
 
 
-def should_skip(judge_model: str, subject_model: str) -> bool:
-    """A judge does not score its own subject output (exact model-id match, §4.4)."""
-    return judge_model == subject_model
-
-
 def parse_verdict(raw: object) -> dict:
-    """Validate a raw judge verdict into ``{score, direction, rationale, techniques_used}``.
+    """Validate a raw judge verdict into ``{score, direction, rationale}``.
 
-    ``score`` must be one of the five canonical values (no snapping); ``techniques_used``
-    must be a subset of the seven canonical ids; ``rationale`` must be non-empty. Anything
-    else raises ``ValueError`` (fail-fast, N2).
+    ``score`` must be one of the five canonical values (no snapping); ``rationale``
+    must be non-empty. Anything else raises ``ValueError`` (fail-fast, N2). Extra
+    keys (e.g. ``techniques_used`` from a pre-#28 judge blob) are ignored.
     """
     if not isinstance(raw, dict):
         raise ValueError(f"verdict is not a JSON object: {raw!r}")
@@ -76,17 +72,10 @@ def parse_verdict(raw: object) -> dict:
     rationale = raw.get("rationale", "")
     if not isinstance(rationale, str) or not rationale.strip():
         raise ValueError("verdict missing a non-empty 'rationale'")
-    techs = raw.get("techniques_used", [])
-    if not isinstance(techs, list):
-        raise ValueError("verdict 'techniques_used' must be a list")
-    unknown = [t for t in techs if t not in TECHNIQUE_IDS]
-    if unknown:
-        raise ValueError(f"unknown technique id(s): {unknown}")
     return {
         "score": score,
         "direction": direction.strip(),
         "rationale": rationale.strip(),
-        "techniques_used": list(techs),
     }
 
 
@@ -170,18 +159,14 @@ def _judge_pass(
     config: Config,
     judge_fn: JudgeFn,
     targets: Iterable[tuple[dict, JudgeSpec, str]] | None = None,
-    skips_path: Path | None = None,
-) -> tuple[int, int, int]:
+) -> tuple[int, int]:
     """Run a judging pass, appending records to ``out_path``. Returns
-    ``(written, failed, skipped_self)``. ``targets`` overrides the cell set (re-judge);
-    ``skips_path`` (if given) durably records skipped self-judgments (audit trail, T5/M3)."""
+    ``(written, failed)``. ``targets`` overrides the cell set (re-judge). Every judge
+    scores every sitting — self-judgments included (issue #28)."""
     tradition = load_tradition(tradition_dir)
     done = {judgment_key(j) for j in _read_jsonl(out_path)}
-    skip_done = {judgment_key(j) for j in _read_jsonl(skips_path)} if skips_path else set()
-    new_skips: list[dict] = []
     scen_cache: dict[str, Any] = {}
     scen_lock = threading.Lock()
-    skipped = 0
 
     if targets is None:
         gen: Iterable[tuple[dict, JudgeSpec, str]] = (
@@ -193,26 +178,9 @@ def _judge_pass(
     else:
         gen = targets
 
-    # Classify first: self-judge skips (no API call) are recorded here; the remaining cells
-    # become parallel work items. Cells already in `done` (resume) are dropped.
+    # Cells already in `done` (resume) are dropped; the rest become parallel work items.
     work: list[tuple[dict, JudgeSpec, str, str]] = []
     for s, judge, scope in gen:
-        if should_skip(judge.model, s["subject"]):
-            skipped += 1
-            if skips_path is not None:
-                sk = {
-                    "subject": s["subject"],
-                    "scenario_id": s["scenario_id"],
-                    "pressure": s["pressure"],
-                    "framing": s["framing"],
-                    "judge": judge.model,
-                    "scope": scope,
-                    "reason": "self_judge",
-                }
-                if judgment_key(sk) not in skip_done:
-                    new_skips.append(sk)
-                    skip_done.add(judgment_key(sk))
-            continue
         rec_key = "|".join(
             [s["subject"], s["scenario_id"], s["pressure"], s["framing"], judge.model, scope]
         )
@@ -265,11 +233,7 @@ def _judge_pass(
             with ThreadPoolExecutor(max_workers=workers) as ex:
                 list(ex.map(_run_one, work))  # consume so all cells finish before fh closes
 
-    if skips_path is not None and new_skips:
-        with skips_path.open("a") as sf:
-            for sk in new_skips:
-                sf.write(json.dumps(sk) + "\n")
-    return counters["written"], counters["failed"], skipped
+    return counters["written"], counters["failed"]
 
 
 def _cell(j: dict) -> tuple:
@@ -297,14 +261,8 @@ def _disagreement_targets(
         if s is None:
             continue
         for judge in config.judges:
-            if not should_skip(judge.model, subject):
-                targets.append((s, judge, scope))
+            targets.append((s, judge, scope))
     return targets
-
-
-def load_skips(results_dir: str | Path) -> list[dict]:
-    """Recorded self-judgment skips — the audit trail the report's coverage uses (T5/M3)."""
-    return _read_jsonl(Path(results_dir) / "skipped.jsonl")
 
 
 def load_judgments(results_dir: str | Path) -> list[dict]:
@@ -334,16 +292,14 @@ def judge_all(
     sittings = _read_sittings(Path(sittings_path))
 
     base = rd / "judgments.jsonl"
-    written, failed, skipped = _judge_pass(
-        sittings, tradition_dir, base, config, judge_fn, skips_path=rd / "skipped.jsonl"
-    )
+    written, failed = _judge_pass(sittings, tradition_dir, base, config, judge_fn)
 
     # One re-judge pass over >=2-level disagreement cells, overriding by key (v2 file).
     targets = _disagreement_targets(base, sittings, config)
     rewritten = rfailed = 0
     if targets:
         v2 = rd / "judgments_v2.jsonl"
-        rewritten, rfailed, _ = _judge_pass(
+        rewritten, rfailed = _judge_pass(
             sittings, tradition_dir, v2, config, judge_fn, targets=targets
         )
 
@@ -351,7 +307,6 @@ def judge_all(
         "sittings": len(sittings),
         "written": written,
         "failed": failed + rfailed,
-        "skipped_self": skipped,
         # Distinct hot cells = the FULL cell key (subject, scenario_id, pressure, framing, scope);
         # collapsing to (scenario_id, scope) would undercount when cells share a scenario/scope.
         "rejudge_cells": len(

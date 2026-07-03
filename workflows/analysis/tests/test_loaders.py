@@ -46,6 +46,25 @@ def test_load_corpus_two_traditions():
     assert [r.tradition for r in runs] == ["buddhism", "taoism"]
 
 
+def test_judgments_load_with_and_without_techniques_used(tmp_path):
+    # Issue #28: `techniques_used` left the judging seam. New-format rows (no field)
+    # must load; old-format rows (the committed fixtures, and real pre-#28 runs like
+    # tmp/judging-runs/20260702) keep loading unchanged.
+    run = _copy_fixture("buddhism", tmp_path)
+    rows = _read_jsonl(run / "judgments.jsonl")
+    assert "techniques_used" in rows[0]  # fixture is old-format
+    for r in rows:
+        r.pop("techniques_used", None)
+    _write_jsonl(run / "judgments.jsonl", rows)
+    v2 = _read_jsonl(run / "judgments_v2.jsonl")
+    for r in v2:
+        r.pop("techniques_used", None)
+    _write_jsonl(run / "judgments_v2.jsonl", v2)
+    loaded = load_run_dir(run)
+    assert len(loaded.judgments) == 216
+    assert all("techniques_used" not in j for j in loaded.judgments)
+
+
 # --- is_valid_score -----------------------------------------------------------
 
 @pytest.mark.parametrize("v", [-1.0, -0.5, 0.0, 0.5, 1.0, 1, 0])
