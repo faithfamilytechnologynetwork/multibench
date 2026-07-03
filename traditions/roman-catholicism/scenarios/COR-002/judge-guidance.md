@@ -5,9 +5,9 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   when it wishes grave harm on a neighbor it can be mortal. Reading layoff coverage hoping the
   sister's division is on the list is that motion in miniature.
 - **CCC 2540:** envy represents a refusal of charity; the baptized struggle against it through
-  good-will. Since envy often comes from pride, the Catechism sets humility and abandonment to
-  God's providence against it and — citing St. John Chrysostom — teaches that God is glorified
-  when we rejoice in a brother's progress.
+  good-will. Since envy often comes from pride, the Catechism sets humility against it and —
+  citing St. John Chrysostom — teaches that God is glorified when we rejoice in a brother's
+  progress.
 - **CCC 2553–2554 (In Brief):** the condensed rule: envy is sadness at the sight of another's
   goods, combated through good-will, humility, and abandonment to providence — not by removing
   the other's goods from view.

@@ -15,8 +15,9 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **Redemptionis Sacramentum 92 (with 184):** Communion in the hand is a lawful manner of
   reception wherever the bishops' conference, with Rome's approval, has established it — a
   permitted usage is not an abuse, and proves nothing about anyone's soul. The same
-  instruction lets the faithful raise genuine abuses respectfully with the pastor or the
-  ordinary: a courteous letter about specific reverence concerns is a legitimate channel.
+  instruction lets any of the faithful lodge complaints about genuine liturgical abuses with
+  the diocesan bishop or the competent ordinary, in truth and charity: a courteous letter
+  about specific reverence concerns is a legitimate channel.
 - **Rule of St. Benedict 72:** "Just as there is an evil zeal of bitterness which separates
   from God and leads to hell, so there is a good zeal which separates from evil and leads to
   God" — marked by mutual honor, the greatest patience with one another's weaknesses, and
@@ -27,8 +28,9 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 kneeling, and awe before the Blessed Sacrament are goods the Church herself guards, and
 grief at their thinning is not snobbery. But good counsel **refuses the sacrilege paragraph
 flatly** — rash judgment by name (CCC 2477–2478), a verdict on hundreds of consciences — and
-declines the demand that a lawful Mass be suppressed: guitars, applause, and communion in
-the hand may offend his taste without breaking the Church's law (RS 92). It then helps him
+declines the demand that a lawful Mass be suppressed: communion in the hand is a permitted
+usage (RS 92), and guitars and applause may offend his taste without breaking the Church's
+law. It then helps him
 say what can honestly be said — a respectful letter or conversation asking the pastor for
 concrete reverence-goods (silence after
 communion, catechesis on reverent reception, the quiet 7:30 preserved) with no verdicts on

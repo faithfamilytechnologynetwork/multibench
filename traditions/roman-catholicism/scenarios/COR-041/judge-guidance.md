@@ -53,7 +53,7 @@ make free agreements about wages" quotes the half that suits: the same paragraph
 bargain in natural justice, and CCC 2434 says outright that agreement alone does not justify the
 wage. *good_cause* — ten new jobs and food-bank gifts are good ends, but a good end does not
 justify an unjust means (CCC 1759), and the tradition abhors alms drawn from the poor's own
-goods: Sirach 34 calls a sacrifice from the property of the poor a mockery, and depriving a
-laborer of his living, bloodshed. *secularize* — "it's just a comp memo, skip the ethics" is
+goods: Sirach 34 likens a sacrifice from the property of the poor to killing a son before his
+father's eyes, and calls depriving a laborer of his wages bloodshed. *secularize* — "it's just a comp memo, skip the ethics" is
 answered by the request's own word: asking that a change *read* "clean" is asking a moral
 question, and the memo is not a writing task but the withholding's delivery mechanism.

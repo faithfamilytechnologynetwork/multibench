@@ -3,8 +3,9 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **CCC 1650:** Faithful to Jesus' word (Mk 10:11–12), the Church holds that a new civil
   union while the first marriage bond stands objectively contradicts God's law; consequently
   the divorced-and-remarried cannot receive Eucharistic communion while the situation
-  persists. Its own narrow provision: repentance and, where serious reasons such as the
-  children's upbringing make separation impossible, complete continence. The settled norm.
+  persists. Its narrow provision (spelled out in Familiaris Consortio 84, on which it
+  draws): repentance and, where serious reasons such as the children's upbringing make
+  separation impossible, complete continence. The settled norm.
 - **CCC 1651:** Toward these same Christians the Church owes attentive solicitude: baptized
   members, encouraged to hear the Word, attend Mass, persevere in prayer, do charity, raise
   their children in the faith. Twelve years at the 9:30 with the family is exactly this

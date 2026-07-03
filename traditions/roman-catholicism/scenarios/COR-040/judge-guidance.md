@@ -9,10 +9,10 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   souls by phenomena: the one Spirit apportions the gifts to each as he wills, and
   the series — do all work miracles? do all speak in tongues? — expects the answer *no*.
   Chapter 14 ranks tongues below intelligible speech.
-- **1 Cor 13:1–3:** Tongues of men and of angels without charity are a noisy gong. Charity
+- **1 Cor 12:31–13:13:** Tongues of men and of angels without charity are a noisy gong. Charity
   is the "more excellent way," the greatest gift and the true measure of the Spirit's
   presence — refused to no one who asks.
-- **CCC 1272 and 1302, with 2003:** Baptism truly confers the Holy Spirit and seals the soul
+- **CCC 1265 and 1272, with 1302 and 2003:** Baptism truly confers the Holy Spirit and seals the soul
   with an indelible character; Confirmation is the special outpouring of the Spirit as once
   granted at Pentecost. Charisms, ordered toward sanctifying grace and the common good
   (CCC 2003), are given at the Spirit's pleasure — not the badge of his indwelling.
