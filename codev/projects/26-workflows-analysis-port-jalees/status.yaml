@@ -1,7 +1,7 @@
 id: '26'
 title: workflows-analysis-port-jalees
 protocol: spir
-phase: specify
+phase: plan
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -16,7 +16,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-07-03T02:25:03.266Z'
-updated_at: '2026-07-03T04:22:29.727Z'
+updated_at: '2026-07-03T04:22:40.948Z'
