@@ -256,3 +256,13 @@ Artifact (rendered real 5-trad report): https://claude.ai/code/artifact/a48ec058
   test. 80 pass. Real 5 dirs: N=5 unchanged, 0 diffs (full runs unaffected — only partial
   runs change). One iteration, not a redesign.
 - Next: commit+push (PR #27), re-run 2-way delta consult, re-request pr gate.
+
+### pr gate APPROVED + merged — 2026-07-03
+- User approved pr gate (explicit). Merged PR #27 with a **merge commit** (c8c5a3c, not
+  squash); #26 auto-closed. `porch done 26 --merged 27`.
+
+### Verify phase — 2026-07-03
+- Pulled integrated main into worktree (merge 8c8f908). Post-merge verification on the
+  integrated tree: **80 tests pass**; CLI help lists all flags; real 5-dir report generated
+  (report.html 50577B self-contained + analysis_stats.json + 4 figure PNGs); **0 parity diffs**.
+- `porch done 26` → verify-approval gate (architect approves).
