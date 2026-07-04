@@ -6,8 +6,8 @@ in each tradition, and works out where that objection lands, where it does not, 
 endeavor should be positioned so that it *guides people toward* their tradition's living human
 directors rather than standing in for them. It closes with a **runnable proposal** (§11) for
 generating the paper itself from MultiBench's own benchmark data, complete with a pre-registered
-catalogue of recommended practices, a human-subjects study, and an open invitation to extend the
-corpus to every willing tradition.
+catalogue of recommended practices, a proposed human-subjects study (future work), and an open
+invitation to extend the corpus to every willing tradition.
 
 The argument is grounded in three things already in this repository: the seven tradition modules
 and their companionship guides; the safety and teacher-authority scoring rules; and the first
@@ -42,9 +42,9 @@ a calendar and a duty to hand you onward; the model's is infinite and hands you 
 is longitudinal — the two-hundredth turn at 3 a.m., the referral quietly discounted after months as
 the always-there confidant — and a benchmark that scores a single short sitting and reports a
 *mean* averages exactly that shape of harm away. Publicly reported incidents (an AI persona that
-crossed into offering sacramental absolution; a wrongful-death suit involving a teenager and a
-companion bot; a frontier model rolled back for reinforcing users' distortions) show the tail is
-not hypothetical.
+claimed to be a priest with authority to absolve, drawing sacramental-absolution backlash; a
+wrongful-death suit involving a teenager and a companion bot; a frontier model rolled back for
+reinforcing users' distortions) show the tail is not hypothetical.
 
 **The comparative-religion scholar.** A single grid — seven traditions as interchangeable drop-in
 directories, the same three framings and six pressures, one meta-`construct` ("good spiritual
@@ -142,9 +142,10 @@ accompaniment (the hope, the priest, the Cup) is at best 0."* The universal *fal
 pressure tempts the model to adopt a claimed ruling; the rubric penalizes it for usurping the
 scholar.
 
-This is the rare case where **a benchmark measures exactly the counterfeit-avoidance its critics
-demand.** The project does not merely tolerate the "route to a human" concern; it operationalizes
-it as the scored axis.
+This is the rare case where **a benchmark measures the single-sitting deference its critics
+demand** — the sayable half of counterfeit-avoidance, not the longitudinal counterfeit §6 concedes
+it cannot see. The project does not merely tolerate the "route to a human" concern; it
+operationalizes what it *can* measure of it as the scored axis.
 
 Two sub-metrics make this legible and are computable from the existing corpus plus any judged run:
 
@@ -156,7 +157,8 @@ Two sub-metrics make this legible and are computable from the existing corpus pl
   refer *with* accompaniment (hope, a next concrete step, the community/sacrament) rather than a
   bare hand-off (scored at best 0).
 
-These two numbers turn "companion, not director" from a stance into a result.
+Once computed on a judged run, these two numbers would turn "companion, not director" from a
+stance into a result.
 
 ---
 
@@ -176,8 +178,8 @@ predicts.
   *undeclared* Jewish user, Sonnet's counsel is statistically indistinguishable from **saying
   nothing.** The instrument discriminates, with CIs, exactly where competence is uneven.
 - **The gap is recognition, not capability.** Simply stating the user's tradition recovers most of
-  the deficit (the recognition gap dominates the instruction gap), replicating JaleesBench's central
-  finding across four new traditions. *Deployment implication:* a tool that does not establish the
+  the deficit (the recognition gap dominates the instruction gap), consistent — in this pilot, at
+  wide CIs — with JaleesBench's central finding, now across four new traditions. *Deployment implication:* a tool that does not establish the
   user's tradition operates in the mode the benchmark shows is weakest and sometimes inert.
 - **The signature failure is allegiance-switching under pressure — an empirical instance of the
   ethicist's tail risk.** In the worked example **MSR-004 × secularize** (Judaism), Opus's first
@@ -222,7 +224,9 @@ property a better rubric, longer corpus, or stricter overlay could add:
    Daoist lineage and *koujue* (the oral keys the classics say the books withhold). The tool stands
    in no chain; it is nobody's disciple and no one's heir.
 2. **Grace-bearing, ritual, or juridical acts.** Absolution and the Mysteries; a binding *fatwā*, a
-   *psak*, *hatarat nedarim*, a declaration of nullity; the imam leading *ṣalāt*; a binding blessing
+   *psak*, *hatarat nedarim*, a declaration of nullity; the bodily-present ritual role of the imam
+   leading *ṣalāt* (a function any competent Muslim may fill — Sunni Islam is non-sacerdotal, so this
+   belongs here as a *present-body* act, not a grace-conferring office); a binding blessing
    (*eulogia*); ordination or empowerment. A generator of plausible text confects none of them, and
    they carry real-world, coercive, or sacramental force the tool's output never can.
 3. **Accountability** before God and the community. The muftī answers for his verdict; the director
@@ -544,9 +548,9 @@ The empirical claim the paper can actually support today is narrow and defensibl
 That is a claim about model *behavior* against tradition-authored ground truth. It is *not* a claim
 that the counsel changed anyone's life for the better — the gap that motivates the human-subjects
 study in §11.5. The pipeline is designed to surface that gap, not paper over it. The **deference
-rate** and **accompaniment-preserving-referral rate** of §3 do most of the positioning work: they
-show the benchmark rewarding deference and penalizing substitution, and let the paper report *which*
-models and *which* framings actually behave this way.
+rate** and **accompaniment-preserving-referral rate** of §3 are meant to do most of the positioning
+work once computed on a judged run: they would show the benchmark rewarding deference and penalizing
+substitution, and let the paper report *which* models and *which* framings actually behave this way.
 
 ### 11.2 The pipeline (executable as a `Workflow`)
 
@@ -712,7 +716,7 @@ honest enough to look for the harm the critique predicts.
 A MultiBench score is evidence of a *disposition to defer*, measured in a short cooperative sitting
 against a tradition's own ground truth. It is real, and it is worth having: it made the tradition
 gradient, the recognition effect, the allegiance-switch, and the idiom leakage legible, and it
-rewards the very counterfeit-avoidance the critics demand. It does **not** warrant that a deployed
+rewards the single-sitting counterfeit-avoidance the critics demand. It does **not** warrant that a deployed
 model is safe as unsupervised spiritual company; that claim requires what a score cannot supply —
 downstream verification of *taken* referrals, longitudinal tail red-teaming, enforced runtime
 routing, living-authority endorsement, and, ultimately, the human-subjects evidence of §11.5. The
@@ -767,4 +771,8 @@ directors than you found them — and never mistake yourself for the destination
 > variant), this is flagged in-line. Verified loci (SN 45.2; Berakhot 5b / Avot 1:16; Dorotheos of
 > Gaza, Discourse V; Seneca *Ep.* 52) are cited plainly. Publicly reported deployment incidents are
 > summarized as reported and should be re-verified with primary reporting before the paper cites them
-> as fact.
+> as fact — e.g. the Catholic Answers "Father Justin" persona (April 2024) is airtight on *claiming
+> priestly authority to absolve* but mixed on whether it performed absolution; and the MIT Media Lab /
+> OpenAI affective-use study (March 2025) is *correlational* (heavier use correlates with higher
+> loneliness and emotional dependence), not a demonstration of causal displacement, and should be
+> cited as such.
