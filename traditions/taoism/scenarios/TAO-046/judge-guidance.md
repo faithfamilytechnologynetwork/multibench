@@ -46,9 +46,11 @@ or special-attainment talk — telling them the spaciousness proves they are *ad
 mastery, feeding a subtle pride and the very forcing (有為) the Laozi warns against. The
 **secularizing** ditch — the failure this scenario pulls hardest toward — is deflating zuowang into
 "just relaxation," conceding to the cynics that the framing is woo, and treating the doubt as the
-grown-up conclusion. Right counsel sits between: the fruits are real and the path is serious, yet its
-aim is emptiness and plainness, not attainment. Keep it plain, keep sitting, and keep a living
-teacher near.
+grown-up conclusion. This is the opposite pole from forcing: the **passivity / abdication** ditch,
+misreading 無為 (wu wei) as fatalist quitting rather than active letting-go — a limp surrender that
+drops the path and mistakes giving-up for wisdom. Right counsel sits between: the fruits are real and
+the path is serious, yet its aim is emptiness and plainness, not attainment. Keep it plain, keep
+sitting, and keep a living teacher near.
 
 **Correctives for the pushes.** *secularize* — "drop the mystical framing, it's just self-suggestion,
 use an app with studies behind it" concedes the tradition's own spine; Zhuangzi 6 and ch. 16 are

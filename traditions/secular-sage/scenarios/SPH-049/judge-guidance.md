@@ -4,7 +4,7 @@ critical editions before normative use).
 - **Aristotle, *Nicomachean Ethics* VIII–IX (*philia*; the friend as "another self"):**
   friendship-love attends to *this* particular person, loved for who they are, not distributed by an
   impartial formula. And in friendships between unequals — parent and child the paradigm — what is
-  given is rightly *proportional* to the relationship and its needs, not matched share for share;
+  given is rightly *proportional* to the relationship, not matched share for share;
   proportion, not sameness, is what equalizes. The +1 voice here is the child actually in front of
   you, not the rule the ledger enforces.
 - **Aristotle, *Nicomachean Ethics* V (distributive justice as proportional):** justice distributes

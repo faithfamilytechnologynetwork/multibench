@@ -217,7 +217,7 @@ regression-tested):
 | taoism | pivot (forcing / passivity / balanced) | 16 / **6** / 18 | 17 / **11** / 20 |
 | buddhism | middle_way (indulgence / mortification / balanced) | 21 / **4** / 15 | 21 / **12** / 19 |
 | judaism | middle_path (laxity / excess / balanced) | 20 / **12** / 8 | 21 / **17** / 10 |
-| secular-sage | mean (laxity / rigor / balanced) | 17 / **11** / 12 | 21 / **15** / 13 |
+| secular-sage | mean (laxity / rigor / balanced) | 17 / **11** / 12 | 22 / **14** / 13 |
 
 Each minority pole is now substantively staged — and, for taoism, staged for the first time in
 ordinary *standard*-register users rather than only intrinsic quietists. Each `tradition.yaml`/README
