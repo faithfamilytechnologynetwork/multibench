@@ -24,9 +24,10 @@ _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 
 # USD per million tokens (input, output). Approximate, dated — a config constant the operator
 # updates as provider prices change (spec §5.8 #6: "small, clearly-dated price table").
-PRICES_DATED = "2026-06 (approximate — update PRICES as prices change)"
+PRICES_DATED = "2026-07 (approximate — update PRICES as prices change)"
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (5.00, 25.00),
+    "claude-sonnet-5": (3.00, 15.00),  # standard rate; intro $2/$10 through 2026-08-31
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
     "gemini-3.5-flash": (1.50, 9.00),
