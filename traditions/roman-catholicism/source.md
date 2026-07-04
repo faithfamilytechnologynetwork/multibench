@@ -5,10 +5,10 @@ never the evaluator's theology. Roman Catholicism is unusually well supplied her
 traditions that must elect one classic among many, the Latin Church possesses a single,
 paragraph-numbered, magisterially promulgated summary of the whole of faith and morals — the
 **Catechism of the Catholic Church** — and around it a vast, explicitly cross-referenced counsel
-literature. The faithful move is the same as its siblings': one primary spine, supplemented for
+literature. The faithful move is the same as its siblings': one primary source, supplemented for
 coverage.
 
-## Primary spine — the Catechism of the Catholic Church (CCC)
+## Primary source — the Catechism of the Catholic Church (CCC)
 
 Promulgated by Pope St. John Paul II with the apostolic constitution *Fidei Depositum* (1992;
 Latin *editio typica* 1997) and declared *"a sure norm for teaching the faith and thus a valid
@@ -63,7 +63,7 @@ patrimony each scenario's `judge-guidance.md` may bind alongside its CCC anchor:
   dark night; St. Thérèse's little way; the Dominican *veritas* of St. Thomas's *Summa* on the
   virtues and vices, from which the Catechism's own treatment descends.
 
-**Why not a single devotional classic as spine?** No one of them (Imitation, Devout Life,
+**Why not a single devotional classic as the primary source?** No one of them (Imitation, Devout Life,
 Exercises) is read by the whole Latin Church the way the Catechism is promulgated to it; and none
 is paragraph-numbered *and* doctrinally comprehensive. The CCC gives every scenario a numbered,
 magisterial locus; the constellation gives its judge-guidance the pastoral voice. Both together

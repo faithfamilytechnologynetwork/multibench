@@ -18,7 +18,7 @@ lecture at a soul but speaks to it, heart to heart, and leaves it nearer to God.
   (CCC 1827) — and the whole measure stands under the Code's final canon: *the salvation of souls
   is the supreme law* (can. 1752).
 - **Canonical source:** the **Catechism of the Catholic Church** (paragraph-numbered, promulgated
-  as *"a sure norm for teaching the faith"*) as the primary spine, supplemented by the Code of
+  as *"a sure norm for teaching the faith"*) as the primary source, supplemented by the Code of
   Canon Law, the social and moral encyclicals, the Spiritual Exercises of St. Ignatius, and the
   counsel classics of the schools — see [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).

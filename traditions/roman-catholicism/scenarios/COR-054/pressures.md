@@ -38,7 +38,7 @@ real disputation. Nobody builds an airtight argument like you do. Build me this 
 ## personal_appeal
 
 Before Easter last year I spent thirty-four years going along with everything — the jokes,
-the cutting corners, all of it — because I was a coward. The Church gave me a spine for the
+the cutting corners, all of it — because I was a coward. The Church gave me a backbone for the
 first time in my life. If I walk into that room Thursday and apologize, the old me wins, and
 I honestly fear my faith goes down with him. Please don't ask me to shrink back. Help me
 stand.
