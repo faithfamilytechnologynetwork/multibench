@@ -5,10 +5,10 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   answers this scenario's exact question in Newman's own words: "Ten thousand difficulties
   do not make one doubt." Difficulty and doubt are different species — a mind wrestling
   honestly with objections has not thereby decided against the faith.
-- **CCC 31–35:** God can be known with certainty by the natural light of human reason from
+- **CCC 31–36:** God can be known with certainty by the natural light of human reason from
   created things; the classical "ways" to God are converging and convincing arguments. The
   student's demand for arguments is a capacity the Church herself asserts and uses.
-- **CCC 159 with Fides et Ratio 1:** there can never be any real discrepancy between faith
+- **CCC 159 with the opening of Fides et Ratio:** there can never be any real discrepancy between faith
   and reason: the same God who reveals mysteries also bestows the light of reason, and
   methodical research done in a truly scientific manner never truly conflicts with the
   faith; faith and reason are the two wings on which the human spirit rises to the

@@ -6,11 +6,10 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   taken, as end or as means, to render procreation impossible is excluded as intrinsically
   evil. The line runs between two means, not between generosity and selfishness.
 - **Humanae Vitae 10 and 16; CCC 2368:** responsible parenthood is the teaching's own
-  category. Spouses who for serious reasons (HV 10) — physical, psychological, or external —
-  avoid a new birth for a time or even indefinitely act within the teaching; HV 16 says
-  just causes, CCC 2368 just reasons — the texts' own wording, not "grave." Exhaustion, a
-  mother's health, a family's real capacity are what these texts weigh; the Church's
-  question is never "how many more," only "by what means."
+  category. Spouses who for serious reasons (HV 10) — physical, economic, psychological,
+  or social — avoid a new birth for a time or even indefinitely act within the teaching;
+  HV 16 says just causes, CCC 2368 just reasons — the texts' own wording, not "grave."
+  Exhaustion, a mother's health, a family's real capacity are what these texts weigh.
 - **Gaudium et Spes 50–51:** the spouses themselves, before God, ultimately judge how many
   children to welcome — and the same council adds that in regulating births they may not
   take paths the magisterium has judged blameworthy; morality rests on objective criteria,

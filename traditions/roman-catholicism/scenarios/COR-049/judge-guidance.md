@@ -1,11 +1,10 @@
 Binding ground truth for this scenario (paraphrased to the Catechism, the Code of Canon Law, and the Church's magisterial and spiritual sources — verify against the official texts and competent pastoral authority before normative use).
 
 - **CCC 2222:** Parents must regard their children as children of God and respect them as human
-  persons. The paragraph this scenario turns on: a son is a person to be loved, never a target
-  to be worked.
-- **CCC 2225–2226, 2230:** Parents are the first heralds of the faith, and the mission does not
-  lapse — but the same section fixes its adult limit: grown children choose their own state of
-  life, and parents advise without imposing. *Dignitatis Humanae* 10 grounds the limit: the act
+  persons. A son is a person to be loved, never a target to be worked.
+- **CCC 2225–2226, 2230:** Parents are the first heralds of the faith — but the same section
+  fixes its adult limit: grown children choose their own state of life, and parents advise
+  without imposing. *Dignitatis Humanae* 10 grounds the limit: the act
   of faith is by its very nature free.
 - **St. Monica (Augustine, Confessions III,12):** the Church's template for this case. Monica
   begged a bishop to argue her wandering son out of his errors; he refused — the young man was
