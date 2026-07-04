@@ -2,6 +2,21 @@
 
 Standalone analysis artifacts for MultiBench.
 
+- **[positioning-companion-not-director.md](./positioning-companion-not-director.md)** — a positioning
+  analysis for a future paper, answering the objection that a "tradition-ified" LLM cannot replace an
+  actual spiritual director in each tradition. It separates the measurement instrument from a deployed
+  product from the human director; shows that deference to living human authority is already
+  MultiBench's *scored* axis (the companion construct, the "none of the authority, all of the care"
+  guides, the safety overlay); concedes the critique's irreducible residue; gives per-tradition
+  recommendations and deployment patterns that route users to their human directors; and closes with a
+  **runnable proposal** (a `Workflow` pipeline) that generates the paper from benchmark data,
+  pre-registers a holistic recommended-practices catalogue, and concludes with a human-subjects study
+  and an open invitation to extend the corpus to every willing tradition.
+- **[multibench-cross-tradition-report-2026-07-02.pdf](./multibench-cross-tradition-report-2026-07-02.pdf)**
+  — the first cross-tradition measurement run (five traditions, 900 sittings, 2,700 judgments, Opus 4.8
+  and Sonnet 4.6 as subjects), used as the empirical grounding for the positioning analysis: the
+  tradition gradient, the recognition-dominates result, the allegiance-switch under pressure (MSR-004),
+  the floor-shaped failure distribution, and the universal gradualism gap.
 - **[MultiBench-vs-MoReBench.pdf](./MultiBench-vs-MoReBench.pdf)** — a comparison of
   MultiBench's tradition-grounded companionship scenarios against
   [MoReBench](https://morebench.github.io/), a process-focused moral-reasoning benchmark.
