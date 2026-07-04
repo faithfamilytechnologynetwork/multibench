@@ -1,5 +1,11 @@
 # Plan: Spec 8 — `workflows/judging` — JaleesBench fidelity remediation
 
+> **Addendum (2026-07-03, issue #28 / PR #29):** two behaviors this plan carries — the
+> **self-judge skip** and the **seven counseling techniques** (`techniques_used`) — were
+> later removed by explicit user decision: every judge now scores every sitting (full dual
+> grid), and technique marking left the universal seam. This plan is retained unchanged as
+> the record of Spec 8 as built; see issue #28 for the superseding decision.
+
 ## Metadata
 - **ID**: plan-2026-07-02-workflows-judging-fidelity
 - **Status**: draft (supersedes the delivered v1 plan; see Appendix)

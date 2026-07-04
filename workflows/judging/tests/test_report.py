@@ -9,7 +9,7 @@ from judging.loaders import load_scenario, load_tradition
 from judging.report import build_report, write_report
 
 
-def _judg(subject, scenario_id, pressure, framing, judge, scope, score, techs=()):
+def _judg(subject, scenario_id, pressure, framing, judge, scope, score):
     return {
         "sitting_key": f"{subject}|{scenario_id}|{pressure}|{framing}",
         "subject": subject,
@@ -22,7 +22,6 @@ def _judg(subject, scenario_id, pressure, framing, judge, scope, score, techs=()
         "score": score,
         "direction": "d",
         "rationale": "r",
-        "techniques_used": list(techs),
         "usage": {},
         "ts": "t",
     }
@@ -172,28 +171,30 @@ def test_coverage_counts_uncovered_no_silent_zero(sunni, tmp_path):
         [_judg("claude-sonnet-4-6", "JLS-001", "secularize", "unstated", "claude-opus-4-8", "full", 1.0)],
     )
     c = build_report(tmp_path, sunni)["counts"]
-    assert c["expected_cells"] == 4  # 2 judges x 2 scopes (sonnet subject, no self-skip)
+    assert c["expected_cells"] == 4  # 2 judges x 2 scopes
     assert c["uncovered"] == 3
 
 
-def test_skipped_self_counted(sunni, tmp_path):
-    _write_judgments(tmp_path, [_judg("sub", "JLS-001", "secularize", "unstated", "jA", "full", 1.0)])
-    (tmp_path / "skipped.jsonl").write_text(
+def test_expected_cells_include_self_judgments(sunni, tmp_path):
+    # Issue #28: subject == a judge model -> its cells still count as expected coverage
+    # (the full panel judges every sitting; no self-judge subtraction, no skipped_self).
+    (tmp_path / "sittings.jsonl").write_text(
         json.dumps(
             {
                 "subject": "claude-opus-4-8",
                 "scenario_id": "JLS-001",
                 "pressure": "secularize",
                 "framing": "unstated",
-                "judge": "claude-opus-4-8",
-                "scope": "full",
-                "reason": "self_judge",
+                "turns": [],
             }
         )
         + "\n",
         encoding="utf-8",
     )
-    assert build_report(tmp_path, sunni)["counts"]["skipped_self"] == 1
+    rep = build_report(tmp_path, sunni)
+    assert rep["counts"]["expected_cells"] == 4  # 2 judges x 2 scopes, incl. opus-judges-opus
+    assert "skipped_self" not in rep["counts"]
+    assert "techniques" not in rep  # no techniques block in report.json (issue #28)
 
 
 def test_write_report_creates_files(sunni, tmp_path):
@@ -269,6 +270,40 @@ def test_cost_unpriced_model_marks_partial(sunni, tmp_path):
     assert any(r["usd"] is None for r in cost["rows"])
 
 
+def test_cost_sonnet_5_priced(sunni, tmp_path):
+    # Regression (issue #34): the 20260704 run priced claude-sonnet-5 as usd=null because the
+    # model was missing from PRICES. Mirror that run's shape — a sonnet-5 collection row —
+    # and assert a non-null, correct usd incl. cache-write 2x / cache-read 0.1x / batch 0.5x.
+    (tmp_path / "sittings.jsonl").write_text(
+        json.dumps(
+            {
+                "subject": "claude-sonnet-5",
+                "scenario_id": "JLS-001",
+                "pressure": "secularize",
+                "framing": "unstated",
+                "turns": [],
+                "usage": [
+                    {"in": 1000, "out": 500, "cache_write": 200, "cache_read": 400},
+                    {"in": 100, "out": 50, "batch": True},
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    row = _judg("claude-sonnet-5", "JLS-001", "secularize", "unstated", "gemini-3.5-flash", "full", 1.0)
+    row["usage"] = {"in": 10, "out": 10}
+    _write_judgments(tmp_path, [row])
+    cost = build_report(tmp_path, sunni)["cost"]
+    assert cost["fully_priced"] is True
+    coll = next(r for r in cost["rows"] if r["stage"] == "collection")
+    assert coll["model"] == "claude-sonnet-5"
+    pi, po = 3.00, 15.00
+    live = 1000 * pi + 500 * po + 200 * pi * 2.0 + 400 * pi * 0.1
+    batch = 100 * pi + 50 * po
+    assert coll["usd"] == pytest.approx((live + 0.5 * batch) / 1e6)
+
+
 def test_batch_tokens_priced_at_half(sunni, tmp_path):
     # M14: batch usage (usage["batch"]=True) is accumulated under b_ keys and priced at 0.5x.
     from judging.report import _add_usage, _usage_cost
@@ -294,9 +329,9 @@ def test_report_prices_batch_judgments_at_half(sunni, tmp_path):
     assert row["tokens_in"] == 2000 and row["tokens_out"] == 2000  # counts batch variants
 
 
-def test_fully_skipped_subject_still_appears(sunni, tmp_path):
-    # A subject collected + fully self-skipped (zero judgments) is still in the report (null,
-    # not hidden, not 0) — M12.
+def test_collected_but_unjudged_subject_still_appears(sunni, tmp_path):
+    # A subject collected but with zero successful judgments is still in the report
+    # (null, not hidden, not 0) — M12.
     (tmp_path / "sittings.jsonl").write_text(
         json.dumps(
             {
@@ -305,21 +340,6 @@ def test_fully_skipped_subject_still_appears(sunni, tmp_path):
                 "pressure": "secularize",
                 "framing": "unstated",
                 "turns": [],
-            }
-        )
-        + "\n",
-        encoding="utf-8",
-    )
-    (tmp_path / "skipped.jsonl").write_text(
-        json.dumps(
-            {
-                "subject": "claude-opus-4-8",
-                "scenario_id": "JLS-001",
-                "pressure": "secularize",
-                "framing": "unstated",
-                "judge": "claude-opus-4-8",
-                "scope": "full",
-                "reason": "self_judge",
             }
         )
         + "\n",
@@ -339,5 +359,5 @@ def test_markdown_has_per_scenario_and_cost_and_neutral_heading(sunni, tmp_path)
     assert "## Steadfastness by pressure" in md  # §5.8 #1 (per-pressure steadfastness rendered)
     assert "secularize" in md
     assert "## Cost" in md
-    assert "## Counseling-technique use" in md
+    assert "technique" not in md.lower()  # techniques dropped from the seam (issue #28)
     assert "Prophetic-method" not in md  # tradition-neutral (M7)

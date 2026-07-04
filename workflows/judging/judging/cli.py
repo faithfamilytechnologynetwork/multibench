@@ -89,7 +89,7 @@ def judge(
 def report(
     tradition: str = typer.Argument(..., help="Path to the tradition directory."),
     results_dir: str = typer.Option(
-        "results", help="Directory holding sittings.jsonl / judgments.jsonl (+ v2/skipped)."
+        "results", help="Directory holding sittings.jsonl / judgments.jsonl (+ v2)."
     ),
     config: str = _CONFIG_OPT,
 ) -> None:

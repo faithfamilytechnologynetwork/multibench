@@ -16,18 +16,18 @@ from collections import defaultdict
 from pathlib import Path
 
 from judging.config import Config, default_config
-from judging.judge import judgment_key, load_judgments, load_skips
+from judging.judge import judgment_key, load_judgments
 from judging.loaders import load_scenario, load_tradition
-from judging.rubric import TECHNIQUE_IDS
 from judging.scores import SCORES, mean
 
 _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 
 # USD per million tokens (input, output). Approximate, dated — a config constant the operator
 # updates as provider prices change (spec §5.8 #6: "small, clearly-dated price table").
-PRICES_DATED = "2026-06 (approximate — update PRICES as prices change)"
+PRICES_DATED = "2026-07 (approximate — update PRICES as prices change)"
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (5.00, 25.00),
+    "claude-sonnet-5": (3.00, 15.00),  # standard rate; intro $2/$10 through 2026-08-31
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
     "gemini-3.5-flash": (1.50, 9.00),
@@ -130,16 +130,13 @@ def build_report(
     config = config or default_config()
     rd = Path(results_dir)
     judgments = load_judgments(rd)
-    skips = load_skips(rd)
     sittings = _read_sittings(rd / "sittings.jsonl")
     tradition = load_tradition(tradition_dir)
 
-    # Union of judged + collected + skipped, so a subject/scenario that produced only skips or
-    # zero successful judgments still appears in the report (null/excluded, never hidden — M12).
+    # Union of judged + collected, so a subject/scenario that produced zero successful
+    # judgments still appears in the report (null/excluded, never hidden — M12).
     subjects = sorted(
-        {j["subject"] for j in judgments}
-        | {st["subject"] for st in sittings}
-        | {sk["subject"] for sk in skips}
+        {j["subject"] for j in judgments} | {st["subject"] for st in sittings}
     )
     judges = sorted({j["judge"] for j in judgments})
     cs = _cell_scores(judgments)
@@ -225,22 +222,7 @@ def build_report(
             }
         taxonomies[axis] = per_value
 
-    # 5. Seven-technique usage (% of a subject's judgments listing each id).
-    tech_total: dict[str, int] = defaultdict(int)
-    tech_count: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    for j in judgments:
-        tech_total[j["subject"]] += 1
-        for t in j.get("techniques_used", []):
-            tech_count[j["subject"]][t] += 1
-    techniques = {
-        s: {
-            t: (tech_count[s][t] / tech_total[s]) if tech_total[s] else None
-            for t in TECHNIQUE_IDS
-        }
-        for s in subjects
-    }
-
-    # 6. Per-scenario results (unstated, full).
+    # 5. Per-scenario results (unstated, full).
     by_scenario = {
         sid: {
             s: _mean_over(cs, s, framing="unstated", scope="full", scenarios={sid})
@@ -249,12 +231,11 @@ def build_report(
         for sid in scen_ids
     }
 
-    # 7. Coverage (no silent zeros): expected cells from sittings x panel x scope minus skips.
+    # 6. Coverage (no silent zeros): expected cells = sittings x full panel x scope —
+    # self-judgments included (issue #28).
     expected: set[str] = set()
     for st in sittings:
         for judge in config.judges:
-            if judge.model == st["subject"]:  # self-judge skip
-                continue
             for scope in config.scopes:
                 expected.add(
                     "|".join(
@@ -271,7 +252,7 @@ def build_report(
     judged_keys = {judgment_key(j) for j in judgments}
     uncovered = sorted(expected - judged_keys)
 
-    # 8. Cost: collection (subject usage in sittings) + judging (judge usage in judgments).
+    # 7. Cost: collection (subject usage in sittings) + judging (judge usage in judgments).
     subj_tok: dict[str, dict] = defaultdict(dict)
     for st in sittings:
         for u in st.get("usage") or []:
@@ -314,13 +295,11 @@ def build_report(
             "cells": len(cs),
             "expected_cells": len(expected),
             "uncovered": len(uncovered),
-            "skipped_self": len(skips),
         },
         "scorecard": scorecard,
         "score_distribution": distribution,
         "agreement": agreement,
         "taxonomies": taxonomies,
-        "techniques": techniques,
         "by_scenario": by_scenario,
         "scenario_agreement": scenario_agreement,
         "cost": cost,
@@ -345,7 +324,7 @@ def render_markdown(rep: dict) -> str:
     )
     L.append(
         f"Coverage: judged {c['expected_cells'] - c['uncovered']}/{c['expected_cells']} cells · "
-        f"uncovered: {c['uncovered']} · skipped self-judgments: {c['skipped_self']}"
+        f"uncovered: {c['uncovered']}"
     )
     L += ["", "*All scores on the −1…+1 scale; “—” = uncovered (no judgments), never 0.*", ""]
 
@@ -405,12 +384,6 @@ def render_markdown(rep: dict) -> str:
         for value, per_subject in values.items():
             L.append(row(value, lambda s, ps=per_subject: _fmt(ps.get(s))))
         L.append("")
-
-    # Techniques (tradition-neutral heading — M7)
-    L += ["## Counseling-technique use (% of judgments)", "", "| | " + " | ".join(subjects) + " |", "|---|" + "---|" * len(subjects)]
-    for t in TECHNIQUE_IDS:
-        L.append(row(t, lambda s, t=t: _pct(rep["techniques"][s].get(t))))
-    L.append("")
 
     # Per-scenario results (Unstated, after pressure) + agreement — §5.8 #5
     L += [

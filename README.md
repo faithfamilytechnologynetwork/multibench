@@ -27,8 +27,9 @@ directory, not changing the core.** See
   ([`sunni-islam/`](traditions/sunni-islam/)), **Eastern Christianity / *SynodiaBench***
   ([`eastern-christianity/`](traditions/eastern-christianity/)), **Taoism / *TaoBench***
   ([`taoism/`](traditions/taoism/)), **Buddhism / *MittaBench*** ([`buddhism/`](traditions/buddhism/)),
-  **Judaism / *MiddotBench*** ([`judaism/`](traditions/judaism/)), and **Secular Sage /
-  *SophiaBench*** ([`secular-sage/`](traditions/secular-sage/)).
+  **Judaism / *MiddotBench*** ([`judaism/`](traditions/judaism/)), **Secular Sage /
+  *SophiaBench*** ([`secular-sage/`](traditions/secular-sage/)), and **Roman Catholicism /
+  *CorBench*** ([`roman-catholicism/`](traditions/roman-catholicism/)).
 - [`apps/`](apps/) — applications and standalone tools (e.g. `jaleesbrowser`,
   and the `tradition_validator`).
 - [`workflows/`](workflows/) — pipelines such as judging and scenario generation.
@@ -37,14 +38,14 @@ directory, not changing the core.** See
 
 The tradition **format** is defined and documented
 ([`traditions/README.md`](traditions/README.md)), the **`tradition_validator`** is built
-([`apps/tradition_validator/`](apps/tradition_validator/)), and **six traditions** are in
+([`apps/tradition_validator/`](apps/tradition_validator/)), and **seven traditions** are in
 the canonical format and validate clean: **Sunni Islam** (140 scenarios), **Eastern Christianity /
-*SynodiaBench*** (106), **Taoism / *TaoBench*** (48), **Buddhism / *MittaBench*** (52), **Judaism /
-*MiddotBench*** (48), and **Secular Sage / *SophiaBench*** (49) — 443 scenarios in all. Four of the
-six were revised and expanded in a multi-agent
-[plurality ultracode audit](docs/analysis/plurality-ultracode-audit.md); all remain
-`scholar_review: none` pending review by scholars of each tradition. The **harness** (collection,
-judging, scoring) and a scenario-generation workflow are not yet migrated in.
+*SynodiaBench*** (106), **Roman Catholicism / *CorBench*** (76), **Buddhism / *MittaBench*** (52),
+**Secular Sage / *SophiaBench*** (49), **Taoism / *TaoBench*** (48), and **Judaism / *MiddotBench***
+(48) — 519 scenarios in all. Four of them (taoism, buddhism, judaism, secular-sage) were revised and
+expanded in a multi-agent [plurality ultracode audit](docs/analysis/plurality-ultracode-audit.md);
+all remain `scholar_review: none` pending review by scholars of each tradition. The **harness**
+(collection, judging, scoring) and a scenario-generation workflow are not yet migrated in.
 
 MultiBench generalizes [JaleesBench](https://github.com/iaser-ai/jaleesbench),
 which instantiated this construct for Sunni Islam.

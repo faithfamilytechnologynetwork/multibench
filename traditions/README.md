@@ -170,8 +170,8 @@ Four further traditions instantiate the same construct, each with its own canoni
 axis, and taxonomies: [`taoism/`](taoism/) (*TaoBench*, the *Tao Te Ching*; `pivot` between forcing
 and passivity), [`buddhism/`](buddhism/) (*MittaBench*, the *Dhammapada*; the `middle_way`),
 [`judaism/`](judaism/) (*MiddotBench*, *Mesillat Yesharim*; the `middle_path`), and
-[`secular-sage/`](secular-sage/) (*SophiaBench*, the Western philosophical tradition; the `mean`).
-All six validate `--strict`.
+[`secular-sage/`](secular-sage/) (*SophiaBench*, the Western philosophical tradition; the `mean`),
+and [`roman-catholicism/`](roman-catholicism/) (*CorBench*). All seven validate `--strict`.
 
 ## Validate
 

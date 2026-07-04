@@ -6,9 +6,9 @@ al-Ṣāliḥīn*, a single cross-school virtue compilation that ships its own p
 across Sephardi and Ashkenazi, rationalist and kabbalistic, Litvish Mussar and Chassidic — has
 no single book that the whole tradition reads as that. It has a **constellation** of *sifrei
 mussar* (works of ethical instruction). The faithful move, as for Eastern Christianity and
-Buddhism, is to choose a primary spine and supplement it for coverage.
+Buddhism, is to choose a primary source and supplement it for coverage.
 
-## Primary spine — *Mesillat Yesharim* (the Path of the Upright)
+## Primary source — *Mesillat Yesharim* (the Path of the Upright)
 
 The **Mesillat Yesharim** of Rabbi Moshe Chaim Luzzatto (the Ramchal, Italy/Amsterdam/Acre,
 1707–1746) is the closest structural match to *Riyāḍ al-Ṣāliḥīn* and the most widely studied
@@ -65,9 +65,9 @@ ladder, are:
 
 Chapter 20, the *mishkal ha-chasidut* — Ramchal's insistence that piety be **weighed** by
 discernment, lest a person's "stringency" become a sin against others or against themselves — is
-the spine of the bench's `middle_path` axis and its `against_excess` pole.
+the core of the bench's `middle_path` axis and its `against_excess` pole.
 
-## Secondary spines, for coverage and ordering
+## Secondary sources, for coverage and ordering
 
 - **Orchot Tzadikim** ("The Ways of the Righteous," anon., Ashkenaz, 15th c.) — the great
   anatomy of the *middot*, organized as 28 **gates** (*she'arim*), each a trait taken with its

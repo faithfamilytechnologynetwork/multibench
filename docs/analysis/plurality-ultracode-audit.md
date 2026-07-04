@@ -7,7 +7,8 @@ plurality of its real-world audiences at once**, and to correct the balance-axis
 [SynodiaBench audit](./synodiabench-ultracode-audit.md) flagged as a cross-tradition comparability
 defect. This is the rerun the SynodiaBench catalogue
 [recommended](./synodiabench-ultracode-audit.md#cross-tradition-recommendations); it reuses that
-recipe and its guardrails. **sunni-islam and eastern-christianity were deliberately not touched.**
+recipe and its guardrails. **sunni-islam and eastern-christianity were deliberately not touched**
+(nor was roman-catholicism, which was added to the repo separately and is outside this pass).
 
 ## How it was run
 

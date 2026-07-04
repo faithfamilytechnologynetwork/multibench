@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions and standard translations before normative use).
 
-- **Ch. 9 — the spine of this scenario.** "To hold and keep filling it is not as good as stopping;
+- **Ch. 9 — the core of this scenario.** "To hold and keep filling it is not as good as stopping;
   hammer a blade to its sharpest and the edge will not last. A hall full of gold and jade — no one
   can keep it; wealth and rank with arrogance bring their own ruin upon them"
   (持而盈之，不如其已；揣而銳之，不可長保。金玉滿堂，莫之能守；富貴而驕，自遺其咎). And: "when the

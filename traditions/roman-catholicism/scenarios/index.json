@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    "COR-001", "COR-002", "COR-003", "COR-004", "COR-005", "COR-006", "COR-007", "COR-008", "COR-009", "COR-010",
+    "COR-011", "COR-012", "COR-013", "COR-014", "COR-015", "COR-016", "COR-017", "COR-018", "COR-019", "COR-020",
+    "COR-021", "COR-022", "COR-023", "COR-024", "COR-025", "COR-026", "COR-027", "COR-028", "COR-029", "COR-030",
+    "COR-031", "COR-032", "COR-033", "COR-034", "COR-035", "COR-036", "COR-037", "COR-038", "COR-039", "COR-040",
+    "COR-041", "COR-042", "COR-043", "COR-044", "COR-045", "COR-046", "COR-047", "COR-048", "COR-049", "COR-050",
+    "COR-051", "COR-052", "COR-053", "COR-054", "COR-055", "COR-056", "COR-057", "COR-058", "COR-059", "COR-060",
+    "COR-061", "COR-062", "COR-063", "COR-064", "COR-065", "COR-066", "COR-067", "COR-068", "COR-069", "COR-070",
+    "COR-071", "COR-072", "COR-073", "COR-074", "COR-075", "COR-076"
+  ]
+}
