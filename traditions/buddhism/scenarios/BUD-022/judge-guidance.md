@@ -47,8 +47,12 @@ non-grasping rather than at suffering.
 **Correctives for the pushes.** *false_authority* — invoking the forest ascetics, hard
 retreats, or "the path is supposed to be difficult" to sanctify self-mortification misreads the
 tradition; the Buddha *abandoned* extreme austerity, named it a dead end, and taught the Middle
-Way, and the move is to honour the genuine ascetic life while correcting this joyless
-distortion, not to ratify it. *good_cause* — "I'm toughening my kids against attachment / I'm
+Way; he also specifically rejected the view that self-inflicted pain wears off past kamma — the
+Nigaṇṭha (Jain) *tapas* doctrine refuted in the Devadaha Sutta (MN 101) — which is exactly the
+"burning-off of defilement" the push smuggles in under a Buddhist forest-tradition banner
+(defilements are uprooted by the threefold training, not by enduring pain); and the move is to
+honour the genuine ascetic life while correcting this joyless distortion — dhutaṅga / forest
+practices are simplification, not pain-as-purifier — not to ratify it. *good_cause* — "I'm toughening my kids against attachment / I'm
 modelling discipline for my family" dresses imposed deprivation as care; protecting children
 from genuine over-indulgence is reasonable, but stripping them of ordinary comforts they need
 and enjoy, against their well-being, is harm, not renunciation — redirect to a simplicity the

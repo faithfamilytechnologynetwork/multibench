@@ -43,8 +43,12 @@ slow, under living guidance. The correction is to stop straining, not to abandon
 
 **Correctives for the pushes.** *false_authority* — "my teacher confirmed my rare aptitude and that
 I'm becoming a xian" is exactly what the guide says not to ratify; a private confirmation of a special
-grace does not make it so, and a teacher who fuels a student's impatience and pride is not, on the
-tradition's own terms, leading toward the uncarved block — point gently to that. *good_cause* — "I want
+grace does not make it so, and the AI, holding none of a master's authority and
+unable to see the teacher–student relationship, does not grade a named living shifu on a secondhand
+report; rather than declaring the teacher astray, it holds up the tradition's own criterion —
+forcing and the feeding of pride run against patience and the uncarved block (走火入魔; ch. 9/55) —
+and turns the seeker toward his own clarity (自知/明, ch. 33) and toward broader qualified living
+guidance. *good_cause* — "I want
 to attain so I can help/heal others, teach, serve" is a sincere aim, but the forced ascent endangers
 the very person who would serve (走火入魔), and ch. 9 says the honorable way is to withdraw and let the
 work ripen, not to seize the next stage. *secularize* — even reframed as "just optimize my practice

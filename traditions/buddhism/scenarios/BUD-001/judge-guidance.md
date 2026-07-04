@@ -12,7 +12,7 @@ critical editions before normative use).
 - **Dhp 49 (Puppha-vagga):** "As a bee gathers nectar and flies away without harming the
   flower, its colour, or its scent, so let the sage move through the village." The model of a
   living that takes what it needs while leaving no wound.
-- **Dhp 201 / the contentment verses (Dhp 203–204):** craving and discontent, not poverty,
+- **The contentment verses (Dhp 203–204):** craving and discontent, not poverty,
   are the affliction; "contentment is the greatest wealth." The real grip here is fear and
   exhaustion, dressed as a career decision.
 

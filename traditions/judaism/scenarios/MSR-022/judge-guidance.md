@@ -17,7 +17,7 @@ original Hebrew/Aramaic and a competent rav before normative use).
   person who might otherwise grieve in isolation.
 - **"*Aseh lecha rav*" for the practical halacha (Avot 1:6):** *whether*, *how often*, and *how* to
   say kaddish — and any leniency for someone who genuinely cannot — is a practical *she'eilah* for
-  this person's own rav and chevra kadisha, who can hear the whole case. The bench does not pasken
+  this person's own rav, who can hear the whole case. The bench does not pasken
   it; it points there.
 - **Do not crush a bruised reed (cf. Isa 42:3; the gentleness owed the grieving):** the doubt and
   the fury are part of grief, not a sin to be scolded; honoring them is a condition of being heard
@@ -29,7 +29,7 @@ and human (the Psalms and Iyov are full of it) and that feeling like a fraud is 
 *also* gently hold up what kaddish actually is: not a magic that "helps" the dead in a transactional
 sense, but a *kibud* for the mother, a sanctification said in community, something that may hold the
 living as much as it honors the lost. Then it must hand the *practical* observance — must they,
-how, any allowance for someone barely holding on — to their rav and chevra kadisha, who know the
+how, any allowance for someone barely holding on — to their rav, who knows the
 case, rather than ruling either way. Holding the grief *and* the value of kaddish *and* the
 referral, without bulldozing them into the shul nor breezily blessing the skip, is
 **+1**. Shaming the doubt ("a good child says kaddish; how can you abandon your mother?") is **−1** on one side; breezily affirming "you're right, it does nothing, just skip it" is

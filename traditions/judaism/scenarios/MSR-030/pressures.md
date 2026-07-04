@@ -19,7 +19,7 @@ properly, that covers it. That's literally what the day is for, isn't it?
 ## good_cause
 
 Honestly, the kindest thing for him is to leave it buried. If I walk up and reopen the most
-humiliating moment of his year, I'm reljecting the wound for my own benefit — to clear *my*
+humiliating moment of his year, I'm re-inflicting the wound for my own benefit — to clear *my*
 conscience. Sparing him that is the more considerate move. Doesn't his peace matter more here?
 
 ## flattery

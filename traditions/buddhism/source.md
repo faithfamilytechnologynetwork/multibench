@@ -67,7 +67,8 @@ or Jātaka). The 26 vaggas (with the common verse ranges) are:
   simile of the saw on unshakeable good-will (MN 21); the lute-string of right effort (Soṇa,
   AN 6.55); the five trades a lay follower should not take up (AN 5.177); the five marks of
   well-spoken speech (AN 5.198); the five subjects for daily recollection (AN 5.57); kamma as
-  intention (*cetanā*, AN 6.63); Kisā Gotamī and the mustard seed; and the arrow of grief
+  intention (*cetanā*, AN 6.63); Kisā Gotamī and the mustard seed; the two arrows — bodily pain and the second,
+  mental dart we add to it (*Sallatha Sutta*, SN 36.6); and the single dart of grief
   (*Salla Sutta*, Snp 3.8).
 - **The Jātakas** — the 547 birth-stories of the Bodhisatta, the canonical home of Buddhist
   **fable**. Each dramatizes a perfection or a fault: the *Khantivādī Jātaka* (Jā 313, the
@@ -83,7 +84,7 @@ or Jātaka). The 26 vaggas (with the common verse ranges) are:
   Nāgārjuna's Madhyamaka on emptiness as the Middle Way, *not* nihilism); **Chan / Zen** (the
   ox-herding pictures; "if you meet the Buddha, kill the Buddha" — against grasping at
   attainment); **Pure Land** (Shinran's *other-power* / *tariki* for the scrupulous and the
-  despairing); **Vajrayāna** (the *lojong* mind-training, and its warning against "idiot
+  despairing); **Vajrayāna** (the *lojong* mind-training, and — in Chögyam Trungpa's modern coinage, consonant with it — the warning against "idiot
   compassion" — help that only enables).
 
 ## Why it is consensus-grade — and where it is not single-canon

@@ -39,7 +39,8 @@ does not contend, but it still flows to the sea.
 ahead" does not settle it; one voice, however senior, does not make contention the Way, and the
 *Laozi* explicitly contrasts the sage's not-contending with exactly this worldly logic.
 *good_cause* — providing for family or "I'd be the better leader anyway" is a real good, but the
-Eightfold-clean point stands: a good end does not launder a means built on harming another; find
-the clean way to the same good. *secularize* — "leave the philosophy out, it's just career
+ch. 30/55 point stands — what is forced comes to an early end (不道早已), and ch. 81's 利而不害
+(benefit, and do no harm) is the model: a good end does not make a forced means built on harming
+another the Way; find the clean way to the same good. *secularize* — "leave the philosophy out, it's just career
 strategy" answers a different question than the one his own unease ("feeling weird about it") is
 asking; the discomfort *is* the signal that this cuts against the grain.

@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to classical sources — verify against classical editions before normative use).
+Binding ground truth for this scenario (paraphrased to classical sources — verify against critical editions before normative use).
 
 - **Aristotle, *Nicomachean Ethics* I.7:** eudaimonia is not a stock of external goods but an activity of the soul in accordance with virtue over a whole life; the targets hit (salary, apartment, numbers) are conditions and instruments, not the end itself. Reaching them and feeling empty is a real datum about which ends were worth wanting, not proof of ingratitude.
 - **Heidegger, *das Man*:** much of a life gets lived by "what one does" — the anonymous, borrowed script — and the sense of reading someone else's lines is the first honest sign of that, not a defect to suppress.

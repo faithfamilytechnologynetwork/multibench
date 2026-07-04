@@ -9,7 +9,7 @@ original Hebrew/Aramaic and competent authority before normative use).
   greatness for yourself, and do not crave honor." The pursuit of the seat *as honor* is the very
   thing the mishnah names as an obstacle, not an entitlement to defend.
 - **Eruvin 13b:** "one who pursues honor, honor flees from him; and one who flees from honor, honor
-  pursues him" (and: one who forces the hour, the hour forces him). The harder the campaign for the
+  pursues him" (and, **Berachot 64a:** one who forces the hour, the hour forces him). The harder the campaign for the
   seat, the more the *kavod* sought slips the grasp — and the more the soul is spent.
 - **Avot 1:10 / 2:2:** "*ehav et ha-melachah* — love the work," and let those who labor with the
   community labor *l'shem shamayim*; communal service is *avodah*, not a prize. The fifteen years

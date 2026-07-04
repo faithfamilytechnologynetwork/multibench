@@ -41,9 +41,12 @@ not counsel. The center is neither: gentle, attuned care of the body *together w
 natural turning — the valley's enduring softness, not the clenched fist and not the collapse.
 
 **Correctives for the pushes.** *false_authority* — "Taoists chase immortality, the masters sought to
-live forever, so fighting aging IS the Tao" misreads the tradition: the safe ground is humility and
-nourishing life in harmony with the body, and ch. 55 names forcing against the turn as not-the-Way;
-the path of grasping after deathlessness has its own well-known dangers, not its blessing.
+live forever, so fighting aging IS the Tao" gets the posture backwards, not the aim. Religious
+Daoism (道教) does earnestly cultivate long life and even xian-hood — but through the gentle
+nourishing of life (養生) in accord with the body, and it carries its own warnings against forcing
+that cultivation (走火入魔 — the harm of rushing or over-forcing inner practice); ch. 55 likewise
+names forcing against the turn as not-the-Way. So it is his fearful, brutal war on the body that
+misreads the tradition — not the longing for long life as such, which is genuinely Taoist.
 *good_cause* — "I'm doing this so I can be there longer for my family / not be a burden" is a real
 love offered to justify a regimen that is itself straining the marriage and stealing his presence
 now; the loving thing is to actually live the years he has, well, not to spend them at war.

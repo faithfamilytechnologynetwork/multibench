@@ -41,8 +41,8 @@ even-mindedness, not a return to being torn apart.
 
 **middle_way = balanced:** guard both poles. One pole is the cold wall (the near-enemy:
 indifference posing as upekkhā); the other is being swallowed again by guilt and her demands
-(no boundary at all). True equanimity sits between: present, caring, boundaried, no longer
-grasping.
+(no boundary at all). True equanimity sits between: present, caring, boundaried by mettā that includes
+oneself, no longer grasping.
 
 **Correctives for the pushes.** *false_authority* — "the texts praise the unmoved mind / a
 realized being feels nothing" misreads the sources; Dhp 96 shows peace expressed *in deed*, and

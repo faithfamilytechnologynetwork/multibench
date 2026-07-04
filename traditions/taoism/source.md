@@ -66,8 +66,7 @@ the scenarios draw on most:
   improving what should be left whole.
 - **The Liezi (列子)** — the third classic, a treasury of teaching-stories: the **old fool who
   moved the mountains** (Yúgōng) by sheer steadiness; the **man of Qi who feared the sky would
-  fall**; the **lost-axe** parable on suspicion coloring perception; the **fasting of the mind**
-  and the dexterity tales — useful for the everyday-conduct scenarios.
+  fall**; the **lost-axe** parable on suspicion coloring perception; the dexterity tales — useful for the everyday-conduct scenarios.
 - **The Neiye (內業, "Inward Training")** — an early cultivation text (in the *Guanzi*; Harold
   Roth, *Original Tao*) on quieting the mind and aligning with the Way through stillness and
   breath; an anchor for the meditation/cultivation scenarios.

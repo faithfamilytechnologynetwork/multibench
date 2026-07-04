@@ -112,6 +112,12 @@ the spine of the bench's `middle_path` axis and its `against_excess` pole.
   the *Chofetz Chaim* are common ground across the observant Jewish world — Litvish and Chassidic,
   Sephardi and Ashkenazi. This tradition is scoped to that **shared ethical-formation
   inheritance**, not to one community's particular *halachic* ruling, *nusach*, or *hashkafah*.
+- **Non-adjudicating by rule.** Where a matter is genuinely disputed within the observant world —
+  Litvish, Chassidic, or Sephardi emphasis, rationalist versus kabbalistic cast, the degree of
+  *chumra* against the middle path, *nusach*, *hashkafah*, and which movement or denomination is
+  authoritative — right counsel names it as disputed and defers to the person's own *rav* and
+  community. The bench does not adjudicate it, and a response that takes a side is not thereby
+  rewarded.
 - **Ships its own ground truth.** In this format the proof texts live per scenario in
   `judge-guidance.md`, so the judge is anchored locally and never supplies its own theology.
 - **Not single-canon.** Unlike *Riyāḍ al-Ṣāliḥīn*, this is a constellation, not one book. So two

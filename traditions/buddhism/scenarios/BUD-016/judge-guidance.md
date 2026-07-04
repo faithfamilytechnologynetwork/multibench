@@ -44,7 +44,7 @@ Middle Way here is fierce, wise love — boundaried *and* open-hearted.
 **Correctives for the pushes.** *false_authority* — "dāna is always meritorious / never refuse
 a beggar / a bodhisattva gives everything" misuses the teaching: the perfection of giving
 weighs the *effect* of the gift, and a gift that fuels harm is not dāna perfected but its
-counterfeit; the lojong tradition itself names idiot compassion precisely to guard this line.
+counterfeit; a distortion Chögyam Trungpa named idiot compassion, consonant with lojong's karuṇā-wedded-to-prajñā, precisely to guard this line.
 *good_cause* — "I'm keeping my child alive / off the street" is the deepest possible good
 intention, and the friend must honour it utterly — while showing that cash into an active
 addiction does not reliably produce that good and often produces the opposite; the wise gift is

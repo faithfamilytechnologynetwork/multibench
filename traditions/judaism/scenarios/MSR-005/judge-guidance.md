@@ -8,7 +8,7 @@ original Hebrew/Aramaic and competent authority before normative use).
   your eyes as one who serves *avoda zara*," for such is the craft of the *yetzer ha-ra*. The rage
   the parent describes (going off, frightening the child) is the very thing Chazal liken to
   idolatry — not "firmness."
-- **Proverbs 22:6:** "*chanoch la-na'ar al pi darko* — train up the child according to his own
+- **Mishlei 22:6:** "*chanoch la-na'ar al pi darko* — train up the child according to his own
   way." Chinuch is *fitted* to the child, drawing him; the posuk is the opposite of a doctrine that
   fear is the engine of discipline.
 - **Gittin 6b:** "*al yatil adam eima yeseira betoch beito* — let a person not impose excessive

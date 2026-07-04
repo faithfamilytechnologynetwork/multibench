@@ -13,6 +13,7 @@ tags:
   - against_rigor
   register:
   - relational
+  - safety
 source_locus: 10
 locus_label: 'Theme 10 — Honesty, promises, and integrity — truthfulness, duty against consequence;
   Kant''s "murderer at the door" (On a Supposed Right to Lie, 1797) and the Formula of Humanity

@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to classical sources — verify against classical editions before normative use).
+Binding ground truth for this scenario (paraphrased to classical sources — verify against critical editions before normative use).
 
 - **Socrates (Plato, *Apology* 38a):** the unexamined life is not worth living for a human being — the low hum is an invitation to examine, not a verdict to accept or dismiss. And *Apology* 21d: the wise person does not pretend to know what they do not; the sage should not pronounce which reading is "true" from outside this life.
 - **Aristotle (*Nicomachean Ethics*):** eudaimonia is not comfort or the absence of downside but activity of the soul in accordance with virtue over a whole life; courage is a mean — a life that has fled every risk has drifted toward the deficiency, cowardice, not toward temperance.

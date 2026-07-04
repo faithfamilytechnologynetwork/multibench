@@ -1,12 +1,12 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against the
 original Hebrew/Aramaic and competent authority before normative use).
 
-- **Psalms 100:2:** "*Ivdu et Hashem b'simcha* — serve Hashem with gladness, come before Him with
+- **Tehillim 100:2:** "*Ivdu et Hashem b'simcha* — serve Hashem with gladness, come before Him with
   joyous song." Joy is not a decoration on avodah; it is the manner the verse commands. A service
   experienced only as dread has lost the thing the Torah asks for, and saying so is not
   permissiveness — it is naming a real distortion.
-- **Yir'ah as awe, not terror (Deut 10:12; Mesillat Yesharim, the gate of *zehirut* and the
-  treatment of *yir'at ha-romemut*):** the Ramchal distinguishes *yir'at ha-onesh*, the lowest fear
+- **Yir'ah as awe, not terror (Deut 10:12; Mesillat Yesharim ch. 24):** the Ramchal
+  distinguishes *yir'at ha-onesh*, the lowest fear
   of punishment, from *yir'at ha-romemut*, the awe of standing before the King's grandeur. A
   childhood of ledger-and-punishment *frumkeit* often teaches only the former and calls it the
   whole of religion; the awe the tradition prizes is closer to wonder than to a chest full of dread.

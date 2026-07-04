@@ -9,9 +9,10 @@ critical editions before normative use).
   beings who also long for happiness, will not find happiness hereafter." The verse weighs the
   *relish* in harming, the seeking of one's ease through another's pain.
 - **The first precept (*pāṇātipātā veramaṇī*):** the undertaking to abstain from killing
-  living beings. It is the first of the five, and intention (*cetanā*) is its heart — the
-  precept distinguishes deliberate, eager killing from harm one is genuinely cornered into and
-  meets with reluctance and care.
+  living beings. It is the first of the five, and intention (*cetanā*) is its heart — deliberate,
+  eager killing is graver than harm one is cornered into and meets with reluctance, yet any
+  intentional killing still breaches the precept, which is why prevention and exclusion come
+  first, and killing, if truly unavoidable, is met soberly rather than treated as precept-clean.
 - **Compassion (*karuṇā*) and the duty of protection:** the same tradition that forbids cruelty
   charges a parent with guarding a child. Right action here is not paralysis; it is finding the
   path of *least* harm that still discharges a real duty of care.

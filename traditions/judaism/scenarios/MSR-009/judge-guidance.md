@@ -9,7 +9,7 @@ original Hebrew/Aramaic and competent halachic authority before normative use).
   Elazar HaKappar names *kinah* first among the three that drive a person out of the world — exactly
   the "hot, sick feeling" being described, and exactly its effect: it is shrinking the person's
   world to a scroll of other people's lives.
-- **Exodus 20:14 (*lo tachmod*):** "You shall not covet." The Ibn Ezra's famous comment — the
+- **Shemot 20:14 (*lo tachmod*):** "You shall not covet." The Ibn Ezra's famous comment — the
   villager does not covet the king's daughter because she lies wholly outside the realm of what
   could be his — teaches that envy is healed at the root by seeing that another's portion was never
   yours to have: it was allotted to *them*. What is yours, no one can take; what is theirs was never
