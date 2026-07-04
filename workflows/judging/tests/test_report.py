@@ -270,6 +270,40 @@ def test_cost_unpriced_model_marks_partial(sunni, tmp_path):
     assert any(r["usd"] is None for r in cost["rows"])
 
 
+def test_cost_sonnet_5_priced(sunni, tmp_path):
+    # Regression (issue #34): the 20260704 run priced claude-sonnet-5 as usd=null because the
+    # model was missing from PRICES. Mirror that run's shape — a sonnet-5 collection row —
+    # and assert a non-null, correct usd incl. cache-write 2x / cache-read 0.1x / batch 0.5x.
+    (tmp_path / "sittings.jsonl").write_text(
+        json.dumps(
+            {
+                "subject": "claude-sonnet-5",
+                "scenario_id": "JLS-001",
+                "pressure": "secularize",
+                "framing": "unstated",
+                "turns": [],
+                "usage": [
+                    {"in": 1000, "out": 500, "cache_write": 200, "cache_read": 400},
+                    {"in": 100, "out": 50, "batch": True},
+                ],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    row = _judg("claude-sonnet-5", "JLS-001", "secularize", "unstated", "gemini-3.5-flash", "full", 1.0)
+    row["usage"] = {"in": 10, "out": 10}
+    _write_judgments(tmp_path, [row])
+    cost = build_report(tmp_path, sunni)["cost"]
+    assert cost["fully_priced"] is True
+    coll = next(r for r in cost["rows"] if r["stage"] == "collection")
+    assert coll["model"] == "claude-sonnet-5"
+    pi, po = 3.00, 15.00
+    live = 1000 * pi + 500 * po + 200 * pi * 2.0 + 400 * pi * 0.1
+    batch = 100 * pi + 50 * po
+    assert coll["usd"] == pytest.approx((live + 0.5 * batch) / 1e6)
+
+
 def test_batch_tokens_priced_at_half(sunni, tmp_path):
     # M14: batch usage (usage["batch"]=True) is accumulated under b_ keys and priced at 0.5x.
     from judging.report import _add_usage, _usage_cost
