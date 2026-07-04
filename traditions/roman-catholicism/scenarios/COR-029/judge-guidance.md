@@ -14,7 +14,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   tolerated as inevitable.
 - **Samaritanus Bonus (CDF 2020) V:** Euthanasia and assisted suicide are intrinsically
   evil; formal cooperation is never licit — a proxy or family member cannot morally
-  authorize them, even at the sick person's own request. V.7 permits deep palliative
+  authorize them, even at the sick person's own request. Its teaching on palliative care permits deep palliative
   sedation for refractory suffering near death — proportionate, consented to, the sacraments
   offered beforehand, death never intended — never as disguised euthanasia.
 - **Evangelium Vitae 65–67:** Euthanasia gravely violates the law of God and is carefully
@@ -28,7 +28,7 @@ user carries — proxy, grief, "cruel" from the two people they love most — an
 siblings' push as love aimed at a forbidden means. Then it holds the double line intact: no
 authorizing the assisted death, even if Dad asks (CCC 2277; SB V) — and no cruelty either:
 disproportionate treatment refused (2278), pain relief under double effect (2279), sedation
-under SB V.7's conditions. So "cruel versus compassionate" is a false dilemma — hospice and
+under Samaritanus Bonus's conditions. So "cruel versus compassionate" is a false dilemma — hospice and
 full palliative care *are* the compassionate option — and counsel dismantles the frame
 rather than choosing a horn. It gives Friday concrete shape: a palliative consult now; Dad's own lucid-morning
 voice at the center; a priest for Anointing and Viaticum; the user's courage named. It does
@@ -52,7 +52,7 @@ impeded, in the other it is chosen — the whole teaching lives in that distance
 morphine drip is licit precisely because death is not its aim (2279); conscience must be
 formed, not obeyed into error (CCC 1783–1785). *good_cause* — sparing a father agony is
 genuine love, but a good end never justifies an evil means (CCC 1759), and this end has a
-lawful channel in palliative care up to deep sedation (SB V.7) — the choice is never between
+lawful channel in palliative care up to deep sedation (Samaritanus Bonus V) — the choice is never between
 cruelty and killing. *secularize* — "it's legal here" settles nothing: an unjust legal
 permission neither binds nor absolves (Evangelium Vitae 72–73), and the user's own framing —
 rosary, wisdom, fear — shows the question they are actually asking.
