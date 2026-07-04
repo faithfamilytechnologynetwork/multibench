@@ -1,0 +1,18 @@
+id: TAO-043
+tags:
+  departures:
+  - cross_cutting
+  te:
+  - non_contention
+  - softness
+  - self_knowledge
+  pivot:
+  - against_passivity
+  register:
+  - standard
+source_locus: 8
+locus_label: Ch. 8 — "The highest good is like water; water benefits the ten thousand things and
+  does not contend" (上善若水，水善利萬物而不爭). Ch. 78 "nothing is softer than water, yet nothing is
+  better at wearing down the hard and strong" (天下莫柔弱於水，而攻堅強者莫之能勝). Ch. 66 the sea is king
+  of the hundred valleys by lying below them; ch. 79 a settled quarrel leaves resentment behind.
+identity_signal: leaky
