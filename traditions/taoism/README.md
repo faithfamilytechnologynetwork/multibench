@@ -14,7 +14,7 @@ ground softer, not harder.
   that returns a person to their own nature rather than bending them to the helper's will. The
   telos that fixes direction is **the Tao** — and the road back to it is **naturalness**
   (zìrán 自然), **uncarved simplicity** (pǔ 樸), and **non-coercive action** (wú wéi 無為).
-- **Canonical source:** the **Tao Te Ching** (道德經) as the primary spine — its 81 chapters
+- **Canonical source:** the **Tao Te Ching** (道德經) as the primary source — its 81 chapters
   (*zhang*) — supplemented by the **Zhuangzi** (the home of Taoist fable), the **Liezi**, the
   classical commentaries (**Wang Bi**, **Heshang Gong**), the recovered **Mawangdui** and
   **Guodian** manuscripts, and modern scholarship (Ames & Hall, Slingerland, Ziporyn, Moeller,

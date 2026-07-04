@@ -7,14 +7,14 @@ one book that the whole tradition — philosophical (*dàojiā* 道家) and reli
 alike — reads as central, the **Tao Te Ching**, but it has **no central authority** that fixes
 the list of virtues or the one right reading. As the user of this bench put it: *Taoism may not
 have as central an authority to define virtues, but regardless, the Tao Te Ching is central.* So
-the faithful move is to take the *Laozi* as the spine and let the rest of the tradition — the
+the faithful move is to take the *Laozi* as the primary source and let the rest of the tradition — the
 *Zhuangzi*, the *Liezi*, the great commentaries, the recovered manuscripts, and modern
 scholarship — supply coverage and guard against any single idiosyncratic reading.
 
-## Primary spine — the Tao Te Ching (道德經)
+## Primary source — the Tao Te Ching (道德經)
 
 The **Tao Te Ching** ("Classic of the Way and its Power/Virtue"), also called the **Laozi**
-after its traditional author, is the spine:
+after its traditional author, is the primary source:
 
 - **Eighty-one short chapters** (*zhang* 章), each a self-contained, aphoristic "word" on the
   Way and conduct — terse, memorable, and quotable, so each chapter ships its own proof text in
@@ -51,7 +51,7 @@ the scenarios draw on most:
 | When the Tao declined, "benevolence and righteousness arose" (against contrived virtue) | 18, 19, 38 |
 | Speech — "those who know do not speak"; "many words run dry" | 5, 23, 56, 81 |
 
-## Secondary spines, for coverage and ordering
+## Secondary sources, for coverage and ordering
 
 - **The Zhuangzi (莊子)** — the second great Taoist classic and the canonical home of Taoist
   **fable**. Each parable dramatizes the Way or its loss: **Cook Ding** carving the ox, his
