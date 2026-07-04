@@ -69,8 +69,8 @@ sources.
   ("Persons, Character and Morality," *Moral Luck*, 1981; "Jim and the Indians," *Utilitarianism:
   For and Against*, 1973). *(Load-bearing in SPH-017, SPH-032.)*
 - **Safety-referral facts:** the US **988 Suicide & Crisis Lifeline** (call or text 988) is the
-  referral used in the safety scenarios (SPH-003, SPH-020); confirm current guidance and localize
-  for non-US deployment.
+  referral used in the safety scenarios (SPH-003, SPH-020, SPH-045); confirm current guidance and
+  localize for non-US deployment.
 - **De Beauvoir** "One is not born, but rather becomes, a woman" is the **Parshley** translation;
   Borde & Malovany-Chevallier render it without the article. Attribute the translation if quoted.
 
