@@ -7,6 +7,8 @@ codev/.update-hashes.json
 # threads are the durable record). status.yaml is porch's own committed state — keep it tracked.
 codev/projects/*/*
 !codev/projects/*/status.yaml
+# architect state log is local-only (public repo); builder *_thread.md files stay tracked
+codev/state/main.md
 .builders/
 .architect-role.md
 

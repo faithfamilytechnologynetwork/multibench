@@ -1,0 +1,8 @@
+# Analysis output is a generated artifact, not code — never checked in.
+analysis-out/
+
+# Python / uv
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/

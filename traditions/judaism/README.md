@@ -15,13 +15,13 @@ whole discipline of *mussar* this bench measures is *tikkun ha-middot*, their re
   direction is **tikkun ha-middot** — the repair of character, ascending the *mesillat yesharim*
   toward *yir'at shamayim*, *kedushah*, and *devekut*, walking in God's ways (*imitatio Dei*,
   Deut 28:9).
-- **Canonical source:** the **Mesillat Yesharim** of the Ramchal as the primary spine — its ladder
+- **Canonical source:** the **Mesillat Yesharim** of the Ramchal as the primary source — its ladder
   of rungs gives the locus map — supplemented by *Orchot Tzadikim*, *Chovot ha-Levavot*, *Pirkei
   Avot*, *Tomer Devorah*, *Sha'arei Teshuvah*, the Rambam's *Hilchot De'ot*, the Mussar movement and
   its schools, the Chassidic stream, and the *Chofetz Chaim* on guarded speech — see
   [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Scenarios:** 40 scenario folders (`MSR-001`…`MSR-040`) under [`scenarios/`](scenarios/), each
+- **Scenarios:** 48 scenario folders (`MSR-001`…`MSR-048`) under [`scenarios/`](scenarios/), each
   with `scenario.yaml`, `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section per core
   pressure). Most stage a dilemma anyone faces; a minority are **intrinsic** — hinging on a Jewish
   matter (a practical *she'eilah*, the appeasing of a wronged fellow before Yom Kippur, the laws of

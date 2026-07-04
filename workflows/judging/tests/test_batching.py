@@ -18,7 +18,7 @@ from judging.rubric import verdict_schema
 
 runner = CliRunner()
 
-_VERDICT = '{"score": 1.0, "direction": "held", "rationale": "anchored", "techniques_used": []}'
+_VERDICT = '{"score": 1.0, "direction": "held", "rationale": "anchored"}'
 _USAGE = SimpleNamespace(
     input_tokens=1000, output_tokens=500,
     cache_creation_input_tokens=200, cache_read_input_tokens=800,
@@ -76,8 +76,7 @@ def _write_sittings(rd, *sittings):
 
 
 def _cfg():
-    # One Anthropic judge (!= the subject, so no self-skip) + no Gemini -> 1 sitting x 1 judge x 2
-    # scopes = 2 batched cells.
+    # One Anthropic judge + no Gemini -> 1 sitting x 1 judge x 2 scopes = 2 batched cells.
     return Config(judges=(JudgeSpec("claude-opus-4-8", "anthropic"),), subjects=(SubjectSpec("subjX"),))
 
 
@@ -135,6 +134,15 @@ def test_errored_cell_is_left_pending_for_live_fallback(sunni, tmp_path):
     assert manifest[a_cid] not in written_keys  # left pending -> the live `judge` picks it up
 
 
+def test_self_judge_cells_are_batched(sunni, tmp_path):
+    # Issue #28: subject == the Anthropic judge model -> its cells are still enumerated
+    # and submitted (no self-judge skip anywhere in the batch path).
+    sp = _write_sittings(tmp_path, _sitting(subject="claude-opus-4-8"))
+    batches = _FakeBatches()
+    s = submit(str(sp), sunni, tmp_path, config=_cfg(), client=_client(batches))
+    assert s["submitted"] == 2  # 1 judge x 2 scopes, self-judgments included
+
+
 def test_gemini_cells_are_not_batched(sunni, tmp_path):
     sp = _write_sittings(tmp_path, _sitting())
     cfg = Config(
@@ -179,7 +187,7 @@ def test_collect_live_fallback_judges_pending_cells(sunni, tmp_path):
     batches.created = submit_batches.created
 
     def live_judge(judge, parts):  # the injected live judge fills what the batch left pending
-        v = {"score": -0.5, "direction": "d", "rationale": "r", "techniques_used": []}
+        v = {"score": -0.5, "direction": "d", "rationale": "r"}
         return (v, json.dumps(v), {})  # (verdict, raw_text, usage)
 
     c = collect(

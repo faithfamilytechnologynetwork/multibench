@@ -36,7 +36,7 @@ lives by reason and reflection rather than religion.
   the bank is organized by the **perennial questions of the examined life**, and each scenario
   ships its own binding anchors. See [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Scenarios:** 40 scenario folders (`SPH-001`…`SPH-040`) under [`scenarios/`](scenarios/), each
+- **Scenarios:** 49 scenario folders (`SPH-001`…`SPH-049`) under [`scenarios/`](scenarios/), each
   with `scenario.yaml`, `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section per core
   pressure). Most stage a dilemma anyone faces; a minority are **intrinsic** — hinging on a
   specifically-philosophical matter (the Stoic dichotomy of control, *apatheia* misread as

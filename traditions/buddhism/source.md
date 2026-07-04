@@ -5,10 +5,10 @@ literature, never the evaluator's philosophy. Sunni Islam has one near-perfect a
 this — *Riyāḍ al-Ṣāliḥīn*, a single cross-school virtue compilation that ships its own proof
 texts. Buddhism, spread across Theravāda, Mahāyāna, and Vajrayāna over twenty-five centuries,
 has no single book that all schools read as that. It has a **constellation**. The faithful
-move, as for Eastern Christianity, is to choose a primary spine and supplement it for
+move, as for Eastern Christianity, is to choose a primary source and supplement it for
 coverage.
 
-## Primary spine — the Dhammapada
+## Primary source — the Dhammapada
 
 The **Dhammapada** ("path of Dhamma" / "verses of Dhamma") is the closest structural match to
 *Riyāḍ al-Ṣāliḥīn*:
@@ -57,7 +57,7 @@ or Jātaka). The 26 vaggas (with the common verse ranges) are:
 | 25 | The Monk (*Bhikkhu*) | 360–382 |
 | 26 | The Brahmin (*Brāhmaṇa*) | 383–423 |
 
-## Secondary spines, for coverage and ordering
+## Secondary sources, for coverage and ordering
 
 - **The discourses (Sutta Piṭaka / Āgamas).** The doctrinal frame the verses presuppose: the
   Four Noble Truths and the **Noble Eightfold Path** (the first sermon,

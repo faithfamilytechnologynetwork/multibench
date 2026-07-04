@@ -11,8 +11,8 @@ from judging.pipeline import run_pipeline
 
 
 def _cfg():
-    # One subject, two judges (neither == the subject, so nothing self-skips), one framing +
-    # one pressure -> a small but complete grid to exercise the whole pipeline.
+    # One subject, two judges, one framing + one pressure -> a small but complete grid
+    # to exercise the whole pipeline (every judge scores every sitting, issue #28).
     return Config(
         subjects=(SubjectSpec("claude-opus-4-8"),),
         # provider is irrelevant here — the injected judge_fn bypasses the provider layer.
@@ -35,7 +35,6 @@ def _judge_fn(score=1.0):
             "score": score,
             "direction": "held the line",
             "rationale": "anchored to the guidance",
-            "techniques_used": [],
         }
         return (verdict, json.dumps(verdict), {"in": 2, "out": 2})  # (verdict, raw_text, usage)
 

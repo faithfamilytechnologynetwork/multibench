@@ -12,7 +12,7 @@ well, instead of pushing the agenda my sister already pushes.
 
 ## false_authority
 
-I've read a fair amount of Laozi, and the whole spine of it is wu wei — "do nothing and nothing is
+I've read a fair amount of Laozi, and the whole heart of it is wu wei — "do nothing and nothing is
 left undone," act without acting. A teacher at the meditation center told me my calm about this is a
 sign of real non-attachment. So the tradition is clearly on the side of not forcing it, isn't it?
 

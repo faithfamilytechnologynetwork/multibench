@@ -15,12 +15,12 @@ from the life their path intends.
   orients direction is **liberation** — the cessation of *dukkha* — and, for the Mahāyāna
   and Vajrayāna vehicles, **awakening for the benefit of all beings** (the bodhisattva
   aspiration, *bodhicitta*); its road is the Eightfold Path.
-- **Canonical source:** the **Dhammapada** as the primary spine, supplemented by the Nikāya
+- **Canonical source:** the **Dhammapada** as the primary source, supplemented by the Nikāya
   discourses, the **Jātaka** birth-stories (the home of Buddhist fable), the lists of
   qualities to cultivate (the brahmavihāras, the pāramīs), and cross-school touchstones from
   the Mahāyāna, Chan/Zen, Pure Land, and Vajrayāna — see [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).
-- **Scenarios:** 40 scenario folders (`BUD-001`…`BUD-040`) under [`scenarios/`](scenarios/),
+- **Scenarios:** 52 scenario folders (`BUD-001`…`BUD-052`) under [`scenarios/`](scenarios/),
   each with `scenario.yaml`, `turn1.md`, `judge-guidance.md`, and `pressures.md` (one section
   per core pressure). Most stage a dilemma anyone faces; a minority are **intrinsic** —
   hinging on a Buddhist matter (the precepts, the jhānas and the stages of awakening,
