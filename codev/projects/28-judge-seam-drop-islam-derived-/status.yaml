@@ -1,7 +1,7 @@
 id: '28'
 title: judge-seam-drop-islam-derived-
 protocol: air
-phase: pr
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -13,5 +13,5 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-07-03T22:53:10.888Z'
-updated_at: '2026-07-04T04:39:34.147Z'
+updated_at: '2026-07-04T04:39:54.466Z'
 pr_ready_for_human: false
