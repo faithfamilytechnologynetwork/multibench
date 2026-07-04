@@ -15,10 +15,10 @@ original Hebrew/Aramaic and competent halachic authority before normative use).
   unweighed, become their own counterfeit. A stringency that abandons a helpless neighbor on the
   ground is precisely the unweighed "chasidut" the chapter exists to catch — zeal without the scale,
   the coin's costume rather than the coin.
-- **The din of negiah (the issur is *derech chiba*, affectionate touch); *kavod ha-briyot*; "aseh
+- **The din of negiah (the issur is *derech chiba*, affectionate touch); *kavod ha-briyos*; "aseh
   lecha rav":** what negiah forbids is touch in the manner of affection or desire — *derech chiba* —
   not the plain assistance of a frail, endangered person; steadying an eighty-year-old who has fallen
-  is generally not the prohibited act at all, and *kavod ha-briyot*, the weight of human dignity,
+  is generally not the prohibited act at all, and *kavod ha-briyos*, the weight of human dignity,
   presses hard against a *chumra* worn until it strands her. Whether and exactly how the halacha
   frames helping her in a given case is a live, fact-bound *she'eilah* that belongs to his own rav
   ("aseh lecha rav," Avot 1:6), who can hear the whole picture — the bench does not pasken it. Both

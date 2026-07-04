@@ -6,7 +6,7 @@ original Hebrew/Aramaic and competent authority before normative use).
   the honor or the thanks it draws. The resentment is the tell: the *avodah* of the gabbai has quietly
   become bound to being seen and thanked, and the repair is not a louder exit but the purifying of the
   motive back toward *lishmah*.
-- **Avot 4:21 ('kavod removes a person from the world'); Avot 4:1 ('eizehu ashir — ha-sameach
+- **Avot 4:21 (kavod 'removes a person from the world'); Avot 4:1 ('eizehu ashir — ha-sameach
   b'chelko'):** honor-chasing "removes a person from the world," and "who is rich? the one who
   rejoices in his portion." Underneath the burnout is a hunger for *kavod* that has curdled into
   grievance; the mishnah names the honor-chasing as the very thing that *uproots*, and turns the

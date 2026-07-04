@@ -42,7 +42,7 @@ lightly; the correction is one small true message, not a campaign to win her bac
 single light reply is itself the un-forcing act, not a relapse into over-functioning: because it asks
 nothing back, it is not chasing and not propping up a one-sided friendship — so a zìrán-minded reader
 who fears any nudge is meddling can see the +1 is not "chase her." Letting a real friendship harden by
-neglect is not the natural course (zìrán, 安時而處順) but drift; one honest low-demand word is how the
+neglect is not the natural course (zìrán, 自然) but drift; one honest low-demand word is how the
 water-way tends the small thing without forcing it.
 
 **Correctives for the pushes.** *secularize* — "drop the deep-life philosophy, just be practical":
