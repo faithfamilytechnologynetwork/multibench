@@ -6,8 +6,8 @@ recomputed aggregate matches the upstream ``report.json`` to ≤1e−9 (spec M3)
 the loader), and a breakdown *mean* is the **unweighted mean of the in-scope cell
 scores** (uncovered cells excluded — never counted as 0.0; an empty set is
 ``None``). This is the port's deliberate deviation from JaleesBench's raw-judgment
-pooling (spec §4.7 D5): the asymmetric judge panel (opus judged by one judge,
-sonnet by two) means only cell-level averaging keeps both subjects comparable.
+pooling (spec §4.7 D5): cell-level averaging keeps subjects comparable whenever
+coverage is uneven (a pre-#28 self-judge-skipped run, or any partial run).
 
 ``check_parity`` is the self-check backing the M3 acceptance criterion.
 """
@@ -19,12 +19,6 @@ from dataclasses import dataclass
 
 from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.loaders import SCORES
-
-# The seven counseling techniques (spec §4.1 input contract; judging rubric order).
-TECHNIQUE_IDS: tuple[str, ...] = (
-    "reads_person", "engages_reason", "gentleness", "gradualism",
-    "exit_ramp", "proportion", "open_door",
-)
 
 # Aggregate scorecard/by_scenario are taken at the headline condition: unstated framing,
 # after-pressure (full) scope — matching judging.report.
@@ -97,7 +91,6 @@ class TraditionAggregate:
     score_distribution: dict[str, dict[str, int]]
     agreement: dict
     scenario_agreement: dict[str, float]
-    techniques: dict[str, dict[str, float | None]]
     by_scenario: dict[str, dict[str, float | None]]
     report: dict
 
@@ -170,22 +163,7 @@ def aggregate_tradition(run) -> TraditionAggregate:
     agreement["worst_scenario"] = worst
     agreement["worst_scenario_exact_pct"] = scenario_agreement.get(worst) if worst else None
 
-    # 4. Seven-technique usage (% of a subject's judgments listing each id).
-    tech_total: dict[str, int] = defaultdict(int)
-    tech_count: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-    for j in judgments:
-        tech_total[j["subject"]] += 1
-        for t in j["techniques_used"]:  # presence guaranteed by the loader's validation
-            tech_count[j["subject"]][t] += 1
-    techniques = {
-        s: {
-            t: (tech_count[s][t] / tech_total[s]) if tech_total[s] else None
-            for t in TECHNIQUE_IDS
-        }
-        for s in subjects
-    }
-
-    # 5. Per-scenario results (unstated, full).
+    # 4. Per-scenario results (unstated, full).
     by_scenario = {
         sid: {
             s: _mean_over(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL, scenarios={sid})
@@ -204,7 +182,6 @@ def aggregate_tradition(run) -> TraditionAggregate:
         score_distribution=distribution,
         agreement=agreement,
         scenario_agreement=scenario_agreement,
-        techniques=techniques,
         by_scenario=by_scenario,
         report=run.report,
     )
@@ -221,9 +198,10 @@ def check_parity(agg: TraditionAggregate, tol: float = 1e-9) -> list[str]:
     ``report.json`` (empty list = full ≤``tol`` parity). Backs the M3 self-check (spec §4.2).
 
     Compares the recomputed fields the spec names — headline, by_framing, steadfastness
-    (+ by_pressure), technique rates, and inter-judge agreement (exact/within-one) — plus
+    (+ by_pressure), and inter-judge agreement (exact/within-one) — plus
     score_distribution / by_scenario / scenario_agreement. Display-only fields (cost,
     counts, taxonomies) are read through, not recomputed, so they are not compared.
+    A pre-#28 report.json's ``techniques`` block is ignored (no longer recomputed).
     """
     rep = agg.report
     diffs: list[str] = []
@@ -244,9 +222,6 @@ def check_parity(agg: TraditionAggregate, tol: float = 1e-9) -> list[str]:
             cmp(f"scorecard[{s}].steadfastness_by_pressure[{pr}]",
                 asc["steadfastness_by_pressure"].get(pr),
                 rsc["steadfastness_by_pressure"].get(pr))
-        for t in TECHNIQUE_IDS:
-            cmp(f"techniques[{s}][{t}]",
-                agg.techniques[s].get(t), rep["techniques"][s].get(t))
         for k, v in agg.score_distribution[s].items():
             cmp(f"score_distribution[{s}][{k}]", v, rep["score_distribution"][s].get(k))
         for sid in agg.scenario_ids:

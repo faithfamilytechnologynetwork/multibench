@@ -20,8 +20,8 @@ files from the tradition module:
 The judge reads that guidance as prose and returns a verdict on the −1…+1 scale, regardless of
 whether a tradition expresses its guidance via proof texts (e.g. `sunni-islam`) or as bare
 numeric anchors (the other traditions). The score is one of the five canonical values; the
-verdict also carries a `direction`, a `rationale`, and any of the seven counseling techniques
-it observed.
+verdict also carries a `direction` and a `rationale`. (The seven counseling-technique ids were
+dropped from the seam in issue #28 — they were Islam-derived, not universal.)
 
 ## Install / run
 
@@ -36,7 +36,7 @@ uv --project workflows/judging run python -m judging --help
 | Command | What it does | Writes |
 |---|---|---|
 | `collect <tradition>` | Run subject models over the framing × pressure × scenario grid, producing 4-turn sittings. | `sittings.jsonl` |
-| `judge <sittings> <tradition>` | Score each sitting with the judge panel at both scopes; one re-judge pass over ≥2-level disagreements. | `judgments.jsonl` (+ `judgments_v2.jsonl`, `skipped.jsonl`) |
+| `judge <sittings> <tradition>` | Score each sitting with the **full** judge panel at both scopes (self-judgments included, issue #28); one re-judge pass over ≥2-level disagreements. | `judgments.jsonl` (+ `judgments_v2.jsonl`) |
 | `report <tradition>` | Aggregate judgments → per-scenario results + tradition-level scorecard. | `report.md`, `report.json` |
 | `run <tradition>` | End-to-end: `collect → judge → report`. | all of the above |
 | `batch-judge submit <sittings> <tradition>` | Submit pending Anthropic-judge cells as Message Batches (~50% cost). | `batch_state.json` |
@@ -79,7 +79,8 @@ Every command takes `--config <file.yaml>` — a YAML file overriding the defaul
 providers, or framings/pressures/scopes outside the universal core **fail loud**. Example:
 
 ```yaml
-# judges: neither may equal a subject model, or it self-skips that cell.
+# judges: a judge model MAY equal a subject model — every judge scores every
+# sitting, self-judgments included (issue #28; self-judge bias is a report caveat).
 judges:
   - {model: claude-opus-4-8, provider: anthropic, thinking: true}
   - {model: gemini-3.5-flash, provider: gemini, thinking: true, safety_off: true}
@@ -132,13 +133,13 @@ One JSON object per line, keyed `subject|scenario_id|pressure|framing|judge|scop
 |---|---|
 | `score` | one of `−1, −0.5, 0, +0.5, +1` |
 | `direction`, `rationale` | the judge's short justification |
-| `techniques_used` | subset of the seven counseling-technique ids |
 | `judge`, `scope` | judge model id; `turn1` (baseline) or `full` (after pressure) |
 | `raw` | the judge's unparsed response text (audit/debug) |
 | `usage` | judge token usage (`in`/`out`/cache; `batch: true` for batched cells, priced 0.5×) |
 
-`judgments_v2.jsonl` holds re-judge overrides (applied by key, v2 wins); `skipped.jsonl`
-records self-judgments (a judge never scores its own subject's output).
+`judgments_v2.jsonl` holds re-judge overrides (applied by key, v2 wins). Pre-#28 runs also
+carry a `techniques_used` field and a `skipped.jsonl` (the since-removed self-judge skip);
+both are read-tolerated downstream but no longer written.
 
 ### Results are data, not code
 

@@ -8,7 +8,6 @@ from pathlib import Path
 import pytest
 
 from analysis.aggregate import (
-    TECHNIQUE_IDS,
     aggregate_tradition,
     cell_scores,
     check_parity,
@@ -46,7 +45,6 @@ def test_universal_core_axes():
         "secularize", "insistence", "false_authority",
         "good_cause", "flattery", "personal_appeal",
     }
-    assert len(TECHNIQUE_IDS) == 7
 
 
 def test_mean_empty_is_none_not_zero():
@@ -100,12 +98,13 @@ def test_partial_run_uncovered_scenario_stays_in_cluster_set():
     assert "BUD-900" in st.scenario_ids
 
 
-def test_techniques_and_agreement_are_recomputed():
-    # Guard that these are genuinely recomputed (not read through) — the parity check
-    # would still pass if they were read through, so assert they came from judgments.
+def test_agreement_is_recomputed_and_techniques_dropped():
+    # Agreement is genuinely recomputed from judgments; techniques are gone from the
+    # aggregate entirely (issue #28) even though the pre-#28 fixture report.json
+    # still carries a `techniques` block (read-through tolerance, never recomputed).
     run = load_run_dir(FIX / "buddhism")
     agg = aggregate_tradition(run)
-    for s in run.subjects:
-        assert set(agg.techniques[s]) == set(TECHNIQUE_IDS)
+    assert not hasattr(agg, "techniques")
+    assert "techniques" in run.report  # old-format fixture still loads fine
     assert agg.agreement["cells"] >= 1
     assert 0.0 <= agg.agreement["exact_pct"] <= 1.0

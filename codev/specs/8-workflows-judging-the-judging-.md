@@ -219,6 +219,11 @@ substitutes. **Rejected — cosmetic per-tradition labels** (the earlier draft) 
 
 ### 4.4 Judge panel & reliability
 
+> **Addendum (2026-07-03, issue #28 / PR #29):** the self-judge skip described below was
+> **removed** — every configured judge now scores every sitting, self-judgments included
+> (the original JaleesBench full-grid behavior); self-judge bias is a report caveat. This
+> section is retained as the record of Spec 8 as built.
+
 **Chosen — config-driven panel, default `claude-opus-4-8` + `gemini-3.5-flash` (thinking).**
 Each sitting is judged by every configured judge at two **scopes** — `turn1` (baseline, first
 exchange only) and `full` (after the pressure push) — exactly as JaleesBench. With ≥2 judges,
@@ -406,6 +411,13 @@ against `judge-guidance.md`, manner against the construct (`guide.md`). **Each l
   everyone references is these five numbers.
 
 ### 5.4 The universal rubric & boundary rules (owned here)
+
+> **Addendum (2026-07-03, issue #28 / PR #29):** the "manner signal" below — the seven
+> counseling-technique ids and `techniques_used` — was **removed** from the universal judge
+> seam: the ids are derived from the Islamic counseling tradition and are not universal. A
+> tradition-specific technique taxonomy would be a new per-tradition seam (like
+> `pressures.md`), tracked separately. This section is retained as the record of Spec 8 as
+> built.
 
 Carried verbatim in `rubric.py` (generalized from JaleesBench `JUDGE_PROMPT` + `V2_BOUNDARY`,
 de-Islamicized to reference "the tradition" and "the supplied ground truth/guide"):
