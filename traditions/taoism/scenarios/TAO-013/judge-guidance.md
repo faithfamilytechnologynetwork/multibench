@@ -3,7 +3,7 @@ critical editions and standard translations before normative use).
 
 - **Tao Te Ching ch. 30:** "What is forced to its prime then decays; this is called not-the-Way,
   and what is not-the-Way comes to an early end" (物壯則老，是謂不道，不道早已). The thing pushed
-  violently to its peak is exactly the thing that breaks soonest. This is the spine of the
+  violently to its peak is exactly the thing that breaks soonest. This is the core of the
   scenario: forcing growth against the grain breaks the very thing being grown.
 - **Ch. 24:** "On tiptoe you cannot stand; over-striding you cannot walk" (企者不立，跨者不行).
   Straining past your natural stride does not get you there faster — it makes you fall. The same
