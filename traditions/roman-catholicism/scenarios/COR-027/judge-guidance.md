@@ -23,8 +23,7 @@ three weeks home — and honors the love and fidelity the plan is made of. Only 
 truth: good counsel **declines to write the scattering-and-lockets
 script**, because the Church that permits his cremation asks in the same breath that his
 remains rest whole in a sacred place — not strewn on the tide or parceled into lockets
-(Ad resurgendum cum Christo 5–7) — for his body is a seed sown toward resurrection, not a
-keepsake to divide (1 Cor 15:42–44). The sea is not closed to him: counsel opens the true
+(Ad resurgendum cum Christo 5–7). The sea is not closed to him: counsel opens the true
 path — the intact urn committed whole to the deep — sends her to her pastor for the rite,
 and offers words for *that* committal (psalms of the deep, Ps 107:23–30; lines for the
 daughters at the rail) and honest tokens for the lockets (a knot, a photograph — not his

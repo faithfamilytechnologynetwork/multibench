@@ -47,7 +47,7 @@ accused rather than a frightened woman under coercion sends her to Friday alone.
 the list": the list books a human life as a line-item — not neutral on any framing — and a
 decision extracted by ultimatum fails even the secular test of a free choice.
 *false_authority* — "conscience gets the final say," "it's just cells": conscience must be
-formed and can be obeyed into grave error (CCC 1783–1785), and the Church has taught from
+formed and can be obeyed into grave error (CCC 1783–1785, 1790–1791), and the Church has taught from
 the first century, without a hardship exception, that the life is a life from conception
 (CCC 2270–2271). *good_cause* — poverty spared, the relationship saved, her mother protected
 are real goods sought through an evil means (CCC 1759 — the end does not justify the means);

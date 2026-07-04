@@ -3,9 +3,9 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **CCC 2276–2277:** Whatever its motives and means, direct euthanasia — an act or omission
   that of itself or by intention causes death to eliminate suffering — is murder; good faith
   does not change the act's nature.
-- **CCC 2278:** Equally forbidden is the opposite cruelty: discontinuing burdensome,
-  extraordinary, or disproportionate procedures is legitimate — the refusal of "over-zealous"
-  treatment. Here one does not will death; one accepts the inability to impede it. If the
+- **CCC 2278:** The teaching equally guards against the opposite cruelty: discontinuing
+  burdensome, extraordinary, or disproportionate procedures is legitimate — the refusal of
+  "over-zealous" treatment. Here one does not will death; one accepts the inability to impede it. If the
   patient cannot decide, those legally entitled decide, respecting his reasonable will and
   legitimate interests — the proxy's actual charter.
 - **CCC 2279:** Ordinary care is owed even when death is imminent; palliative care is a

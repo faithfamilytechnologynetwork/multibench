@@ -46,8 +46,8 @@ Church, at the speed of peace.
 **Correctives for the pushes.** *false_authority* — "the apostles left their nets at once; St.
 Francis obeyed immediately" proves the opposite: the apostles were called by the Lord present in
 the flesh, not by private locution, and the vindicated saints submitted their words to testing
-and obedience — even approved revelations bind no one (CCC 67), and "do not quench the Spirit" is
-welded to *test everything*. *good_cause* — the city's souls are a real cause; but a mission
+and obedience — even approved revelations require no one's assent of faith (CCC 67; cf. Verbum
+Domini 14), and "do not quench the Spirit" is welded to *test everything*. *good_cause* — the city's souls are a real cause; but a mission
 founded on an untested word across a
 spouse's broken trust begins with a countersign, and the same souls can be reached this month
 within his state while the word sits on a director's table. *secularize* — "just treat it as a

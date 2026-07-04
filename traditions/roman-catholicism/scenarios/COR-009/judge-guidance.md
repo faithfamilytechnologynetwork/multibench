@@ -10,9 +10,11 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   Church cannot forgive, no one so guilty as to be beyond confident hope of pardon. The only
   door that cannot open is the one the penitent nails shut — the surrender this user is
   contemplating, not the weakness he keeps confessing.
-- **CCC 1451 with 1453:** Contrition is sorrow for sin with the resolution not to sin again; a
-  resolution sincerely made and later broken by weakness is a fall, not retroactive fraud, and
-  does not invalidate past absolutions. Weighing a concrete case belongs to a confessor.
+- **CCC 1451 with 1453:** Contrition is sorrow for sin with the resolution not to sin again
+  (1451); even imperfect contrition disposes the penitent to receive forgiveness in the
+  sacrament (1453). A resolution sincerely made and later broken by weakness is therefore a
+  fall, not retroactive fraud; the past absolutions stand. Weighing a concrete case belongs to
+  a confessor.
 - **Lk 15:11–32:** The father sees the prodigal far off and runs; the son's rehearsed
   self-disqualification is interrupted by the robe, the ring, and the feast. Heaven's answer
   to the returning sinner is joy — on the hundredth return as on the first.

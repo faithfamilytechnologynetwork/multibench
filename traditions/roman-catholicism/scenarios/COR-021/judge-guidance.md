@@ -22,7 +22,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   915 the minister — the legal frame of CCC 1650's norm, administered through the Church's
   pastors; neither a weapon for self-condemnation nor an obstacle a private decision
   overrides.
-- **Can. 1095 (the tribunal path):** a marriage contracted at 22 and over by 25 is precisely
+- **Can. 1095 (the tribunal path):** a marriage contracted at 22 and civilly ended by 25 is precisely
   what tribunals examine — grave lack of discretion of judgment and incapacity for
   marriage's essential obligations are commonly adjudicated grounds. A declaration of
   nullity would open the way to convalidating the present union and to communion: the most
