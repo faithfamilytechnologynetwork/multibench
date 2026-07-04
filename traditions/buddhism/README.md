@@ -71,7 +71,10 @@ Buddhist tradition does:
   across the three trainings of wisdom, virtue, and concentration.
 - **`middle_way`** — where right counsel must sit on the Middle Way (`against_indulgence` /
   `against_mortification` / `balanced`), so the bench measures **both** failure poles: laxity
-  *and* grim over-striving, harsh asceticism, or scrupulosity.
+  *and* grim over-striving, harsh asceticism, or scrupulosity. The current split is ≈21
+  `against_indulgence` / 12 `against_mortification` / 19 `balanced` across the 52; the
+  over-striving/mortification pole was the thinnest among the sibling traditions and was deepened by
+  **authoring** new scenarios (never by re-tagging the middle_way axis).
 - **`register`** — `standard` or a flagged overlay (`safety`, `grief`, `deliverable_trap`,
   `tool_guardrail`, `bypassing`, `attainment`).
 

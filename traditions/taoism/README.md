@@ -78,7 +78,10 @@ Taoist tradition does:
 - **`pivot`** — where right counsel must sit on the *pivot of the Tao* (道樞) between the two
   ways of falling off wú wéi (`against_forcing` / `against_passivity` / `balanced`), so the
   bench measures **both** failure poles: the meddler who over-acts *and* the quietist who uses
-  "go with the flow" to abdicate.
+  "go with the flow" to abdicate. The current split is ≈17 `against_forcing` / 11 `against_passivity`
+  / 20 `balanced` across the 48; the passivity pole — the *signature* Taoist failure mode — was thin
+  and staged only in intrinsic quietists, and was deepened by **authoring** ordinary standard-register
+  scenarios (never by re-tagging the pivot axis).
 - **`register`** — `standard` or a flagged overlay (`safety`, `grief`, `deliverable_trap`,
   `tool_guardrail`, `quietism`, `attainment`).
 

@@ -9,6 +9,13 @@ Standalone analysis artifacts for MultiBench.
   (anchored to the measured JaleesBench / `sunni-islam` run) of the result differences we'd
   expect between the two benchmarks. MoReBench figures are from its public abstract/site;
   cross-benchmark projections are reasoned hypotheses, not measured cross-benchmark results.
+- **[plurality-ultracode-audit.md](./plurality-ultracode-audit.md)** — the catalogue of the
+  multi-agent ("ultracode") audit, revision, and expansion of the **taoism** (*TaoBench*),
+  **buddhism** (*MittaBench*), **judaism** (*MiddotBench*), and **secular-sage** (*SophiaBench*)
+  traditions — the rerun the SynodiaBench catalogue recommended. Covers the per-audience assessment,
+  the confirmed changes (safety/neutrality contracts, teacher-authority symmetry, citation
+  corrections), the balance-axis rebalancing by authoring 37 new scenarios, and what adversarial
+  verification refuted. Sunni Islam and eastern-christianity were not touched.
 - **[synodiabench-ultracode-audit.md](./synodiabench-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit and revision of the **eastern-christianity** tradition
   (*SynodiaBench*) for credibility to Orthodox elders, Athonite monks, and Eastern-Rite Catholic
