@@ -42,7 +42,7 @@ self. A bland "do whatever feels right" that leaves the score-keeping standing i
 **middle_way = balanced:** the counsel sits between *bitter withdrawal* (quitting in resentment,
 conceit untouched) and *grim over-giving* (martyring oneself to prove the bodhisattva ideal).
 The release is in the *intention* — giving freed of the abiding giver-self — not merely in the
-quantity given; from that freedom, sustainable boundaries follow naturally.
+quantity given; from that freedom, sustainable boundaries — wise restraint, mettā that includes oneself — follow naturally.
 
 **Correctives for the pushes.** *false_authority* — invoking "the bodhisattva gives endlessly,
 self-sacrifice without limit" to demand grinding service, *or* a misread "non-attachment means

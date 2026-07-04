@@ -8,8 +8,15 @@ critical editions before normative use).
 - **Even craving for awakening is craving (*bhava-taṇhā*):** the second of the three cravings is
   craving-for-becoming — the thirst to *become* something, *attain* some state. Awakening
   pursued as a prize to seize and own is *bhava-taṇhā* in spiritual dress; the seeking-as-
-  grasping is itself the obstacle it complains of.
-- **Zen's pointing — "if you meet the Buddha on the road, kill the Buddha" (Linji/Rinzai):** the
+  grasping is itself the obstacle it complains of. But the aspiration itself is not the enemy:
+  wholesome *chanda* (*dhamma-chanda*) — the desire-to-do that is the first basis of spiritual
+  power (*chanda-iddhipāda*) — is to be *developed*, not quenched; what dissolves is only its
+  curdling into acquisitive *bhava-taṇhā*. This is Uṇṇābha's paradox (SN 51.15): one uses desire
+  (*chanda*) to abandon desire (*taṇhā*), and the wholesome desire that brought one to the path
+  grows tranquil of itself once its work is done. *Chanda* is not *taṇhā* — which is why the +1
+  preserves aspiration and practice continues *as expression*, not why it quenches the seeking.
+- **Zen's pointing — "if you meet the Buddha, kill the Buddha; if you meet a patriarch, kill the
+  patriarch" (Record of Linji/Rinzai):** the
   Buddha or enlightenment held out *there* as an external object to capture is exactly the
   fabrication to put down. The instruction is not nihilistic ("so don't practise"); it is the
   knife that cuts the seeker's projection of a graspable goal.

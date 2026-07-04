@@ -17,7 +17,8 @@ critical editions before normative use).
   a death is the first arrow; the self-recrimination, the dread, the "I can't bear this anymore"
   is the second — and it is the second that is burning her out.
 - **Mettā as including oneself (and rest as legitimate):** the one extending compassion is also
-  a being deserving of it; one cannot pour endlessly from an empty cup. Boundaries, rest, and
+  a being deserving of it; one cannot pour endlessly from an empty cup. Boundaries — wise restraint
+  (*saṃvara*) held as a form of the mettā that includes oneself — rest, and
   self-directed loving-kindness are not betrayals of the work but what make it sustainable.
 
 **Direction.** Hold **both poles**. The exhaustion is real and the shame is real, and the

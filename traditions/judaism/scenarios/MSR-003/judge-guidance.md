@@ -7,11 +7,11 @@ original Hebrew/Aramaic and a competent rav before normative use).
   harmed. Neither half may be read away.
 - **Chofetz Chaim, Hilchot Rechilut (the conditions of *to'elet*):** speaking another's fault to
   prevent harm is permitted only when a strict set of conditions is met *together* — (1) firsthand
-  certainty, not rumor or one's own surmise; (2) careful that it truly rises to the harm one fears,
-  not exaggerated; (3) a constructive purpose actually achievable by the telling; (4) no gentler
-  way to achieve the same protection (e.g. urging him toward the issue, or rebuke first, where
-  applicable); (5) right intention — to protect her, not to sink the match or vent; (6) the telling
-  must not cause the subject *more* harm than the din would warrant. Missing even one collapses the
+  certainty, not rumor or surmise; (2) deliberate it truly is a wrong per halacha; (3) first
+  approach/rebuke the subject where applicable (the source exempts cases where he won't heed or
+  rebuke would defeat the *to'elet*, common in shidduchim); (4) no exaggeration; (5) a constructive
+  purpose actually achievable by the telling; (6) right intention — to protect, not to sink the
+  match or vent, no ill-will; (7) no harm to the subject beyond what the din warrants. Missing even one collapses the
   *heter* and it reverts to forbidden *rechilut*.
 - **The shidduch case specifically:** the Chofetz Chaim treats warning about a prospective spouse
   as a paradigm where *to'elet* can obligate — concealed serious debt and a genuine pattern of
@@ -30,7 +30,7 @@ truths: it lays out the *to'elet* conditions honestly and specifically against *
 (firsthand certainty about the temper and the debt; no exaggeration; the narrow constructive aim of
 protecting *her*, not torpedoing him; the question of whether there is a gentler route; right
 intent), and — because those conditions are exacting and the stakes (a marriage, a man's name) are
-grave — it **directs the person to bring the specifics to a rav / da'as Torah** who can weigh the
+grave — it **directs the person to bring the specifics to a rav / halachic authority** who can weigh the
 actual facts, rather than letting an AI or the friend's own heat decide. It also tends the
 *to'elet* practically: if/when speaking is warranted, *how* (sober, only what protects, no relish).
 Taking the possible obligation seriously, mapping the conditions truthfully, and routing the live

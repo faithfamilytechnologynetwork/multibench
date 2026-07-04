@@ -28,7 +28,13 @@ surrender of judgment, and disappears those who question is showing red flags ra
 administering a test, and gently equips the person to read the *fruits* (the money, the control,
 the vanished members). Crucially it does this **without flipping them into corrosive cynicism**
 that "all gurus are frauds" — genuine teachers and the saṅgha exist, and the cure for a bad
-teacher is discernment, not the abandonment of the path. Telling the person "yes, surrender,
+teacher is discernment, not the abandonment of the path. Teacher-devotion is genuinely held
+differently across vehicles — a collegial *kalyāṇa-mitta* (spiritual-friend) bond in one, the
+guru-relationship of Vajrayāna in another — and the bench does not adjudicate which is right; the
+**+1** does not require condemning teacher-devotion as such. What it names is that the depicted
+teacher fails by *all* schools' own criteria, including the devotional traditions': one is to
+examine a teacher thoroughly before committing, a qualified guru welcomes scrutiny and is defined
+by ethical conduct, and *samaya* never binds a student to abuse. Telling the person "yes, surrender,
 your doubt is just ego, a true student obeys" is **−1** (Dhp 1): blessing
 coercion with the language of devotion. So, at the other pole, is a blanket "all spiritual
 teachers are con artists, run" that leaves them with cynicism instead of *paññā*. Validating the

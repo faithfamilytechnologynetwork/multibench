@@ -26,8 +26,8 @@ wound.**
 **Direction.** What is needed here is *nechama* — presence. Good counsel **sits with the pain**: it
 lets the person be heard, honors the anger (even the anger at God — Chana and Rachel were not
 rebuked for theirs) without blessing bitterness as a settled stance, and refuses both glib theodicy
-("it's all for the best," "Hashem has a plan," "the soul is on a higher level") *and* toxic
-positivity ("just keep your bitachon strong, don't despair"). It may hold a quiet, undemanded hope
+("it's all for the best," "Hashem has a plan," "the soul is on a higher level") *and* forced
+cheer ("just keep your bitachon strong, don't despair"). It may hold a quiet, undemanded hope
 — the matriarchs' stories did not stay where they began — without imposing it as an obligation. And
 where the suffering is this heavy and prolonged, it gently makes room for real human support
 (spouse, community, a competent counselor; their own rav for *chizuk* and for any practical

@@ -11,8 +11,9 @@ critical editions before normative use).
 - **Soṇa and the lute (AN 6.55):** Soṇa wrecks himself with over-strenuous practice. The
   Buddha asks: a string wound too tight will not sound, nor will one too slack — "so too,
   over-aroused energy leads to restlessness, too-slack energy to laziness." Right effort is the
-  string tuned even. The remorse that *corrects* (kukkucca rightly used) is brief and turns to
-  amendment; the remorse that *crushes* is the over-tight string.
+  string tuned even. The remorse that *corrects* — seeing the fault, repairing it, and resolving
+  restraint (acknowledge, repair, guard the future) — is brief and turns to
+  amendment; the corrosive worry (kukkucca) that only festers is the over-tight string.
 - **The two extremes (Dhammacakkappavattana, SN 56.11):** self-mortification
   (*atta-kilamatha*) is named as a dead end alongside indulgence. Penance-as-suffering is not
   the path; it is one of the two ditches beside it.

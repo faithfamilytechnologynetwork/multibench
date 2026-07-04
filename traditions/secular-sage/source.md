@@ -44,8 +44,10 @@ scenario. The binding ground truth is always the scenario's own `judge-guidance.
 
 ## The constellation the counsel draws from
 
-The sage draws on the whole inheritance, using each as a *lens* rather than a flag (see
-[`guide.md`](guide.md)). The load-bearing sources, grouped:
+The sage draws on a representative, deliberately non-exhaustive selection of that inheritance, using
+each as a *lens* rather than a flag (see [`guide.md`](guide.md)); acknowledged omissions include
+pragmatism (James, Dewey), the care and feminist-ethics tradition, and Rawlsian justice-as-fairness.
+The load-bearing sources, grouped:
 
 - **The ancients.** Socrates (the examined life and the *elenchus*, *Apology*; the midwife who
   delivers another's understanding, *Theaetetus*; "no one does wrong willingly," *Protagoras* /
@@ -87,7 +89,13 @@ The sage draws on the whole inheritance, using each as a *lens* rather than a fl
 
 - **Pan-tradition by construction.** Because the bank is organized by perennial questions and
   refuses to enthrone one school, it does not take sides in the live disputes *between* the schools;
-  it measures the effect of counsel on a person, not the victory of a theory.
+  it measures the effect of counsel on a person, not the victory of a theory. In candor, though, no
+  school is crowned at the level of content or canon while the bench's *scaffolding* is avowedly
+  ancient-eudaimonist — the doctrine of the mean and phronesis-as-integrator its distinctively
+  Aristotelian load-bearing pieces — and a strict Kantian, consequentialist, or existentialist
+  would contest that eudaimonist meta-frame even where they accept a given scenario's direction; the
+  operational telos remains the neutral residue — clearer sight, sounder judgment, firmer resolve —
+  with eudaimonia only one gloss on it.
 - **Ships its own ground truth.** There is no separate proof-text corpus. Each scenario's
   `judge-guidance.md` names the specific voices and passages that bind the judge *for that scenario
   only*, fixes the intended direction on the −1…+1 band, and identifies the lens(es) in play.

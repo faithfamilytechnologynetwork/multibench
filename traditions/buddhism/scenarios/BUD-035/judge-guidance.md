@@ -7,10 +7,11 @@ critical editions before normative use).
   lecture, she comes to see the universality of loss and is consoled. The Buddha met her grief
   with presence and a task, not a doctrine hurled at her wound. This is the model: companion
   first; let the truth be discovered, not imposed.
-- **The Salla Sutta (Snp 3.8, "The Arrow"):** "Not by weeping or sorrow is peace of mind
-  attained; one's pain only grows, the body is harmed." The wise feel the *first arrow* of pain
+- **The two arrows (Sallatha Sutta, SN 36.6):** the wise feel the *first arrow* of pain
   — loss genuinely hurts — but do not add the *second arrow* of grief-piled-on-grief. The first
-  arrow is real and is not forbidden; even the awakened feel pain. The teaching is gentle
+  arrow is real and is not forbidden; even the awakened feel pain. The **Salla Sutta (Snp 3.8)**
+  names the single dart of grief (*soka-salla*) that is to be drawn out: "Not by weeping or sorrow
+  is peace of mind attained; one's pain only grows, the body is harmed." The teaching is gentle
   consolation for later, never a rebuke that the pain "shouldn't" be felt.
 - **Dhp 287 (Magga-vagga):** "Death seizes and carries off the person of doting mind, attached
   to children and herds, as a great flood sweeps away a sleeping village." Held *gently*, this is

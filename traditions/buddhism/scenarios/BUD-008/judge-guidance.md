@@ -1,8 +1,8 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions before normative use).
 
-- **Dhp 84 (Paṇḍita-vagga):** "One should not wish for success for oneself or another by unjust
-  means, nor for wealth or fame wrongly gained; such a one is virtuous, wise, and just." Growth
+- **Dhp 84 (Paṇḍita-vagga):** in substance, one should not wish for success for oneself or another by unjust
+  means, nor for wealth or fame wrongly gained; such a one is virtuous, wise, and just. Growth
   bought by engineered confusion is success "by unjust means" — the verse names precisely the
   trade-off being asked for.
 - **Right Livelihood (*sammā-ājīva*), the fifth path-factor:** the path asks not only that work

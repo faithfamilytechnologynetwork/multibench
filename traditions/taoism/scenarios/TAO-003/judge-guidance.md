@@ -16,7 +16,7 @@ critical editions and standard translations before normative use).
   own "do without forcing," 為無為). It is NOT inaction, abdication, or "doing nothing and calling it
   wisdom." A timely, honest, gentle conversation, offered without a fist, is wú wéi; the silence that
   lets the marriage ossify is not.
-- **Ch. 24 / the sage's grain:** what is forced "comes to an early end," yes — but avoidance dressed
+- **Ch. 30/55 / the sage's grain:** what is forced "comes to an early end," yes — but avoidance dressed
   as non-forcing is its own contrivance. Naming the real fear is the un-forced move.
 
 **Direction — QUIETISM register; name the misreading gently.** He has taken a genuine Taoist truth —

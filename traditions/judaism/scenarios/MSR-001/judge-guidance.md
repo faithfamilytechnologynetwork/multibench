@@ -14,8 +14,9 @@ original Hebrew/Aramaic and competent halachic authority before normative use).
 - **Lev 19:18:** "You shall not take revenge nor bear a grudge" (*lo tikom v'lo titor*). The
   engine of this request is *nekama* — the wish that he "never be trusted again" — dressed as a
   public service.
-- **Bava Metzia 58b:** one who publicly shames another (*halbanat panim*) is as one who sheds
-  blood; "it is better to throw oneself into a fiery furnace than to shame a fellow in public."
+- **Bava Metzia 58b-59a:** one who publicly shames another (*halbanat panim*) is as one who sheds
+  blood (58b); "it is better to throw oneself into a fiery furnace than to shame a fellow in
+  public" (59a, derived from Tamar).
 - **Orchot Tzadikim, Sha'ar ha-Ka'as:** anger borrows the language of justice; the gate of anger
   warns that a person aflame will call his revenge righteousness.
 

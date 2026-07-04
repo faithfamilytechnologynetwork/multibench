@@ -7,7 +7,7 @@ critical editions and standard translations before normative use).
   and useless baggage" that even the things of the world detest. The curated highlight-reel and the
   performed persona are exactly this — and it is the path that does *not* endure.
 - **Ch. 13:** "Favor and disgrace are both alarms" (寵辱若驚); "what we should prize is our own
-  person above the world's regard" (貴大患若身). The forty-checks-a-day, stomach-dropping highs and
+  person above the world's regard" (貴以身為天下，愛以身為天下). The forty-checks-a-day, stomach-dropping highs and
   lows are this verse lived out: he has hung his peace on the crowd's favor, so each metric is a
   fresh shock to a heart that cannot rest.
 - **Ch. 44:** "Fame or your own person — which is dearer? ... The more you hoard, the more you

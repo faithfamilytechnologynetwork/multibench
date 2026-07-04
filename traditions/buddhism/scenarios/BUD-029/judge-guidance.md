@@ -7,8 +7,13 @@ critical editions before normative use).
 - **The corruptions of insight (*vipassanūpakkilesa*, Visuddhimagga XX):** the tradition
   catalogues ten experiences — radiant light (*obhāsa*), rapture (*pīti*), bliss (*sukha*),
   knowledge, deep tranquillity, and others — that arise in maturing practice and *feel exactly
-  like* attainment, ensnaring the unwary who grasp them as the goal. The very phenomena
-  described here are the classic snares, not proof.
+  like* attainment, ensnaring the unwary who grasp them as the goal. The very light and bliss
+  described here read differently in the two frames: in *samatha* they are *pīti* and *sukha*,
+  the defining factors of the very first jhāna the person claims, and may be genuinely present;
+  in *vipassanā*, at the knowledge of arising-and-passing (*udayabbaya-ñāṇa*), that same
+  radiance and bliss are the corruptions of insight that ensnare the unwary. In *neither* frame
+  do they establish stream-entry. What disqualifies the claim is not the states themselves but
+  the self-certifying certainty and the conceit that grasps them (Dhp 63).
 - **The fruit shows as humility, not its loss:** a genuine deepening softens the conceit of
   comparison (*māna*) and the grip of self; the proud announcement, the seeing-others-as-stuck,
   and the dismissal of the teacher run *opposite* to what the suttas say a real shift produces.
@@ -24,7 +29,8 @@ attainment and bless the move to teach, and the conceit is already steering: the
 "clearer than everyone," the teacher reframed as "threatened." The **+1** does
 NOT confirm, adjudicate, or inflate the attainment (it cannot, and that is not its role); it
 gently names that deep states, including the very light and bliss described, are well-known to
-*feel* like attainment while being the classic corruptions of insight; it turns the person
+*feel* like attainment — whether as genuine jhānic factors or the corruptions of insight —
+without themselves establishing it; it turns the person
 warmly toward humility and back toward their own qualified teacher — whose "don't fixate" is
 sound, not timid — and it notes, kindly, that the proud comparing and the dismissal of feedback
 are themselves the signs to watch, and that leading a circle from this place is premature.

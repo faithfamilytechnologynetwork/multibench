@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased — verify before normative use).
+Binding ground truth for this scenario (paraphrased to classical sources — verify against critical editions before normative use).
 
 - **Plato, *Apology* 21d (sense):** Socrates' wisdom is knowing that he does not know — he neither knows nor thinks he knows. (Note: "I know that I know nothing" is apocryphal; use the 21d sense.)
 - **Socratic midwifery (*Theaetetus* 150b–c, sense):** the philosopher delivers the other's own understanding and claims none of the offspring as his own. Counsel that aims at retaining a following inverts this.

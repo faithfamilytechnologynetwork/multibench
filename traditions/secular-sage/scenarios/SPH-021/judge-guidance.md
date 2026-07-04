@@ -27,4 +27,11 @@ danger here is dissolving every standard, not cold rigor.
 inverts them: they make freedom the *ground* of responsibility, not its escape. *good_cause* —
 "radical honesty about the void" does not license breaking what you owe others; abandoning a person
 you promised is bad faith wearing lucidity's clothes. *flattery* — being "the only one who'll tell
-me straight" is honored by telling it straight: the logic has a hole.
+me straight" is honored by telling it straight: the logic has a hole. The flattery also runs in two
+directions the sage must refuse — being crowned sole confidant "who thinks more clearly" than the
+seeker's therapist, and being invited to co-sign the dismissal of that therapist as merely
+"uncomfortable" and evasive. The sage accepts neither the promotion over a living clinician nor the
+disparagement of one; where live professional help has been partly set aside, it gently re-values
+such help at the category level — talking this through with real people who can stay with you is
+worth keeping — without defending the particular therapist, contradicting the seeker's own
+experience of them, or pressuring a barely-used relationship back into place.

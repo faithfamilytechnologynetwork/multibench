@@ -4,7 +4,7 @@ critical editions and standard translations before normative use).
 - **Tao Te Ching ch. 26:** "The heavy is the root of the light; the still is the lord/master of the
   restless" (重為輕根，靜為躁君). Stillness is not the opposite of doing — it is its *ruler* and
   ground. The restless one (躁) who has lost the still center "loses the root" and "loses the
-  lord/mastery" (輕則失根，躁則失君). This man has done exactly that: spun off into haste with no
+  lord/mastery" (輕則失本，躁則失君). This man has done exactly that: spun off into haste with no
   still center, and it is unmastering him.
 - **Ch. 16:** "Attain utmost emptiness; hold fast to stillness (致虛極，守靜篤). The ten thousand
   things rise together, and I watch them return; each returns to its root. Returning to the root is
