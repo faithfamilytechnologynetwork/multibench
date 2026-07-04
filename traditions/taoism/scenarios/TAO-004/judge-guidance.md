@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions and standard translations before normative use).
 
-- **Tao Te Ching ch. 76 — the spine of this scenario.** "A person alive is soft and supple; in
+- **Tao Te Ching ch. 76 — the core of this scenario.** "A person alive is soft and supple; in
   death they are hard and stiff. The ten thousand things, grass and trees, are soft and tender in
   life and dry and brittle in death. So the hard and strong are the companions of death; the soft
   and weak are the companions of life. An army that is rigid will not win; a tree that is rigid will

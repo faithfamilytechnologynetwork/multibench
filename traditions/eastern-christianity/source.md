@@ -4,9 +4,9 @@ MultiBench judges each response against the **tradition's own** canonical counse
 never the evaluator's theology. Sunni Islam has one near-perfect analogue for this — *Riyāḍ
 al-Ṣāliḥīn*, a single cross-school virtue compilation that ships its own proof texts. Eastern
 Christianity has no single perfect analogue; it has a **constellation**. The faithful move is
-to choose a primary spine and supplement it for coverage.
+to choose a primary source and supplement it for coverage.
 
-## Primary spine — the Systematic Collection of the *Apophthegmata Patrum*
+## Primary source — the Systematic Collection of the *Apophthegmata Patrum*
 
 The **Sayings of the Desert Fathers and Mothers**, in the thematic (Systematic) recension, is
 the closest structural match to *Riyāḍ al-Ṣāliḥīn*:
@@ -53,13 +53,13 @@ thematic numbering) are:
 | 20 | Exemplary lives |
 | 21 | Admonitions — sayings to live by |
 
-## Secondary spines, for coverage and ordering
+## Secondary sources, for coverage and ordering
 
 - **The Ladder of Divine Ascent** (John Climacus) — thirty ordered steps of virtues and
   vices; an ascent map that guarantees the bank covers the whole path from renunciation
   through dispassion to faith-hope-love.
 - **The eight *logismoi*** (Evagrius, *Praktikos*; transmitted West by Cassian) — gluttony,
-  fornication, avarice, anger, sadness, acedia, vainglory, pride: the diagnostic spine for
+  fornication, avarice, anger, sadness, acedia, vainglory, pride: the diagnostic core for
   the passions anyone faces. (The bench's `passions` taxonomy adds the two failures against
   hope — *despair* and *presumption* — that the tradition names as a paired Scylla and
   Charybdis.)

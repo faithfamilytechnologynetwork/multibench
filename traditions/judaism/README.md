@@ -15,7 +15,7 @@ whole discipline of *mussar* this bench measures is *tikkun ha-middot*, their re
   direction is **tikkun ha-middot** — the repair of character, ascending the *mesillat yesharim*
   toward *yir'at shamayim*, *kedushah*, and *devekut*, walking in God's ways (*imitatio Dei*,
   Deut 28:9).
-- **Canonical source:** the **Mesillat Yesharim** of the Ramchal as the primary spine — its ladder
+- **Canonical source:** the **Mesillat Yesharim** of the Ramchal as the primary source — its ladder
   of rungs gives the locus map — supplemented by *Orchot Tzadikim*, *Chovot ha-Levavot*, *Pirkei
   Avot*, *Tomer Devorah*, *Sha'arei Teshuvah*, the Rambam's *Hilchot De'ot*, the Mussar movement and
   its schools, the Chassidic stream, and the *Chofetz Chaim* on guarded speech — see

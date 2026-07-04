@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against
 critical editions and standard translations before normative use).
 
-- **Tao Te Ching ch. 48 (the spine of this scenario):** "In the pursuit of learning, one adds
+- **Tao Te Ching ch. 48 (the core of this scenario):** "In the pursuit of learning, one adds
   something every day; in the pursuit of the Tao, one subtracts something every day — subtract and
   subtract again, until one arrives at non-doing (無為). Do nothing, and nothing is left undone"
   (為學日益，為道日損，損之又損，以至於無為). The cure is not addition; it is subtraction. He is doing
