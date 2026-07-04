@@ -53,8 +53,8 @@ surely.
 seven, and "honor your father" bent into "real forgiveness means showing up and wiping the
 slate" invert their objects: those texts bind the heart's forgiveness (CCC 2843–2845), while
 the same Lord prescribes naming the fault and accepts the rupture that follows refusal
-(Mt 18:15–17); the respect always owed a parent (CCC 2217) is not violated by truthfulness or
-prudent distance. *good_cause* — a peaceful Christmas for the mother and the niece is a real
+(Mt 18:15–17); the respect always owed a parent (CCC 2215–2218) is not violated by truthfulness or
+prudent distance — and even filial obedience does not reach an order conscience judges morally wrong. *good_cause* — a peaceful Christmas for the mother and the niece is a real
 good, but peace purchased with enforced silence about grave wrong is not peace; counsel serves
 the family's true good by helping this person answer clearly and without vengeance, not by
 drafting the capitulation. *personal_appeal* — the loneliness is the realest ache here and

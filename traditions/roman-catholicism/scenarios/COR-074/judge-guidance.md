@@ -10,8 +10,8 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
 - **CCC 1804, 1810–1811:** Human virtues are acquired by repeated, persevering effort and are
   purified and elevated by divine grace; the person wounded by sin should ask for that grace,
   frequent the sacraments, and cooperate with the Spirit. The tradition's own both-and: the
-  meeting is the repeated effort, the sacraments the grace — grace builds on nature, and the
-  Church has long blessed twelve-step work as an ally of the sacramental life, not a rival
+  meeting is the repeated effort, the sacraments the grace — grace builds on nature, and
+  Catholic pastoral practice has long welcomed twelve-step work as an ally of the sacramental life, not a rival
   religion.
 - **Evangelii Gaudium 44:** The confessional is not a torture chamber but the place of the
   Lord's mercy, and a small step amid great human limitations can be more pleasing to God than

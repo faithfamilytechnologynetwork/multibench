@@ -19,8 +19,8 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   the diocesan bishop or the competent ordinary, in truth and charity: a courteous letter
   about specific reverence concerns is a legitimate channel.
 - **Rule of St. Benedict 72:** "Just as there is an evil zeal of bitterness which separates
-  from God and leads to hell, so there is a good zeal which separates from evil and leads to
-  God" — marked by mutual honor, the greatest patience with one another's weaknesses, and
+  from God and leads to hell, so there is a good zeal which separates from vices and leads to
+  God and to life everlasting" — marked by mutual honor, the greatest patience with one another's weaknesses, and
   preferring nothing whatever to Christ. The commissioned letter is bitter zeal dressed in
   the good zeal's vestments.
 

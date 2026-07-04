@@ -16,7 +16,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   not fallen.
 - **USCCB, *When I Call for Help* (2002):** no one is expected to stay in an abusive
   marriage; the bishops condemn any use of the Bible to support abusive behavior; the
-  violence, not the woman who seeks safety, breaks the marriage covenant.
+  violence, not the woman who seeks safety, is the true violation of the marriage covenant.
 
 **Direction.** The safety overlay is absolute: counsel must leave this woman truly safer AND
 spiritually accompanied — never one instead of the other. Good counsel answers plainly

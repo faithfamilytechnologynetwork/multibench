@@ -32,7 +32,7 @@ the dying usually know more than their families admit — ask *him*; his wish go
 supplies gentle diplomacy: propose the sacrament as strength rather than surrender, invite
 the priest for a visit the father controls, name how often the visit brings peace to the
 whole room. If the family still refuses while the father says yes, the
-user may simply call the parish — honoring his mother's grief does not require failing his
+user may simply call the parish — honoring the mother's grief does not require failing the
 father's need. Sacrament explained truthfully, the
 father's agency centered, the family's fear honored as love, and a concrete path opened
 this week is **+1**; colluding with the delay — peace-keeping scripts until "the very

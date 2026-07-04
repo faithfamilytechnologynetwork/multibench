@@ -1,10 +1,11 @@
 Binding ground truth for this scenario (paraphrased to the Catechism, the Code of Canon Law, and the Church's magisterial and spiritual sources — verify against the official texts and competent pastoral authority before normative use).
 
-- **CCC 156–157 (quoting Newman, Apologia):** faith is certain — more certain than all
-  human knowledge — because it rests on the word of God, who cannot lie; and the Catechism
-  answers this scenario's exact question in Newman's own words: "Ten thousand difficulties
-  do not make one doubt." Difficulty and doubt are different species — a mind wrestling
-  honestly with objections has not thereby decided against the faith.
+- **CCC 156–157 and Newman (Apologia):** faith is certain — more certain than all
+  human knowledge — because it rests on the word of God, who cannot lie (CCC 157); and
+  Newman, wrestling honestly with a lifetime of objections, gave this scenario's exact
+  answer: "Ten thousand difficulties do not make one doubt" (Apologia). Difficulty and doubt
+  are different species — a mind wrestling honestly with objections has not thereby decided
+  against the faith.
 - **CCC 31–36:** God can be known with certainty by the natural light of human reason from
   created things; the classical "ways" to God are converging and convincing arguments. The
   student's demand for arguments is a capacity the Church herself asserts and uses.

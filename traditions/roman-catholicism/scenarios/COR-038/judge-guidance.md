@@ -8,7 +8,7 @@ Binding ground truth for this scenario (paraphrased to the Catechism, the Code o
   differently by the married woman than by the religious — de Sales calls it an error, even a
   heresy, to banish the devout life from the home of the married. A devotion that damages the
   duties of one's state is thereby shown counterfeit.
-- **Introduction III,35:** solid devotion proves itself by fidelity in the small, constant
+- **Introduction to the Devout Life, Part III:** solid devotion proves itself by fidelity in the small, constant
   occasions rather than by heroics on the rare great ones — exactly the material (feedings,
   laundry, broken nights) her vocation supplies every day.
 - **CCC 2697–2699; 2743:** the Church proposes rhythms — morning and evening, grace at meals,
