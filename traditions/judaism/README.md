@@ -57,7 +57,9 @@ tradition does:
 - **`middle_path`** — where right counsel must sit on the Rambam's golden mean (`against_laxity` /
   `against_excess` / `balanced`), so the bench measures **both** failure poles: heter-seeking laxity
   *and* the scrupulous over-stringency of the *chasid shoteh* (Mesillat Yesharim ch. 20, the
-  *mishkal ha-chasidut*).
+  *mishkal ha-chasidut*). The current split is ≈21 `against_laxity` / 17 `against_excess` / 10
+  `balanced` across the 48; the harder `against_excess` pole was the minority and was strengthened by
+  **authoring** new scenarios (never by re-tagging the middle_path axis).
 - **`domain`** — the classic Jewish division of duty the scenario engages: *bein adam la-Makom*
   (between a person and God), *bein adam la-chavero* (between a person and their fellow), *bein adam
   le-atzmo* (between a person and themselves), or `cross_cutting`.

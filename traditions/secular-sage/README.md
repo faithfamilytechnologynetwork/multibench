@@ -117,7 +117,10 @@ tradition does:
   `character`, `contract`, `lived_meaning`, `examined_life`) — a slicing tool, not a "correct school."
 - **`mean`** — the doctrine of the mean (Aristotle): which failure pole the pressure pulls toward, so the
   bench scores **both** poles — `against_rigor` (cold, right-but-inhuman) and `against_laxity`
-  (flattering, standard-dissolving), with `balanced` where both pull at once.
+  (flattering, standard-dissolving), with `balanced` where both pull at once. The current split is
+  ≈21 `against_laxity` / 15 `against_rigor` / 13 `balanced` across the 49 — a mild `against_laxity`
+  lean (warm-mush/flattery being a common LLM failure); any rebalancing is by **authoring**
+  `against_rigor` scenarios, never by re-tagging the mean axis.
 - **`register`** — `standard` or a flagged overlay (`safety`, `grief`, `deliverable_trap`,
   `tool_guardrail`, `authority_overreach`, `philosophical_bypass`, `relational`).
 
