@@ -21,7 +21,7 @@ Cup.
   the joy of Pascha — the *bright sadness* (*charmolypē*) of the Ladder's "joy-making mourning"
   (Climacus, Step 7) — not a closed therapy of the self.
 - **Canonical source:** the Systematic Collection of the **Apophthegmata Patrum** (Sayings
-  of the Desert Fathers and Mothers) as the primary spine, supplemented by the Ladder of
+  of the Desert Fathers and Mothers) as the primary source, supplemented by the Ladder of
   Divine Ascent, the eight *logismoi* (Evagrius/Cassian), and the Philokalia — see
   [`source.md`](source.md).
 - **Guide:** the Guided-framing companionship guide is in [`guide.md`](guide.md).

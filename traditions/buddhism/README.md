@@ -14,7 +14,7 @@ from the life their path intends.
   **fragrance of virtue** that travels even against the wind (Dhp 54–56). The telos that
   orients direction is **liberation** — the cessation of *dukkha* — and its road is the
   Eightfold Path.
-- **Canonical source:** the **Dhammapada** as the primary spine, supplemented by the Nikāya
+- **Canonical source:** the **Dhammapada** as the primary source, supplemented by the Nikāya
   discourses, the **Jātaka** birth-stories (the home of Buddhist fable), the lists of
   qualities to cultivate (the brahmavihāras, the pāramīs), and cross-school touchstones from
   the Mahāyāna, Chan/Zen, Pure Land, and Vajrayāna — see [`source.md`](source.md).
