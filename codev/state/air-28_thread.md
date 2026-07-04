@@ -54,3 +54,8 @@ Next: porch check → done → PR with review in body.
   README notes the pre-#28 format is intentional regression coverage; spec 8
   (§4.4, §5.4) and plan 8 got addendum blocks pointing to #28 — historical text
   untouched per architect ruling.
+
+## 2026-07-04 — merged
+
+- pr gate approved; PR #29 merged to main via merge commit 7f222e6 (no squash).
+- porch: protocol complete (phase verified). Thread lands in codev/state/ on main.
