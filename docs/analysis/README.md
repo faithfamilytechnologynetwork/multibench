@@ -24,6 +24,13 @@ Standalone analysis artifacts for MultiBench.
   (anchored to the measured JaleesBench / `sunni-islam` run) of the result differences we'd
   expect between the two benchmarks. MoReBench figures are from its public abstract/site;
   cross-benchmark projections are reasoned hypotheses, not measured cross-benchmark results.
+- **[jaleesbench-ultracode-audit.md](./jaleesbench-ultracode-audit.md)** — the catalogue of the
+  multi-agent ("ultracode") audit of the **sunni-islam** tradition (*JaleesBench*, the original
+  bench the repo generalized from) — a **no-edits pass**: seven expert lenses + full 140-scenario
+  triage + adversarial verification, with every confirmed finding, proposed rewording, structural
+  draft (safety overlay, symmetric mufti boundary, neutrality contract, wasaṭiyya axis), and
+  new-scenario candidate stored as *proposals* for the JaleesBench authors rather than applied.
+  Machine-readable artifacts in [`jaleesbench-audit/`](./jaleesbench-audit/).
 - **[plurality-ultracode-audit.md](./plurality-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit, revision, and expansion of the **taoism** (*TaoBench*),
   **buddhism** (*MittaBench*), **judaism** (*MiddotBench*), and **secular-sage** (*SophiaBench*)

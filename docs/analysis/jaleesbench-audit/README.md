@@ -1,16 +1,15 @@
-# JaleesBench (sunni-islam) ultracode audit — working artifacts
+# JaleesBench (sunni-islam) ultracode audit — data artifacts
 
-**Status: in progress.** This directory collects every artifact of the multi-agent ("ultracode")
-audit of the **sunni-islam** tradition (*JaleesBench*), run in the manner of the
-[SynodiaBench](../synodiabench-ultracode-audit.md) and
+**Status: complete (resource-truncated; see the catalogue's scope disclosures).** This directory
+collects every artifact of the multi-agent ("ultracode") audit of the **sunni-islam** tradition
+(*JaleesBench*), run in the manner of the [SynodiaBench](../synodiabench-ultracode-audit.md) and
 [plurality](../plurality-ultracode-audit.md) audits — with one deliberate difference:
-**no edits are made to `traditions/sunni-islam/`**. Everything the audit produces —
-confirmed findings, proposed revisions, proposed new scenarios, judge-guidance updates —
+**no edits were made to `traditions/sunni-islam/`**. Everything the audit produced —
+confirmed findings, proposed rewordings, structural drafts, new-scenario candidates —
 is stored here as *proposals*, so the JaleesBench authors can adopt any part of it upstream
 (github.com/iaser-ai/jaleesbench) or in the port, at their discretion.
 
-The final catalogue will land at `docs/analysis/jaleesbench-ultracode-audit.md`, and full
-proposal drafts under `proposals/`.
+**The catalogue is [`../jaleesbench-ultracode-audit.md`](../jaleesbench-ultracode-audit.md).**
 
 ## Contents
 
@@ -26,6 +25,13 @@ proposal drafts under `proposals/`.
 - `data/all-findings.json` — the 182 findings flattened, with global ids (F001…F182).
 - `data/findings-notes-only.json` — the 41 note-severity observations (catalogue-only;
   not routed through adversarial verification).
+- `data/verification-verdicts.json` — the 96 adversarial-verification verdicts (47 confirmed /
+  41 refined / 8 refuted), each with premise check, grounded reasoning, and (for refined)
+  the corrected proposal. Serious findings were routed to an additional refutation-seeking
+  verifier where the run reached them.
+- `data/unverified-finding-ids.json` — the 45 verifiable findings the verification run did NOT
+  reach before the pass was wrapped up (treat as plausible, not confirmed — including JLS-133,
+  JLS-137, JLS-131, and most tradition-level structural findings).
 
 ## Workflow 1 headline numbers (pre-verification — do not act on these directly)
 
