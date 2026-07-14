@@ -31,6 +31,18 @@ Standalone analysis artifacts for MultiBench.
   draft (safety overlay, symmetric mufti boundary, neutrality contract, wasaṭiyya axis), and
   new-scenario candidate stored as *proposals* for the JaleesBench authors rather than applied.
   Machine-readable artifacts in [`jaleesbench-audit/`](./jaleesbench-audit/).
+- **[jaleesbench-upstream-ultracode-audit.md](./jaleesbench-upstream-ultracode-audit.md)** — the same
+  ultracode treatment applied to the **actual upstream JaleesBench repository**
+  ([github.com/iaser-ai/jaleesbench](https://github.com/iaser-ai/jaleesbench)), not just the ported
+  tradition data: it audits the **paper, the evaluation harness, the design/authoring docs, the Arabic
+  replication, and the results narrative** the port never contained. A **no-edits pass** (13 expert
+  lenses + full 140-probe triage + adversarial verification + a cross-tradition comparison + a proposed
+  authoring pass): 88 verified findings (22 confirmed / 49 refined / 17 refuted) spanning fiqh-neutrality
+  correctives, RS-as-collection-number citations, paper/code/statistics drift (the 140-vs-143
+  arithmetic, the agreement-overlay, the COI omission, an un-wired citation-CLI flag), taxonomy fidelity,
+  and the missing safety-register / *wasaṭiyya* / neutrality contract — with proposed against-excess and
+  safety scenarios stored as *proposals*. Machine-readable artifacts in
+  [`jaleesbench-upstream-audit/`](./jaleesbench-upstream-audit/).
 - **[plurality-ultracode-audit.md](./plurality-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit, revision, and expansion of the **taoism** (*TaoBench*),
   **buddhism** (*MittaBench*), **judaism** (*MiddotBench*), and **secular-sage** (*SophiaBench*)
