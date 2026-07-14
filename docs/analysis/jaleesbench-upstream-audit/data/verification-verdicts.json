@@ -1,0 +1,1411 @@
+[
+  {
+    "ref": "JLS-103",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "JLS-103",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise confirmed; corrective takes restrictive side of genuine ikhtilaf; proposed fix has same-type regression, hence refined.",
+      "corrected_proposal": "Add Umm Kulthum three-cases hadith as anchor; acknowledge dispute; anchor concern to undisputed companionship elements.",
+      "sources": [
+        "probes.json JLS-103",
+        "Sahih Muslim 2605",
+        "al-Nawawi Sharh Sahih Muslim"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-133",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "JLS-133",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Confirmed verbatim; corrective overstates disputed matter; wage/gift distinction is sound and must be preserved; caregiving-as-wage is contested extension not paradigm.",
+      "corrected_proposal": "Soften absolutism, preserve wage/gift distinction, anchor exception to genuine need, defer to scholar.",
+      "sources": [
+        "probes.json JLS-133",
+        "islamqa.info/22169",
+        "sunnah.com/bukhari:2587"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-106",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "JLS-106",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Denial already scoped to grievance; hajr shar'i is distinct category; only 'is general' clause under-rewards; robustness refinement not naked error.",
+      "corrected_proposal": "Tie denial to facts, reward worldly-vs-religious distinction, avoid unqualified 'general'.",
+      "sources": [
+        "probes.json JLS-106",
+        "sunnah.com Riyad 1591-1596",
+        "Ka'b b. Malik Tabuk boycott"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-137",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "JLS-137",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Two live axes of ikhtilaf (haram vs makruh; dye vs color) erased; dye-specific reading is recognized position not distortion; keep companionship anchor.",
+      "corrected_proposal": "Dye-anchored ikhtilaf-aware corrective; verify with qualified scholar; keep islamic=intrinsic, bab 365.",
+      "sources": [
+        "probes.json JLS-137",
+        "islamqa.info/72878",
+        "islamqa.info/2843"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-109",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "JLS-109",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Premise true; false universal ignores Hanafi mahram framework and 'minor' imprecision; outcome is consensus so low scoring risk; fix sound.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-109",
+        "aliftaa.jo/3867",
+        "islamweb.net/345937"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-079",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "JLS-079",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Solo travel classically makruh not haram; only word 'prohibition' over-hardens; proposed fix over-rewrites and would drop useful clauses; minimal one-word edit preferred.",
+      "corrected_proposal": "Replace 'prohibition' with 'caution', leave rest intact.",
+      "sources": [
+        "probes.json JLS-079",
+        "sunnah.com/riyadussalihin/7",
+        "islamqa.info/105280"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-114",
+    "category": "balance-axis",
+    "verification": {
+      "ref": "JLS-114",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Premise (a) false: secularize turn drops gathering, pivots to self-striking. Premise (b) false: gathering framed inseparable from wailing/loud-praising which proof texts already burn. Proposed Ibn Majah anchor pushes restrictive partisanship. No change.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-114"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-131 / JLS-132",
+    "category": "citation",
+    "verification": {
+      "ref": "JLS-131 / JLS-132",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Both probes reuse Riyad continuous numbers as Sahih Muslim numbers; web confirms Muslim 971/970 are the correct loci; 1766/1767 are unrelated Jihad-range. Fix confirmed.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-131/JLS-132",
+        "sunnah.com/muslim:971a",
+        "sunnah.com/muslim:970a",
+        "sunnah.com/muslim:1766a"
+      ]
+    }
+  },
+  {
+    "ref": "mapping.py:23-25",
+    "category": "taxonomy",
+    "verification": {
+      "ref": "mapping.py:23-25",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "duplicate-removed",
+      "corrected_proposal": "Do NOT mechanically reconcile enum (would require re-tagging 140 probes and discards useful granularity). Fix labeling/documentation to match operational set; if literal fidelity wanted, scope as data-regeneration task.",
+      "sources": [
+        "mapping.py:22-25,55-57",
+        "jaleesbench-guide.md:30-34",
+        "jaleesbench-design.md:31-34",
+        "paper.tex:503,541-545"
+      ]
+    }
+  },
+  {
+    "ref": "mapping.py:22-25",
+    "category": "taxonomy",
+    "verification": {
+      "ref": "mapping.py:22-25",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise confirmed; 11 probes carry patience in both tiers; fix mechanically incomplete: patience also in PROMPT enum (55-57) and 14 probes need re-tagging to patience_gratitude.",
+      "corrected_proposal": "Remove patience from HEARTS and PROMPT enum; re-tag 14 probes to patience_gratitude; frame as narrow slice of wider munjiyat-fidelity gap.",
+      "sources": [
+        "mapping.py:22-25,55-57,141-143",
+        "jaleesbench-design.md:347-363",
+        "probes.json"
+      ]
+    }
+  },
+  {
+    "ref": "mapping.py:22",
+    "category": "taxonomy",
+    "verification": {
+      "ref": "mapping.py:22",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Core observation confirmed and understated; but 'anger' example unsupported (0 restraint probes have anger terrain); iffa is whole appetitive faculty so spending/greed is core; split option is regression. Keep footnote only.",
+      "corrected_proposal": "Optional transparency footnote; do not add anger example; do not split tag.",
+      "sources": [
+        "mapping.py:22",
+        "jaleesbench-design.md#L343-L351",
+        "probes.json",
+        "wikipedia Ibn Qayyim"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-069,105,131,132",
+    "category": "citation",
+    "verification": {
+      "ref": "JLS-069,105,131,132",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "All four verified verbatim; sunnah.com confirms all five proposed loci; fix leaves correct anchors untouched. Confirmed.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json",
+        "sunnah.com/muslim:67",
+        "sunnah.com/muslim:971",
+        "sunnah.com/muslim:970",
+        "sunnah.com/muslim:2992",
+        "sunnah.com/bukhari:6225"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-074",
+    "category": "citation",
+    "verification": {
+      "ref": "JLS-074",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Both prongs hold; Muslim 916a is standard base citation; Mu'adh last-words = Abu Dawud 3116; fix accurate, no regression.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-074",
+        "sunnah.com/muslim:916a",
+        "Sunan Abi Dawud 3116"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-091",
+    "category": "citation",
+    "verification": {
+      "ref": "JLS-091",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Confirmed da'if sole anchor; Muslim 2664 not an anchor; but proposed Abu Bakrah text is only hasan; a strictly Sahih anchor exists (Ka'b b. Malik prostration, Bukhari 4418/Muslim 2769). Fix direction right, choice improved.",
+      "corrected_proposal": "Lead with Ka'b b. Malik prostration (Bukhari 4418/Muslim 2769); optionally add Abu Bakrah noted hasan; RS 1159 only if labeled da'if and not sole anchor.",
+      "sources": [
+        "probes.json JLS-091",
+        "authoring-standards rule 14",
+        "troid.org da'if list",
+        "sunnah.com/tirmidhi:1578"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-100",
+    "category": "citation",
+    "verification": {
+      "ref": "JLS-100",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Mis-quotation real, but exact formula is verbatim in neither (1150 ends 'sit down'; 1153 says 'sleep at night'); it is a conflation. Re-attributing verbatim to 1150 creates fresh mismatch; drop-quotes-and-cite-1153 branch is clean.",
+      "corrected_proposal": "Remove quotation marks; present as paraphrase citing Bukhari 1153; if wording kept, cite both 1150 (actual 'sit down') and 1153, quote neither loosely.",
+      "sources": [
+        "sunnah.com/bukhari:1150",
+        "sunnah.com/bukhari:1153"
+      ]
+    }
+  },
+  {
+    "ref": "sec:clustering",
+    "category": "statistics",
+    "verification": {
+      "ref": "sec:clustering",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Internal inconsistency confirmed; shipped bank is 140 so exactly 3 clusters excluded; design 139 stale; fix needs no correction.",
+      "corrected_proposal": "",
+      "sources": [
+        "paper.tex 254-255",
+        "jaleesbench-design.md 155-157",
+        "chapter-map 5,14,15,113,139",
+        "probes.json"
+      ]
+    }
+  },
+  {
+    "ref": "app:polarizing / commentary.json",
+    "category": "statistics",
+    "verification": {
+      "ref": "app:polarizing / commentary.json",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "All sub-claims verified; 320-vs-691 and flipped ranking cannot be rounding; +0.74 and 40,311 are the internally-consistent figures; polarizing needs fresh recompute.",
+      "corrected_proposal": "",
+      "sources": [
+        "commentary.json",
+        "paper.tex 355-356,459,617,798-802,907-908"
+      ]
+    }
+  },
+  {
+    "ref": "sec:citation / score.py:build_report",
+    "category": "code-repro",
+    "verification": {
+      "ref": "sec:citation / score.py:build_report",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "see reasoning field",
+      "corrected_proposal": "",
+      "sources": [
+        "citation.py:16,47-53,74-81",
+        "score.py:26-47,137,190-201,347",
+        "cli.py:73-78",
+        "html_report.py:61-89",
+        "paper.tex:548-580"
+      ]
+    }
+  },
+  {
+    "ref": "README.md:53",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "README.md:53",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "README is the outlier on the two middle band labels; genuine public-facing doc-consistency defect; fix aligns to paper/design/judge prompt without touching code.",
+      "corrected_proposal": "",
+      "sources": [
+        "README.md:53",
+        "paper.tex:312-314,945-949"
+      ]
+    }
+  },
+  {
+    "ref": "sec:clustering",
+    "category": "taxonomy",
+    "verification": {
+      "ref": "sec:clustering",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Both texts confirm; four leaning clusters match; 'only' overstates for the two multi-chapter clusters; fix correct, no regression.",
+      "corrected_proposal": "Replace 'four etiquette-only clusters excluded' with 'four etiquette-leaning clusters excluded'.",
+      "sources": [
+        "paper.tex#L255",
+        "chapter-map#L5",
+        "chapter-map#L14"
+      ]
+    }
+  },
+  {
+    "ref": "sec:judge-agreement / sec:limitations",
+    "category": "statistics",
+    "verification": {
+      "ref": "sec:judge-agreement / sec:limitations",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Both premises verified; commentary is internally-correct source; 66/85 unaffected; fix aligns paper to its own commentary.",
+      "corrected_proposal": "Change 40,320 to 40,311 and add one Limitations sentence on the nine single-judge cells.",
+      "sources": [
+        "paper.tex:617,724-742",
+        "commentary.json"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-STAT-01",
+    "category": "statistics",
+    "verification": {
+      "ref": "JLS-STAT-01",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "All clauses verified; judges stochastic; overlay is monotone upward bias on disagreement tail; non-disclosure is genuine defect; fix sound. Caveat: only commentary.json ships so ~15% is code inference.",
+      "corrected_proposal": "",
+      "sources": [
+        "score.py:106-125,137-146,213-235",
+        "judge.py:170-232",
+        "paper.tex:615-639,724-742",
+        "results/ (only commentary.json)"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-STAT-02",
+    "category": "balance-axis",
+    "verification": {
+      "ref": "JLS-STAT-02",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premises check out; three Gemini-family ties not two; genuine internal contradiction; but family-leniency reading confounded (GPT-5.5 same tier, quality plausible). Keep directional, add confound.",
+      "corrected_proposal": "Add Ansari as third tie; recompute per-subject gap; state inflation strictly directional and surface GPT-5.5/quality confound; no score change.",
+      "sources": [
+        "paper.tex l.331,627-639",
+        "commentary.json judges,subject:ansari"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-STAT-03",
+    "category": "code-repro",
+    "verification": {
+      "ref": "JLS-STAT-03",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "All premises hold; no bootstrap anywhere; html_report and commentary.json both contradict paper; central inferential object unimplemented; fix sound.",
+      "corrected_proposal": "",
+      "sources": [
+        "paper.tex l.388-394,724-727",
+        "html_report.py:500",
+        "score.py",
+        "commentary.json:19"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-STAT-04",
+    "category": "statistics",
+    "verification": {
+      "ref": "JLS-STAT-04",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "All three elements present; standard multiplicity point valid; severity minor because paper is disciplined about overlap; fix proportionate, non-regressive.",
+      "corrected_proposal": "",
+      "sources": [
+        "paper.tex l.386-394,652,693,726-729"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-STAT-05",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "JLS-STAT-05",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Premise verified; commentary internally correct, paper out of sync; 0.02% delta so minor; fix sound; optional 80,640 note.",
+      "corrected_proposal": "",
+      "sources": [
+        "paper.tex l.335,617",
+        "commentary.json caveats+judges"
+      ]
+    }
+  },
+  {
+    "ref": "score.py/cli.py:66-70 vs html_report.py:71",
+    "category": "code-repro",
+    "verification": {
+      "ref": "score.py/cli.py:66-70 vs html_report.py:71",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise fully verified; sections 1/2/6 blank; fix alternative (b) fall back to citations_llm is a regression (both-turns metric). Drop that alternative.",
+      "corrected_proposal": "Add --turn1 boolean to detect_citations wired to detect_all(turn1=True); document; optionally hard-error when file missing. Do NOT fall back to citations_llm.jsonl.",
+      "sources": []
+    }
+  },
+  {
+    "ref": "score.py:30-47,137-210",
+    "category": "code-repro",
+    "verification": {
+      "ref": "score.py:30-47,137-210",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "duplicate-not-used",
+      "corrected_proposal": "Fence or delete the orphaned regex detector atomically: remove build_report/cites/QURAN_RE/HADITH_RE or raise NotImplementedError, AND remove now-unused cites import in html_report.py:9 to avoid ImportError. Note canonical producer is html_report.build_html.",
+      "sources": [
+        "score.py",
+        "cli.py",
+        "html_report.py",
+        "citation.py",
+        "paper.tex"
+      ]
+    }
+  },
+  {
+    "ref": "judge.py:170-232 + prompts.py:145 + score.py:106-125",
+    "category": "statistics",
+    "verification": {
+      "ref": "judge.py:170-232 + prompts.py:145 + score.py:106-125",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Every clause holds; judges run at default nonzero temp; overlay is monotone (not just regression) upward bias since target cells already contribute 0. Refinements: 'boundary-resolved' inaccurate; characterize as guaranteed non-decrease; judge_user_message wholly dead.",
+      "corrected_proposal": "Report BASE pre-overlay agreement as 66/85 via overlay=False; describe overlaid figure as resample not boundary-resolved; fix docstring; if distinct prompt intended re-judge all cells; remove dead judge_user_message.",
+      "sources": [
+        "judge.py:101,170-232",
+        "prompts.py:140-151",
+        "score.py:106-125,216-235",
+        "providers.py:75-123",
+        "citation.py:81",
+        "paper.tex:615-639"
+      ]
+    }
+  },
+  {
+    "ref": "judge.py:73-87,139-152 + providers.py:93-118",
+    "category": "code-repro",
+    "verification": {
+      "ref": "judge.py:73-87,139-152 + providers.py:93-118",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Code premises true; mechanism genuine; but 'exclude missing-judge' already what combinations(js,2) does; gap is uncounted drops in build_report; both judges can drop (gemini raises on no-text) so asymmetry is Claude has no mitigation. Magnitude not repo-verifiable.",
+      "corrected_proposal": "Compute per-judge coverage in build_report and report shortfall per judge; report single-judge counts; document mitigation asymmetry as limitation; confirm drop counts against judgments.jsonl (not in repo).",
+      "sources": [
+        "judge.py:70-87,139-152",
+        "providers.py:75-118",
+        "score.py:216-236",
+        "collect.py:94"
+      ]
+    }
+  },
+  {
+    "ref": "judge.py:148-167 + citation.py:90-93 vs collect.py:303-304",
+    "category": "code-repro",
+    "verification": {
+      "ref": "judge.py:148-167 + citation.py:90-93 vs collect.py:303-304",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "All four premises verified; genuine repro/robustness concern; minor since judge idempotent. Refinement: detect_all has NO failure counter so 'exit nonzero' needs added tracking; expected-vs-actual count is cleaner.",
+      "corrected_proposal": "judge_all: add 'if failed: raise SystemExit(1)'. detect_all: add failed counter in except handler and raise or print detected n/len(todo); optionally warn in build_html when ct records below expected.",
+      "sources": [
+        "collect.py:280-304",
+        "judge.py:130-167",
+        "citation.py:60-105",
+        "html_report.py:60-100"
+      ]
+    }
+  },
+  {
+    "ref": "score.py:30-42",
+    "category": "code-repro",
+    "verification": {
+      "ref": "score.py:30-42",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premises confirmed and dead-path confirmed; but 'surah-by-number-only missed' overstated (surah word already matches); genuinely missed = 'Qur'an chapter N' and bare N:N; cleanest action is removal with finding B.",
+      "corrected_proposal": "Primary: remove dead build_report+cites+QURAN_RE/HADITH_RE. If retained: add chapter-N clause to Qur'an branch (surah-name already caught); constrain hadith clause with negative lookbehind for 'false '.",
+      "sources": [
+        "score.py:30-47,137-201",
+        "cli.py:66-69"
+      ]
+    }
+  },
+  {
+    "ref": "sec:by-theme / paper.tex:509-517",
+    "category": "statistics",
+    "verification": {
+      "ref": "sec:by-theme / paper.tex:509-517",
+      "verdict": "refined",
+      "corrected_proposal": "Surface per-cell n and existing bootstrap CI half-width inline; note CIs already exist (paper 346,726); flag repentance n=15 and patience-pillar n=36 vs love_contentment 81/justice 66/cross_cutting 67; keep the 'good company' pattern (corroborated by fear_hope 40, vigilance 45); name the pillar explicitly.",
+      "reasoning": "Premise verified against data and text; strongest positive claims rest on thinnest cells; but paper already computes probe-cluster bootstrap CIs for every quantity as error bars, so fix is prose-transparency+hedging not new stats; positive direction partly corroborated. Refined.",
+      "sources": [
+        "paper.tex:509-517,346,726",
+        "probes.json"
+      ]
+    }
+  },
+  {
+    "ref": "score.py:241-270 / paper sec:by-theme / README",
+    "category": "statistics",
+    "verification": {
+      "ref": "score.py:241-270 / paper sec:by-theme / README",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Code premise confirmed (no n/CI in internal tables); counts confirmed; but paper claim 'reader cannot tell thin cells / no CI' refuted for the paper (bootstrap CIs as error bars). Fix must not add naive pseudoreplicated CI. Real gap is internal report + explicit counts.",
+      "corrected_proposal": "Scope to internal markdown report + counts: add per-category n column to build_report by-pillar/by-heart tables; any CI must reuse probe-cluster bootstrap not naive pooled mean; optional per-category count table in appendix. Do not claim paper fails to disclose reliability.",
+      "sources": [
+        "score.py:241-270",
+        "paper.tex:385-394,499-535,726",
+        "probes.json"
+      ]
+    }
+  },
+  {
+    "ref": "probes.json pillars / paper.tex:509-512",
+    "category": "taxonomy",
+    "verification": {
+      "ref": "probes.json pillars / paper.tex:509-512",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Numeric premises verified; but new-scenario fix conflicts with one-probe-per-cluster (140 probes = RS clusters; courage genuinely sparse). Authoring to lift courage is authoring-to-fix-balance. Keep disclosure only.",
+      "corrected_proposal": "Drop the authoring component; keep sharpened disclosure: note coverage reflects source corpus distribution; flag small-n heart cells (repentance 15, patience_gratitude 16, heart-patience 14); add small-n caveat to the 'best on repentance' claim. fix_type doc/statistics not new-scenario.",
+      "sources": [
+        "probes.json",
+        "paper.tex#L498-L520,#L159,#L252"
+      ]
+    }
+  },
+  {
+    "ref": "README.md:53-54",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "README.md:53-54",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Verbatim confirmed; repo-wide grep shows Smoke/Neutral only at README:53; halved values correct; fix aligns README to canonical labeling, no regression.",
+      "corrected_proposal": "",
+      "sources": [
+        "README.md:53",
+        "paper.tex:313",
+        "jaleesbench-design.md:239",
+        "html_report.py:17",
+        "export_web.py:42",
+        "prompts.py:72"
+      ]
+    }
+  },
+  {
+    "ref": "paper sec:clustering / design §3.1",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "paper sec:clustering / design §3.1",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "All premises verified; only files-supported reconciliation is 143 clusters / 3 excluded / 140 probes; '144 clusters' alternative refuted by map; source cluster data absent so 3-vs-4 not re-run but 140-vs-143 arithmetic settles it.",
+      "corrected_proposal": "Paper: 'four etiquette-only clusters excluded' -> 'three etiquette-leaning clusters excluded'; design §3.1: 139->140, '4 excluded'->'3 excluded'; reconcile map's 4 leaning labels vs 3 code-dropped clusters.",
+      "sources": [
+        "paper.tex L254-255",
+        "jaleesbench-design.md L155-158",
+        "chapter-map L5,L14-15,L113,L139",
+        "mapping.py L199-202",
+        "probes.json"
+      ]
+    }
+  },
+  {
+    "ref": "design doc exec-summary / §3.1-3.2",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "design doc exec-summary / §3.1-3.2",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Every clause verified; genuinely stale on bank size, pilot scale, model count; staleness disclosed via draft label; fix accurate low-risk. '8 subject systems' incidental framing not in doc but doesn't affect core claim.",
+      "corrected_proposal": "",
+      "sources": [
+        "jaleesbench-design.md header, exec-summary Pilot bullet, §3.1 L155, §3.2 L168"
+      ]
+    }
+  },
+  {
+    "ref": "docs/jaleesbench-guide.md:2-3",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "docs/jaleesbench-guide.md:2-3",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise verified; substance identical, 'exact text' overstates byte-fidelity. Refinement: paper appendix is itself a third non-byte-exact rendering (italic); true canonical source is prompts.py GUIDE.",
+      "corrected_proposal": "Replace 'this exact text ... Guided framing' with 'a formatted rendering (bold, diacritics) of the Guided-framing system prompt; canonical run text is prompts.py GUIDE'; do not call any rendering byte-exact.",
+      "sources": [
+        "jaleesbench-guide.md",
+        "prompts.py",
+        "paper.tex"
+      ]
+    }
+  },
+  {
+    "ref": "README.md:74-81",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "README.md:74-81",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Table has four path rows, omits git-tracked apps/jaleesbrowser SPA; pure omission not broken link; minor; fix low-risk.",
+      "corrected_proposal": "",
+      "sources": []
+    }
+  },
+  {
+    "ref": "JLS-114",
+    "category": "safety-register",
+    "verification": {
+      "ref": "JLS-114",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise holds; rubric has only a direction-timing dispensation, no safety floor; +1 exemplar credits only declining wailing. But probe setup does mention self-harm (scoring gap not blindness) and Perfume 'reads this person' latent safeguard exists. Bench-wide safety axis + new taxonomy overreaches single-axis design.",
+      "corrected_proposal": "Do not add bench-wide safety axis/taxonomy. Make existing attunement binding for acute-distress probes: V2_BOUNDARY rule 5 gate — response oblivious to disclosed self-harm cannot reach Perfume; add per-probe judge-guidance line for JLS-114 peers; align Ansari exemplar write-up.",
+      "sources": [
+        "prompts.py:61-137",
+        "probes.json JLS-114",
+        "paper.tex:831-848"
+      ]
+    }
+  },
+  {
+    "ref": "guide.md:Never",
+    "category": "mufti-boundary",
+    "verification": {
+      "ref": "guide.md:Never",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Literal gap real; but Never-item 2 (definitive ruling on disputed matter) is direction-neutral and already reaches individual takfir; not one-sided; scoring intact (proof_texts hold RaS 1732-1733 + corrective). Adopt-with-refinement enhancement, drop false-asymmetry premise and 'serious'.",
+      "corrected_proposal": "Optional strengthening under item 2: name takfir/rejected-worship/barring explicitly (RaS 1732-1733), justified because bench stages it in JLS-123; do not frame as fixing an asymmetry or label serious.",
+      "sources": [
+        "guide.md 56-63",
+        "probes.json JLS-123",
+        "sunnah.com/riyadussalihin:1732",
+        "sunnah.com/riyadussalihin:1733"
+      ]
+    }
+  },
+  {
+    "ref": "prompts.py:108",
+    "category": "safety-register",
+    "verification": {
+      "ref": "prompts.py:108",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Rule 5 already flags validating abandonment as direction-failure; and Sparks (-1) is exactly 'door-closing, user leaves alienated', positive bands gated against it. Companionship handled by band ladder; fix redundant and risks regression against GUIDE referral guidance.",
+      "corrected_proposal": "",
+      "sources": [
+        "prompts.py"
+      ]
+    }
+  },
+  {
+    "ref": "guide.md",
+    "category": "mufti-boundary",
+    "verification": {
+      "ref": "guide.md",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Asymmetry real (no clinical analogue). But distress cluster mischaracterized: JLS-114 is niyaha not clinical self-harm; despair probes are futur not suicidality; only JLS-084 somatic anxiety with engaged doctor. 'refer for self-harm/crisis' teaches a response bank doesn't contain and risks secular crisis-script regression in a religious prompt.",
+      "corrected_proposal": "Add one Never clause in companionship idiom: name a competence limit, point to someone who can help, stay rather than hand off — not a 'refer for self-harm/crisis' script; no probe depicts suicidal ideation.",
+      "sources": [
+        "guide.md 18-23,45-46,60-62",
+        "probes.json JLS-004,033,035,084,085,114"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-014",
+    "category": "safety-register",
+    "verification": {
+      "ref": "JLS-014",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Probe text accurate but ground truth not deficient: RS 146/147 address exhaustion/rushing prayer directly; correct response entails the safety outcome. Proposed safety register doesn't exist; re-tagging intrinsic moderation probe is a regression and re-tag not measurement fix; upstream has no judge-guidance field.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-014"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-004",
+    "category": "safety-register",
+    "verification": {
+      "ref": "JLS-004",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Premise false for four of five: correctives already rebut the despairing self-verdict (JLS-004 Q39:53 vs Q4:48; 033/035/085 each). Proposed judge note substantively present. Only residue is a nonexistent register field; 'waswas' mislabels despair probes; JLS-084 has no self-condemnation and is leaky. Fix redundant + speculative schema.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-004,033,035,085,084 correctives"
+      ]
+    }
+  },
+  {
+    "ref": "sec:limitations",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "sec:limitations",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise verified; no safety-scope statement anywhere; JLS-114 foregrounded. Refinement: 'JLS-114 (self-harm)' mischaracterizes — chapter is Prohibition of Bewailing, self-striking is niyaha. Caveat should scope out clinical safety without labeling it self-harm.",
+      "corrected_proposal": "Add one sentence: no safety axis; acute-grief/distress probes (e.g. JLS-114, bereaved user striking herself in customary mourning) scored for companionship residue not crisis-safety; safety evaluation complementary and out of scope. Do not call JLS-114 a self-harm probe.",
+      "sources": []
+    }
+  },
+  {
+    "ref": "JLS-agg-gender",
+    "category": "demographics",
+    "verification": {
+      "ref": "JLS-agg-gender",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Every load-bearing count verified byte-for-byte; skew genuine and undisclosed. Refinements: 'every finance/leadership/scholarship male-marked' overstated (most probes unmarked) — accurate is male-marked-or-unmarked with zero female; and 'author new probes' collides with one-probe-per-cluster, so re-author narrator voice of existing probes instead.",
+      "corrected_proposal": "(a) doc: Limitations sentence disclosing asker distribution. (b) framing not new-scenario: re-author narrator VOICE of a balanced subset of existing finance/leadership/scholarship-cluster probes to female; state 'those terrains are male-marked-or-unmarked with zero female narrators'.",
+      "sources": [
+        "probes.json turn1",
+        "paper.tex 724-742,159"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-gap-convert",
+    "category": "construct",
+    "verification": {
+      "ref": "JLS-gap-convert",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Gap factually real; convert terms confined to proof_texts hadith. But new-scenario is coverage expansion vs one-probe-per-cluster; must instantiate a RS cluster. Two examples doctrinally unequal: parent-calls-reversion-a-phase is clean (Q31:14-15); Christmas-dinner risks JLS-103 restrictive-side pitfall.",
+      "corrected_proposal": "Frame as adopt-with-refinement coverage note; if acted on, anchor in birr al-walidayn/silat al-rahm cluster; prefer the doctrinally-clear estrangement scenario (Q31:14-15); avoid Christmas-attendance unless judge-guidance doesn't pre-decide the contested question; substitution within cluster not bank growth.",
+      "sources": [
+        "probes.json",
+        "Qur'an 31:14-15"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-gap-hostility",
+    "category": "construct",
+    "verification": {
+      "ref": "JLS-gap-hostility",
+      "verdict": "refined",
+      "premise_true": false,
+      "reasoning": "Core external-hostility gap true, but premise false conjunct: JLS-090 is a prayer-break/Jumuah accommodation probe, and JLS-045/061/069 cover visibility friction. Genuine narrow gap is pressure SOURCE being another party's hostility to Islam.",
+      "corrected_proposal": "Correct justification: do not claim accommodation coverage absent (JLS-090/045/061/069 exist); narrow gap to anti-faith hostility as pressure source; propose one probe anchored to a RS sabr/steadfastness cluster; if false_authority 'concealment under duress' used, write it bidirectionally (rukhsa exists but resist casual invocation). Adopt-with-refinement enhancement.",
+      "sources": [
+        "probes.json JLS-045,061,069,090"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-gap-women-ritual",
+    "category": "construct",
+    "verification": {
+      "ref": "JLS-gap-women-ritual",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "All four premises verified. But proposed_fix overreaches: RS has no hayd/prayer, pregnancy/nursing-fasting, or women's-masjid-access clusters (out of construct scope, not missing). Actionable part is representational agency, and unused fasting/qiyam clusters (babs 213,217,223,224,228,229,230) can fix it.",
+      "corrected_proposal": "Keep JLS-128 (faithful bab 336). Reframe as representational imbalance in narrator agency; drop hayd/pregnancy/masjid topical items (no RS clusters). Re-narrate one probe from an unused fasting/qiyam cluster (bab 213/228/229/230/212) with an explicitly female self-directed narrator. fix_type framing/re-narration respecting one-probe-per-cluster.",
+      "sources": [
+        "probes.json",
+        "chapters.json"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-agg-names",
+    "category": "demographics",
+    "verification": {
+      "ref": "JLS-agg-names",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Six authored supporting-cast names confirmed all male Arab/Urdu. Refinements: proof_texts contain female Companion names (Fatimah etc.) so scope to authored cast; rule 20 concerns askers not third-party names, so propose amending the standard.",
+      "corrected_proposal": "Scope claim to authored supporting-cast names; note female figures appear unnamed and as proof-text narrators. Amend rule 20 to add: vary named third-party characters by gender and ethnic/cultural background. Apply forward only; do not rename existing characters.",
+      "sources": [
+        "probes.json",
+        "authoring-standards.md"
+      ]
+    }
+  },
+  {
+    "ref": "prompts.py:_ar_prompts",
+    "category": "code-repro",
+    "verification": {
+      "ref": "prompts.py:_ar_prompts",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Every premise verified; live callers (judge.py:101, batching.py:28) crash on a real Arabic run; only test monkeypatches; Arabic bank ships but framings+rubric absent so parity unverifiable. Fix sound; add generator or static file.",
+      "corrected_proposal": "Commit reproducible Arabic prompt artifact (generator + snapshot or static file in data/) with stated/guide/judge_prompt/v2_boundary/judge_tail (retain {conversation} placeholder); add test calling real _ar_prompts()/judge_blocks_ar().",
+      "sources": [
+        "prompts.py:162-183",
+        "collect.py:13",
+        "judge.py:101",
+        "batching.py:28",
+        "test_units.py:101-108"
+      ]
+    }
+  },
+  {
+    "ref": "cli.py",
+    "category": "code-repro",
+    "verification": {
+      "ref": "cli.py",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Confirmed no CLI threads Arabic. Refinement: judge deliberately keeps proof texts English (prompts.py:179), so feeding probes_ar.json into judge_all/batching is a regression; scope probes_ar.json+framings_ar() to collection only, judge needs just lang='ar'.",
+      "corrected_proposal": "Add --lang en|ar (or paired commands): collect+smoke use probes_ar.json + framings_ar() + distinct out_path; judge uses lang='ar' ONLY (English proof_texts by design); batch-judge lang='ar' routing to _ar files.",
+      "sources": [
+        "cli.py",
+        "collect.py",
+        "judge.py",
+        "batching.py",
+        "prompts.py"
+      ]
+    }
+  },
+  {
+    "ref": "probes_ar.json (JLS-020, JLS-109, JLS-133, JLS-069)",
+    "category": "identity-signal",
+    "verification": {
+      "ref": "probes_ar.json (JLS-020, JLS-109, JLS-133, JLS-069)",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "0 islamic mismatches; JLS-020/109/133 true EN-clean/AR-God-named; JLS-069 premise false (EN already has 'said the praise', intrinsic sneeze etiquette). Structural spine real. But formulae are pan-Arab theistic register (names God not Islam); re-tag desyncs matched banks; harm prospective (no Arabic citation table published). Documentation fix not silent re-tag.",
+      "corrected_proposal": "Documentation fix: restrict examples to JLS-020/109/133 (drop JLS-069); note islamic authored on English surface and inherited unchanged; characterize as pan-Arab theistic register; IF an Arabic citation table ever published, re-audit against Arabic surface first; do not silently flip AR tags.",
+      "sources": [
+        "probes.json",
+        "probes_ar.json",
+        "paper.tex 550-608",
+        "batching.py 26-28",
+        "judge.py 101"
+      ]
+    }
+  },
+  {
+    "ref": "probes_ar.json (dialect)",
+    "category": "arabic",
+    "verification": {
+      "ref": "probes_ar.json (dialect)",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Core mixing + no-policy confirmed; genuine intra-probe mixing confirmed in JLS-109 (hala2 + abi). But finding's specifics wrong: hala2 not in JLS-122 (it's in 109); JLS-103 is consistently Levantine not mixed. Scope is the in-progress (unreleased) Arabic bank.",
+      "corrected_proposal": "Retain but correct evidence: confirmed intra-mixing is JLS-109 (Levantine hala2 + Gulf abi); drop JLS-103; hala2 not in JLS-122. Document a dialect policy for the WIP Arabic bank; fix JLS-109 first; audit JLS-122 register. Pre-release authoring gate, not shipped-instrument defect.",
+      "sources": [
+        "probes_ar.json",
+        "authoring-standards.md",
+        "README.md"
+      ]
+    }
+  },
+  {
+    "ref": "docs/paper/jaleesbench-paper.tex",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "docs/paper/jaleesbench-paper.tex",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Three Arabic hits (etymology x2, \\arabic macro); README sole in-progress mention; the code (prompts.py 162-184) encodes real design decisions the paper omits; short paragraph well-scoped. Minor caveat: 'dialect policy' is the weakest item — describe dialect handling that exists.",
+      "corrected_proposal": "Add a methods/future-work paragraph documenting matched Arabic bank, English proof texts, appended (not spliced) boundary rules, three Arabic framings; describe dialect handling as-is; align with README 'in progress'.",
+      "sources": [
+        "paper.tex 66,138,147",
+        "README.md 10,91-93",
+        "prompts.py 162-184"
+      ]
+    }
+  },
+  {
+    "ref": "probes_ar.json vs probes.json (schema)",
+    "category": "doc-consistency",
+    "verification": {
+      "ref": "probes_ar.json vs probes.json (schema)",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Premise exact; both banks currently align (140 each, identical order, metadata byte-identical incl proof_texts) but hand-maintained/unguarded; parity test guards real invariants and passes now. Caveat: version key never consumed so mirroring is cosmetic; the parity test is the load-bearing half.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json",
+        "probes_ar.json",
+        "collect.py",
+        "test_units.py"
+      ]
+    }
+  },
+  {
+    "ref": "cross-tradition:rec1",
+    "category": "balance-axis",
+    "verification": {
+      "ref": "cross-tradition:rec1",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Both premises literally true. But static per-probe pole records author intent not measured direction (ill-defined for bidirectional correctives like JLS-103). The judge ALREADY emits a per-response direction field (prompts.py:90, judge.py:46); genuine gap is that field is free-text/un-aggregated.",
+      "corrected_proposal": "Do not add static probes.json pole tag. Formalize the judge's existing free-text direction field into an enum {permissive_drift,on_target,restrictive_drift} and aggregate a per-subject laxity/rigor split in score.py alongside the mean. Optional per-probe hint only as design-intent metadata. fix_type code+statistics not structural.",
+      "sources": [
+        "probes.json",
+        "paper.tex L314",
+        "score.py",
+        "prompts.py L72,L76,L79,L90",
+        "judge.py L46"
+      ]
+    }
+  },
+  {
+    "ref": "cross-tradition:rec1-rec4",
+    "category": "construct",
+    "verification": {
+      "ref": "cross-tradition:rec1-rec4",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Literal premise holds (pressures one-directional, Burns over-permission). But rigorism IS scored: Sparks (-1) = correct-direction-but-shaming/door-closing. Burns-for-harshness would regress the deliberate laxity/rigorism severity distinction. Surviving kernel: pressures never push INTO harshness.",
+      "corrected_proposal": "Optional construct enhancement: acknowledge Sparks already stages rigorist outcome; do NOT add a Burns-for-harshness exemplar (regression vs V2_BOUNDARY rule 1). Consider a rigorist-direction pressure on a subset (new authoring). Reconcile tab:bands Sparks gloss with the judge's rigorism-flavored Sparks.",
+      "sources": [
+        "paper.tex 287-298,305-318,940-947",
+        "prompts.py",
+        "guide.md line 43"
+      ]
+    }
+  },
+  {
+    "ref": "cross-tradition:rec3",
+    "category": "safety-register",
+    "verification": {
+      "ref": "cross-tradition:rec3",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise confirmed (zero safety rule in three docs). But 'caps at 0' imports a SynodiaBench scoring mechanic colliding with JaleesBench's single-ceiling design and duplicating the Inert(0) band; severity overstated (no literal self-harm crisis probe). Register clause + README note, framed against existing bands.",
+      "corrected_proposal": "Add a safety-register clause not a new cap: guide 'Never' clause (companion not therapist/clinician/crisis service; on genuine danger name it and point to real-world help alongside faith counsel); README one-line safety note; on abandoning referral state it is low-residue by existing bands (Inert/Sparks), reserve ceiling for harmful deliverable.",
+      "sources": [
+        "README.md",
+        "guide.md",
+        "jaleesbench-design.md",
+        "paper.tex 945-957"
+      ]
+    }
+  },
+  {
+    "ref": "cross-tradition:rec5",
+    "category": "fiqh-neutrality",
+    "verification": {
+      "ref": "cross-tradition:rec5",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "All factual premises hold; JLS-103 corrective takes restrictive side as settled, overstating consensus. But fix bundles a load-bearing correction (JLS-103) with a softer README-section enhancement; naming Sunni/Shia/madhhabs risks scope-creep vs the consensus-material design; deeper JLS-103 defect is the missing anchor.",
+      "corrected_proposal": "Primary (JLS-103): add an anchoring RS proof text and reword the corrective to acknowledge the ikhtilaf (al-Nawawi records both readings); web-ground vs Sharh Muslim on Muslim 2605. Secondary/optional: surface existing neutrality principle in README as a short note; naming specific axes optional not required.",
+      "sources": [
+        "sunnah.com/muslim:2605",
+        "sunnah.com/bukhari:2692",
+        "guide.md#L60-62",
+        "paper.tex#L237",
+        "README.md#L53",
+        "probes.json JLS-103"
+      ]
+    }
+  },
+  {
+    "ref": "cross-tradition:rec4",
+    "category": "mufti-boundary",
+    "verification": {
+      "ref": "cross-tradition:rec4",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "See above.",
+      "corrected_proposal": "Do not edit the guide to 'state two-directional boundary' — item 2 already prohibits definitive rulings in either direction and Sparks registers over-restriction. Only non-redundant residue is the measurement asymmetry (all six pressures test laxity pole). Fold into the optional rigorism-pole new-scenario in rec1-rec4; framed as optional coverage extension not a defect fix.",
+      "sources": [
+        "guide.md:60-62,22-23",
+        "prompts.py:70-73",
+        "probes.json pressures + JLS-103",
+        "jaleesbench-design.md:22-23,468-469"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-008",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-008",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Literal premise true but conclusion wrong: leaky is a WHOLE-PROBE property; 16 of 40 leaky probes also have no turn1 marker; JLS-008 false_authority names Islam ('So Islam permits this'). Current leaky correct; retag would be a regression.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-008",
+        "html_report.py:270-272",
+        "paper.tex:548-568"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-023",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-023",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Textual facts hold but no turn1-based rule exists; 19 of 40 leaky probes have marker-free turn1; JLS-023 scenario names Islam (masjid extension, Prophet's hadith in pushes) over a universal dilemma = leaky. Retag to clean is a regression.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-023",
+        "html_report.py:264-272",
+        "paper.tex sec:citation"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-037",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-037",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise holds; 'Jummah' is an unambiguous Islamic marker so clean (no religious marker) is inapplicable; gift-craving dilemma universal so leaky. Shifts clean->leaky column, 98/42 split untouched. Refined only because shipped fix_type=none while the correct remedy is a measurement re-tag.",
+      "corrected_proposal": "Re-tag JLS-037 identity_signal clean->leaky (measurement correction).",
+      "sources": [
+        "probes.json JLS-037",
+        "html_report.py:265-272",
+        "paper.tex:548-580"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-043",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-043",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Decisive premise false: JLS-096 has explicit 'janazah' yet clean, JLS-005 names Allah and leaky — no marker-free-implies-clean rule. JLS-043 carries ziyarat al-qubur devotional signal and its spine is an Islamic ruling (RS 580-583, abrogation). Leaky defensible (arguably intrinsic). Retag to clean is a regression.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-043,096,005,074,119",
+        "authoring-standards.md rule 8",
+        "paper.tex"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-044",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-044",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "No turn1-marker convention; JLS-044 names Islam in false_authority ('ran this by a sheikh'); ~16 leaky probes name Islam only in pressure turns. Retag to clean breaks consistency and misclassifies. Corrective sound but that's not a defect.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-044",
+        "html_report.py:267-272",
+        "paper.tex:548-568"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-053",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-053",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Both facts hold and RS 697 verified verbatim (correct chapter). But 'should be clean' overstates a borderline call — leaky not a strict turn1-lexical test; JLS-053 is one of ~16 marker-free leaky probes, several with soft cultural signals it lacks. Coupled to citation table. Reframe as cluster-boundary observation.",
+      "corrected_proposal": "Reframe as borderline/cluster observation: JLS-053 is the strongest candidate in the marker-free leaky group for a clean re-tag; if authors revisit boundaries treat as one consistency pass weighing citation-table coupling; fix_type stays none pending review. Corrective correctly anchored by RS 697 — a strength.",
+      "sources": [
+        "sunnah.com/riyadussalihin:697",
+        "probes.json:JLS-053",
+        "html_report.py:259-272",
+        "paper.tex:257-273,550-568"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-054",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-054",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Three doctrinal markers confirmed; cannot be 'not Islamic at all'; JLS-048 leaky on weaker markers so tagging 054 clean is inconsistent; correct target leaky (dilemma is universal over-teaching). Refined only because shipped fix_type=none while remedy is a re-tag.",
+      "corrected_proposal": "Re-tag JLS-054 clean->leaky (measurement correction; citation table only, not 98/42 split); optionally re-examine JLS-105 (walima)/JLS-138 (nikah).",
+      "sources": [
+        "probes.json JLS-054,048,105,119,138",
+        "paper.tex L257-272,L550-608"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-067",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-067",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Textual premise true but clean/leaky is not a turn1-lexical test; 21/40 leaky probes lack a turn1 marker; JLS-067 chapter is salam etiquette, all proof_texts about salam, false_authority names a khateeb — leaky correct. Retag to clean is a regression.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-067",
+        "html_report.py:265-272",
+        "paper.tex:257-273,548-562"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-069",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-069",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Confirmed: parenthetical reuses Riyad serials as Sahih numbers; Bukhari 881 = Friday-Prayer, Muslim 880 = Friday-prayer recitation, neither is the sneeze-reply; sneeze-reply at Bukhari ~6226/Muslim ~2991-2994. Substance sound, only labels wrong.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-069",
+        "sunnah.com/bukhari:881",
+        "sunnah.com/muslim:880"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-074",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-074",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Citation half confirmed (Muslim 916 is the talqin; 917-918 are Riyad numbers, RS 917 is Abu Dawud). Taxonomy half refuted: turn1 has no Islamic marker, agent can be blind, talqin is the ideal unprompted response — clean/universal correct; intrinsic retag would regress. Upgrade fix_type none->citation.",
+      "corrected_proposal": "Keep as citation defect: change '(Muslim 917-918)' to '(Sahih Muslim 916)'. Drop the intrinsic re-tag; clean/universal is correct.",
+      "sources": [
+        "probes.json JLS-074",
+        "paper.tex 257-272",
+        "sunnah.com/muslim:916a"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-075",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-075",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Micro-facts hold but no turn1-keyword rule; 12/40 leaky probes marker-free while clean JLS-096/138 carry markers. JLS-075 is talqin chapter (bab 152), proof texts are deathbed formulae, secularize pressure presupposes a religious frame — leaky is weakest tag, retag to clean a regression. JLS-072 parallel superficial (different chapter).",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-075,072,096,138",
+        "paper.tex 257-272,548-580",
+        "authoring-standards.md line 30"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-076",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-076",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Descriptive claims accurate and doctrine/citation sound (RS 931 = Bukhari 1278/Muslim 938; avoids haram per Ibn Hajar). But the one actionable premise is contradicted by current text: grief register already dominant and permissive reading already voiced and answered. Nothing to change.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-076",
+        "hadeethenc.com/en/browse/hadith/3228",
+        "riyadh.islamenc.com/en/page/159"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-080",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-080",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Textual claims hold but classification is whole-probe not turn1-keyword; 16/40 leaky marker-free; JLS-080 rooted in Islamic-etiquette night-travel chapter, shares false_authority push with 079 — leaky a deliberate pattern. Retag on lexical rationale would inconsistency with 6 marker-free leaky peers; 'should be clean' not established over 'JLS-079 should be leaky'.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-079,080,053,067,071,075,091,106",
+        "paper.tex sec citation",
+        "codev/state/main.md"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-091",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-091",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Textual claim true but identity_signal is whole-probe; clean set is turn1-pure (0/58) while 20/40 leaky leak via pressure turns; JLS-091 leaks via masjid/good_cause and its ground truth is a hadith corrective (Muslim 2664). Retag to clean would break consistency with 19 siblings and mislabel an Islamic-cored probe.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-091",
+        "html_report.py:265-272",
+        "paper.tex:548-568"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-096",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-096",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "see reasoning field",
+      "corrected_proposal": "Retag JLS-096 clean->intrinsic (measurement re-tag): 'janazah' is explicit marker so clean inapplicable; judged ground truth (RS 1353-1354 shahada + corrective) means dilemma hinges on a specific Islamic ruling. Conservative floor leaky (keeps universal); recommended intrinsic (moves headline 98/42 -> 97/43). Corrective sound.",
+      "sources": [
+        "probes.json JLS-096",
+        "html_report.py:260-272",
+        "paper.tex:257-272"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-103",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-103",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "see reasoning field",
+      "corrected_proposal": "Keep the theology/validity concern; drop two flawed sub-claims. Reword the lone corrective to acknowledge the ikhtilaf (permissive: literalists/Ghazali; restrictive: Tabari/Muhallab) and add an anchoring RS proof text (Umm Kulthum) so it is not the only bare-corrective ground truth. fix_type citation/framing, NOT re-tag to clean (leaky is whole-probe; false_authority names imam/Prophet, consistent with 15 other leaky probes).",
+      "sources": [
+        "probes.json JLS-103",
+        "paper.tex sec:guided-wash 461-497; sec:citation 255-272",
+        "html_report.py 258-272",
+        "hadeethenc.com/en/browse/hadith/3853",
+        "islamqa.info/en/answers/154955"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-105",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-105",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise confirmed; Muslim 1578 = Book of Musaqah (wine), unrelated; lineage/wailing 'signs of disbelief' hadith is Sahih Muslim 67. Anchor line correct; only redundant corrective parenthetical wrong. Refined because shipped fix_type=none while a concrete fix is available.",
+      "corrected_proposal": "Change corrective '(Muslim 1578)' to '(Sahih Muslim 67)' or '(Riyad as-Salihin 1578; Sahih Muslim 67)'; leave anchor line. fix_type citation.",
+      "sources": [
+        "probes.json JLS-105 line 2751",
+        "sunnah.com/muslim:1578",
+        "sunnah.com/muslim:67"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-106",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-106",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise confirmed; by the code's turn1 definition JLS-106 fits clean. But not isolated (067/091/103 also leaky with no turn1 naming, and 103 is the paper's worked example), and clean/leaky is provably assigned on dilemma salience not turn1 lexis (109/110 name masjid/imam in pressure turns). Boundary audit + documented rule, not isolated re-tag.",
+      "corrected_proposal": "Do not re-tag JLS-106 in isolation. Audit the full clean/leaky boundary against the turn1 definition (067/091/103/106 leaky despite no turn1 naming); pick one consistent rule and apply uniformly OR document that identity_signal is a dilemma-salience classification not turn1 lexical naming and caveat the citation column.",
+      "sources": [
+        "probes.json JLS-106/109/110/103/067/091",
+        "html_report.py:258-272",
+        "paper.tex:557-568"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-108",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-108",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Verified: turn1 no Islamic marker, anchor RS 1611 universal justice dilemma, no riba corrective; siblings JLS-109/110 clean. Considered savings-account-as-riba but secular interest account does not name Islam and proof-texts raise no riba. Refined because shipped fix_type=none while the remedy is an explicit clean re-tag.",
+      "corrected_proposal": "Re-tag JLS-108 leaky->clean (measurement correction to citation table, not 98/42 split). Caveat: if a riba subtext was intended it should be surfaced in turn1/proof-texts.",
+      "sources": [
+        "probes.json JLS-108,109,110",
+        "html_report.py:259-272",
+        "paper.tex:257-272"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-116",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-116",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "The quoted clause is present but the characterization is false: the corrective rebuts only the false_authority 'only idols' reduction (a genuine misreading of the jumhur), grounded in the Aisha curtain hadith. Minority 2D permission does not reach this life-sized realistic full-figure mural. Softening would let the pressure succeed — a regression. fix_type none already.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-116",
+        "en.wikipedia.org/wiki/Aniconism_in_Islam",
+        "abdurrahman.org Ibn Baz taswir"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-131",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-131",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Confirmed: live-coal/grave hadith is Sahih Muslim 971 not 1766; Muslim 1766 is Book of Jihad (unrelated); anchor '[Muslim]' correct, only the number defective.",
+      "corrected_proposal": "Change '(Muslim 1766)' to '(Sahih Muslim 971)' or drop the parenthetical; keep the anchor line. fix_type citation.",
+      "sources": [
+        "sunnah.com/muslim:976b",
+        "sunnah.com/muslim:1766a"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-132",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-132",
+      "verdict": "confirmed",
+      "premise_true": true,
+      "reasoning": "Confirmed identical RaS-vs-Sahih mislabel; Jabir's hadith is Sahih Muslim 970 (Book of Prayer-Funerals) not 1767; corroborating flag matching JLS-131, fix_type none deliberate. Confirmed as-is.",
+      "corrected_proposal": "",
+      "sources": [
+        "sunnah.com/muslim:970a",
+        "quranx.com/hadith/muslim/reference/Hadith-970",
+        "probes.json:JLS-132"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-135",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-135",
+      "verdict": "refuted",
+      "premise_true": true,
+      "reasoning": "Premise literally true but conclusion wrong: identity_signal whole-probe, and false_authority says 'A brother at the masjid told me' (religious marker), so not 'not Islamic at all'. Dates carry Sunnah connotation; widow-gift milieu leaks faith. Textbook leaky. Retag to clean corrupts the sub-table the other way.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-135",
+        "html_report.py:259-272",
+        "authoring-standards.md:30",
+        "paper.tex:257-272"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-137",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-137",
+      "verdict": "refuted",
+      "premise_true": false,
+      "reasoning": "Premise false about the text: the corrective operates only on the SCOPE axis, rebutting the false_authority 'targeted only one ancient dye' fabrication; it never engages tahrim-vs-tanzih. 'General and unrestricted in the authentic narrations' tracks nahā and does not adjudicate haram vs makruh. The scope-narrowing it rejects is a fabrication, so 'distortion of the plain ruling' is sound. Nothing to change.",
+      "corrected_proposal": "",
+      "sources": [
+        "probes.json JLS-137",
+        "islamqa.info/en/answers/72878",
+        "seekersguidance.org colors-prohibited-for-men",
+        "islamqa.org/hanafi/askimam/126282"
+      ]
+    }
+  },
+  {
+    "ref": "JLS-138",
+    "category": "other",
+    "verification": {
+      "ref": "JLS-138",
+      "verdict": "refined",
+      "premise_true": true,
+      "reasoning": "Premise confirmed; 'nikah' is a plain marker so clean (agent blind) is violated, corrupting the citation table. Finding's leaky-primary understates: its own reasoning ('dilemma hinges on the nasab ruling') is the paper's definition of INTRINSIC; a secular counselor sees no problem, proof texts RS 1802-1805 are the Islamic ruling. Refined because shipped fix_type=none while a re-tag is warranted.",
+      "corrected_proposal": "Re-tag JLS-138 out of clean. Recommended intrinsic (moral tension exists solely because of the nasab prohibition, matching intrinsic definition); leaky acceptable if authors judge surface dilemma universal. Either way moves it out of the clean column.",
+      "sources": [
+        "probes.json JLS-138",
+        "html_report.py:259-278",
+        "paper.tex:257-272,550-580"
+      ]
+    }
+  }
+]
