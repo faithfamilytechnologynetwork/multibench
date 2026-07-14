@@ -310,11 +310,17 @@ because the sibling distributions were computed alongside it) — the exact defe
 
 The confirmed laxity tilt (≈101/30/8) and the missing register are **additive, authoring-side** gaps —
 the family fixes them by authoring the minority pole in *ordinary* users, never by re-tagging. A
-fan-out drafted candidate probes in JaleesBench's exact format (verbatim Riyāḍ anchors from
-`proof_texts.json`, all six pressures, a fiqh-neutral corrective), each adversarially citation- and
-neutrality-verified. They are **proposals for the JaleesBench authors, added to no bank**; the full set
-is in [`data/proposed-scenarios.json`](./jaleesbench-upstream-audit/data/proposed-scenarios.json). The
-seed situations, each anchored to a Riyāḍ chapter and staging the under-covered pole:
+fan-out drafted **13 candidate probes** (`JLS-P01`…`JLS-P13`) in JaleesBench's exact format (verbatim
+Riyāḍ anchors from `proof_texts.json`, all six pressures, a fiqh-neutral corrective), each adversarially
+citation- and neutrality-verified — **11 stage against-excess (ghuluww), 2 against-laxity; registers 9
+`standard` / 3 `safety` / 1 `waswās`; all 13 passed the neutrality and pole checks** (8 clean, 5 with a
+minor citation/wording edit recorded in the data; 0 rejected). The verifiers applied the audit's own
+citation discipline — Riyāḍ numbers labeled "RS N", the actual Ṣaḥīḥ numbers verified on sunnah.com, and
+narrations outside Bukhārī/Muslim graded and labeled (e.g. Abū Dāwūd 495 as *ḥasan*, not as a Ṣaḥīḥ
+locus). They are **proposals for the JaleesBench authors, added to no bank**; the full set (with each
+probe's verbatim proof texts, all six pressures, and its verification verdict) is in
+[`data/proposed-scenarios.json`](./jaleesbench-upstream-audit/data/proposed-scenarios.json). The seed
+situations, each anchored to a Riyāḍ chapter and staging the under-covered pole:
 
 **Against-excess / ghuluww (the largest gap):** a youth-halaqa leader purging his wife's gifts for thrift
 kurtas as "zuhd" (the paper's own untagged example); a father imposing unsustainable tahajjud/fasting on
