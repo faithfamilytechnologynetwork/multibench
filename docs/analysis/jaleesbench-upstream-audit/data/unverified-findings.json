@@ -1,0 +1,807 @@
+{
+  "schema_version": 1,
+  "generated_by": "ultracode upstream audit",
+  "note": "plausible-not-confirmed",
+  "unverified_findings": [
+    {
+      "ref": "JLS-002",
+      "title": "Riba-employment probe is an exemplary model of rule-19 process handling",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Judge note mandates process: neither adopt the claim nor condemn scholars; verify, decline to rule, refer to a qualified scholar; separates consensus katib al-riba from disputed bank employment.",
+      "location": "probes.json JLS-002.proof_texts",
+      "premise_check": "Judge note states expected behavior is process/refer.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "No change; preserve as reference pattern.",
+      "source_lens": "traditionalist-faqih",
+      "corroborating": [
+        "traditionalist-faqih"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "docs/jaleesbench-guide.md + authoring-standards rule 19",
+      "title": "Framework's stated fiqh-neutrality rule is correct; defects are local failures to honor it",
+      "severity": "note",
+      "category": "strength",
+      "claim": "guide 'Never issue a definitive ruling on a disputed matter ... refer to a qualified scholar' and rule 19 process-mandate are the right posture; serious/revise findings are correctives failing this rule.",
+      "location": "guide.md Never list; authoring-standards rule 19",
+      "premise_check": "guide ~60 and rule 19 process-mandate present.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "No change; use as acceptance criterion.",
+      "source_lens": "traditionalist-faqih",
+      "corroborating": [
+        "traditionalist-faqih"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "false_authority axis",
+      "title": "false_authority pressure near-monolithically stages a scholar granting laxity",
+      "severity": "note",
+      "category": "balance-axis",
+      "claim": "false_authority almost always invokes a scholar permitting the lax reading; opposite shape rarely staged; over-strictness corrected on user axis not authority axis.",
+      "premise_check": "scholar-invoking false_authority turns overwhelmingly cite an authority granting a dispensation.",
+      "needs_web_grounding": false,
+      "location": "probes.json pressure_turns.false_authority",
+      "fix_type": "none",
+      "proposed_fix": "Optional: one probe where a harsh authority forbids a permitted matter and the corrective restores the rukhsa.",
+      "source_lens": "salafi-athari",
+      "corroborating": [
+        "salafi-athari"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-131 / JLS-132",
+      "title": "STRENGTH: grave-practice correctives vindicate the Athari reading against a lax imam",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Both grave probes: false authority is a lax imam; corrective restores the general prohibition; Salafi voice not caricatured.",
+      "premise_check": "Correctives side with the general prohibition over the imam's permissive framing.",
+      "needs_web_grounding": false,
+      "location": "probes.json JLS-131, JLS-132",
+      "fix_type": "none",
+      "proposed_fix": "Preserve (modulo citation-number correction).",
+      "source_lens": "salafi-athari",
+      "corroborating": [
+        "salafi-athari"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-123 / JLS-027",
+      "title": "STRENGTH: religious over-zeal (rash takfir, humiliating an elder) is staged as the flaw and softened",
+      "severity": "note",
+      "category": "strength",
+      "claim": "JLS-123 corrects rash takfir; JLS-027 tempers publicly correcting a 70-year-old imam; over-strictness corrected as readily as laxity.",
+      "premise_check": "JLS-123 restrains takfir; JLS-027 forbids humiliating a senior while affirming evidence-following.",
+      "needs_web_grounding": false,
+      "location": "probes.json JLS-123, JLS-027",
+      "fix_type": "none",
+      "proposed_fix": "Preserve as-is.",
+      "source_lens": "salafi-athari",
+      "corroborating": [
+        "salafi-athari"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-015",
+      "title": "STRENGTH: bidʿa concept aimed at genuine syncretism, not Muslim tradition",
+      "severity": "note",
+      "category": "strength",
+      "claim": "JLS-015 applies 'every innovation is misguidance' to a new-age candle/vision-board program, not a Muslim practice.",
+      "premise_check": "turn1 is a law-of-attraction program; corrective invokes innovation-is-misguidance against it.",
+      "needs_web_grounding": false,
+      "location": "probes.json JLS-015",
+      "fix_type": "none",
+      "proposed_fix": "Preserve as-is.",
+      "source_lens": "salafi-athari",
+      "corroborating": [
+        "salafi-athari"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-101 / JLS-115 / JLS-119",
+      "title": "STRENGTH: creed handling on karamat, soothsaying, and oaths is textually careful",
+      "severity": "note",
+      "category": "strength",
+      "claim": "JLS-101 affirms karamat real-but-unsought; JLS-115 prohibits card reader as a clue; JLS-119 keeps the ulama gloss that oath-shirk is extreme admonition not major shirk.",
+      "premise_check": "Three correctives make these distinctions.",
+      "needs_web_grounding": false,
+      "location": "probes.json JLS-101, JLS-115, JLS-119",
+      "fix_type": "none",
+      "proposed_fix": "Preserve as-is.",
+      "source_lens": "salafi-athari",
+      "corroborating": [
+        "salafi-athari"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "docs/jaleesbench-design.md:342",
+      "title": "'Every category name appears verbatim in a citable classical text' is overbroad and self-contradicted",
+      "severity": "revise",
+      "category": "strength",
+      "claim": "Seven teaching techniques and cross_cutting have no classical verbatim source; the blanket §7 claim is contradicted by the bench's own §6.2/paper disclaimer.",
+      "premise_check": "design §7 blanket claim; §6.2/paper say techniques are ours not classical; cross_cutting is a reported pillar bucket.",
+      "needs_web_grounding": false,
+      "fix_type": "framing",
+      "proposed_fix": "Scope the claim: pillar/heart names are verbatim; seven-technique consolidation and cross_cutting are the bench's own.",
+      "location": "design.md §7 (~342); paper sec by-theme (~501), rubric (~959)",
+      "source_lens": "tasawwuf-ihsan",
+      "corroborating": [
+        "tasawwuf-ihsan"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "prompts.py:26-31",
+      "title": "STRENGTH: Guided-framing heart-state list is faithful to al-Ghazali's Quarter 4",
+      "severity": "note",
+      "category": "strength",
+      "claim": "GUIDE lists exactly the ten Rubʿ al-Munjiyat book titles correctly paired.",
+      "premise_check": "prompts.py 26-31 and guide 30-34 enumerate the ten munjiyat titles.",
+      "needs_web_grounding": true,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; reference list against which the code enum should be reconciled.",
+      "location": "prompts.py:26-31; guide.md:30-34",
+      "source_lens": "tasawwuf-ihsan",
+      "corroborating": [
+        "tasawwuf-ihsan"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "prompts.py:22-24",
+      "title": "STRENGTH: Four conduct pillars faithful to Ibn al-Qayyim",
+      "severity": "note",
+      "category": "strength",
+      "claim": "patience/restraint/courage/justice = sabr/iffa/shajaa/adl with the four roots correctly paired.",
+      "premise_check": "prompts.py 22-24 name the four pillars and roots; Madarij lists them.",
+      "needs_web_grounding": true,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "location": "prompts.py:22-24; design.md §7",
+      "source_lens": "tasawwuf-ihsan",
+      "corroborating": [
+        "tasawwuf-ihsan"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "prompts.py:82-84",
+      "title": "STRENGTH: Seven teaching techniques honestly owned as a consolidation, not overclaimed as classical",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Design §6.2, paper rubric, and guide label the seven techniques 'ours, a consolidation'; good scholarly hygiene.",
+      "premise_check": "prompts.py 82-84 list seven; §6.2 and paper ~959 own it.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; model for scoping the §7 claim.",
+      "location": "prompts.py:82-84; design.md §6.2; paper ~959",
+      "source_lens": "tasawwuf-ihsan",
+      "corroborating": [
+        "tasawwuf-ihsan"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-051,062,091",
+      "title": "Correctives that reach outside the Riyad block cite genuine Sahih collection numbers correctly",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Muslim 49 (see-evil), Muslim 91 (arrogance/beauty), Muslim 2664 (strong-believer) all resolve correctly; mislabel class is a narrow block-reuse slip.",
+      "premise_check": "None of these numbers appears as a Riyad number in its own block; sunnah.com confirms.",
+      "needs_web_grounding": true,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; control pinning the mislabel mechanism.",
+      "location": "probes.json",
+      "source_lens": "hadith-citation-sweeper",
+      "corroborating": [
+        "hadith-citation-sweeper"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "proof_texts/quran",
+      "title": "All 13 Quranic references are correctly numbered and accurately quoted",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Every Quran citation in the correctives is correctly numbered and accurately paraphrased with correct scoping.",
+      "premise_check": "13 Q refs, each real and matching the mushaf.",
+      "needs_web_grounding": true,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "location": "probes.json Quran refs",
+      "source_lens": "hadith-citation-sweeper",
+      "corroborating": [
+        "hadith-citation-sweeper"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "proof_texts/anchors",
+      "title": "Anchor blocks preserve verbatim text and Riyad grading provenance; attributed sayings labeled as sayings",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Anchor texts quoted verbatim with Riyad source brackets; attributed sayings labeled as sayings (JLS-003 al-Fudayl).",
+      "premise_check": "Anchor blocks carry Riyad numbers with brackets; JLS-003 labels the saying; 135/140 have a false-authority corrective.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; mislabel finding touches only corrective parentheticals.",
+      "location": "probes.json anchor blocks",
+      "source_lens": "hadith-citation-sweeper",
+      "corroborating": [
+        "hadith-citation-sweeper"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "tab:framing",
+      "title": "Derived-gap columns differ from displayed subtraction by 0.01 (rounding artifact)",
+      "severity": "note",
+      "category": "statistics",
+      "claim": "Recognition/Instruction cells differ from rounded subtraction by 0.01; correct (gaps on unrounded means) but a referee will flag it.",
+      "premise_check": "tab:framing 907 GPT 0.73-0.28=0.45 vs +0.46.",
+      "needs_web_grounding": false,
+      "fix_type": "doc",
+      "proposed_fix": "Add a footnote: gaps computed on unrounded per-probe means.",
+      "source_lens": "paper-methodologist",
+      "corroborating": [
+        "paper-methodologist"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "sec:related",
+      "title": "Related-work citations unverifiable at knowledge cutoff — confirm references.bib resolves",
+      "severity": "note",
+      "category": "citation",
+      "claim": "Related work cites IslamicMMLU, IslamicLegalBench, IslamTrust, etc., several 2025-2026 not verifiable here; fair if they exist.",
+      "premise_check": "Paper 177-225 cite these; not verified.",
+      "needs_web_grounding": true,
+      "fix_type": "citation",
+      "proposed_fix": "Verify each cited benchmark exists with stated figures during verify phase.",
+      "source_lens": "paper-methodologist",
+      "corroborating": [
+        "paper-methodologist"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "sec:scorecard / sec:eval",
+      "title": "STRENGTH: paper is internally consistent across tables and abstract",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Table 1 and framing table agree on shared columns; abstract matches tables; scale arithmetic (20,160/80,640/40,320) correct; cost reconciles ~$1,316.",
+      "premise_check": "Shared columns equal row-by-row; 140*6*3*8=20160, *4=80640.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "paper-methodologist",
+      "corroborating": [
+        "paper-methodologist"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "app:polarizing / sec:guided-wash / sec:casestudy",
+      "title": "STRENGTH: sub-count arithmetic sums correctly and case study is honest",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Polarizing breakdown sums to 691; guided-wash sums to 840; case study reports held-out +0.44 vs +0.41 with non-overlapping CIs and a no-regression check.",
+      "premise_check": "798-802 sums 691; 473 594+144+102=840; 688-699 figures.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "paper-methodologist",
+      "corroborating": [
+        "paper-methodologist"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "sec:limitations / sec:judge-agreement",
+      "title": "STRENGTH: well-scoped, non-overclaiming limitations and judge-bias handling",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Limitations acknowledge single-response, gate normative claims behind scholar review, flag contamination, report family-tie as directional; citation reported beside not folded in.",
+      "premise_check": "724-742 and 624-639 caveats; 609-613 citation alongside.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "paper-methodologist",
+      "corroborating": [
+        "paper-methodologist"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-STAT-06",
+      "title": "Bootstrap clusters on the correct unit (probe = cluster)",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Resampling 140 probes is the right clustering unit; CI propagates between-probe variance.",
+      "premise_check": "Paper 346/385 probe-cluster bootstrap; one probe per cluster.",
+      "needs_web_grounding": false,
+      "location": "paper l.346, l.385",
+      "fix_type": "none",
+      "proposed_fix": "Preserve; sound design.",
+      "source_lens": "statistics-auditor",
+      "corroborating": [
+        "statistics-auditor"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-STAT-07",
+      "title": "Single-response-per-cell limitation honestly disclosed",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Paper discloses CIs capture probe-sampling variance only; run-to-run not captured.",
+      "premise_check": "726-728 states it.",
+      "needs_web_grounding": false,
+      "location": "paper l.726-728",
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "statistics-auditor",
+      "corroborating": [
+        "statistics-auditor"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-STAT-08",
+      "title": "Overlapping-CI honesty in the scorecard",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Scorecard flags GPT/Sonnet and Nemotron/GLM pairs as not separable at 95%.",
+      "premise_check": "386-389 names both pairs.",
+      "needs_web_grounding": false,
+      "location": "paper l.386-389",
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "statistics-auditor",
+      "corroborating": [
+        "statistics-auditor"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "tests/ (test_units, test_seam, test_providers)",
+      "title": "Test coverage gaps over the exact seams that carry the reproducibility defects",
+      "severity": "note",
+      "category": "code-repro",
+      "claim": "No test exercises citation turn1 routing/filename, detect-citations CLI wiring, judge-refusal skip, rejudge prompt-identity, or build_report/cites.",
+      "premise_check": "tests contain only the five files; no coverage of these seams.",
+      "needs_web_grounding": false,
+      "fix_type": "code",
+      "proposed_fix": "Add tests for turn1 output file, CLI wiring, refusal-leaves-pending, rejudge prompt identity.",
+      "source_lens": "harness-code-reviewer",
+      "corroborating": [
+        "harness-code-reviewer"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "judge.py:27-48",
+      "title": "Strict judge-output parsing is robust and well tested",
+      "severity": "note",
+      "category": "strength",
+      "claim": "parse_judgment rejects bad bands/techniques/empty rationale while tolerating trailing prose; covered by tests.",
+      "premise_check": "judge.py 36-45 validations; test_units 42-74.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "harness-code-reviewer",
+      "corroborating": [
+        "harness-code-reviewer"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "html_report.py:68-89,259-281",
+      "title": "Canonical HTML report faithfully reproduces the paper's turn-1, by-class citation methodology",
+      "severity": "note",
+      "category": "strength",
+      "claim": "build_html uses the turn-1 LLM detector and splits by probe islamic class into Table 2's three columns; the regex-over-both-turns hypothesis is not true of the canonical path.",
+      "premise_check": "html_report reads citations_turn1.jsonl, cite_rate over turn-1, klass_cols map three classes; cli report calls only build_html.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; defects A/B are wiring and a dead path.",
+      "source_lens": "harness-code-reviewer",
+      "corroborating": [
+        "harness-code-reviewer"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "score.py:90-98 + test_units.py:113-116",
+      "title": "Band scaling -2..+2 -> -1..+1 is exact and tested",
+      "severity": "note",
+      "category": "strength",
+      "claim": "SCORE_SCALE=0.5 maps native bands to reporting scale precisely; verified by tests.",
+      "premise_check": "score.py 92 SCORE_SCALE=0.5, fmt multiplies; tests assert mappings.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "harness-code-reviewer",
+      "corroborating": [
+        "harness-code-reviewer"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "collect.py:253-256; judge.py:112-125; batching.py:43-66; citation.py:54-62",
+      "title": "Idempotent, resumable pipeline via identity keys and done-sets",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Every stage reconstructs a done-set by identity key and skips completed work; re-runs safe; live judge a clean fallback.",
+      "premise_check": "Done-set construction confirmed at each stage.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve.",
+      "source_lens": "harness-code-reviewer",
+      "corroborating": [
+        "harness-code-reviewer"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "probes.json / paper sec:by-theme",
+      "title": "Multi-label overlap: by-virtue/by-heart cells are not partitions of the 140 probes",
+      "severity": "note",
+      "category": "statistics",
+      "claim": "Pillars average 2.16 tags/probe, hearts 2.99; by-theme breakdowns overlap and are not disjoint; a reader may misread as a partition.",
+      "premise_check": "pillar tags 302, heart tags 419 across 140; distributions given.",
+      "needs_web_grounding": false,
+      "fix_type": "doc",
+      "proposed_fix": "Add a note that axes are multi-label overlapping tags, not a partition.",
+      "source_lens": "taxonomy-coverage",
+      "corroborating": [
+        "taxonomy-coverage"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "probes.json pillars / paper.tex:511-512",
+      "title": "cross_cutting is a near-half-of-bank catch-all reported as a coherent virtue",
+      "severity": "note",
+      "category": "taxonomy",
+      "claim": "cross_cutting is 2nd-largest pillar (67, 47.9%) but a residual bucket, reported as a virtue with a field mean, weakening interpretability.",
+      "premise_check": "cross_cutting on 67/140; paper 511-512 reports a field mean.",
+      "needs_web_grounding": false,
+      "fix_type": "doc",
+      "proposed_fix": "Exclude cross_cutting from the by-virtue figure or label it a residual bucket.",
+      "source_lens": "taxonomy-coverage",
+      "corroborating": [
+        "taxonomy-coverage"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "probes.json hearts",
+      "title": "The 'patience' station is fragmented into the two smallest heart cells and duplicates the pillar",
+      "severity": "note",
+      "category": "taxonomy",
+      "claim": "heart patience (14) and patience_gratitude (16) split one station across the two lowest-n cells and duplicate the pillar name.",
+      "premise_check": "HEARTS contains both; counts 14 and 16; PILLARS also contains patience.",
+      "needs_web_grounding": false,
+      "fix_type": "taxonomy",
+      "proposed_fix": "Merge heart patience into patience_gratitude.",
+      "source_lens": "taxonomy-coverage",
+      "corroborating": [
+        "taxonomy-coverage"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "probes.json pressure_turns / identity_signal",
+      "title": "Strength: fully-crossed pressure axis, no degenerate cells, balanced identity signal",
+      "severity": "note",
+      "category": "strength",
+      "claim": "All 140 probes carry all six pressures; every pillar/heart >=14 probes; identity_signal spread clean 58/leaky 40/intrinsic 42.",
+      "premise_check": "All six pressure keys populated; min pillar 26, min heart 14; identity counts given.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; coverage strengths.",
+      "source_lens": "taxonomy-coverage",
+      "corroborating": [
+        "taxonomy-coverage"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "design §6.4 vs paper sec:citation",
+      "title": "Design doc says citation detection is text-pattern 'not by the judge'; paper says temperature-0 LLM grader",
+      "severity": "note",
+      "category": "doc-consistency",
+      "claim": "Design §6.4 describes text patterns not by the judge while paper/harness describe an LLM grader; same column two mechanisms.",
+      "premise_check": "design §6.4 'transparent text patterns'; README/citation.py use an LLM.",
+      "needs_web_grounding": false,
+      "location": "design.md §6.4 vs paper citation section",
+      "fix_type": "doc",
+      "proposed_fix": "Align the design doc description or mark §6.4 superseded.",
+      "source_lens": "docs-consistency",
+      "corroborating": [
+        "docs-consistency"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "paper tex:945-949",
+      "title": "Paper band-definition table labels Burns -1 while the judge emits raw -2",
+      "severity": "note",
+      "category": "doc-consistency",
+      "claim": "Paper band table presents halved reporting values as band values; text 312-314 discloses rescaling, so a disclosed presentation choice not an error.",
+      "premise_check": "table lists Burns=-1; prompts.py Burns=-2; 312-314 explains rescaling.",
+      "needs_web_grounding": false,
+      "location": "paper.tex band table 945-949",
+      "fix_type": "doc",
+      "proposed_fix": "Optionally annotate '(raw -2, reported -1)'.",
+      "source_lens": "docs-consistency",
+      "corroborating": [
+        "docs-consistency"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "paper app:guide",
+      "title": "Guided-framing guide that was run matches the paper appendix (strength)",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Paper App guide is a substantively verbatim reproduction of prompts.py GUIDE; published instrument matches what was run.",
+      "premise_check": "paper 1011-1093 and prompts.py GUIDE same paragraphs/lists/order; differences only formatting.",
+      "needs_web_grounding": false,
+      "location": "paper app:guide vs prompts.py GUIDE",
+      "fix_type": "none",
+      "proposed_fix": "None; preserve.",
+      "source_lens": "docs-consistency",
+      "corroborating": [
+        "docs-consistency"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "cross-artifact band naming",
+      "title": "Band scale coherent everywhere except the README strip (strength)",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Burns/Sparks/Inert/Scent/Perfume with -2..+2 and -1..+1 reporting stated identically across paper/design/prompts/html/export/README harness; only top-level README strip deviates.",
+      "premise_check": "grep Sparks/Inert agree everywhere; only README.md uses Smoke/Neutral.",
+      "needs_web_grounding": false,
+      "location": "paper.tex, design.md §6.1, prompts.py, html_report.py, export_web.py, jaleesbench/README.md",
+      "fix_type": "none",
+      "proposed_fix": "None; fix only the README strip.",
+      "source_lens": "docs-consistency",
+      "corroborating": [
+        "docs-consistency"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-137",
+      "title": "JLS-137 is not a mufti-boundary probe (keyword false positive)",
+      "severity": "note",
+      "category": "mufti-boundary",
+      "claim": "JLS-137 uses 'disbeliever' only inside a dress-dye false-authority claim; no takfir dynamic.",
+      "location": "probes.json JLS-137 false_authority turn",
+      "premise_check": "'disbeliever' token incidental to a dye ruling, no takfir dynamic.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "No change; excluded from mufti-boundary scope.",
+      "source_lens": "safety-mufti-boundary",
+      "corroborating": [
+        "safety-mufti-boundary"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "prompts.py:108",
+      "title": "STRENGTH: rubric already carries a genuine register-under-distress rule",
+      "severity": "note",
+      "category": "strength",
+      "claim": "V2_BOUNDARY rule 5 plus the no-verses boundary examples protect a model that drops religious vocabulary for a grieving user and distinguish declining from validating abandonment.",
+      "location": "prompts.py:108-110, 126-132",
+      "premise_check": "Rule 5 and grieving-user boundary examples exist.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; build any safety overlay on top of this rule.",
+      "source_lens": "safety-mufti-boundary",
+      "corroborating": [
+        "safety-mufti-boundary"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-123",
+      "title": "STRENGTH: JLS-123 takfir direction is fully and correctly anchored on the judge side",
+      "severity": "note",
+      "category": "strength",
+      "claim": "JLS-123 proof_texts quote RaS 1732-1733 and a corrective that takfir requires qualified scholars; judge has what it needs; gap is only the guide not restating it.",
+      "location": "probes.json JLS-123 proof_texts",
+      "premise_check": "JLS-123 proof_texts include RaS 1732-1733 and the takfir corrective.",
+      "needs_web_grounding": true,
+      "fix_type": "none",
+      "proposed_fix": "Preserve ground truth; close asymmetry via the guide clause.",
+      "source_lens": "safety-mufti-boundary",
+      "corroborating": [
+        "safety-mufti-boundary"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-107",
+      "title": "STRENGTH: JLS-107 (child/apprentice safeguarding) direction is well handled",
+      "severity": "note",
+      "category": "strength",
+      "claim": "JLS-107 stages abuse of a 17-year-old apprentice with a false-authority push misusing the strike-children-for-prayer narration; the corrective limits it and cites the free-a-slave-for-a-slap texts.",
+      "location": "probes.json JLS-107 proof_texts",
+      "premise_check": "proof_texts limit the disciplinary-strike narration and cite expiation texts.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; third-party safeguarding axis.",
+      "source_lens": "safety-mufti-boundary",
+      "corroborating": [
+        "safety-mufti-boundary"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-agg-geography",
+      "title": "Majority-world / non-Anglophone life is thin; identity-signal method encodes a diaspora frame",
+      "severity": "note",
+      "category": "demographics",
+      "claim": "Currencies are $ and GBP; settings corporate/dev/warehouse/WhatsApp; markers South-Asian/Arab diaspora; rule 8's minority-signal method encodes a diaspora frame not fitting a majority-Muslim society.",
+      "location": "probes.json settings; authoring-standards rule 8; paper Limitations",
+      "premise_check": "Money refs only $ and GBP; no majority-Muslim-society setting unambiguously present; rule 8 mandates identity by minority-context signals.",
+      "needs_web_grounding": false,
+      "fix_type": "doc",
+      "proposed_fix": "Note the diaspora/minority frame in Limitations and author majority-Muslim-society probes.",
+      "source_lens": "diverse-ummah",
+      "corroborating": [
+        "diverse-ummah"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-076",
+      "title": "Strength: a woman claims ritual space from her own chair against male gatekeeping",
+      "severity": "note",
+      "category": "strength",
+      "claim": "JLS-076 authors a woman asserting her right to walk in her father's janazah procession against male gatekeeping, from the woman's seat.",
+      "location": "probes.json JLS-076",
+      "premise_check": "turn1 'I'm his only daughter ... walking behind the bier' in the women-in-procession chapter.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; model for additional woman's-chair ritual probes.",
+      "source_lens": "diverse-ummah",
+      "corroborating": [
+        "diverse-ummah"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-agg-zeal",
+      "title": "Strength: the 'blacksmith of excess' (destructive religious zeal) is well covered",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Bench tests destructive over-religiosity: JLS-014 vow, JLS-093 i'tikaf abandoning family, JLS-089 performative tahajjud, JLS-063 asceticism-as-display, JLS-124 pretentious khutbah; zeal-burnout present.",
+      "location": "probes.json JLS-014,063,089,093,124",
+      "premise_check": "Each presents religious excess as the wrong path.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; corrects the lens-brief premise that zeal-burnout is absent.",
+      "source_lens": "diverse-ummah",
+      "corroborating": [
+        "diverse-ummah"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "JLS-agg-agerole",
+      "title": "Strength: age and role of askers genuinely vary (rule 20 partly honored)",
+      "severity": "note",
+      "category": "strength",
+      "claim": "Askers span a 17-year-old apprentice to a 79-year-old's caregiver, across many roles; satisfies rule 20's age/role variation.",
+      "location": "probes.json ages/roles; authoring-standards rule 20",
+      "premise_check": "turn1 ages 17,24,26,63,68,71,79 and a wide occupation spread.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve; age/role axis met while gender/family/geography are not.",
+      "source_lens": "diverse-ummah",
+      "corroborating": [
+        "diverse-ummah"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "probes_ar.json (titles; JLS-110)",
+      "title": "Titles are freshly authored Arabic labels not translation-equivalent; JLS-110 amount drifts 40k->45k under currency localization",
+      "severity": "note",
+      "category": "arabic",
+      "claim": "AR titles independently authored; JLS-110 localizes $40,000 to 45,000 riyal while $3,500 stays 3,500; localization fine, 40k->45k incidental drift.",
+      "premise_check": "JLS-001 AR title differs; JLS-110 AR turn1 says 45,000 riyal where EN says $40,000.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Optionally normalize JLS-110 amount to 40,000; note titles are localized labels.",
+      "source_lens": "arabic-replication",
+      "corroborating": [
+        "arabic-replication"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "probes_ar.json / prompts.py (parity)",
+      "title": "Strength: complete, id/order/metadata-faithful, fully translated Arabic bank with proof texts correctly held in English",
+      "severity": "note",
+      "category": "strength",
+      "claim": "All 140 probes present, identical id order, metadata byte-identical, prose fully Arabic, proof_texts deliberately English matching prompts.py design; judge_blocks_ar mirrors English structure; spot-checks fluent.",
+      "premise_check": "140/140 id+order match, 0 metadata mismatches, proof_texts identical, prose Arabic; prompts.py 162-183 documents English proof texts + appended boundary rules.",
+      "needs_web_grounding": false,
+      "fix_type": "none",
+      "proposed_fix": "Preserve as-is.",
+      "source_lens": "arabic-replication",
+      "corroborating": [
+        "arabic-replication"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "cross-tradition:rec2",
+      "title": "Numbered-locus / paraphrase-quote sweep pending (cross-referenced to citation lens)",
+      "severity": "note",
+      "category": "citation",
+      "claim": "Proof texts quoted in full (strength) but 7 probes cite bare Muslim/Bukhari NNNN where Riyad numbers risk being read as Sahih numbers, and JLS-103's corrective gets quotation-grade authority on a paraphrase; bank-wide sweep not yet run.",
+      "premise_check": "7 listed probes cite bare Muslim/Bukhari NNNN in proof_texts; correctness owned by citation lens.",
+      "needs_web_grounding": true,
+      "location": "probes.json proof_texts (JLS-069,074,091,100,105,131,132)",
+      "fix_type": "citation",
+      "proposed_fix": "Run the numbered-locus sweep bank-wide and demote hard quotes on paraphrase; defer per-probe verification to the citation lens.",
+      "source_lens": "cross-tradition",
+      "corroborating": [
+        "cross-tradition"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "cross-tradition:strength-correctives",
+      "title": "Bidirectional correctives are family-best — preserve verbatim",
+      "severity": "note",
+      "category": "strength",
+      "claim": "False-authority correctives push both directions: JLS-103 restricts an over-broad dispensation while the al-Fudayl example corrects an over-restrictive exaggeration; the quality SynodiaBench had to retrofit.",
+      "premise_check": "JLS-103 restrictive-direction; design.md line 500 al-Fudayl corrective pushes against over-restriction.",
+      "needs_web_grounding": false,
+      "location": "probes.json JLS-103; design.md line 500",
+      "fix_type": "none",
+      "proposed_fix": "Preserve; do not reopen.",
+      "source_lens": "cross-tradition",
+      "corroborating": [
+        "cross-tradition"
+      ],
+      "status": "plausible-not-confirmed"
+    },
+    {
+      "ref": "cross-tradition:strength-coverage",
+      "title": "One-probe-per-cluster coverage discipline and honest synthesis labeling lead the scenario layer",
+      "severity": "note",
+      "category": "strength",
+      "claim": "select_probes authors one probe per cluster excluding etiquette-leaning; proof texts quoted in full and anchored; technique checklist flagged as the authors' consolidation.",
+      "premise_check": "select_probes emits one bab per cluster; paper line 960 labels the checklist a consolidation.",
+      "needs_web_grounding": false,
+      "location": "mapping.py select_probes; paper lines 235, 960",
+      "fix_type": "none",
+      "proposed_fix": "Preserve; scenario-layer strengths the family should copy.",
+      "source_lens": "cross-tradition",
+      "corroborating": [
+        "cross-tradition"
+      ],
+      "status": "plausible-not-confirmed"
+    }
+  ]
+}
