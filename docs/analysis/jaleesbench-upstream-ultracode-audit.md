@@ -20,6 +20,27 @@ providers, collect, batching), the **design & authoring docs**, the **Arabic rep
 real repo — rather than the port — is what surfaces the paper-, code-, and reproducibility-level
 findings below. Machine-readable artifacts are in [`jaleesbench-upstream-audit/`](./jaleesbench-upstream-audit/).
 
+## Corrections (2026-07-19 cross-verification)
+
+On 2026-07-19 the **taqwabench architect** ran an independent 8-agent cross-verification of this
+catalogue against the *current* upstream jaleesbench repo. Four corrections came back and are applied
+in place below, so the trail is explicit rather than silent; the machine-readable record in
+[`jaleesbench-upstream-audit/`](./jaleesbench-upstream-audit/) is a frozen audit artifact and is
+deliberately left unchanged:
+
+- **F016 (§3)** — this catalogue's "the true exclusion count is three" was **wrong**. The correct
+  account: 140 shipped probes = 139 cluster-derived probes + **JLS-140**, which was authored off the
+  cluster map from bab 370, so the paper's "four etiquette-only clusters excluded" is arithmetically
+  fine. The real gap is the undocumented off-map provenance of JLS-140 (and the design doc's stale 139).
+- **F048 (§8 and the executive seams table)** — "~20:4 wife/husband asker skew" was inverted/ambiguous
+  wording. The data: 20 probes say "my wife" vs 4 "my husband", i.e. a ~20:4 **male-vs-female-marked
+  asker** skew. The finding itself (male-default skew, undisclosed) stands.
+- **F030 (§4)** — "silently dropped" overstated the consequence: failed judge cells print and stay
+  pending, and either judge can drop a cell. The operative defects are the `judge_all` exit-code gap
+  (F031) and `build_report` not counting the drops.
+- **F021 (§3)** — stale/overtaken: the current upstream 10-subject run is fully dual-judged. The
+  40,311-vs-40,320 discrepancy stands only as a record of the audited snapshot.
+
 ## How it was run
 
 The upstream repo was cloned read-only and audited with three chained workflows plus in-loop synthesis,
@@ -92,7 +113,7 @@ code-level ones the port audit could not see:**
 | **Paper ↔ code ↔ released-data drift** | An off-by-one in the headline construction math, a released `commentary.json` that disagrees with the paper's tables, an inter-judge-agreement statistic computed on a re-judged overlay, a COI paragraph that omits the #1 system, and bootstrap CIs claimed but not in the released code. |
 | **Reproducibility** | The harness hardcodes the authors' local env paths and private endpoints; the documented CLI cannot generate the file the report's citation table needs (renders blank); the Arabic replication's prompt scaffolding is not shipped, so the entire Arabic path throws. |
 | **Taxonomy fidelity** | The operational `hearts` enum is not al-Ghazālī's ten munjiyāt (it drops three, splits two, and adds a bare `patience` duplicating the pillar), yet the paper labels the tagged axis "al-Ghazālī's stations." |
-| **Undisclosed demographic default** | ~20:4 wife/husband asker skew, named characters homogeneously male and Arab/South-Asian-coded, zero converts across 140 probes. |
+| **Undisclosed demographic default** | ~20:4 male-vs-female-marked asker skew (20 probes say "my wife" vs 4 "my husband"), named characters homogeneously male and Arab/South-Asian-coded, zero converts across 140 probes. |
 
 ## Confirmed & refined findings
 
@@ -143,11 +164,16 @@ collection numbers.
 
 ### 3. The paper — statistics & internal consistency
 
-- **Headline construction arithmetic is off by one (F016, confirmed).** §clustering says "140 probes …
-  from 143 clusters (four etiquette-only clusters excluded)" — but 143 − 4 = **139**, and the shipped
-  bank is **140**. The design doc and `docs/jaleesbench-probe-bank.md` both still say 139. The true
-  exclusion count is **three**, and "etiquette-only" should read "etiquette-*leaning*" (the chapter map
-  defines the excluded clusters as *majority*-etiquette) (F020).
+- **Headline construction arithmetic — provenance gap, not an off-by-one (F016, corrected 2026-07-19).**
+  §clustering says "140 probes … from 143 clusters (four etiquette-only clusters excluded)", and
+  143 − 4 = **139** — which is exactly the number of *cluster-derived* probes. The shipped bank is 140
+  because **JLS-140 was authored off the cluster map**, from bab 370 (verified:
+  `scenarios/JLS-140/scenario.yaml` carries `source_locus: 370`), so the paper's four-cluster exclusion
+  is arithmetically fine. *(This catalogue originally concluded "the true exclusion count is three" —
+  that was wrong; corrected by the taqwabench cross-verification.)* The real gap is **provenance**:
+  neither the paper nor the design doc documents JLS-140's off-map origin, and the design doc's /
+  `docs/jaleesbench-probe-bank.md`'s "139" is stale. "Etiquette-only" should still read
+  "etiquette-*leaning*" (the chapter map defines the excluded clusters as *majority*-etiquette) (F020).
 - **The released `commentary.json` disagrees with the paper's tables beyond rounding (F017, confirmed):**
   691 polarizing cells vs 320, a flipped subject ranking, Ansari +0.74 vs +0.75, and 40,320 vs 40,311
   dual-judged cells. Regenerate the narrative from the run the paper reports.
@@ -169,9 +195,12 @@ collection numbers.
   reports probe-cluster bootstrap 95% CIs "for every reported quantity" and says the full set "ships with
   the reproducibility artifact," but there is no bootstrap/resample anywhere in the harness, and
   `html_report.py` prints "no confidence intervals yet." Release the interval code or soften the claim.
-- **Minor, confirmed:** "40,320 dual-judged cells / every cell scored by both judges" overstates by the
-  9 single-judge cells (8 Gemini safety-refusals, 1 Opus omission) — the true base is 40,311, and
-  Limitations is silent on it (F021/F026); no multiplicity/FDR adjustment is noted across the many
+- **Minor, confirmed — now stale (F021):** "40,320 dual-judged cells / every cell scored by both judges"
+  overstated by the 9 single-judge cells (8 Gemini safety-refusals, 1 Opus omission) in the audited
+  snapshot — there the true base was 40,311, and Limitations was silent on it (F021/F026). *(Stale /
+  overtaken as of the 2026-07-19 cross-verification: the current upstream 10-subject run is fully
+  dual-judged; the finding stands only as a historical record of the audited snapshot.)* No
+  multiplicity/FDR adjustment is noted across the many
   reported per-cell comparisons (F025); and the by-theme "best" claims (repentance n=15, patience-pillar
   n=36) rest on the thinnest cells while the "worst" cells are well-powered — report per-cell n inline
   (F033/F034/F035).
@@ -200,9 +229,12 @@ collection numbers.
   so the harness is not runnable as released; raw responses/judgments are not published; and it collects
   a 9th subject (`claude-opus-4-8`) the paper's "eight subjects" omits.
 - **Judge-side safety asymmetry (F030, revise):** the Gemini judge runs `safety_off=True` but the
-  Anthropic judge has no analogue, so a Claude-judge refusal on a benign-but-sensitive cell is silently
-  dropped (only the Gemini judge remains) — and `judge_all` exits 0 on partial failure while `collect`
-  exits 1 (F031). Report per-judge coverage and make partial judging exit non-zero.
+  Anthropic judge has no analogue, so a Claude-judge refusal on a benign-but-sensitive cell can leave
+  that cell single-judged — a drop either judge can in fact produce. It is not *silent* at judge time:
+  per the verification verdict (refined) and the taqwabench re-check, failed cells print an error and
+  stay pending for re-runs. The operative defects are downstream — `judge_all` exits 0 on partial
+  failure while `collect` exits 1 (F031), and `build_report` never counts the dropped cells. Report
+  per-judge coverage and make partial judging exit non-zero.
 
 ### 5. Taxonomy fidelity
 
@@ -253,7 +285,8 @@ collection numbers.
   unstaged as a measured axis. Proposed: a **`wasaṭiyya`** axis (Q2:143; *halaka al-mutanaṭṭiʿūn*) with
   `against_laxity` (tafrīṭ) / `against_excess` (ghuluww) / `balanced`, disclosed honestly and rebalanced
   **only by authoring** (never re-tagging) — see § Proposed scenarios.
-- **Demographics (F048/F052, serious/minor):** ~20:4 wife/husband asker skew, undisclosed in Limitations;
+- **Demographics (F048/F052, serious/minor):** ~20:4 male-vs-female-marked asker skew (20 probes say
+  "my wife" vs 4 "my husband"), undisclosed in Limitations;
   named characters homogeneously male and Arab/Urdu-coded. Additive fix: disclose + author.
 - **Absent construct territory (F049/F050/F051, revise):** the convert with a non-Muslim family;
   anti-Muslim hostility / visible practice at work; women's *embodied* ritual fiqh from a woman's own
