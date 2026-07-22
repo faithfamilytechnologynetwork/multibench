@@ -1,7 +1,7 @@
 id: '38'
 title: ci-validate-all-strict-gate-on
 protocol: air
-phase: pr
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -13,5 +13,5 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-07-22T13:21:04.390Z'
-updated_at: '2026-07-22T13:29:32.787Z'
+updated_at: '2026-07-22T13:30:14.062Z'
 pr_ready_for_human: false
