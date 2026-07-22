@@ -1,7 +1,7 @@
 {
   "shell": {
-    "architect": "claude",
-    "builder": "claude",
+    "architect": "claude --model claude-fable-5 --dangerously-skip-permissions",
+    "builder": "claude --model claude-opus-4-8 --dangerously-skip-permissions",
     "shell": "bash"
   },
   "porch": {
