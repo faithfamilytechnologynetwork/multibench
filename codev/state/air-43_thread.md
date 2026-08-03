@@ -57,8 +57,32 @@ All 3 PASS. Command: `pytest workflows/judging -m live --live -k openrouter -s`.
   would hit the same — reuse this sanitization if you batch Gemini (you likely won't; Gemini isn't batched).
 - Opus slug confirmed: `anthropic/claude-opus-4.8` (DOT) works live via OpenRouter.
 
+## Integration review (REQUEST_CHANGES) — ADDRESSED (commit 37331b6)
+1. `_openai_judge` honors judge.thinking (forwards OpenRouter `reasoning.enabled` via extra_body —
+   OR infers from model default if omitted, so set explicitly) + judge.safety_off (raises loudly;
+   OR has NO Google safety passthrough). Funded config: Gemini judge -> DIRECT gemini + safety_off.
+2. PRICES corrected vs live models API: terra 1.00/6.00, qwen 0.15/0.60, inkling 1.00/4.05;
+   sonnet basis documented; case-dup {I,i}nkling now identical rate + commented.
+3. _openai_usage: honest cache-WRITE understatement note (writes billed 2x land in `in` at 1x);
+   removed the _usage_cost parity claim.
+
+## Re-run smoke evidence (after reasoning change; numbers only)
+- Subject qwen: text='ok', priced. Gemini judge (openai path): score=1.0 in=2588 out=527.
+- Opus cache: first in=4146 (WRITE), second in=347 cache_read=3799 (READ) — shows write->read AND
+  the understatement (3799 write toks in `in` @1x). Opus out rose to 630/673 (reasoning now ON).
+
+## ⚠️ ARCHITECT DECISION PENDING (flagged in PR): Gemini judge routing
+OpenRouter can't forward Google safety_settings; Gemini judge needs safety-off (§5.5). Funded config
+defaults to DIRECT gemini provider (safety-off, bills GEMINI_API_KEY not OpenRouter key). Alternatives:
+(a) safety-ON Gemini via OpenRouter (refusal risk), (b) drop Gemini judge. Defaulted to spec-correct.
+
+## FOR ASPIR-44 (batch) — updated
+- `_openai_judge_content` + `_to_gemini_schema` are module-level/importable — reuse for batch bodies.
+  Google needs the schema sanitize (string-enum) + safety-off is NOT forwardable via OpenRouter.
+- Reasoning must be set EXPLICITLY in batch bodies too (`reasoning.enabled`), else model-default.
+- Cache WRITE tokens not surfaced on OpenRouter openai-compat usage — your batch cache evidence should
+  rely on cache_read (proven >0 live).
+
 ## Status — PR OPEN, at PR gate (awaiting human approval)
-- **PR #45**: https://github.com/faithfamilytechnologynetwork/multibench/pull/45 (review in body + smoke numbers).
-- All scope + tests + live smokes DONE. Default suite: 180 pass, 9 skipped. porch check: PASSED.
-- porch phase: `pr` -> `GATE REQUIRED: pr`. STOPPED, waiting for human approval (will NOT self-approve).
-- Do NOT merge / porch approve until architect says so.
+- **PR #45**: https://github.com/faithfamilytechnologynetwork/multibench/pull/45 (body updated w/ review responses).
+- Suite: 182 pass, 9 skipped. porch check: PASSED. Still at GATE: pr — STOPPED, will NOT self-approve.
