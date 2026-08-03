@@ -1,7 +1,7 @@
 id: '46'
 title: multibrowser-show-scenario-cat
 protocol: air
-phase: implement
+phase: pr
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -11,4 +11,4 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-03T23:40:57.560Z'
-updated_at: '2026-08-03T23:40:57.561Z'
+updated_at: '2026-08-03T23:49:49.187Z'
