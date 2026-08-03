@@ -380,6 +380,84 @@ def test_openai_usage_splits_cached_prompt_tokens():
     assert _openai_usage(resp2) == {"in": 120, "out": 45}
 
 
+def _fake_openai_returning(captured, content_json):
+    """A fake OpenAI client whose chat.completions.create captures kwargs and returns a canned
+    JSON verdict — lets us assert the request the judge builds without a live call."""
+    from types import SimpleNamespace
+
+    class FakeCompletions:
+        def create(self, **kwargs):
+            captured.update(kwargs)
+            msg = SimpleNamespace(content=content_json)
+            return SimpleNamespace(
+                choices=[SimpleNamespace(message=msg)],
+                usage=SimpleNamespace(
+                    prompt_tokens=100, completion_tokens=20, prompt_tokens_details=None
+                ),
+            )
+
+    class FakeChat:
+        completions = FakeCompletions()
+
+    class FakeOpenAI:
+        def __init__(self, **kwargs):
+            self.chat = FakeChat()
+
+    return FakeOpenAI
+
+
+def test_openai_judge_google_slug_sanitizes_schema_and_casts_score(monkeypatch):
+    # Regression for the live failure: Google (even via OpenRouter) rejects our NUMERIC `score` enum
+    # and `additionalProperties`. For google/* the judge must sanitize the schema (string-enum, drop
+    # unsupported keys) and drop OpenAI-`strict`, then cast the returned string score back to float.
+    import openai
+
+    from judging.rubric import verdict_schema
+
+    captured: dict = {}
+    monkeypatch.setenv("OPENROUTER_API_KEY", "x")
+    monkeypatch.setattr(
+        openai, "OpenAI",
+        _fake_openai_returning(captured, '{"score": "0.5", "direction": "d", "rationale": "r"}'),
+    )
+    judge = JudgeSpec(
+        "google/gemini-3.6-flash", "openai",
+        base_url="https://openrouter.ai/api/v1", api_key_env="OPENROUTER_API_KEY",
+    )
+    verdict, _, _ = judge_complete(judge, ("R", "A", "T"), verdict_schema(), retries=0)
+    assert verdict["score"] == 0.5 and isinstance(verdict["score"], float)  # string -> float cast
+    js = captured["response_format"]["json_schema"]
+    assert js["strict"] is False  # google enforces via its own responseSchema; OpenAI-strict dropped
+    score = js["schema"]["properties"]["score"]
+    assert score["type"] == "string" and all(isinstance(v, str) for v in score["enum"])
+    assert "additionalProperties" not in js["schema"]  # dropped for google
+
+
+def test_openai_judge_non_google_uses_raw_strict_schema(monkeypatch):
+    # anthropic/* (and openai/*) via OpenRouter accept the raw numeric-enum schema with OpenAI-strict
+    # enforcement (verified live for Opus) — no sanitization, score stays numeric.
+    import openai
+
+    from judging.rubric import verdict_schema
+
+    captured: dict = {}
+    monkeypatch.setenv("OPENROUTER_API_KEY", "x")
+    monkeypatch.setattr(
+        openai, "OpenAI",
+        _fake_openai_returning(captured, '{"score": 0.5, "direction": "d", "rationale": "r"}'),
+    )
+    judge = JudgeSpec(
+        "anthropic/claude-opus-4.8", "openai",
+        base_url="https://openrouter.ai/api/v1", api_key_env="OPENROUTER_API_KEY",
+    )
+    verdict, _, _ = judge_complete(judge, ("R", "A", "T"), verdict_schema(), retries=0)
+    assert verdict["score"] == 0.5
+    js = captured["response_format"]["json_schema"]
+    assert js["strict"] is True
+    assert js["schema"]["properties"]["score"]["type"] == "number"  # raw numeric enum, unmodified
+    assert js["schema"]["additionalProperties"] is False  # kept for anthropic/openai
+
+
 # --- HTTP timeouts on all live provider calls (issue #43 §4) ------------------
 # Motivated by a live incident: a collection wedged 2+ hours on dead sockets (CLOSE_WAIT) because
 # provider calls had no client timeout. Every live client is now built with an explicit timeout, and

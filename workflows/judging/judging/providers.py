@@ -346,21 +346,35 @@ def _openai_judge(
     # OpenAI proper wants `max_completion_tokens`; OpenAI-*compatible* hosts (base_url set, e.g.
     # OpenRouter) take legacy `max_tokens` — mirror the subject seam's host split.
     tok_kwarg = "max_tokens" if judge.base_url else "max_completion_tokens"
+    # Google's structured-output parser (even routed through OpenRouter) rejects JSON-Schema that
+    # Anthropic/OpenAI accept: `enum` is allowed only on STRING types and `additionalProperties` is
+    # rejected. Our canonical `score` enum is numeric, so a raw schema fails with "required requires
+    # unspecified property 'score'" (verified live). Reuse the native Gemini sanitizer (string-enum +
+    # drop unsupported keys) for google/* and cast the string score back to float; other backends take
+    # the raw schema with OpenAI-`strict` enforcement (Opus via OpenRouter verified live).
+    is_google = judge.model.startswith("google/")
+    req_schema = _to_gemini_schema(schema) if is_google else schema
+    response_format = {
+        "type": "json_schema",
+        "json_schema": {"name": "verdict", "schema": req_schema, "strict": not is_google},
+    }
 
     def call() -> tuple[dict, str, dict]:
         resp = client.chat.completions.create(
             model=judge.model,
             messages=[{"role": "user", "content": content}],
-            response_format={
-                "type": "json_schema",
-                "json_schema": {"name": "verdict", "strict": True, "schema": schema},
-            },
+            response_format=response_format,
             **{tok_kwarg: judge.max_tokens},
         )
         text = (resp.choices[0].message.content or "").strip()
         if not text:
             raise RuntimeError("empty judge response")
-        return json.loads(text), text, _openai_usage(resp)
+        verdict = json.loads(text)
+        # google/* returns `score` as a string enum member ("0.5") — restore the numeric type the
+        # rest of the pipeline (parse_verdict -> validate_score) expects, mirroring _gemini_judge.
+        if is_google and isinstance(verdict.get("score"), str):
+            verdict["score"] = float(verdict["score"])
+        return verdict, text, _openai_usage(resp)
 
     return _retry(call, retries)
 
