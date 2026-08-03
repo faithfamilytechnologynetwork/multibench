@@ -1,7 +1,7 @@
 id: '43'
 title: openrouter-migration-upgradeab
 protocol: air
-phase: pr
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -13,5 +13,5 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-03T18:19:15.134Z'
-updated_at: '2026-08-03T19:22:29.206Z'
+updated_at: '2026-08-03T19:23:05.565Z'
 pr_ready_for_human: false
