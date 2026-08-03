@@ -1,0 +1,56 @@
+# Funded-run configuration — subjects + the Opus judge on the pre-funded OpenRouter key (issue #43).
+#
+# Provider path: the generic OpenAI-chat-completions seam (#41), pointed at OpenRouter — no new
+# provider code: `provider: openai` + `base_url` + `api_key_env`.
+#
+#   env: OPENROUTER_API_KEY   (fail-fast if missing — no fallback, baked decision)
+#   base_url: https://openrouter.ai/api/v1
+#
+# Prices are the CURRENT OpenRouter-BILLED rates from the live models API (openrouter.ai/api/v1/models,
+# 2026-08-03), cited per-slug in report.py PRICES. OpenRouter forwards Anthropic prompt-cache READS
+# (priced 0.1x); the judge path sends the two 1h cache_control breakpoints (static rubric + per-scenario
+# anchor) so Opus judging is not billed full input price on re-reads. Cache WRITES are under-reported on
+# this path (see the _openai_usage note) — cost lines are a funded-run ESTIMATE, not invoice-exact.
+# OpenAI/Gemini auto-cache on their own.
+#
+# GEMINI JUDGE — on OpenRouter, SAFETY ON (user decision 2026-08-03). OpenRouter exposes no Google
+# safety-settings passthrough, so BLOCK_NONE can't be forwarded; rather than route the judge off the
+# funded key, the user chose to run it safety-ON through OpenRouter to maximize spend on the funded key
+# (see the per-judge comment for the §5.5 deviation + the refusal-handling plan). This is the single
+# judge for the run — Opus was dropped as a judge (user decision 2026-08-03).
+#
+# Serving-host routing / pinning: OpenRouter routes to an available host by default. For Qwen the
+# effective rate is HOST-DEPENDENT (0.15/0.60 is the models-API top-level default on 2026-08-03).
+# Deterministic host pinning is NOT expressible in the current config schema (no provider-routing field)
+# — a small follow-up if the funded run needs a fixed host, out of scope for #43.
+#
+# CROSS-RUN COMPARABILITY: report/cost keys are the OpenRouter SLUGS (e.g. `anthropic/claude-opus-4.8`,
+# `openai/gpt-5.6-terra`), which differ from direct-provider model strings (`claude-opus-4-8`,
+# `gpt-5.6-terra`). Reports from this run key subjects/judges by slug — don't expect row-key identity
+# with earlier direct-provider runs when diffing report.json.
+#
+# The batch judging path (OpenRouter Batch API, ~50% off) is issue #44 — NOT configured here.
+
+subjects:
+  # GPT-5.6 Terra — current billed 1.00/6.00 (50%-off promo; standard 2.00/12.00).
+  - {model: openai/gpt-5.6-terra, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Claude Sonnet 5 — current billed 2.00/10.00 (intro; standard 3.00/15.00).
+  - {model: anthropic/claude-sonnet-5, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Gemini 3.6 Flash — 1.50/7.50.
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Qwen3-235B-A22B-Instruct-2507 — 0.15/0.60 (routed-host default; host-dependent).
+  - {model: qwen/qwen3-235b-a22b-2507, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Inkling — 1.00/4.05. It IS on OpenRouter (contrary to the issue's "may not be"), so it routes
+  # through the funded key too rather than the direct Tinker provider.
+  - {model: thinkingmachines/inkling, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+
+judges:
+  # Gemini 3.6 Flash judge — via OpenRouter (openai-compat path), thinking ON (reasoning forwarded).
+  # safety_off is EXPLICIT false: safety-ON is a user-decided deviation from spec §5.5 (2026-08-03) to
+  # keep judging on the funded key; refusals surface as failed cells — count and review post-run,
+  # backfill via direct Gemini only if material. (The openai path fails loud if safety_off were true,
+  # since OpenRouter can't forward Google BLOCK_NONE — hence the explicit false.)
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, safety_off: false}
+
+# Full framings sweep (the funded run's "framings expansion") — unstated / stated / guided.
+framings: [unstated, stated, guided]

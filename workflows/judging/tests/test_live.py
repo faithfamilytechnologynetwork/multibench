@@ -200,3 +200,78 @@ def test_live_gemini_subject_smoke():
     text, usage, attempts = subject_complete(subject, None, _SMOKE_TURN, 2)
     assert text.strip(), "empty completion from Gemini subject"
     assert usage.get("in", 0) > 0, f"no usage reported: {usage}"
+
+
+# --- issue #43: live smokes for the OpenRouter live judge path ----------------
+# Real completions through OpenRouter via the generic openai-compatible seam. Skip cleanly without
+# OPENROUTER_API_KEY (N4). Run before the funded run (paste output in the PR):
+#   OPENROUTER_API_KEY=... uv --project workflows/judging run pytest workflows/judging -m live \
+#     --live -k openrouter -s
+
+_OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+_HAS_OPENROUTER = bool(os.environ.get("OPENROUTER_API_KEY"))
+
+
+@pytest.mark.skipif(not _HAS_OPENROUTER, reason="no OPENROUTER_API_KEY")
+def test_live_openrouter_subject_smoke():
+    """issue #43: a subject completion through OpenRouter (openai-compatible seam) — real text +
+    priced usage. Default is a cheap slug; override via OPENROUTER_SMOKE_MODEL."""
+    from judging.providers import subject_complete
+
+    subject = SubjectSpec(
+        model=os.environ.get("OPENROUTER_SMOKE_MODEL", "qwen/qwen3-235b-a22b-2507"),
+        provider="openai",
+        base_url=_OPENROUTER_BASE_URL,
+        api_key_env="OPENROUTER_API_KEY",
+    )
+    text, usage, attempts = subject_complete(subject, None, _SMOKE_TURN, 2)
+    print(f"\n[openrouter subject smoke] text={text!r} usage={usage} attempts={attempts}")
+    assert text.strip(), "empty completion from OpenRouter subject"
+    assert usage.get("in", 0) > 0 and usage.get("out", 0) > 0, f"no usage reported: {usage}"
+
+
+@pytest.mark.skipif(not _HAS_OPENROUTER, reason="no OPENROUTER_API_KEY")
+def test_live_openrouter_gemini_judge_smoke(sunni):
+    """issue #43 (REQUIRED smoke): google/gemini-3.6-flash as a JUDGE through the openai-compatible
+    path (OpenRouter). One real scenario; the verdict must parse to a canonical score, usage priced."""
+    from judging.providers import judge_complete
+
+    judge = JudgeSpec(
+        model=os.environ.get("OPENROUTER_JUDGE_SMOKE_MODEL", "google/gemini-3.6-flash"),
+        provider="openai",
+        base_url=_OPENROUTER_BASE_URL,
+        api_key_env="OPENROUTER_API_KEY",
+    )
+    trad = load_tradition(sunni)
+    scen = load_scenario(sunni, trad.scenario_ids[0])
+    parts = judge_prompt_parts(trad, scen, _TURNS, "full")
+    raw, text, usage = judge_complete(judge, parts, verdict_schema(), 2)
+    verdict = parse_verdict(raw)  # canonical five-value score or raises
+    print(f"\n[openrouter gemini judge smoke] verdict={verdict} usage={usage}")
+    assert verdict["score"] in (-1.0, -0.5, 0.0, 0.5, 1.0)
+    assert usage.get("in", 0) > 0, f"no usage reported: {usage}"
+
+
+@pytest.mark.skipif(not _HAS_OPENROUTER, reason="no OPENROUTER_API_KEY")
+def test_live_openrouter_opus_judge_forwards_cache(sunni):
+    """issue #43 §3: Opus judging through OpenRouter forwards Anthropic prompt caching — a second
+    judge call sharing the cached rubric+anchor prefix reports cache_read > 0. De-risks #44 (batch)
+    by proving the cache_control forwarding works on the LIVE path first. (If caching does NOT
+    survive here, that is the STOP-and-report signal for the cost math.)"""
+    from judging.providers import judge_complete
+
+    judge = JudgeSpec(
+        model="anthropic/claude-opus-4.8",
+        provider="openai",
+        base_url=_OPENROUTER_BASE_URL,
+        api_key_env="OPENROUTER_API_KEY",
+    )
+    trad = load_tradition(sunni)
+    scen = load_scenario(sunni, trad.scenario_ids[0])
+    parts = judge_prompt_parts(trad, scen, _TURNS, "full")
+    _, _, first = judge_complete(judge, parts, verdict_schema(), 2)  # writes cache
+    _, _, second = judge_complete(judge, parts, verdict_schema(), 2)  # should read it back
+    print(f"\n[openrouter opus cache smoke] first={first} second={second}")
+    assert second.get("cache_read", 0) > 0, (
+        f"no cache hit through OpenRouter on the live path; usage={second}"
+    )

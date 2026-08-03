@@ -27,7 +27,7 @@ _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 # Rates verified 2026-08-02 against each provider's official pricing page; see the PR for #41
 # for the citation of every new entry. Two entries are flagged UNVERIFIED (no first-party rate
 # found) — confirm on the provider console before trusting their cost lines.
-PRICES_DATED = "2026-08-03 (verified vs. official pages; Inkling/Tinker + Qwen/Friendli per architect host decisions)"
+PRICES_DATED = "2026-08-03 (verified vs. official pages; Inkling/Tinker + Qwen/Friendli per architect host decisions; OpenRouter slugs vs. openrouter.ai model pages, issue #43)"
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (5.00, 25.00),
     "claude-sonnet-5": (3.00, 15.00),  # standard rate; intro $2/$10 through 2026-08-31
@@ -45,6 +45,24 @@ PRICES: dict[str, tuple[float, float]] = {
     # Qwen3-235B on Friendli serverless (FRIENDLI_API_KEY) — paper's serving host + exact checkpoint.
     # NOTE: Friendli flags this checkpoint for deprecation 2026-08-05 — confirm still live at run time.
     "Qwen/Qwen3-235B-A22B-Instruct-2507": (0.20, 0.80),  # friendli.ai/pricing (api/public/model-apis)
+    # --- issue #43: OpenRouter slugs (funded run). Rates are the CURRENT OpenRouter-BILLED price from
+    # the live models API (openrouter.ai/api/v1/models, 2026-08-03) — costs must reflect the invoice,
+    # not list. OpenRouter forwards Anthropic prompt-cache READS (priced 0.1x by _usage_cost); cache
+    # WRITES are under-reported on this path (see the _openai_usage understatement note — not invoice-
+    # exact). Keyed by the EXACT slug the run config sends; the live smokes confirm each resolves. ---
+    "anthropic/claude-opus-4.8": (5.00, 25.00),  # models API (Opus judge)
+    # Current OpenRouter-billed (intro) rate; standard 3/15 resumes after the intro window. NB the basis
+    # differs deliberately from the direct `claude-sonnet-5` entry above, which is keyed to the STANDARD
+    # rate for direct-provider runs — the OpenRouter block is invoice-basis, direct entries are list-basis.
+    "anthropic/claude-sonnet-5": (2.00, 10.00),  # models API (current billed / intro)
+    "google/gemini-3.6-flash": (1.50, 7.50),  # models API (subject + Gemini-judge smoke)
+    "openai/gpt-5.6-terra": (1.00, 6.00),  # models API: current billed (50%-off promo); standard 2.00/12.00
+    "qwen/qwen3-235b-a22b-2507": (0.15, 0.60),  # models API top-level (0.1495/0.598 rounded; routed-host default)
+    # Inkling on OpenRouter (LOWERCASE slug). Same MODEL as the direct-Tinker `thinkingmachines/Inkling`
+    # entry above (capital I) and — per the models API on 2026-08-03 — the SAME rate, so the case-only
+    # key difference cannot cause wrong-host mispricing here. The two keys are the two host spellings,
+    # kept intentionally; revisit if the rates ever diverge.
+    "thinkingmachines/inkling": (1.00, 4.05),  # models API
 }
 
 
