@@ -41,6 +41,12 @@ Protocol: AIR (strict). Issue #43 (amended 2026-08-03).
 - cache_control survives openai SDK RUNTIME transform (`maybe_transform`) even though the stricter TypeAdapter strips it — anti-mock test asserts both paths.
 
 ## Status
-- Code + tests DONE. 178 pass, 6 skipped (pre-existing live tests). Committing.
-- BLOCKER for PR: live smokes (subject via OpenRouter + Gemini judge live) need OPENROUTER_API_KEY (not in env) — will ask architect.
-- OPEN RISK to confirm in smoke: (a) exact opus slug dot vs hyphen; (b) response_format json_schema strict + numeric `score` enum through OpenRouter/Gemini.
+- Code + tests + live-smoke harness DONE and committed (2 commits: feat 67d252f, test dcb47b1).
+- Default suite: 178 pass, 9 skipped (6 pre-existing + 3 new OpenRouter live smokes, skip w/o key).
+- porch check 43: PASSED (dispatcher ran workflows/judging pytest).
+- BLOCKED on PR completion: the 2 required live smokes need OPENROUTER_API_KEY (not in my env).
+  Asked architect to either set the key for me or run:
+    OPENROUTER_API_KEY=... uv --project workflows/judging run pytest workflows/judging -m live --live -k openrouter -s
+- OPEN RISK to confirm in smoke: (a) exact opus slug dot(`4.8`) vs hyphen(`4-8`); (b) response_format
+  json_schema strict + numeric `score` enum through OpenRouter→Gemini; (c) cache_read>0 on live Opus.
+- Have NOT run `porch done 43` yet (holding at implement→PR until smoke plan is settled).
