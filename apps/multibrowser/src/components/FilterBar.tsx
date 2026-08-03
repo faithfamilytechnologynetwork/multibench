@@ -1,39 +1,45 @@
 import { Search, X } from "lucide-react";
-import { IDENTITY_SIGNALS } from "../lib/constants";
-import { isActive, toggle, type Selection, type SortKey } from "../lib/filtering";
-import type { TaxonomyAxis } from "../lib/model";
+import { isActive, toggle, type Facet, type Facets, type Selection, type SortKey } from "../lib/filtering";
 
-// Manifest-DRIVEN filter controls: the axis groups are generated from `taxonomies`, so this
-// adapts to 2-axis or 5-axis traditions with no hardcoded vocabulary. Interactive controls use
+// DATA-DRIVEN filter controls: the axis groups + identity signals are discovered from the
+// scenarios actually loaded (see `computeFacets`), so this adapts to any tradition with no
+// hardcoded vocabulary and shows no tag UI for a tradition whose scenarios carry no tags. Each
+// value carries its scenario count under the current filters. Interactive controls use
 // accessible native elements + toggle buttons (HeroUI Chips are used for read-only display).
 function Toggle({
   selected,
+  value,
+  count,
   onClick,
-  children,
 }: {
   selected: boolean;
+  value: string;
+  count: number;
   onClick: () => void;
-  children: React.ReactNode;
 }) {
   return (
     <button
       type="button"
       aria-pressed={selected}
+      aria-label={value}
       onClick={onClick}
       className={
-        "rounded-full border px-2.5 py-0.5 text-xs transition-colors " +
+        "flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs transition-colors " +
         (selected
           ? "border-primary bg-primary text-primary-foreground"
           : "border-default-200 bg-default-50 text-default-600 hover:border-default-300")
       }
     >
-      {children}
+      <span>{value}</span>
+      <span aria-hidden className={"tabular-nums " + (selected ? "opacity-80" : "text-default-400")}>
+        {count}
+      </span>
     </button>
   );
 }
 
 export interface FilterBarProps {
-  taxonomies: Record<string, TaxonomyAxis>;
+  facets: Facets;
   selection: Selection;
   onChange: (next: Selection) => void;
   total: number;
@@ -42,7 +48,7 @@ export interface FilterBarProps {
   loadedAll: boolean;
 }
 
-export function FilterBar({ taxonomies, selection, onChange, total, shown, loaded, loadedAll }: FilterBarProps) {
+export function FilterBar({ facets, selection, onChange, total, shown, loaded, loadedAll }: FilterBarProps) {
   const set = (patch: Partial<Selection>) => onChange({ ...selection, ...patch });
 
   const toggleAxis = (axis: string, v: string) => {
@@ -123,30 +129,38 @@ export function FilterBar({ taxonomies, selection, onChange, total, shown, loade
         )}
       </div>
 
-      <div className="flex flex-col gap-2">
-        {Object.entries(taxonomies).map(([axis, def]) => (
-          <div key={axis} className="flex flex-wrap items-center gap-1.5">
-            <span className="mr-1 text-xs font-medium uppercase tracking-wide text-default-500">{axis}</span>
-            {def.values.map((v) => (
-              <Toggle key={v} selected={(selection.axes[axis] ?? []).includes(v)} onClick={() => toggleAxis(axis, v)}>
-                {v}
-              </Toggle>
-            ))}
-          </div>
-        ))}
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="mr-1 text-xs font-medium uppercase tracking-wide text-default-500">identity</span>
-          {IDENTITY_SIGNALS.map((v) => (
-            <Toggle
-              key={v}
-              selected={selection.identity.includes(v)}
-              onClick={() => set({ identity: toggle(selection.identity, v) })}
-            >
-              {v}
-            </Toggle>
+      {(Object.keys(facets.axes).length > 0 || facets.identity.length > 0) && (
+        <div className="flex flex-col gap-2">
+          {Object.entries(facets.axes).map(([axis, values]) => (
+            <div key={axis} className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium uppercase tracking-wide text-default-500">{axis}</span>
+              {values.map((f: Facet) => (
+                <Toggle
+                  key={f.value}
+                  value={f.value}
+                  count={f.count}
+                  selected={(selection.axes[axis] ?? []).includes(f.value)}
+                  onClick={() => toggleAxis(axis, f.value)}
+                />
+              ))}
+            </div>
           ))}
+          {facets.identity.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="mr-1 text-xs font-medium uppercase tracking-wide text-default-500">identity</span>
+              {facets.identity.map((f: Facet) => (
+                <Toggle
+                  key={f.value}
+                  value={f.value}
+                  count={f.count}
+                  selected={selection.identity.includes(f.value)}
+                  onClick={() => set({ identity: toggle(selection.identity, f.value) })}
+                />
+              ))}
+            </div>
+          )}
         </div>
-      </div>
+      )}
     </section>
   );
 }

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useScenarioMetas, useTradition } from "../lib/queries";
-import { filterAndSort, parseSelection, selectionToSearch, type Selection } from "../lib/filtering";
+import { computeFacets, filterAndSort, parseSelection, selectionToSearch, type Selection } from "../lib/filtering";
 import { taxonomyValues } from "../lib/model";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { TraditionHeader } from "../components/TraditionHeader";
@@ -40,6 +40,9 @@ export function TraditionPage() {
     loading: metas[i]?.isPending ?? !sha,
   }));
   const visible = filterAndSort(entries, selection);
+  // Facets are discovered from the scenarios actually loaded (not the manifest), so a tradition
+  // whose scenarios carry no tags shows no tag UI. `declaredTax` only orders the values.
+  const facets = useMemo(() => computeFacets(entries, selection, declaredTax), [entries, selection, declaredTax]);
   const loaded = entries.filter((e) => !e.loading).length;
   const loadedAll = entries.length > 0 && loaded === entries.length;
 
@@ -117,7 +120,7 @@ export function TraditionPage() {
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Scenarios</h2>
         <FilterBar
-          taxonomies={taxonomies}
+          facets={facets}
           selection={selection}
           onChange={onChange}
           total={scenarioIds.length}
