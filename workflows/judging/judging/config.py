@@ -33,12 +33,20 @@ class JudgeSpec:
 
 @dataclass(frozen=True)
 class SubjectSpec:
-    """One subject model to collect responses from (Claude-only for now, §4.5)."""
+    """One subject model to collect responses from.
+
+    ``provider`` is one of ``anthropic`` | ``openai`` | ``gemini`` (issue #41). The
+    ``openai`` provider is a **generic OpenAI-chat-completions-compatible** seam: ``base_url``
+    points it at the host (OpenAI, Thinking Machines/Inkling, a Qwen host, …) and ``api_key_env``
+    names the env var holding that host's key — each subject brings its own dedicated credential
+    (N4). ``base_url``/``api_key_env`` are ignored by the anthropic/gemini branches."""
 
     model: str
     provider: str = "anthropic"
     thinking: bool = False
     max_tokens: int = 16384
+    base_url: str | None = None  # openai-compatible: host endpoint (None -> SDK default)
+    api_key_env: str | None = None  # openai-compatible: env var holding the key (None -> OPENAI_API_KEY)
 
 
 # Default judge panel (architect decision 2026-06-25): config-driven; default
@@ -51,7 +59,8 @@ DEFAULT_JUDGES: tuple[JudgeSpec, ...] = (
     ),
 )
 
-# Default subjects: the minimal Claude-only collector (spec §4.5).
+# Default subjects: the minimal Claude collector. The full multi-provider lineup for a run
+# (Terra/Inkling/Qwen/Gemini) is supplied via a --config YAML, not baked in here.
 DEFAULT_SUBJECTS: tuple[SubjectSpec, ...] = (
     SubjectSpec(model="claude-opus-4-8"),
     SubjectSpec(model="claude-sonnet-4-6"),
@@ -82,7 +91,8 @@ class ConfigError(Exception):
 
 
 _JUDGE_PROVIDERS = ("anthropic", "gemini")
-_SUBJECT_PROVIDERS = ("anthropic",)  # Claude-only collector for now (§4.5)
+# Subjects: Claude, any OpenAI-compatible host (via base_url/api_key_env), or Gemini (issue #41).
+_SUBJECT_PROVIDERS = ("anthropic", "openai", "gemini")
 
 
 def _require_str(raw: dict, key: str, where: str) -> str:
@@ -97,6 +107,13 @@ def _opt_bool(raw: dict, key: str, default: bool, where: str) -> bool:
     if not isinstance(v, bool):
         raise ConfigError(f"{where}: {key!r} must be a boolean")
     return v
+
+
+def _opt_str(raw: dict, key: str, where: str) -> str | None:
+    """An optional string field: absent -> None; present -> must be a non-empty string."""
+    if key not in raw:
+        return None
+    return _require_str(raw, key, where)
 
 
 def _opt_pos_int(raw: dict, key: str, default: int, where: str) -> int:
@@ -128,6 +145,8 @@ def _spec(raw: object, *, kind: str, allowed: set[str], providers: tuple[str, ..
     return SubjectSpec(
         model=model, provider=provider, thinking=thinking,
         max_tokens=_opt_pos_int(raw, "max_tokens", 16384, where),
+        base_url=_opt_str(raw, "base_url", where),
+        api_key_env=_opt_str(raw, "api_key_env", where),
     )
 
 
@@ -143,7 +162,7 @@ def _str_tuple(raw: dict, key: str, allowed: tuple[str, ...], where: str) -> tup
 
 _CONFIG_FIELDS = {f.name for f in fields(Config)}
 _JUDGE_FIELDS = {"model", "provider", "thinking", "safety_off", "max_tokens"}
-_SUBJECT_FIELDS = {"model", "provider", "thinking", "max_tokens"}
+_SUBJECT_FIELDS = {"model", "provider", "thinking", "max_tokens", "base_url", "api_key_env"}
 
 
 def load_config(path: str | Path) -> Config:

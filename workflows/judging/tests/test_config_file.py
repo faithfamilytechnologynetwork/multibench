@@ -46,10 +46,41 @@ def test_load_config_builds_judge_and_subject_specs(tmp_path):
     assert cfg.subjects[0].provider == "anthropic"
 
 
+def test_load_config_builds_openai_and_gemini_subjects(tmp_path):
+    # issue #41: subjects may be openai-compatible (base_url + api_key_env) or gemini.
+    cfg = load_config(
+        _write(
+            tmp_path,
+            {
+                "subjects": [
+                    {
+                        "model": "qwen3-235b-a22b",
+                        "provider": "openai",
+                        "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                        "api_key_env": "DASHSCOPE_API_KEY",
+                    },
+                    {"model": "gpt-5.6-terra", "provider": "openai"},  # base_url/api_key_env default
+                    {"model": "gemini-3.6-flash", "provider": "gemini"},
+                ]
+            },
+        )
+    )
+    qwen, terra, gem = cfg.subjects
+    assert qwen.provider == "openai"
+    assert qwen.base_url == "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+    assert qwen.api_key_env == "DASHSCOPE_API_KEY"
+    assert (terra.base_url, terra.api_key_env) == (None, None)  # optional -> None
+    assert gem.provider == "gemini"
+
+
 @pytest.mark.parametrize(
     "obj,needle",
     [
         ({"nope": 1}, "unknown config key"),
+        ({"subjects": [{"model": "m", "provider": "mistral"}]}, "provider must be one of"),
+        ({"subjects": [{"model": "m", "base_url": 5}]}, "non-empty string"),
+        ({"subjects": [{"model": "m", "api_key_env": ""}]}, "non-empty string"),
+        ({"subjects": [{"model": "m", "nope": 1}]}, "unknown subject key"),
         ({"judges": [{"model": "m", "provider": "anthropic", "bad": 1}]}, "unknown judge key"),
         ({"judges": [{"model": "m", "provider": "openai"}]}, "provider must be one of"),
         ({"judges": []}, "non-empty list"),

@@ -36,12 +36,123 @@ def test_unsupported_judge_provider_fails_loud():
         judge_complete(JudgeSpec("x", "mistral"), ("r", "a", "t"), {}, retries=0)
 
 
-def test_subject_collection_is_claude_only():
-    # Subjects are Claude-only in this workflow (§4.5).
-    with pytest.raises(ProviderError):
+def test_unsupported_subject_provider_fails_loud():
+    # Subjects support anthropic | openai | gemini (issue #41); anything else fails loud.
+    with pytest.raises(ProviderError) as ei:
         subject_complete(
-            SubjectSpec("gemini-x", "gemini"), None, [{"role": "user", "content": "hi"}]
+            SubjectSpec("x", "mistral"), None, [{"role": "user", "content": "hi"}]
         )
+    assert "unsupported subject provider" in str(ei.value)
+
+
+def test_openai_subject_missing_default_credential_fails_loud(monkeypatch):
+    # N4: openai subject with no api_key_env falls back to OPENAI_API_KEY and fails loud if absent,
+    # before any SDK call.
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    with pytest.raises(ProviderError) as ei:
+        subject_complete(
+            SubjectSpec("gpt-5.6-terra", "openai"), None, [{"role": "user", "content": "hi"}]
+        )
+    assert "OPENAI_API_KEY" in str(ei.value)
+
+
+def test_openai_subject_missing_named_credential_fails_loud(monkeypatch):
+    # N4: a dedicated per-host key (api_key_env) is required for OpenAI-compatible hosts
+    # (Inkling/Qwen). Fail loud naming the exact var, before any SDK call.
+    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    with pytest.raises(ProviderError) as ei:
+        subject_complete(
+            SubjectSpec(
+                "qwen3-235b-a22b",
+                "openai",
+                base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
+                api_key_env="DASHSCOPE_API_KEY",
+            ),
+            None,
+            [{"role": "user", "content": "hi"}],
+        )
+    assert "DASHSCOPE_API_KEY" in str(ei.value)
+
+
+def test_gemini_subject_missing_credential_fails_loud(monkeypatch):
+    # N4: a gemini subject needs a Gemini credential (same auth surface as the judge) — fail loud
+    # when none is present.
+    for var in ("GEMINI_API_KEY", "GOOGLE_APPLICATION_CREDENTIALS", "GOOGLE_GENAI_USE_VERTEXAI"):
+        monkeypatch.delenv(var, raising=False)
+    with pytest.raises(ProviderError) as ei:
+        subject_complete(
+            SubjectSpec("gemini-3.6-flash", "gemini"), None, [{"role": "user", "content": "hi"}]
+        )
+    assert "GEMINI_API_KEY" in str(ei.value)
+
+
+def test_openai_messages_fold_framing_on_every_user_turn():
+    # Blinding design (§4.5): the framing is folded onto EVERY user turn as a text prefix (never a
+    # system prompt); assistant turns are untouched.
+    from judging.providers import _openai_messages, ctx_block
+
+    msgs = [
+        {"role": "user", "content": "Q1"},
+        {"role": "assistant", "content": "A1"},
+        {"role": "user", "content": "Q2"},
+    ]
+    out = _openai_messages(msgs, "GUIDE")
+    prefix = ctx_block("GUIDE")
+    assert out[0] == {"role": "user", "content": f"{prefix}\n\nQ1"}
+    assert out[1] == {"role": "assistant", "content": "A1"}  # untouched
+    assert out[2] == {"role": "user", "content": f"{prefix}\n\nQ2"}  # folded on EVERY user turn
+    # Unstated framing (no prefix): user turns pass through verbatim.
+    assert _openai_messages([{"role": "user", "content": "Q"}], None) == [
+        {"role": "user", "content": "Q"}
+    ]
+
+
+def test_gemini_contents_fold_and_role_mapping():
+    # google-genai contents: assistant->model, framing folded onto every user turn (§4.5).
+    from judging.providers import _gemini_contents, ctx_block
+
+    msgs = [
+        {"role": "user", "content": "Q1"},
+        {"role": "assistant", "content": "A1"},
+        {"role": "user", "content": "Q2"},
+    ]
+    out = _gemini_contents(msgs, "GUIDE")
+    prefix = ctx_block("GUIDE")
+    assert out[0] == {"role": "user", "parts": [{"text": f"{prefix}\n\nQ1"}]}
+    assert out[1] == {"role": "model", "parts": [{"text": "A1"}]}  # assistant -> model
+    assert out[2] == {"role": "user", "parts": [{"text": f"{prefix}\n\nQ2"}]}
+
+
+def test_openai_usage_extracts_prompt_and_completion_tokens():
+    from types import SimpleNamespace
+
+    from judging.providers import _openai_usage
+
+    resp = SimpleNamespace(usage=SimpleNamespace(prompt_tokens=120, completion_tokens=45))
+    assert _openai_usage(resp) == {"in": 120, "out": 45}
+    assert _openai_usage(SimpleNamespace(usage=None)) == {}
+
+
+def test_openai_subject_request_constructs_via_real_sdk_params():
+    # Real-client construction (M21, anti-mock, OpenAI-compatible subject path): validate the
+    # ACTUAL create-kwargs through the REAL openai SDK request param TypedDict — not a hand-checked
+    # dict — so request-shape drift (model/max_tokens/messages) is caught without a live call.
+    import pydantic
+    from openai.types.chat import completion_create_params as ccp
+
+    from judging.providers import _openai_messages
+
+    msgs = _openai_messages(
+        [{"role": "user", "content": "Q1"}, {"role": "assistant", "content": "A1"},
+         {"role": "user", "content": "Q2"}],
+        "CTX",
+    )
+    kwargs = {"model": "gpt-5.6-terra", "max_tokens": 1024, "messages": msgs}
+    ta = pydantic.TypeAdapter(ccp.CompletionCreateParamsNonStreaming)
+    ta.validate_python(kwargs)  # rejects e.g. a missing model
+    # Prove the real-SDK validation actually bites (anti-mock): drop the required model.
+    with pytest.raises(pydantic.ValidationError):
+        ta.validate_python({"max_tokens": 1024, "messages": msgs})
 
 
 def test_subject_messages_fold_and_cache_breakpoints():
@@ -109,6 +220,20 @@ def test_subject_request_constructs_via_real_anthropic_params():
     assert msgs[0]["content"][0]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
     assert msgs[0]["content"][1]["cache_control"] == {"type": "ephemeral"}
     assert all("cache_control" not in b for b in msgs[2]["content"])
+
+
+def test_gemini_subject_config_never_sets_safety_override():
+    # Real google-genai types (M21, anti-mock): mirror _gemini_subject's config construction —
+    # subjects set max_output_tokens (+ optional dynamic thinking) and NEVER safety_settings
+    # (§5.5: subjects are never run safety-off; only the judge seam may be). This is the contract
+    # that keeps the safety-off path judge-only.
+    from google.genai import types
+
+    cfg = types.GenerateContentConfig(
+        max_output_tokens=16384, thinking_config=types.ThinkingConfig(thinking_budget=-1)
+    )
+    assert cfg.safety_settings is None
+    assert cfg.max_output_tokens == 16384
 
 
 def test_gemini_text_raises_clear_diagnostic_on_blocked_response():

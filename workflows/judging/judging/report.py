@@ -24,13 +24,23 @@ _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 
 # USD per million tokens (input, output). Approximate, dated — a config constant the operator
 # updates as provider prices change (spec §5.8 #6: "small, clearly-dated price table").
-PRICES_DATED = "2026-07 (approximate — update PRICES as prices change)"
+# Rates verified 2026-08-02 against each provider's official pricing page; see the PR for #41
+# for the citation of every new entry. Two entries are flagged UNVERIFIED (no first-party rate
+# found) — confirm on the provider console before trusting their cost lines.
+PRICES_DATED = "2026-08-02 (verified vs. official pages; qwen3-235b/inkling flagged UNVERIFIED)"
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (5.00, 25.00),
     "claude-sonnet-5": (3.00, 15.00),  # standard rate; intro $2/$10 through 2026-08-31
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
     "gemini-3.5-flash": (1.50, 9.00),
+    # --- issue #41 subjects (unstated-only run) ---
+    "gpt-5.6-terra": (2.00, 12.00),  # OpenAI dev docs (>272K-tok prompts bill 2x in / 1.5x out)
+    "gemini-3.6-flash": (1.50, 7.50),  # ai.google.dev/gemini-api/docs/pricing (output incl. thinking)
+    # UNVERIFIED — aggregator-sourced, no readable first-party rate as of 2026-08-02 (see PR #41):
+    "qwen3-235b-a22b": (0.455, 0.90),  # DashScope-intl; confirm on the Model Studio console
+    # "inkling": open-weights, NO first-party API/price — set to the chosen host's rate + key
+    #            in the run config (base_url/api_key_env). Left out until a host is picked (#41).
 }
 
 

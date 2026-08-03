@@ -73,9 +73,13 @@ def subject_complete(
     """
     if subject.provider == "anthropic":
         return _anthropic_subject(subject, context_prefix, messages, retries)
+    if subject.provider == "openai":
+        return _openai_subject(subject, context_prefix, messages, retries)
+    if subject.provider == "gemini":
+        return _gemini_subject(subject, context_prefix, messages, retries)
     raise ProviderError(
         f"unsupported subject provider {subject.provider!r} "
-        "(collection is Claude-only in this workflow, §4.5)"
+        "(supported: anthropic, openai, gemini — issue #41)"
     )
 
 
@@ -131,6 +135,105 @@ def _anthropic_subject(
             if not text.strip():
                 raise RuntimeError("empty subject response")
             return text.strip(), _anthropic_usage(resp), attempt + 1
+        except Exception as e:  # noqa: BLE001 — transient API/transport; retry then fail
+            last = e
+            if attempt < retries:
+                time.sleep(_BACKOFF_BASE_SECONDS * (attempt + 1))
+    raise ProviderError(f"subject call failed after {retries + 1} attempts: {last}")
+
+
+# --- OpenAI-compatible subject seam (issue #41) -----------------------------
+# One generic provider for every OpenAI-chat-completions-compatible host: OpenAI itself
+# (GPT-5.6 Terra), Thinking Machines/Inkling, and a Qwen host — differing only by base_url +
+# api_key_env in the run config. No prompt-cache breakpoints: OpenAI-compatible hosts cache
+# common prefixes automatically (no explicit markers), so the framing/turn-1 prefix is reused
+# for free without our doing anything special.
+
+
+def _openai_messages(messages: list[dict], context_prefix: str | None) -> list[dict]:
+    """OpenAI chat messages: fold the framing onto **every** user turn as a text prefix
+    (blinding design §4.5 — never a system prompt; no subject gets a privileged channel).
+    Assistant turns pass through untouched."""
+    out: list[dict] = []
+    for m in messages:
+        if m["role"] == "user" and context_prefix:
+            out.append({"role": "user", "content": f"{ctx_block(context_prefix)}\n\n{m['content']}"})
+        else:
+            out.append({"role": m["role"], "content": m["content"]})
+    return out
+
+
+def _openai_subject(
+    subject: SubjectSpec, context_prefix: str | None, messages: list[dict], retries: int
+) -> tuple[str, dict, int]:
+    env = subject.api_key_env or "OPENAI_API_KEY"
+    _require_env(env)  # dedicated per-host key; fail loud before any SDK call (N4)
+    from openai import OpenAI
+
+    client = OpenAI(api_key=os.environ[env], base_url=subject.base_url)  # base_url None -> default
+    folded = _openai_messages(messages, context_prefix)
+    last: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            resp = client.chat.completions.create(
+                model=subject.model, max_tokens=subject.max_tokens, messages=folded
+            )
+            text = (resp.choices[0].message.content or "").strip()
+            if not text:
+                raise RuntimeError("empty subject response")
+            return text, _openai_usage(resp), attempt + 1
+        except Exception as e:  # noqa: BLE001 — transient API/transport; retry then fail
+            last = e
+            if attempt < retries:
+                time.sleep(_BACKOFF_BASE_SECONDS * (attempt + 1))
+    raise ProviderError(f"subject call failed after {retries + 1} attempts: {last}")
+
+
+# --- Gemini subject seam (issue #41) ----------------------------------------
+# Gemini as a SUBJECT (e.g. gemini-3.6-flash). Distinct from the Gemini *judge* seam below:
+# a subject is NEVER run safety-off (§5.5) and gets no schema constraint.
+
+
+def _gemini_contents(messages: list[dict], context_prefix: str | None) -> list[dict]:
+    """google-genai ``contents``: fold the framing onto **every** user turn (§4.5) and map
+    assistant->``model``. Returned as plain ContentDicts (the SDK accepts dicts)."""
+    out: list[dict] = []
+    for m in messages:
+        role = "model" if m["role"] == "assistant" else "user"
+        text = m["content"]
+        if role == "user" and context_prefix:
+            text = f"{ctx_block(context_prefix)}\n\n{text}"
+        out.append({"role": role, "parts": [{"text": text}]})
+    return out
+
+
+def _gemini_subject(
+    subject: SubjectSpec, context_prefix: str | None, messages: list[dict], retries: int
+) -> tuple[str, dict, int]:
+    if not _gemini_has_creds():
+        raise ProviderError(
+            "no Gemini credential: set GEMINI_API_KEY, or a Vertex service account "
+            "(GOOGLE_APPLICATION_CREDENTIALS + GOOGLE_CLOUD_PROJECT) — spec N4"
+        )
+    from google.genai import types
+
+    client = _gemini_client()
+    contents = _gemini_contents(messages, context_prefix)
+    config_kwargs: dict[str, Any] = {"max_output_tokens": subject.max_tokens}
+    if subject.thinking:
+        config_kwargs["thinking_config"] = types.ThinkingConfig(thinking_budget=-1)
+    # NOTE: no safety_settings — subjects are NEVER run safety-off (§5.5).
+    config = types.GenerateContentConfig(**config_kwargs)
+    last: Exception | None = None
+    for attempt in range(retries + 1):
+        try:
+            resp = client.models.generate_content(
+                model=subject.model, contents=contents, config=config
+            )
+            text = (getattr(resp, "text", None) or "").strip()
+            if not text:
+                raise RuntimeError("empty subject response")
+            return text, _gemini_usage(resp), attempt + 1
         except Exception as e:  # noqa: BLE001 — transient API/transport; retry then fail
             last = e
             if attempt < retries:
@@ -321,6 +424,18 @@ def _anthropic_usage(resp: Any) -> dict:
         "out": getattr(u, "output_tokens", 0) or 0,
         "cache_write": getattr(u, "cache_creation_input_tokens", 0) or 0,
         "cache_read": getattr(u, "cache_read_input_tokens", 0) or 0,
+    }
+
+
+def _openai_usage(resp: Any) -> dict:
+    u = getattr(resp, "usage", None)
+    if u is None:
+        return {}
+    # OpenAI-compatible usage: prompt/completion tokens. (Reasoning tokens, when a host reports
+    # them, are already folded into completion_tokens — so no separate add is needed.)
+    return {
+        "in": getattr(u, "prompt_tokens", 0) or 0,
+        "out": getattr(u, "completion_tokens", 0) or 0,
     }
 
 
