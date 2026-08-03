@@ -99,19 +99,19 @@ def test_load_config_builds_openrouter_judge(tmp_path):
 
 
 def test_funded_run_config_loads():
-    # The committed funded-run config (issue #43) must load: OpenRouter subjects + Opus judge, full
-    # framings. Guards against slug/field drift in the run-config example we ship.
+    # The committed funded-run config (issue #43) must load: OpenRouter subjects + a single Gemini
+    # judge via OpenRouter, full framings. Guards against slug/field drift in the run-config we ship.
     from pathlib import Path
 
     root = Path(__file__).resolve().parents[3]
     cfg = load_config(root / "workflows/judging/configs/openrouter-funded-run.yaml")
     assert cfg.framings == ("unstated", "stated", "guided")
-    assert [j.model for j in cfg.judges] == ["gemini-3.6-flash", "anthropic/claude-opus-4.8"]
-    # Gemini judge runs DIRECT + safety-off (OpenRouter can't forward Google safety-off); Opus judge
-    # runs through OpenRouter.
-    gem, opus = cfg.judges
-    assert gem.provider == "gemini" and gem.safety_off is True
-    assert opus.provider == "openai" and opus.api_key_env == "OPENROUTER_API_KEY"
+    # Single judge: Gemini via OpenRouter, safety-ON explicit (user decision — Opus dropped as judge).
+    assert len(cfg.judges) == 1
+    (gem,) = cfg.judges
+    assert gem.model == "google/gemini-3.6-flash"
+    assert gem.provider == "openai" and gem.api_key_env == "OPENROUTER_API_KEY"
+    assert gem.safety_off is False  # safety-ON deviation, explicit
     assert all(s.provider == "openai" for s in cfg.subjects)
 
 

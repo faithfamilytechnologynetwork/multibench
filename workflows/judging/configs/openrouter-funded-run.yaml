@@ -13,12 +13,11 @@
 # this path (see the _openai_usage note) — cost lines are a funded-run ESTIMATE, not invoice-exact.
 # OpenAI/Gemini auto-cache on their own.
 #
-# GEMINI JUDGE — NOT on OpenRouter (deliberate). The Gemini judge must run safety-off (BLOCK_NONE) so it
-# does not refuse benign-but-sensitive transcripts (spec §5.5), but OpenRouter exposes no Google
-# safety-settings passthrough, so the openai-compat path fails loud on safety_off. The Gemini judge
-# therefore uses the DIRECT `gemini` provider, honoring BLOCK_NONE — it bills to GEMINI_API_KEY / Vertex,
-# NOT the OpenRouter funded key. (The `google/gemini-3.6-flash`-as-OpenRouter-judge path is still proven
-# by the live smoke; it is just not spec-usable for the real run because of safety-off.)
+# GEMINI JUDGE — on OpenRouter, SAFETY ON (user decision 2026-08-03). OpenRouter exposes no Google
+# safety-settings passthrough, so BLOCK_NONE can't be forwarded; rather than route the judge off the
+# funded key, the user chose to run it safety-ON through OpenRouter to maximize spend on the funded key
+# (see the per-judge comment for the §5.5 deviation + the refusal-handling plan). This is the single
+# judge for the run — Opus was dropped as a judge (user decision 2026-08-03).
 #
 # Serving-host routing / pinning: OpenRouter routes to an available host by default. For Qwen the
 # effective rate is HOST-DEPENDENT (0.15/0.60 is the models-API top-level default on 2026-08-03).
@@ -46,13 +45,12 @@ subjects:
   - {model: thinkingmachines/inkling, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
 
 judges:
-  # Gemini 3.6 Flash judge — DIRECT gemini provider, safety-off (see the GEMINI JUDGE note above:
-  # OpenRouter can't forward Google safety-settings, and the openai path fails loud on safety_off).
-  # Bills to GEMINI_API_KEY / Vertex, not the OpenRouter key.
-  - {model: gemini-3.6-flash, provider: gemini, safety_off: true}
-  # Opus 4.8 judge — anthropic/claude-opus-4.8 (5.00/25.00) via OpenRouter; cache_control breakpoints
-  # forwarded automatically by the openai judge path (issue #43 §3). thinking is ON (reasoning forwarded).
-  - {model: anthropic/claude-opus-4.8, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Gemini 3.6 Flash judge — via OpenRouter (openai-compat path), thinking ON (reasoning forwarded).
+  # safety_off is EXPLICIT false: safety-ON is a user-decided deviation from spec §5.5 (2026-08-03) to
+  # keep judging on the funded key; refusals surface as failed cells — count and review post-run,
+  # backfill via direct Gemini only if material. (The openai path fails loud if safety_off were true,
+  # since OpenRouter can't forward Google BLOCK_NONE — hence the explicit false.)
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, safety_off: false}
 
 # Full framings sweep (the funded run's "framings expansion") — unstated / stated / guided.
 framings: [unstated, stated, guided]

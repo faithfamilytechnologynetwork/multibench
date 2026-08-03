@@ -71,10 +71,10 @@ All 3 PASS. Command: `pytest workflows/judging -m live --live -k openrouter -s`.
 - Opus cache: first in=4146 (WRITE), second in=347 cache_read=3799 (READ) — shows write->read AND
   the understatement (3799 write toks in `in` @1x). Opus out rose to 630/673 (reasoning now ON).
 
-## ⚠️ ARCHITECT DECISION PENDING (flagged in PR): Gemini judge routing
-OpenRouter can't forward Google safety_settings; Gemini judge needs safety-off (§5.5). Funded config
-defaults to DIRECT gemini provider (safety-off, bills GEMINI_API_KEY not OpenRouter key). Alternatives:
-(a) safety-ON Gemini via OpenRouter (refusal risk), (b) drop Gemini judge. Defaulted to spec-correct.
+## Gemini judge routing — RESOLVED (user decision 2026-08-03, commit after 1a09fa7)
+Funded config: SINGLE judge = google/gemini-3.6-flash via OpenRouter, safety_off: false EXPLICIT
+(safety-ON deviation from §5.5 to keep spend on funded key; refusals = failed cells, review post-run).
+Opus DROPPED as judge entirely. Opus PRICES entry kept (verified slug; #44 may still use it).
 
 ## FOR ASPIR-44 (batch) — updated
 - `_openai_judge_content` + `_to_gemini_schema` are module-level/importable — reuse for batch bodies.
