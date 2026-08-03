@@ -1,0 +1,14 @@
+id: '41'
+title: judging-add-terra-inkling-qwen
+protocol: air
+phase: implement
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-03T05:33:27.326Z'
+updated_at: '2026-08-03T05:33:27.327Z'
