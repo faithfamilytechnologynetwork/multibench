@@ -40,13 +40,25 @@ Protocol: AIR (strict). Issue #43 (amended 2026-08-03).
   `google/gemini-3.6-flash` ($1.50/$7.50), `openai/gpt-5.6-terra` ($2/$12 list, 50% promo), `qwen/qwen3-235b-a22b-2507` ($0.09/$0.55 host-dep), `thinkingmachines/inkling` ($0.95/$4.05, IS on OR).
 - cache_control survives openai SDK RUNTIME transform (`maybe_transform`) even though the stricter TypeAdapter strips it — anti-mock test asserts both paths.
 
+## LIVE SMOKE EVIDENCE (2026-08-03, via OpenRouter; numbers only, no secrets)
+All 3 PASS. Command: `pytest workflows/judging -m live --live -k openrouter -s`.
+- Subject `qwen/qwen3-235b-a22b-2507`: text='ok', usage in=14 out=2 cache_read=3.
+- Judge  `google/gemini-3.6-flash`: score=1.0 (real rationale), usage in=2713 out=466.
+- Judge  `anthropic/claude-opus-4.8` (cache): first cache_read=3799, second cache_read=3799.
+  => **cache_control forwarding WORKS through OpenRouter on the LIVE path** (cache_read>0).
+
+## FOR ASPIR-44 (batch): live path de-risks your cache gate
+- Anthropic 1h cache_control breakpoints (rubric+anchor) forwarded via the openai-compat seam DO
+  produce cache_read>0 through OpenRouter live. Your batch smoke (§3) should expect the same; if
+  batch does NOT show cache_read>0, that's the STOP-and-report signal (live path proves it's possible).
+- Resolved RISK: Google (via OpenRouter) rejects numeric `score` enum + additionalProperties. The
+  openai judge path now sanitizes schema for `google/*` (string-enum, drop unsupported, strict=False,
+  cast score back to float). anthropic/*/openai/* use raw strict schema. Batch requests to Google
+  would hit the same — reuse this sanitization if you batch Gemini (you likely won't; Gemini isn't batched).
+- Opus slug confirmed: `anthropic/claude-opus-4.8` (DOT) works live via OpenRouter.
+
 ## Status
-- Code + tests + live-smoke harness DONE and committed (2 commits: feat 67d252f, test dcb47b1).
-- Default suite: 178 pass, 9 skipped (6 pre-existing + 3 new OpenRouter live smokes, skip w/o key).
-- porch check 43: PASSED (dispatcher ran workflows/judging pytest).
-- BLOCKED on PR completion: the 2 required live smokes need OPENROUTER_API_KEY (not in my env).
-  Asked architect to either set the key for me or run:
-    OPENROUTER_API_KEY=... uv --project workflows/judging run pytest workflows/judging -m live --live -k openrouter -s
-- OPEN RISK to confirm in smoke: (a) exact opus slug dot(`4.8`) vs hyphen(`4-8`); (b) response_format
-  json_schema strict + numeric `score` enum through OpenRouter→Gemini; (c) cache_read>0 on live Opus.
-- Have NOT run `porch done 43` yet (holding at implement→PR until smoke plan is settled).
+- ALL scope + tests + live smokes DONE. Commits: feat 67d252f, smoke-harness dcb47b1,
+  thread 703dee2, google-fix a010b40.
+- Default suite: 180 pass, 9 skipped. porch check: PASSED.
+- NEXT: porch done 43 -> open PR (review in body, smoke numbers pasted) -> notify architect.
