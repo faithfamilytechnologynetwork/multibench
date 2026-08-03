@@ -57,8 +57,8 @@ All 3 PASS. Command: `pytest workflows/judging -m live --live -k openrouter -s`.
   would hit the same — reuse this sanitization if you batch Gemini (you likely won't; Gemini isn't batched).
 - Opus slug confirmed: `anthropic/claude-opus-4.8` (DOT) works live via OpenRouter.
 
-## Status
-- ALL scope + tests + live smokes DONE. Commits: feat 67d252f, smoke-harness dcb47b1,
-  thread 703dee2, google-fix a010b40.
-- Default suite: 180 pass, 9 skipped. porch check: PASSED.
-- NEXT: porch done 43 -> open PR (review in body, smoke numbers pasted) -> notify architect.
+## Status — PR OPEN, at PR gate (awaiting human approval)
+- **PR #45**: https://github.com/faithfamilytechnologynetwork/multibench/pull/45 (review in body + smoke numbers).
+- All scope + tests + live smokes DONE. Default suite: 180 pass, 9 skipped. porch check: PASSED.
+- porch phase: `pr` -> `GATE REQUIRED: pr`. STOPPED, waiting for human approval (will NOT self-approve).
+- Do NOT merge / porch approve until architect says so.
