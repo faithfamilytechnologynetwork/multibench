@@ -42,3 +42,20 @@ Design:
 
 ## PR phase
 - Pushing branch + opening PR with review + pricing citations in body.
+
+## Review round 2 (architect feedback on PR #42) — commit d1855bf
+- Applied host decisions: Inkling→Tinker (`thinkingmachines/Inkling`, TINKER_API_KEY,
+  base_url tinker.thinkingmachines.dev/.../oai/api/v1); Qwen3-235B→Friendli
+  (`Qwen/Qwen3-235B-A22B-Instruct-2507`, FRIENDLI_API_KEY, api.friendli.ai/serverless/v1).
+  Dropped the interim DashScope Qwen config.
+- providers.py `_openai_subject`: max_completion_tokens when base_url is None (OpenAI proper),
+  legacy max_tokens otherwise (OpenAI-compat hosts).
+- report.py PRICES re-keyed to exact model strings; PRICES_DATED refreshed.
+- Tests updated (credential fail-loud → Friendli; config-parse → Friendli; SDK-param contract
+  now covers both max_completion_tokens and max_tokens). 164 passed / 6 skipped; porch check green.
+- PR body updated with host-config table + citations.
+- ⚠️ RE-VERIFY finding: architect's cited Inkling rate 1.87/4.68 = Tinker *training* meter (50%
+  launch discount), NOT the inference endpoint. Verified serverless-INFERENCE rate = 1.00/4.05.
+  Shipped 1.00/4.05; flagged to architect to confirm or revert.
+- ⚠️ Friendli flags the Qwen checkpoint for deprecation 2026-08-05 — confirm live at run time.
+- Pushed d1855bf. NOT approaching pr gate — architect takes the gate to the human.
