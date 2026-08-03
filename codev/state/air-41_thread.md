@@ -24,3 +24,21 @@ Design:
   prompt. No privileged channel for any subject.
 - Fail-fast on missing env keys (N4) — no fallbacks.
 - Pricing research dispatched to background agent (verified rates + cited URLs for PR body).
+
+## Implemented
+- providers.py: `_openai_subject`/`_openai_messages`/`_openai_usage` (generic OpenAI-compat) +
+  `_gemini_subject`/`_gemini_contents` (subject seam, never safety-off). Dispatch widened.
+- config.py: SubjectSpec +base_url/+api_key_env; providers anthropic|openai|gemini; `_opt_str`.
+- report.py: PRICES + verified gpt-5.6-terra ($2/$12), gemini-3.6-flash ($1.5/$7.5); qwen3-235b
+  flagged UNVERIFIED; inkling deferred to host choice.
+- openai dep added.
+- Tests: fail-loud + real-SDK-param contract per provider; config-file parsing; live smokes.
+- ~150 prod LOC (AIR-sized). Suite: 164 passed / 6 skipped. porch check green.
+
+## Pricing gaps flagged to architect (afx send)
+- INKLING: no first-party API/price (open-weights) — needs a host decision. Not in PRICES yet.
+- QWEN3-235B: rate unconfirmable on official Alibaba page; using aggregator ~$0.455/$0.90, flagged.
+- Could NOT run live smokes: NO provider creds in builder env. Operator must run before benchmark.
+
+## PR phase
+- Pushing branch + opening PR with review + pricing citations in body.
