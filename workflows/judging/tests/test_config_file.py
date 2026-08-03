@@ -54,10 +54,10 @@ def test_load_config_builds_openai_and_gemini_subjects(tmp_path):
             {
                 "subjects": [
                     {
-                        "model": "qwen3-235b-a22b",
+                        "model": "Qwen/Qwen3-235B-A22B-Instruct-2507",
                         "provider": "openai",
-                        "base_url": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-                        "api_key_env": "DASHSCOPE_API_KEY",
+                        "base_url": "https://api.friendli.ai/serverless/v1",
+                        "api_key_env": "FRIENDLI_API_KEY",
                     },
                     {"model": "gpt-5.6-terra", "provider": "openai"},  # base_url/api_key_env default
                     {"model": "gemini-3.6-flash", "provider": "gemini"},
@@ -67,8 +67,8 @@ def test_load_config_builds_openai_and_gemini_subjects(tmp_path):
     )
     qwen, terra, gem = cfg.subjects
     assert qwen.provider == "openai"
-    assert qwen.base_url == "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
-    assert qwen.api_key_env == "DASHSCOPE_API_KEY"
+    assert qwen.base_url == "https://api.friendli.ai/serverless/v1"
+    assert qwen.api_key_env == "FRIENDLI_API_KEY"
     assert (terra.base_url, terra.api_key_env) == (None, None)  # optional -> None
     assert gem.provider == "gemini"
 

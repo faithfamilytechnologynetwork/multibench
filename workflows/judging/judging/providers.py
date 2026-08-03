@@ -172,11 +172,14 @@ def _openai_subject(
 
     client = OpenAI(api_key=os.environ[env], base_url=subject.base_url)  # base_url None -> default
     folded = _openai_messages(messages, context_prefix)
+    # OpenAI's own API only accepts `max_completion_tokens` now; OpenAI-*compatible* hosts
+    # (base_url set: Tinker/Friendli/…) still take the legacy `max_tokens`. Pick by base_url.
+    tok_kwarg = "max_tokens" if subject.base_url else "max_completion_tokens"
     last: Exception | None = None
     for attempt in range(retries + 1):
         try:
             resp = client.chat.completions.create(
-                model=subject.model, max_tokens=subject.max_tokens, messages=folded
+                model=subject.model, messages=folded, **{tok_kwarg: subject.max_tokens}
             )
             text = (resp.choices[0].message.content or "").strip()
             if not text:

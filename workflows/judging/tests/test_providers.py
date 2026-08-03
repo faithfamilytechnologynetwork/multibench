@@ -57,21 +57,22 @@ def test_openai_subject_missing_default_credential_fails_loud(monkeypatch):
 
 
 def test_openai_subject_missing_named_credential_fails_loud(monkeypatch):
-    # N4: a dedicated per-host key (api_key_env) is required for OpenAI-compatible hosts
-    # (Inkling/Qwen). Fail loud naming the exact var, before any SDK call.
-    monkeypatch.delenv("DASHSCOPE_API_KEY", raising=False)
+    # N4: a dedicated per-host key (api_key_env) is required for OpenAI-compatible hosts.
+    # Qwen3-235B is served on Friendli (architect host decision); fail loud naming the exact
+    # var, before any SDK call.
+    monkeypatch.delenv("FRIENDLI_API_KEY", raising=False)
     with pytest.raises(ProviderError) as ei:
         subject_complete(
             SubjectSpec(
-                "qwen3-235b-a22b",
+                "Qwen/Qwen3-235B-A22B-Instruct-2507",
                 "openai",
-                base_url="https://dashscope-intl.aliyuncs.com/compatible-mode/v1",
-                api_key_env="DASHSCOPE_API_KEY",
+                base_url="https://api.friendli.ai/serverless/v1",
+                api_key_env="FRIENDLI_API_KEY",
             ),
             None,
             [{"role": "user", "content": "hi"}],
         )
-    assert "DASHSCOPE_API_KEY" in str(ei.value)
+    assert "FRIENDLI_API_KEY" in str(ei.value)
 
 
 def test_gemini_subject_missing_credential_fails_loud(monkeypatch):
@@ -136,7 +137,9 @@ def test_openai_usage_extracts_prompt_and_completion_tokens():
 def test_openai_subject_request_constructs_via_real_sdk_params():
     # Real-client construction (M21, anti-mock, OpenAI-compatible subject path): validate the
     # ACTUAL create-kwargs through the REAL openai SDK request param TypedDict — not a hand-checked
-    # dict — so request-shape drift (model/max_tokens/messages) is caught without a live call.
+    # dict — so request-shape drift (model/token-limit/messages) is caught without a live call.
+    # The token-limit kwarg differs by host: OpenAI proper (base_url None) requires
+    # `max_completion_tokens`; OpenAI-*compatible* hosts (Tinker/Friendli) take legacy `max_tokens`.
     import pydantic
     from openai.types.chat import completion_create_params as ccp
 
@@ -147,12 +150,16 @@ def test_openai_subject_request_constructs_via_real_sdk_params():
          {"role": "user", "content": "Q2"}],
         "CTX",
     )
-    kwargs = {"model": "gpt-5.6-terra", "max_tokens": 1024, "messages": msgs}
     ta = pydantic.TypeAdapter(ccp.CompletionCreateParamsNonStreaming)
-    ta.validate_python(kwargs)  # rejects e.g. a missing model
+    # OpenAI proper: max_completion_tokens is the accepted kwarg.
+    ta.validate_python({"model": "gpt-5.6-terra", "max_completion_tokens": 1024, "messages": msgs})
+    # OpenAI-compatible host: legacy max_tokens is still accepted by the SDK param model.
+    ta.validate_python(
+        {"model": "Qwen/Qwen3-235B-A22B-Instruct-2507", "max_tokens": 1024, "messages": msgs}
+    )
     # Prove the real-SDK validation actually bites (anti-mock): drop the required model.
     with pytest.raises(pydantic.ValidationError):
-        ta.validate_python({"max_tokens": 1024, "messages": msgs})
+        ta.validate_python({"max_completion_tokens": 1024, "messages": msgs})
 
 
 def test_subject_messages_fold_and_cache_breakpoints():

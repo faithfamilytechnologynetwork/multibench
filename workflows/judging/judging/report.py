@@ -27,20 +27,24 @@ _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 # Rates verified 2026-08-02 against each provider's official pricing page; see the PR for #41
 # for the citation of every new entry. Two entries are flagged UNVERIFIED (no first-party rate
 # found) — confirm on the provider console before trusting their cost lines.
-PRICES_DATED = "2026-08-02 (verified vs. official pages; qwen3-235b/inkling flagged UNVERIFIED)"
+PRICES_DATED = "2026-08-03 (verified vs. official pages; Inkling/Tinker + Qwen/Friendli per architect host decisions)"
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (5.00, 25.00),
     "claude-sonnet-5": (3.00, 15.00),  # standard rate; intro $2/$10 through 2026-08-31
     "claude-sonnet-4-6": (3.00, 15.00),
     "claude-haiku-4-5": (1.00, 5.00),
     "gemini-3.5-flash": (1.50, 9.00),
-    # --- issue #41 subjects (unstated-only run) ---
+    # --- issue #41 subjects (unstated-only run). Keyed by the exact configured model string. ---
     "gpt-5.6-terra": (2.00, 12.00),  # OpenAI dev docs (>272K-tok prompts bill 2x in / 1.5x out)
     "gemini-3.6-flash": (1.50, 7.50),  # ai.google.dev/gemini-api/docs/pricing (output incl. thinking)
-    # UNVERIFIED — aggregator-sourced, no readable first-party rate as of 2026-08-02 (see PR #41):
-    "qwen3-235b-a22b": (0.455, 0.90),  # DashScope-intl; confirm on the Model Studio console
-    # "inkling": open-weights, NO first-party API/price — set to the chosen host's rate + key
-    #            in the run config (base_url/api_key_env). Left out until a host is picked (#41).
+    # Inkling on Tinker (Thinking Machines OpenAI-compat endpoint; TINKER_API_KEY). Reasoning model:
+    # hidden reasoning bills as completion tokens — give it ample max_tokens (see PR #41).
+    # Rate = the SERVERLESS INFERENCE meter (what this endpoint bills), NOT the training prefill/
+    # sample meter — those are the 1.87/4.68 the host decision cited; the inference rate is lower.
+    "thinkingmachines/Inkling": (1.00, 4.05),  # tinker-docs.thinkingmachines.ai/tinker/models/
+    # Qwen3-235B on Friendli serverless (FRIENDLI_API_KEY) — paper's serving host + exact checkpoint.
+    # NOTE: Friendli flags this checkpoint for deprecation 2026-08-05 — confirm still live at run time.
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": (0.20, 0.80),  # friendli.ai/pricing (api/public/model-apis)
 }
 
 
