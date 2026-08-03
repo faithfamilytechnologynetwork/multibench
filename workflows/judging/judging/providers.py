@@ -337,6 +337,18 @@ def _openai_judge(
 ) -> tuple[dict, str, dict]:
     env = judge.api_key_env or "OPENAI_API_KEY"
     _require_env(env)  # dedicated host key (e.g. OPENROUTER_API_KEY); fail loud before SDK (N4)
+    # safety_off is a Gemini-only control (BLOCK_NONE, so the judge doesn't refuse benign-but-sensitive
+    # transcripts, §5.5). OpenRouter exposes NO Google safety-settings passthrough (verified on their
+    # docs), so this path CANNOT honor it — and unknown params are silently ignored, which would judge
+    # with filters ON. Fail loud (fail-fast, no silent drop) rather than violate the spec: a safety-off
+    # judge must use the direct ``gemini`` provider where BLOCK_NONE is actually applied.
+    if judge.safety_off:
+        raise ProviderError(
+            "safety_off cannot be honored through the OpenAI-compatible (OpenRouter) judge path — "
+            "OpenRouter has no Google safety-settings passthrough, and silently judging with safety "
+            "filters ON would violate spec §5.5. Configure a safety-off judge with provider: gemini "
+            "(direct) so BLOCK_NONE is actually applied."
+        )
     from openai import OpenAI
 
     client = OpenAI(
@@ -358,12 +370,18 @@ def _openai_judge(
         "type": "json_schema",
         "json_schema": {"name": "verdict", "schema": req_schema, "strict": not is_google},
     }
+    # Judge thinking is a deliberate ON decision (§4.7 deviation), matching the native anthropic/gemini
+    # judges. OpenRouter INFERS reasoning from each model's default when the param is omitted, so set it
+    # EXPLICITLY (extra_body, Python SDK) — otherwise a model whose default is reasoning-off would judge
+    # without thinking. Mirrors judge.thinking exactly.
+    extra_body = {"reasoning": {"enabled": bool(judge.thinking)}}
 
     def call() -> tuple[dict, str, dict]:
         resp = client.chat.completions.create(
             model=judge.model,
             messages=[{"role": "user", "content": content}],
             response_format=response_format,
+            extra_body=extra_body,
             **{tok_kwarg: judge.max_tokens},
         )
         text = (resp.choices[0].message.content or "").strip()
@@ -525,10 +543,13 @@ def _openai_usage(resp: Any) -> dict:
     # them, are already folded into completion_tokens — so no separate add is needed.)
     prompt = getattr(u, "prompt_tokens", 0) or 0
     completion = getattr(u, "completion_tokens", 0) or 0
-    # OpenRouter/OpenAI report the CACHED prompt subset under `prompt_tokens_details.cached_tokens`;
-    # `prompt_tokens` is the TOTAL (cached + uncached). Split them so the report prices the cached
-    # part at 0.1x — this is how Anthropic-caching-through-OpenRouter (issue #43 §3) shows up as
-    # real cost on the live openai-compatible path. Absent details -> cached 0 -> unchanged.
+    # OpenRouter/OpenAI report the CACHED-READ prompt subset under `prompt_tokens_details.cached_tokens`;
+    # `prompt_tokens` is the TOTAL. Split it so reads price at 0.1x, the rest at 1x (issue #43 §3).
+    # KNOWN UNDERSTATEMENT (do NOT claim cost parity with the native path): Anthropic 1h cache *writes*
+    # (billed 2x) are NOT surfaced separately on this OpenAI-compat path — they land in `prompt_tokens`
+    # and get priced at 1x, so the FIRST (cache-writing) call per prefix under-reports cost. Acceptable
+    # for a funded-run ESTIMATE, but these cost lines are not invoice-exact. (The native Anthropic path
+    # gets `cache_creation_input_tokens`; OpenRouter's OpenAI-compat usage does not expose it.)
     details = getattr(u, "prompt_tokens_details", None)
     cached = (getattr(details, "cached_tokens", 0) or 0) if details is not None else 0
     usage = {"in": prompt - cached, "out": completion}

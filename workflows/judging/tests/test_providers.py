@@ -433,6 +433,49 @@ def test_openai_judge_google_slug_sanitizes_schema_and_casts_score(monkeypatch):
     assert "additionalProperties" not in js["schema"]  # dropped for google
 
 
+def test_openai_judge_forwards_reasoning_per_thinking(monkeypatch):
+    # #43 review: judge thinking is a deliberate ON decision; OpenRouter infers reasoning from model
+    # defaults when omitted, so the path must forward `reasoning.enabled` EXPLICITLY == judge.thinking
+    # (via extra_body). A thinking judge that silently ran reasoning-off would break the spec deviation.
+    import openai
+
+    from judging.rubric import verdict_schema
+
+    captured: dict = {}
+    monkeypatch.setenv("OPENROUTER_API_KEY", "x")
+    monkeypatch.setattr(
+        openai, "OpenAI",
+        _fake_openai_returning(captured, '{"score": 0.0, "direction": "d", "rationale": "r"}'),
+    )
+    base = dict(base_url="https://openrouter.ai/api/v1", api_key_env="OPENROUTER_API_KEY")
+    judge_complete(
+        JudgeSpec("anthropic/claude-opus-4.8", "openai", thinking=True, **base),
+        ("R", "A", "T"), verdict_schema(), retries=0,
+    )
+    assert captured["extra_body"] == {"reasoning": {"enabled": True}}
+    judge_complete(
+        JudgeSpec("anthropic/claude-opus-4.8", "openai", thinking=False, **base),
+        ("R", "A", "T"), verdict_schema(), retries=0,
+    )
+    assert captured["extra_body"] == {"reasoning": {"enabled": False}}
+
+
+def test_openai_judge_safety_off_fails_loud(monkeypatch):
+    # #43 review: OpenRouter has no Google safety-settings passthrough, so safety_off cannot be honored
+    # on this path — fail loud (no silent drop) BEFORE any SDK call, pointing at the direct gemini path.
+    monkeypatch.setenv("OPENROUTER_API_KEY", "x")
+    with pytest.raises(ProviderError) as ei:
+        judge_complete(
+            JudgeSpec(
+                "google/gemini-3.6-flash", "openai", safety_off=True,
+                base_url="https://openrouter.ai/api/v1", api_key_env="OPENROUTER_API_KEY",
+            ),
+            ("R", "A", "T"), {}, retries=0,
+        )
+    msg = str(ei.value)
+    assert "safety_off" in msg and "gemini" in msg  # names the field + the correct alternative
+
+
 def test_openai_judge_non_google_uses_raw_strict_schema(monkeypatch):
     # anthropic/* (and openai/*) via OpenRouter accept the raw numeric-enum schema with OpenAI-strict
     # enforcement (verified live for Opus) — no sanitization, score stays numeric.
