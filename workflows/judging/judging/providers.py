@@ -24,6 +24,12 @@ from judging.config import JudgeSpec, SubjectSpec
 
 _BACKOFF_BASE_SECONDS = 2.0
 
+# Explicit per-call HTTP timeout on EVERY live provider call (issue #43). Motivated by a live
+# incident where a collection wedged 2+ hours on dead sockets (CLOSE_WAIT) because provider calls
+# had no client timeout: a hung call must become a failed cell (surfaced by ``_retry`` / the inline
+# retry loops), never a wedged run. Generous, so a slow-but-live thinking call is not cut off.
+REQUEST_TIMEOUT_SECONDS = 300.0
+
 
 class ProviderError(Exception):
     """A provider call failed (credentials / transport / parse) — fail loud."""
@@ -117,7 +123,7 @@ def _anthropic_subject(
     _require_env("ANTHROPIC_API_KEY")
     import anthropic
 
-    client = anthropic.Anthropic()
+    client = anthropic.Anthropic(timeout=REQUEST_TIMEOUT_SECONDS)  # #43: no un-timed calls
     folded = _subject_messages(messages, context_prefix)
     # Inline retry so we can report the 1-based attempt that succeeded (sittings audit, §5.6).
     last: Exception | None = None
@@ -170,7 +176,9 @@ def _openai_subject(
     _require_env(env)  # dedicated per-host key; fail loud before any SDK call (N4)
     from openai import OpenAI
 
-    client = OpenAI(api_key=os.environ[env], base_url=subject.base_url)  # base_url None -> default
+    client = OpenAI(
+        api_key=os.environ[env], base_url=subject.base_url, timeout=REQUEST_TIMEOUT_SECONDS
+    )  # base_url None -> default; timeout is #43
     folded = _openai_messages(messages, context_prefix)
     # OpenAI's own API only accepts `max_completion_tokens` now; OpenAI-*compatible* hosts
     # (base_url set: Tinker/Friendli/…) still take the legacy `max_tokens`. Pick by base_url.
@@ -259,9 +267,14 @@ def judge_complete(
     """
     if judge.provider == "anthropic":
         return _anthropic_judge(judge, parts, schema, retries)
+    if judge.provider == "openai":
+        return _openai_judge(judge, parts, schema, retries)
     if judge.provider == "gemini":
         return _gemini_judge(judge, parts, schema, retries)
-    raise ProviderError(f"unsupported judge provider {judge.provider!r}")
+    raise ProviderError(
+        f"unsupported judge provider {judge.provider!r} "
+        "(supported: anthropic, openai, gemini — issue #43)"
+    )
 
 
 def _anthropic_judge(
@@ -270,7 +283,7 @@ def _anthropic_judge(
     _require_env("ANTHROPIC_API_KEY")
     import anthropic
 
-    client = anthropic.Anthropic()
+    client = anthropic.Anthropic(timeout=REQUEST_TIMEOUT_SECONDS)  # #43: no un-timed calls
     rubric, anchor, tail = parts
     # The two stable parts are 1h cache breakpoints (rubric is shared by every judgment;
     # the anchor by all judgments of one scenario). The conversation block is uncached.
@@ -296,6 +309,62 @@ def _anthropic_judge(
     return _retry(call, retries)
 
 
+# --- OpenAI-compatible judge seam (issue #43: OpenRouter live judging) -------
+# The SAME generic OpenAI-chat-completions seam the subjects use, now for the judge stage: a judge
+# configured ``provider: openai`` with ``base_url`` = OpenRouter's endpoint and
+# ``api_key_env: OPENROUTER_API_KEY``. Schema-constrained via ``response_format`` json_schema.
+
+
+def _openai_judge_content(model: str, parts: tuple[str, str, str]) -> list[dict]:
+    """OpenAI-chat content for a judge. For ``anthropic/*`` slugs through OpenRouter, forward the
+    SAME two 1h prompt-cache breakpoints the native Anthropic judge sets (static rubric + per-scenario
+    anchor) as content-block ``cache_control`` — OpenRouter forwards Anthropic caching ONLY if the
+    breakpoints are sent, else Opus judging silently pays full input price (issue #43 §3). The openai
+    SDK passes these non-standard content-block keys through untouched. Non-anthropic hosts
+    (OpenAI/Gemini) auto-cache, so a single joined text block suffices."""
+    rubric, anchor, tail = parts
+    if model.startswith("anthropic/"):
+        return [
+            {"type": "text", "text": rubric, "cache_control": {"type": "ephemeral", "ttl": "1h"}},
+            {"type": "text", "text": anchor, "cache_control": {"type": "ephemeral", "ttl": "1h"}},
+            {"type": "text", "text": tail},
+        ]
+    return [{"type": "text", "text": "\n\n".join(parts)}]
+
+
+def _openai_judge(
+    judge: JudgeSpec, parts: tuple[str, str, str], schema: dict, retries: int
+) -> tuple[dict, str, dict]:
+    env = judge.api_key_env or "OPENAI_API_KEY"
+    _require_env(env)  # dedicated host key (e.g. OPENROUTER_API_KEY); fail loud before SDK (N4)
+    from openai import OpenAI
+
+    client = OpenAI(
+        api_key=os.environ[env], base_url=judge.base_url, timeout=REQUEST_TIMEOUT_SECONDS
+    )  # timeout is #43
+    content = _openai_judge_content(judge.model, parts)
+    # OpenAI proper wants `max_completion_tokens`; OpenAI-*compatible* hosts (base_url set, e.g.
+    # OpenRouter) take legacy `max_tokens` — mirror the subject seam's host split.
+    tok_kwarg = "max_tokens" if judge.base_url else "max_completion_tokens"
+
+    def call() -> tuple[dict, str, dict]:
+        resp = client.chat.completions.create(
+            model=judge.model,
+            messages=[{"role": "user", "content": content}],
+            response_format={
+                "type": "json_schema",
+                "json_schema": {"name": "verdict", "strict": True, "schema": schema},
+            },
+            **{tok_kwarg: judge.max_tokens},
+        )
+        text = (resp.choices[0].message.content or "").strip()
+        if not text:
+            raise RuntimeError("empty judge response")
+        return json.loads(text), text, _openai_usage(resp)
+
+    return _retry(call, retries)
+
+
 def _gemini_has_creds() -> bool:
     """Gemini auth per spec N4: a Vertex service account **or** GEMINI_API_KEY."""
     return bool(
@@ -307,14 +376,18 @@ def _gemini_has_creds() -> bool:
 
 def _gemini_client():
     from google import genai
+    from google.genai import types
 
+    # google-genai's HttpOptions.timeout is in MILLISECONDS (issue #43: no un-timed calls).
+    http_options = types.HttpOptions(timeout=int(REQUEST_TIMEOUT_SECONDS * 1000))
     if os.environ.get("GEMINI_API_KEY"):
-        return genai.Client()  # Gemini Developer API
+        return genai.Client(http_options=http_options)  # Gemini Developer API
     # Vertex AI: service account via ADC (GOOGLE_APPLICATION_CREDENTIALS) / configured project.
     return genai.Client(
         vertexai=True,
         project=os.environ.get("GOOGLE_CLOUD_PROJECT"),
         location=os.environ.get("GOOGLE_CLOUD_LOCATION", "global"),
+        http_options=http_options,
     )
 
 
@@ -436,10 +509,18 @@ def _openai_usage(resp: Any) -> dict:
         return {}
     # OpenAI-compatible usage: prompt/completion tokens. (Reasoning tokens, when a host reports
     # them, are already folded into completion_tokens — so no separate add is needed.)
-    return {
-        "in": getattr(u, "prompt_tokens", 0) or 0,
-        "out": getattr(u, "completion_tokens", 0) or 0,
-    }
+    prompt = getattr(u, "prompt_tokens", 0) or 0
+    completion = getattr(u, "completion_tokens", 0) or 0
+    # OpenRouter/OpenAI report the CACHED prompt subset under `prompt_tokens_details.cached_tokens`;
+    # `prompt_tokens` is the TOTAL (cached + uncached). Split them so the report prices the cached
+    # part at 0.1x — this is how Anthropic-caching-through-OpenRouter (issue #43 §3) shows up as
+    # real cost on the live openai-compatible path. Absent details -> cached 0 -> unchanged.
+    details = getattr(u, "prompt_tokens_details", None)
+    cached = (getattr(details, "cached_tokens", 0) or 0) if details is not None else 0
+    usage = {"in": prompt - cached, "out": completion}
+    if cached:
+        usage["cache_read"] = cached
+    return usage
 
 
 def _gemini_usage(resp: Any) -> dict:

@@ -304,6 +304,37 @@ def test_cost_sonnet_5_priced(sunni, tmp_path):
     assert coll["usd"] == pytest.approx((live + 0.5 * batch) / 1e6)
 
 
+def test_openrouter_slugs_are_priced(sunni, tmp_path):
+    # issue #43: every OpenRouter slug used by the funded run has a PRICES entry (report shows a
+    # real, non-None cost — the acceptance bar). Priced via the real _usage_cost path.
+    from judging.report import _usage_cost
+
+    slugs = [
+        "openai/gpt-5.6-terra",
+        "anthropic/claude-sonnet-5",
+        "google/gemini-3.6-flash",
+        "anthropic/claude-opus-4.8",
+        "qwen/qwen3-235b-a22b-2507",
+        "thinkingmachines/inkling",
+    ]
+    for slug in slugs:
+        usd = _usage_cost(slug, {"in": 1000, "out": 500})
+        assert usd is not None and usd > 0, f"{slug} is unpriced"
+
+
+def test_openrouter_anthropic_cache_read_priced_at_tenth(sunni, tmp_path):
+    # #43 §3: caching-through-OpenRouter shows up as cache_read tokens on the openai-compatible path
+    # (from prompt_tokens_details.cached_tokens). They must price at 0.1x input, like the native path.
+    from judging.report import _usage_cost
+
+    m = "anthropic/claude-opus-4.8"
+    pi = 5.00
+    uncached = _usage_cost(m, {"in": 1000, "out": 0})
+    cached = _usage_cost(m, {"in": 0, "out": 0, "cache_read": 1000})
+    assert uncached == pytest.approx(1000 * pi / 1e6)
+    assert cached == pytest.approx(1000 * pi * 0.1 / 1e6)  # 10x cheaper than uncached input
+
+
 def test_batch_tokens_priced_at_half(sunni, tmp_path):
     # M14: batch usage (usage["batch"]=True) is accumulated under b_ keys and priced at 0.5x.
     from judging.report import _add_usage, _usage_cost

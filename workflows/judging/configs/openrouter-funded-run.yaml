@@ -1,0 +1,44 @@
+# Funded-run configuration — everything on the pre-funded OpenRouter key (issue #43).
+#
+# One provider path for every subject and judge: the generic OpenAI-chat-completions seam (#41),
+# pointed at OpenRouter. No new provider code — `provider: openai` + `base_url` + `api_key_env`.
+#
+#   env: OPENROUTER_API_KEY   (fail-fast if missing — no fallback, baked decision)
+#   base_url: https://openrouter.ai/api/v1
+#
+# Slugs + prices verified 2026-08-03 against each model's openrouter.ai page (cited in report.py
+# PRICES). OpenRouter forwards each provider's LIST price; for anthropic/* models it also forwards
+# Anthropic prompt caching (1h write 2x / read 0.1x) — the judge path sends the two 1h cache_control
+# breakpoints (static rubric + per-scenario anchor) so Opus judging is NOT billed full input price.
+# OpenAI/Gemini auto-cache on their own; nothing extra to send.
+#
+# Serving-host routing / pinning: OpenRouter routes to an available host by default. Prices here are
+# the model-page list rates; for Qwen the effective rate is HOST-DEPENDENT (0.09/0.55 is the cheapest
+# routed host on 2026-08-03). Deterministic host pinning is NOT expressible in the current config
+# schema (there is no provider-routing field) — if the funded run needs a fixed host for price/quality
+# consistency, that is a small follow-up (add a routing passthrough), out of scope for #43.
+#
+# The batch judging path (OpenRouter Batch API, ~50% off) is issue #44 — NOT configured here.
+
+subjects:
+  # GPT-5.6 Terra — openrouter.ai/openai/gpt-5.6-terra ($2/$12 list; a temporary 50%-off promo may apply).
+  - {model: openai/gpt-5.6-terra, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Claude Sonnet 5 — openrouter.ai/anthropic/claude-sonnet-5 ($2/$10 intro thru 2026-08-31; std $3/$15).
+  - {model: anthropic/claude-sonnet-5, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Gemini 3.6 Flash — openrouter.ai/google/gemini-3.6-flash ($1.50/$7.50).
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Qwen3-235B-A22B-Instruct-2507 — openrouter.ai/qwen/qwen3-235b-a22b-2507 ($0.09/$0.55 cheapest host; host-dependent).
+  - {model: qwen/qwen3-235b-a22b-2507, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Inkling — openrouter.ai/thinkingmachines/inkling ($0.95/$4.05). It IS on OpenRouter (contrary to the
+  # issue's "may not be"), so it routes through the funded key too rather than the direct Tinker provider.
+  - {model: thinkingmachines/inkling, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+
+judges:
+  # Gemini 3.6 Flash judge — through the openai-compatible path (openrouter.ai/google/gemini-3.6-flash).
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  # Opus 4.8 judge — openrouter.ai/anthropic/claude-opus-4.8 ($5/$25). anthropic/* -> cache_control
+  # breakpoints are forwarded automatically by the openai judge path (issue #43 §3).
+  - {model: anthropic/claude-opus-4.8, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+
+# Full framings sweep (the funded run's "framings expansion") — unstated / stated / guided.
+framings: [unstated, stated, guided]

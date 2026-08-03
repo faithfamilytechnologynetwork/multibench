@@ -27,7 +27,7 @@ _FRAMINGS_REPORT = ("unstated", "stated", "guided")
 # Rates verified 2026-08-02 against each provider's official pricing page; see the PR for #41
 # for the citation of every new entry. Two entries are flagged UNVERIFIED (no first-party rate
 # found) — confirm on the provider console before trusting their cost lines.
-PRICES_DATED = "2026-08-03 (verified vs. official pages; Inkling/Tinker + Qwen/Friendli per architect host decisions)"
+PRICES_DATED = "2026-08-03 (verified vs. official pages; Inkling/Tinker + Qwen/Friendli per architect host decisions; OpenRouter slugs vs. openrouter.ai model pages, issue #43)"
 PRICES: dict[str, tuple[float, float]] = {
     "claude-opus-4-8": (5.00, 25.00),
     "claude-sonnet-5": (3.00, 15.00),  # standard rate; intro $2/$10 through 2026-08-31
@@ -45,6 +45,16 @@ PRICES: dict[str, tuple[float, float]] = {
     # Qwen3-235B on Friendli serverless (FRIENDLI_API_KEY) — paper's serving host + exact checkpoint.
     # NOTE: Friendli flags this checkpoint for deprecation 2026-08-05 — confirm still live at run time.
     "Qwen/Qwen3-235B-A22B-Instruct-2507": (0.20, 0.80),  # friendli.ai/pricing (api/public/model-apis)
+    # --- issue #43: OpenRouter slugs (funded run). OpenRouter forwards each provider's LIST price
+    # (verified per-model on the openrouter.ai model pages, 2026-08-03) and forwards Anthropic prompt
+    # caching (1h write 2x input, read 0.1x input — the SAME multipliers _usage_cost already applies).
+    # Keyed by the EXACT slug the run config sends; the live smoke confirms each slug resolves. ---
+    "anthropic/claude-opus-4.8": (5.00, 25.00),  # openrouter.ai/anthropic/claude-opus-4.8 (Opus judge)
+    "anthropic/claude-sonnet-5": (2.00, 10.00),  # openrouter.ai/anthropic/claude-sonnet-5 (intro rate thru 2026-08-31; std 3/15)
+    "google/gemini-3.6-flash": (1.50, 7.50),  # openrouter.ai/google/gemini-3.6-flash (subject + Gemini judge)
+    "openai/gpt-5.6-terra": (2.00, 12.00),  # openrouter.ai/openai/gpt-5.6-terra (list; a temporary 50%-off promo may apply)
+    "qwen/qwen3-235b-a22b-2507": (0.09, 0.55),  # openrouter.ai/qwen/qwen3-235b-a22b-2507 (cheapest routed host; host-dependent)
+    "thinkingmachines/inkling": (0.95, 4.05),  # openrouter.ai/thinkingmachines/inkling (Inkling IS on OpenRouter — needn't stay on Tinker)
 }
 
 

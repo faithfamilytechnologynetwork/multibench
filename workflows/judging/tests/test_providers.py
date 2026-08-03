@@ -277,6 +277,209 @@ def test_gemini_usage_counts_thinking_tokens():
     assert _gemini_usage(resp) == {"in": 100, "out": 65}  # 40 answer + 25 thinking
 
 
+# --- OpenAI-compatible judge seam (issue #43: OpenRouter live judging) -------
+
+
+def test_openai_judge_missing_named_credential_fails_loud(monkeypatch):
+    # N4: the OpenRouter judge needs OPENROUTER_API_KEY; fail loud naming the exact var, before SDK.
+    monkeypatch.delenv("OPENROUTER_API_KEY", raising=False)
+    with pytest.raises(ProviderError) as ei:
+        judge_complete(
+            JudgeSpec(
+                "anthropic/claude-opus-4.8", "openai",
+                base_url="https://openrouter.ai/api/v1", api_key_env="OPENROUTER_API_KEY",
+            ),
+            ("rubric", "anchor", "tail"), {}, retries=0,
+        )
+    assert "OPENROUTER_API_KEY" in str(ei.value)
+
+
+def test_openai_judge_missing_default_credential_fails_loud(monkeypatch):
+    # api_key_env absent -> falls back to OPENAI_API_KEY; fail loud if that's missing too (N4).
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
+    with pytest.raises(ProviderError) as ei:
+        judge_complete(JudgeSpec("some/model", "openai"), ("r", "a", "t"), {}, retries=0)
+    assert "OPENAI_API_KEY" in str(ei.value)
+
+
+def test_openai_judge_content_forwards_anthropic_cache_breakpoints():
+    # #43 §3: for anthropic/* slugs, forward the SAME two 1h cache_control breakpoints the native
+    # Anthropic judge sets (static rubric + per-scenario anchor); tail is uncached. OpenRouter
+    # forwards Anthropic caching ONLY if these are sent.
+    from judging.providers import _openai_judge_content
+
+    c = _openai_judge_content("anthropic/claude-opus-4.8", ("RUBRIC", "ANCHOR", "TAIL"))
+    assert [b["text"] for b in c] == ["RUBRIC", "ANCHOR", "TAIL"]
+    assert c[0]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert c[1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert "cache_control" not in c[2]
+
+
+def test_openai_judge_content_non_anthropic_single_block_no_cache():
+    # Non-anthropic host (Gemini/OpenAI) auto-caches: one joined text block, NO cache_control.
+    from judging.providers import _openai_judge_content
+
+    c = _openai_judge_content("google/gemini-3.6-flash", ("R", "A", "T"))
+    assert c == [{"type": "text", "text": "R\n\nA\n\nT"}]
+
+
+def test_openai_judge_request_constructs_via_real_sdk_and_forwards_cache():
+    # Anti-mock (M21): validate the ACTUAL judge create-kwargs through the REAL openai SDK param
+    # model AND prove the anthropic/* cache_control breakpoints survive the SDK's RUNTIME transform
+    # (`maybe_transform` — what actually builds the request body on the wire). The pydantic
+    # TypeAdapter is a stricter path that strips nested cache_control, so shape and cache are
+    # asserted through their respective real code paths — no hand-rolled dict.
+    import pydantic
+    from openai._utils import maybe_transform
+    from openai.types.chat import completion_create_params as ccp
+
+    from judging.providers import _openai_judge_content
+    from judging.rubric import verdict_schema
+
+    content = _openai_judge_content("anthropic/claude-opus-4.8", ("rubric", "anchor", "tail"))
+    kwargs = {
+        "model": "anthropic/claude-opus-4.8",
+        "max_tokens": 4096,
+        "messages": [{"role": "user", "content": content}],
+        "response_format": {
+            "type": "json_schema",
+            "json_schema": {"name": "verdict", "strict": True, "schema": verdict_schema()},
+        },
+    }
+    ta = pydantic.TypeAdapter(ccp.CompletionCreateParamsNonStreaming)
+    ta.validate_python(kwargs)  # rejects request-shape drift (model/max_tokens/messages/response_format)
+    # RUNTIME body (what goes on the wire) keeps the two 1h cache_control breakpoints:
+    body = maybe_transform(kwargs, ccp.CompletionCreateParamsNonStreaming)
+    wire = body["messages"][0]["content"]
+    assert wire[0]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert wire[1]["cache_control"] == {"type": "ephemeral", "ttl": "1h"}
+    assert "cache_control" not in wire[2]
+    # Prove the real-SDK validation actually bites (anti-mock): drop the required model.
+    with pytest.raises(pydantic.ValidationError):
+        ta.validate_python({"max_tokens": 4096, "messages": kwargs["messages"]})
+
+
+def test_openai_usage_splits_cached_prompt_tokens():
+    # #43 §3: OpenRouter reports the cached subset under prompt_tokens_details.cached_tokens, while
+    # prompt_tokens is the TOTAL — split so the report prices cached input at 0.1x, uncached at full.
+    from types import SimpleNamespace
+
+    from judging.providers import _openai_usage
+
+    resp = SimpleNamespace(
+        usage=SimpleNamespace(
+            prompt_tokens=1000, completion_tokens=50,
+            prompt_tokens_details=SimpleNamespace(cached_tokens=800),
+        )
+    )
+    assert _openai_usage(resp) == {"in": 200, "out": 50, "cache_read": 800}
+    # No cached tokens -> no cache_read key, `in` == prompt_tokens (unchanged from the #41 shape).
+    resp2 = SimpleNamespace(
+        usage=SimpleNamespace(prompt_tokens=120, completion_tokens=45, prompt_tokens_details=None)
+    )
+    assert _openai_usage(resp2) == {"in": 120, "out": 45}
+
+
+# --- HTTP timeouts on all live provider calls (issue #43 §4) ------------------
+# Motivated by a live incident: a collection wedged 2+ hours on dead sockets (CLOSE_WAIT) because
+# provider calls had no client timeout. Every live client is now built with an explicit timeout, and
+# a hung/erroring call surfaces as a ProviderError (failed, resumable cell), never a wedged run.
+
+
+def _fake_openai(captured, exc):
+    class FakeCompletions:
+        def create(self, **kwargs):
+            raise exc
+
+    class FakeChat:
+        completions = FakeCompletions()
+
+    class FakeOpenAI:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+            self.chat = FakeChat()
+
+    return FakeOpenAI
+
+
+def test_openai_subject_sets_timeout_and_hung_call_fails(monkeypatch):
+    # The incident was a *collection* (subject) hang — this is the on-point regression.
+    import openai
+
+    import judging.providers as P
+
+    captured: dict = {}
+    monkeypatch.setenv("OPENAI_API_KEY", "x")
+    monkeypatch.setattr(openai, "OpenAI", _fake_openai(captured, TimeoutError("hung socket")))
+    with pytest.raises(ProviderError):
+        subject_complete(
+            SubjectSpec("gpt-5.6-terra", "openai"), None, [{"role": "user", "content": "hi"}],
+            retries=0,
+        )
+    assert captured["timeout"] == P.REQUEST_TIMEOUT_SECONDS
+
+
+def test_openai_judge_sets_timeout_and_hung_call_fails(monkeypatch):
+    import openai
+
+    import judging.providers as P
+
+    captured: dict = {}
+    monkeypatch.setenv("OPENROUTER_API_KEY", "x")
+    monkeypatch.setattr(openai, "OpenAI", _fake_openai(captured, TimeoutError("hung socket")))
+    with pytest.raises(ProviderError):
+        judge_complete(
+            JudgeSpec(
+                "anthropic/claude-opus-4.8", "openai",
+                base_url="https://openrouter.ai/api/v1", api_key_env="OPENROUTER_API_KEY",
+            ),
+            ("r", "a", "t"), {"type": "object"}, retries=0,
+        )
+    assert captured["timeout"] == P.REQUEST_TIMEOUT_SECONDS
+    assert captured["base_url"] == "https://openrouter.ai/api/v1"
+
+
+def test_anthropic_judge_sets_timeout_and_hung_call_fails(monkeypatch):
+    import anthropic
+
+    import judging.providers as P
+
+    captured: dict = {}
+
+    class FakeMessages:
+        def create(self, **kwargs):
+            raise TimeoutError("hung socket")
+
+    class FakeAnthropic:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+            self.messages = FakeMessages()
+
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "x")
+    monkeypatch.setattr(anthropic, "Anthropic", FakeAnthropic)
+    with pytest.raises(ProviderError):
+        judge_complete(JudgeSpec("claude-opus-4-8", "anthropic"), ("r", "a", "t"), {}, retries=0)
+    assert captured["timeout"] == P.REQUEST_TIMEOUT_SECONDS
+
+
+def test_gemini_client_sets_timeout_in_milliseconds(monkeypatch):
+    # google-genai's HttpOptions.timeout is in MILLISECONDS (not seconds) — verify the unit.
+    from google import genai
+
+    import judging.providers as P
+
+    captured: dict = {}
+
+    class FakeClient:
+        def __init__(self, **kwargs):
+            captured.update(kwargs)
+
+    monkeypatch.setenv("GEMINI_API_KEY", "x")
+    monkeypatch.setattr(genai, "Client", FakeClient)
+    P._gemini_client()
+    assert captured["http_options"].timeout == int(P.REQUEST_TIMEOUT_SECONDS * 1000)
+
+
 def test_subject_request_missing_required_field_is_rejected_by_sdk():
     # Prove the real-SDK validation actually bites (anti-mock): a request missing max_tokens fails.
     import pydantic

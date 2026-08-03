@@ -73,6 +73,48 @@ def test_load_config_builds_openai_and_gemini_subjects(tmp_path):
     assert gem.provider == "gemini"
 
 
+def test_load_config_builds_openrouter_judge(tmp_path):
+    # issue #43: a judge may be openai-compatible (OpenRouter) with base_url + api_key_env.
+    cfg = load_config(
+        _write(
+            tmp_path,
+            {
+                "judges": [
+                    {
+                        "model": "anthropic/claude-opus-4.8",
+                        "provider": "openai",
+                        "base_url": "https://openrouter.ai/api/v1",
+                        "api_key_env": "OPENROUTER_API_KEY",
+                    },
+                    {"model": "claude-opus-4-8", "provider": "anthropic"},  # base_url/api_key_env -> None
+                ]
+            },
+        )
+    )
+    orr, native = cfg.judges
+    assert orr.provider == "openai"
+    assert orr.base_url == "https://openrouter.ai/api/v1"
+    assert orr.api_key_env == "OPENROUTER_API_KEY"
+    assert (native.base_url, native.api_key_env) == (None, None)  # optional -> None
+
+
+def test_funded_run_config_loads():
+    # The committed funded-run config (issue #43) must load: OpenRouter subjects + judges, full
+    # framings. Guards against slug/field drift in the run-config example we ship.
+    from pathlib import Path
+
+    root = Path(__file__).resolve().parents[3]
+    cfg = load_config(root / "workflows/judging/configs/openrouter-funded-run.yaml")
+    assert cfg.framings == ("unstated", "stated", "guided")
+    assert [j.model for j in cfg.judges] == [
+        "google/gemini-3.6-flash", "anthropic/claude-opus-4.8"
+    ]
+    assert all(
+        j.provider == "openai" and j.api_key_env == "OPENROUTER_API_KEY" for j in cfg.judges
+    )
+    assert all(s.provider == "openai" for s in cfg.subjects)
+
+
 @pytest.mark.parametrize(
     "obj,needle",
     [
@@ -82,7 +124,8 @@ def test_load_config_builds_openai_and_gemini_subjects(tmp_path):
         ({"subjects": [{"model": "m", "api_key_env": ""}]}, "non-empty string"),
         ({"subjects": [{"model": "m", "nope": 1}]}, "unknown subject key"),
         ({"judges": [{"model": "m", "provider": "anthropic", "bad": 1}]}, "unknown judge key"),
-        ({"judges": [{"model": "m", "provider": "openai"}]}, "provider must be one of"),
+        # openai is now a VALID judge provider (issue #43 — OpenRouter live judging); mistral is not.
+        ({"judges": [{"model": "m", "provider": "mistral"}]}, "provider must be one of"),
         ({"judges": []}, "non-empty list"),
         ({"framings": ["made-up"]}, "unknown framings value"),
         ({"pressures": ["not-a-pressure"]}, "unknown pressures value"),

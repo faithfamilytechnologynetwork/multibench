@@ -20,15 +20,24 @@ SCOPES: tuple[str, ...] = ("turn1", "full")
 
 @dataclass(frozen=True)
 class JudgeSpec:
-    """One judge in the panel."""
+    """One judge in the panel.
+
+    ``provider`` is one of ``anthropic`` | ``openai`` | ``gemini``. The ``openai`` provider is the
+    same generic OpenAI-chat-completions-compatible seam the subjects use (issue #41): ``base_url``
+    points it at the host (e.g. OpenRouter ``https://openrouter.ai/api/v1``) and ``api_key_env``
+    names the env var holding that host's key (e.g. ``OPENROUTER_API_KEY``). Both are ignored by the
+    anthropic/gemini branches. Judging through OpenRouter forwards Anthropic prompt caching for
+    ``anthropic/*`` slugs (issue #43); other hosts auto-cache."""
 
     model: str
-    provider: str  # "anthropic" | "gemini"
+    provider: str  # "anthropic" | "openai" | "gemini"
     thinking: bool = True
     # Judging-only: a judge must score benign-but-sensitive transcripts without
     # refusing. Subjects are NEVER run safety-off (spec §5.5).
     safety_off: bool = False
     max_tokens: int = 4096
+    base_url: str | None = None  # openai-compatible: host endpoint (None -> SDK default)
+    api_key_env: str | None = None  # openai-compatible: env var holding the key (None -> OPENAI_API_KEY)
 
 
 @dataclass(frozen=True)
@@ -90,7 +99,7 @@ class ConfigError(Exception):
     """A config file is missing or malformed (fail-loud, spec N2)."""
 
 
-_JUDGE_PROVIDERS = ("anthropic", "gemini")
+_JUDGE_PROVIDERS = ("anthropic", "openai", "gemini")
 # Subjects: Claude, any OpenAI-compatible host (via base_url/api_key_env), or Gemini (issue #41).
 _SUBJECT_PROVIDERS = ("anthropic", "openai", "gemini")
 
@@ -141,6 +150,8 @@ def _spec(raw: object, *, kind: str, allowed: set[str], providers: tuple[str, ..
             model=model, provider=provider, thinking=thinking,
             safety_off=_opt_bool(raw, "safety_off", False, where),
             max_tokens=_opt_pos_int(raw, "max_tokens", 4096, where),
+            base_url=_opt_str(raw, "base_url", where),
+            api_key_env=_opt_str(raw, "api_key_env", where),
         )
     return SubjectSpec(
         model=model, provider=provider, thinking=thinking,
@@ -161,7 +172,7 @@ def _str_tuple(raw: dict, key: str, allowed: tuple[str, ...], where: str) -> tup
 
 
 _CONFIG_FIELDS = {f.name for f in fields(Config)}
-_JUDGE_FIELDS = {"model", "provider", "thinking", "safety_off", "max_tokens"}
+_JUDGE_FIELDS = {"model", "provider", "thinking", "safety_off", "max_tokens", "base_url", "api_key_env"}
 _SUBJECT_FIELDS = {"model", "provider", "thinking", "max_tokens", "base_url", "api_key_env"}
 
 
