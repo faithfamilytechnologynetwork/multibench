@@ -10,6 +10,7 @@ dependencies = [
     "google-genai>=0.3",
     "pyyaml>=6.0",
     "tradition_validator",
+    "openai>=2.0",
 ]
 
 [project.scripts]
@@ -24,8 +25,8 @@ packages = ["judging"]
 
 # Single-source the universal core + format loaders: depend on the validator
 # package by path (spec/issue: "don't fork divergently"). The provider SDKs
-# (anthropic, google-genai) are declared up front per the approved plan; they are
-# used by providers.py in Phase 3 (the judge/subject completion seams).
+# (anthropic, google-genai, openai) back providers.py's judge/subject completion
+# seams; `openai` is the generic OpenAI-compatible subject host (Terra/Inkling/Qwen, issue #41).
 [tool.uv.sources]
 tradition_validator = { path = "../../apps/tradition_validator", editable = true }
 

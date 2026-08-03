@@ -155,3 +155,48 @@ def test_live_run_smoke_end_to_end(sunni, tmp_path):
     assert rep["counts"]["judgments"] > 0  # real verdicts landed
     # Both default judges actually produced verdicts (this is what the mock boundary hid).
     assert any("gemini" in j for j in rep["judges"]), f"no gemini verdicts: judges={rep['judges']}"
+
+
+# --- issue #41: live smoke for the NEW subject seams -------------------------
+# The anti-mock smoke per provider (mock-boundary lesson): one real completion each, proving the
+# seam returns real text + priced usage against a live host. Skips cleanly without creds (N4).
+# Point at a different host/model via env: OPENAI_SMOKE_BASE_URL / OPENAI_SMOKE_KEY_ENV /
+# *_SMOKE_MODEL (e.g. a Qwen or Inkling host). Run before the benchmark:
+#   OPENAI_API_KEY=... uv --project workflows/judging run pytest workflows/judging -m live --live \
+#     -k live_openai_subject_smoke
+
+_HAS_OPENAI = bool(os.environ.get("OPENAI_API_KEY") or os.environ.get(os.environ.get("OPENAI_SMOKE_KEY_ENV", "")))
+
+_SMOKE_TURN = [{"role": "user", "content": "Reply with exactly the single word: ok."}]
+
+
+@pytest.mark.skipif(not _HAS_OPENAI, reason="no OpenAI-compatible key")
+def test_live_openai_subject_smoke():
+    """issue #41: the generic OpenAI-compatible subject seam returns real text + usage. Defaults to
+    OpenAI (gpt-5.6-terra / OPENAI_API_KEY); override base_url/api_key_env/model via env to smoke a
+    Qwen or Inkling host with the SAME seam."""
+    from judging.providers import subject_complete
+
+    subject = SubjectSpec(
+        model=os.environ.get("OPENAI_SMOKE_MODEL", "gpt-5.6-terra"),
+        provider="openai",
+        base_url=os.environ.get("OPENAI_SMOKE_BASE_URL"),
+        api_key_env=os.environ.get("OPENAI_SMOKE_KEY_ENV"),
+    )
+    text, usage, attempts = subject_complete(subject, None, _SMOKE_TURN, 2)
+    assert text.strip(), "empty completion from OpenAI-compatible subject"
+    assert usage.get("in", 0) > 0 and usage.get("out", 0) > 0, f"no usage reported: {usage}"
+
+
+@pytest.mark.skipif(not _HAS_GEMINI, reason="needs Gemini creds")
+def test_live_gemini_subject_smoke():
+    """issue #41: the Gemini SUBJECT seam (distinct from the judge seam) returns real text +
+    usage, run WITHOUT any safety-off (subjects are never safety-off, §5.5)."""
+    from judging.providers import subject_complete
+
+    subject = SubjectSpec(
+        model=os.environ.get("GEMINI_SMOKE_MODEL", "gemini-3.6-flash"), provider="gemini"
+    )
+    text, usage, attempts = subject_complete(subject, None, _SMOKE_TURN, 2)
+    assert text.strip(), "empty completion from Gemini subject"
+    assert usage.get("in", 0) > 0, f"no usage reported: {usage}"
