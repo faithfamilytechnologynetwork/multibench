@@ -88,22 +88,42 @@ The over-application probe category E is the negative mirror of condition (b).
 
 - **AFB instrument** vendored at `data/input/afb/` (150 Qs + official scorer, MIT; see SOURCE.md).
 - **Over-application probes** authored at `probes/` (70 prompts, designed pre-training).
-- **Collection**: gemma-4-31b is NOT yet a MultiBench subject. Add it as a `SubjectSpec`
-  (`workflows/judging/judging/config.py`) via a run config; the OpenAI-compat `base_url` +
-  `api_key_env` seam routes either OpenRouter (verify slug) or self-serve vLLM. `collect.py`
-  globs `traditions/*/tradition.yaml` and runs the grid — adding a subject is config-only.
+- **Collection route (architect REVISED, Waleed 2026-08-04): OpenRouter, not self-serve vLLM**
+  — keeps spend on the funded key. Config-only `SubjectSpec` via the OpenAI-compat seam:
+  `configs/gemma-collection.yaml` — subject `google/gemma-4-31b-it` (lowercase, **not** the
+  `:free` variant), `base_url: https://openrouter.ai/api/v1`, `api_key_env: OPENROUTER_API_KEY`.
+  `collect.py` globs `traditions/*/tradition.yaml` and runs the grid.
   - guided framing (training source): 519 × 6 pressures = 3,114 sittings.
   - unstated framing (before/after baseline): 3,114 sittings.
-- **Training/eval**: Modal 1×H200, QLoRA r32, custom loops. Port from taqwabench:
-  `modal_gemma_sft.py`, `modal_gemma_sample.py` (samplability + stage-2), `modal_gemma_dpo2.py`,
-  `modal_gemma_eval.py`, `modal_gemma_capability.py`. vLLM bf16 + LoRA for eval serving.
+- **Eval/training stack stays Modal + vLLM** (H200/H100, QLoRA r32, custom loops). Port from
+  taqwabench: `modal_gemma_sft.py`, `modal_gemma_sample.py` (samplability + stage-2),
+  `modal_gemma_dpo2.py`, `modal_gemma_eval.py`, `modal_gemma_capability.py`. Serving reference
+  in hand: shannon `apps/modal/serve.py` (proven vLLM OpenAI-server for gemma-4-31B on H100,
+  gemma4 chat-template + cached weights in the `shannon-gemma-vllm-hf-cache` volume). Modal is
+  authed (`waleedkadous`); the `huggingface` secret + `gemma-dpo` volume already exist.
 
-**Keys**: request from architect when needed (do not hunt). None used yet.
+### Cross-stack methodology consequences of OpenRouter collection (architect 2026-08-04)
+1. **The same-stack base control absorbs the collection-vs-eval stack shift.** Collection is on
+   OpenRouter; eval serving is vLLM. Running **base gemma through the identical vLLM eval
+   stack** is the control that makes an OpenRouter-collected training set compatible with a
+   vLLM-evaluated result — the shift is measured, not assumed away. (jalees saw a −0.058
+   provider-vs-vLLM shift, larger than several DPO arms' effects.)
+2. **Provenance caveat — "own outputs AS SERVED."** OpenRouter may route gemma to a
+   **quantized** host, so the distillation source is the model's outputs as that host produced
+   them. **Record the serving host from response metadata for every collection call** where
+   OpenRouter returns it (field to be verified on a real response at smoke time — no guessing;
+   see Next steps). Host pinning is NOT expressible in the current config schema — disclose in
+   the writeup.
+3. **The Modal/vLLM work is not wasted** — it is the eval stack AND the same-stack base control.
+
+**Keys**: `OPENROUTER_API_KEY` via `(set -a; source /Users/mwk/Development/fftn/taqwabench/.env; set +a)`.
+**NEVER** copy the key into repo / logs / PR text — public repo, funded key.
 
 ## Gates & sequencing (architect, 2026-08-04)
 
-1. **[HARD BLOCK] Framings expansion is running** on the shared OpenRouter key + Gemini
-   quota → do NOT start gemma collection until architect gives the word (finishes within hours).
+1. **[HARD BLOCK] Framings expansion / mop-up is running** on the shared OpenRouter key +
+   Gemini quota. Gemma collection now goes through THAT SAME key → do NOT start collection OR
+   Gemini banding until architect gives the word (mop-up likely done within hours).
 2. **[HARD GATE] Samplability diagnostic** — K=4 unstated samples/scenario from base gemma,
    gemini-banded, per-tradition histogram. **Report to architect before ANY training.**
    Expected (per jalees): good-band behavior barely appears → stage-1-first mandatory.
@@ -124,17 +144,31 @@ green-light for the prerequisite gemma collection.
   Required BEFORE training per methodology §5.6; over-application is the spec's headline risk.
 - Confirmed collection is a config-only change (SubjectSpec seam) — no core edits.
 - Confirmed corpus counts (519; sunni-islam 140 dominant → balancing needed).
-- **No spend, no shared-key use, nothing collected or trained.** Awaiting green-light on (1).
+- Probe suite tightenings (architect): cat E guard → P(score ≥ 1) ≈ base (opt-out makes even a
+  passing mention a violation); cat F → comparative-vs-base only (prompt itself names religion).
+- **Route pivot (architect revised):** collection → OpenRouter funded key (slug
+  `google/gemma-4-31b-it`, not `:free`), not self-serve vLLM. Wrote dormant
+  `configs/gemma-collection.yaml`. Recorded the 3 cross-stack consequences (same-stack control
+  absorbs the shift; quantized-host provenance caveat + record serving host; Modal = eval stack).
+- Environment verified: Modal authed (`waleedkadous`), `huggingface` secret + `gemma-dpo`
+  volume exist, shannon `serve.py` is the vLLM-server reference for the eval stack.
+- **No spend, no shared-key use, nothing collected or trained.** Collection + banding both now
+  gated on the framings mop-up finishing (shares the funded key) — awaiting architect's word.
 
 ## Next steps (ordered)
 
-1. **[now, no spend]** Port/adapt the Modal scripts into `experiments/48.../modal/` (SFT,
-   sample, dpo2, eval, capability) parameterized for the pooled MultiBench set; write the
-   gemma `SubjectSpec` run config (dormant until green-light).
-2. **[now, ask for key]** Verify the OpenRouter slug for `google/gemma-4-31B-it`; if routing
-   is doubtful, plan self-serve vLLM collection through the SAME stack used for eval (kills
-   the serving-stack confound at the source, spec §8).
-3. **[on green-light]** Run gemma collection (guided + unstated, 7 traditions) → Gemini banding.
-4. **[HARD GATE]** Samplability diagnostic → report per-tradition histogram to architect.
-5. **[on approval + capability config]** Stage-1 SFT → eval battery → stage-2 DPO → full battery.
-6. Write up: AFB before/after figure, over-application table, capability panel, MultiBench (descriptive).
+1. **[DONE]** Dormant OpenRouter collection config → `configs/gemma-collection.yaml`.
+   Over-application probe suite designed (`probes/`). AFB instrument vendored.
+2. **[on collection go-word] SMOKE**: `collect --config configs/gemma-collection.yaml --limit 1`
+   against one scenario. At smoke time, **inspect a real OpenRouter response object to find the
+   serving-host field** (e.g. `resp.provider` / `model_extra`) — verify, don't guess — then
+   decide the minimal, backward-compatible capture so full collection records host per call.
+   Verify sittings are clean (framing in `context_prefix` only; turns hold bare scenario text).
+3. **[on clean smoke]** Full collection (guided + unstated, 7 traditions) → report actuals.
+4. **[on banding go-word]** Gemini band all guided + unstated sittings (selection judge).
+5. **[HARD GATE]** Samplability diagnostic (K=4 unstated from base gemma, per-tradition
+   histogram) → **report to architect before ANY training.**
+6. **[on approval + capability config]** Build pooled bare SFT set (adapt taqwabench
+   `build_sft_guided.py` to `scenario_id`/tradition, no split, per-tradition balancing) →
+   stage-1 SFT → eval battery → stage-2 DPO → full battery (AFB + probes + capability panel).
+7. Write up: AFB before/after figure, over-application table, capability panel, MultiBench (descriptive).

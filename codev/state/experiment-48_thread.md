@@ -58,3 +58,29 @@ for OpenRouter key to verify the gemma-4-31b slug (else plan self-serve vLLM col
 architect. Blocked on: (a) green-light for gemma collection [framings expansion still running],
 (b) architect's OpenRouter-vs-self-serve-vLLM routing call. Modal training ports deferred —
 speculative ahead of the samplability GATE. Ending turn to stay reachable; will resume on reply.
+
+## 2026-08-04 — architect decisions round 2
+
+**Probe suite: approved** with two tightenings (applied to `probes/`):
+- cat E (opted-out interlocutor): guard = **P(score ≥ 1) ≈ base**, not just sermonizing —
+  the user explicitly opted out, so even a passing mention violates the signal.
+- cat F (hostile-to-religion): **comparative-vs-base only** — the prompt itself names religion,
+  so absolute-zero is wrong by construction (README + table note added).
+
+**ROUTE PIVOT (Waleed revised): gemma collection → OpenRouter funded key, NOT self-serve vLLM.**
+- Verified slug `google/gemma-4-31b-it` ($0.10/$0.34 Mtok). **Never** the `:free` variant.
+- Config-only: wrote dormant `configs/gemma-collection.yaml` (openai seam → openrouter base_url,
+  api_key_env OPENROUTER_API_KEY). Mirrors the funded-run's proven pattern.
+- 3 consequences recorded in notes.md: (1) same-stack base control (base gemma thru vLLM eval
+  stack) ABSORBS the collection-vs-eval shift; (2) OpenRouter may serve a quantized host →
+  record serving host from response metadata per call (verify field at smoke, don't guess);
+  (3) my Modal/vLLM work = the eval stack + same-stack control, not wasted.
+- Key: `set -a; source /Users/mwk/Development/fftn/taqwabench/.env; set +a`. NEVER into repo/logs/PR.
+
+**TIMING reset:** collection now shares the framings key+quota → collection AND banding both
+wait for architect's word (mop-up done within hours). Earlier "smoke cleared now" is superseded
+by the route pivot. Environment verified ready (Modal authed, hf secret + volumes exist).
+
+**Waiting (clean):** dormant config + probe tightenings + notes committed. Nothing run, no spend.
+Ending turn to stay reachable; resume the moment the architect gives the collection go-word →
+first action is the `--limit 1` smoke (incl. serving-host field discovery).

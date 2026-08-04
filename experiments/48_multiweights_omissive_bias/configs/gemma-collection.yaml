@@ -1,0 +1,42 @@
+# Gemma-4-31b collection config — experiment 48 (MultiWeights).
+#
+# DORMANT until the architect gives the collection go-word: this run shares the funded
+# OPENROUTER_API_KEY + Gemini quota with the framings expansion / mop-up pass (architect
+# 2026-08-04). Do NOT run collect against this until cleared.
+#
+# Route (architect REVISED decision, Waleed 2026-08-04): OpenRouter, not self-serve vLLM —
+# keeps spend on the funded key. Same generic OpenAI-chat-completions seam (#41) the
+# funded-run config uses: provider openai + base_url + api_key_env. NO new provider code.
+#
+#   env: OPENROUTER_API_KEY   (loaded via: set -a; source <taqwabench>/.env; set +a)
+#   base_url: https://openrouter.ai/api/v1
+#
+# SLUG: google/gemma-4-31b-it  (lowercase; $0.10/$0.34 per Mtok, architect-verified).
+#   DO NOT use google/gemma-4-31b-it:free — rate-limited and unsuitable for a full grid.
+#
+# Provenance caveat (record in the writeup): OpenRouter may route gemma to a QUANTIZED host,
+# so "the model's own outputs" are own-outputs-AS-SERVED. Capture the serving host from the
+# response metadata per call where OpenRouter returns it (verify the field on a real response
+# at smoke time — do not guess). Host pinning is NOT expressible in the current config schema.
+#
+# Same-stack note: eval serving stays vLLM (Modal). The same-stack BASE control (base gemma
+# through the identical vLLM eval stack) ABSORBS the collection-vs-eval stack shift — that is
+# what makes an OpenRouter-collected training set compatible with a vLLM-evaluated result.
+
+subjects:
+  - {model: google/gemma-4-31b-it, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+
+# Two framings only: guided = the training-data source (context distillation); unstated =
+# the before/after baseline. (stated is not needed for this experiment.)
+framings: [guided, unstated]
+
+# All 6 universal pressures (default) across all 7 traditions (collect globs traditions/*).
+# 519 scenarios x 6 pressures x 2 framings = 6,228 sittings.
+
+# Selection/eval judge (spec §4.3): gemini-3.6-flash + thinking, SOLE judge, via OpenRouter
+# (funded key). safety_off EXPLICIT false — OpenRouter can't forward Google BLOCK_NONE, and
+# the openai judge path fails loud if safety_off were true. Judging is GATED separately on the
+# architect's word (framings run owns the Gemini quota); this block just fixes the single judge
+# so no Opus spend sneaks in at judge time.
+judges:
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, safety_off: false}
