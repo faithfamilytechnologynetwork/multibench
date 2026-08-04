@@ -1,0 +1,10 @@
+# Large / regenerable experiment artifacts — keep out of git (protocol: commit summaries, not heavy data)
+data/output/**/*.jsonl
+data/output/**/collect_*.jsonl
+data/output/**/*.log
+data/output/**/samples/
+data/output/**/checkpoints/
+data/output/**/*.safetensors
+data/output/**/*.bin
+# scratch reference clones
+reference/afb-clone/
