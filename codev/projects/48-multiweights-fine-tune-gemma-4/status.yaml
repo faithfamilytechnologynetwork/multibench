@@ -1,0 +1,14 @@
+id: '48'
+title: multiweights-fine-tune-gemma-4
+protocol: experiment
+phase: hypothesis
+plan_phases: []
+current_plan_phase: null
+gates:
+  experiment-complete:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-04T21:39:40.845Z'
+updated_at: '2026-08-04T21:39:40.846Z'
