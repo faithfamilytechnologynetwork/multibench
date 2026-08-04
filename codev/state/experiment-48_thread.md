@@ -40,3 +40,21 @@ sunni-islam 140 dominant → per-tradition balancing needed after banding.
 
 Next (no spend): port taqwabench Modal scripts + write dormant gemma run config; ask architect
 for OpenRouter key to verify the gemma-4-31b slug (else plan self-serve vLLM collection).
+
+### De-risked the collection/training seams (research, no spend)
+- **Run-config format nailed.** `configs/openrouter-funded-run.yaml` (the config CURRENTLY
+  running the framings expansion) already uses the `provider: openai` + `base_url` +
+  `api_key_env: OPENROUTER_API_KEY` seam. Gemma collection = a SEPARATE config
+  (`gemma-collection.yaml`, subject `google/gemma-4-31B-it`, framings `[guided, unstated]`),
+  run AFTER the expansion finishes. **Do NOT touch the live config.** Self-serve vLLM route is
+  the same seam with `base_url` → a Modal-served OpenAI endpoint (doesn't exist yet).
+- **SFT transform understood.** taqwabench `build_sft_guided.py` bands guided sittings
+  (Gemini full-scope AND turn-1 band ≥ +1), screens guide-refs + dangling `[n]` markers,
+  re-renders bare. It's keyed to taqwabench's judgment schema (`probe_id`, `split_70_70.json`).
+  MultiBench differs: `scenario_id` + tradition, NO split (train on all 519). → adapt the
+  builder AFTER collection produces our judgment records + add per-tradition balancing.
+
+**Waiting state (clean):** setup committed (2b1e654), report + routing question sent to
+architect. Blocked on: (a) green-light for gemma collection [framings expansion still running],
+(b) architect's OpenRouter-vs-self-serve-vLLM routing call. Modal training ports deferred —
+speculative ahead of the samplability GATE. Ending turn to stay reachable; will resume on reply.
