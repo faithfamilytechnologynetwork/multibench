@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   applyFilters,
+  computeFacets,
   filterAndSort,
   isActive,
   parseSelection,
@@ -138,6 +139,61 @@ describe("URL search <-> selection round-trip", () => {
     expect(isActive(sel())).toBe(false);
     expect(isActive(sel({ q: "x" }))).toBe(true);
     expect(isActive(sel({ axes: { pillars: ["a"] } }))).toBe(true);
+  });
+});
+
+describe("computeFacets (data-driven discovery + counts)", () => {
+  const map = (fs: { value: string; count: number }[]) => Object.fromEntries(fs.map((f) => [f.value, f.count]));
+
+  it("discovers only axes/values present in the loaded rows (never the manifest)", () => {
+    const f = computeFacets(rows, sel());
+    // pillars/hearts from the sunni rows; the five judaism axes from MSR-001 — nothing else.
+    expect(Object.keys(f.axes).sort()).toEqual(
+      ["domain", "hearts", "middle_path", "middot", "pillars", "register", "virtues"].sort(),
+    );
+    expect(f.axes.pillars!.map((x) => x.value).sort()).toEqual(["justice", "restraint"]);
+    expect(f.axes.hearts!.map((x) => x.value).sort()).toEqual(["patience", "vigilance"]);
+  });
+
+  it("a tradition whose loaded scenarios carry no tags yields no axis facets (no tag UI)", () => {
+    const untagged: Row[] = [
+      { id: "A", meta: { id: "A", tags: {}, sourceLocus: 1, locusLabel: "", identitySignal: "clean" } },
+      { id: "B", meta: null },
+    ];
+    const f = computeFacets(untagged, sel());
+    expect(f.axes).toEqual({});
+    expect(f.identity.map((x) => x.value)).toEqual(["clean"]); // identity still discovered
+  });
+
+  it("orders values by the manifest vocabulary first, then unknown extras alphabetically", () => {
+    const order = { pillars: ["justice", "restraint", "courage"] as const };
+    const withExtra: Row[] = [row("X", { pillars: ["zeta", "restraint", "alpha"] })];
+    const f = computeFacets(withExtra, sel(), order);
+    // declared 'restraint' first (justice/courage absent from rows), then extras alpha
+    expect(f.axes.pillars!.map((x) => x.value)).toEqual(["restraint", "alpha", "zeta"]);
+  });
+
+  it("counts reflect the current filters but EXCLUDE the value's own axis", () => {
+    const unfiltered = computeFacets(rows, sel());
+    expect(map(unfiltered.axes.pillars!)).toEqual({ restraint: 1, justice: 2 });
+
+    // Selecting pillars=justice leaves pillars' own counts untouched (own-axis excluded)…
+    const withPillar = computeFacets(rows, sel({ axes: { pillars: ["justice"] } }));
+    expect(map(withPillar.axes.pillars!)).toEqual({ restraint: 1, justice: 2 });
+    // …but narrows OTHER axes to the pillars=justice subset (JLS-001 + JLS-002).
+    expect(map(withPillar.axes.hearts!)).toEqual({ patience: 1, vigilance: 1 });
+  });
+
+  it("identity facets are discovered + counted, excluding the identity filter itself", () => {
+    const f = computeFacets(rows, sel({ identity: ["leaky"] }));
+    // own-filter excluded: counts span all rows -> clean 2, leaky 1
+    expect(map(f.identity)).toEqual({ clean: 2, leaky: 1 });
+  });
+
+  it("counts respect a non-own active filter (locus range) on identity", () => {
+    const f = computeFacets(rows, sel({ locusMin: 10 }));
+    // locus>=10 keeps JLS-001 (clean) + JLS-002 (leaky); MSR-001 (locus 5) drops out
+    expect(map(f.identity)).toEqual({ clean: 1, leaky: 1 });
   });
 });
 

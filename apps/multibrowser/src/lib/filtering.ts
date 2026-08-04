@@ -165,3 +165,75 @@ export function filterAndSort<T extends Row>(rows: T[], sel: Selection): T[] {
 export function toggle(list: string[], value: string): string[] {
   return list.includes(value) ? list.filter((v) => v !== value) : [...list, value];
 }
+
+// ---------------------------------------------------------------------------------------------
+// Facets (data-driven filter chrome + counts)
+// ---------------------------------------------------------------------------------------------
+
+/** One selectable facet value and how many rows it matches under the current filters. */
+export interface Facet {
+  value: string;
+  count: number;
+}
+
+/**
+ * The filterable universe DISCOVERED from the rows actually loaded (never the manifest): axis
+ * name -> its observed values, plus the observed identity_signals. Absent families/values simply
+ * don't appear, so a tradition whose scenarios carry no tags yields `axes: {}` (no tag UI).
+ */
+export interface Facets {
+  axes: Record<string, Facet[]>;
+  identity: Facet[];
+}
+
+/** Order `observed` by `preferred` first (in that order), then any leftovers alphabetically. */
+function ordered(observed: Set<string>, preferred: readonly string[] = []): string[] {
+  const known = preferred.filter((v) => observed.has(v));
+  const extra = [...observed].filter((v) => !preferred.includes(v)).sort();
+  return [...known, ...extra];
+}
+
+/**
+ * Compute facet values + counts from the loaded rows. Discovery is data-driven: only axes/values
+ * present in the rows' metadata appear. Counts use the standard faceted convention — a value's
+ * count reflects every ACTIVE filter EXCEPT its own family, so multi-selecting within a family
+ * (OR) keeps each sibling's count meaningful ("what would adding this give"). `order` (the
+ * manifest vocab) only sorts the output; it never gates which values appear.
+ */
+export function computeFacets(
+  rows: Row[],
+  sel: Selection,
+  order: Record<string, readonly string[]> = {},
+): Facets {
+  const axisVals: Record<string, Set<string>> = {};
+  const identityVals = new Set<string>();
+  for (const { meta } of rows) {
+    if (!meta) continue;
+    for (const [axis, vals] of Object.entries(meta.tags)) {
+      for (const v of vals) (axisVals[axis] ??= new Set()).add(v);
+    }
+    if (meta.identitySignal != null) identityVals.add(meta.identitySignal);
+  }
+
+  const axes: Record<string, Facet[]> = {};
+  for (const axis of ordered(new Set(Object.keys(axisVals)), Object.keys(order))) {
+    const base = applyFilters(rows, { ...sel, axes: omitKey(sel.axes, axis) });
+    axes[axis] = ordered(axisVals[axis]!, order[axis]).map((value) => ({
+      value,
+      count: base.filter((r) => (r.meta?.tags[axis] ?? []).includes(value)).length,
+    }));
+  }
+
+  const idBase = applyFilters(rows, { ...sel, identity: [] });
+  const identity = ordered(identityVals, IDENTITY_SIGNALS).map((value) => ({
+    value,
+    count: idBase.filter((r) => r.meta?.identitySignal === value).length,
+  }));
+
+  return { axes, identity };
+}
+
+function omitKey<T>(obj: Record<string, T>, key: string): Record<string, T> {
+  const { [key]: _drop, ...rest } = obj;
+  return rest;
+}

@@ -5,7 +5,7 @@ import { renderApp } from "../test/renderApp";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
 import { REPO } from "../lib/constants";
 import { FilterBar } from "../components/FilterBar";
-import type { TaxonomyAxis } from "../lib/model";
+import type { Facets, Selection } from "../lib/filtering";
 
 const SHA = "deadbeef";
 
@@ -74,29 +74,40 @@ describe("tradition page", () => {
   });
 });
 
-describe("FilterBar is manifest-driven (handles 5-axis traditions)", () => {
-  it("renders a control group for every declared axis", () => {
-    const axis = (values: string[]): TaxonomyAxis => ({ description: "", appliesTo: "scenario", values });
-    const taxonomies = {
-      middot: axis(["anavah"]),
-      virtues: axis(["emet"]),
-      middle_path: axis(["balance"]),
-      domain: axis(["speech"]),
-      register: axis(["plain"]),
+describe("FilterBar is data-driven (facets from loaded scenarios, handles 5-axis traditions)", () => {
+  const emptySel: Selection = { axes: {}, identity: [], locusMin: null, locusMax: null, q: "", sort: "default" };
+  const f = (value: string, count: number) => ({ value, count });
+
+  it("renders a control group per discovered axis + identity, with per-value counts", () => {
+    const facets: Facets = {
+      axes: {
+        middot: [f("anavah", 3)],
+        virtues: [f("emet", 1)],
+        middle_path: [f("balance", 2)],
+        domain: [f("speech", 4)],
+        register: [f("plain", 0)],
+      },
+      identity: [f("clean", 5), f("leaky", 2)],
     };
     render(
-      <FilterBar
-        taxonomies={taxonomies}
-        selection={{ axes: {}, identity: [], locusMin: null, locusMax: null, q: "", sort: "default" }}
-        onChange={() => {}}
-        total={0}
-        shown={0}
-        loaded={0}
-        loadedAll
-      />,
+      <FilterBar facets={facets} selection={emptySel} onChange={() => {}} total={0} shown={0} loaded={0} loadedAll />,
     );
-    for (const name of ["middot", "virtues", "middle_path", "domain", "register"]) {
+    for (const name of ["middot", "virtues", "middle_path", "domain", "register", "identity"]) {
       expect(screen.getByText(name)).toBeInTheDocument();
     }
+    // value buttons keep the value as their accessible name; counts render alongside.
+    expect(screen.getByRole("button", { name: "anavah" })).toHaveTextContent("3");
+    expect(screen.getByRole("button", { name: "clean" })).toHaveTextContent("5");
+    expect(screen.getByRole("button", { name: "plain" })).toHaveTextContent("0"); // zero-count values still render
+  });
+
+  it("shows NO tag UI when no scenario carries tags (empty axes)", () => {
+    const facets: Facets = { axes: {}, identity: [f("clean", 2)] };
+    render(
+      <FilterBar facets={facets} selection={emptySel} onChange={() => {}} total={2} shown={2} loaded={2} loadedAll />,
+    );
+    expect(screen.queryByText("pillars")).not.toBeInTheDocument();
+    // identity is still offered when present
+    expect(screen.getByText("identity")).toBeInTheDocument();
   });
 });
