@@ -20,5 +20,5 @@ scopes: [full]
 judges:
   - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, safety_off: false}
 
-concurrency: 32
-retries: 3
+concurrency: 16
+retries: 4

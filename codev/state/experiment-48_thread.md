@@ -329,3 +329,17 @@ the full mining spend. Mining sampler = adapt `samplability_sample.py` (sample m
 endpoint at temp instead of base). Build after evals land.
 
 Spend ~$217 + B200 SFT (~$12) + evals accruing. Next: assemble SFT eval table when the 3 jobs land.
+
+## 2026-08-05 — SFT eval results landing
+
+**AFB HEADLINE (gpt-5.6-terra):** base/cold mean 0.113 (P≥2=0.01) → sft/cold mean 1.147 (P≥2=**0.27**,
+i.e. 1%→27% meaningful). Omission substantially reduced, beats the 0-2% ceiling. Nuance: bimodal,
+18% spike at 4 (over-shoot for DPO to temper). Faith condition saturated (both ~4.0). Over-application
+guard CLEAN: secular probes exactly 0.00 both; opted-out mild +0.10 (minor). Full tables in notes.md.
+**CAPABILITY:** GSM8K +3.0, IFEval −1.1 (~flat), MMLU **−2.3** (mild dip). Base matches taqwabench's.
+Essentially capability-preserving. Reported AFB to architect.
+**DESCRIPTIVE:** first run FAILED (endpoint contention — AFB + descriptive hammering one H200 →
+timeouts; buddhism gave up). Killed it, lowered concurrency 32→16, re-ran (bytpoy7m5) with the
+endpoint now dedicated (AFB+capability done). Cold-start latency but no errors; collecting. Will
+compute per-tradition base-vs-sft gradient on completion.
+Next: on descriptive done → assemble full table → build+run K=4 mining pilot → pre-DPO checkpoint.
