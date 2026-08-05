@@ -299,3 +299,16 @@ parity ok (−492.4 vs −493.1), loss sane (nll 3.56), **peak 63.2GB** (huge he
 **FULL bf16 SFT LAUNCHED** — detached app ap-WB9C8dtq4lYQ1o7AkXD8fn, run mb-sft-guided, 2 ep = 683
 steps, B200, ~2h expected. Poller bisvachvg (watches /runs/mb-sft-guided/config.json) still alive →
 notifies at completion. Next: report to architect; on completion → eval sweep → pre-DPO checkpoint.
+
+## 2026-08-05 — SFT COMPLETE; eval sweep launched
+
+SFT `mb-sft-guided` done: 683 steps, 2 ep, **loss 2.64 → 0.47**, adapter saved, peak 65.5GB, ~1h48m,
+clean. (On-disk config.json has a stale "nf4" quant label — actual = bf16; fixed the string in both
+scripts, noted.) Fixed the quant-label string; committed.
+**Eval sweep launched:**
+- Eval server DEPLOYED: `https://waleedkadous--multibench-gemma-eval-serve-serve.modal.run/v1`
+  (base = `google/gemma-4-31B-it`, sft = `sft`). Warming (bfmjm501j, cold-start ~10min).
+- Capability panel RUNNING (b98pm4tbs, detached): lm-eval ifeval+mmlu+gsm8k on base + mb-sft-guided.
+- On warm → run `eval_afb_probes.py` (AFB-150 cold+faith + 70 probes, gpt-5.6-terra judge).
+- MultiBench-descriptive (collect via the endpoint, gemini judge) = optional bonus.
+Then assemble base-vs-SFT table → **pre-DPO checkpoint report** (SFT results + K=4 mining yield).
