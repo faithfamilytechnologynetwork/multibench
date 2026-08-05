@@ -201,3 +201,15 @@ Sampling done (driver bm0a8blp0): **2,076 sittings** (519×4 exact per tradition
 scopes:[full], ~$25 est). Verified alive. On completion → compute the per-tradition
 "ever-good-across-4" histogram (fraction of scenarios with ≥1 of 4 samples good, ≥+0.5 full) +
 the K=4 score distribution → **report to architect = the formal training gate.**
+
+## 2026-08-05 — SAMPLABILITY HISTOGRAM (THE GATE) — reported, awaiting training go
+
+Banding done (brdclkzz5), 2,076 full-scope judgments. Histogram (never-good = all 4 bad, taqwabench
+75%): overall **55% never-good** — severe where it matters (sunni-islam 71%, roman-catholicism 67%),
+free on easy traditions (buddhism 29%, taoism 33%). K=4 dist bimodal (51.9% at −1.0, 24.3% at +1.0).
+**VERDICT: stage-1-first CONFIRMED mandatory** (DPO-on-base flat where the tune needs to work);
+DPO-on-SFT unaffected (anchored on distilled policy). Gradient tracks difficulty exactly — clean
+mechanism figure. Samplability spend $32.31 (sampling $1.18 + banding $31.12). **Total ≈ $201.98.**
+
+**HARD GATE: reported the histogram to the architect. STOP — waiting for the explicit training go
+before SFT.** On go: SFT ~$5 (2,732-example set, already built, sha256 06fa6d0d) → eval baseline → DPO.

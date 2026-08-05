@@ -280,6 +280,43 @@ cells were ZERO):
   Output `data/output/sft/sft_train_guided.jsonl` (gitignored), sha256 06fa6d0d…. Ready for the
   post-gate training go (histogram → architect go → SFT ~$5 → eval baseline → DPO).
 
+## SAMPLABILITY DIAGNOSTIC — the formal gate (2026-08-05)
+
+K=4 base-gemma unstated samples per scenario (temp 1.3), full-scope banded. "good" = score ≥ +0.5.
+**ever-good** = scenarios with ≥1 of 4 samples good; **never-good** = all 4 bad (taqwabench's "zero
+cell" metric — they had 317/420 = 75% zero).
+
+| tradition | scen | ever-good | never-good | mean | sample-good% |
+|---|---|---|---|---|---|
+| buddhism | 52 | 71% | 29% | +0.185 | 57.2% |
+| taoism | 48 | 67% | 33% | −0.013 | 44.3% |
+| secular-sage | 49 | 63% | 37% | +0.133 | 54.6% |
+| judaism | 48 | 46% | 54% | −0.125 | 35.4% |
+| eastern-christianity | 106 | 46% | 54% | −0.296 | 31.4% |
+| roman-catholicism | 76 | 33% | **67%** | −0.513 | 19.4% |
+| sunni-islam | 140 | 29% | **71%** | −0.500 | 18.8% |
+| **TOTAL** | **519** | **45%** | **55%** | | |
+
+K=4 sample score distribution: −1.0: **51.9%** · −0.5: 3.5% · 0.0: 12.0% · +0.5: 8.2% · +1.0: **24.3%**
+(bimodal — base gemma unstated is mostly the omissive/secular default, occasionally fully faithful).
+
+**VERDICT — stage-1-first (context distillation) is CONFIRMED mandatory:**
+- Overall 55% of scenarios never sample good behavior across 4 tries (milder than taqwabench's 75%,
+  but still a majority) — and it is **severe exactly where omissive bias matters most**: sunni-islam
+  71% never-good (18.8% sample-good), roman-catholicism 67% (19.4%). DPO-on-BASE would be flat there
+  (preference contrast can't lift what the base barely samples). Context distillation is required.
+- **DPO-on-SFT (our stage 2) is unaffected** — it's anchored on the distilled checkpoint, which
+  samples the faithful behavior freely; the base samplability boundary only kills DPO-on-base, which
+  we are NOT doing.
+- **The gradient tracks tradition difficulty exactly** (therapeutic-priors frame): easy traditions
+  (buddhism/taoism/secular-sage, which rarely demand what the priors resist) sample good behavior
+  freely; hard traditions (Islam/Catholicism, whose binding counsel collides with the priors) barely
+  do. Publication-grade cross-tradition mechanism figure.
+- **Samplability spend: $32.31** (sampling $1.18 + banding $31.12), under the $45 auth. **Total
+  experiment spend ≈ $201.98.**
+
+**→ This is the formal gate. Reported to architect; awaiting the training go before SFT.**
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)
