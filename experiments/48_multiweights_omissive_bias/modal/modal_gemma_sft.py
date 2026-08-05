@@ -210,7 +210,7 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
         "model": MODEL, "data": data_path, "n_examples": len(data),
         "batch": batch, "lr": lr, "epochs": epochs, "lora_r": 32, "seed": seed,
         "objective": "masked token-mean NLL (SL-CAI context distillation)",
-        "quant": "nf4-4bit bf16-compute", "masking": "assistant-tokens-only (tml_v0 parity)",
+        "quant": "bf16 (no quantization; Waleed 2026-08-05)", "masking": "assistant-tokens-only (tml_v0 parity)",
         "checkpoint_every_steps": CKPT_EVERY, "resumable": True,
     }, indent=2))
     if state_file.exists():

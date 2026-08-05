@@ -224,7 +224,7 @@ def train(pairs_path: str, sft_run: str, run_name: str, batch: int, beta: float,
         "model": MODEL, "pairs": pairs_path, "n_pairs": len(data), "batch": batch,
         "beta": beta, "lr": lr, "epochs": 1, "lora_r": 32, "seed": seed,
         "reference": f"sft:{sft_run}", "init": f"sft:{sft_run}",
-        "quant": "nf4-4bit bf16-compute", "masking": "assistant-tokens-only (tml_v0 parity)",
+        "quant": "bf16 (no quantization; Waleed 2026-08-05)", "masking": "assistant-tokens-only (tml_v0 parity)",
         "checkpoint_every_steps": CKPT_EVERY, "resumable": True,
     }, indent=2))
     if resume_file.exists():

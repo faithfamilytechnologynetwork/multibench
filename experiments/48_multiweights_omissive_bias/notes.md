@@ -365,6 +365,19 @@ Ready to fire the moment SFT completes (all syntax-checked):
 Eval sequence post-SFT: `modal deploy serve_gemma_eval.py` → capability panel (detached) ∥ AFB+probes
 runner ∥ MultiBench descriptive → assemble base-vs-sft table → **pre-DPO checkpoint report to architect.**
 
+## 2026-08-05 — SFT COMPLETE (bf16, B200)
+
+Run `mb-sft-guided` finished clean: **683 steps** (= 2,732 × 2 / 8, exact), 2 full epochs, seen 5,464.
+**Loss converged 2.64 → 0.47** (smooth; 2nd epoch settled ~0.47). Adapter saved
+(`adapter_model.safetensors`). Peak 65.5 GB (bf16, B200 192 GB — big headroom). Wall-clock ~1h48m
+(the ~2h bf16/B200 estimate held). No flap issues (spawn survived).
+- NOTE: the on-disk `config.json` for this run has a **stale `"quant": "nf4-4bit"` label** — a string
+  I missed in the bf16 conversion; the ACTUAL training was bf16 (no bnb in the image or code). Fixed
+  the string in both scripts for future runs; not worth re-writing this run's metadata.
+
+Next: deploy the eval server (base + sft LoRA) → capability panel ∥ AFB+probes ∥ MultiBench
+descriptive → assemble base-vs-SFT table → pre-DPO checkpoint report.
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)
