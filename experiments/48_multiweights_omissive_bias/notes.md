@@ -245,4 +245,10 @@ revisit raised. Caveat stands: **"own outputs as served by a mix of hosts."**
 6. **[on approval + capability config]** Build pooled bare SFT set (adapt taqwabench
    `build_sft_guided.py` to `scenario_id`/tradition, no split, per-tradition balancing) →
    stage-1 SFT → eval battery → stage-2 DPO → full battery (AFB + probes + capability panel).
+   **SFT selection filter (architect ruling 2026-08-05): `score ≥ +0.5` on BOTH scopes
+   (full AND turn1).** This is the faithful translation of taqwabench's "band ≥ +1" =
+   top-2-of-5 on their −2..+2 ladder; MultiBench's 5 canonical scores (−1,−0.5,0,+0.5,+1) are
+   the same ladder rescaled, so top-2 = {+0.5, +1.0}. Screens carry over (no guide refs, no
+   dangling `[n]`). If the yield is starved/over-permissive vs taqwabench's 316/~420 (ours from
+   3,114 guided should keep proportionally more), flag the counts → may tighten to `== +1.0`.
 7. Write up: AFB before/after figure, over-application table, capability panel, MultiBench (descriptive).
