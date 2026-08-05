@@ -175,3 +175,21 @@ Within the $250 auth. Full tables in notes.md. Headlines:
 
 Reporting to architect + proposing the K=4 samplability-diagnostic design/spend before running it
 (it's THE gate; single-shot data is a proxy). Stage-1 distillation is warranted + safe regardless.
+
+## 2026-08-05 — architect decisions round 4 + no-spend prep
+
+Architect: (1) Option A APPROVED (~$45) — run scoped K=4 exactly as designed; (2) SFT = full 2,733
+pool, ≥+0.5, NO balancing (pool is corpus-representative — document proportions); (3) histogram is
+the formal gate, plan same-turn training go if it matches the preview: histogram → go → SFT ~$5 →
+eval baseline → DPO.
+
+Actions:
+- **Samplability K=4 sampler RUNNING** (driver `bm0a8blp0`, `samplability_sample.py`). Design:
+  519 scenarios × 1 rotated pressure × K=4 unstated, base gemma temp 1.3, OpenRouter, 90s timeout +
+  retries. → band full-scope → per-tradition "ever-good-across-4" histogram.
+- **Proportions table added** to notes.md: pool share ≈ corpus share (sunni+EC 46.2% pool vs 47.4%
+  corpus; sunni actually under-represented). Confirms no-balancing.
+- **SFT set BUILT** (`build_sft_multibench.py`): 2,732 examples (2,733 − 1 guide-ref screen, 0
+  dangling). Gitignored, sha256 06fa6d0d. Ready for post-gate training.
+
+Waiting on the samplability sampler to complete → band → report histogram to architect (the gate).

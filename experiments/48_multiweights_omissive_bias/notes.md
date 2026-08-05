@@ -224,10 +224,25 @@ the architect's ~$240 and the $250 authorization. **Total experiment spend so fa
 | roman-catholicism | 389/456 (85.3%) | | **TOTAL** | **2,733/3,114 (87.8%)** |
 
 - **Threshold sensitivity is low:** ≥+0.5 → 2,733; ==+1.0 → 2,586 (only 147 fewer, since guided is
-  86% at +1.0). Neither is starved (taqwabench kept 316). **Keeping the ruling default ≥+0.5** — the
-  +0.5 tail is still genuinely good counsel; the operative lever is **per-tradition balancing**, not
-  the threshold. Balance is lopsided: sunni-islam (641) + eastern-christianity (622) = 46% of the
-  pool; judaism/taoism/secular-sage ~260 each. Balancing plan (subsample the big traditions) applies.
+  86% at +1.0). Neither is starved (taqwabench kept 316). **Keeping the ruling default ≥+0.5.**
+
+**Balancing decision (architect 2026-08-05): use the FULL 2,733 pool, NO subsample.** The pool is
+**corpus-representative, not skew** — each tradition's pool share ≈ its corpus scenario share:
+
+| tradition | scenarios | corpus % | SFT pool | pool % |
+|---|---|---|---|---|
+| buddhism | 52 | 10.0% | 294 | 10.8% |
+| eastern-christianity | 106 | 20.4% | 622 | 22.8% |
+| judaism | 48 | 9.2% | 269 | 9.8% |
+| roman-catholicism | 76 | 14.6% | 389 | 14.2% |
+| secular-sage | 49 | 9.4% | 254 | 9.3% |
+| sunni-islam | 140 | 27.0% | 641 | 23.5% |
+| taoism | 48 | 9.2% | 264 | 9.7% |
+| **TOTAL** | **519** | 100% | **2,733** | 100% |
+
+sunni-islam + eastern-christianity = **47.4% of corpus ≈ 46.2% of pool** (sunni is actually slightly
+*under*-represented in the pool — lowest pass rate, 76.3%). So the "big two" share reflects the
+corpus, not a filter artifact. Revisit only if per-tradition evals show interference.
 
 ### Samplability PREVIEW (single-shot proxy — NOT the K=4 gate)
 
@@ -252,6 +267,18 @@ cells were ZERO):
   the mechanism** (guided ceiling +0.77 >> unstated −0.23), and it is safe regardless of the K=4
   result. The K=4 diagnostic mainly informs whether stage-2 DPO-on-SFT is worth it (it needs
   samplable contrast). Design + spend confirmation pending with architect.
+
+### 2026-08-05 — samplability diagnostic launched + SFT set built (no-spend prep)
+- **Samplability K=4 sampler running** (background driver `bm0a8blp0`, `samplability_sample.py`):
+  519 scenarios × one rotated pressure × K=4 unstated samples, base gemma temp 1.3, OpenRouter.
+  90s request timeout + 4 retries + backoff (rides the flap). On completion: band full-scope →
+  per-tradition "ever-good-across-4" histogram = the formal gate.
+- **SFT set BUILT** (`build_sft_multibench.py`, deterministic, no spend): **2,732 examples** kept
+  of 3,114 guided (87.7%) — 2,733 pass score≥+0.5 both scopes, minus **1** guide-ref screen
+  ("my instructions"), **0** dangling-citation screens. Guided outputs are remarkably clean.
+  Per-tradition: bud 294 / EC 622 / jud 269 / RC 389 / sage 253 / islam 641 / tao 264.
+  Output `data/output/sft/sft_train_guided.jsonl` (gitignored), sha256 06fa6d0d…. Ready for the
+  post-gate training go (histogram → architect go → SFT ~$5 → eval baseline → DPO).
 
 ## Progress log
 
