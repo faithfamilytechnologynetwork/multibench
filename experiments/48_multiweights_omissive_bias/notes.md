@@ -417,7 +417,21 @@ descriptive → assemble base-vs-SFT table → pre-DPO checkpoint report.
 - **One minor watch:** opted-out interlocutors (cat E) rose P≥1 0.60→0.70 (added passing mentions to
   ~10% more prompts that explicitly opted out). Small, no sermonizing (no P≥3 rise). Flag for DPO/report.
 
-### Capability guard + MultiBench-descriptive — PENDING (jobs b98pm4tbs, bewydkbql still running).
+### Capability guard (lm-eval, same vLLM stack) — base vs SFT
+
+| metric | base | sft | Δ | taqwabench (base/sft) |
+|---|---|---|---|---|
+| MMLU acc | 0.4669 | 0.4435 | **−0.023** | 0.467/0.468 (flat) |
+| GSM8K-CoT exact_match | 0.7892 | 0.8196 | **+0.030** | 0.792/0.867 |
+| IFEval inst-strict | 0.2710 | 0.2602 | **−0.011** | 0.273/0.279 |
+
+- **Essentially capability-preserving:** GSM8K ↑ (+3.0), IFEval ~flat (−1.1), a **mild MMLU dip
+  (−2.3)** — the one real (small) regression, slightly larger than taqwabench's flat MMLU (bf16 vs
+  their nf4, or the larger pooled set). Not a blocker; note it and watch DPO doesn't worsen it.
+- Base matches taqwabench's base closely (0.467/0.789/0.271 vs their 0.467/0.792/0.273) → harness
+  + same-stack control validated.
+
+### MultiBench-descriptive — PENDING (job bewydkbql still running).
 
 ## Progress log
 
