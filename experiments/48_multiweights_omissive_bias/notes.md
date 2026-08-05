@@ -173,11 +173,22 @@ Populate from the collected `sittings.jsonl` once full collection runs (count `u
 across all calls). Revisit-trigger: one host dominating pathologically, or a mix that looks wrong
 at the samplability-diagnostic stage → raise with architect before training.
 
-| provider (serving host) | calls | % of calls | notes |
-|---|---|---|---|
-| _to be filled_ | | | |
+Filled from the full collection (12,456 calls, **0 missing provider** — capture worked 100%):
 
-Observed in the 2-cell smoke only (NOT representative): Friendli, DeepInfra, Novita.
+| provider (serving host) | calls | % | | provider | calls | % |
+|---|---|---|---|---|---|---|
+| Parasail | 6,155 | 49.4% | | Crusoe | 376 | 3.0% |
+| Chutes | 1,874 | 15.0% | | Novita | 253 | 2.0% |
+| DeepInfra | 1,136 | 9.1% | | ModelRun | 195 | 1.6% |
+| CoreWeave | 798 | 6.4% | | Together | 147 | 1.2% |
+| SiliconFlow | 475 | 3.8% | | Phala | 122 | 1.0% |
+| Morph | 463 | 3.7% | | SambaNova | 42 | 0.3% |
+| Friendli | 415 | 3.3% | | Cerebras | 5 | 0.0% |
+
+**Policy read: NOT pathological.** 14 distinct hosts; the top host (Parasail) is a ~49% plurality,
+not an overwhelming monoculture — normal OpenRouter load-balancing. The real robustness check is the
+samplability diagnostic (host-mix policy revisit-trigger). Flagged to architect for awareness; no
+revisit raised. Caveat stands: **"own outputs as served by a mix of hosts."**
 
 ## Progress log
 
@@ -209,6 +220,14 @@ Observed in the 2-cell smoke only (NOT representative): Friendli, DeepInfra, Nov
   (gitignored). Verified alive (buddhism writing sittings within seconds).
 - Capability baseline received (taqwabench, no regression — GSM8K improved); reference logged in
   the battery table for the capability-guard step. No action now.
+
+### 2026-08-05 — COLLECTION COMPLETE
+- Driver `b3w8q535y` exit 0, `{"status":"complete"}`. All 7 traditions done on **attempt 1**,
+  `failed=0` each, **no flap retries needed**. **6,228 sittings** = 3,114 guided + 3,114 unstated
+  (exact). 12,456 calls, **0 missing provider**.
+- Tokens: in 10.85M, out 8.25M, cache_read 8.0M. **Actual collection spend ≈ $3.97**
+  ($0.10/$0.34 Mtok; in $1.08 + out $2.80 + cache $0.08) — well under the ~$10–20 est and the $50 gate.
+- Provider distribution table filled above (Parasail 49.4% plurality across 14 hosts; not pathological).
 
 ## Next steps (ordered)
 

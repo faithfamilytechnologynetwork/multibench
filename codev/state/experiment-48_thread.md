@@ -132,3 +132,15 @@ Capability baseline in from taqwabench (no regression; GSM8K improved 0.792→0.
 in the battery table as the lm-eval reference for the capability-guard step. No action now.
 
 Turn ending to stay reachable while collection runs in the background.
+
+## 2026-08-05 — COLLECTION COMPLETE (clean)
+
+Driver `b3w8q535y` exit 0. All 7 traditions done on **attempt 1**, `failed=0`, **no flap retries**.
+**6,228 sittings** (3,114 guided + 3,114 unstated, exact). 12,456 calls, **0 missing provider**
+(provenance patch 100%). **Actual spend ≈ $3.97** (tokens in 10.85M / out 8.25M / cache 8.0M).
+Provider mix: Parasail 49.4% across 14 hosts — not pathological (table in notes.md).
+
+Next: (a) report done+spend to architect [doing now]; (b) Gemini banding of the collected sittings
+(cleared) — verifying judge scopes (full + turn1, both needed by the SFT selection) and estimating
+cost before launch; (c) samplability diagnostic = the HARD GATE (K=4 unstated base-gemma samples,
+per-tradition histogram) — report before any training.
