@@ -213,3 +213,15 @@ mechanism figure. Samplability spend $32.31 (sampling $1.18 + banding $31.12). *
 
 **HARD GATE: reported the histogram to the architect. STOP — waiting for the explicit training go
 before SFT.** On go: SFT ~$5 (2,732-example set, already built, sha256 06fa6d0d) → eval baseline → DPO.
+
+## 2026-08-05 — GATE PASSED, TRAINING GO — SFT launching
+
+Architect: GATE PASSED. Cleared SFT + eval sweep; AFB judge-of-record decided = **gpt-5.6-terra**
+(OpenRouter, disclosed). Remaining gate = report SFT results + K=4-from-distilled mining yield
+BEFORE DPO.
+- Ported `modal/modal_gemma_sft.py` (recipe unchanged; deviations: scenario_id field, 683 steps for
+  2,732 ex, +limit smoke knob). Uploaded set to gemma-dpo `/pairs/sft_guided_mb.jsonl`.
+- **SFT smoke RUNNING** (b4iliggjl, mb-sft-smoke, 4 ex/1 ep) to de-risk the 6h full run. On smoke
+  pass → launch full SFT `--detach` (background) → post-SFT eval sweep → checkpoint-before-DPO gate.
+- **⚠️ Budget flagged:** SFT is ~$30-45 (8.6× taqwabench's data), remaining path ≈ $300-320 total,
+  modestly over the $300 plan — flagged to architect to trim scope if they want to hold $300.

@@ -74,7 +74,7 @@ which use their own judges/harnesses (AFB judge-of-record ≠ gemini — open de
 
 | Axis | Instrument | Success |
 |---|---|---|
-| **Omission (headline)** | AFB 150 Qs, official 0–4 judge; judge-of-record ≠ gemini | mean ↑ from ≈0; mass 0→1–2; 3–4 ≈ base; beats 0–2% ≥2 ceiling |
+| **Omission (headline)** | AFB 150 Qs, official 0–4 judge; **judge-of-record = gpt-5.6-terra via OpenRouter** (architect 2026-08-05; disclosed subject, ≠ our gemini pipeline judge) | mean ↑ from ≈0; mass 0→1–2; 3–4 ≈ base; beats 0–2% ≥2 ceiling |
 | Capability guard | IFEval + MMLU + GSM8K-CoT (lm-eval, same vLLM stack) | flat vs base — **taqwabench jalees baseline in (no regression):** MMLU 0.467/0.468/0.470, GSM8K-CoT-strict 0.792/**0.867**/0.848, IFEval-inst-strict 0.273/0.279/0.282 (base/sft/sft+dpo). Copy their exact lm-eval config: iaser-ai/jaleesbench issue 21, latest comment. Our pooled multi-tradition set is a different treatment → guard still runs every checkpoint. |
 | Over-application guard | `probes/over_application_probes.{md,jsonl}` (70 prompts, AFB judge) + AFB 4-fraction | flat vs base on secular; 0 sermonizing on opt-out |
 | Fabrication guard | citation-marker scan on tuned outputs | zero (jalees: 0) |
@@ -316,6 +316,25 @@ K=4 sample score distribution: −1.0: **51.9%** · −0.5: 3.5% · 0.0: 12.0% �
   experiment spend ≈ $201.98.**
 
 **→ This is the formal gate. Reported to architect; awaiting the training go before SFT.**
+
+## 2026-08-05 — GATE PASSED, TRAINING GO
+
+Architect cleared: (1) SFT on the 2,732 set per the recipe; (2) post-SFT eval sweep — MultiBench
+descriptive (gemini), AFB-150 on base+sft (judge-of-record **gpt-5.6-terra** via OpenRouter),
+capability panel (taqwabench lm-eval), over-application probes both checkpoints; (3) **CHECKPOINT
+before DPO**: report SFT results + K=4-from-distilled mining yield — the remaining gate.
+
+**SFT run (Modal, port `modal/modal_gemma_sft.py`):** recipe UNCHANGED (QLoRA r32, masked
+token-mean NLL, lr 5e-5, 2 epochs, nf4). Deviations noted: `scenario_id` field; 2,732 examples →
+683 optimizer steps (batch 8 × 2 epochs) vs taqwabench's 79. Data uploaded to `gemma-dpo` volume
+`/pairs/sft_guided_mb.jsonl`. **Smoke running** (`mb-sft-smoke`, 4 ex / 1 epoch) to validate the
+machinery before the full run.
+
+**⚠️ BUDGET TRAJECTORY FLAG (per architect's ask):** the 2,732-example set is 8.6× taqwabench's 316,
+so SFT is **~$30–45** (H200 ~6 h), NOT the ~$5 taqwabench figure. Remaining path (SFT + eval sweep
++ DPO) likely lands total ≈ **$300–320**, modestly over the ~$300 plan. Flagged to architect — can
+trim (e.g. 1 epoch, or drop the AFB faith-context 2nd condition) if they want to hold $300. At
+$201.98 now.
 
 ## Progress log
 
