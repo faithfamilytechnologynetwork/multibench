@@ -84,3 +84,26 @@ by the route pivot. Environment verified ready (Modal authed, hf secret + volume
 **Waiting (clean):** dormant config + probe tightenings + notes committed. Nothing run, no spend.
 Ending turn to stay reachable; resume the moment the architect gives the collection go-word →
 first action is the `--limit 1` smoke (incl. serving-host field discovery).
+
+## 2026-08-04 — SMOKE run (cleared by architect, OpenRouter, 2 cells, negligible)
+
+**Smoke green.** `collect --limit 1` on sunni-islam via `configs/gemma-collection.yaml`:
+`{"grid":1680,"written":1,"failed":0}`. (One run hung ~2min mid-turn — architect confirms a
+local network flap in that window; the retry was clean.)
+
+**Confirmed:** distillation transform is exact — guide lives in `context_prefix` outside the
+turns; stored turns are bare scenario text; dropping `context_prefix` ⇒ exact unstated re-render.
+No framing leak.
+
+**Serving-host field (verified on a RAW response, not guessed):** OpenRouter returns top-level
+`provider`; SDK surfaces `resp.provider`. **KEY FINDING: host varies PER CALL, even within one
+sitting** — one 2-turn sitting served by Friendli (turn1) + DeepInfra (turn2). ⇒ per-CALL capture
+is the right granularity; provenance = "own outputs as served by a MIX of hosts."
+
+**Provenance patch APPLIED** — `providers.py::_openai_subject`, 12 lines, stashes `resp.provider`
+into the per-turn usage dict. Backward-compatible (only on the OpenRouter path); safe by the
+existing non-int `usage["batch"]` precedent (`report._add_usage` sums only the token whitelist).
+**Judging suite: 182 passed, 9 skipped, 0 failed.** Diff sent to architect for review.
+
+**Still HELD:** full collection + Gemini banding wait for the architect's word (framings mop-up
+mid-pass, roman-catholicism backfilling). Nothing else run.

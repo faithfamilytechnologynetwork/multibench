@@ -135,6 +135,27 @@ The over-application probe category E is the negative mirror of condition (b).
 (David's CEFEAI key vs out-of-pocket); AFB judge-of-record (Terra vs Sonnet-5); naming;
 green-light for the prerequisite gemma collection.
 
+## Smoke results (2026-08-04, OpenRouter, 2 cells, negligible spend)
+
+- **Pipeline works end-to-end.** `collect --limit 1` on `traditions/sunni-islam` via
+  `configs/gemma-collection.yaml`: `{"grid": 1680, "written": 1, "failed": 0}` (1680 = 140 × 6 × 2).
+- **Distillation transform confirmed exact.** Guided sitting: the guide sits in `context_prefix`
+  ("You are talking with a practising Muslim…") OUTSIDE the judged turns; the stored turns are
+  bare scenario text ("My coworker keeps taking credit for my work…"). Dropping `context_prefix`
+  ⇒ an exact unstated re-render, as spec §3.1 claims. No framing leak into turns.
+- **Serving-host field discovered (verified on a raw response, not guessed):** OpenRouter returns
+  a top-level `provider` string; the SDK surfaces it as `resp.provider` (also `resp.model_extra["provider"]`).
+- **KEY FINDING — host varies PER CALL, even within one sitting.** A single 2-turn sitting was
+  served by **two different hosts**: `usage: [{"in":776,"out":840,"provider":"Friendli"},
+  {"in":2349,"out":705,"provider":"DeepInfra"}]`. OpenRouter load-balances per request, so
+  quantization/host can differ turn-to-turn. ⇒ per-CALL capture (what the patch does) is the
+  correct granularity; a per-sitting host label would be wrong. Sharpens the provenance caveat:
+  the distilled source is "own outputs as served by a *mix* of hosts."
+- **Provenance patch applied** (`workflows/judging/judging/providers.py`, `_openai_subject`):
+  12-line backward-compatible stash of `resp.provider` into the per-turn usage dict. Safe by the
+  existing `usage["batch"]` (non-int) precedent — `report._add_usage` sums only the explicit token
+  whitelist. Full judging suite: **182 passed, 9 skipped, 0 failed.**
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)

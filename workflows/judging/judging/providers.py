@@ -192,7 +192,18 @@ def _openai_subject(
             text = (resp.choices[0].message.content or "").strip()
             if not text:
                 raise RuntimeError("empty subject response")
-            return text, _openai_usage(resp), attempt + 1
+            usage = _openai_usage(resp)
+            # Provenance (experiment 48): OpenRouter returns the SERVING host as a top-level
+            # `provider` string (e.g. "Novita"); it may route to a quantized host, so the
+            # distilled source is "own outputs AS SERVED". Stash it into the usage dict so each
+            # sitting records who served it. Backward-compatible: only added when present (the
+            # OpenRouter path); a non-token string key is ignored by cost accounting, exactly
+            # like the existing non-int `usage["batch"]` (report._add_usage sums only the explicit
+            # token whitelist). Host pinning is not expressible in the config schema — disclose.
+            provider = getattr(resp, "provider", None)
+            if provider:
+                usage["provider"] = provider
+            return text, usage, attempt + 1
         except Exception as e:  # noqa: BLE001 — transient API/transport; retry then fail
             last = e
             if attempt < retries:
