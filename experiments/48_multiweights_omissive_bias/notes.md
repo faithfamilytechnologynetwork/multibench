@@ -336,6 +336,23 @@ so SFT is **~$30–45** (H200 ~6 h), NOT the ~$5 taqwabench figure. Remaining pa
 trim (e.g. 1 epoch, or drop the AFB faith-context 2nd condition) if they want to hold $300. At
 $201.98 now.
 
+## 2026-08-05 — eval harness built (no-spend, during the SFT training window)
+
+Ready to fire the moment SFT completes (all syntax-checked):
+- **`modal/serve_gemma_eval.py`** — vLLM OpenAI server on Modal serving BASE + the SFT LoRA as two
+  model names (`google/gemma-4-31B-it` = base same-stack control, `sft` = base+adapter). Plain chat
+  (gemma tokenizer's own template; no tool/reasoning parsers). Every eval runner hits this one stack.
+- **`eval_afb_probes.py`** — AFB-150 (base+sft × cold + faith-context) + the 70 over-application
+  probes, judged by **gpt-5.6-terra** (OpenRouter) via the official 0-4 scorer; emits mean / P(≥1) /
+  P(≥2) / P(≥3) and per-probe-category stats. Faith-context = light rotating faith self-ID (§4.4).
+- **`modal/modal_gemma_capability.py`** — ported taqwabench lm-eval panel VERBATIM (ifeval, mmlu,
+  gsm8k_cot) over base + mb-sft-guided; comparable to their no-regression baseline.
+- **MultiBench descriptive** — reuse `collect.py`+`judge` with a subject config pointing base_url at
+  the eval endpoint (built at run time once the endpoint URL is known); gemini judge; DESCRIPTIVE only.
+
+Eval sequence post-SFT: `modal deploy serve_gemma_eval.py` → capability panel (detached) ∥ AFB+probes
+runner ∥ MultiBench descriptive → assemble base-vs-sft table → **pre-DPO checkpoint report to architect.**
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)

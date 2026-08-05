@@ -228,3 +228,16 @@ BEFORE DPO.
 - **Architect ruled: keep 2 epochs + keep AFB faith-context condition, accept ~$315** (recipe
   fidelity > 5% over plan). Proceed full SFT on smoke-pass. Waiting on smoke b4iliggjl → then launch
   full `--detach`, report launch, run eval sweep, hit the pre-DPO checkpoint gate.
+
+## 2026-08-05 — SFT smoke PASSED, full SFT training, eval harness built
+
+Smoke b4iliggjl: **selective-head parity EXACT** (-534.878 vs -534.878), r32 engaged (244M/0.78%),
+peak 27.8GB, max len 1323 (no truncation), adapter saved. Clean.
+**FULL SFT training** — detached Modal `ap-USfALZXIo0BV5o2gA4TKEZ` (task bt77gq0cv, notifies at end),
+mb-sft-guided, 2,732 ex × 2 ep = 683 steps, ~6h. Survives flaps.
+**Eval harness BUILT during the window** (all syntax-checked, no spend): serve_gemma_eval.py (vLLM
+OpenAI base+sft LoRA), eval_afb_probes.py (AFB-150 cold+faith + 70 probes, gpt-5.6-terra judge),
+modal_gemma_capability.py (ported lm-eval panel). MultiBench-descriptive = collect.py config at run
+time. Post-SFT: deploy serve → capability ∥ AFB+probes ∥ MultiBench descriptive → pre-DPO checkpoint.
+
+Waiting on SFT (bt77gq0cv). Spend ~$202 + SFT accruing.
