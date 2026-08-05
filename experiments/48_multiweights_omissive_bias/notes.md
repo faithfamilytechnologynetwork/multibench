@@ -1,6 +1,6 @@
 # Experiment 48: MultiWeights — overcoming omissive bias
 
-**Status**: In Progress (setup / pre-collection — no spend yet)
+**Status**: In Progress — **full collection running** (2026-08-05, background driver `b3w8q535y`)
 
 **Date**: 2026-08-04
 
@@ -75,7 +75,7 @@ which use their own judges/harnesses (AFB judge-of-record ≠ gemini — open de
 | Axis | Instrument | Success |
 |---|---|---|
 | **Omission (headline)** | AFB 150 Qs, official 0–4 judge; judge-of-record ≠ gemini | mean ↑ from ≈0; mass 0→1–2; 3–4 ≈ base; beats 0–2% ≥2 ceiling |
-| Capability guard | IFEval + MMLU + GSM8K-CoT (lm-eval, same vLLM stack) | flat vs base (taqwabench config lands 08-05) |
+| Capability guard | IFEval + MMLU + GSM8K-CoT (lm-eval, same vLLM stack) | flat vs base — **taqwabench jalees baseline in (no regression):** MMLU 0.467/0.468/0.470, GSM8K-CoT-strict 0.792/**0.867**/0.848, IFEval-inst-strict 0.273/0.279/0.282 (base/sft/sft+dpo). Copy their exact lm-eval config: iaser-ai/jaleesbench issue 21, latest comment. Our pooled multi-tradition set is a different treatment → guard still runs every checkpoint. |
 | Over-application guard | `probes/over_application_probes.{md,jsonl}` (70 prompts, AFB judge) + AFB 4-fraction | flat vs base on secular; 0 sermonizing on opt-out |
 | Fabrication guard | citation-marker scan on tuned outputs | zero (jalees: 0) |
 | MultiBench (descriptive only) | trained-scenario bare/unstated, gemini-thinking judge | color only; NOT a claim |
@@ -198,6 +198,17 @@ Observed in the 2-cell smoke only (NOT representative): Friendli, DeepInfra, Nov
   volume exist, shannon `serve.py` is the vLLM-server reference for the eval stack.
 - **No spend, no shared-key use, nothing collected or trained.** Collection + banding both now
   gated on the framings mop-up finishing (shares the funded key) — awaiting architect's word.
+
+### 2026-08-05 — GO: full collection launched
+- Architect cleared full collection (guided + unstated, 7 traditions) at concurrency 32 (the
+  proven OpenRouter envelope; runs alongside the ~1k-cell mop-up tail). Gemini banding cleared to
+  follow on completion. Report actual spend at end (est ~$10–20 incl. banding).
+- Launched resumable background driver `b3w8q535y` (`scratchpad/collect_driver.sh`): per-tradition
+  collect with whole-run resume, rides out network-flap waves (re-run on `failed>0`, bail a
+  tradition only after 3 no-progress attempts). Output → `data/output/collection/<tradition>/`
+  (gitignored). Verified alive (buddhism writing sittings within seconds).
+- Capability baseline received (taqwabench, no regression — GSM8K improved); reference logged in
+  the battery table for the capability-guard step. No action now.
 
 ## Next steps (ordered)
 

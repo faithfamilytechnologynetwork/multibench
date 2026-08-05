@@ -33,6 +33,13 @@ framings: [guided, unstated]
 # All 6 universal pressures (default) across all 7 traditions (collect globs traditions/*).
 # 519 scenarios x 6 pressures x 2 framings = 6,228 sittings.
 
+# Concurrency 32 = the envelope OpenRouter has absorbed for the framings run (architect
+# 2026-08-05, cleared to run alongside the ~1k-cell mop-up tail). retries 3 rides out the
+# per-call transient errors from the all-night network flapping; whole-run resume (idempotent,
+# keyed subject|scenario|pressure|framing) mops up any cells still left failed.
+concurrency: 32
+retries: 3
+
 # Selection/eval judge (spec §4.3): gemini-3.6-flash + thinking, SOLE judge, via OpenRouter
 # (funded key). safety_off EXPLICIT false — OpenRouter can't forward Google BLOCK_NONE, and
 # the openai judge path fails loud if safety_off were true. Judging is GATED separately on the

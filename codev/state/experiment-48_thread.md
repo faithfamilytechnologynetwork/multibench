@@ -116,3 +116,19 @@ dominates pathologically or the mix looks wrong at the samplability stage. (3) H
 mop-up pass 2 mid-flight; collection + banding word comes when it lands clean.
 
 Documented the policy + a fill-at-collection provider-distribution table in notes.md. Holding.
+
+## 2026-08-05 — GO: full collection running
+
+Architect cleared full collection (guided + unstated, all 7 traditions) at concurrency 32; banding
+to follow on completion; report actual spend (~$10–20). Launched **background driver `b3w8q535y`**
+(`scratchpad/collect_driver.sh`) — per-tradition resumable collect that rides the network-flap
+waves (re-run on failed>0, bail a tradition after 3 no-progress attempts). Output →
+`data/output/collection/<tradition>/sittings.jsonl` (gitignored). Verified alive (buddhism writing
+within seconds). Will be re-invoked on completion → then: aggregate the per-call provider
+distribution table, compute actual spend, report, and (on the banding go-word, already cleared)
+run Gemini banding → samplability diagnostic (HARD GATE, report histogram before training).
+
+Capability baseline in from taqwabench (no regression; GSM8K improved 0.792→0.867 at sft) — logged
+in the battery table as the lm-eval reference for the capability-guard step. No action now.
+
+Turn ending to stay reachable while collection runs in the background.
