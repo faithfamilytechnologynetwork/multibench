@@ -107,3 +107,12 @@ existing non-int `usage["batch"]` precedent (`report._add_usage` sums only the t
 
 **Still HELD:** full collection + Gemini banding wait for the architect's word (framings mop-up
 mid-pass, roman-catholicism backfilling). Nothing else run.
+
+**Architect decisions 2026-08-05:** (1) provenance diff APPROVED as written (committed 74b58aa);
+(2) host-mix policy = ACCEPT & DOCUMENT, NO host pinning — judge-filter + samplability robust to
+mild quant variance, same-stack control covers eval; obligation: record per-call provider
+distribution as a table when collection runs (placeholder added to notes.md); revisit if one host
+dominates pathologically or the mix looks wrong at the samplability stage. (3) Holds unchanged —
+mop-up pass 2 mid-flight; collection + banding word comes when it lands clean.
+
+Documented the policy + a fill-at-collection provider-distribution table in notes.md. Holding.

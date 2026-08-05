@@ -116,6 +116,16 @@ The over-application probe category E is the negative mirror of condition (b).
    the writeup.
 3. **The Modal/vLLM work is not wasted** — it is the eval stack AND the same-stack base control.
 
+**Host-mix policy (architect, 2026-08-05): ACCEPT & DOCUMENT, do NOT build host pinning.**
+Smoke showed OpenRouter routes per-call — one 2-turn sitting was served by a *mix* (Friendli +
+DeepInfra). Rationale for accepting the mix: the distillation data only needs to be text the
+model *plausibly emits*; judge-filtering (band ≥ +1 both scopes) + the samplability diagnostic
+are robust to mild quantization variance; and the same-stack vLLM control covers eval. So the
+writeup caveat is exactly **"own outputs as served by a mix of hosts."** Obligation: when
+collection runs, **record the per-call provider distribution as a table** (below). Revisit-trigger:
+if one host dominates pathologically OR the mix looks wrong at the samplability-diagnostic stage,
+raise it with the architect before training.
+
 **Keys**: `OPENROUTER_API_KEY` via `(set -a; source /Users/mwk/Development/fftn/taqwabench/.env; set +a)`.
 **NEVER** copy the key into repo / logs / PR text — public repo, funded key.
 
@@ -154,7 +164,20 @@ green-light for the prerequisite gemma collection.
 - **Provenance patch applied** (`workflows/judging/judging/providers.py`, `_openai_subject`):
   12-line backward-compatible stash of `resp.provider` into the per-turn usage dict. Safe by the
   existing `usage["batch"]` (non-int) precedent — `report._add_usage` sums only the explicit token
-  whitelist. Full judging suite: **182 passed, 9 skipped, 0 failed.**
+  whitelist. Full judging suite: **182 passed, 9 skipped, 0 failed.** **Diff APPROVED** (architect
+  2026-08-05), committed `74b58aa`.
+
+### Per-call provider distribution (FILL AT COLLECTION — host-mix policy obligation)
+
+Populate from the collected `sittings.jsonl` once full collection runs (count `usage[].provider`
+across all calls). Revisit-trigger: one host dominating pathologically, or a mix that looks wrong
+at the samplability-diagnostic stage → raise with architect before training.
+
+| provider (serving host) | calls | % of calls | notes |
+|---|---|---|---|
+| _to be filled_ | | | |
+
+Observed in the 2-cell smoke only (NOT representative): Friendli, DeepInfra, Novita.
 
 ## Progress log
 
