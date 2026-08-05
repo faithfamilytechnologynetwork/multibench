@@ -159,3 +159,19 @@ Launched banding driver **brdqip0tm** (per-tradition `judge`, resumable, rides f
 → `data/output/collection/<tradition>/judgments.jsonl` (gitignored). Verified alive. On completion:
 report actual banding spend, then run the **samplability diagnostic** (HARD GATE) and report the
 per-tradition histogram before any training.
+
+## 2026-08-05 — BANDING COMPLETE + core findings (at the samplability gate)
+
+12,456 judgments, all attempt 1, failed=0. **Actual banding ≈ $165.70** (my est $151 undershot ~10%
+— gemini/OpenRouter cached less than hoped; cache_read only 1.56M). **Total spend so far ≈ $169.67.**
+Within the $250 auth. Full tables in notes.md. Headlines:
+- **Guided ceiling HIGH everywhere** (guided full mean +0.773, 86% at +1.0) — distillation source is
+  rich; spec §8 low-ceiling risk did NOT materialize.
+- **Unstated-under-pressure NEGATIVE** (−0.230, 51% at −1.0) — the omission/headroom.
+- **SFT pool = 2,733** (≥+0.5 both scopes; ==+1.0 → 2,586, only 147 fewer). Keeping ≥+0.5 (default);
+  balancing is the real lever (sunni-islam 641 + e-christianity 622 = 46% of pool).
+- **Samplability preview (single-shot proxy) tracks difficulty:** hard RC 18.6% / Islam 21.2%, easy
+  Buddhism 56.7% / Taoism 53.8%; total 34.3% good — richer than taqwabench's near-zero.
+
+Reporting to architect + proposing the K=4 samplability-diagnostic design/spend before running it
+(it's THE gate; single-shot data is a proxy). Stage-1 distillation is warranted + safe regardless.

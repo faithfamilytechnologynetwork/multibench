@@ -1,6 +1,6 @@
 # Experiment 48: MultiWeights — overcoming omissive bias
 
-**Status**: In Progress — **full collection running** (2026-08-05, background driver `b3w8q535y`)
+**Status**: In Progress — collection + Gemini banding COMPLETE; at the samplability-diagnostic gate (2026-08-05)
 
 **Date**: 2026-08-04
 
@@ -189,6 +189,69 @@ Filled from the full collection (12,456 calls, **0 missing provider** — captur
 not an overwhelming monoculture — normal OpenRouter load-balancing. The real robustness check is the
 samplability diagnostic (host-mix policy revisit-trigger). Flagged to architect for awareness; no
 revisit raised. Caveat stands: **"own outputs as served by a mix of hosts."**
+
+## Banding results + samplability preview (2026-08-05) — CORE FINDINGS
+
+**Banding complete:** 12,456 judgments (6,228 × 2 scopes), all 7 traditions on attempt 1, failed=0.
+**Actual banding spend ≈ $165.70** (in 56.4M×$1.50 + out 10.8M×$7.50 + cache 1.56M×$0.15). Above my
+$151 estimate (~10% — gemini-via-OpenRouter cached less than hoped: cache_read only 1.56M), below
+the architect's ~$240 and the $250 authorization. **Total experiment spend so far ≈ $169.67**
+(collection $3.97 + banding $165.70).
+
+### Score distributions (−1…+1, MultiBench 5-point scale), per framing × scope
+
+| framing | scope | mean | −1.0 | −0.5 | 0.0 | +0.5 | +1.0 |
+|---|---|---|---|---|---|---|---|
+| guided | full | **+0.773** | 9.6% | 1.0% | 0.6% | 2.7% | **86.0%** |
+| guided | turn1 | +0.867 | 4.5% | 1.1% | 0.5% | 4.4% | 89.6% |
+| unstated | full | **−0.230** | **50.8%** | 3.7% | 11.2% | 9.3% | 25.0% |
+| unstated | turn1 | +0.003 | 32.9% | 5.8% | 18.9% | 12.6% | 29.8% |
+
+- **Guided ceiling is HIGH across all traditions** (+0.773 full, 86% at +1.0) — the distillation
+  source is rich; spec §8's "gemma's guided ceiling might be low on some traditions" risk did NOT
+  materialize. The JaleesModel precondition holds.
+- **Unstated-under-pressure is NEGATIVE** (−0.230; 51% at −1.0) — base gemma's omissive/secular
+  default under the 6 pressures. This is the headroom the tune targets. turn1 ≈ neutral (0.003)
+  then pressure drives it down — the "steadfastness under pressure is negative" pattern.
+
+### SFT candidate pool (guided, filter = score ≥ +0.5 on BOTH scopes) — pre-screens/balance
+
+| tradition | pass/total | | tradition | pass/total |
+|---|---|---|---|---|
+| buddhism | 294/312 (94.2%) | | secular-sage | 254/294 (86.4%) |
+| eastern-christianity | 622/636 (97.8%) | | sunni-islam | 641/840 (76.3%) |
+| judaism | 269/288 (93.4%) | | taoism | 264/288 (91.7%) |
+| roman-catholicism | 389/456 (85.3%) | | **TOTAL** | **2,733/3,114 (87.8%)** |
+
+- **Threshold sensitivity is low:** ≥+0.5 → 2,733; ==+1.0 → 2,586 (only 147 fewer, since guided is
+  86% at +1.0). Neither is starved (taqwabench kept 316). **Keeping the ruling default ≥+0.5** — the
+  +0.5 tail is still genuinely good counsel; the operative lever is **per-tradition balancing**, not
+  the threshold. Balance is lopsided: sunni-islam (641) + eastern-christianity (622) = 46% of the
+  pool; judaism/taoism/secular-sage ~260 each. Balancing plan (subsample the big traditions) applies.
+
+### Samplability PREVIEW (single-shot proxy — NOT the K=4 gate)
+
+Fraction of **unstated single-shot** cells scoring good (≥+0.5, full), per tradition — a K=1 proxy
+for the samplability question (the real gate resamples K=4 per cell; taqwabench base gemma: 317/420
+cells were ZERO):
+
+| tradition | good single-shot | | tradition | good single-shot |
+|---|---|---|---|---|
+| roman-catholicism | 18.6% | | eastern-christianity | 31.1% |
+| sunni-islam | 21.2% | | secular-sage | 54.1% |
+| judaism | 39.9% | | taoism | 53.8% |
+| buddhism | 56.7% | | **TOTAL** | **34.3%** |
+
+- **Samplability tracks tradition DIFFICULTY exactly** (therapeutic-priors doc): hard traditions
+  (RC 18.6%, Islam 21.2% — counsel that collides with the priors) sample good behavior rarely
+  unstated; easy traditions (Buddhism 56.7%, Taoism 53.8% — rarely demand what the priors resist)
+  sample it often. This is itself a clean cross-tradition result.
+- **Implication:** base gemma samples good behavior more than taqwabench's did (34% vs their near-
+  zero), so the samplability boundary may be milder here — BUT the proper GO/NO-GO needs the K=4
+  per-cell "ever good" histogram. Whichever way it lands, **stage-1 (context distillation) is still
+  the mechanism** (guided ceiling +0.77 >> unstated −0.23), and it is safe regardless of the K=4
+  result. The K=4 diagnostic mainly informs whether stage-2 DPO-on-SFT is worth it (it needs
+  samplable contrast). Design + spend confirmation pending with architect.
 
 ## Progress log
 
