@@ -225,3 +225,6 @@ BEFORE DPO.
   pass → launch full SFT `--detach` (background) → post-SFT eval sweep → checkpoint-before-DPO gate.
 - **⚠️ Budget flagged:** SFT is ~$30-45 (8.6× taqwabench's data), remaining path ≈ $300-320 total,
   modestly over the $300 plan — flagged to architect to trim scope if they want to hold $300.
+- **Architect ruled: keep 2 epochs + keep AFB faith-context condition, accept ~$315** (recipe
+  fidelity > 5% over plan). Proceed full SFT on smoke-pass. Waiting on smoke b4iliggjl → then launch
+  full `--detach`, report launch, run eval sweep, hit the pre-DPO checkpoint gate.
