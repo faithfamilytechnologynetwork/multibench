@@ -293,5 +293,9 @@ BOTH `modal_gemma_sft.py` + `modal_gemma_dpo2.py` to bf16 (drop BitsAndBytesConf
 prepare_model_for_kbit_training → bf16 load + gradient_checkpointing_enable + enable_input_require_grads),
 gpu="B200", cu128 image. main() blocks (remote) for smokes, spawns for full runs. Syntax-checked.
 **Sunk cost nf4 ~$25–28** (run1 ~$20-25 + run3 ~$2 + smoke ~$1).
-**bf16 B200 smoke running (brntikm8q)** — building the cu128 image + mechanics/compat check. On pass →
-relaunch full bf16 SFT detached. (Stale poller bisvachvg will be replaced at full-run launch.)
+**bf16 B200 smoke PASSED** (brntikm8q): torch 2.11.0+cu128 ran clean on B200 (no sm_100/kernel
+errors → Blackwell compat CONFIRMED); grad-checkpointing active, LoRA r32 (244M/0.78%), selective-head
+parity ok (−492.4 vs −493.1), loss sane (nll 3.56), **peak 63.2GB** (huge headroom on 192GB B200).
+**FULL bf16 SFT LAUNCHED** — detached app ap-WB9C8dtq4lYQ1o7AkXD8fn, run mb-sft-guided, 2 ep = 683
+steps, B200, ~2h expected. Poller bisvachvg (watches /runs/mb-sft-guided/config.json) still alive →
+notifies at completion. Next: report to architect; on completion → eval sweep → pre-DPO checkpoint.
