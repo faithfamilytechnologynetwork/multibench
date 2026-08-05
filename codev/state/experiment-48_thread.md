@@ -257,3 +257,12 @@ exit, Tasks=0. Need BOTH `--detach` AND spawn.)
 Tasks=1), detached.** Completion poller `bisvachvg` watches the volume for config.json.
 **Cost impact:** run 1 burned ~4h H200 (~$20-25 wasted); re-run adds ~$30. SFT total ~$50-60 →
 experiment likely ~$320-340 total (over the $300 plan, mostly the wasted run). Flagged to architect.
+Architect acked: spawn() fix right, surfaced ~$320-340 to Waleed, proceed; stop at pre-DPO checkpoint.
+
+**DPO script PREPPED with resumable checkpointing** (architect: add before launching DPO, note as
+deliberate deviation from taqwabench parity justified by 6h/run × real money). `modal/modal_gemma_dpo2.py`:
+DPO machinery unchanged (β0.1, lr1e-5, 1ep, ref=SFT); ADDED periodic policy-adapter checkpoint every
+100 steps + resume.json + vol.commit; RESUME loads policy from the last checkpoint and fast-forwards
+the seed-deterministic shuffle (skips the init-equality check on resume); --detach+spawn launch;
+scenario_id field. Syntax-checked. Won't run until after the pre-DPO gate (needs the mined pairs).
+SFT run 3 (ap-3IotDJ...) still alive; poller bisvachvg watching.
