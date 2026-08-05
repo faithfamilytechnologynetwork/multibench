@@ -378,6 +378,47 @@ Run `mb-sft-guided` finished clean: **683 steps** (= 2,732 × 2 / 8, exact), 2 f
 Next: deploy the eval server (base + sft LoRA) → capability panel ∥ AFB+probes ∥ MultiBench
 descriptive → assemble base-vs-SFT table → pre-DPO checkpoint report.
 
+## SFT EVAL RESULTS (base vs SFT) — 2026-08-05
+
+### AFB-150 (headline — omissive bias), official gpt-5.6-terra 0–4 judge
+
+| condition | mean | 0 | 1 | 2 | 3 | 4 | P≥1 | P≥2 | P≥3 |
+|---|---|---|---|---|---|---|---|---|---|
+| base / cold | 0.113 | 90% | 9% | 0% | 1% | 0% | 0.10 | **0.01** | 0.01 |
+| **sft / cold** | **1.147** | 53% | 19% | 5% | 5% | 18% | 0.47 | **0.27** | 0.23 |
+| base / faith | 3.993 | 0 | 0 | 0 | 1% | 99% | 1.00 | 1.00 | 1.00 |
+| sft / faith | 3.993 | 0 | 0 | 0 | 1% | 99% | 1.00 | 1.00 | 1.00 |
+
+- **HEADLINE WORKS:** cold AFB omission substantially reduced — P(meaningful ≥2) **1% → 27%**
+  (base ≈0, matching the published 0–2% ceiling across 27 models). Representation added on 47% of
+  the 150 questions. Mean 0.11 → 1.15.
+- **Honest nuance:** the cold shift is BIMODAL — 53% stay at 0, but of those that move there's an
+  18% spike at **4** (predominantly religious) rather than clean calibration to 1–2. This is the
+  over-shoot **stage-2 DPO is meant to temper** (JaleesModel §7). Report it plainly.
+- **Faith condition is saturated/uninformative** — the "I'm a practicing Catholic…" prefix drives
+  BOTH base and sft to ~4.0 (99% at 4). Confirms responsiveness exists in base already; the tune's
+  value is entirely on the COLD condition. (A lighter prefix would discriminate better — noted.)
+
+### Over-application guard (70 probes, same 0–4 judge) — base → sft mean (P≥1)
+
+| category | base | sft | verdict |
+|---|---|---|---|
+| coding | 0.00 (0.00) | 0.00 (0.00) | ✅ flat at 0 |
+| factual | 0.00 (0.00) | 0.00 (0.00) | ✅ flat at 0 |
+| math | 0.00 (0.00) | 0.00 (0.00) | ✅ flat at 0 |
+| secular-practical | 0.00 (0.00) | 0.00 (0.00) | ✅ flat at 0 |
+| creative-professional | 0.00 (0.00) | 0.00 (0.00) | ✅ flat at 0 |
+| hostile-to-religion | 2.60 (1.00) | 2.70 (1.00) | ✅ comparative-flat (+0.10; prompt names religion) |
+| opted-out-interlocutor | 1.00 (0.60) | 1.10 (0.70) | ⚠️ minor: P≥1 0.60→0.70 (mean +0.10; no sermonizing) |
+
+- **Calibration holds at the task level:** the tune adds ZERO religious content to truly secular
+  tasks (coding/factual/math/secular/creative all exactly 0). The AFB 4-spike is NOT accompanied by
+  secular over-application — represents where faith is expected, silent where not.
+- **One minor watch:** opted-out interlocutors (cat E) rose P≥1 0.60→0.70 (added passing mentions to
+  ~10% more prompts that explicitly opted out). Small, no sermonizing (no P≥3 rise). Flag for DPO/report.
+
+### Capability guard + MultiBench-descriptive — PENDING (jobs b98pm4tbs, bewydkbql still running).
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)
