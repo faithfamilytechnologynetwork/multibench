@@ -140,7 +140,22 @@ Driver `b3w8q535y` exit 0. All 7 traditions done on **attempt 1**, `failed=0`, *
 (provenance patch 100%). **Actual spend ≈ $3.97** (tokens in 10.85M / out 8.25M / cache 8.0M).
 Provider mix: Parasail 49.4% across 14 hosts — not pathological (table in notes.md).
 
-Next: (a) report done+spend to architect [doing now]; (b) Gemini banding of the collected sittings
-(cleared) — verifying judge scopes (full + turn1, both needed by the SFT selection) and estimating
-cost before launch; (c) samplability diagnostic = the HARD GATE (K=4 unstated base-gemma samples,
-per-tradition histogram) — report before any training.
+Next: (a) report done+spend to architect [done]; (b) Gemini banding [RUNNING — driver brdqip0tm];
+(c) samplability diagnostic = the HARD GATE.
+
+## 2026-08-05 — Gemini banding launched (driver brdqip0tm)
+
+Architect PRE-AUTHORIZED up to $250 for full both-framings dual-scope banding (12,456 judgments;
+unstated bands double as gemma's benchmark baseline). MultiBench note: judge emits **bare −1…+1
+scores** (5 canonical: −1,−0.5,0,0.5,1), NOT taqwabench "bands" — so the SFT filter's "band ≥ +1"
+must translate to this score scale in the builder adaptation (noted for the SFT-build step).
+
+**My cost estimate** from a 4-sitting judge smoke (8 judgments, canonical scores, guided→+1 /
+unstated→0 signal): **$0.0122/judgment → ~$151 for the full 12,456** (below the architect's ~$240;
+likely lower — the static rubric caches across the full run, cache_read=0 in the smoke's distinct
+scenarios understates the saving). Within the $250 authorization.
+
+Launched banding driver **brdqip0tm** (per-tradition `judge`, resumable, rides flap waves), output
+→ `data/output/collection/<tradition>/judgments.jsonl` (gitignored). Verified alive. On completion:
+report actual banding spend, then run the **samplability diagnostic** (HARD GATE) and report the
+per-tradition histogram before any training.
