@@ -3,8 +3,9 @@ modal_gemma_dpo2.py; the DPO machinery is UNCHANGED (two PEFT adapters over one 
 trainable "policy" init-from-SFT + frozen "ref"=SFT; β 0.1, lr 1e-5, 1 epoch; selective-head logp;
 reference = the SFT checkpoint, not raw base).
 
-DELIBERATE DEVIATIONS FROM taqwabench PARITY (architect 2026-08-05, justified by 6h/run × real
-money — total-loss-on-failure is unacceptable after the SFT flap cancel):
+DELIBERATE DEVIATIONS FROM taqwabench PARITY (human-directed, documented):
+  0. **bf16 LoRA, NO bitsandbytes/nf4** + **B200** (Blackwell), matching the bf16 SFT (Waleed
+     2026-08-05). Policy + ref adapters over one bf16 base. Image = CUDA 12.8 + torch cu128 (sm_100).
   1. PERIODIC CHECKPOINTING: every CKPT_EVERY optimizer steps, save the policy adapter to the final
      `/runs/<run>/adapter` path + write `resume.json {step, seen}` + vol.commit.
   2. RESUME: on start, if `resume.json` + a saved adapter exist, init the policy FROM that adapter
@@ -26,19 +27,18 @@ CKPT_EVERY = 100  # optimizer steps between resumable adapter checkpoints (devia
 app = modal.App("multibench-gemma-dpo2")
 vol = modal.Volume.from_name("gemma-dpo")
 
+# Blackwell (B200/sm_100): CUDA 12.8 devel base + torch cu128. No bitsandbytes (bf16 LoRA).
 image = (
-    modal.Image.debian_slim(python_version="3.12")
-    .pip_install(
-        "torch==2.6.0", "transformers>=4.53", "peft>=0.15", "bitsandbytes>=0.45",
-        "accelerate>=1.3", "hf_transfer",
-    )
+    modal.Image.from_registry("nvidia/cuda:12.8.1-devel-ubuntu24.04", add_python="3.12")
+    .pip_install("torch>=2.7.0", index_url="https://download.pytorch.org/whl/cu128")
+    .pip_install("transformers>=4.53", "peft>=0.15", "accelerate>=1.3", "hf_transfer")
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HOME": "/vol/hf-cache",
           "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
 )
 
 
 @app.function(
-    image=image, gpu="H200", timeout=8 * 60 * 60, volumes={"/vol": vol},
+    image=image, gpu="B200", timeout=8 * 60 * 60, volumes={"/vol": vol},
     secrets=[modal.Secret.from_name("huggingface")],
 )
 def train(pairs_path: str, sft_run: str, run_name: str, batch: int, beta: float,
@@ -50,10 +50,9 @@ def train(pairs_path: str, sft_run: str, run_name: str, batch: int, beta: float,
 
     import torch
     import torch.nn.functional as F
-    from peft import PeftModel, prepare_model_for_kbit_training
+    from peft import PeftModel
     from transformers import (
-        AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText,
-        AutoTokenizer, BitsAndBytesConfig,
+        AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText, AutoTokenizer,
     )
 
     out = pathlib.Path(f"/vol/runs/{run_name}")
@@ -100,18 +99,11 @@ def train(pairs_path: str, sft_run: str, run_name: str, batch: int, beta: float,
     multimodal = hasattr(cfg, "vision_config")
     loader = AutoModelForImageTextToText if multimodal else AutoModelForCausalLM
     base_model = loader.from_pretrained(
-        MODEL, torch_dtype=torch.bfloat16, device_map="auto",
-        quantization_config=BitsAndBytesConfig(
-            load_in_4bit=True, bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.bfloat16,
-        ),
-        attn_implementation="sdpa",
-    )
+        MODEL, torch_dtype=torch.bfloat16, device_map="auto", attn_implementation="sdpa",
+    )  # bf16, no quantization (Waleed 2026-08-05)
     base_model.config.use_cache = False
-    base_model = prepare_model_for_kbit_training(
-        base_model, use_gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False},
-    )
+    base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    base_model.enable_input_require_grads()
     # policy: from SFT (fresh) or the resume checkpoint; ref: ALWAYS the frozen SFT.
     model = PeftModel.from_pretrained(base_model, policy_init,
                                       adapter_name="policy", is_trainable=True)

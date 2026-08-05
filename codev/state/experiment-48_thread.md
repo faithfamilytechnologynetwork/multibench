@@ -280,3 +280,18 @@ code now; DPO won't run until then).
 **B200 decision (architect):** stay on H200 for this SFT run AND DPO by default (bnb/Blackwell kernel
 risk). If DPO wall-clock justifies, PROPOSE a B200 smoke test at the pre-DPO checkpoint — do not
 switch unilaterally. Noted; will assess DPO wall-clock from the SFT step timing and raise at the gate.
+
+## 2026-08-05 — RECIPE CHANGE (Waleed): nf4 → bf16 LoRA + B200
+
+Waleed: KILL the nf4 SFT re-run, switch to **bf16 LoRA (no bitsandbytes anywhere)** — nf4 is a
+reproducibility confound; accept losing exact taqwabench numeric parity (document as deliberate
+human-directed deviation). Addendum: run bf16 SFT + DPO on **B200** (Blackwell); image bumped to
+CUDA 12.8 + torch cu128 for sm_100; smoke doubles as B200 compat check. Expect ~2× H200 (~2h, $6.25/hr).
+
+Done: killed nf4 run 3 (was at step 105, loss ~0.58); cleared stale `/runs/mb-sft-guided`; converted
+BOTH `modal_gemma_sft.py` + `modal_gemma_dpo2.py` to bf16 (drop BitsAndBytesConfig +
+prepare_model_for_kbit_training → bf16 load + gradient_checkpointing_enable + enable_input_require_grads),
+gpu="B200", cu128 image. main() blocks (remote) for smokes, spawns for full runs. Syntax-checked.
+**Sunk cost nf4 ~$25–28** (run1 ~$20-25 + run3 ~$2 + smoke ~$1).
+**bf16 B200 smoke running (brntikm8q)** — building the cu128 image + mechanics/compat check. On pass →
+relaunch full bf16 SFT detached. (Stale poller bisvachvg will be replaced at full-run launch.)

@@ -324,11 +324,23 @@ descriptive (gemini), AFB-150 on base+sft (judge-of-record **gpt-5.6-terra** via
 capability panel (taqwabench lm-eval), over-application probes both checkpoints; (3) **CHECKPOINT
 before DPO**: report SFT results + K=4-from-distilled mining yield — the remaining gate.
 
-**SFT run (Modal, port `modal/modal_gemma_sft.py`):** recipe UNCHANGED (QLoRA r32, masked
-token-mean NLL, lr 5e-5, 2 epochs, nf4). Deviations noted: `scenario_id` field; 2,732 examples →
-683 optimizer steps (batch 8 × 2 epochs) vs taqwabench's 79. Data uploaded to `gemma-dpo` volume
-`/pairs/sft_guided_mb.jsonl`. **Smoke running** (`mb-sft-smoke`, 4 ex / 1 epoch) to validate the
-machinery before the full run.
+**SFT run (Modal, `modal/modal_gemma_sft.py`):** LoRA r32/alpha32, masked token-mean NLL, lr 5e-5,
+2 epochs, batch 8 accumulation, seed 3446. Data on `gemma-dpo` volume `/pairs/sft_guided_mb.jsonl`.
+
+**DELIBERATE HUMAN-DIRECTED DEVIATIONS FROM taqwabench PARITY (for the review doc):**
+- **bf16 LoRA — NO bitsandbytes/nf4 anywhere (Waleed 2026-08-05).** Rationale: nf4 is non-standard and
+  makes quantization a reproducibility confound; we accept losing exact taqwabench numeric parity.
+  Base loads bf16 (~62GB); grad-checkpointing via `gradient_checkpointing_enable` +
+  `enable_input_require_grads` (bf16 substitute for `prepare_model_for_kbit_training`). DPO likewise bf16.
+- **B200 (Blackwell) not H200 (Waleed 2026-08-05).** bnb gone → no Blackwell-kernel risk; image bumped
+  to CUDA 12.8 devel + torch cu128 for sm_100. Expect ~2× H200 throughput (~2h full run) at $6.25/hr.
+- Full-state resumable checkpointing (every 100 steps: adapter + optimizer + data-pos + RNG,
+  `--resume-from`); `scenario_id` field; 2,732 ex → 683 steps; `--detach`+`.spawn()` launch.
+
+**nf4 attempts KILLED (sunk cost ~$25–28):** nf4 run 1 cancelled at step 470 by a flap (~$20–25);
+nf4 run 3 killed at step 105 for the bf16 switch (~$2); nf4 smoke (~$1). Stale `/runs/mb-sft-guided`
+cleared from the volume. **bf16 B200 smoke running** (`mb-sft-bf16-smoke`) = mechanics + Blackwell
+compat check (numeric parity vs taqwabench no longer applies; verify loss sane + memory headroom).
 
 **⚠️ BUDGET TRAJECTORY FLAG (per architect's ask):** the 2,732-example set is 8.6× taqwabench's 316,
 so SFT is **~$30–45** (H200 ~6 h), NOT the ~$5 taqwabench figure. Remaining path (SFT + eval sweep

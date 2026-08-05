@@ -1,14 +1,16 @@
 """Stage-1 SFT: gemma-4-31b context distillation on its own good GUIDED responses, rendered bare
-(experiment 48). Recipe ported VERBATIM from taqwabench modal_gemma_sft.py (QLoRA r32, masked
-token-mean NLL, lr 5e-5, 2 epochs, nf4, selective-head logp) — NOT changed.
+(experiment 48). LoRA r32 recipe from taqwabench (masked token-mean NLL, lr 5e-5, 2 epochs, batch 8
+accumulation, selective-head logp) — hyperparameters unchanged.
 
-DELIBERATE DEVIATIONS FROM taqwabench PARITY (architect 2026-08-05, justified by 6h/run × real money
-— a client-DNS flap cancelled run 1 at step 470/683 with total loss):
+DELIBERATE DEVIATIONS FROM taqwabench PARITY (human-directed, documented):
+  0. **bf16 LoRA, NO bitsandbytes/nf4 anywhere** (Waleed 2026-08-05): nf4 makes quantization a
+     reproducibility confound; we accept losing exact taqwabench numeric parity. Base loads in bf16;
+     LoRA trains on the bf16 base. Runs on **B200** (Blackwell) — bnb gone, so no bnb/Blackwell
+     kernel risk; image bumped to CUDA 12.8 + torch cu128 for sm_100. Expect ~2× H200 (~2h).
   1. FULL-STATE CHECKPOINTING every CKPT_EVERY steps: adapter + AdamW optimizer state + (epoch, data
      position, shuffled order) + Python/torch/cuda RNG state → the volume + vol.commit.
-  2. `--resume-from <run_name>` restores ALL of the above and continues exactly where it stopped
-     (optimizer momentum + RNG + data position preserved), instead of restarting.
-  3. Launch via `--detach` + `.spawn()` (survives client/network drops).
+  2. `--resume-from <run_name>` restores ALL of the above and continues exactly where it stopped.
+  3. Launch via `--detach` + `.spawn()` (survives client/network drops — a flap cancelled nf4 run 1).
 Also: dataset field `scenario_id` (not `probe_id`); `--limit` smoke knob.
 
 Run (fresh):  modal run --detach .../modal_gemma_sft.py --data /pairs/sft_guided_mb.jsonl --run-name mb-sft-guided
@@ -22,19 +24,19 @@ CKPT_EVERY = 100  # optimizer steps between full-state checkpoints (deviation #1
 app = modal.App("multibench-gemma-sft")
 vol = modal.Volume.from_name("gemma-dpo")
 
+# Blackwell (B200/sm_100) needs CUDA 12.8+ and a recent torch: CUDA 12.8 devel base + torch cu128.
+# No bitsandbytes (bf16 LoRA). vLLM eval/serve images already use this same CUDA 12.8 base.
 image = (
-    modal.Image.debian_slim(python_version="3.12")
-    .pip_install(
-        "torch==2.6.0", "transformers>=4.53", "peft>=0.15", "bitsandbytes>=0.45",
-        "accelerate>=1.3", "hf_transfer",
-    )
+    modal.Image.from_registry("nvidia/cuda:12.8.1-devel-ubuntu24.04", add_python="3.12")
+    .pip_install("torch>=2.7.0", index_url="https://download.pytorch.org/whl/cu128")
+    .pip_install("transformers>=4.53", "peft>=0.15", "accelerate>=1.3", "hf_transfer")
     .env({"HF_HUB_ENABLE_HF_TRANSFER": "1", "HF_HOME": "/vol/hf-cache",
           "PYTORCH_CUDA_ALLOC_CONF": "expandable_segments:True"})
 )
 
 
 @app.function(
-    image=image, gpu="H200", timeout=8 * 60 * 60, volumes={"/vol": vol},
+    image=image, gpu="B200", timeout=8 * 60 * 60, volumes={"/vol": vol},
     secrets=[modal.Secret.from_name("huggingface")],
 )
 def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
@@ -44,10 +46,9 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
     import random
 
     import torch
-    from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
+    from peft import LoraConfig, PeftModel, get_peft_model
     from transformers import (
-        AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText,
-        AutoTokenizer, BitsAndBytesConfig,
+        AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText, AutoTokenizer,
     )
 
     out = pathlib.Path(f"/vol/runs/{run_name}")
@@ -88,18 +89,12 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
     multimodal = hasattr(cfg, "vision_config")
     loader = AutoModelForImageTextToText if multimodal else AutoModelForCausalLM
     base_model = loader.from_pretrained(
-        MODEL, torch_dtype=torch.bfloat16, device_map="auto",
-        quantization_config=BitsAndBytesConfig(
-            load_in_4bit=True, bnb_4bit_quant_type="nf4",
-            bnb_4bit_compute_dtype=torch.bfloat16,
-        ),
-        attn_implementation="sdpa",
-    )
+        MODEL, torch_dtype=torch.bfloat16, device_map="auto", attn_implementation="sdpa",
+    )  # bf16, no quantization (Waleed 2026-08-05)
     base_model.config.use_cache = False
-    base_model = prepare_model_for_kbit_training(
-        base_model, use_gradient_checkpointing=True,
-        gradient_checkpointing_kwargs={"use_reentrant": False},
-    )
+    # bf16 equivalents of prepare_model_for_kbit_training's grad-checkpointing setup (no bnb):
+    base_model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
+    base_model.enable_input_require_grads()  # so grads flow to LoRA through the frozen base under GC
     proj = "(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)"
     if resuming:
         # Restore the LoRA weights from the checkpoint adapter (deviation #2).
@@ -227,6 +222,10 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
 @app.local_entrypoint()
 def main(data: str, run_name: str, batch: int = 8, lr: float = 5e-5,
          epochs: int = 2, seed: int = 3446, limit: int = 0, resume_from: str = ""):
-    # --detach + spawn: survive client/network drops (see the SFT run-1 flap cancel).
-    call = train.spawn(data, run_name, batch, lr, epochs, seed, limit, resume_from)
-    print(f"spawned SFT: call_id={call.object_id}  run_name={run_name} resume_from={resume_from or '(fresh)'}")
+    if limit:
+        # smoke: block (remote) so loss / memory / B200-compat print directly to this client.
+        train.remote(data, run_name, batch, lr, epochs, seed, limit, resume_from)
+    else:
+        # full run: --detach + spawn so it survives client/network drops (nf4 run-1 flap cancel).
+        call = train.spawn(data, run_name, batch, lr, epochs, seed, limit, resume_from)
+        print(f"spawned SFT: call_id={call.object_id}  run_name={run_name} resume_from={resume_from or '(fresh)'}")
