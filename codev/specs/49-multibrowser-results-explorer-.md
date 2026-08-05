@@ -26,9 +26,21 @@ plus reference data already fix the key decisions. The questions the spec had to
   then average those seven tradition-means with equal weight. `scope=full` is post-pressure; `scope=turn1`
   is first-response. Verified to equal the paper's `subj_overall` point estimates exactly.
 - **Q: How is the dual-judge / Opus alias / sample-coverage problem handled?**
-  A: The export alias-normalizes the two Opus judge ids to one, and records per-cell coverage
+  A: The export alias-normalizes the two Opus **judge** ids to one, and records per-cell coverage
   (`n_judged / n_expected`) so views can degrade honestly where Opus is sample-only. The SPA never sees
   two Opus judges and never presents a sample mean as if it were full-grid.
+- **Q: Are only *judge* ids aliased across the source runs?**
+  A: No — **subject** ids are also split. `20260803-framings-opus-sample` uses provider-prefixed, lowercased
+  subject ids (`anthropic/claude-sonnet-5`, `qwen/qwen3-235b-a22b-2507`, `thinkingmachines/inkling`, …) while
+  `20260803-merged` / `-unstated-opus` use the canonical ids (`claude-sonnet-5`,
+  `Qwen/Qwen3-235B-A22B-Instruct-2507`, `thinkingmachines/Inkling`, …). A naive "strip prefix + lowercase"
+  rule **fails on Qwen** (`qwen3-235b-a22b-2507` vs `Qwen3-235B-A22B-Instruct-2507` — the `-Instruct` segment
+  is dropped upstream). So the export needs an **explicit subject alias map** (not an algorithm) plus a test
+  asserting exactly five normalized subjects. (Verified against the run data.)
+- **Q: With tiny Opus samples, is "exclude zero-coverage traditions" enough?**
+  A: No — measured stated/full Opus coverage ranges from ~2 cells (secular-sage) to ~230 cells (sunni-islam)
+  per tradition; equal 1/7 weighting would let a 2-cell estimate count as much as a 230-cell one. Honest
+  degradation must cover **tiny-non-zero** coverage via a concrete minimum-coverage rule, not just zero.
 - **Q: What granularity keeps the export in single-digit MB with no transcripts?**
   A: Pre-aggregated breakdowns + coverage + score distributions, sharded per tradition. No transcript
   turns and no per-judgment rationale in v1 (see Open Questions for the rationale trade-off).
@@ -65,9 +77,18 @@ must be honest wherever Opus coverage is only a sample.
   × scope; cell score = mean of present judges; breakdown = unweighted mean of in-scope cells; headline =
   unstated + full; steadfastness = full − turn1). The report-v2 `stats_bundle.json.subj_overall` holds the
   paper's standings point estimates + bootstrap CIs.
-- **The Opus alias split is real**: in `20260803-framings-opus-sample`, Opus judgments appear under both
-  `claude-opus-4-8` (batch) and `anthropic/claude-opus-4.8` (OpenRouter tail); the split is per-tradition
-  and the sample dir is still being tail-filled (counts moving until the architect seals it).
+- **The Opus judge alias split is real**: in `20260803-framings-opus-sample`, Opus judgments appear under
+  both `claude-opus-4-8` (batch) and `anthropic/claude-opus-4.8` (OpenRouter tail); the split is
+  per-tradition and the sample dir is still being tail-filled (counts moving until the architect seals it).
+- **A subject-id split is *also* real** (not just judges): the sample run's subject ids are provider-prefixed
+  and lowercased and, for Qwen, drop the `-Instruct` segment — so a merge on the raw subject key yields ten
+  subjects instead of five. Verified: merged/unstated-opus use `{Qwen/Qwen3-235B-A22B-Instruct-2507,
+  claude-sonnet-5, gemini-3.6-flash, gpt-5.6-terra, thinkingmachines/Inkling}`; the sample run uses
+  `{qwen/qwen3-235b-a22b-2507, anthropic/claude-sonnet-5, google/gemini-3.6-flash, openai/gpt-5.6-terra,
+  thinkingmachines/inkling}`.
+- **`gemini-3.6-flash` is both a judge and a subject**: it is the sole judge of the merged run *and* one of
+  the five evaluated subjects. In the merged run the Gemini judge *does* score the `gemini-3.6-flash` subject
+  (no self-skip for the launch data), so both roles coexist and must be disambiguated in the data and UI.
 
 ## Desired State
 
@@ -77,8 +98,16 @@ A **Results Explorer** in `multibrowser`, added as new routes/facets without dis
   the **mean of per-tradition means, post-pressure** (the paper's `tab_standings` convention), with a
   **per-tradition drill-down**, a **framing toggle** (unstated / stated / guided), and a **scope toggle**
   (first-response = `turn1` / post-pressure = `full`).
-- A **judge selector** that switches whose verdicts drive every view — **Gemini** (full grid) or **Opus**
-  (one normalized judge). Opus stated/guided views degrade honestly (badged sample, coverage shown).
+- A **judge selector** that switches whose verdicts drive every view — **judge=Gemini** (full grid) or
+  **judge=Opus** (one normalized judge). "Judge" and "subject" are kept distinct everywhere: the judge is
+  who scores; `gemini-3.6-flash` may also appear as one of the five ranked **subjects**, and the UI must
+  never conflate the two. Opus stated/guided views degrade honestly (badged sample, coverage shown).
+- **Honest degradation for uneven samples**: each tradition-mean carries its coverage (`n_judged /
+  n_expected`). A tradition-mean whose coverage is below a **`min_coverage`** threshold (recorded in the
+  manifest, default 0.5) is **excluded from the leaderboard's mean-of-means** and shown in the drill-down
+  badged `sample (n/N)`; the leaderboard annotates how many of the seven traditions actually contributed
+  (`k/7`). Zero-coverage traditions are likewise excluded (never counted as 0). This covers the tiny-non-zero
+  case (e.g. a 2-cell tradition-mean), not just the zero case.
 - A **pressure selector** that filters every results view by one of the six pressures or "all".
 - The whole explorer is fed by a **committed, additive results dataset** the SPA reads at runtime:
   `results/<run-id>/` with a **manifest** (subjects, judges, framings, pressures, scopes, counts, dates,
@@ -88,9 +117,10 @@ A **Results Explorer** in `multibrowser`, added as new routes/facets without dis
 
 **Reconciliation is guaranteed by construction.** The export publishes each tradition's breakdown means
 computed by the canonical Python aggregator; the SPA's only client-side statistic for the leaderboard is
-the equal-weight mean across the seven tradition-means. This was verified against the launch data:
+the equal-weight mean across the seven tradition-means. This was verified against the launch data (judge = Gemini; the ranked subject is `gemini-3.6-flash`; scope =
+full; pressure = all):
 
-| framing | mean-of-per-tradition-means (Gemini) | paper `subj_overall[gemini-3.6-flash]` | match |
+| framing | mean-of-per-tradition-means (subject `gemini-3.6-flash`) | paper `subj_overall[gemini-3.6-flash]` | match |
 |---|---|---|---|
 | unstated | 0.138790 | 0.138790 | exact |
 | stated | 0.555226 | 0.555226 | exact |
@@ -114,13 +144,22 @@ the equal-weight mean across the seven tradition-means. This was verified agains
       the leaderboard and drill-down.
 - [ ] **Per-tradition drill-down** shows each tradition's contributing mean for the current selection.
 - [ ] **Honest degradation**: where Opus coverage is sample-only (stated/guided), the view is badged as a
-      sample and shows coverage (`n_judged / n_expected`); a tradition with zero coverage for the selection
-      is shown as excluded, never as 0.
+      sample and shows coverage (`n_judged / n_expected`); a tradition-mean below `min_coverage` (default
+      0.5) — including the tiny-non-zero and zero cases — is excluded from the leaderboard mean-of-means and
+      the leaderboard annotates the contributing-tradition count (`k/7`).
+- [ ] **Subject normalization**: the export maps all source subject-id variants to exactly **five** canonical
+      subjects via an explicit alias map (covering the Qwen `-Instruct` case); a test asserts exactly five.
+- [ ] **Judge alias normalization**: the export collapses `claude-opus-4-8` and `anthropic/claude-opus-4.8`
+      into one Opus judge, deduping any identity present under both aliases (no double-counting); a test
+      covers both the disjoint-sum case and the collision-dedup case.
 - [ ] **Additive, no-redeploy publish**: a new `results/<run-id>/` exported and committed appears in the
-      browser without a code change; corpus browsing is unchanged.
-- [ ] **Size budget**: each run's committed dataset is single-digit MB, sharded per tradition.
-- [ ] **Alias normalization**: the export collapses `claude-opus-4-8` and `anthropic/claude-opus-4.8` into
-      one Opus judge with no double-counting.
+      browser without a code change; corpus browsing is unchanged. This holds **even when the recursive git
+      tree is truncated** — the truncation fallback must discover `results/` as well as `traditions/`.
+- [ ] **Size budget (exact, CI-checked)**: each run's committed dataset is **≤ 8 MB total** and each
+      per-tradition shard is **≤ 1 MB**; a test/CI assertion enforces these byte ceilings.
+- [ ] **Runtime dataset validation**: the SPA validates the manifest and shards (schema version, well-formed
+      JSON, finite in-range scores, known selector values); malformed/missing data renders an inline notice,
+      never a crash.
 - [ ] Judge & pressure selectors work on the live Railway deploy (manual `railway up`).
 - [ ] All tests pass (the touched-app suites: `pnpm -C apps/multibrowser test` and, if the export is Python,
       `uv … pytest` for the export module); no reduction in coverage.
@@ -141,10 +180,32 @@ the equal-weight mean across the seven tradition-means. This was verified agains
 - **Scores + metadata only — no full transcripts.** Raw run data is 583 MB; the export must land in
   single-digit MB, **sharded per tradition** so raw fetches stay small. Include a **manifest** (subjects,
   judges, framings, pressures, scopes, counts, dates).
-- **Dual-judge with Opus alias normalization**: the run is Gemini 3.6 Flash (full grid) + Claude Opus 4.8
-  (unstated full + stated/guided sample). Opus judgments exist under two aliases (`claude-opus-4-8` vs
-  `anthropic/claude-opus-4.8`); **the export must alias-normalize** so the SPA sees one Opus judge. Views
-  must **degrade honestly** where Opus coverage is sample-only.
+- **Dual-judge with Opus judge-alias normalization**: the run is Gemini 3.6 Flash (full grid) + Claude Opus
+  4.8 (unstated full + stated/guided sample). Opus judgments exist under two aliases (`claude-opus-4-8` vs
+  `anthropic/claude-opus-4.8`); **the export must alias-normalize** so the SPA sees one Opus judge. The
+  normalized judgment identity is `(subject, tradition, scenario_id, pressure, framing, judge, scope)`; the
+  two aliases are expected to be **disjoint** (batch vs tail-fill), so the normalized count equals the sum —
+  but if the *same* identity appears under both, the later `ts` **wins (overlay)** and it is counted once (no
+  double-vote). Views must **degrade honestly** where Opus coverage is sample-only.
+- **Subject-id normalization**: the export must map every source subject-id variant to one of exactly five
+  canonical subjects via an **explicit alias map** (not an algorithmic prefix-strip, which breaks on Qwen's
+  dropped `-Instruct`). Canonical set: `Qwen/Qwen3-235B-A22B-Instruct-2507`, `claude-sonnet-5`,
+  `gemini-3.6-flash`, `gpt-5.6-terra`, `thinkingmachines/Inkling`.
+- **Coverage & `n_expected` (data contract)**: every published tradition-mean carries `n_judged` and
+  `n_expected`. For a slice `(tradition, subject, framing, scope, pressure)` where pressure is a specific
+  pressure, `n_expected = n_scenarios(tradition)`; for the pooled `pressure="all"` slice,
+  `n_expected = n_scenarios(tradition) × 6`. `n_scenarios(tradition)` is fixed per tradition (recorded in the
+  manifest) and is judge-independent, so coverage is a true fraction of the full grid, not of observed rows.
+- **Truncation fallback must cover `results/`**: the SPA's git-tree read is one recursive call in the normal
+  case, but GitHub may report the recursive tree `truncated`; the existing per-directory fallback walks only
+  `traditions/`. Adding `results/` shards increases tree size (raising truncation odds), so the fallback
+  **must be extended to also walk `results/`**, or results would silently vanish on a truncated tree. The
+  "exactly one git-tree call" property holds only for the normal, non-truncated snapshot.
+- **Exact size ceilings (CI-enforced)**: committed dataset **≤ 8 MB total per run**; **≤ 1 MB per tradition
+  shard**. These replace the informal "single-digit MB" so a CI assertion is unambiguous.
+- **Versioned, validated dataset**: the manifest carries a `schema_version`; the SPA validates the manifest
+  and shards (well-formed JSON, finite scores in −1…+1, known subjects/judges/framings/pressures/scopes) and
+  renders an inline notice on any violation rather than crashing.
 - **Leaderboard convention is fixed**: overall standings by framing = **mean of per-tradition means,
   post-pressure**, the same convention as the paper's Table `tab_standings`. Numbers must reconcile with the
   paper's tables. To guarantee this, the export must use the **canonical aggregation semantics** already
@@ -167,14 +228,17 @@ the equal-weight mean across the seven tradition-means. This was verified agains
   `score` (∈ {−1, −0.5, 0, 0.5, 1}) and the identity keys `(subject, tradition, scenario_id, pressure,
   framing, judge, scope)`; the export reads the top-level `score`, never the `raw` string.
 - The three source run directories together supply Gemini (all framings, full grid) and Opus (unstated full
-  + stated/guided sample) for the same seven traditions and five subjects; the export **merges** them into
-  per-tradition, per-judge shards.
+  + stated/guided sample) for the same seven traditions and five *logical* subjects — but the subject **and**
+  judge ids are spelled differently across runs (see Current State). After the export applies its explicit
+  subject and judge alias maps, exactly five subjects and two judges (Gemini, Opus) remain; the export
+  **merges** the runs into per-tradition, per-judge shards on the normalized keys.
 - The canonical aggregation in `workflows/analysis/analysis/aggregate.py` is the source of truth for cell
   and breakdown semantics; the export reuses it (or re-derives identical numbers verified against
   `report.json` / `stats_bundle.json`).
-- `framings-opus-sample` counts are still moving; the export is **re-runnable** and the committed dataset is
-  regenerated when the architect confirms the sample is sealed. The manifest records the run's coverage as
-  of export time.
+- `framings-opus-sample` counts are still moving; the export is **re-runnable**, so an **interim** committed
+  dataset is acceptable and is regenerated (same command) once the architect confirms the sample is sealed.
+  The manifest records the run's coverage and an export timestamp, so an interim export is self-describing
+  rather than misleading. (This resolves the first-round "sample sealing" concern — it does not block.)
 - The SPA continues to have exactly one git-tree call per snapshot; results shards are additional `raw`
   fetches (off-budget) fetched lazily per tradition/run.
 
@@ -239,12 +303,23 @@ and the smallest reconciliation risk), with the **per-scenario layer of Approach
 if it fits the size budget. Approach 2 is not recommended because it puts the paper-reconciliation guarantee
 at risk.
 
-## Open Questions
+Several issues raised in first-round consultation are now **resolved** in the sections above and are noted
+here for traceability: subject-id alias map (Constraints); Opus judge-alias dedup/overlay semantics
+(Constraints); `n_expected` definition (Constraints); truncation-fallback extension to `results/`
+(Constraints); exact size ceilings and runtime validation (Constraints/Success Criteria); pooled
+`pressure="all"` = cell-pooled mean emitted directly by the export (below); judge-vs-subject disambiguation
+(Desired State). The remaining genuine questions:
 
 ### Critical (Blocks Progress)
-- [ ] **Sample sealing**: `20260803-framings-opus-sample` is still tail-filling. The committed launch
-      dataset must be regenerated once the architect confirms it is sealed. Do we commit an interim export
-      now and refresh, or wait for the seal before the first commit? (Export is re-runnable either way.)
+- [ ] **`min_coverage` threshold value**: the default is 0.5 (a tradition-mean below it is excluded from the
+      leaderboard mean-of-means and badged in the drill-down). Is 0.5 the right cut, and should it differ by
+      framing (unstated is full-grid for both judges; only Opus stated/guided is a sample)? This directly
+      shapes which numbers rank, so it must be confirmed before implementation — but a concrete testable
+      default (0.5) unblocks progress.
+- [ ] **Opus stated/guided ranking presentation**: with judge=Opus + stated/guided, most tradition-means
+      fall below `min_coverage`, so the leaderboard would rank on very few (or zero) traditions. Confirm the
+      desired presentation: rank on the qualifying `k/7` with a prominent sample caveat, or show
+      "sample — not ranked" for those selections entirely.
 
 ### Important (Affects Design)
 - [ ] **Rationale/verdict text**: v1 excludes per-judgment `direction`/`rationale` to hold the size budget.
@@ -252,12 +327,9 @@ at risk.
       or is aggregates-only acceptable indefinitely?
 - [ ] **Run discovery UX**: default to the most recent run by manifest date, or expose a run selector across
       all `results/*/`? (Acceptance only requires that a new run *appears*; a selector is a SHOULD.)
-- [ ] **Pressure="all" vs per-pressure means**: confirm the pooled "all" column is the cell-pooled mean
-      (all pressures pooled within a tradition before the mean), matching the paper — not a mean of the six
-      per-pressure means. (Export emits the pooled slice directly so the SPA never pools cells.)
-- [ ] **Opus stated/guided in the leaderboard**: when judge=Opus and framing∈{stated,guided}, should those
-      subjects still rank (badged sample) or be shown as "sample — not ranked"? Affects how the leaderboard
-      presents partially-covered selections.
+- [ ] **Pooled `pressure="all"` confirmation**: the export emits the "all" slice as the cell-pooled mean (all
+      pressures pooled within a tradition before the mean, matching the paper) — not a mean of the six
+      per-pressure means. Confirm this is the intended semantics for the pressure="all" leaderboard.
 
 ### Nice-to-Know (Optimization)
 - [ ] Whether to also surface bootstrap CIs (from `stats_bundle.json`) in the UI, or only point estimates.
@@ -290,22 +362,33 @@ at risk.
 1. **Leaderboard reconciliation (happy path)**: given the launch shards, the leaderboard for each subject ×
    framing at scope=full / judge=Gemini / pressure=all equals the paper's standings to displayed precision.
 2. **Judge switch**: selecting Opus recomputes every view from the normalized Opus judge; the alias split
-   never surfaces as two judges; alias-normalized Opus counts equal the sum of the two source aliases with
-   no double-count.
-3. **Pressure filter**: selecting each of the six pressures (and "all") changes the standings/drill-down to
+   never surfaces as two judges. Alias-normalization tests: (a) disjoint aliases → normalized count == sum;
+   (b) same identity under both aliases → counted once, later `ts` wins.
+3. **Subject normalization**: merging the three source runs yields exactly five canonical subjects; the Qwen
+   variant `qwen/qwen3-235b-a22b-2507` maps to `Qwen/Qwen3-235B-A22B-Instruct-2507` (a test guards the
+   `-Instruct` case); no run produces a sixth subject.
+4. **Pressure filter**: selecting each of the six pressures (and "all") changes the standings/drill-down to
    the corresponding precomputed slice; "all" matches the cell-pooled convention.
-4. **Framing & scope toggles**: unstated/stated/guided and turn1/full each select the correct slice;
-   first-response vs post-pressure differ as expected (steadfastness = full − turn1 holds).
-5. **Honest degradation (Opus sample)**: judge=Opus, framing=stated/guided shows the sample badge and
-   coverage; a zero-coverage tradition is excluded from the mean-of-means, not counted as 0.
-6. **Additive no-redeploy publish**: with a second `results/<run-id>/` present in the fake repo tree, the
+5. **Framing & scope toggles**: unstated/stated/guided and turn1/full each select the correct slice.
+   Steadfastness (full − turn1) is computed **only over cells present in both scopes** (the unstated-opus
+   panel has slightly more turn1 than full cells), so the test uses a matched-cell definition, not raw
+   scope totals.
+6. **Honest degradation (uneven Opus sample)**: judge=Opus, framing=stated shows the sample badge and
+   coverage; a tradition-mean below `min_coverage` (e.g. secular-sage's ~2-cell mean) is excluded from the
+   mean-of-means and the leaderboard shows `k/7` contributing traditions; a zero-coverage tradition is
+   likewise excluded (never 0).
+7. **Additive no-redeploy publish**: with a second `results/<run-id>/` present in the fake repo tree, the
    explorer lists/loads it without any code change; the corpus routes are unaffected.
-7. **Missing/partial data**: a shard or manifest field absent renders an inline notice (display-first), not
-   a crash; a 403 serves cached data + the rate-limit banner.
+8. **Truncated-tree discovery**: when the fake repo reports the recursive tree `truncated`, the extended
+   fallback still discovers `results/` and the explorer loads (regression guard for the current
+   `traditions/`-only fallback).
+9. **Runtime validation / missing data**: a malformed shard, an out-of-range/non-finite score, an unknown
+   selector value, an unsupported `schema_version`, or an absent shard/manifest field each renders an inline
+   notice (display-first), not a crash; a 403 serves cached data + the rate-limit banner.
 
 ### Non-Functional Tests
-1. **Size check**: the exported launch dataset is single-digit MB and each tradition shard is under the size
-   target (a test/CI assertion on the committed output).
+1. **Size check**: the exported launch dataset is **≤ 8 MB total** and **each tradition shard ≤ 1 MB** (a
+   CI assertion on the committed output, using the exact byte ceilings).
 2. **Export parity**: the export's tradition-means match `report.json` / `stats_bundle.json` within numeric
    tolerance (self-check against the canonical aggregator).
 3. **API-budget**: loading the explorer adds no new on-budget API calls beyond the existing git-tree poll
@@ -339,18 +422,47 @@ at risk.
 |------|------------|--------|-------------------|
 | Leaderboard drifts from the paper's numbers | Medium | High | Publish canonical tradition-means from `workflows/analysis`; SPA does only mean-of-means (verified exact); add an export-parity test against `report.json`/`stats_bundle.json`. |
 | Export exceeds single-digit MB | Low | Medium | Aggregates-only, no transcripts/rationale in v1; per-tradition shards; a size assertion in CI; per-scenario layer gated on fitting the budget. |
-| Opus alias double-counting | Medium | High | Normalize both aliases to one judge in the export; test that normalized counts == sum of source aliases; the SPA never sees two Opus judges. |
-| Opus sample-only coverage presented as authoritative | Medium | High | Carry per-cell coverage in every slice; badge sample views, show `n_judged/n_expected`, exclude zero-coverage traditions (never 0). |
+| Opus judge-alias double-counting | Medium | High | Normalize both aliases to one judge; dedup by normalized identity with later-`ts`-wins overlay; test the disjoint-sum and collision-dedup cases; the SPA never sees two Opus judges. |
+| Subject-id split → 10 subjects / wrong Qwen merge | High | High | Explicit subject alias map (not prefix-strip); test asserting exactly five canonical subjects incl. the Qwen `-Instruct` case. |
+| Tiny-non-zero Opus sample presented as authoritative | High | High | `min_coverage` rule (default 0.5) excludes low-coverage tradition-means from the mean-of-means; drill-down badges `sample (n/N)`; leaderboard shows `k/7` contributing traditions. |
+| Results silently vanish on a truncated git tree | Medium | High | Extend the per-directory fallback to walk `results/` as well as `traditions/`; regression test with a `truncated` fake tree. |
+| Malformed remote dataset crashes the SPA | Medium | Medium | Versioned manifest + zod validation of shards; out-of-range/non-finite/unknown values and missing shards render inline notices, not crashes. |
 | `framings-opus-sample` still moving at export | High | Medium | Re-runnable export; regenerate the committed dataset once the architect seals the sample; manifest records coverage-as-of-export. |
 | Breaking corpus browsing | Low | High | Additive routes/facets only; reuse existing data layer; keep existing tests green; new tests via `fakeFetch`/`renderApp`. |
 
 ## Expert Consultation
-**Date**: (pending)
-**Models Consulted**: (porch will run the 3-way spec consultation — Codex, Claude; Gemini per repo policy)
-**Sections Updated**:
-- (to be filled after consultation)
+**Date**: 2026-08-05
+**Models Consulted**: Codex (GPT) and Claude (2-way per this repo's `porch.consultation.models=[codex,claude]`
+— Gemini's per-phase consult cannot see the worktree here).
 
-Note: All consultation feedback will be incorporated directly into the relevant sections above.
+Both returned **REQUEST_CHANGES** (HIGH confidence). Every issue below was independently verified against the
+real run data before incorporation.
+
+**Sections Updated (iteration 1 feedback):**
+- **Subject-id alias split** (Claude, verified): source runs spell subjects differently (`anthropic/claude-sonnet-5`
+  vs `claude-sonnet-5`; Qwen drops `-Instruct`) → naive merge yields 10 subjects. Added explicit subject
+  alias-map requirement + test (Constraints, Success Criteria, Test Scenario 3); fixed the false "five
+  subjects" claim in Assumptions; documented in Current State.
+- **Tiny-non-zero Opus coverage** (Claude, verified: secular-sage stated/full ≈ 2 cells vs sunni-islam ≈ 230):
+  added the `min_coverage` rule (default 0.5) excluding low-coverage tradition-means from the mean-of-means,
+  with `k/7` annotation (Desired State, Success Criteria, Test Scenario 6); promoted the ranking question to
+  Critical.
+- **Truncation fallback** (both, verified `github.ts` walks only `traditions/`): added the requirement to
+  extend the fallback to `results/` + regression test (Constraints, Success Criteria, Test Scenario 8); qualified
+  the "one git-tree call" property.
+- **`n_expected` undefined** (both): pinned the coverage denominator to the full grid (Constraints data contract).
+- **Judge/subject ambiguity for `gemini-3.6-flash`** (Claude): disambiguated judge vs subject throughout
+  (Current State, Desired State, reconciliation table).
+- **Opus alias collision vs "sum of aliases"** (Codex): defined normalized identity + later-`ts`-wins overlay
+  dedup (Constraints, Test Scenario 2).
+- **Asymmetric turn1/full panels** (both): steadfastness test now uses a matched-cell definition (Test Scenario 5).
+- **Exact size limits** (Codex): replaced "single-digit MB" with CI-enforceable ≤ 8 MB total / ≤ 1 MB per shard.
+- **Runtime dataset validation** (Codex): added schema-version + zod validation requirement (Constraints,
+  Success Criteria, Test Scenario 9).
+- **Sample sealing** (both): explicitly permitted an interim re-runnable export rather than blocking (Assumptions,
+  Open Questions).
+
+Note: All consultation feedback has been incorporated directly into the relevant sections above.
 
 ## Approval
 - [ ] Technical Lead Review

@@ -69,4 +69,20 @@ coverage(n_judged/n_expected)}, alias-normalized Opus, computed by canonical agg
 No transcripts, no rationale (size budget) — flagged as open Q. Per-scenario drill-down = SHOULD/limited
 (size risk). Discovery: `results/*/manifest.json` via git-trees, latest by date, new run → no redeploy.
 
-### Phase: drafting spec now.
+### Phase: Specify — draft committed (00a871a), 2-way consult done, revised for iter1 feedback.
+
+Both reviewers (codex + claude) → REQUEST_CHANGES, HIGH confidence. All findings verified against real data
+before incorporating. Load-bearing catches:
+- **Subject-id split** (not just judge aliases): framings-opus-sample uses provider-prefixed lowercase ids;
+  Qwen even drops `-Instruct` → naive merge = 10 subjects. Needs EXPLICIT subject alias map + test. (verified)
+- **Tiny-non-zero Opus coverage**: secular-sage stated/full ≈ 2 cells vs sunni-islam ≈ 230 — equal 1/7 weight
+  is dishonest. Added `min_coverage` rule (default 0.5) → exclude low-coverage tradition-means from
+  mean-of-means, show k/7. (verified)
+- **Truncation fallback** (`github.ts` walkTraditions) walks ONLY traditions/ → results/ would silently vanish
+  on truncated tree. Must extend fallback + test. (verified)
+- Plus: n_expected pinned to full grid; judge-vs-subject disambiguation for gemini-3.6-flash; Opus alias
+  collision dedup (later-ts-wins overlay); asymmetric turn1/full → matched-cell steadfastness; exact size
+  ceilings (≤8MB/run, ≤1MB/shard) for CI; runtime zod validation + schema_version; interim export permitted.
+
+Design still Approach 1 (pre-aggregated per-tradition shards, canonical aggregate.py, SPA does mean-of-means).
+Consultation Log filled. Re-committing, then porch next.
