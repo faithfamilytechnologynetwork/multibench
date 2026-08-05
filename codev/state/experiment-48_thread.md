@@ -241,3 +241,19 @@ modal_gemma_capability.py (ported lm-eval panel). MultiBench-descriptive = colle
 time. Post-SFT: deploy serve → capability ∥ AFB+probes ∥ MultiBench descriptive → pre-DPO checkpoint.
 
 Waiting on SFT (bt77gq0cv). Spend ~$202 + SFT accruing.
+
+## 2026-08-05 — SFT run 1 CANCELLED by flap; fixed (spawn) + relaunched
+
+**Incident:** SFT run 1 (`--detach` + `remote()`) was CANCELLED at **step 470/683** (~69%, epoch 2)
+when the local client hit a DNS crash (`[Errno 8] nodename nor servname` — the network flap) and a
+cancellation signal propagated to the function. `--detach`+`remote()` did NOT survive the abnormal
+client death. Loss was excellent (nll 3.56 → ~0.47), so the recipe is validated — but no adapter
+saved (volume dir empty) → full re-run needed (no mid-train checkpoint).
+**Fix (taqwabench's drop-survival pattern): `--detach` + `.spawn()`** — spawn fully decouples the
+function from the client; `--detach` keeps it alive after the entrypoint exits / client drops.
+(Interim mistake: `modal run` WITHOUT `--detach` + spawn → ephemeral app tore down on entrypoint
+exit, Tasks=0. Need BOTH `--detach` AND spawn.)
+**Run 3 (app ap-3IotDJLAfHEUQL1CPaE2aS, call fc-01KZ9NKQXD9ZGX0N43YZY3B9X4): running (ephemeral,
+Tasks=1), detached.** Completion poller `bisvachvg` watches the volume for config.json.
+**Cost impact:** run 1 burned ~4h H200 (~$20-25 wasted); re-run adds ~$30. SFT total ~$50-60 →
+experiment likely ~$320-340 total (over the $300 plan, mostly the wasted run). Flagged to architect.

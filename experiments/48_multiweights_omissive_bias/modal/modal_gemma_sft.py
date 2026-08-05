@@ -191,4 +191,9 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
 @app.local_entrypoint()
 def main(data: str, run_name: str, batch: int = 8, lr: float = 5e-5,
          epochs: int = 2, seed: int = 3446, limit: int = 0):
-    train.remote(data, run_name, batch, lr, epochs, seed, limit)
+    # spawn() (NOT remote()): fire-and-forget so the training survives a local client / network drop
+    # — a DNS crash cancelled the first --detach/remote() run at step 470/683. Completion is observed
+    # via the volume (config.json). taqwabench's capability script uses this same pattern for the
+    # same reason ("survive local client/network drops which killed two attempts").
+    call = train.spawn(data, run_name, batch, lr, epochs, seed, limit)
+    print(f"spawned SFT: call_id={call.object_id}  run_name={run_name} (runs independently of this client)")
