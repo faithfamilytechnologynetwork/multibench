@@ -312,3 +312,20 @@ scripts, noted.) Fixed the quant-label string; committed.
 - On warm → run `eval_afb_probes.py` (AFB-150 cold+faith + 70 probes, gpt-5.6-terra judge).
 - MultiBench-descriptive (collect via the endpoint, gemini judge) = optional bonus.
 Then assemble base-vs-SFT table → **pre-DPO checkpoint report** (SFT results + K=4 mining yield).
+
+## 2026-08-05 — eval sweep in flight (3 parallel jobs); mining plan
+
+Server warm (base 425s cold-start, sft instant). Three parallel eval jobs running:
+- **b98pm4tbs** — capability panel (lm-eval ifeval+mmlu+gsm8k, base + sft).
+- **bhjbo1vrm** — AFB-150 (base+sft × cold+faith) + 70 over-application probes, gpt-5.6-terra judge.
+- **bewydkbql** — MultiBench-descriptive: collect sft unstated via endpoint + gemini full-scope judge,
+  all 7 traditions (compare per-tradition to existing base bands → the 3-tier gradient for Waleed).
+
+**Mining plan for the pre-DPO gate (cost-aware):** full K=4-from-SFT mining over all 3,114 cells +
+banding would be ~$150 judging — too much to spend before the gate. Plan: run a **mining PILOT**
+(K=4 from the sft endpoint at temp on a subset), band, count within-cell max-gap pairs (gap ≥ 2) →
+report the **yield estimate** (+ per-tradition) at the checkpoint, and let the architect green-light
+the full mining spend. Mining sampler = adapt `samplability_sample.py` (sample model="sft" via the
+endpoint at temp instead of base). Build after evals land.
+
+Spend ~$217 + B200 SFT (~$12) + evals accruing. Next: assemble SFT eval table when the 3 jobs land.
