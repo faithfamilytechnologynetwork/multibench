@@ -1,24 +1,26 @@
 """Stage-1 SFT: gemma-4-31b context distillation on its own good GUIDED responses, rendered bare
-(experiment 48). Ported VERBATIM from taqwabench tmp/dpo-experiment/modal_gemma_sft.py; the recipe
-(QLoRA r32, masked token-mean NLL, lr 5e-5, 2 epochs, nf4 4-bit, selective-head logp) is the
-validated JaleesModel stage-1 and is NOT changed.
+(experiment 48). Recipe ported VERBATIM from taqwabench modal_gemma_sft.py (QLoRA r32, masked
+token-mean NLL, lr 5e-5, 2 epochs, nf4, selective-head logp) — NOT changed.
 
-Deviations (architect asked to note them):
-  - dataset field `scenario_id` (MultiBench) instead of taqwabench `probe_id`;
-  - dataset = the pooled 2,732-example MultiBench set (vs taqwabench 316) → batch 8 × 2 epochs =
-    683 optimizer steps (vs 79); no hyperparameter change, just more steps on more data;
-  - added `--limit` for a cheap end-to-end smoke before the full run.
+DELIBERATE DEVIATIONS FROM taqwabench PARITY (architect 2026-08-05, justified by 6h/run × real money
+— a client-DNS flap cancelled run 1 at step 470/683 with total loss):
+  1. FULL-STATE CHECKPOINTING every CKPT_EVERY steps: adapter + AdamW optimizer state + (epoch, data
+     position, shuffled order) + Python/torch/cuda RNG state → the volume + vol.commit.
+  2. `--resume-from <run_name>` restores ALL of the above and continues exactly where it stopped
+     (optimizer momentum + RNG + data position preserved), instead of restarting.
+  3. Launch via `--detach` + `.spawn()` (survives client/network drops).
+Also: dataset field `scenario_id` (not `probe_id`); `--limit` smoke knob.
 
-Run:
-  modal run --detach experiments/48_multiweights_omissive_bias/modal/modal_gemma_sft.py \
-    --data /pairs/sft_guided_mb.jsonl --run-name mb-sft-guided --batch 8 --lr 5e-5 --epochs 2
+Run (fresh):  modal run --detach .../modal_gemma_sft.py --data /pairs/sft_guided_mb.jsonl --run-name mb-sft-guided
+Run (resume): modal run --detach .../modal_gemma_sft.py --data /pairs/sft_guided_mb.jsonl --run-name mb-sft-guided --resume-from mb-sft-guided
 """
 
 import modal
 
 MODEL = "google/gemma-4-31B-it"
+CKPT_EVERY = 100  # optimizer steps between full-state checkpoints (deviation #1)
 app = modal.App("multibench-gemma-sft")
-vol = modal.Volume.from_name("gemma-dpo")  # reuse taqwabench's volume (has the gemma hf-cache)
+vol = modal.Volume.from_name("gemma-dpo")
 
 image = (
     modal.Image.debian_slim(python_version="3.12")
@@ -36,13 +38,13 @@ image = (
     secrets=[modal.Secret.from_name("huggingface")],
 )
 def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
-          seed: int, limit: int):
+          seed: int, limit: int, resume_from: str):
     import json
     import pathlib
     import random
 
     import torch
-    from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+    from peft import LoraConfig, PeftModel, get_peft_model, prepare_model_for_kbit_training
     from transformers import (
         AutoConfig, AutoModelForCausalLM, AutoModelForImageTextToText,
         AutoTokenizer, BitsAndBytesConfig,
@@ -50,6 +52,11 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
 
     out = pathlib.Path(f"/vol/runs/{run_name}")
     out.mkdir(parents=True, exist_ok=True)
+    adapter_dir = out / "adapter"
+    state_file = out / "train_state.pt"
+
+    resume_dir = pathlib.Path(f"/vol/runs/{resume_from}") if resume_from else None
+    resuming = bool(resume_from) and (resume_dir / "adapter").exists() and (resume_dir / "train_state.pt").exists()
 
     tok = AutoTokenizer.from_pretrained(MODEL)
 
@@ -75,13 +82,12 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
         if len(ids) > 16384:
             raise RuntimeError(f"sitting over 16k tokens in {r.get('scenario_id')}|{r.get('pressure')}")
         data.append((ids, mask))
-    print(f"{len(data)} examples from {data_path}, max len "
-          f"{max(len(d[0]) for d in data)}")
+    print(f"{len(data)} examples from {data_path}, max len {max(len(d[0]) for d in data)}")
 
     cfg = AutoConfig.from_pretrained(MODEL)
     multimodal = hasattr(cfg, "vision_config")
     loader = AutoModelForImageTextToText if multimodal else AutoModelForCausalLM
-    model = loader.from_pretrained(
+    base_model = loader.from_pretrained(
         MODEL, torch_dtype=torch.bfloat16, device_map="auto",
         quantization_config=BitsAndBytesConfig(
             load_in_4bit=True, bnb_4bit_quant_type="nf4",
@@ -89,17 +95,21 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
         ),
         attn_implementation="sdpa",
     )
-    model.config.use_cache = False
-    model = prepare_model_for_kbit_training(
-        model, use_gradient_checkpointing=True,
+    base_model.config.use_cache = False
+    base_model = prepare_model_for_kbit_training(
+        base_model, use_gradient_checkpointing=True,
         gradient_checkpointing_kwargs={"use_reentrant": False},
     )
     proj = "(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)"
-    model = get_peft_model(model, LoraConfig(
-        r=32, lora_alpha=32, lora_dropout=0.0, bias="none",
-        target_modules=(rf".*language_model.*{proj}" if multimodal else rf".*{proj}"),
-        task_type="CAUSAL_LM",
-    ))
+    if resuming:
+        # Restore the LoRA weights from the checkpoint adapter (deviation #2).
+        model = PeftModel.from_pretrained(base_model, str(resume_dir / "adapter"), is_trainable=True)
+    else:
+        model = get_peft_model(base_model, LoraConfig(
+            r=32, lora_alpha=32, lora_dropout=0.0, bias="none",
+            target_modules=(rf".*language_model.*{proj}" if multimodal else rf".*{proj}"),
+            task_type="CAUSAL_LM",
+        ))
     model.train()
     n_ckpt = sum(1 for m in model.modules() if getattr(m, "gradient_checkpointing", False))
     if not n_ckpt or not model.training:
@@ -130,70 +140,93 @@ def train(data_path: str, run_name: str, batch: int, lr: float, epochs: int,
                 parts.append(lg.gather(1, idx)[:, 0] - lg.logsumexp(-1))
             return torch.cat(parts).float().sum(), len(tgt)
 
-    # Parity check vs the model's own full forward (as in the DPO driver).
+    # Parity check vs the model's own full forward (holds regardless of weights).
     ci0, cm0 = data[0]
     w = cm0.index(True) + 128
     with torch.no_grad():
-        sel, _ = seq_logp(ci0[:w], cm0[:w])
-        sel = sel.cpu()
+        sel, _ = seq_logp(ci0[:w], cm0[:w]); sel = sel.cpu()
         t0 = torch.tensor([ci0[:w]], device="cuda:0")
         full = base(input_ids=t0).logits
         lp = torch.log_softmax(full[0, :-1].float(), -1)
         m0 = torch.tensor(cm0[1:w], dtype=torch.bool, device=lp.device)
-        ref = lp[torch.arange(w - 1, device=lp.device),
-                 t0[0, 1:].to(lp.device)][m0].sum().cpu()
+        ref = lp[torch.arange(w - 1, device=lp.device), t0[0, 1:].to(lp.device)][m0].sum().cpu()
     if not torch.allclose(sel, ref, rtol=1e-3, atol=0.5):
         raise RuntimeError(f"selective-head logp mismatch: {sel.item()} vs {ref.item()}")
     print(f"selective-head parity check ok: {sel.item():.3f} vs {ref.item():.3f}")
 
+    def save_ckpt(step, ep, order, pos, seen, log):
+        model.save_pretrained(adapter_dir)
+        torch.save({
+            "step": step, "epoch": ep, "order": order, "pos": pos, "seen": seen,
+            "opt": opt.state_dict(), "log": log,
+            "py_rng": random.getstate(),
+            "torch_rng": torch.get_rng_state(),
+            "cuda_rng": torch.cuda.get_rng_state_all(),
+        }, state_file)
+        vol.commit()
+
+    # Resume state (deviation #2): restore optimizer + RNG + data position.
     rng = random.Random(seed)
-    step, acc_loss, acc_n, log = 0, 0.0, 0, []
+    step, log = 0, []
+    start_ep, start_pos, resume_order = 0, 0, None
+    if resuming:
+        st = torch.load(resume_dir / "train_state.pt", weights_only=False)
+        opt.load_state_dict(st["opt"])
+        random.setstate(st["py_rng"])
+        torch.set_rng_state(st["torch_rng"])
+        torch.cuda.set_rng_state_all(st["cuda_rng"])
+        step, log = st["step"], st["log"]
+        start_ep, start_pos, resume_order = st["epoch"], st["pos"], st["order"]
+        print(f"RESUMED: step={step} epoch={start_ep} pos={start_pos} seen={st['seen']}")
+
+    acc_loss, acc_n = 0.0, 0
     opt.zero_grad()
-    seen = 0
-    for ep in range(epochs):
-        order = list(range(len(data)))
-        rng.shuffle(order)
-        for idx in order:
-            ids, mask = data[idx]
+    seen = step * batch  # approximate; exact 'seen' tracked per example below
+    for ep in range(start_ep, epochs):
+        if ep == start_ep and resume_order is not None:
+            order = resume_order
+        else:
+            order = list(range(len(data))); rng.shuffle(order)
+        pos0 = start_pos if ep == start_ep else 0
+        for j in range(pos0, len(order)):
+            ids, mask = data[order[j]]
             logp, ntok = seq_logp(ids, mask, grad=True)
             loss = -(logp / ntok)
             (loss / batch).backward()
-            acc_loss += loss.item()
-            acc_n += 1
-            seen += 1
-            if acc_n == batch or seen == epochs * len(data):
-                opt.step()
-                opt.zero_grad()
-                step += 1
-                rec = {"step": step, "epoch": ep, "seen": seen,
-                       "nll_per_token": acc_loss / acc_n,
+            acc_loss += loss.item(); acc_n += 1; seen += 1
+            last = (ep == epochs - 1) and (j == len(order) - 1)
+            if acc_n == batch or last:
+                opt.step(); opt.zero_grad(); step += 1
+                rec = {"step": step, "epoch": ep, "seen": seen, "nll_per_token": acc_loss / acc_n,
                        "peak_gb": [round(torch.cuda.max_memory_allocated(d) / 2**30, 1)
                                    for d in range(torch.cuda.device_count())]}
                 for d in range(torch.cuda.device_count()):
                     torch.cuda.reset_peak_memory_stats(d)
-                log.append(rec)
-                print(rec, flush=True)
+                log.append(rec); print(rec, flush=True)
                 acc_loss, acc_n = 0.0, 0
+                if step % CKPT_EVERY == 0:
+                    save_ckpt(step, ep, order, j + 1, seen, log)
+                    print(f"checkpoint: step {step}, epoch {ep}, pos {j+1}", flush=True)
                 vol.commit()
 
-    model.save_pretrained(out / "adapter")
+    model.save_pretrained(adapter_dir)
     (out / "train_log.jsonl").write_text("\n".join(json.dumps(r) for r in log) + "\n")
     (out / "config.json").write_text(json.dumps({
         "model": MODEL, "data": data_path, "n_examples": len(data),
         "batch": batch, "lr": lr, "epochs": epochs, "lora_r": 32, "seed": seed,
         "objective": "masked token-mean NLL (SL-CAI context distillation)",
         "quant": "nf4-4bit bf16-compute", "masking": "assistant-tokens-only (tml_v0 parity)",
+        "checkpoint_every_steps": CKPT_EVERY, "resumable": True,
     }, indent=2))
+    if state_file.exists():
+        state_file.unlink()  # clean completion marker
     vol.commit()
     print(f"done: {step} steps; adapter at /vol/runs/{run_name}/adapter")
 
 
 @app.local_entrypoint()
 def main(data: str, run_name: str, batch: int = 8, lr: float = 5e-5,
-         epochs: int = 2, seed: int = 3446, limit: int = 0):
-    # spawn() (NOT remote()): fire-and-forget so the training survives a local client / network drop
-    # — a DNS crash cancelled the first --detach/remote() run at step 470/683. Completion is observed
-    # via the volume (config.json). taqwabench's capability script uses this same pattern for the
-    # same reason ("survive local client/network drops which killed two attempts").
-    call = train.spawn(data, run_name, batch, lr, epochs, seed, limit)
-    print(f"spawned SFT: call_id={call.object_id}  run_name={run_name} (runs independently of this client)")
+         epochs: int = 2, seed: int = 3446, limit: int = 0, resume_from: str = ""):
+    # --detach + spawn: survive client/network drops (see the SFT run-1 flap cancel).
+    call = train.spawn(data, run_name, batch, lr, epochs, seed, limit, resume_from)
+    print(f"spawned SFT: call_id={call.object_id}  run_name={run_name} resume_from={resume_from or '(fresh)'}")

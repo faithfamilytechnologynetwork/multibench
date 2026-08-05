@@ -266,3 +266,17 @@ DPO machinery unchanged (β0.1, lr1e-5, 1ep, ref=SFT); ADDED periodic policy-ada
 the seed-deterministic shuffle (skips the init-equality check on resume); --detach+spawn launch;
 scenario_id field. Syntax-checked. Won't run until after the pre-DPO gate (needs the mined pairs).
 SFT run 3 (ap-3IotDJ...) still alive; poller bisvachvg watching.
+
+## 2026-08-05 — full-state checkpointing added to SFT; B200 deferred
+
+Architect extended: add FULL-state checkpointing to the SFT script too (adapter + optimizer state +
+epoch/data-position + RNG state, + `--resume-from`). Done in `modal/modal_gemma_sft.py` (every 100
+steps → adapter + `train_state.pt`{opt, order, pos, epoch, py/torch/cuda RNG} + vol.commit; resume
+restores all and fast-forwards). Live run 3 NOT touched (it uses its mounted snapshot; edits are for
+future runs). DPO currently has lighter (adapter+position) checkpointing — will ALIGN it to the same
+full-state scheme (optimizer+RNG) when I finalize DPO at the pre-DPO gate (avoids churning unreviewed
+code now; DPO won't run until then).
+
+**B200 decision (architect):** stay on H200 for this SFT run AND DPO by default (bnb/Blackwell kernel
+risk). If DPO wall-clock justifies, PROPOSE a B200 smoke test at the pre-DPO checkpoint — do not
+switch unilaterally. Noted; will assess DPO wall-clock from the SFT step timing and raise at the gate.
