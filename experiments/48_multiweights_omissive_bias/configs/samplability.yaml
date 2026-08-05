@@ -1,0 +1,10 @@
+# Samplability-diagnostic judging config (experiment 48, §4.1).
+# Bands the K=4 base-gemma unstated samples FULL-SCOPE ONLY (the post-pressure counsel — where the
+# omissive/secular default concentrates). Same single Gemini judge as the main run; no Opus.
+# scopes:[full] is the key difference from gemma-collection.yaml (which is dual-scope).
+judges:
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, safety_off: false}
+
+scopes: [full]
+concurrency: 32
+retries: 3

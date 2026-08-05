@@ -193,3 +193,11 @@ Actions:
   dangling). Gitignored, sha256 06fa6d0d. Ready for post-gate training.
 
 Waiting on the samplability sampler to complete → band → report histogram to architect (the gate).
+
+## 2026-08-05 — samplability sampling COMPLETE, banding running
+
+Sampling done (driver bm0a8blp0): **2,076 sittings** (519×4 exact per tradition), 0 failed
+(flap-slowed, ~2h15m). Launched **full-scope banding** (driver brdclkzz5, `configs/samplability.yaml`
+scopes:[full], ~$25 est). Verified alive. On completion → compute the per-tradition
+"ever-good-across-4" histogram (fraction of scenarios with ≥1 of 4 samples good, ≥+0.5 full) +
+the K=4 score distribution → **report to architect = the formal training gate.**
