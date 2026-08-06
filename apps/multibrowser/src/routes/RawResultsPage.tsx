@@ -220,7 +220,8 @@ export function RawResultsPage() {
                 <Link key={e.key}
                   to="/results/$runId/$groupId/$itemId"
                   params={{ runId, groupId: e.params.group, itemId: e.params.item }}
-                  search={{ a: e.params.a, ...(e.params.b ? { b: e.params.b } : {}), scope: e.params.scope, judge: sel.judge, ...e.params.conditions }}
+                  // conditions first so the reserved keys always win (matches rawSelectionToSearch)
+                  search={{ ...e.params.conditions, a: e.params.a, ...(e.params.b ? { b: e.params.b } : {}), scope: e.params.scope, judge: sel.judge }}
                   className="rounded bg-default-100 px-2 py-0.5 text-primary hover:underline">
                   {e.label}
                 </Link>
