@@ -72,7 +72,9 @@ Architect: the disable **recurred** (hit exp-57 mining too) — confirmed patter
 - **Safe-state**: 5,034/5,736 sittings on local disk (unchanged, safe); 702 still missing (sunni-islam
   tail 510 + taoism 192). No DPO, no banding launched. Serve endpoint is scale-to-zero → idles to $0.
   Nothing spending.
-- The 8 `taqwabench…capability` procs running are **exp-57's**, NOT mine — left untouched.
+- The 8 `taqwabench…capability` procs running are the **TAQWABENCH programme's** chat-mode rerun
+  (other workspace, same Modal account), NOT mine — left untouched. Their concurrent GPU draw + ours
+  likely tripped the account cap (architect 14:51Z; their architect alerted directly).
 - **HOLDING all Modal work** until Waleed clears the billing/spend-cap. Banding (OpenRouter) is
   Modal-immune but I'm holding it too until the hold lifts, since it needs complete mining first.
 - Resume path when cleared: redeploy serve → re-run mine (dedup fills only the 702) → band → pairs →
