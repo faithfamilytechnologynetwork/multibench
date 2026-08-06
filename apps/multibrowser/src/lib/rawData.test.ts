@@ -141,7 +141,7 @@ describe("raw contract + view are catalog-generic (static check)", () => {
     const url = await import("node:url");
     const path = await import("node:path");
     const here = path.dirname(url.fileURLToPath(import.meta.url));
-    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "../routes/RawResultsPage.tsx"];
+    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "rawSelection.ts", "../routes/RawResultsPage.tsx"];
     const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
     for (const f of files) {
       const code = stripComments(fs.readFileSync(path.join(here, f), "utf8"));
@@ -277,7 +277,7 @@ describe("loadRawShard (fail-soft)", () => {
 
   it("loads + parses a shard from the fixture source", async () => {
     const { shard, notices } = await loadRawShard(fakeRawSource("baked"), "run1", "buddhism/BUD-001.json.gz");
-    expect(shard?.cells).toHaveLength(2);
+    expect(shard?.cells).toHaveLength(3);
     expect(notices).toHaveLength(0);
   });
 

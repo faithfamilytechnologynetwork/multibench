@@ -32,7 +32,7 @@ describe("loadRawScenario (integration)", () => {
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001",
       RAW_FIXTURE_FINGERPRINT, sources());
     expect(r.catalog?.items).toHaveLength(1);
-    expect(r.shard?.cells).toHaveLength(2);
+    expect(r.shard?.cells).toHaveLength(3);
     expect(r.notices).toHaveLength(0); // coherent baked → no fallback notice
   });
 
@@ -59,14 +59,14 @@ describe("loadRawScenario (integration)", () => {
     const second = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001",
       RAW_FIXTURE_FINGERPRINT, src);
     expect(second.notices).toHaveLength(0);
-    expect(second.shard?.cells).toHaveLength(2);
+    expect(second.shard?.cells).toHaveLength(3);
   });
 
   it("serves the GitHub gz shard when baked is stale", async () => {
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001",
       RAW_FIXTURE_FINGERPRINT, sources("sha256:STALE"));
     expect(r.notices.some((n) => /stale/.test(n.message))).toBe(true);
-    expect(r.shard?.cells).toHaveLength(2); // still renders — from the GitHub gz fallback
+    expect(r.shard?.cells).toHaveLength(3); // still renders — from the GitHub gz fallback
   });
 
   it("survives cache persistence/hydration (no class instance is cached)", async () => {
@@ -82,7 +82,7 @@ describe("loadRawScenario (integration)", () => {
     // a later load in the same run must still work — the source is reconstructed from `kind`,
     // not read back as a (now method-less) hydrated instance
     const r = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
-    expect(r.shard?.cells).toHaveLength(2);
+    expect(r.shard?.cells).toHaveLength(3);
     expect(r.notices).toHaveLength(0);
   });
 
@@ -100,7 +100,7 @@ describe("loadRawScenario (integration)", () => {
       github: new GitHubRawSource("owner/repo", "sha", ghFetch),
     };
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
-    expect(r.shard?.cells).toHaveLength(2); // served from GitHub
+    expect(r.shard?.cells).toHaveLength(3); // served from GitHub
     expect(r.notices.some((n) => /baked shard unavailable — served from GitHub/.test(n.message))).toBe(true);
   });
 
@@ -132,7 +132,7 @@ describe("loadRawScenario (integration)", () => {
       },
     };
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
-    expect(r.shard?.cells).toHaveLength(2);
+    expect(r.shard?.cells).toHaveLength(3);
     expect(githubCalls).toBe(0); // coherent baked → no GitHub fetch (rate-limit immunity)
   });
 });

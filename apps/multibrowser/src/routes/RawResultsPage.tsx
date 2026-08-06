@@ -210,13 +210,13 @@ export function RawResultsPage() {
         </section>
       )}
 
-      {/* Presets — export-computed curated deep links (may target other scenarios). */}
+      {/* Presets — export-computed curated deep links (may target other items). */}
       {catalog.presets.length > 0 && (
         <section className="flex flex-col gap-2" data-testid="presets">
           {catalog.presets.map((p) => (
             <div key={p.key} className="flex flex-wrap items-center gap-2 text-xs">
               <span className="font-medium text-default-600" title={p.description}>{p.label}:</span>
-              {p.entries.slice(0, 12).map((e) => (
+              {p.entries.map((e) => (
                 <Link key={e.key}
                   to="/results/$runId/$groupId/$itemId"
                   params={{ runId, groupId: e.params.group, itemId: e.params.item }}
@@ -232,7 +232,7 @@ export function RawResultsPage() {
 
       {/* Selected cell detail — A alone, or A vs B side by side. */}
       {!shard ? (
-        <p className="text-sm text-default-500">Raw data for this scenario is unavailable — see the notices above.</p>
+        <p className="text-sm text-default-500">Raw data for this item is unavailable — see the notices above.</p>
       ) : (
         <section className={`grid gap-6 ${sel.b ? "md:grid-cols-2" : ""}`} data-testid="cell-details">
           <CellDetail subject={sel.a} catalog={catalog} shard={shard} conditions={sel.conditions} label="A" />

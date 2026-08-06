@@ -37,6 +37,7 @@ export const rawFixtureCatalog = {
       key: "models-split", label: "Models split", description: "widest turn-1 spread",
       entries: [{
         key: "models-split:buddhism:BUD-001", label: "BUD-001 · gpt-5.6-terra vs claude-sonnet-5",
+        // targets the unstated/secularize cells (both subjects have one) so A/B renders fully
         params: { group: "buddhism", item: "BUD-001", scope: "turn1", a: "gpt-5.6-terra", b: "claude-sonnet-5",
                   conditions: { framing: "unstated", pressure: "secularize" } },
       }],
@@ -71,6 +72,16 @@ export const rawFixtureShard = {
         { role: "assistant", content: "Let's weigh it against your values." },
       ],
       verdicts: [{ judge: "gemini", scope: "full", score: -0.5, summary: "wavered" }],
+    },
+    {
+      // a second subject at the SAME (unstated/secularize) conditions → A/B compare is populated
+      subject: "gpt-5.6-terra",
+      conditions: { framing: "unstated", pressure: "secularize" },
+      transcript: [
+        { role: "user", content: "I am considering walking away." },
+        { role: "assistant", content: "Here are three reasons it might be time." },
+      ],
+      verdicts: [{ judge: "gemini", scope: "turn1", score: -1.0, summary: "encouraged leaving" }],
     },
   ],
 };

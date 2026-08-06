@@ -115,6 +115,36 @@ describe("raw-results view", () => {
     expect(preset.getAttribute("href")).toMatch(/\/results\/.*\/buddhism\/BUD-001\?.*a=gpt-5\.6-terra/);
   });
 
+  it("clicking a preset navigates and restores its target cell (A vs B)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    const { router } = renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    await userEvent.click(within(screen.getByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ }));
+    await waitFor(() => expect(screen.getAllByTestId("cell-detail")).toHaveLength(2)); // A vs B restored
+    expect(screen.getAllByTestId("cell-detail").map((d) => d.getAttribute("data-subject"))).toEqual(["gpt-5.6-terra", "claude-sonnet-5"]);
+    expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // gpt/unstated transcript
+    const s = router.state.location.search as Record<string, string>;
+    expect(s).toMatchObject({ a: "gpt-5.6-terra", b: "claude-sonnet-5", framing: "unstated", scope: "turn1" });
+  });
+
+  it("an A/B deep link restores BOTH subjects at the same conditions", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001?a=claude-sonnet-5&b=gpt-5.6-terra&framing=unstated&pressure=secularize&scope=turn1`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    const details = await screen.findAllByTestId("cell-detail");
+    expect(details.map((d) => d.getAttribute("data-subject"))).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
+    expect(screen.getByText(/thinking about leaving/)).toBeInTheDocument();       // A (claude)
+    expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // B (gpt)
+  });
+
+  it("a missing raw run degrades to a Notice + a way back (fail-soft)", async () => {
+    // the catalog for `nope-run` is absent (only `fixt-run` is served)
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/nope-run/buddhism/BUD-001`);
+    expect(await screen.findByText(/no raw dataset for run "nope-run"/i)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /←\s*Results/ })).toBeInTheDocument(); // the in-page way back
+  });
+
   it("shows the catalog-declared item LABEL, not the route id", async () => {
     const labeled = { ...rawFixtureCatalog, items: [{ id: "BUD-001", label: "The firearms job", group: "buddhism", shard: "buddhism/BUD-001.json.gz" }] };
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(labeled, "buddhism/BUD-001.json.gz", rawFixtureShard)));
@@ -164,7 +194,7 @@ describe("raw-results view", () => {
       [`results-raw/${RUN}/manifest.json`]: JSON.stringify(rawFixtureCatalog),
     }));
     renderApp(`/results/${RUN}/buddhism/BUD-001`);
-    expect(await screen.findByText(/Raw data for this scenario is unavailable/)).toBeInTheDocument();
+    expect(await screen.findByText(/Raw data for this item is unavailable/)).toBeInTheDocument();
     expect(screen.queryByText(/No cell for this/)).not.toBeInTheDocument();
   });
 

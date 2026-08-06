@@ -162,6 +162,14 @@ export function parseRawCatalog(text: string, where: string): { catalog: RawCata
     };
   }
   const notices: Notice[] = [];
+  // A condition-axis key that collides with a reserved URL param (the raw view encodes each axis
+  // as its own search param) would be dropped from deep links — flag it loudly, not silently.
+  const RESERVED_AXIS_KEYS = new Set(["a", "b", "scope", "judge"]);
+  const colliding = c.conditionAxes.map((ax) => ax.key).filter((k) => RESERVED_AXIS_KEYS.has(k));
+  if (colliding.length) {
+    notices.push(notice("warning", "results-raw", where,
+      `condition axis key(s) collide with reserved URL params (not deep-linkable): ${colliding.join(", ")}`));
+  }
   // Manifest-declared shard paths are spliced into fetch URLs — flag any unsafe one (don't fail
   // the whole catalog; those items just won't be loadable and are dropped).
   const safeItems = c.items.filter((it) => {
