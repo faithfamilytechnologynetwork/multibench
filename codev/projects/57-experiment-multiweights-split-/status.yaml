@@ -1,0 +1,14 @@
+id: '57'
+title: experiment-multiweights-split-
+protocol: experiment
+phase: hypothesis
+plan_phases: []
+current_plan_phase: null
+gates:
+  experiment-complete:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-06T10:02:57.058Z'
+updated_at: '2026-08-06T10:02:57.059Z'
