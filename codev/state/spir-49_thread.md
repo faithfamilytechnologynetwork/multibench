@@ -95,3 +95,24 @@ Notified architect via `afx send`. Will NOT self-approve. Two Critical open ques
 Next action (after `porch approve 49 spec-approval` by human): `porch run`/`porch next` → Plan phase.
 
 Commits so far: 00a871a (initial draft), 940d12c (with multi-agent review).
+
+### Spec APPROVED (2026-08-06) + Plan phase.
+
+Architect approved with simplifying decisions (folded into spec §"Approved Decisions", commit 525d843):
+- **Leaderboard ranks GEMINI ONLY** (full grid). Opus never ranks; judge selector = inspection/validation
+  layer only (drill-down/coverage badges where Opus data exists). Moots the Opus-ranking Critical Q.
+- min_coverage no longer a ranking gate — display/badge only.
+- pressure=all = cell-pooled mean (confirmed); run discovery = latest-by-manifest-date (selector optional);
+  rationale = aggregates-only v1; CIs = optional SHOULD (pooled Gemini only); ResultsRegion seam = inert;
+  one re-export at Opus tail-fill seal.
+
+Gate flipped by architect (2ec8f5f). Now PLAN phase.
+
+Dispatcher note: `.codev/checks/test.sh` ALREADY registers workflows/analysis (uv pytest) + apps/multibrowser
+(pnpm test) — no dispatcher change needed. Export tool → `workflows/analysis` (Typer `export` cmd), reuses
+aggregate.py.
+
+**Plan drafted** (codev/plans/49-...md) — 6 phases: (1) export core normalization+aggregation+parity,
+(2) export writer+manifest+CLI+committed dataset, (3) SPA data layer (discovery/loader/validation/truncation
+fallback), (4) leaderboard route + framing/scope/pressure selectors (Gemini-ranked), (5) drill-down + judge
+selector + Opus validation layer, (6) docs. Linear deps. Committing → porch done → 2-way plan consult.
