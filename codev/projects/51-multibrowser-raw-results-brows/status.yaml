@@ -10,10 +10,10 @@ plan_phases:
     status: complete
   - id: phase_2
     title: Fingerprint cross-tier plumbing + streaming writer + export-raw CLI + size measurement
-    status: in_progress
+    status: complete
   - id: phase_3
     title: 'Presets (export-computed): Models split, Judges differed, Steadfastness cliff'
-    status: pending
+    status: in_progress
   - id: phase_4
     title: Committed launch dataset + results-raw/README (data contract)
     status: pending
@@ -31,7 +31,7 @@ plan_phases:
   - id: phase_8
     title: Railway gz-baked deploy wiring (--no-gitignore) + deploy-test safety + documentation + arch-docs
     status: pending
-current_plan_phase: phase_2
+current_plan_phase: phase_3
 gates:
   spec-approval:
     status: approved
@@ -45,8 +45,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -109,7 +109,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-51/codev/projects/51-multibrowser-raw-results-brows/51-phase_2-iter2-claude.txt
 started_at: '2026-08-06T07:30:57.553Z'
-updated_at: '2026-08-06T14:49:25.330Z'
+updated_at: '2026-08-06T14:55:36.365Z'
 force_advanced:
   phase: phase_1
   iteration: 3
