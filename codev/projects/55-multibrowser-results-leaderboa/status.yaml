@@ -1,9 +1,21 @@
 id: '55'
 title: multibrowser-results-leaderboa
 protocol: spir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: Client aggregation for the dense rows (pure lib + tests)
+    status: in_progress
+  - id: phase_2
+    title: Dense sortable table + URL state (presentation swap)
+    status: pending
+  - id: phase_3
+    title: 'Multi-faith layer: heat strip, drill-down, judge selector, a11y'
+    status: pending
+  - id: phase_4
+    title: 'Docs, #49 supersession, local preview verify'
+    status: pending
+current_plan_phase: phase_1
 gates:
   spec-approval:
     status: approved
@@ -17,19 +29,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
-history:
-  - iteration: 1
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-55/codev/projects/55-multibrowser-results-leaderboa/55-plan-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-55/codev/projects/55-multibrowser-results-leaderboa/55-plan-iter1-claude.txt
+iteration: 1
+build_complete: false
+history: []
 started_at: '2026-08-06T09:50:22.324Z'
-updated_at: '2026-08-06T13:37:49.985Z'
+updated_at: '2026-08-06T13:38:02.748Z'
