@@ -296,6 +296,20 @@ bullet, byte-stable overclaim, score ranges, judges order), Codex APPROVE → al
 - (.claude/hooks/ untracked = harness local config, pre-existing, NOT committed — not my deliverable.)
 - **PR gate is held for WALEED** (architect said so). Notifying. Do NOT merge myself.
 
+### PR review consult: 3 iters.
+- iter1: Codex RC (CI-enforcement, inconsistent-shard-affects-standings, coverage validation,
+  reconciliation coverage, metadata) / Claude APPROVE. Fixed: exclude contract-breaking shards, coverage
+  sanity, all-5×3 reconciliation, doc/metadata, .gitignore .claude/hooks.
+- iter2: Codex APPROVE / Claude RC (path-traversal in exporter + minors). Fixed: _require_safe_segment
+  guard on run_id/tradition, notice dedup, manifest-sourced n_scenarios.
+- iter3: Codex RC (unknown framing/pressure/scope silently dropped) / Claude APPROVE. Fixed: _read_rows
+  fail-fast on out-of-vocab dimensions; refreshed test counts (py 112, js 152).
+Review loop hit ceiling → porch force-advanced to **pr gate** (WAITING FOR HUMAN).
+
+### GATE: pr — STOPPED. Held for Waleed. Final state: py 112 + js 152 pass, typecheck+build clean, PR #50
+up to date (b2e9a78). Will NOT self-approve / self-merge. After `porch approve 49 pr` by human → merge
+(merge commit, not squash) → Verify phase.
+
 **Phase 5 consult: BOTH APPROVE first iteration** (judge selector structurally can't re-rank; steadfastness
 denominators correct; zero-coverage omission verified vs real shards). Only cosmetic suggestions.
 
