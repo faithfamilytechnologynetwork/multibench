@@ -380,3 +380,11 @@ Progress: descriptive 4/7 traditions clean (1,692 sit / 1,673 jud, 0 failed); mi
 DROP option 3.** Checkpoint is now a TWO-WAY decision: **stop-at-SFT (~280)** vs **DPO+lean
 (~340-360)**, gated on mining yield + total ≤400. Writeup note: SFT-stage MMLU (−2.3) is a
 trajectory HINT only — **post-DPO capability is the number of record.**
+
+## 2026-08-06 — mining sampled (1,680, 0 failed); banding + descriptive running
+
+Mining pilot sampling DONE: 1,680 sittings (240/tradition = 10 scen × 6 press × K4), 0 failed.
+Banding it full-scope (gemini) — driver **birz2e9au** (~1,680 judgments ≈ 20 USD, the pilot-band cost).
+Descriptive **bij4m15e7** at 5/7 traditions (1,762/3,114 judgments, 0 failed; secular-sage/sunni/taoism left).
+On mine-band done → `build_dpo_pairs.py` → per-tradition yield + projected full-mining cost.
+On descriptive done → per-tradition base-vs-SFT gradient. Then assemble the two-way checkpoint report.
