@@ -152,7 +152,40 @@ $75 / 5,040 both reconcile). Sampling (endpoint GPU) $5 / 5,040 sittings. DPO $7
 
 ## Results
 
-_(pending gate approval + execution)_
+### Mining + pairs (complete)
+
+- **Mining**: 5,736/5,736 uncovered sittings from `mb-sft-guided` @ temp 1.3, K=4 (0 failed after the
+  workspace-disable refill). Full-scope gemini banding: 5,736 judgments, 0 failed.
+- **New-pair yield (gap ≥ 1.0)**: **416 / 1,434 cells = 29%** — matches the pre-registered estimate.
+
+  | tradition | cells | pairs | yield |
+  |---|---:|---:|---:|
+  | buddhism | 72 | 33 | 46% |
+  | eastern-christianity | 396 | 76 | 19% |
+  | judaism | 48 | 7 | 15% |
+  | roman-catholicism | 216 | 58 | 27% |
+  | secular-sage | 54 | 9 | 17% |
+  | sunni-islam | 600 | 225 | 38% |
+  | taoism | 48 | 8 | 17% |
+  | **TOTAL** | **1,434** | **416** | **29%** |
+
+- **Combined full-grid set**: 487 surviving + 416 new = **903 pairs, 0 cell collisions** (scoped and
+  uncovered scenario sets are disjoint by construction). Uploaded → `/pairs/pairs_dpo_full_mb.jsonl`
+  (incumbent's `pairs_sft2_mb.jsonl` untouched). Per-tradition: buddhism 94, eastern-christianity 133,
+  judaism 92, roman-catholicism 130, secular-sage 64, sunni-islam 323, taoism 67.
+
+### Spend reconciliation (usage-summed, exact where possible)
+
+| leg | actual | method |
+|---|---:|---|
+| Sampling (mining, Modal GPU) | ~$8–11 | GPU-time (incl. 3 cold-starts + disable retry churn); not token-summable |
+| **Banding (gemini, OpenRouter)** | **$80.99** | EXACT: in 25.86M×$1.50 + out 5.62M×$7.50 + cache 0.49M×$0.15 |
+| **so far** | **~$89–92** | |
+| DPO (B200, 903 pairs) — pending | ~$10–15 | |
+| Lean battery (AFB+probes + 4-ckpt chat capability) — pending | ~$28–43 | |
+| **projected total** | **~$127–150** | vs $300 ceiling |
+
+_(DPO + battery pending — at the ping-before-DPO gate.)_
 
 ## Next step — **PRE-SPEND GATE**
 

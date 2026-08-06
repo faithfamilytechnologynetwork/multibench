@@ -99,3 +99,15 @@ probe of the serving path — exp-57 resumes only after my refill confirms stabi
   (config problem). Report both prompt-strict AND inst-strict IFEval for the gate.
 - Next: banding done → build+combine pairs (487 + new) → reconcile EXACT banding usage-actual →
   PING-before-DPO → DPO mb-dpo-full → lean battery (AFB cold + probes + 4-ckpt chat capability).
+
+## 2026-08-06 — banding done, pairs combined; AT PING-BEFORE-DPO GATE
+
+- Banding complete: 5,736 judgments, 0 failed. New pairs (gap≥1.0): **416/1,434 = 29%** (matches est).
+- Combined **903 pairs** (487 surviving + 416 new, 0 cell collisions) → uploaded
+  `/pairs/pairs_dpo_full_mb.jsonl` (incumbent untouched).
+- **Banding actual = $80.99** (exact usage-sum; in 25.86M×$1.50 + out 5.62M×$7.50). Running ~$89–92;
+  projected total ~$127–150 vs $300.
+- **STOPPING at the ping-before-DPO gate.** DPO cmd staged:
+  `modal run --detach .../modal_gemma_dpo2.py --pairs /pairs/pairs_dpo_full_mb.jsonl
+   --run-name mb-dpo-full --sft-run mb-sft-guided --batch 8` (ref+init = mb-sft-guided, fresh; NOT
+  continue-train from mb-sft-dpo). Awaiting architect stability-go. Stop-on-disable stays ARMED.
