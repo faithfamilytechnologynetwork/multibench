@@ -195,3 +195,14 @@ only for base cross-alias collision; added disjoint-alias (count==sum) + v2 file
 Phase 1 consult iter3: **BOTH APPROVE** (unanimous). 99 pass, 0 skip. Commits 888d506, +2 fix commits.
 Advancing to Phase 2 (export writer/manifest/CLI + committed launch dataset — must PING ARCHITECT before
 committing the dataset to eyeball size+manifest).
+
+### Phase 2 (export writer/manifest/CLI) — code done, dataset pending architect eyeball.
+- export_results.py: serialize_tradition (shard), build_manifest, write_dataset (size ceilings ≤8MB/≤1MB),
+  export_dataset; added n_judgments to TraditionExport. cli.py: `analysis export` Typer command.
+- 7 Phase 2 tests (manifest fields+judge consistency, shard round-trip, deterministic write, size-ceiling,
+  end-to-end). 23 export tests total, ruff clean.
+- Generated launch dataset results/20260803/ via CLI: 174KB total, largest shard 26KB (sunni-islam), 8 files.
+  Manifest: 5 subjects, 2 judges (opus absorbs both aliases sample=true; gemini full_grid), counts
+  gemini=93420 (matches issue!) opus=40114, 7 traditions w/ n_scenarios.
+- Leaderboard recomputed FROM WRITTEN SHARDS == paper (all 15). 
+- Code committed; DATASET commit HELD pending architect eyeball (they asked). Pinged architect, waiting.

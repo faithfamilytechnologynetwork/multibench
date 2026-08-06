@@ -21,13 +21,19 @@ import pytest
 
 from analysis.export_results import (
     CANONICAL_SUBJECTS,
+    MAX_SHARD_BYTES,
+    SCHEMA_VERSION,
     build_corpus_export,
+    build_manifest,
     build_tradition_export,
+    export_dataset,
     leaderboard_mean_of_means,
     normalize_judge,
     normalize_subject,
     read_run_root,
     resolve_judgments,
+    serialize_tradition,
+    write_dataset,
 )
 from analysis.loaders import AnalysisInputError
 
@@ -274,6 +280,79 @@ def test_same_file_duplicate_base_identity_rejected(tmp_path):
                report=_report(["T-1"], ["claude-sonnet-5"], ["gemini-3.6-flash"]))
     with pytest.raises(AnalysisInputError, match="duplicate base identity"):
         build_corpus_export([root])
+
+
+# ── Serialization: manifest + shards + round-trip + size (Phase 2) ────────────────
+
+
+def _build_fixture_exports():
+    return build_corpus_export([_FIXTURE / "gemini-run", _FIXTURE / "opus-run"])
+
+
+def test_manifest_has_required_fields_and_judge_consistency():
+    exports = _build_fixture_exports()
+    m = build_manifest(exports, run_id="testrun", generated_at="2026-08-06T00:00:00+00:00")
+    assert m["schema_version"] == SCHEMA_VERSION
+    assert m["run_id"] == "testrun"
+    assert m["generated_at"] == "2026-08-06T00:00:00+00:00"
+    assert m["subjects"] == list(CANONICAL_SUBJECTS)
+    assert m["framings"] == ["unstated", "stated", "guided"]
+    assert set(m["scopes"]) == {"turn1", "full"} and "steadfastness" in m["metrics"]
+    # judges carry key/model/aliases/full_grid; opus absorbs both aliases
+    by_model = {j["model"]: j for j in m["judges"]}
+    assert by_model["claude-opus-4-8"]["key"] == "opus"
+    assert by_model["claude-opus-4-8"]["sample"] is True
+    assert set(by_model["claude-opus-4-8"]["aliases"]) == {
+        "claude-opus-4-8", "anthropic/claude-opus-4.8"}
+    assert by_model["gemini-3.6-flash"]["full_grid"] is True
+    # every shard judge is declared in the manifest
+    manifest_models = set(by_model)
+    for exp in exports.values():
+        assert set(exp.judges) <= manifest_models
+    # per-tradition entries carry n_scenarios + shard filename
+    assert m["traditions"] == [{"id": "buddhism", "n_scenarios": 2, "shard": "buddhism.json"}]
+
+
+def test_shard_round_trips_and_matches_in_memory():
+    exports = _build_fixture_exports()
+    exp = exports["buddhism"]
+    shard = serialize_tradition(exp)
+    # a means entry round-trips as [mean, n_judged, n_expected]
+    g = shard["means"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["full"]["secularize"]
+    assert g == [pytest.approx(0.75), 2, 2]
+    st = shard["steadfastness"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["secularize"]
+    assert st == [pytest.approx(1.25), 2]
+    # JSON serialization is byte-stable (sorted keys)
+    assert json.dumps(shard, sort_keys=True) == json.dumps(shard, sort_keys=True)
+
+
+def test_write_dataset_layout_and_deterministic(tmp_path):
+    exports = _build_fixture_exports()
+    written = write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+    run_dir = tmp_path / "r1"
+    assert (run_dir / "manifest.json").is_file()
+    assert (run_dir / "buddhism.json").is_file()
+    assert {p.name for p in written} == {"manifest.json", "buddhism.json"}
+    first = (run_dir / "buddhism.json").read_bytes()
+    # re-writing yields byte-identical output (deterministic serialization)
+    write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+    assert (run_dir / "buddhism.json").read_bytes() == first
+
+
+def test_write_dataset_size_ceiling_enforced(tmp_path, monkeypatch):
+    exports = _build_fixture_exports()
+    monkeypatch.setattr("analysis.export_results.MAX_SHARD_BYTES", 5)  # force overflow
+    with pytest.raises(AnalysisInputError, match="ceiling"):
+        write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+
+
+def test_export_dataset_end_to_end(tmp_path):
+    written = export_dataset([_FIXTURE / "gemini-run", _FIXTURE / "opus-run"],
+                             tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+    manifest = json.loads((tmp_path / "r1" / "manifest.json").read_text())
+    assert manifest["counts"]["judgments"]["gemini-3.6-flash"] == 4
+    assert manifest["counts"]["judgments"]["claude-opus-4-8"] == 1  # 2 rows → 1 after collision+v2
+    assert all(p.stat().st_size <= MAX_SHARD_BYTES for p in written)
 
 
 # ── Real-data parity (sealed launch runs) ─────────────────────────────────────────

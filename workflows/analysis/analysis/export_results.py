@@ -289,6 +289,7 @@ class TraditionExport:
     tradition: str
     n_scenarios: int
     judges: list[str]
+    n_judgments: dict[str, int]  # judge → deduped judgment count (manifest counts)
     # keyed by (judge, subject, framing, scope, pressure_or_"all")
     means: dict[tuple, Slice]
     # keyed by (judge, subject, framing, pressure_or_"all")
@@ -367,6 +368,7 @@ def build_tradition_export(tradition: str, raws: list[RawTradition]) -> Traditio
         )
 
     judges = sorted({j["judge"] for j in judgments})
+    n_judgments = {jg: sum(1 for j in judgments if j["judge"] == jg) for jg in judges}
     means: dict[tuple, Slice] = {}
     steadfast: dict[tuple, Steadfastness] = {}
 
@@ -397,6 +399,7 @@ def build_tradition_export(tradition: str, raws: list[RawTradition]) -> Traditio
         tradition=tradition,
         n_scenarios=n_scenarios,
         judges=judges,
+        n_judgments=n_judgments,
         means=means,
         steadfastness=steadfast,
     )
@@ -431,3 +434,122 @@ def leaderboard_mean_of_means(
         if (judge, subject, framing, scope, pressure) in exp.means
     ]
     return sum(vals) / len(vals) if vals else None
+
+
+# ── Serialization (Phase 2): manifest + per-tradition shards ──────────────────────
+# The committed, versioned dataset the SPA reads at runtime. Compact: nested dicts,
+# means as ``[mean, n_judged, n_expected]`` and steadfastness as ``[value, matched_n]``;
+# zero-coverage slices are simply absent (the SPA derives ``n_expected`` from
+# ``n_scenarios``). ``json.dumps(sort_keys=True)`` makes the output byte-stable.
+
+SCHEMA_VERSION = 1
+MAX_TOTAL_BYTES = 8 * 1024 * 1024   # ≤ 8 MB per run (spec size ceiling)
+MAX_SHARD_BYTES = 1 * 1024 * 1024   # ≤ 1 MB per tradition shard
+
+_MANIFEST = "manifest.json"
+
+
+def _nested_set(d: dict, path: tuple, value) -> None:
+    for k in path[:-1]:
+        d = d.setdefault(k, {})
+    d[path[-1]] = value
+
+
+def serialize_tradition(exp: TraditionExport) -> dict:
+    """One tradition's shard document."""
+    means: dict = {}
+    for (judge, subject, framing, scope, pressure), sl in exp.means.items():
+        _nested_set(means, (judge, subject, framing, scope, pressure),
+                    [sl.mean, sl.n_judged, sl.n_expected])
+    steadfast: dict = {}
+    for (judge, subject, framing, pressure), st in exp.steadfastness.items():
+        _nested_set(steadfast, (judge, subject, framing, pressure),
+                    [st.value, st.matched_n])
+    return {
+        "tradition": exp.tradition,
+        "n_scenarios": exp.n_scenarios,
+        "judges": exp.judges,
+        "means": means,
+        "steadfastness": steadfast,
+    }
+
+
+def build_manifest(exports: dict[str, TraditionExport], run_id: str,
+                   generated_at: str) -> dict:
+    """The run-level manifest (subjects, judges, framings, pressures, scopes, counts)."""
+    all_judges = sorted({j for exp in exports.values() for j in exp.judges})
+    judges_meta = []
+    for model in all_judges:
+        ui = JUDGE_UI.get(model, {"key": model, "full_grid": False})
+        aliases = sorted({model, *_JUDGE_VARIANTS.get(model, ())})
+        judges_meta.append({
+            "key": ui["key"], "model": model, "aliases": aliases,
+            "full_grid": ui["full_grid"], "sample": not ui["full_grid"],
+        })
+    counts: dict[str, int] = {}
+    for exp in exports.values():
+        for jg, n in exp.n_judgments.items():
+            counts[jg] = counts.get(jg, 0) + n
+    return {
+        "schema_version": SCHEMA_VERSION,
+        "run_id": run_id,
+        "generated_at": generated_at,
+        "subjects": list(CANONICAL_SUBJECTS),
+        "judges": judges_meta,
+        "framings": list(FRAMINGS),
+        "pressures": list(PRESSURES),
+        "pressure_all": PRESSURE_ALL,
+        "scopes": list(SCOPES),
+        "metrics": ["turn1", "full", "steadfastness"],
+        "traditions": [
+            {"id": t, "n_scenarios": exports[t].n_scenarios, "shard": f"{t}.json"}
+            for t in sorted(exports)
+        ],
+        "counts": {"judgments": counts},
+    }
+
+
+def _dump(obj: dict) -> str:
+    return json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":"))
+
+
+def write_dataset(exports: dict[str, TraditionExport], out_root: str | Path,
+                  run_id: str, generated_at: str) -> list[Path]:
+    """Write ``<out_root>/<run_id>/{manifest.json, <tradition>.json}``; enforce size ceilings.
+
+    Returns the written paths. Raises if any shard exceeds ``MAX_SHARD_BYTES`` or the run
+    total exceeds ``MAX_TOTAL_BYTES``.
+    """
+    run_dir = Path(out_root) / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    written: list[Path] = []
+    total = 0
+
+    manifest = build_manifest(exports, run_id, generated_at)
+    m_bytes = _dump(manifest).encode("utf-8")
+    (run_dir / _MANIFEST).write_bytes(m_bytes)
+    written.append(run_dir / _MANIFEST)
+    total += len(m_bytes)
+
+    for tradition in sorted(exports):
+        payload = _dump(serialize_tradition(exports[tradition])).encode("utf-8")
+        if len(payload) > MAX_SHARD_BYTES:
+            raise AnalysisInputError(
+                f"{tradition} shard is {len(payload)} bytes (> {MAX_SHARD_BYTES} ceiling)"
+            )
+        path = run_dir / f"{tradition}.json"
+        path.write_bytes(payload)
+        written.append(path)
+        total += len(payload)
+
+    if total > MAX_TOTAL_BYTES:
+        raise AnalysisInputError(
+            f"dataset total {total} bytes (> {MAX_TOTAL_BYTES} ceiling)"
+        )
+    return written
+
+
+def export_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
+                   generated_at: str) -> list[Path]:
+    """End-to-end: read run roots → build exports → write the committed dataset."""
+    return write_dataset(build_corpus_export(roots), out_root, run_id, generated_at)
