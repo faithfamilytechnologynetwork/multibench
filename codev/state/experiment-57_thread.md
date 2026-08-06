@@ -77,3 +77,22 @@ per-cell→per-scenario, joins reused base, partitions by committed split, emits
 deliverable** (held-out lift+CI vs train-half memo ref vs #48 +0.83 / #53 +0.22), per-tradition
 held-out CIs (★ hard tier), base-balance check, and the pre-registered verdict. Reuses #53's
 bootstrap machinery; scenario-clustered CIs.
+
+## 2026-08-06 — SFT RESULT (STRONG transfer) + DPO stage started
+
+**Descriptive complete**: all 7 traditions, 3,114 cells, 0 failed. **Held-out transfer lift +0.778
+[+0.700,+0.856]**, post-SFT +0.574 (crosses positive); train-half memo +0.900; Δ +0.122 (small);
+base-balanced (Δ+0.053). **PRE-REG VERDICT: TRANSFER CONFIRMED (STRONG).** Every tradition transfers
+(CI>0); hard tier strong (RC +1.07, sunni +0.67). **Revises #53**: +0.83 was ~85% genuine transfer,
+not 4× memorization — #53's +0.22 was its biased-holdout lower bound. Committed a0fedd1, reported to
+architect, **verdict ACCEPTED**. Writeup caveat logged: +0.778 is the COMPANION half-data retrain, not
+the shipped full-data model (shipped model's unseen behavior bounded [+0.22, ~+0.78]).
+
+**Spend reconciled ≈ $58/250** (SFT ~6 + descriptive gemini **45.75 exact** + endpoint ~6). Headroom ~192.
+
+**DPO stage — mining sampling LAUNCHED** (bg br8nw1aw4, `mine_dpo_split.py`): train-half FULL grid
+(259 scen × 6 × K4 = **6,216 sittings**, no subsetting per Waleed), model="sft"=mb-sft-split50 via the
+split endpoint, temp 1.3. Endpoint-GPU only (~$8), NO gemini yet. Writing sittings (alive). Prepped
+(zero-spend): `run_mining_judge.sh` (the ~$90 G2 gemini band), `build_dpo_pairs_split.py` (max-gap
+pairs, gap≥1.0). NEXT: sampling done → G2 band → reconcile → pairs → mb-dpo-split50 → G3 → decide the
+split-DPO descriptive add-on (headroom will be ~76 ≥ 50 → likely affordable).

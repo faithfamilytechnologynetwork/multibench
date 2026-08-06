@@ -256,6 +256,14 @@ Spend reconciled (usage-exact where gemini): SFT ~$6 (B200 54 min) + descriptive
 
 Artifacts: `data/output/summary_57_sft.json`, `per_scenario_57_sft.csv`, `fig_transfer_sft.pdf`.
 
+**⚠️ Writeup caveat (architect 2026-08-06):** this +0.778 is the transfer of the **companion split
+retrain — `mb-sft-split50`, trained on HALF the data** — NOT the shipped full-data model
+(`mb-sft-dpo`). The shipped model was trained on all 519 scenarios so it has no clean holdout; its
+unseen-scenario behavior is **bounded by [+0.22 (#53 hardest-cells lower bound), ~+0.78 (this clean
+split)]**. The paper states this explicitly: the half-data companion establishes that the recipe
+*generalizes* (heterogeneity, not contradiction with #53 — #53's +0.22 was the biased-sample lower
+bound its own caveat predicted); it does not re-measure the shipped model itself.
+
 ### DPO stage
 *(next: full-grid train-half mining → G2 → `mb-dpo-split50` → G3 → optional split-DPO descriptive)*
 
