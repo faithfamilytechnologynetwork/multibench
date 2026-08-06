@@ -1,0 +1,34 @@
+{
+  "overall_lift": 0.8291586384071933,
+  "overall_base": -0.23041104688503533,
+  "overall_sft": 0.598747591522158,
+  "n_cells": 3114,
+  "n_scenarios": 519,
+  "exposed_cells": 2732,
+  "unexposed_cells": 382,
+  "raw_exposed_lift": 0.8771961932650073,
+  "raw_unexposed_lift": 0.4856020942408377,
+  "raw_delta": 0.3915940990241696,
+  "matched_exposed_lift": 1.4917791477088849,
+  "matched_unexposed_lift": 0.4856020942408378,
+  "delta_matched": 1.006177053468047,
+  "delta_matched_ci": [
+    0.9155487010442765,
+    1.0960556966705668
+  ],
+  "tau": 0.15,
+  "included_strata": [
+    -1.0,
+    -0.5,
+    0.0,
+    0.5,
+    1.0
+  ],
+  "unexposed_mass_in_incl": 1.0,
+  "zero_exposure_n_scen": 13,
+  "zero_exposure_lift": 0.21794871794871792,
+  "zero_exposure_ci": [
+    0.10897435897435896,
+    0.34615384615384615
+  ]
+}
