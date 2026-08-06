@@ -65,6 +65,37 @@ approval of the live leaderboard's look-and-feel after the post-merge `railway u
 it looks right, **both issue #55 and the parked #49 `verify-approval` gate stay open**. Any changes he
 requests are **follow-up iterations on the open issue, not scope creep**.
 
+## Architecture Updates
+
+**No hot-tier `arch-critical.md` change is warranted** — and that is the point worth recording. #55 is a
+**presentation rewrite**; the system-shape facts are unchanged:
+
+- The results data tier (`results/<run-id>/` shards + manifest, `analysis export`) is untouched — no
+  export change.
+- The always-on fact "the `/results` leaderboard ranks **Gemini-only** … Opus is a badged validation
+  layer, never re-ranks" (Spec 49) still holds exactly; #55 made that invariant **structural**
+  (`computeLeaderboardRows` takes no judge) rather than merely conventional.
+
+So the `arch-critical.md` "Results datasets" fact stays as-is; the only thing that changed is the
+*presentation* (a dense sortable table vs the #49 selector strip), which is UI detail, not a hot-tier
+system-shape fact. The `results/README.md` and `apps/multibrowser/README.md` (cold/reference docs) were
+updated to the v2 presentation as part of Phase 4.
+
+## Lessons Learned Updates
+
+The strongest durable lesson from this work — a candidate the architect may want in the hot
+`lessons-critical.md` (it is cross-cutting for **every** multibrowser builder, not just #55):
+
+> **A pure-type break ships green here.** The porch tests-check runs only `pnpm -C apps/multibrowser
+> test` (Vitest), and neither Vitest nor `vite build` (esbuild) typechecks. A `Pick<Selection, …>`
+> coupling would have broken silently when the selection shape changed. Mitigate per-builder by
+> decoupling shared types early and making `check-types` a per-phase definition-of-done; the durable
+> fix is adding `check-types` to the multibrowser branch of `.codev/checks/test.sh` (flagged to the
+> architect — shared infra, out of #55's scope).
+
+(Placement into `lessons-critical.md` is left to the architect because the hot tier is capped and
+displacement is their call; recorded here so it is not lost.)
+
 ## Lessons learned
 
 - **A type break can ship green here.** The porch tests-check runs only Vitest, and neither Vitest nor
