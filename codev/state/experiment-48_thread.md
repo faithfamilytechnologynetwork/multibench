@@ -412,3 +412,7 @@ Budget track: 280 → scoped-mining band +65 (→345) → DPO +7 (→352) → le
 - Updated `mine_dpo_sample.py` selection rule (scoped_scenarios: pilot-10 + seeded-random). **Scoped
   mining sampling RUNNING (b2333x6t6)** — sampling the 30 new scen/tradition (pilot dedup'd). On done →
   band new sittings (full-scope gemini, ~60) → `build_dpo_pairs.py` (~632 pairs) → upload → DPO run.
+
+Scoped mining sampled: 6,720 total (960/tradition = 40×6×4), 5,040 new + 1,680 pilot reused, 0 failed.
+**Banding the new 5,040 (bp6oiay0z, resumable — skips pilot)** ~60. On done → build_dpo_pairs → upload
+pairs to gemma-dpo `/pairs/pairs_sft2_mb.jsonl` → DPO (modal_gemma_dpo2.py, bf16 B200, SFT ref).
