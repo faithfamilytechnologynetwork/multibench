@@ -265,3 +265,14 @@ deep-link param maps {group,item,framing,pressure,scope,a,b?}. Accumulated from 
 per-cell judge-score map (numbers only) during streaming (written scenarios only) — no extra
 memory. Wired into catalog (build_catalog + write_dataset). Real data: all 3 presets, 12
 entries each, sensible. 9 preset tests; full suite 168 green.
+
+### 2026-08-06 — phase_3 iter-2: preset determinism + cross-tradition diversity
+CORRECTION to my earlier "12 entries each, sensible" note: with the initial (magnitude,
+scenario-lexicographic) tie-break, all 36 real preset entries landed in buddhism (hundreds of
+scenarios tie at max spread → alphabetical pick). Fixed: (1) group added to all sort keys +
+canonical _PRESSURE_ORDER/_FRAMING_ORDER (Codex determinism); (2) _dedup now ROUND-ROBINS
+across groups (sorted group order) so a preset is a curated CROSS-tradition view. Verified:
+all 3 presets now span all 7 traditions. This refines the spec's fixed "(scenario,pressure,
+framing) tie-break" — flagging the architect (serves the spec's curation goal; both reviewers
+required it). Added cross-group diversity+determinism tests + write_dataset-emits-presets +
+--limit-confines-preset-entries tests. 176 green.

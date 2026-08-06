@@ -565,17 +565,34 @@ def _entry(preset_key: str, group: str, item: str, *, framing: str, pressure: st
 
 
 def _dedup_per_item(sorted_entries) -> list[dict]:
-    """Keep the first (highest-magnitude) entry per (group, item); cap at PRESET_CAP."""
+    """Dedup to one entry per (group, item), then round-robin across groups up to PRESET_CAP.
+
+    On real data hundreds of scenarios tie at the max magnitude (e.g. a −1↔+1 spread), so a
+    straight magnitude+lexicographic cut fills all 12 slots from one tradition. To make the
+    preset an actually *curated* cross-tradition view, we keep each group's candidates in the
+    incoming (magnitude-sorted, deterministic) order and interleave them by group — the
+    strongest from each tradition first, then the next, etc. Fully deterministic (groups are
+    visited in sorted name order); with a single group it degenerates to plain magnitude order.
+    """
     seen: set[tuple] = set()
-    out: list[dict] = []
+    by_group: dict[str, list[dict]] = defaultdict(list)
     for e in sorted_entries:
         ident = (e["params"]["group"], e["params"]["item"])
         if ident in seen:
             continue
         seen.add(ident)
-        out.append(e)
-        if len(out) >= PRESET_CAP:
-            break
+        by_group[e["params"]["group"]].append(e)
+
+    out: list[dict] = []
+    groups = sorted(by_group)
+    round_i = 0
+    while len(out) < PRESET_CAP and any(round_i < len(by_group[g]) for g in groups):
+        for g in groups:
+            if round_i < len(by_group[g]):
+                out.append(by_group[g][round_i])
+                if len(out) >= PRESET_CAP:
+                    break
+        round_i += 1
     return out
 
 
@@ -603,7 +620,7 @@ def _models_split(cells: dict[PresetCell, dict[str, float]]) -> dict | None:
         if spread <= 0:
             continue
         cands.append((spread, trad, scen, pr, fr, hi, lo))
-    cands.sort(key=lambda e: (-e[0], e[2], e[3], e[4]))
+    cands.sort(key=lambda e: (-e[0], e[1], e[2], _PRESSURE_ORDER[e[3]], _FRAMING_ORDER[e[4]]))
     entries = _dedup_per_item(
         _entry("models-split", trad, scen, framing=fr, pressure=pr, scope="turn1",
                a=hi, b=lo, label=f"{scen} · {hi} vs {lo}")
@@ -625,7 +642,7 @@ def _judges_differed(cells: dict[PresetCell, dict[str, float]]) -> dict | None:
     for (trad, scen, subj, pr, fr, scope), js in cells.items():
         if scope == "full" and _GEMINI in js and _OPUS in js and abs(js[_GEMINI] - js[_OPUS]) >= 1.0:
             cands.append((abs(js[_GEMINI] - js[_OPUS]), trad, scen, pr, fr, subj))
-    cands.sort(key=lambda e: (-e[0], e[2], e[3], e[4], e[5]))
+    cands.sort(key=lambda e: (-e[0], e[1], e[2], _PRESSURE_ORDER[e[3]], _FRAMING_ORDER[e[4]], e[5]))
     entries = _dedup_per_item(
         _entry("judges-differed", trad, scen, framing=fr, pressure=pr, scope="full",
                a=subj, b=_top_gemini_subject(full_gemini[(trad, scen, pr, fr)], subj),
@@ -650,7 +667,8 @@ def _steadfastness_cliff(cells: dict[PresetCell, dict[str, float]]) -> dict | No
             drop = sc["full"] - sc["turn1"]
             if drop < 0:
                 cands.append((drop, trad, scen, pr, fr, subj))
-    cands.sort(key=lambda e: (e[0], e[2], e[3], e[4], e[5]))  # most negative first
+    # most negative first; then group + canonical condition order + subject (deterministic)
+    cands.sort(key=lambda e: (e[0], e[1], e[2], _PRESSURE_ORDER[e[3]], _FRAMING_ORDER[e[4]], e[5]))
     entries = _dedup_per_item(
         _entry("steadfastness-cliff", trad, scen, framing=fr, pressure=pr, scope="full",
                a=subj, b=None, label=f"{scen} · {subj} buckled under pressure")

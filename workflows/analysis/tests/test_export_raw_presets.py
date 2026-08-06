@@ -184,6 +184,68 @@ def test_catalog_carries_presets(tmp_path):
     assert ms["entries"][0]["params"]["item"] == "BUD-001"
 
 
+def test_presets_round_robin_across_groups_for_diverse_curation():
+    """When many scenarios across groups tie at max magnitude, entries span groups (round-robin)
+    rather than filling the cap from the alphabetically-first group."""
+    cells = {}
+    for g in ("buddhism", "taoism", "judaism"):
+        for n in range(6):  # 6 max-spread scenarios per group
+            cells.update(_cells(
+                _cell(g, f"{g[:3].upper()}-{n:03d}", "A", "secularize", "unstated", "turn1", gemini=1.0),
+                _cell(g, f"{g[:3].upper()}-{n:03d}", "B", "secularize", "unstated", "turn1", gemini=-1.0),
+            ))
+    ms = _preset(compute_presets(cells), "models-split")
+    groups = [e["params"]["group"] for e in ms["entries"]]
+    assert len(ms["entries"]) == 12
+    # every group represented (round-robin), not 12 from one
+    assert set(groups) == {"buddhism", "judaism", "taoism"}
+    assert groups[:3] == ["buddhism", "judaism", "taoism"]  # first round, sorted group order
+
+
+def test_presets_deterministic_across_groups_under_shuffle():
+    items = []
+    for g in ("buddhism", "taoism"):
+        items += [
+            _cell(g, f"{g[:3].upper()}-001", "A", "secularize", "unstated", "turn1", gemini=1.0),
+            _cell(g, f"{g[:3].upper()}-001", "B", "secularize", "unstated", "turn1", gemini=-1.0),
+        ]
+    assert compute_presets(dict(items)) == compute_presets(dict(reversed(items)))
+
+
+def test_write_dataset_emits_presets_into_manifest(tmp_path):
+    from analysis.export_raw import write_dataset
+    import json
+    def score_fn(su, fr, pr, scope):
+        return (1.0 if su == "gpt-5.6-terra" else -1.0) if scope == "turn1" else 0.0
+    base, sittings = _grid(["gpt-5.6-terra", "claude-sonnet-5"], score_fn=score_fn)
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra", "claude-sonnet-5"], judges=["gemini-3.6-flash"])
+    write_dataset([root], tmp_path / "out", "run1")
+    manifest = json.loads((tmp_path / "out" / "run1" / "manifest.json").read_text())
+    keys = {p["key"] for p in manifest["presets"]}
+    assert "models-split" in keys
+
+
+def test_limit_confines_preset_entries_to_written_items(tmp_path):
+    from analysis.export_raw import write_dataset
+    import json
+    base, sittings = [], []
+    for sc in ("BUD-001", "BUD-002", "BUD-003"):
+        b, s = _grid(["gpt-5.6-terra", "claude-sonnet-5"],
+                     scenario=sc,
+                     score_fn=lambda su, fr, pr, scope: (1.0 if su == "gpt-5.6-terra" else -1.0)
+                     if scope == "turn1" else 0.0)
+        base += b
+        sittings += s
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra", "claude-sonnet-5"], judges=["gemini-3.6-flash"],
+                      scenarios=("BUD-001", "BUD-002", "BUD-003"))
+    write_dataset([root], tmp_path / "out", "run1", limit=2)
+    manifest = json.loads((tmp_path / "out" / "run1" / "manifest.json").read_text())
+    ms = _preset(manifest["presets"], "models-split")
+    assert {e["params"]["item"] for e in ms["entries"]} <= {"BUD-001", "BUD-002"}  # no BUD-003
+
+
 def test_accumulate_cell_scores_maps_judge_keys():
     cells: dict = {}
     accumulate_cell_scores(
