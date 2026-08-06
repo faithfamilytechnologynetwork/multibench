@@ -114,3 +114,14 @@ Claude verified impl well-built + both gates green; RC items were TEST gaps, no 
 - sortRows now tests every numeric key both directions + null-among-non-nulls.
 - Extracted loadCommitted() helper (dedup ~40 lines); comment at strip join re: tradition-id key match.
 check-types green, 166 tests. Rebuttal written. Re-running porch done.
+
+## 2026-08-06 — Phase 1 APPROVED (codex + claude, both APPROVE/HIGH).
+
+Made the cheap non-blocking improvements both flagged: replaced brittle computeLeaderboardRows.length
+proxy with a behavioral test (Opus data changes no row); asserted uncovered strip nJudged===0; added
+drill-down inclusion via a non-first-framing slice (framings.some branch). 167 tests green.
+
+⚠️ SCOPE-LEAK (PR-time, architect's call): d0fa576 "[Docs] paper drafts" is the branch base and is NOT
+on origin/main → 27 docs/paper/* files would ride in my PR. This is the known branch-from-local-HEAD
+leak. Plan: rebase spir-55 commits onto origin/main at PR prep (Phase 4) so the PR carries only my
+changes. Flagged to architect. NOT rebasing mid-implement.

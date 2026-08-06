@@ -243,6 +243,7 @@ describe("computeLeaderboardRows — dense rows", () => {
     const b = sonnet.strip.find((c) => c.tradition === "b")!;
     expect(a.value).toBeCloseTo(0.6, 10);
     expect(b.value).toBeNull();
+    expect(b.nJudged).toBe(0); // uncovered cell: zero numerator
     expect(b.nExpected).toBe(2 * manifest.pressures.length); // manifest-derived denominator for "all"
     const nonNull = sonnet.strip.map((c) => c.value).filter((v): v is number => v !== null);
     const mean = nonNull.reduce((x, y) => x + y, 0) / nonNull.length;
@@ -295,8 +296,15 @@ describe("computeLeaderboardRows — dense rows", () => {
     expect(sonnet.byFraming.stated).toBeCloseTo(0.3, 10); // not gemini's 0.6
   });
 
-  it("takes no judgeModel argument — the board is always the ranking judge by construction", () => {
-    expect(computeLeaderboardRows.length).toBe(3); // (shards, manifest, opts) — no judge param
+  it("ignores non-ranking-judge (Opus) data — the board is always the ranking judge by construction", () => {
+    // Behavioral guarantee (stronger than a Function.length proxy): adding Opus judge data must not
+    // change a single row, because computeLeaderboardRows takes no judge and hardwires the ranking one.
+    const base = mkShard("a", { "claude-sonnet-5": { full: 0.6, turn1: 0.2, stead: 0.4 } });
+    const withOpus = mkShard("a", { "claude-sonnet-5": { full: 0.6, turn1: 0.2, stead: 0.4 } });
+    withOpus.means["claude-opus-4-8"] = { "claude-sonnet-5": { unstated: { full: { all: [0.99, 2, 2] } } } };
+    const rowsBase = computeLeaderboardRows({ a: base }, manifest, { pressure: "all" });
+    const rowsOpus = computeLeaderboardRows({ a: withOpus }, manifest, { pressure: "all" });
+    expect(rowsOpus).toEqual(rowsBase); // Opus data changes nothing — Gemini-only ranking
   });
 });
 
@@ -376,6 +384,18 @@ describe("subjectDrilldownRows — per-tradition dense drill-down", () => {
     expect(b.initial).toBeCloseTo(0.3, 10); // included via Initial
     expect(b.nJudged).toBeNull(); // no Post numerator, but denominator still defined
     expect(b.nExpected).toBe(2 * manifest.pressures.length);
+  });
+
+  it("includes a tradition present ONLY via a non-first-framing slice (framings.some branch)", () => {
+    // Only `stated` full present — no unstated/turn1/stead. Inclusion must come from the framing loop.
+    const s = { a: mkShard("a", { "claude-sonnet-5": { stated: 0.7 } }) };
+    const rows = subjectDrilldownRows(s, manifest, "claude-sonnet-5", { pressure: "all", judgeModel: "gemini-3.6-flash" });
+    const a = rows.find((r) => r.tradition === "a")!;
+    expect(a.byFraming.stated).toBeCloseTo(0.7, 10);
+    expect(a.post).toBeNull(); // no first-framing (unstated) full
+    expect(a.initial).toBeNull();
+    expect(a.nJudged).toBeNull(); // no Post numerator, denominator still defined
+    expect(a.nExpected).toBe(2 * manifest.pressures.length);
   });
 
   it("omits a tradition with no data for the judge, and returns nothing for an absent judge", () => {
