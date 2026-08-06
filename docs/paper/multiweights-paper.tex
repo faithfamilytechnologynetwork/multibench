@@ -64,10 +64,13 @@ decisively above the published 0--2\% frontier ceiling
 \citep{omissivebias2026}, with \emph{zero} measured leakage into coding,
 factual, mathematical, or secular-practical tasks and general capability
 essentially preserved (GSM8K $+3.0$, IFEval $-1.1$, MMLU $-2.3$ points).
-On MultiBench's own descriptive read, the distilled model's unstated mean
-flips positive in all seven traditions, with the largest lift on the
-hardest tier ($\Delta$ +0.94) --- the tune helps most exactly where the
-omission was deepest. The on-policy preference stage then calibrates the
+On MultiBench's own descriptive read, the distilled model's unstated
+means flip positive in all seven traditions in aggregate; an
+exposure-stratified holdout analysis shows that in-distribution read is
+roughly 4$\times$ exposure-concentrated, with a smaller but real
+transferable component ($+0.22$ on strictly untrained scenarios) --- the
+paper's load-bearing claims therefore rest on the out-of-distribution
+instruments. The on-policy preference stage then calibrates the
 shape: meaningful representation rises further (27\% $\to$ 30\%) while
 the maximal-representation spike tempers and the opted-out over-mention
 regression repairs fully to the base rate, with capability still flat ---
@@ -211,7 +214,17 @@ exactly: mean 0.113 on the 0--4 scale, 90\% of items scored 0, and
 \textbf{1.147}, adds representation on 47\% of items, and reaches
 meaningful representation on \textbf{27\%}.
 
-The shift is bimodal rather than calibrated: 53\% of items remain at 0,
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/afb_distribution.pdf}
+\caption{AFB-150 cold score distribution, base vs.\ distilled (SFT) vs.\
+two-stage (SFT+DPO), with meaningful-representation rates (P$\ge$2)
+annotated per head.}
+\label{fig:afbdist}
+\end{figure}
+
+The shift is bimodal rather than calibrated (\cref{fig:afbdist}): 53\% of
+items remain at 0,
 while 18\% spike to 4 (predominantly religious framing) rather than
 settling at the 1--2 the construct targets. This over-shoot is the shape
 stage 2 exists to temper. The faith-context condition saturates for both
@@ -260,8 +273,18 @@ vLLM serving stack for both.}
 
 \subsection{MultiBench descriptive}\label{sec:mbdesc}
 
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/tradition_gradient.pdf}
+\caption{Per-tradition MultiBench descriptive means (unstated, full
+scope), base vs.\ distilled, ordered by difficulty tier. Aggregate view;
+see the exposure decomposition below.}
+\label{fig:gradient}
+\end{figure}
+
 Running the tuned model through MultiBench itself (unstated framing, full
-scope) shows the same story from the benchmark's own instrument: the
+scope) shows the same story from the benchmark's own instrument
+(\cref{fig:gradient}): the
 distilled model's mean flips from negative to positive in \emph{all seven}
 traditions, and the lift is largest exactly where the omission was
 deepest. By MultiBench's difficulty tiers: the hard tier (Sunni Islam,
@@ -270,11 +293,31 @@ Catholicism alone $-0.542 \to +0.621$), the medium tier (Eastern
 Christianity, Judaism) $-0.204 \to +0.721$ ($\Delta$ +0.93), the easy
 tier (Buddhism, Taoism, secular sage) $+0.149 \to +0.750$ ($\Delta$
 +0.60), and the overall mean $-0.138 \to +0.652$ ($\Delta$ +0.79). The
-tier ordering compresses sharply: internalized recognition takes the
-model most of the way toward the flat profile that guided framing
-produces for frontier subjects.
+tier ordering compresses sharply in aggregate.
 
-Three disclosures bound this read. It is \emph{descriptive only}: the
+How much of this is generalization rather than memorization? Because the
+judge filter operates per cell, scenarios entered training with anywhere
+from all six to \emph{none} of their cells, and training examples are
+rendered bare --- so the 13 zero-exposure scenarios constitute a true
+prompt-level holdout inside the descriptive run. An exposure-stratified
+analysis (interpretation rule pre-registered before computing)
+decomposes the lift: the strictly untrained scenarios improve by a real
+\textbf{+0.22} (95\% CI $[+0.11, +0.35]$), while lift rises
+monotonically with exposure (to $+0.86$ at full exposure) and a
+base-difficulty-matched contrast does not flatten it ($\Delta_{\text{matched}}
+\approx +1.01$). Two consequences are stated plainly: the aggregate
+$+0.79$ overstates the \emph{transferable} effect by roughly 4$\times$;
+and the zero-exposure scenarios improve without flipping sign (base
+$-0.87 \to \approx -0.65$) --- the all-seven-positive result includes
+trained scenarios. One structural caveat cuts both ways: unexposed cells
+are exactly the guided-band filter failures, i.e.\ the samplability
+boundary, so memorization and trainability are confounded \emph{with
+each other} here; both readings imply the same bottom line. That bottom
+line is why the paper's load-bearing claims rest on the
+out-of-distribution instruments (\cref{sec:afb,sec:overapp,sec:capability}),
+which this analysis does not touch.
+
+Three further disclosures bound this read. It is \emph{descriptive only}: the
 model was trained on its own counsel for these same scenarios (no
 holdout; \cref{sec:sft}), so this is not a leaderboard claim and is
 memorization-confounded by construction. The judge is the same Gemini
@@ -337,15 +380,21 @@ tradition: the capability panel is flat, and the training data is the
 model's \emph{own} counsel. What moved is the decision to use what it
 already knew.
 
-\textbf{The samplability ordering is mechanism evidence.} Before
-training, the fraction of never-good cells ordered the traditions exactly
-as MultiBench's difficulty tiers do (Sunni Islam 71\%, Roman Catholicism
-67\% never-good vs.\ Buddhism 29\%); after distillation, the descriptive
-lift is \emph{largest} on precisely those traditions, and stage-2 mining
-finds its no-contrast cells are uniformly good --- including on the hard
-tier, which contributes the most preference pairs at scale. The
-recognition deficit and its repair are the same phenomenon seen from
-three instruments.
+\textbf{The samplability ordering is mechanism evidence --- with a
+bound.} Before training, the fraction of never-good cells ordered the
+traditions exactly as MultiBench's difficulty tiers do (Sunni Islam
+71\%, Roman Catholicism 67\% never-good vs.\ Buddhism 29\%); after
+distillation, the descriptive lift is largest on precisely those
+traditions, and stage-2 mining finds its no-contrast cells are uniformly
+good --- including on the hard tier, which contributes the most
+preference pairs at scale. The exposure analysis (\cref{sec:mbdesc})
+bounds how far to push this: on-bench, the transferable component is
+$+0.22$, not the aggregate $+0.79$, so the within-benchmark repair is
+partly training-set-specific. The cross-instrument story is what
+survives unqualified: the same model that memorably repairs its trained
+scenarios also moves 1\% $\to$ 30\% on an instrument it never trained
+on, with zero leakage --- recognition transfer that is real but, on
+in-distribution counsel, thinner than the aggregate suggests.
 
 \textbf{Distillation transfers a decision; preference optimization
 calibrates it.} Stage 1's shift is bimodal --- items either stay at 0 or
