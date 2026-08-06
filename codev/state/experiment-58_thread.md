@@ -79,3 +79,12 @@ Architect: the disable **recurred** (hit exp-57 mining too) — confirmed patter
   Modal-immune but I'm holding it too until the hold lifts, since it needs complete mining first.
 - Resume path when cleared: redeploy serve → re-run mine (dedup fills only the 702) → band → pairs →
   ping-before-DPO → DPO → lean battery.
+
+## 2026-08-06 — CAUTIOUS RESUME as probe (15:33Z)
+
+Architect: Waleed apparently cleared billing; control plane + volume answer. I'm the cheapest live
+probe of the serving path — exp-57 resumes only after my refill confirms stability.
+- Control-plane probe OK (`modal app list` + `volume ls gemma-dpo` = 20 runs). Redeployed serve.
+- Resumed refill `brlcyfbe8` (dedup → only the 702 missing). **Stop-on-disable stays ARMED**: any
+  disable → kill + ping, no retry.
+- On clean completion → banding authorized (proceed).
