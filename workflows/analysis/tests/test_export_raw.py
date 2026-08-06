@@ -2,10 +2,14 @@
 
 Deterministic unit/integration tests over tiny synthetic run roots in ``tmp_path`` (no
 dependence on the git-ignored ``tmp/judging-runs/`` symlink). They cover the new sitting
-reader (normalization, dedup, conflicting-prefix), the transcript↔verdict join (field
-parity, orphan abort, out-of-universe abort, normalized-subject join, full-grid-only
-transcript source), the per-shard contexts pool, the generic catalog, and the shared
-source fingerprint (determinism + sensitivity + matching the resolved stream).
+reader (normalization, dedup, conflicting-prefix, unstated-prefix, malformed turns), the
+transcript↔verdict join (field parity, orphan abort, universe both-ways, per-scenario
+grid completeness, normalized-subject join, full-grid-only transcript source), the
+per-shard contexts pool, the generic catalog, the streaming generator, and the shared
+source fingerprint.
+
+Corpus-level tests build a COMPLETE subject×framing×pressure grid (the exporter enforces
+grid completeness), via ``_grid``; the focused reader tests stay minimal.
 """
 
 from __future__ import annotations
@@ -16,16 +20,17 @@ from pathlib import Path
 import pytest
 
 from analysis.aggregate import breakdown_mean, cell_scores
+from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.export_raw import (
     SCHEMA_VERSION,
     build_catalog,
     build_raw_corpus,
     build_shard,
+    iter_tradition_raw,
     read_full_grid_sittings,
     source_fingerprint,
 )
 from analysis.export_results import (
-    JUDGE_UI,
     build_tradition_export,
     read_run_root,
     resolve_judgments,
@@ -43,14 +48,12 @@ _TURNS = [
 
 
 def _jrow(subject, scenario, pressure, framing, scope, judge, score, ts,
-          direction=None, rationale=None):
+          direction="held the line", rationale=None):
     row = {
         "subject": subject, "tradition": _TRAD, "scenario_id": scenario,
         "pressure": pressure, "framing": framing, "judge": judge,
-        "scope": scope, "score": score, "ts": ts,
+        "scope": scope, "score": score, "ts": ts, "direction": direction,
     }
-    if direction is not None:
-        row["direction"] = direction
     if rationale is not None:
         row["rationale"] = rationale
     return row
@@ -88,13 +91,41 @@ def _write_run(root: Path, *, base, sittings=None, v2=None, report=None) -> Path
     return root
 
 
+def _default_score(su, fr, pr, scope):
+    return 1.0 if scope == "turn1" else 0.5
+
+
+def _default_prefix(su, fr):
+    return None if fr == "unstated" else f"[Context for {fr}.]"
+
+
+def _grid(subjects, *, scenario="BUD-001", judge="gemini-3.6-flash",
+          score_fn=_default_score, prefix_fn=_default_prefix, rationale=None):
+    """A COMPLETE subject×framing×pressure grid (turn1+full judgments + one sitting/cell)."""
+    base, sittings = [], []
+    for su in subjects:
+        for fr in FRAMINGS:
+            for pr in PRESSURES:
+                for scope in ("turn1", "full"):
+                    base.append(_jrow(su, scenario, pr, fr, scope, judge,
+                                      score_fn(su, fr, pr, scope), "t1", rationale=rationale))
+                sittings.append(_srow(su, scenario, pr, fr, context_prefix=prefix_fn(su, fr)))
+    return base, sittings
+
+
 def _full_grid(root: Path, *, base, sittings, subjects, judges, scenarios=("BUD-001",)):
     """A full-grid run root (report.json + sittings.jsonl + judgments.jsonl)."""
     return _write_run(root, base=base, sittings=sittings,
                       report=_report(list(scenarios), subjects, judges))
 
 
-# ── Sitting reader ──────────────────────────────────────────────────────────────────
+def _grid_root(tmp_path, subjects=("gpt-5.6-terra",), **kw):
+    base, sittings = _grid(list(subjects), **kw)
+    return _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=list(subjects), judges=["gemini-3.6-flash"])
+
+
+# ── Sitting reader (minimal, direct) ────────────────────────────────────────────────
 
 
 def test_sitting_reader_normalizes_subject_and_drops_harness_fields(tmp_path):
@@ -106,13 +137,11 @@ def test_sitting_reader_normalizes_subject_and_drops_harness_fields(tmp_path):
         subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
     )
     sittings = read_full_grid_sittings(root / _TRAD / "sittings.jsonl", _TRAD)
-    # keyed by the CANONICAL subject even though the source used the provider-prefixed id
-    key = ("gpt-5.6-terra", "BUD-001", "secularize", "unstated")
+    key = ("gpt-5.6-terra", "BUD-001", "secularize", "unstated")  # CANONICAL subject
     assert key in sittings
     s = sittings[key]
     assert s.turns == _TURNS
-    assert s.context_prefix is None  # unstated → no prefix
-    # only role/content survive on turns
+    assert s.context_prefix is None
     assert all(set(t) == {"role", "content"} for t in s.turns)
 
 
@@ -122,14 +151,13 @@ def test_sitting_reader_rejects_duplicate_identity(tmp_path):
         tmp_path / "fg",
         base=[_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
                     "gemini-3.6-flash", 1.0, "t1")],
-        sittings=[dup, dict(dup)],
-        subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
+        sittings=[dup, dict(dup)], subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
     )
     with pytest.raises(AnalysisInputError, match="duplicate sitting identity"):
         read_full_grid_sittings(root / _TRAD / "sittings.jsonl", _TRAD)
 
 
-def test_sitting_reader_rejects_conflicting_context_prefix(tmp_path):
+def test_sitting_reader_rejects_conflicting_context_prefix_same_identity(tmp_path):
     a = _srow("gpt-5.6-terra", "BUD-001", "secularize", "stated", context_prefix="[A]")
     b = _srow("gpt-5.6-terra", "BUD-001", "secularize", "stated", context_prefix="[B]")
     root = _full_grid(
@@ -142,102 +170,103 @@ def test_sitting_reader_rejects_conflicting_context_prefix(tmp_path):
         read_full_grid_sittings(root / _TRAD / "sittings.jsonl", _TRAD)
 
 
-# ── build_raw_corpus: join, parity, contexts, guards ────────────────────────────────
+def test_sitting_reader_rejects_unstated_with_prefix(tmp_path):
+    root = _full_grid(
+        tmp_path / "fg",
+        base=[_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
+                    "gemini-3.6-flash", 1.0, "t1")],
+        sittings=[_srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated",
+                        context_prefix="[should not be here]")],
+        subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
+    )
+    with pytest.raises(AnalysisInputError, match="unstated cell carries a context_prefix"):
+        read_full_grid_sittings(root / _TRAD / "sittings.jsonl", _TRAD)
 
 
-def _one_cell_corpus(tmp_path):
-    """A minimal full-grid corpus: 1 scenario, 1 subject, unstated+stated, gemini, both scopes."""
-    base = [
-        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
-              "gemini-3.6-flash", 1.0, "t1", direction="held", rationale="stayed the course"),
-        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "full",
-              "gemini-3.6-flash", 0.5, "t2", direction="wavered"),
-        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "stated", "turn1",
-              "gemini-3.6-flash", 1.0, "t3"),
-    ]
-    sittings = [
-        _srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated"),
-        _srow("gpt-5.6-terra", "BUD-001", "secularize", "stated",
-              context_prefix="[Context: talking with a practising Buddhist.]"),
-    ]
-    return _full_grid(tmp_path / "fg", base=base, sittings=sittings,
-                      subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
+def test_sitting_reader_rejects_malformed_turns(tmp_path):
+    bad = _srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", turns="not a list")
+    root = _full_grid(
+        tmp_path / "fg",
+        base=[_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
+                    "gemini-3.6-flash", 1.0, "t1")],
+        sittings=[bad], subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
+    )
+    with pytest.raises(AnalysisInputError, match="'turns' is not a list"):
+        read_full_grid_sittings(root / _TRAD / "sittings.jsonl", _TRAD)
+
+
+# ── build_raw_corpus: join, parity, contexts, guards (complete grids) ────────────────
 
 
 def test_build_raw_corpus_cells_and_verdict_field_parity(tmp_path):
-    root = _one_cell_corpus(tmp_path)
+    root = _grid_root(tmp_path, rationale="stayed the course")
     corpus = build_raw_corpus([root])
     export = corpus.per_tradition[_TRAD]
     assert [s.scenario_id for s in export.scenarios] == ["BUD-001"]
-    cells = {(c["subject"], c["conditions"]["framing"]): c for c in export.scenarios[0].cells}
+    scenario = export.scenarios[0]
+    assert len(scenario.cells) == 1 * len(FRAMINGS) * len(PRESSURES)  # complete grid
 
-    unstated = cells[("gpt-5.6-terra", "unstated")]
+    unstated = next(c for c in scenario.cells
+                    if c["conditions"] == {"framing": "unstated", "pressure": "secularize"})
+    assert unstated["subject"] == "gpt-5.6-terra"
     assert unstated["transcript"] == _TURNS
-    # two verdicts (turn1, full), sorted; fields match the resolved judgment (allowlisted)
     verdicts = {v["scope"]: v for v in unstated["verdicts"]}
     assert verdicts["turn1"] == {
         "judge": "gemini", "scope": "turn1", "score": 1.0,
-        "summary": "held", "rationale": "stayed the course",
+        "summary": "held the line", "rationale": "stayed the course",
     }
     assert verdicts["full"] == {
-        "judge": "gemini", "scope": "full", "score": 0.5, "summary": "wavered",
-    }  # rationale omitted when absent
+        "judge": "gemini", "scope": "full", "score": 0.5, "summary": "held the line",
+        "rationale": "stayed the course",
+    }
 
 
-def test_contexts_pool_present_for_stated_absent_for_unstated(tmp_path):
-    root = _one_cell_corpus(tmp_path)
+def test_verdict_summary_always_present_even_without_rationale(tmp_path):
+    root = _grid_root(tmp_path)  # no rationale
     corpus = build_raw_corpus([root])
-    scenario = corpus.per_tradition[_TRAD].scenarios[0]
-    assert scenario.contexts == {"stated": "[Context: talking with a practising Buddhist.]"}
-    shard = build_shard(scenario)
-    assert shard["schema_version"] == SCHEMA_VERSION
-    assert shard["contexts"]["stated"].startswith("[Context")
-    assert "unstated" not in shard["contexts"]
-    # the stated cell carries an explicit contextKey into the pool; the unstated cell doesn't
-    by_framing = {c["conditions"]["framing"]: c for c in shard["cells"]}
-    assert by_framing["stated"]["contextKey"] == "stated"
-    assert "contextKey" not in by_framing["unstated"]
+    cell = corpus.per_tradition[_TRAD].scenarios[0].cells[0]
+    for v in cell["verdicts"]:
+        assert v["summary"] == "held the line"  # summary(=direction) always emitted
+        assert "rationale" not in v
 
 
-def test_conflicting_context_prefix_across_cells_aborts(tmp_path):
-    # two subjects, same (scenario, stated framing), DIFFERENT prefix → pool is ambiguous
-    base = [
-        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "stated", "turn1",
-              "gemini-3.6-flash", 1.0, "t1"),
-        _jrow("claude-sonnet-5", "BUD-001", "secularize", "stated", "turn1",
-              "gemini-3.6-flash", 1.0, "t2"),
-    ]
-    sittings = [
-        _srow("gpt-5.6-terra", "BUD-001", "secularize", "stated", context_prefix="[A]"),
-        _srow("claude-sonnet-5", "BUD-001", "secularize", "stated", context_prefix="[B]"),
-    ]
+def test_verdict_missing_direction_aborts(tmp_path):
+    base, sittings = _grid(["gpt-5.6-terra"])
+    base[0]["direction"] = ""  # blank direction on one verdict
     root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
-                      subjects=["gpt-5.6-terra", "claude-sonnet-5"], judges=["gemini-3.6-flash"])
-    with pytest.raises(AnalysisInputError, match="conflicting context_prefix for framing"):
+                      subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
+    with pytest.raises(AnalysisInputError, match="no direction summary"):
         build_raw_corpus([root])
 
 
-def test_report_scenario_without_sittings_aborts(tmp_path):
-    # report lists BUD-001 and BUD-002 but only BUD-001 has sittings → partial full-grid run
-    base = [_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
-                  "gemini-3.6-flash", 1.0, "t1")]
-    sittings = [_srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated")]
-    root = _write_run(
-        tmp_path / "fg", base=base, sittings=sittings,
-        report=_report(["BUD-001", "BUD-002"], ["gpt-5.6-terra"], ["gemini-3.6-flash"]))
-    with pytest.raises(AnalysisInputError, match="have no full-grid sittings"):
+def test_contexts_pool_present_for_stated_absent_for_unstated(tmp_path):
+    root = _grid_root(tmp_path)
+    corpus = build_raw_corpus([root])
+    scenario = corpus.per_tradition[_TRAD].scenarios[0]
+    assert scenario.contexts == {"stated": "[Context for stated.]",
+                                 "guided": "[Context for guided.]"}
+    shard = build_shard(scenario)
+    assert shard["schema_version"] == SCHEMA_VERSION
+    assert "unstated" not in shard["contexts"]
+    by_key = {(c["conditions"]["framing"], c["conditions"]["pressure"]): c for c in shard["cells"]}
+    assert by_key[("stated", "secularize")]["contextKey"] == "stated"
+    assert "contextKey" not in by_key[("unstated", "secularize")]
+
+
+def test_incomplete_cell_grid_aborts(tmp_path):
+    base, sittings = _grid(["gpt-5.6-terra"])
+    sittings = sittings[:-1]  # drop one cell → incomplete grid
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
+    with pytest.raises(AnalysisInputError, match="incomplete cell grid"):
         build_raw_corpus([root])
 
 
 def test_orphan_verdict_without_transcript_aborts(tmp_path):
-    # a judgment for a (guided) cell with no matching sitting
-    base = [
-        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
-              "gemini-3.6-flash", 1.0, "t1"),
-        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "guided", "turn1",
-              "gemini-3.6-flash", 1.0, "t2"),
-    ]
-    sittings = [_srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated")]
+    # complete grid for one subject, plus a stray verdict for a subject with no sitting
+    base, sittings = _grid(["gpt-5.6-terra"])
+    base.append(_jrow("claude-sonnet-5", "BUD-001", "secularize", "unstated", "turn1",
+                      "gemini-3.6-flash", 1.0, "t9"))
     root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
                       subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
     with pytest.raises(AnalysisInputError, match="orphan"):
@@ -245,30 +274,45 @@ def test_orphan_verdict_without_transcript_aborts(tmp_path):
 
 
 def test_out_of_universe_sitting_aborts(tmp_path):
-    base = [_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
-                  "gemini-3.6-flash", 1.0, "t1")]
-    sittings = [
-        _srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated"),
-        _srow("gpt-5.6-terra", "BUD-999", "secularize", "unstated"),  # not in the report
-    ]
+    base, sittings = _grid(["gpt-5.6-terra"])
+    sittings.append(_srow("gpt-5.6-terra", "BUD-999", "secularize", "unstated"))  # not in report
     root = _write_run(tmp_path / "fg", base=base, sittings=sittings,
                       report=_report(["BUD-001"], ["gpt-5.6-terra"], ["gemini-3.6-flash"]))
     with pytest.raises(AnalysisInputError, match="outside the report universe"):
         build_raw_corpus([root])
 
 
+def test_report_scenario_without_sittings_aborts(tmp_path):
+    base, sittings = _grid(["gpt-5.6-terra"])  # only BUD-001
+    root = _write_run(
+        tmp_path / "fg", base=base, sittings=sittings,
+        report=_report(["BUD-001", "BUD-002"], ["gpt-5.6-terra"], ["gemini-3.6-flash"]))
+    with pytest.raises(AnalysisInputError, match="have no full-grid sittings"):
+        build_raw_corpus([root])
+
+
+def test_conflicting_context_prefix_across_cells_aborts(tmp_path):
+    # two subjects, same stated framing, DIFFERENT prefix → the framing-keyed pool is ambiguous
+    def prefix_fn(su, fr):
+        if fr == "unstated":
+            return None
+        if fr == "stated":
+            return "[A]" if su == "gpt-5.6-terra" else "[B]"
+        return f"[ctx {fr}]"
+    base, sittings = _grid(["gpt-5.6-terra", "claude-sonnet-5"], prefix_fn=prefix_fn)
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra", "claude-sonnet-5"], judges=["gemini-3.6-flash"])
+    with pytest.raises(AnalysisInputError, match="conflicting context_prefix for framing"):
+        build_raw_corpus([root])
+
+
 def test_verdicts_join_across_roots_by_normalized_subject_and_full_grid_transcript(tmp_path):
     """An Opus layer (provider-prefixed spellings, its own sittings) contributes verdicts;
     transcripts still come from the full-grid run, joined by normalized subject."""
-    fg = _full_grid(
-        tmp_path / "fg",
-        base=[_jrow("claude-sonnet-5", "BUD-001", "secularize", "unstated", "turn1",
-                    "gemini-3.6-flash", 1.0, "t1")],
-        sittings=[_srow("claude-sonnet-5", "BUD-001", "secularize", "unstated")],
-        subjects=["claude-sonnet-5"], judges=["gemini-3.6-flash"],
-    )
-    # Opus root: provider-prefixed subject + Opus judge alias + a DIFFERENT sitting that must
-    # be ignored (no report.json → not the full-grid source).
+    base, sittings = _grid(["claude-sonnet-5"])
+    fg = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                    subjects=["claude-sonnet-5"], judges=["gemini-3.6-flash"])
+    # Opus root: provider-prefixed subject + Opus judge alias, one cell; its own (ignored) sitting
     opus = _write_run(
         tmp_path / "opus",
         base=[_jrow("anthropic/claude-sonnet-5", "BUD-001", "secularize", "unstated", "turn1",
@@ -278,35 +322,41 @@ def test_verdicts_join_across_roots_by_normalized_subject_and_full_grid_transcri
                                {"role": "assistant", "content": "WRONG"}])],
     )
     corpus = build_raw_corpus([fg, opus])
-    cell = corpus.per_tradition[_TRAD].scenarios[0].cells[0]
+    cell = next(c for c in corpus.per_tradition[_TRAD].scenarios[0].cells
+                if c["conditions"] == {"framing": "unstated", "pressure": "secularize"})
     assert cell["subject"] == "claude-sonnet-5"
     assert cell["transcript"] == _TURNS  # from the full-grid run, NOT the opus sitting
-    judges = {v["judge"] for v in cell["verdicts"]}
-    assert judges == {"gemini", "opus"}  # both judges present, opus joined by normalized subject
+    assert {v["judge"] for v in cell["verdicts"]} == {"gemini", "opus"}
 
 
 def test_ambiguous_two_full_grid_roots_aborts(tmp_path):
-    a = _full_grid(tmp_path / "a",
-                   base=[_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
-                               "gemini-3.6-flash", 1.0, "t1")],
-                   sittings=[_srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated")],
-                   subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
-    b = _full_grid(tmp_path / "b",
-                   base=[_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "full",
-                               "gemini-3.6-flash", 1.0, "t2")],
-                   sittings=[_srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated")],
+    a = _grid_root(tmp_path / "wrap_a")
+    # move to a distinct dir so both roots exist
+    b_base, b_sit = _grid(["gpt-5.6-terra"])
+    b = _full_grid(tmp_path / "b", base=b_base, sittings=b_sit,
                    subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
     with pytest.raises(AnalysisInputError, match="ambiguous transcript source"):
         build_raw_corpus([a, b])
+
+
+# ── Streaming generator ─────────────────────────────────────────────────────────────
+
+
+def test_iter_tradition_raw_yields_per_tradition(tmp_path):
+    root = _grid_root(tmp_path)
+    yielded = list(iter_tradition_raw([root]))
+    assert [t for t, _e, _r in yielded] == [_TRAD]
+    _t, export, resolved = yielded[0]
+    assert export.scenarios[0].scenario_id == "BUD-001"
+    assert resolved and all(r["judge"] == "gemini-3.6-flash" for r in resolved)
 
 
 # ── Catalog (generic) ───────────────────────────────────────────────────────────────
 
 
 def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
-    root = _one_cell_corpus(tmp_path)
-    corpus = build_raw_corpus([root])
-    cat = build_catalog(corpus)
+    root = _grid_root(tmp_path)
+    cat = build_catalog(build_raw_corpus([root]))
     assert cat["schema_version"] == SCHEMA_VERSION
     assert cat["dataset"]["license"] == "CC-BY-4.0"
     assert cat["scale"] == {"min": -1.0, "center": 0.0, "max": 1.0}
@@ -318,11 +368,7 @@ def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
         "id": "BUD-001", "label": "BUD-001", "group": "buddhism",
         "shard": "buddhism/BUD-001.json.gz",
     }]
-    # generic: no band labels on the ramp; scale is numeric
-    assert all(isinstance(x, str) for x in cat["ramp"])
-
-
-# ── Fingerprint ─────────────────────────────────────────────────────────────────────
+    assert all(isinstance(x, str) for x in cat["ramp"])  # numeric scale, no band labels
 
 
 # ── Agreement with the score tier + field allowlist ─────────────────────────────────
@@ -331,12 +377,9 @@ def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
 def test_raw_verdicts_reconcile_with_score_tier_aggregate(tmp_path):
     """Spec Test 2: a score-tier slice recomputed from the raw verdict stream equals the
     #49 export's slice — the raw and score tiers cannot disagree (same resolved stream)."""
-    root = _one_cell_corpus(tmp_path)
+    root = _grid_root(tmp_path)
     corpus = build_raw_corpus([root])
-    raws = [read_run_root(root)[_TRAD]]
-    te = build_tradition_export(_TRAD, raws)  # the #49 score-tier export
-
-    # recompute the (gemini, gpt-5.6-terra, unstated, full, secularize) slice from raw verdicts
+    te = build_tradition_export(_TRAD, [read_run_root(root)[_TRAD]])
     cs = cell_scores([r for r in corpus.resolved if r["judge"] == "gemini-3.6-flash"])
     recomputed = breakdown_mean(cs, "gpt-5.6-terra", framing="unstated", scope="full",
                                 pressure="secularize")
@@ -357,15 +400,13 @@ def _all_keys(obj, acc):
 
 def test_field_allowlist_no_disallowed_keys_in_shards_or_catalog(tmp_path):
     """Spec Test 8: harness-only fields never leave the exporter."""
-    root = _one_cell_corpus(tmp_path)
-    corpus = build_raw_corpus([root])
+    corpus = build_raw_corpus([_grid_root(tmp_path)])
     scenario = corpus.per_tradition[_TRAD].scenarios[0]
     shard = build_shard(scenario)
     catalog = build_catalog(corpus)
     disallowed = {"usage", "raw", "attempts", "ts", "sitting_key", "model", "context_prefix"}
     assert not (_all_keys(shard, set()) & disallowed)
     assert not (_all_keys(catalog, set()) & disallowed)
-    # positive: cell + verdict keys are within the allowed sets
     for cell in shard["cells"]:
         assert set(cell) <= {"subject", "conditions", "transcript", "verdicts", "contextKey"}
         assert set(cell["conditions"]) == {"framing", "pressure"}
@@ -375,21 +416,21 @@ def test_field_allowlist_no_disallowed_keys_in_shards_or_catalog(tmp_path):
             assert set(v) <= {"judge", "scope", "score", "summary", "rationale"}
 
 
+# ── Fingerprint ─────────────────────────────────────────────────────────────────────
+
+
 def test_fingerprint_deterministic_order_independent(tmp_path):
-    root = _one_cell_corpus(tmp_path)
-    corpus = build_raw_corpus([root])
+    corpus = build_raw_corpus([_grid_root(tmp_path)])
     fp1 = source_fingerprint(corpus.resolved)
     fp2 = source_fingerprint(list(reversed(corpus.resolved)))
     assert fp1 == fp2 and fp1.startswith("sha256:")
 
 
 def test_fingerprint_matches_resolved_stream_and_changes_on_edit(tmp_path):
-    root = _one_cell_corpus(tmp_path)
+    root = _grid_root(tmp_path)
     corpus = build_raw_corpus([root])
-    # the corpus stream equals resolve_judgments over the same root (one tradition here)
     raws = [read_run_root(root)[_TRAD]]
     assert source_fingerprint(corpus.resolved) == source_fingerprint(resolve_judgments(raws))
-    # mutating a score changes the fingerprint
     mutated = [dict(r) for r in corpus.resolved]
     mutated[0]["score"] = mutated[0]["score"] - 0.5
     assert source_fingerprint(mutated) != source_fingerprint(corpus.resolved)

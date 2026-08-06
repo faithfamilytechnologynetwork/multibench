@@ -24,6 +24,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections import defaultdict
+from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -88,12 +90,17 @@ def source_fingerprint(resolved: list[dict]) -> str:
     """`sha256:<hex>` over the sorted resolved-judgments stream.
 
     ``resolved`` is the **global** list of canonical (normalized) resolved judgments across
-    all traditions — exactly what ``resolve_judgments`` returns, concatenated. Sorting makes
-    it order-independent; compact, sorted-key JSON makes it byte-stable. export_results must
-    call THIS function on the same global stream (Phase 2) for the tiers to agree.
+    all traditions — exactly what ``resolve_judgments`` returns, concatenated. Each row is
+    serialized to its canonical JSON form and the stream is sorted on that exact serialization
+    (so the sort key and the hashed bytes agree), making the hash order-independent and
+    byte-stable. export_results must call THIS function on the same global stream (Phase 2)
+    for the tiers to agree.
     """
-    rows = sorted((_fingerprint_tuple(r) for r in resolved), key=lambda t: [str(x) for x in t])
-    blob = json.dumps(rows, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+    lines = sorted(
+        json.dumps(_fingerprint_tuple(r), ensure_ascii=False, separators=(",", ":"))
+        for r in resolved
+    )
+    blob = "\n".join(lines)
     return "sha256:" + hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
@@ -142,7 +149,12 @@ def read_full_grid_sittings(sittings_path: Path, tradition: str) -> dict[Sitting
             raise AnalysisInputError(f"{where}: unknown pressure {row['pressure']!r}")
         key = _sitting_key(normalize_subject(row["subject"]), row)
         turns = _clean_turns(row["turns"], where)
-        prefix = _clean_prefix(row.get("context_prefix"))
+        prefix = _clean_prefix(row.get("context_prefix"), where)
+        # The unstated framing is context-free by contract — a prefix on it is an anomaly.
+        if row["framing"] == "unstated" and prefix is not None:
+            raise AnalysisInputError(
+                f"{where}: unstated cell carries a context_prefix (unstated is context-free)"
+            )
         sitting = Sitting(turns=turns, context_prefix=prefix)
         if key in out:
             prev = out[key]
@@ -161,9 +173,17 @@ _SITTING_FIELDS: tuple[str, ...] = ("subject", "scenario_id", "pressure", "frami
 
 
 def _clean_turns(turns, where: str) -> list[dict]:
-    """Keep only ``{role, content}`` (drop any harness-only per-turn fields); validate roles."""
+    """Keep only ``{role, content}`` (drop any harness-only per-turn fields); validate roles.
+
+    Validates the container and element types so malformed input fails as an
+    ``AnalysisInputError`` (fail-loud) rather than an ``AttributeError``/``TypeError``.
+    """
+    if not isinstance(turns, list):
+        raise AnalysisInputError(f"{where}: 'turns' is not a list")
     cleaned: list[dict] = []
     for t in turns:
+        if not isinstance(t, dict):
+            raise AnalysisInputError(f"{where}: turn is not an object")
         role, content = t.get("role"), t.get("content")
         if role not in ("user", "assistant"):
             raise AnalysisInputError(f"{where}: unexpected turn role {role!r}")
@@ -173,12 +193,12 @@ def _clean_turns(turns, where: str) -> list[dict]:
     return cleaned
 
 
-def _clean_prefix(prefix) -> str | None:
+def _clean_prefix(prefix, where: str) -> str | None:
     """Normalize the context prefix: JSON null / empty → None; a non-empty string → itself."""
     if prefix is None or (isinstance(prefix, str) and prefix.strip() == ""):
         return None
     if not isinstance(prefix, str):
-        raise AnalysisInputError(f"context_prefix is not a string: {prefix!r}")
+        raise AnalysisInputError(f"{where}: context_prefix is not a string: {prefix!r}")
     return prefix
 
 
@@ -247,19 +267,26 @@ def _full_grid_root_for(tradition: str, per_root: list[tuple[Path, dict[str, Raw
     return roots[0]
 
 
-def _verdict(row: dict) -> dict:
+def _verdict(row: dict, tradition: str) -> dict:
     """One resolved judgment → a slimmed, allowlisted verdict on the display scale.
 
-    Only the shipped fields: UI judge key, scope, numeric score, the direction summary, and
-    the rationale when present. Harness-only fields (raw/usage/ts/sitting_key) are dropped.
+    Only the shipped fields: UI judge key, scope, numeric score, the direction ``summary``
+    (always present — the judging contract carries a direction on every verdict), and the
+    rationale when present. Harness-only fields (raw/usage/ts/sitting_key) are dropped.
     """
     model = row["judge"]
     ui = JUDGE_UI.get(model)
     if ui is None:  # fail-fast — a normalized judge is always known here
         raise AnalysisInputError(f"no UI metadata for judge {model!r}")
-    verdict = {"judge": ui["key"], "scope": row["scope"], "score": row["score"]}
-    if row.get("direction"):
-        verdict["summary"] = row["direction"]
+    direction = row.get("direction")
+    if not (isinstance(direction, str) and direction.strip()):
+        raise AnalysisInputError(
+            f"{tradition}: verdict for {row['subject']}/{row['scenario_id']}/"
+            f"{row['pressure']}/{row['framing']}/{ui['key']}/{row['scope']} has no direction "
+            f"summary (the verdict contract requires one)"
+        )
+    verdict = {"judge": ui["key"], "scope": row["scope"], "score": row["score"],
+               "summary": direction}
     if row.get("rationale"):
         verdict["rationale"] = row["rationale"]
     return verdict
@@ -339,6 +366,25 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
             f"sittings — a partial full-grid run must not produce a partial public tier"
         )
 
+    # Per-scenario cell-grid completeness: every scenario must carry the full expected grid
+    # (report subjects × framings × pressures), so a partially-copied sittings file can't
+    # silently ship a thin shard. (Verified complete across all traditions on the real run.)
+    expected_subjects = _report_subjects(raws) or {su for (su, _sc, _pr, _fr) in full_grid_sittings}
+    expected_cells = {(su, fr, pr)
+                      for su in expected_subjects for fr in FRAMINGS for pr in PRESSURES}
+    cells_by_scenario: dict[str, set] = defaultdict(set)
+    for (su, sc, pr, fr) in full_grid_sittings:
+        cells_by_scenario[sc].add((su, fr, pr))
+    for sc in sorted(sitting_scenarios):
+        got = cells_by_scenario[sc]
+        if got != expected_cells:
+            lack, extra = expected_cells - got, got - expected_cells
+            raise AnalysisInputError(
+                f"{tradition}/{sc}: incomplete cell grid — missing {len(lack)}, extra "
+                f"{len(extra)} of {len(expected_cells)} expected (subject×framing×pressure); "
+                f"a partial full-grid run must not produce a partial shard"
+            )
+
     verdicts_by_cell: dict[tuple, list[dict]] = {}
     for row in resolved:
         key = (row["subject"], row["scenario_id"], row["pressure"], row["framing"])
@@ -347,7 +393,7 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
                 f"{tradition}: resolved verdict {dict(zip(_SITTING_FIELDS, key))} has no "
                 f"full-grid transcript (orphan) — refusing to ship a verdict without a transcript"
             )
-        verdicts_by_cell.setdefault(key, []).append(_verdict(row))
+        verdicts_by_cell.setdefault(key, []).append(_verdict(row, tradition))
 
     scenarios = [
         _build_scenario(sc, tradition, full_grid_sittings, verdicts_by_cell)
@@ -356,29 +402,54 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
     return RawTraditionExport(tradition=tradition, scenarios=scenarios)
 
 
-def build_raw_corpus(roots: list[str | Path]) -> RawCorpus:
-    """Read all run roots and build the in-memory raw corpus (transform only, no writes)."""
+def _report_subjects(raws: list[RawTradition]) -> set[str]:
+    """The normalized subject set declared by the full-grid report (empty if undeclared)."""
+    for r in raws:
+        if r.report is not None:
+            return {normalize_subject(s) for s in (r.report.get("subjects") or [])}
+    return set()
+
+
+def iter_tradition_raw(
+    roots: list[str | Path],
+) -> Iterator[tuple[str, RawTraditionExport, list[dict]]]:
+    """Yield ``(tradition, RawTraditionExport, resolved_rows)`` one tradition at a time.
+
+    The **streaming** entry point (Phase 2's writer consumes this so only ONE tradition's
+    transcripts are live at a time — the whole corpus is ~430 MB of source sittings). The
+    resolved rows are small (no transcripts) and are what the caller accumulates for the
+    global :func:`source_fingerprint`.
+    """
     per_root: list[tuple[Path, dict[str, RawTradition]]] = [
         (Path(r), read_run_root(r)) for r in roots
     ]
-    traditions = sorted({t for _root, parsed in per_root for t in parsed})
-
-    per_tradition: dict[str, RawTraditionExport] = {}
-    global_resolved: list[dict] = []
-    subjects_present: set[str] = set()
-    judges_present: set[str] = set()
-
-    for tradition in traditions:
+    for tradition in sorted({t for _root, parsed in per_root for t in parsed}):
         raws = [parsed[tradition] for _root, parsed in per_root if tradition in parsed]
         fg_root = _full_grid_root_for(tradition, per_root)
         sittings = read_full_grid_sittings(fg_root / tradition / _SITTINGS, tradition)
         resolved = resolve_judgments(raws)  # resolve once; reused for export + fingerprint
         export = build_tradition_raw(tradition, raws, sittings, resolved)
+        yield tradition, export, resolved
+
+
+def build_raw_corpus(roots: list[str | Path]) -> RawCorpus:
+    """Read all run roots and build the whole in-memory raw corpus (transform only, no writes).
+
+    Convenience wrapper over :func:`iter_tradition_raw` that materializes every tradition —
+    fine for tests and small runs. Phase 2's writer uses the generator directly for the real
+    (large) export so it never holds all transcripts at once.
+    """
+    per_tradition: dict[str, RawTraditionExport] = {}
+    global_resolved: list[dict] = []
+    subjects_present: set[str] = set()
+    judges_present: set[str] = set()
+
+    for tradition, export, resolved in iter_tradition_raw(roots):
         per_tradition[tradition] = export
-        # Accumulate the global resolved stream + presence sets for the catalog + fingerprint.
         global_resolved.extend(resolved)
         subjects_present.update(row["subject"] for row in resolved)
-        subjects_present.update(k[0] for k in sittings)  # subjects with transcripts too
+        for scenario in export.scenarios:
+            subjects_present.update(c["subject"] for c in scenario.cells)
         judges_present.update(row["judge"] for row in resolved)
 
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
