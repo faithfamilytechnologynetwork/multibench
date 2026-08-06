@@ -310,6 +310,17 @@ Review loop hit ceiling → porch force-advanced to **pr gate** (WAITING FOR HUM
 up to date (b2e9a78). Will NOT self-approve / self-merge. After `porch approve 49 pr` by human → merge
 (merge commit, not squash) → Verify phase.
 
+### Architect integration CMAP (gemini+claude APPROVE, codex RC) — 3 required items DONE (f1e4767):
+1. **Full-grid invariant**: build_manifest now validates complete Gemini coverage (every
+   tradition×subject×framing×scope×pressure) before writing full_grid:true; fail-fast + regression
+   test (incomplete gemini → raises). Manifest tests refactored to use a generated full-grid fixture.
+2. **Ephemeral deploy port**: deploy.test.ts binds 0 for an OS-assigned free port (was hardcoded 4199
+   → collides under concurrent builders); kept detached+group-reap; dropped fixed-port pre-flight.
+3. **Cleanups**: _mean_over→breakdown_mean (6 sites + alias dropped); SPA isSafePathSegment guards
+   manifest entry.shard before the raw URL (+test).
+Committed dataset byte-identical (re-export diff verified). Python 113 + JS 153 pass, typecheck+build
+clean. Pushed. Pinged architect to re-verify + approve the pr gate. STILL WAITING — no self-approve.
+
 **Phase 5 consult: BOTH APPROVE first iteration** (judge selector structurally can't re-rank; steadfastness
 denominators correct; zero-coverage omission verified vs real shards). Only cosmetic suggestions.
 
