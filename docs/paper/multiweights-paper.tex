@@ -69,9 +69,9 @@ means flip positive in all seven traditions, and a companion 50/50-split
 retrain shows this is predominantly \emph{genuine transfer}: randomly
 held-out scenarios lift $+0.78$ (95\% CI $[+0.70, +0.86]$) against a
 train-half reference of $+0.90$, with every tradition's held-out CI
-above zero and the hard tier transferring strongly; only the hardest
-filter-failure scenarios transfer weakly ($+0.22$ on an earlier
-13-scenario pseudo-holdout). The on-policy preference stage then calibrates the
+above zero and the hard tier transferring strongly; only the scenarios
+at the samplability floor --- those whose guided counsel never passed
+the training filter --- transfer weakly ($+0.22$). The on-policy preference stage then calibrates the
 shape: meaningful representation rises further (27\% $\to$ 30\%) while
 the maximal-representation spike tempers and the opted-out over-mention
 regression repairs fully to the base rate, with capability still flat ---
@@ -321,32 +321,31 @@ prompt-level holdout.}
 \label{fig:dose}
 \end{figure}
 
-How much of this is generalization rather than memorization? Two
-companion analyses answer, and their sequence is instructive. First, an
-exposure-stratified analysis of the full-data model itself
-(\cref{fig:dose}; interpretation rule pre-registered): because the judge
-filter operates per cell, 13 scenarios entered training with \emph{no}
-cells at all, and on that strict pseudo-holdout the lift is only
-$+0.22$ (95\% CI $[+0.11, +0.35]$) against a matched trained-scenario
-contrast of $\approx +1.01$ --- suggesting heavy memorization. But that
-holdout is exactly the guided-band \emph{filter failures} --- the
-hardest, most samplability-starved scenarios, 9 of 13 from Sunni Islam
---- so memorization and trainability were confounded, as the analysis
-itself disclosed. Second, a clean test: a \textbf{companion 50/50
-retrain} (scenario-level split, stratified by tradition, seeded), which
-breaks that confound by holding out 260 \emph{randomly chosen} scenarios
-(24--70 per tradition; base-difficulty balanced, $\Delta = 0.05$). The
-result reverses the pessimistic reading: held-out scenarios lift
-\textbf{+0.78} (95\% CI $[+0.70, +0.86]$) against a train-half
-memorization reference of $+0.90$ --- roughly \textbf{85\% of the
-on-bench lift is genuine cross-tradition transfer}, with a memorization
-inflation of only $+0.12$ $[+0.01, +0.24]$. Every tradition's held-out
-CI is above zero; the hard tier transfers \emph{strongly} (Roman
-Catholicism $+1.07$, Sunni Islam $+0.67$, both crossing positive
-post-SFT), and the held-out mean crosses positive ($-0.20 \to +0.57$).
-The reconciled picture: transfer is strong in general and weak
-specifically on the filter-failure scenarios --- the $+0.22$ was the
-biased lower bound its own caveat predicted (\cref{fig:transfer}).
+How much of this is generalization rather than memorization? A
+\textbf{companion 50/50 retrain} answers: the identical recipe trained
+on a stratified random half of the scenarios (259; seeded scenario-level
+split, base-difficulty balanced across arms, $\Delta = 0.05$), evaluated
+descriptively on the 260 held out (24--70 per tradition). Held-out
+scenarios lift \textbf{+0.78} (95\% CI $[+0.70, +0.86]$) against a
+train-half memorization reference of $+0.90$ --- roughly \textbf{85\% of
+the on-bench lift is genuine cross-tradition transfer}, with a
+memorization inflation of only $+0.12$ $[+0.01, +0.24]$
+(\cref{fig:transfer}). Every tradition's held-out CI is above zero; the
+hard tier transfers \emph{strongly} (Roman Catholicism $+1.07$, Sunni
+Islam $+0.67$, both crossing positive post-SFT), and the held-out mean
+crosses positive ($-0.20 \to +0.57$).
+
+Transfer is not uniform. An exposure-stratified analysis of the
+full-data model (\cref{fig:dose}) localizes the exception: the scenarios
+whose guided sittings never passed the training filter --- the
+samplability floor, 13 scenarios, predominantly Sunni Islam --- improve
+by only $+0.22$ $[+0.11, +0.35]$ and do not cross positive. The
+recognition deficit's deepest pockets resist both training and
+transfer. One scope note: the transfer estimate comes from the companion
+half-data retrain; the shipped full-data model's unseen-scenario
+behavior is accordingly bounded by $[+0.22, \sim+0.78]$. The
+out-of-distribution instruments (\cref{sec:afb,sec:overapp}) remain the
+headline evidence.
 
 \begin{figure}[ht]
 \centering
