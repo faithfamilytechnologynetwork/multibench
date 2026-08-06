@@ -25,6 +25,12 @@ import {
   type Tradition,
 } from "./model";
 import { loadResults } from "./results";
+import {
+  parseResultsManifest,
+  parseResultsShard,
+  type ResultsManifest,
+  type ResultsShard,
+} from "./resultsModel";
 
 const GC_TIME = 1000 * 60 * 60; // keep SHA-pinned (immutable) data ~1h for instant back-nav
 
@@ -73,6 +79,16 @@ export function scenarioFolderIds(entries: TreeEntry[], traditionId: string): st
 
 export function hasFile(entries: TreeEntry[], path: string): boolean {
   return entries.some((e) => e.type === "blob" && e.path === path);
+}
+
+/** Results run ids = `results/<id>/manifest.json` blobs (the #49 results datasets). */
+export function resultsRunIds(entries: TreeEntry[]): string[] {
+  const ids: string[] = [];
+  for (const e of entries) {
+    const m = /^results\/([^/]+)\/manifest\.json$/.exec(e.path);
+    if (m && m[1]) ids.push(m[1]);
+  }
+  return ids.sort();
 }
 
 // ---- shared cached fetchers (dedupe across derived queries) ----------------------------------
@@ -149,6 +165,61 @@ export async function loadTraditions(qc: QueryClient, sha: string): Promise<Trad
   const entries = await ensureTree(qc, sha);
   const ids = traditionIds(entries);
   return Promise.all(ids.map((id) => loadTraditionCore(qc, sha, entries, id)));
+}
+
+// ---- results datasets (#49): discovery + manifest/shard loaders --------------------
+
+export interface ResultsRun {
+  id: string;
+  manifest: ResultsManifest | null;
+  notices: Notice[];
+}
+
+export interface ResultsRunsResult {
+  runs: ResultsRun[];
+  /** The run to show by default: the most recent by manifest `generatedAt`, or null if none. */
+  defaultRunId: string | null;
+}
+
+const rPath = (runId: string, file: string) => ["results", runId, file].join("/");
+
+export async function loadResultsManifest(
+  qc: QueryClient,
+  sha: string,
+  runId: string,
+): Promise<{ manifest: ResultsManifest | null; notices: Notice[] }> {
+  const where = rPath(runId, "manifest.json");
+  const text = await ensureRaw(qc, sha, where);
+  if (text === null) {
+    return { manifest: null, notices: [notice("error", "results", where, "manifest not found")] };
+  }
+  return parseResultsManifest(text, where);
+}
+
+/** Discover every `results/<id>/` run and load its manifest; newest (by date) is the default. */
+export async function loadResultsRuns(qc: QueryClient, sha: string): Promise<ResultsRunsResult> {
+  const entries = await ensureTree(qc, sha);
+  const ids = resultsRunIds(entries);
+  const runs: ResultsRun[] = await Promise.all(
+    ids.map(async (id) => ({ id, ...(await loadResultsManifest(qc, sha, id)) })),
+  );
+  const valid = runs.filter((r) => r.manifest !== null);
+  valid.sort((a, b) => b.manifest!.generatedAt.localeCompare(a.manifest!.generatedAt));
+  return { runs, defaultRunId: valid[0]?.id ?? null };
+}
+
+export async function loadResultsShard(
+  qc: QueryClient,
+  sha: string,
+  runId: string,
+  tradition: string,
+): Promise<{ shard: ResultsShard | null; notices: Notice[] }> {
+  const where = rPath(runId, `${tradition}.json`);
+  const text = await ensureRaw(qc, sha, where);
+  if (text === null) {
+    return { shard: null, notices: [notice("error", "results", where, `no results shard for ${tradition}`)] };
+  }
+  return parseResultsShard(text, where);
 }
 
 export async function loadTradition(qc: QueryClient, sha: string, id: string): Promise<Tradition | null> {
@@ -287,6 +358,30 @@ export function useTradition(sha: string | undefined, id: string) {
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadTradition(qc, sha as string, id),
+  });
+}
+
+/** All results runs + the default (most recent). SHA-keyed, immutable per snapshot. */
+export function useResultsRuns(sha: string | undefined) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["results", "runs", REPO, sha],
+    enabled: !!sha,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadResultsRuns(qc, sha as string),
+  });
+}
+
+/** One tradition's results shard for a run (off the API budget; parsed fail-soft). */
+export function useResultsShard(sha: string | undefined, runId: string | undefined, tradition: string) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["results", "shard", REPO, sha, runId, tradition],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadResultsShard(qc, sha as string, runId as string, tradition),
   });
 }
 

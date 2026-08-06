@@ -206,3 +206,31 @@ committing the dataset to eyeball size+manifest).
   gemini=93420 (matches issue!) opus=40114, 7 traditions w/ n_scenarios.
 - Leaderboard recomputed FROM WRITTEN SHARDS == paper (all 15). 
 - Code committed; DATASET commit HELD pending architect eyeball (they asked). Pinged architect, waiting.
+
+**Phase 2 DATASET APPROVED** by architect (independently re-verified: 105 by-framing + 35 steadfastness ==
+report.json; counts reconcile 93420=46710×2, 40114=31114+9000). Committed results/20260803/ (3c3224c).
+Phase 2 consult iter1: Codex REQUEST_CHANGES / Claude APPROVE → added manifest coverage summary (Gemini 100%,
+Opus unstated 99.9% / stated-guided 14.5% — replaces misleading per-judge sample flag), validate-before-write
++ stale-prune in write_dataset, committed-artifact tests, fail-fast/malformed-JSON/cli fixes.
+Phase 2 consult iter2: Codex COMMENT (non-blocking) / Claude APPROVE → polished CLI output (counts) + CLI
+command tests. 110 tests pass. Phase 2 DONE. **PR gate held for WALEED (not architect).**
+
+### Phase 3 (SPA results data layer) — STARTING.
+Plan: new resultsModel.ts (zod, parseResultsManifest — avoid parse.ts parseManifest collision), discovery +
+useResults hooks in queries.ts, extend github.ts walkTraditions→results/ (truncation fallback), runtime
+validation → Notice not crash. Tests via fakeFetch/renderApp. VITE_MULTIBENCH_REF for pre-merge view.
+
+**Phase 3 CODE done, 13 results-data tests pass, typecheck clean, build OK.**
+- github.ts: walkTraditions→walkTopDirs (truncation fallback now covers traditions/ AND results/).
+- resultsModel.ts (new): zod schemas + parseResultsManifest/parseResultsShard (fail-soft → Notice; score
+  ranges; unsupported schema_version rejected). Fixed a bug: coverage schema had one rec() too many.
+- queries.ts: resultsRunIds, loadResultsRuns (latest-by-date default), loadResultsManifest, loadResultsShard
+  + useResultsRuns/useResultsShard hooks.
+- fakeRepo.ts: non-recursive git-trees support (truncation walk) + resultsFiles() helper.
+
+⚠️ BLOCKER (pre-existing, NOT mine): src/deploy.test.ts "REAL smoke" fails in sandbox. Confirmed git status:
+deploy.test.ts/package.json/vite.config.ts UNTOUCHED by me. Cause: sandbox node v26 (app engine wants 20.x);
+PORT=4199 not propagating to `serve -s dist -l ${PORT:-4173}` → server binds 4173, test polls 4199 → timeout.
+Full suite: 109 pass / 1 fail (only this smoke). Since Phase 3 touches apps/multibrowser, porch dispatcher
+runs `pnpm test` → this fails → blocks porch-done. It's the architect's deploy guard → NOTIFYING before any
+skip. Proposed: conditional skip on node major != 20 (preserves CI coverage). Awaiting architect guidance.
