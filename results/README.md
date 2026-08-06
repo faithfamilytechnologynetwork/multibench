@@ -32,8 +32,14 @@ uv --project workflows/analysis run python -m analysis export \
 ```
 
 Commit **only** the `results/<run-id>/` output (never from the gitignored `tmp/judging-runs/`).
-Re-running with the same inputs is deterministic (sorted keys → byte-stable), so refreshing a run
-after more judgments land is just the same command again, then a new commit.
+Re-running with the same inputs is deterministic (sorted keys) — the shards are **byte-stable** and
+the manifest differs only in its `generated_at` timestamp — so refreshing a run after more
+judgments land is just the same command again, then a new commit.
+
+**Which run the SPA shows.** The Results explorer defaults to the **newest** run by `generated_at`
+and lets you pin a specific one with `?run=<run-id>` in the URL. So committing a new
+`results/<run-id>/` with a later timestamp makes it the default automatically; older runs remain
+reachable by their id.
 
 ## `manifest.json`
 
@@ -57,7 +63,7 @@ after more judgments land is just the same command again, then a new commit.
 {
   "tradition": "buddhism",
   "n_scenarios": 52,
-  "judges": ["gemini-3.6-flash", "claude-opus-4-8"],
+  "judges": ["claude-opus-4-8", "gemini-3.6-flash"],   // sorted
   "means": {           // judge → subject → framing → scope → pressure(+"all") → [mean, n_judged, n_expected]
     "gemini-3.6-flash": { "claude-sonnet-5": { "unstated": { "full": { "all": [0.81, 312, 312] } } } }
   },
@@ -68,7 +74,8 @@ after more judgments land is just the same command again, then a new commit.
 ```
 
 - **Cells are arrays**: `means` cells are `[mean, n_judged, n_expected]`; `steadfastness` cells are
-  `[value, matched_n]`. Scores are on the **−1…+1** scale (numeric only — **no band names**).
+  `[value, matched_n]`. Numeric only — **no band names**. A `means` **`mean` is on −1…+1**; a
+  `steadfastness` **`value` is on −2…+2** (a full − turn1 difference), and can be negative.
 - **Zero-coverage slices are simply absent** (the SPA derives `n_expected` from `n_scenarios` and
   shows nothing rather than a 0).
 

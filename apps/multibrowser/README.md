@@ -32,10 +32,11 @@ command live in [`results/README.md`](../../results/README.md).
   (routing / deep links) + **TanStack Query** (fetch / cache). Standalone app — it does not depend
   on any workspace packages.
 - **GitHub is the data layer, fetched in the browser.** A single client (`src/lib/github.ts`)
-  resolves the latest `main` commit SHA, lists `traditions/**` via the **git-trees API** (one call),
-  and fetches file content from **`raw.githubusercontent.com`** pinned to that SHA (an immutable,
-  internally-consistent snapshot). All of this flows through TanStack Query (`src/lib/queries.ts`),
-  keyed by SHA.
+  resolves the latest `main` commit SHA, lists `traditions/**` **and `results/**`** via the
+  **git-trees API** (one call; the truncation fallback walks both dirs), and fetches file content
+  from **`raw.githubusercontent.com`** pinned to that SHA (an immutable, internally-consistent
+  snapshot). All of this flows through TanStack Query (`src/lib/queries.ts`), keyed by SHA — so
+  both the corpus and committed `results/<run-id>/` datasets are read the same way.
 - **Freshness without redeploy.** `useLatestSha` polls the commit SHA on an interval
   (`VITE_SHA_POLL_MS`, default 5 min) plus on window focus/reconnect. When the SHA changes, the
   SHA-keyed queries automatically refetch the new snapshot — even on an already-open page.
@@ -46,12 +47,14 @@ command live in [`results/README.md`](../../results/README.md).
   pressure, index↔folder drift) renders with an inline **notice** rather than crashing; an error
   boundary backstops any render error. Taxonomy axes are read **from each manifest** — nothing is
   hardcoded, so 2-axis and 5-axis traditions both work.
-- **Results-ready seam (#8).** v1 builds **no** results UI, but the scenario type carries an
-  optional `results` field, a single `loadResults()` boundary (returns `none` in v1), and a
-  reserved `ResultsRegion` — so the judging workflow (**#8**) slots in additively later
-  (`src/lib/results.ts`).
+- **Results explorer (#49).** The `/results` explorer reads committed `results/<run-id>/` datasets
+  at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
+  run shown defaults to the newest by `generated_at`; a specific run can be pinned with `?run=<id>`.
+  The **per-scenario** `ResultsRegion` seam (optional `Scenario.results`, `loadResults()` → `none`)
+  remains inert — the explorer is a separate route-level feature, not that seam.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable
-  setup; filters live in the URL as flat repeated params (`?pillars=a&pillars=b`).
+  setup; corpus filters and results selectors live in the URL as flat params
+  (`?pillars=a&pillars=b`, `?framing=stated&metric=steadfastness`).
 
 ## Develop
 
@@ -90,8 +93,10 @@ data-baking static build — new traditions appear without redeploying.
 
 ```
 src/lib/      constants, model, parse (tolerant parsers), github (fetch boundary),
-              queries (TanStack Query), filtering (pure filter/sort), results (inert #8 seam)
-src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, NotFound (+ tests)
+              queries (TanStack Query), filtering (pure filter/sort), results (inert #8 seam),
+              resultsModel (results manifest/shard parsers), resultsSelection (explorer deep-link
+              model), leaderboard (mean-of-means standings), scoreColor (diverging palette)
+src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, ResultsPage, NotFound (+ tests)
 src/components/  Markdown, Notice, ErrorBoundary, RateLimitBanner, TraditionCard, FilterBar,
                  ScenarioList/Row, ScenarioHeader, PressureSection, FramingsPanel,
                  ResultsRegion, Collapsible, Loading
