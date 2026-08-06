@@ -321,6 +321,19 @@ up to date (b2e9a78). Will NOT self-approve / self-merge. After `porch approve 4
 Committed dataset byte-identical (re-export diff verified). Python 113 + JS 153 pass, typecheck+build
 clean. Pushed. Pinged architect to re-verify + approve the pr gate. STILL WAITING — no self-approve.
 
+### pr gate APPROVED (Waleed, 2026-08-06). MERGED + VERIFY phase.
+PR #50 merged with a MERGE COMMIT (099ac7d) via codev pr-merge.sh; recorded `porch done 49 --merged 50`.
+main now at 099ac7d (includes /results route code + committed results/20260803/ data).
+Porch → verify phase. Architect wants: manual `railway up` + live /results checks (leaderboard vs paper,
+judge selector→Opus drill-down never re-ranks, deep links + SPA fallback, pressure/metric toggles).
+
+**Live deploy handoff**: railway CLI authed (waleedk@gmail.com) but NO project linked in this worktree +
+no project id / URL in repo → won't guess which Railway project to deploy the live team site to (outward-
+facing, Waleed's account). Asked Waleed to run `! railway link` (pick multibrowser) + `! railway up`, then
+share the URL for a smoke-test. Holding `porch done 49` until the live check passes (issue stays open until
+Verify passes). Deterministic coverage already proves the behaviors: leaderboard==paper (real committed
+shards, all 5×3), Gemini-only-ranking structural, deep-link + drill-down + selector + SPA-fallback tests.
+
 **Phase 5 consult: BOTH APPROVE first iteration** (judge selector structurally can't re-rank; steadfastness
 denominators correct; zero-coverage omission verified vs real shards). Only cosmetic suggestions.
 
