@@ -349,8 +349,17 @@ function HeatStrip({ strip, subject }: { strip: StripCell[]; subject: string }) 
                 role="tooltip"
                 id={tipId}
                 data-testid="strip-tooltip"
-                style={{ transform: `translateX(calc(-50% + ${shift}px))` }}
-                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 w-max max-w-xs rounded bg-default-900 px-2 py-1 text-xs text-default-50 shadow-lg"
+                // Surface is set via INLINE style, not `bg-*` classes: HeroUI v3 has no `default-900`
+                // shade, so the old `bg-default-900` generated no rule and the panel was transparent
+                // (Waleed's iter-3 screenshot: text bled through the header). Concrete colours are the
+                // same proven mechanism the score cells use (`scoreColor`), so the panel is opaque.
+                style={{
+                  transform: `translateX(calc(-50% + ${shift}px))`,
+                  backgroundColor: "#18181b",
+                  color: "#fafafa",
+                  border: "1px solid rgba(255,255,255,0.14)",
+                }}
+                className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 w-max max-w-xs rounded px-2 py-1 text-xs shadow-lg"
               >
                 {summary}
               </span>
