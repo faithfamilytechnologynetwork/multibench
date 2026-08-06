@@ -33,3 +33,17 @@ score/leaderboard tier stays MB-specific. Shared app → rebase discipline, no t
 tier. #49 verify gate parked; close #49 when this lands.
 
 Writing the spec now.
+
+## 2026-08-06 — Specify iter 1 consultation (codex + claude, both REQUEST_CHANGES, HIGH)
+
+Both high-quality, converging. Claude verified data/reuse claims against actual shards + code.
+Incorporated all: pressure now reframes WHOLE table (headline+framing+strip+rank) at selected
+pressure (default all); canonical rank recomputed at selected pressure; **Δ-distinctness test
+re-scoped to a synthetic fixture** (Claude's catch: all 34 shard-steadfastness≠full−turn1 cells are
+Opus; Gemini identical in all 1470 — grid complete); heat strip built from computeStandings'
+returned `contributions` (by-construction mean==Post, not a 2nd aggregation); drill-down columns
+defined (per-tradition Initial/Post/Δ + framings); sortable = numeric cols only + tie-break; heat-strip
+accessibility (title/aria-label, keyboard expand, non-color empty, narrow-viewport scroll); k/N
+coverage visibility; Δ reuses −1…+1 ramp which CLAMPS (verified scoreColor.ts); dropped
+coverage-% gate (no provider) → suite-green + new tests; stale ?metric/?framing ignored.
+Committing iter-2, re-running consult.
