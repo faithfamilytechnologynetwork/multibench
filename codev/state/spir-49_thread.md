@@ -86,3 +86,12 @@ before incorporating. Load-bearing catches:
 
 Design still Approach 1 (pre-aggregated per-tradition shards, canonical aggregate.py, SPA does mean-of-means).
 Consultation Log filled. Re-committing, then porch next.
+
+### GATE: spec-approval reached (2026-08-05) — STOPPED, waiting for human.
+
+Wrote rebuttal (porch-tracked/gitignored, like consult outputs), ran `porch done` → `porch gate 49`.
+Notified architect via `afx send`. Will NOT self-approve. Two Critical open questions surfaced to architect:
+`min_coverage` threshold (default 0.5) and how Opus stated/guided ranks in the leaderboard.
+Next action (after `porch approve 49 spec-approval` by human): `porch run`/`porch next` → Plan phase.
+
+Commits so far: 00a871a (initial draft), 940d12c (with multi-agent review).
