@@ -1,7 +1,7 @@
 id: '48'
 title: multiweights-fine-tune-gemma-4
 protocol: experiment
-phase: analyze
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -13,4 +13,4 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-04T21:39:40.845Z'
-updated_at: '2026-08-06T09:48:39.668Z'
+updated_at: '2026-08-06T09:49:04.300Z'
