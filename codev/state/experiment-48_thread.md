@@ -357,3 +357,15 @@ temp 1.3, per cell) + `build_dpo_pairs.py` (within-cell max-gap pairs, gap ≥ 1
 the architect green-lights full mining. Both jobs share the endpoint (64-concurrent capacity; the
 earlier failures were the max_tokens bug, not contention). On both done → band mining → yield table →
 assemble pre-DPO checkpoint report.
+
+## 2026-08-06 — checkpoint report: THREE scoped options (architect steer)
+
+Architect corrected my lean cut: capability MUST re-run on +DPO (MMLU −2.3 is the watch item, only
+~5); the right cut is SKIP descriptive re-run (judge-heavy, non-claim) + SKIP AFB faith-context
+(saturated). Present three options with plain-digit totals (final numbers pin to the mining yield):
+1. **stop-at-SFT** ≈ 280 (current 260 + pilot banding ~20 to produce the yield figure for the decision).
+2. **DPO + lean battery** (AFB-150 cold + probes + capability on +DPO; skip descriptive + faith) ≈
+   340–360 (current 260 + mining pilot-band 20 + scoped full-mining ~30-50 + DPO B200 ~7 + lean eval ~22).
+3. **DPO + full battery** (adds descriptive re-run + faith) ≈ 390–420 — over the 320-340 gate.
+Decision waits for the yield + descriptive numbers. SFT alone already delivers the headline
+(P≥2 1%→27%), so stop-at-SFT is a real option.
