@@ -186,12 +186,16 @@ $75 / 5,040 both reconcile). Sampling (endpoint GPU) $5 / 5,040 sittings. DPO $7
 
 | leg | actual | method |
 |---|---:|---|
-| Sampling (mining, Modal GPU) | ~$8–11 | GPU-time (incl. 3 cold-starts + disable retry churn); not token-summable |
-| **Banding (gemini, OpenRouter)** | **$80.99** | EXACT: in 25.86M×$1.50 + out 5.62M×$7.50 + cache 0.49M×$0.15 |
-| **so far** | **~$89–92** | |
-| DPO (B200, 903 pairs) — pending | ~$10–15 | |
-| Lean battery (AFB+probes + 4-ckpt chat capability) — pending | ~$28–43 | |
-| **projected total** | **~$127–150** | vs $300 ceiling |
+| Sampling (mining, Modal GPU H200) | ~$9 | GPU-time; 5,736 sittings + 3 cold-starts + 2 disable retry-churns |
+| **Banding (gemini-3.6-flash, OpenRouter)** | **$80.99** | **EXACT** usage-sum: in 25.86M×$1.50 + out 5.62M×$7.50 + cache 0.49M×$0.15 |
+| DPO train (B200, 903 pairs, 1 epoch ~56 min) | ~$6 | GPU-time |
+| AFB-150 cold + 70 probes — terra judge | ~$4 | 220 gpt-5.6-terra judgments (est; usage not persisted) |
+| Capability 4-ckpt chat + serve-for-AFB + base-collision relaunch | ~$15 | 4 H200 lm-eval jobs + serve endpoint + ~$4–6 relaunch |
+| **TOTAL** | **≈ $115** | vs **$300 ceiling** (~38%; ~$185 unspent) |
+
+Exact-computable (OpenRouter, token-summed) = banding $80.99 + terra ~$4; Modal GPU legs (~$30) are
+wall-clock estimates. The two workspace-disable incidents cost only retry-churn (~$1–2) — mining writes
+locally + dedups; the base-collision relaunch added ~$4–6. **Nothing approached the ceiling at any gate.**
 
 ### DPO training (complete)
 
@@ -200,8 +204,7 @@ $75 / 5,040 both reconcile). Sampling (endpoint GPU) $5 / 5,040 sittings. DPO $7
 counsel). ref+init = `mb-sft-guided` (fresh; NOT continue-trained from the incumbent). bf16, β0.1,
 lr1e-5, seed 3446. Clean completion (resume marker unlinked). Adapter on volume `/runs/mb-dpo-full`.
 
-Running spend: sampling ~$8-11 + banding $80.99 + DPO ~$6 (B200 ~56 min wall) = **~$95-98**. Battery
-pending (~$28-43) → projected total **~$123-141** vs $300.
+Final reconciled spend **≈ $115** all-in (see the reconciliation table above) — ~38% of the $300 ceiling.
 
 ### Lean battery — gates 1–3 (mb-dpo-full, this run)
 
