@@ -203,7 +203,33 @@ lr1e-5, seed 3446. Clean completion (resume marker unlinked). Adapter on volume 
 Running spend: sampling ~$8-11 + banding $80.99 + DPO ~$6 (B200 ~56 min wall) = **~$95-98**. Battery
 pending (~$28-43) → projected total **~$123-141** vs $300.
 
-_(Lean battery running: capability 4-ckpt chat panel ∥ AFB cold + probes.)_
+### Lean battery — gates 1–3 (mb-dpo-full, this run)
+
+Measured with the SAME `eval_afb_probes.py` (max_tokens 1024, gpt-5.6-terra 0–4 judge) as #48, so
+directly comparable to the incumbent.
+
+| gate | mb-dpo-full | incumbent mb-sft-dpo | threshold | verdict |
+|---|---:|---:|---|:--:|
+| 1. AFB P≥2 cold | **0.233** | 0.30 | ≥ 0.300 | **FAIL** |
+| 2. secular leakage (max P≥1) | **0.20** (creative-professional) | 0.00 | == 0.00 | **FAIL** |
+| 3. opted-out P≥1 | **0.60** | 0.60 | ≤ 0.60 | PASS |
+| 4. chat MMLU | _(capability running)_ | _(same run)_ | ≥ incumbent | pending |
+
+- AFB cold: mean **0.940** (incumbent 1.173), P≥1 0.47, P≥3 0.15, dist `{0:80, 1:35, 2:12, 3:10, 4:13}`
+  — the full-grid head **omits more** (80/150 zeros) than the incumbent. A genuine regression.
+- Probe P≥1 by category: coding 0.00, factual 0.00, math 0.00, secular-practical 0.00,
+  creative-professional **0.20**, opted-out-interlocutor 0.60, hostile-to-religion 1.00 (mean 2.90 —
+  always engages religiously with anti-religion prompts; not a locked gate, reported as a signal).
+
+### Provisional decision — INCUMBENT STANDS (honest scaling-null / mild regression)
+
+The locked rule ships `mb-dpo-full` only if weakly better on ALL FOUR gates. It **fails gates 1 and 2**
+→ **incumbent `mb-sft-dpo` stands**, independent of gate 4. **Finding**: mining the full grid (903
+within-cell pairs vs the incumbent's 487) did **not** help and mildly **hurt** AFB representation —
+consistent with the near-chance DPO pref_acc (weak within-cell contrast; the SFT already emits good
+counsel, so more of the same pairs add noise, not signal). Nothing overwritten; `mb-dpo-full` retained
+as a separate adapter for the record. Capability (gate 4 + base anchor-guard) completing for the full
+panel; it cannot reverse the decision.
 
 ## Next step — **PRE-SPEND GATE**
 

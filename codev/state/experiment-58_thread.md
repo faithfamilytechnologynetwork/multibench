@@ -162,3 +162,14 @@ Post-DPO plan revised to run concurrently (~45-60 min vs 2.5-3h), stop-on-disabl
   AFB-150 cold + probes `bzhvunyzn` (EVAL_MODELS=dpo, AFB->probes sequential, terra CONCURRENCY=16).
 - On capability done → read_capability.py (base anchor-guard FIRST). On AFB done → eval_gates.py g1-3.
   ~5 concurrent H200 on the account; stop-on-disable ARMED.
+
+## 2026-08-06 — GATES 1-3 landed: INCUMBENT STANDS (scaling-null / mild regression)
+
+- AFB+probes (bzhvunyzn) done clean. GATE 1 AFB P>=2 cold = 0.233 vs 0.30 → FAIL (mean 0.940 vs 1.173,
+  80/150 zeros = omits MORE). GATE 2 secular leakage 0.20 (creative-professional) vs 0.00 → FAIL.
+  GATE 3 opted-out P>=1 0.60 → PASS.
+- Locked rule: fails ANY gate → INCUMBENT mb-sft-dpo STANDS. Fails 1 AND 2 → decision locked regardless
+  of gate 4. Honest scaling-null (mild regression): 903 pairs vs 487 did NOT help — consistent with
+  near-chance DPO pref_acc. Nothing overwritten; mb-dpo-full kept as separate adapter.
+- Capability (b8ojo8czg) still running for the full record (gate 4 MMLU + base anchor-guard); cannot
+  reverse the decision. Reported to architect.
