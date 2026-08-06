@@ -230,28 +230,48 @@ describe("/results leaderboard", () => {
     expect(screen.queryByTestId("leaderboard")).not.toBeInTheDocument();
   });
 
-  it("renders the per-tradition heat strip (labels + values), and it reframes with pressure", async () => {
+  it("each strip square carries a rich per-tradition label (name + Post/First/Δ/n), reframing with pressure", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     renderApp("/results");
     await screen.findAllByTestId("standings-row");
     const sonnet = () => screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
-    // sonnet strip: buddhism 0.600, taoism 0.800 — color is never the only encoding (aria-label carries the value).
-    let cells = within(sonnet()).getAllByTestId("strip-cell");
-    expect(cells).toHaveLength(2);
-    const bud = cells.find((c) => c.getAttribute("data-tradition") === "buddhism")!;
-    expect(bud).toHaveAttribute("aria-label", "buddhism: 0.600");
-    // an all-null subject (no data) renders distinct empty cells labelled "no data".
+    const budCell = () => within(sonnet()).getAllByTestId("strip-cell").find((c) => c.getAttribute("data-tradition") === "buddhism")!;
+    // buddhism sonnet @ all: Post 0.6, First(turn1) 0.2, Δ(stead) 0.4, n_judged 2 — display name title-cased.
+    expect(budCell()).toHaveAttribute("aria-label", "Buddhism — Post +0.60 · First +0.20 · Δ +0.40 · 2 scenarios");
+    // an all-null subject (no data) → dashed "no data" square.
     const qwen = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject")?.includes("Qwen"))!;
     const qCell = within(qwen).getAllByTestId("strip-cell")[0]!;
     expect(qCell).toHaveAttribute("data-empty", "true");
-    expect(qCell).toHaveAttribute("aria-label", expect.stringContaining("no data"));
-    // reframe by pressure: at false_authority sonnet buddhism = 0.100 → the strip cell updates.
+    expect(qCell.getAttribute("aria-label")).toContain("no data");
+    // reframe by pressure: at false_authority sonnet buddhism Post = 0.100 (First/Δ absent for that pressure → —).
     await userEvent.click(within(screen.getByTestId("sel-pressure")).getByText("false_authority"));
-    await waitFor(() => {
-      cells = within(sonnet()).getAllByTestId("strip-cell");
-      const b = cells.find((c) => c.getAttribute("data-tradition") === "buddhism")!;
-      expect(b).toHaveAttribute("aria-label", "buddhism: 0.100");
-    });
+    await waitFor(() => expect(budCell().getAttribute("aria-label")).toContain("Post +0.10"));
+    expect(budCell().getAttribute("aria-label")).toContain("First — · Δ —");
+  });
+
+  it("reveals the strip tooltip on hover AND keyboard focus, consistent with the drill-down", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    const sonnet = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    const budCell = within(sonnet).getAllByTestId("strip-cell").find((c) => c.getAttribute("data-tradition") === "buddhism")!;
+    // no tooltip until interaction
+    expect(screen.queryByTestId("strip-tooltip")).not.toBeInTheDocument();
+    // hover reveals it
+    await userEvent.hover(budCell);
+    const tip = await screen.findByTestId("strip-tooltip");
+    expect(tip).toHaveAttribute("role", "tooltip");
+    expect(tip).toHaveTextContent("Buddhism — Post +0.60 · First +0.20 · Δ +0.40 · 2 scenarios");
+    await userEvent.unhover(budCell);
+    await waitFor(() => expect(screen.queryByTestId("strip-tooltip")).not.toBeInTheDocument());
+    // keyboard focus reveals the SAME tooltip (accessibility)
+    budCell.focus();
+    expect(await screen.findByTestId("strip-tooltip")).toHaveTextContent("Post +0.60");
+    // the tooltip's Post equals the drill-down's buddhism Post (same computeStandings source)
+    await userEvent.click(within(sonnet).getByTestId("standings-expand"));
+    const drill = await screen.findByTestId("drilldown");
+    const budRow = within(drill).getAllByTestId("drill-row").find((r) => r.getAttribute("data-tradition") === "buddhism")!;
+    expect(within(budRow).getByTestId("drill-post")).toHaveTextContent("0.600"); // 0.60 tooltip ≡ 0.600 drill
   });
 
   it("mutes a zero-contribution subject row (honest degradation: data-void + opacity)", async () => {

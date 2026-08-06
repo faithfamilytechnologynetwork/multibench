@@ -269,3 +269,20 @@ Removed (kept the await for render sync). My opacity-50/data-void addition: arch
 degradation) but wanted it tested + documented. Added test "mutes a zero-contribution subject row"
 (Qwen data-void=true + opacity-50; sonnet not void). Noted in review doc as reviewed-and-kept deviation.
 181 tests green. Pushing to PR #59, pinging architect → pr gate to Waleed.
+
+## 2026-08-06 — Verify iteration 1 (Waleed live feedback): heat-strip tooltip. Follow-up PR.
+
+Waleed wants a real hover+focus tooltip per strip square (not bare title): display name + Post/First/Δ
++ contributing n at current pressure, e.g. "Sunni Islam — Post +0.44 · First +0.62 · Δ −0.18 · 140
+scenarios". Implemented on new branch builder/spir-55-strip-tooltip off origin/main:
+- Enriched StripCell w/ initial+delta from the SAME computeStandings headline calls (no 2nd aggregation
+  path — kept the full Standing[] for turn1/steadfastness, joined contributions per tradition).
+- HeatStrip: each square focusable (tabIndex=0, role=img) w/ FULL summary in aria-label (SR gets it
+  w/o interaction) + visual tooltip (role=tooltip) on hover OR keyboard focus. title-case display name.
+  fmtSigned (+0.60/-0.18). "N scenarios" = nJudged (strip is Gemini full-grid).
+- Chose a lightweight custom tooltip over HeroUI's (react-aria portal + focusable-trigger + hover-delay
+  is heavy for a 7x5 tiny-square grid + harder to assert in jsdom) — FLAGGING the choice in the PR for
+  architect review. Numbers consistent w/ drill-down (same source), tested.
+Tests: rewrote heat-strip label test to rich format; +tooltip test (hover+focus+drill-down consistency);
++strip initial/delta unit assertion. 182 tests green, check-types + build OK. This is verify iter-1 on
+OPEN #55 (not scope creep). PR against main → architect low-risk review → merge → redeploy → Waleed re-check.

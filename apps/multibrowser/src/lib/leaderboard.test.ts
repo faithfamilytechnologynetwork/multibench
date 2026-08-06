@@ -228,6 +228,9 @@ describe("computeLeaderboardRows — dense rows", () => {
     const a = sonnet.strip.find((c) => c.tradition === "a")!;
     const b = sonnet.strip.find((c) => c.tradition === "b")!;
     expect(a.value).toBeCloseTo(0.6, 10);
+    // the strip carries per-tradition First + Δ for the tooltip, from the same slices (no 2nd path).
+    expect(a.initial).toBeCloseTo(0.2, 10); // tradition a turn1
+    expect(a.delta).toBeCloseTo(0.4, 10); // tradition a steadfastness
     expect(b.value).toBeNull();
     expect(b.nJudged).toBe(0); // uncovered cell: zero numerator
     expect(b.nExpected).toBe(2 * manifest.pressures.length); // manifest-derived denominator for "all"

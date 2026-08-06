@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -69,6 +69,19 @@ function Segmented<T extends string>({
 
 function fmt(v: number | null): string {
   return v === null ? "—" : v.toFixed(3);
+}
+
+/** Signed 2-dp for the strip tooltip (e.g. "+0.44", "-0.18", "—"). */
+function fmtSigned(v: number | null): string {
+  return v === null ? "—" : (v > 0 ? "+" : "") + v.toFixed(2);
+}
+
+/** Title-case a tradition id for display: "sunni-islam" → "Sunni Islam". */
+function traditionDisplayName(id: string): string {
+  return id
+    .split("-")
+    .map((w) => (w ? w[0]!.toUpperCase() + w.slice(1) : w))
+    .join(" ");
 }
 
 export function ResultsPage() {
@@ -262,32 +275,62 @@ function ScoreCell({ value, testid }: { value: number | null; testid: string }) 
   );
 }
 
+/** The rich text for a strip square's hover/focus tooltip (also its accessible name). */
+function stripSummary(c: StripCell): string {
+  const name = traditionDisplayName(c.tradition);
+  if (c.value === null) return `${name} — no data at this selection`;
+  return `${name} — Post ${fmtSigned(c.value)} · First ${fmtSigned(c.initial)} · Δ ${fmtSigned(c.delta)} · ${c.nJudged} scenarios`;
+}
+
 /**
  * The per-tradition heat strip (the multi-faith upgrade): one `scoreColor` square per tradition, in
- * manifest order, whose non-null mean IS the Post column. Color is never the sole encoding — every
- * square carries a `title`/`aria-label` with the tradition and its exact value, and an uncovered
- * (null) tradition renders a visually distinct dashed square labelled "no data".
+ * manifest order, whose non-null mean IS the Post column. Color is never the sole encoding — each
+ * square is a focusable `role="img"` whose `aria-label` carries the full per-tradition summary (so
+ * assistive tech gets everything without opening anything), and hover OR keyboard focus reveals the
+ * same summary as a visual tooltip (`role="tooltip"`). An uncovered tradition is a dashed "no data"
+ * square. All numbers come from the row's `strip` (the same `computeStandings` aggregation as the
+ * drill-down — no second path).
  */
 function HeatStrip({ strip, subject }: { strip: StripCell[]; subject: string }) {
+  const [active, setActive] = useState<string | null>(null);
+  const safe = subject.replace(/[^\w-]/g, "-");
   return (
     <div className="flex items-center gap-0.5" role="group" aria-label={`Per-tradition scores for ${subject}`} data-testid="strip">
       {strip.map((c) => {
-        const label = c.value === null ? `${c.tradition}: no data` : `${c.tradition}: ${fmt(c.value)}`;
+        const summary = stripSummary(c);
+        const open = active === c.tradition;
+        const tipId = `tip-${safe}-${c.tradition}`;
+        const clear = () => setActive((a) => (a === c.tradition ? null : a));
         return (
-          <span
-            key={c.tradition}
-            role="img"
-            data-testid="strip-cell"
-            data-tradition={c.tradition}
-            data-empty={c.value === null ? "true" : undefined}
-            title={label}
-            aria-label={label}
-            className={
-              "inline-block h-4 w-4 rounded-sm border " +
-              (c.value === null ? "border-dashed border-default-400" : "border-default-200/60")
-            }
-            style={{ backgroundColor: scoreColor(c.value) }}
-          />
+          <span key={c.tradition} className="relative inline-flex">
+            <span
+              tabIndex={0}
+              role="img"
+              aria-label={summary}
+              data-testid="strip-cell"
+              data-tradition={c.tradition}
+              data-empty={c.value === null ? "true" : undefined}
+              onMouseEnter={() => setActive(c.tradition)}
+              onMouseLeave={clear}
+              onFocus={() => setActive(c.tradition)}
+              onBlur={clear}
+              className={
+                "inline-block h-4 w-4 cursor-help rounded-sm border " +
+                (c.value === null ? "border-dashed border-default-400" : "border-default-200/60")
+              }
+              style={{ backgroundColor: scoreColor(c.value) }}
+            />
+            {open && (
+              <span
+                role="tooltip"
+                id={tipId}
+                data-testid="strip-tooltip"
+                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 w-max max-w-xs -translate-x-1/2 whitespace-nowrap rounded bg-default-900 px-2 py-1 text-xs text-default-50 shadow-lg"
+              >
+                {summary}
+              </span>
+            )}
+          </span>
         );
       })}
     </div>

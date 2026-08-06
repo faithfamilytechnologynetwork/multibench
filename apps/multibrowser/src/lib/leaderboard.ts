@@ -118,6 +118,10 @@ export interface StripCell {
   tradition: string;
   /** the subject's Post value for this tradition, or null when that tradition had no coverage. */
   value: number | null;
+  /** first-framing `turn1` (First-response) for this tradition — for the hover/focus tooltip. */
+  initial: number | null;
+  /** first-framing matched-cell steadfastness (Δ) for this tradition — for the tooltip. */
+  delta: number | null;
   nJudged: number;
   nExpected: number;
 }
@@ -169,19 +173,24 @@ export function computeLeaderboardRows(
   const firstFraming = framings[0];
   if (firstFraming === undefined) return [];
 
-  // Each per-column result, indexed by subject (the by-id join source).
-  const initialBy = valueBySubject(
-    computeStandings(shards, manifest, { framing: firstFraming, metric: "turn1", pressure }, judge),
-  );
-  const deltaBy = valueBySubject(
-    computeStandings(shards, manifest, { framing: firstFraming, metric: "steadfastness", pressure }, judge),
-  );
+  // Each per-column result, indexed by subject (the by-id join source). We keep the full `Standing[]`
+  // for the three headline slices so the strip tooltip can reuse their per-tradition `contributions`
+  // (the SAME aggregation as the drill-down — no second path).
+  const initialStandings = computeStandings(shards, manifest, { framing: firstFraming, metric: "turn1", pressure }, judge);
+  const deltaStandings = computeStandings(shards, manifest, { framing: firstFraming, metric: "steadfastness", pressure }, judge);
   // Post standings carry the per-tradition contributions we need for the heat strip.
   const postStandings = computeStandings(
     shards, manifest, { framing: firstFraming, metric: "full", pressure }, judge,
   );
+  const initialBy = valueBySubject(initialStandings);
+  const deltaBy = valueBySubject(deltaStandings);
   const postBy = valueBySubject(postStandings);
   const contributionsBy = new Map(postStandings.map((s) => [s.subject, s.contributions]));
+  // subject → (tradition → value) for the two extra tooltip metrics.
+  const perTradition = (standings: Standing[]) =>
+    new Map(standings.map((s) => [s.subject, new Map(s.contributions.map((c) => [c.tradition, c.value]))]));
+  const initialByTradition = perTradition(initialStandings);
+  const deltaByTradition = perTradition(deltaStandings);
   const byFramingMaps: Record<string, Map<string, number | null>> = {};
   for (const f of framings) {
     byFramingMaps[f] = valueBySubject(
@@ -212,10 +221,14 @@ export function computeLeaderboardRows(
     // (and `shardConsistencyNotices` flags any divergence at load), so every covered contribution
     // lands in a manifest cell and `mean(non-null strip) == post` holds.
     const contribBy = new Map((contributionsBy.get(subject) ?? []).map((c) => [c.tradition, c]));
+    const initById = initialByTradition.get(subject);
+    const deltaById = deltaByTradition.get(subject);
     const strip: StripCell[] = manifest.traditions.map((t) => {
       const c = contribBy.get(t.id);
-      if (c) return { tradition: t.id, value: c.value, nJudged: c.nJudged, nExpected: c.nExpected };
-      return { tradition: t.id, value: null, nJudged: 0, nExpected: t.nScenarios * perScenarioFactor(manifest, pressure) };
+      const initial = initById?.get(t.id) ?? null;
+      const delta = deltaById?.get(t.id) ?? null;
+      if (c) return { tradition: t.id, value: c.value, initial, delta, nJudged: c.nJudged, nExpected: c.nExpected };
+      return { tradition: t.id, value: null, initial, delta, nJudged: 0, nExpected: t.nScenarios * perScenarioFactor(manifest, pressure) };
     });
 
     return {
