@@ -10,6 +10,7 @@ import {
   selectionToResultsSearch,
   type ResultsSelection,
   type SortDir,
+  type SortSpec,
 } from "../lib/resultsSelection";
 import {
   computeLeaderboardRows,
@@ -207,6 +208,31 @@ export function ResultsPage() {
   );
 }
 
+/**
+ * A sortable column header. Hoisted to module scope (NOT defined in the table's render body): a
+ * component defined inside render gets a new identity each render, so React would remount the
+ * `<th>`/button on every state change and drop keyboard focus after a sort activation.
+ */
+function SortHeader({
+  colKey, label, sort, onSort,
+}: {
+  colKey: string;
+  label: string;
+  sort: SortSpec | null;
+  onSort: (key: string) => void;
+}) {
+  const active = sort?.key === colKey;
+  const ariaSort = active ? (sort!.dir === "desc" ? "descending" : "ascending") : "none";
+  return (
+    <th className="py-2 pr-2 font-medium" aria-sort={ariaSort} data-testid={`col-${colKey}`}>
+      <button type="button" className="hover:text-primary" onClick={() => onSort(colKey)}>
+        {label}
+        {active ? (sort!.dir === "desc" ? " ↓" : " ↑") : ""}
+      </button>
+    </th>
+  );
+}
+
 function ScoreCell({ value, testid }: { value: number | null; testid: string }) {
   return (
     <span
@@ -247,19 +273,6 @@ function Leaderboard({
       return next;
     });
 
-  const SortHeader = ({ colKey, label }: { colKey: string; label: string }) => {
-    const active = sel.sort?.key === colKey;
-    const ariaSort = active ? (sel.sort!.dir === "desc" ? "descending" : "ascending") : "none";
-    return (
-      <th className="py-2 pr-2 font-medium" aria-sort={ariaSort} data-testid={`col-${colKey}`}>
-        <button type="button" className="hover:text-primary" onClick={() => onSort(colKey)}>
-          {label}
-          {active ? (sel.sort!.dir === "desc" ? " ↓" : " ↑") : ""}
-        </button>
-      </th>
-    );
-  };
-
   return (
     <div className="overflow-x-auto" data-testid="leaderboard-scroll">
       <table className="w-full border-collapse text-sm" data-testid="leaderboard">
@@ -267,8 +280,12 @@ function Leaderboard({
           <tr className="border-b border-default-200 text-left text-xs uppercase text-default-500">
             <th className="py-2 pr-2 font-medium">#</th>
             <th className="py-2 pr-2 font-medium">Subject</th>
-            {HEADLINE_COLS.map((c) => <SortHeader key={c.key} colKey={c.key} label={c.label} />)}
-            {framingCols.map((c) => <SortHeader key={c.key} colKey={c.key} label={c.label} />)}
+            {HEADLINE_COLS.map((c) => (
+              <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
+            ))}
+            {framingCols.map((c) => (
+              <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
+            ))}
             <th className="py-2 pr-2 font-medium">Traditions</th>
           </tr>
         </thead>

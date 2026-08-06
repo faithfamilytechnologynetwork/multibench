@@ -14,12 +14,15 @@ const SHA = "deadbeef";
 //   gemini-3.6-flash unstated/turn1/all: 0.5, 0.5 → 0.500 (so sorting by Initial REORDERS vs post-rank)
 //   claude-sonnet-5 stated/full/all:    buddhism 0.9, taoism 0.9 → 0.900 (Stated column)
 //   sonnetSecularize: unstated/full/secularize (a specific pressure); sonnetStead: unstated steadfastness/all
+//   false_authority slice flips the order: sonnet 0.1, gemini 0.9 → gemini out-ranks sonnet there,
+//   so selecting that pressure must recompute the canonical rank (not just the Post value).
 const VALS: Record<string, {
   sonnetFull: number; sonnetTurn1: number; geminiFull: number; geminiTurn1: number;
   sonnetStated: number; sonnetSecularize: number; sonnetStead: number;
+  sonnetFA: number; geminiFA: number;
 }> = {
-  buddhism: { sonnetFull: 0.6, sonnetTurn1: 0.2, geminiFull: 0.2, geminiTurn1: 0.5, sonnetStated: 0.9, sonnetSecularize: 0.5, sonnetStead: 0.4 },
-  taoism: { sonnetFull: 0.8, sonnetTurn1: 0.0, geminiFull: 0.4, geminiTurn1: 0.5, sonnetStated: 0.9, sonnetSecularize: 0.3, sonnetStead: 0.8 },
+  buddhism: { sonnetFull: 0.6, sonnetTurn1: 0.2, geminiFull: 0.2, geminiTurn1: 0.5, sonnetStated: 0.9, sonnetSecularize: 0.5, sonnetStead: 0.4, sonnetFA: 0.1, geminiFA: 0.9 },
+  taoism: { sonnetFull: 0.8, sonnetTurn1: 0.0, geminiFull: 0.4, geminiTurn1: 0.5, sonnetStated: 0.9, sonnetSecularize: 0.3, sonnetStead: 0.8, sonnetFA: 0.1, geminiFA: 0.9 },
 };
 
 function shardFor(t: string) {
@@ -27,13 +30,16 @@ function shardFor(t: string) {
   const gemini = {
     "claude-sonnet-5": {
       unstated: {
-        full: { all: [v.sonnetFull, 2, 12], secularize: [v.sonnetSecularize, 2, 2] },
+        full: { all: [v.sonnetFull, 2, 12], secularize: [v.sonnetSecularize, 2, 2], false_authority: [v.sonnetFA, 2, 2] },
         turn1: { all: [v.sonnetTurn1, 2, 12] },
       },
       stated: { full: { all: [v.sonnetStated, 2, 12] } },
     },
     "gemini-3.6-flash": {
-      unstated: { full: { all: [v.geminiFull, 2, 12] }, turn1: { all: [v.geminiTurn1, 2, 12] } },
+      unstated: {
+        full: { all: [v.geminiFull, 2, 12], false_authority: [v.geminiFA, 2, 2] },
+        turn1: { all: [v.geminiTurn1, 2, 12] },
+      },
     },
   };
   const means: Record<string, unknown> = { "gemini-3.6-flash": gemini };
@@ -123,7 +129,7 @@ describe("/results leaderboard", () => {
     expect(router.state.location.searchStr).toContain("sort=initial.desc");
   });
 
-  it("the pressure selector reframes the whole table + updates the URL", async () => {
+  it("the pressure selector reframes the Post value + updates the URL", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     const { router } = renderApp("/results");
     await screen.findAllByTestId("standings-row");
@@ -133,6 +139,28 @@ describe("/results leaderboard", () => {
       expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.400"),
     );
     expect(router.state.location.searchStr).toContain("pressure=secularize");
+  });
+
+  it("a pressure reframes the WHOLE table — headline, framing columns, AND canonical rank", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results");
+    let rows = await screen.findAllByTestId("standings-row");
+    // At 'all': sonnet Post 0.700 rank 1, gemini 0.300 rank 2.
+    expect(rows[0]).toHaveAttribute("data-subject", "claude-sonnet-5");
+    await userEvent.click(within(screen.getByTestId("sel-pressure")).getByText("false_authority"));
+    // At false_authority: sonnet Post 0.100, gemini 0.900 → gemini RANKS FIRST (rank recomputed).
+    await waitFor(() => {
+      rows = screen.getAllByTestId("standings-row");
+      expect(rows[0]).toHaveAttribute("data-subject", "gemini-3.6-flash");
+    });
+    const gem = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "gemini-3.6-flash")!;
+    const son = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    expect(within(gem).getByTestId("standings-score")).toHaveTextContent("0.900"); // headline reframed
+    expect(within(gem).getByTestId("standings-rank")).toHaveTextContent("1"); // rank RECOMPUTED at this pressure
+    expect(within(son).getByTestId("standings-rank")).toHaveTextContent("2");
+    // framing column reframes too: there is no stated/false_authority slice → "—"
+    expect(within(son).getByTestId("cell-stated")).toHaveTextContent("—");
+    expect(router.state.location.searchStr).toContain("pressure=false_authority");
   });
 
   it("ignores a stale ?framing=/?metric= deep link (renders the default board, no crash)", async () => {

@@ -10,11 +10,14 @@
 import { z } from "zod";
 import type { SearchRecord } from "./filtering";
 import type { ResultsManifest } from "./resultsModel";
+import { isSortableColumn, type SortDir } from "./leaderboard";
 
-/** Retained for the aggregation slice types (leaderboard.ts) — the UI's supported metrics. */
-export type Metric = "turn1" | "full" | "steadfastness";
+// `Metric` and `SortDir` live in one place each (resultsModel / leaderboard) and are re-exported here
+// so consumers of the selection model keep a single import site. Sortable-key validation defers to
+// `isSortableColumn` — the single source of truth for the column vocabulary (no duplicated key list).
+export type { Metric } from "./resultsModel";
+export type { SortDir } from "./leaderboard";
 
-export type SortDir = "asc" | "desc";
 export interface SortSpec {
   /** a headline key ("initial" | "post" | "delta") or a framing id. */
   key: string;
@@ -42,9 +45,6 @@ export const DEFAULTS = {
   expanded: [] as string[],
 };
 
-/** The fixed headline sort keys; a framing id is also a valid sort key (validated vs the manifest). */
-const HEADLINE_SORT_KEYS = ["initial", "post", "delta"];
-
 /** Route-boundary schema (fail-soft, like filtering.ts's): a flat string record or {}. */
 export const resultsSearchSchema = z
   .record(z.string(), z.union([z.string(), z.array(z.string())]))
@@ -67,10 +67,9 @@ function parseSort(raw: string | undefined, manifest?: ResultsManifest | null): 
   const dirRaw = dot >= 0 ? raw.slice(dot + 1) : "";
   if (!key) return null;
   const dir: SortDir = dirRaw === "asc" ? "asc" : "desc";
-  if (manifest) {
-    const ok = HEADLINE_SORT_KEYS.includes(key) || manifest.framings.includes(key);
-    if (!ok) return null;
-  }
+  // With a manifest, the key must be a real column (headline key or declared framing id). Without
+  // one, framing ids can't be validated, so accept optimistically (the page re-parses WITH manifest).
+  if (manifest && !isSortableColumn(manifest, key)) return null;
   return { key, dir };
 }
 

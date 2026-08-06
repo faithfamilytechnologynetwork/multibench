@@ -140,3 +140,16 @@ results.test.tsx: +geminiTurn1 so Initial-sort reorders; rewrote metric/framing-
 dense-columns, sort+persistent-rank, stale-param, run-switch (2 runs), API-budget call-log (1 tree,
 0 results-via-api, shards via raw). resultsSelection.test.ts rewritten for new shape.
 check-types green; 171 tests. Only the 4 intended files touched. expanded[] wired to URL in Phase 3.
+
+## 2026-08-06 — Phase 2 impl consult (codex RC, claude COMMENT). All 3 incorporated.
+
+Claude verified all deliverables present + 171 green; issues were 1 real bug + 2 refinements:
+1. (real bug) SortHeader was defined inside Leaderboard render body → new component identity each
+   render → <th>/button remount → keyboard focus lost after sort. HOISTED to module scope w/ props.
+2. Vocabulary dedup: HEADLINE_SORT_KEYS (resultsSelection) vs HEADLINE_KEYS (leaderboard). Moved
+   `type Metric` → resultsModel (breaks leaderboard→resultsSelection edge), resultsSelection now
+   imports isSortableColumn+SortDir from leaderboard = single source of truth; re-exports for consumers.
+3. (codex blocking) pressure-reframe test only checked Post; gemini had no secularize data so rank
+   couldn't change → unobservable. Added false_authority fixture (sonnet 0.1/gemini 0.9 flips order) +
+   test asserting headline reframe + RANK recompute (gemini→1, sonnet→2) + framing col reframe (stated→—).
+check-types green, 172 tests. Touched resultsModel/leaderboard/resultsSelection/ResultsPage/results.test.

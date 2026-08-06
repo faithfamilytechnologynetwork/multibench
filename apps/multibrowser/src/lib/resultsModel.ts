@@ -14,6 +14,10 @@ import { FRAMINGS, PRESSURES } from "./constants";
 /** The schema version this build understands. A dataset stamped otherwise is not trusted. */
 export const SUPPORTED_SCHEMA_VERSION = 1;
 
+/** The UI's supported leaderboard metrics (the scopes plus the derived steadfastness). Lives here
+ *  (the data model) so both `leaderboard.ts` and `resultsSelection.ts` depend on it without a cycle. */
+export type Metric = "turn1" | "full" | "steadfastness";
+
 /**
  * A safe single path segment — mirrors the exporter's `_require_safe_segment`. The manifest is
  * untrusted remote JSON; validate a manifest-declared `shard` filename before it's spliced into a

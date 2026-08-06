@@ -2,8 +2,7 @@
 // is the equal-weight mean of the per-tradition means — which reconciles with the paper's
 // tab_standings by construction (the per-tradition means come from the canonical Python export).
 
-import type { ResultsManifest, ResultsShard } from "./resultsModel";
-import type { Metric } from "./resultsSelection";
+import type { Metric, ResultsManifest, ResultsShard } from "./resultsModel";
 
 /**
  * The aggregation slice the cross-tradition statistics are computed over. Deliberately standalone
