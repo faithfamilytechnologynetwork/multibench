@@ -25,6 +25,7 @@ import modal
 
 MODEL = "google/gemma-4-31B-it"
 SFT_ADAPTER = "/vol/runs/mb-sft-guided/adapter"
+DPO_ADAPTER = "/vol/runs/mb-sft-dpo/adapter"  # stage-2 checkpoint (served as model="dpo")
 VLLM_PORT = 8000
 MINUTES = 60
 
@@ -54,7 +55,7 @@ def serve() -> None:
         "--max-model-len", "16384",
         "--gpu-memory-utilization", "0.92",
         "--enable-lora", "--max-lora-rank", "32",
-        "--lora-modules", f"sft={SFT_ADAPTER}",
+        "--lora-modules", f"sft={SFT_ADAPTER}", f"dpo={DPO_ADAPTER}",
     ]
     print("launching:", " ".join(cmd), flush=True)
     subprocess.Popen(cmd)

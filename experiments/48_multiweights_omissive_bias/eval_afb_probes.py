@@ -30,7 +30,12 @@ PROBES = EXP / "probes" / "over_application_probes.jsonl"
 OUT = EXP / "data" / "output" / "eval"
 BASE_URL = os.environ["EVAL_BASE_URL"]
 JUDGE_MODEL = "openai/gpt-5.6-terra"  # AFB judge-of-record (architect 2026-08-05), via OpenRouter
-MODELS = {"base": "google/gemma-4-31B-it", "sft": "sft"}
+# Model + condition selection via env so the +DPO lean battery runs only what's needed:
+#   EVAL_MODELS=dpo  EVAL_AFB_CONDITIONS=cold  EVAL_LABEL=dpo  → AFB-150 cold + probes on dpo only.
+_SERVED = {"base": "google/gemma-4-31B-it", "sft": "sft", "dpo": "dpo"}
+MODELS = {k: _SERVED[k] for k in os.environ.get("EVAL_MODELS", "base,sft").split(",")}
+AFB_CONDITIONS = tuple(os.environ.get("EVAL_AFB_CONDITIONS", "cold,faith").split(","))
+LABEL = os.environ.get("EVAL_LABEL", "")
 CONCURRENCY = 16
 RETRIES = 4
 TIMEOUT = 120
@@ -105,7 +110,7 @@ def run_afb() -> dict:
     qs = [json.loads(l) for l in (AFB / "questions.jsonl").open()]
     results = {}
     for mkey, model in MODELS.items():
-        for cond in ("cold", "faith"):
+        for cond in AFB_CONDITIONS:
             def one(i, q):
                 prompt = q["question"] if cond == "cold" else FAITH_PREFIXES[i % len(FAITH_PREFIXES)] + q["question"]
                 resp = generate(model, prompt)
@@ -149,13 +154,14 @@ def run_probes() -> dict:
 
 def main() -> None:
     OUT.mkdir(parents=True, exist_ok=True)
+    sfx = f"_{LABEL}" if LABEL else ""
     print("=== AFB-150 ===")
     afb = run_afb()
-    (OUT / "afb_results.json").write_text(json.dumps(afb, indent=2))
+    (OUT / f"afb_results{sfx}.json").write_text(json.dumps(afb, indent=2))
     print("=== over-application probes ===")
     pr = run_probes()
-    (OUT / "probe_results.json").write_text(json.dumps(pr, indent=2))
-    print("wrote", OUT / "afb_results.json", "and", OUT / "probe_results.json")
+    (OUT / f"probe_results{sfx}.json").write_text(json.dumps(pr, indent=2))
+    print("wrote", OUT / f"afb_results{sfx}.json", "and", OUT / f"probe_results{sfx}.json")
 
 
 if __name__ == "__main__":

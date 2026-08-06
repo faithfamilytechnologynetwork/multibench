@@ -457,7 +457,13 @@ Pair = within-cell max-gap (chosen=best of 4, rejected=worst) with full-score ga
   tier is mildly under-represented in the PAIR set, but for a benign reason — a known, acceptable DPO
   limitation (DPO sharpens where contrast exists; SFT already carries the saturated-good cells).
 
-**SCOPED-MINING RECOMMENDATION (concrete):** **40 scenarios/tradition, FLAT count** (not proportional
+**Scoped-mining ACTUALS (executed):** 40 scen/tradition flat → **487 pairs** (29% yield; more
+representative than the pilot's 38%). Per-tradition: sunni-islam **98**, judaism 85, RC 72, buddhism 61,
+taoism 59, EC 57, secular-sage 55. **sunni-islam contributing the MOST pairs directly softens the
+hard-tier under-representation caveat** (architect note for the writeup) — at scale the hard tier mines
+plenty of contrast. Mining band actual: 75 (new 5,040) / 100 (all 6,720).
+
+**SCOPED-MINING RECOMMENDATION (as proposed):** **40 scenarios/tradition, FLAT count** (not proportional
 — balances the pair set across traditions, mitigating the SFT-pool imbalance). **Selection rule:**
 the pilot's 10 scenarios (reused — already sampled + banded, NOT re-judged; sampler + banding are
 resumable/keyed) **+ 30 drawn seeded-random (seed 3446) from each tradition's remaining scenarios.**

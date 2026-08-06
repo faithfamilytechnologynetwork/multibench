@@ -27,7 +27,7 @@ image = (
 CHECKPOINTS = {
     "base": None,
     "mb-sft-guided": "/vol/runs/mb-sft-guided/adapter",
-    # "mb-sft-dpo": "/vol/runs/mb-sft-dpo/adapter",  # add after stage-2 DPO
+    "mb-sft-dpo": "/vol/runs/mb-sft-dpo/adapter",  # stage-2 (run via --only mb-sft-dpo for the lean battery)
 }
 TASKS = "ifeval,mmlu,gsm8k_cot"
 
