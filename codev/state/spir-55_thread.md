@@ -61,3 +61,19 @@ components + client aggregation, rebase at PR). Wrote plan: 4 phases —
 4) docs + #49 supersession flag + live railway smoke.
 Files confined: leaderboard.ts, resultsSelection.ts, ResultsPage.tsx, their tests, 2 READMEs. No
 contact with #51 raw tier / #49 export. Committing, running plan consult.
+
+## 2026-08-06 — Plan iter 1 consultation (codex + claude, both REQUEST_CHANGES, HIGH)
+
+Central catch (both, verified): leaderboard.ts:66,88 use Pick<ResultsSelection,"framing"|"metric"|
+"pressure"> → Phase 2 dropping those fields breaks it, and NOTHING typechecks in the gate (porch check
+= vitest only; vite build = esbuild; check-types exists but unrun). Fixed: Phase 1 now decouples to a
+`Slice` interface BEFORE Phase 2; check-types added to every phase's acceptance (per-phase DoD, not
+the shared dispatcher — flagged dispatcher gap to architect as out-of-scope follow-up).
+Other fixes: byFraming → id-keyed Record (Codex: sort by framing id); heat strip → manifest-aligned
+`strip` field with value:null for uncovered traditions (Claude: contributions is sparse, can't yield
+empty cells; mean over non-null still == post); subjectDrilldownRows → nullable per-slice fields +
+inclusion=any-non-null + coverage-from-Post-slice (Opus sample path); test-plan corrected (no
+"kept" additive-publish/403 tests — those live in results.data.test.ts; page reconciliation → display-
+precision formatting test; API-budget call-log owned by Phase 2); Phase 2 removes opus-caption as
+one clean unit + reframed as intermediate non-shipped state; Post==framings[0] visual-grouping note.
+Rebuttal written. Committing iter-2, signaling done → plan-approval gate.
