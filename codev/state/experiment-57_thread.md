@@ -172,3 +172,19 @@ headroom ~$84.**
 `multibench_descriptive_split_dpo.yaml` (subject model=dpo). Running a 1-scenario **dpo smoke** (bg
 brkdjqrl7) to confirm the dpo LoRA serves before the full ~$46 run. Then full descriptive_dpo (519
 unstated/full, gemini) → `analyze.py --model dpo` → held-out DPO lift + SFT-vs-DPO increment.
+
+## 2026-08-06 — EXPERIMENT COMPLETE
+
+**Split-DPO descriptive** done: 3,114 judgments, 0 missing/failed. **DPO descriptive gemini = $43.86
+exact.** **Held-out DPO lift +0.897 [+0.820,+0.972]**, post-DPO +0.693 (crosses positive); all 7
+traditions CI>0; **STRONG**. **DPO increment vs SFT = +0.119** (uniform both halves) — but **same-judge
+confound** (DPO banded+evaluated by gemini → likely selection-judge alignment, not clean quality; OOD
+arbiter = Exp B's AFB, not re-run). Both stages transfer strongly on the clean holdout.
+
+**FINAL SPEND reconciled ≈ $216/250** (gemini EXACT $181.86 = 45.75+92.25+43.86; GPU ~$34). Clean
+landing under ceiling — the 3 reconciled gates + batch-unavailable honesty upfront held it (vs #48's
+overshoot). Committed 51b262b, notes.md Status=COMPLETE.
+
+**Deliverables:** `mb-sft-split50` + `mb-dpo-split50` (companion split adapters; #48 shipped model
+untouched); notes.md (full writeup); fig_transfer_{sft,dpo}.pdf; split lists; G2 memo.
+**NEXT:** report completion to architect → review doc (`codev/reviews/57-…`) + PR.
