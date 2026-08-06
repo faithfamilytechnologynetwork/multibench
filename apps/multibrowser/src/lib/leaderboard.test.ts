@@ -1,4 +1,6 @@
 import { describe, it, expect } from "vitest";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { computeStandings, rankingJudgeModel, traditionValue } from "./leaderboard";
 import type { ResultsManifest, ResultsShard } from "./resultsModel";
 
@@ -77,8 +79,51 @@ describe("computeStandings — mean of per-tradition means", () => {
   });
 
   it("traditionValue returns coverage for a means cell and null for a missing one", () => {
-    const tv = traditionValue(shards.a, "gemini-3.6-flash", "claude-sonnet-5", "unstated", "full", "all");
-    expect(tv).toEqual({ tradition: "a", value: 0.6, nJudged: 2, nExpected: 2 });
-    expect(traditionValue(shards.a, "gemini-3.6-flash", "missing", "unstated", "full", "all")).toBeNull();
+    const tv = traditionValue(shards.a, "gemini-3.6-flash", "claude-sonnet-5", "unstated", "full", "all", 12);
+    expect(tv).toEqual({ tradition: "a", value: 0.6, nJudged: 2, nExpected: 2 }); // means uses cell's own nExpected
+    expect(traditionValue(shards.a, "gemini-3.6-flash", "missing", "unstated", "full", "all", 12)).toBeNull();
+  });
+
+  it("steadfastness coverage uses the full-grid denominator, not matched_n (Phase-5 badging)", () => {
+    const tv = traditionValue(shards.a, "gemini-3.6-flash", "claude-sonnet-5", "unstated", "steadfastness", "all", 12);
+    expect(tv).toEqual({ tradition: "a", value: 0.4, nJudged: 2, nExpected: 12 }); // 2/12, not 2/2
+  });
+});
+
+// Reconciliation against the REAL committed dataset (results/20260803/) — the SPA's mean-of-means
+// must equal the paper's standings. Uses the committed artifact (no gitignored symlink needed);
+// the paper values are the ones verified end-to-end in the Python export tests.
+describe("committed dataset reconciles with the paper (Gemini standings)", () => {
+  // vitest runs with cwd = apps/multibrowser; the committed dataset is at <repo>/results/.
+  const root = resolve(process.cwd(), "../../results/20260803");
+  const manifestPath = `${root}/manifest.json`;
+  const hasCommitted = existsSync(manifestPath);
+  const PAPER: Record<string, number> = { unstated: 0.13878992434644954, stated: 0.5552255169248714, guided: 0.9392007764689806 };
+
+  it.runIf(hasCommitted)("gemini-3.6-flash full/all mean-of-means == subj_overall for every framing", () => {
+    const realManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    const m: ResultsManifest = {
+      ...manifest,
+      subjects: realManifest.subjects,
+      judges: realManifest.judges.map((j: { key: string; model: string; aliases: string[]; full_grid: boolean }) => ({
+        key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid,
+      })),
+      pressures: realManifest.pressures,
+      pressureAll: realManifest.pressure_all,
+      traditions: realManifest.traditions.map((t: { id: string; n_scenarios: number; shard: string }) => ({
+        id: t.id, nScenarios: t.n_scenarios, shard: t.shard,
+      })),
+    };
+    const realShards: Record<string, ResultsShard> = {};
+    for (const t of m.traditions) {
+      const s = JSON.parse(readFileSync(`${root}/${t.shard}`, "utf8"));
+      realShards[t.id] = { tradition: s.tradition, nScenarios: s.n_scenarios, judges: s.judges, means: s.means, steadfastness: s.steadfastness };
+    }
+    for (const framing of ["unstated", "stated", "guided"]) {
+      const st = computeStandings(realShards, m, { framing, metric: "full", pressure: "all" });
+      const gem = st.find((s) => s.subject === "gemini-3.6-flash")!;
+      expect(gem.value).toBeCloseTo(PAPER[framing]!, 9);
+      expect(gem.nContributing).toBe(7);
+    }
   });
 });

@@ -12,9 +12,13 @@ const SHA = "deadbeef";
 //   gemini-3.6-flash unstated/full/all: buddhism 0.2, taoism 0.4 → 0.300 (rank 2)
 //   claude-sonnet-5 unstated/turn1/all: buddhism 0.2, taoism 0.0 → 0.100
 //   claude-sonnet-5 stated/full/all:    buddhism 0.9, taoism 0.9 → 0.900
-const VALS: Record<string, { sonnetFull: number; sonnetTurn1: number; geminiFull: number; sonnetStated: number }> = {
-  buddhism: { sonnetFull: 0.6, sonnetTurn1: 0.2, geminiFull: 0.2, sonnetStated: 0.9 },
-  taoism: { sonnetFull: 0.8, sonnetTurn1: 0.0, geminiFull: 0.4, sonnetStated: 0.9 },
+// sonnetSecularize: unstated/full/secularize (a specific pressure); sonnetStead: unstated steadfastness/all
+const VALS: Record<string, {
+  sonnetFull: number; sonnetTurn1: number; geminiFull: number; sonnetStated: number;
+  sonnetSecularize: number; sonnetStead: number;
+}> = {
+  buddhism: { sonnetFull: 0.6, sonnetTurn1: 0.2, geminiFull: 0.2, sonnetStated: 0.9, sonnetSecularize: 0.5, sonnetStead: 0.4 },
+  taoism: { sonnetFull: 0.8, sonnetTurn1: 0.0, geminiFull: 0.4, sonnetStated: 0.9, sonnetSecularize: 0.3, sonnetStead: 0.8 },
 };
 
 function shardFor(t: string) {
@@ -26,13 +30,18 @@ function shardFor(t: string) {
     means: {
       "gemini-3.6-flash": {
         "claude-sonnet-5": {
-          unstated: { full: { all: [v.sonnetFull, 2, 2] }, turn1: { all: [v.sonnetTurn1, 2, 2] } },
-          stated: { full: { all: [v.sonnetStated, 2, 2] } },
+          unstated: {
+            full: { all: [v.sonnetFull, 2, 12], secularize: [v.sonnetSecularize, 2, 2] },
+            turn1: { all: [v.sonnetTurn1, 2, 12] },
+          },
+          stated: { full: { all: [v.sonnetStated, 2, 12] } },
         },
-        "gemini-3.6-flash": { unstated: { full: { all: [v.geminiFull, 2, 2] } } },
+        "gemini-3.6-flash": { unstated: { full: { all: [v.geminiFull, 2, 12] } } },
       },
     },
-    steadfastness: {},
+    steadfastness: {
+      "gemini-3.6-flash": { "claude-sonnet-5": { unstated: { all: [v.sonnetStead, 2] } } },
+    },
   };
 }
 
@@ -78,6 +87,50 @@ describe("/results leaderboard", () => {
     const rows = await screen.findAllByTestId("standings-row");
     // claude-sonnet-5 stated/full/all = 0.900
     expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.900");
+  });
+
+  it("the framing selector updates the table AND the URL", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    await userEvent.click(within(screen.getByTestId("sel-framing")).getByText("Stated"));
+    await waitFor(() =>
+      expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.900"),
+    );
+    expect(router.state.location.searchStr).toContain("framing=stated");
+  });
+
+  it("the pressure selector filters + updates the URL", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    await userEvent.click(within(screen.getByTestId("sel-pressure")).getByText("secularize"));
+    // claude-sonnet-5 unstated/full/secularize: (0.5 + 0.3)/2 = 0.400
+    await waitFor(() =>
+      expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.400"),
+    );
+    expect(router.state.location.searchStr).toContain("pressure=secularize");
+  });
+
+  it("the steadfastness metric reads the steadfastness slice", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    await userEvent.click(within(screen.getByTestId("sel-metric")).getByText("Steadfastness (Δ)"));
+    // claude-sonnet-5 unstated steadfastness/all: (0.4 + 0.8)/2 = 0.600
+    await waitFor(() =>
+      expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.600"),
+    );
+    expect(router.state.location.searchStr).toContain("metric=steadfastness");
+  });
+
+  it("renders a notice (not a blank page) on a malformed manifest", async () => {
+    const bad = files();
+    bad["results/20260803/manifest.json"] = "{ not valid json";
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, bad));
+    renderApp("/results");
+    expect(await screen.findByTestId("results-notices")).toBeInTheDocument();
+    expect(screen.queryByTestId("leaderboard")).not.toBeInTheDocument();
   });
 
   it("shows an empty-state when no results runs are published", async () => {

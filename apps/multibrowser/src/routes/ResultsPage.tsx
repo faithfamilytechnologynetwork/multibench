@@ -12,6 +12,7 @@ import {
 } from "../lib/resultsSelection";
 import { computeStandings } from "../lib/leaderboard";
 import { scoreColor, scoreTextColor } from "../lib/scoreColor";
+import { notice, type Notice as NoticeT } from "../lib/model";
 
 const routeApi = getRouteApi("/results");
 
@@ -65,17 +66,37 @@ export function ResultsPage() {
   const shaQ = useLatestSha();
   const runsQ = useResultsRuns(shaQ.data);
 
-  const rl = asRateLimit(shaQ.error) ?? asRateLimit(runsQ.error);
   const preSel = parseResultsSelection(search);
-  const runId = preSel.runId ?? runsQ.data?.defaultRunId ?? undefined;
+  const runs = runsQ.data?.runs ?? [];
+  const knownRunIds = new Set(runs.map((r) => r.id));
+  const runInvalid = preSel.runId != null && runsQ.data != null && !knownRunIds.has(preSel.runId);
+  const runId =
+    preSel.runId && knownRunIds.has(preSel.runId) ? preSel.runId : runsQ.data?.defaultRunId ?? undefined;
   const runQ = useResultsRun(shaQ.data, runId);
   const manifest = runQ.data?.manifest ?? null;
+
+  const rl = asRateLimit(shaQ.error) ?? asRateLimit(runsQ.error) ?? asRateLimit(runQ.error);
 
   // Re-parse against the manifest so out-of-vocab deep links degrade to defaults.
   const sel = parseResultsSelection(search, manifest);
 
   const update = (patch: Partial<ResultsSelection>) =>
     navigate({ search: selectionToResultsSearch({ ...sel, ...patch }) });
+
+  // Surface every data-layer notice (malformed/missing manifest or shard, unknown vocab, dropped
+  // tradition) — display-first: the page never silently hides a problem or renders blank.
+  const dataNotices: NoticeT[] = [
+    ...runs.flatMap((r) => r.notices),
+    ...(runQ.data?.notices ?? []),
+  ];
+  if (runInvalid) {
+    dataNotices.unshift(
+      notice("warning", "results", "?run", `run "${preSel.runId}" not found — showing ${runId ?? "no run"}`),
+    );
+  }
+  if (runQ.error && !rl) {
+    dataNotices.unshift(notice("error", "results", "GitHub", `could not load run: ${(runQ.error as Error).message}`));
+  }
 
   const loadingFirst = !runsQ.data && !rl && !shaQ.error && !runsQ.error;
 
@@ -102,6 +123,14 @@ export function ResultsPage() {
             ? `Couldn't load results — GitHub's rate limit was reached. Live data resumes around ${resetLabel(rl)}.`
             : `Could not load results: ${((shaQ.error || runsQ.error) as Error).message}`,
         }} />
+      )}
+
+      {dataNotices.length > 0 && (
+        <div className="flex flex-col gap-2" data-testid="results-notices">
+          {dataNotices.slice(0, 20).map((n, i) => (
+            <Notice key={`${n.where}-${i}`} notice={n} />
+          ))}
+        </div>
       )}
 
       {manifest && (

@@ -33,15 +33,20 @@ export function judgeModelForKey(manifest: ResultsManifest, key: string): string
   return manifest.judges.find((j) => j.key === key)?.model ?? null;
 }
 
-/** One tradition's value for a (judge, subject, framing, metric, pressure) slice, or null. */
+/**
+ * One tradition's value for a (judge, subject, framing, metric, pressure) slice, or null.
+ * `expectedCells` is the full-grid denominator for this slice (n_scenarios × pressures, or ×1 for
+ * a single pressure) — used as the steadfastness coverage denominator, since a steadfastness cell
+ * only carries its matched-cell count, not the expected total.
+ */
 export function traditionValue(
   shard: ResultsShard, judgeModel: string, subject: string, framing: string,
-  metric: Metric, pressure: string,
+  metric: Metric, pressure: string, expectedCells: number,
 ): TraditionValue | null {
   if (metric === "steadfastness") {
     const cell = shard.steadfastness?.[judgeModel]?.[subject]?.[framing]?.[pressure];
     if (!cell) return null;
-    return { tradition: shard.tradition, value: cell[0], nJudged: cell[1], nExpected: cell[1] };
+    return { tradition: shard.tradition, value: cell[0], nJudged: cell[1], nExpected: expectedCells };
   }
   const cell = shard.means?.[judgeModel]?.[subject]?.[framing]?.[metric]?.[pressure];
   if (!cell) return null;
@@ -59,10 +64,12 @@ export function computeStandings(
   sel: Pick<ResultsSelection, "framing" | "metric" | "pressure">,
   judgeModel: string = rankingJudgeModel(manifest),
 ): Standing[] {
+  const perScenario = sel.pressure === manifest.pressureAll ? manifest.pressures.length : 1;
   const standings = manifest.subjects.map((subject) => {
     const contributions: TraditionValue[] = [];
     for (const shard of Object.values(shards)) {
-      const tv = traditionValue(shard, judgeModel, subject, sel.framing, sel.metric, sel.pressure);
+      const expectedCells = shard.nScenarios * perScenario;
+      const tv = traditionValue(shard, judgeModel, subject, sel.framing, sel.metric, sel.pressure, expectedCells);
       if (tv !== null) contributions.push(tv);
     }
     const value = contributions.length
@@ -70,6 +77,12 @@ export function computeStandings(
       : null;
     return { subject, value, contributions, nContributing: contributions.length };
   });
-  standings.sort((a, b) => (b.value ?? -Infinity) - (a.value ?? -Infinity));
+  // Rank by value desc; nulls (no coverage) sort last, deterministically (no NaN from null−null).
+  standings.sort((a, b) => {
+    if (a.value === null && b.value === null) return a.subject.localeCompare(b.subject);
+    if (a.value === null) return 1;
+    if (b.value === null) return -1;
+    return b.value - a.value;
+  });
   return standings;
 }
