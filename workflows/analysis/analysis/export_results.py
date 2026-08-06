@@ -25,6 +25,7 @@ writer, manifest, and CLI live in Phase 2.
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -451,6 +452,19 @@ MAX_SHARD_BYTES = 1 * 1024 * 1024   # ≤ 1 MB per tradition shard
 
 _MANIFEST = "manifest.json"
 
+# A safe single path segment — no separators, no `..`, no leading dot/dash. Guards the
+# destructive parts of write_dataset (mkdir + unlink of stale shards) against a run-id or
+# tradition name that would escape the output dir via path traversal.
+_SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+
+def _require_safe_segment(name: str, kind: str) -> None:
+    if not _SAFE_SEGMENT.match(name) or ".." in name:
+        raise AnalysisInputError(
+            f"unsafe {kind} {name!r} — must be a single path segment matching "
+            f"[A-Za-z0-9][A-Za-z0-9._-]* (no separators or '..')"
+        )
+
 
 def _nested_set(d: dict, path: tuple, value) -> None:
     for k in path[:-1]:
@@ -549,6 +563,11 @@ def write_dataset(exports: dict[str, TraditionExport], out_root: str | Path,
     pruned, so regeneration does not depend on prior directory contents. Returns the
     written paths.
     """
+    # 0. Path-safety: run_id + tradition names must be safe segments (write_dataset unlinks).
+    _require_safe_segment(run_id, "run-id")
+    for tradition in exports:
+        _require_safe_segment(tradition, "tradition")
+
     # 1. Serialize everything in memory.
     docs: dict[str, bytes] = {
         _MANIFEST: _dump(build_manifest(exports, run_id, generated_at)).encode("utf-8")

@@ -91,11 +91,18 @@ export function ResultsPage() {
     navigate({ search: selectionToResultsSearch({ ...sel, ...patch }) });
 
   // Surface every data-layer notice (malformed/missing manifest or shard, unknown vocab, dropped
-  // tradition) — display-first: the page never silently hides a problem or renders blank.
+  // tradition) — display-first: the page never silently hides a problem or renders blank. Deduped
+  // because the selected run's manifest notices arrive from BOTH the runs list and the loaded run.
+  const seenNotice = new Set<string>();
   const dataNotices: NoticeT[] = [
     ...runs.flatMap((r) => r.notices),
     ...(runQ.data?.notices ?? []),
-  ];
+  ].filter((n) => {
+    const k = `${n.severity}|${n.scope}|${n.where}|${n.message}`;
+    if (seenNotice.has(k)) return false;
+    seenNotice.add(k);
+    return true;
+  });
   if (runInvalid) {
     dataNotices.unshift(
       notice("warning", "results", "?run", `run "${preSel.runId}" not found — showing ${runId ?? "no run"}`),

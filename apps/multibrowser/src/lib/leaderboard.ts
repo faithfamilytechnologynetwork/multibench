@@ -89,10 +89,13 @@ export function computeStandings(
   judgeModel: string = rankingJudgeModel(manifest),
 ): Standing[] {
   const perScenario = sel.pressure === manifest.pressureAll ? manifest.pressures.length : 1;
+  // n_scenarios comes from the MANIFEST (the authoritative full grid) — same source as
+  // subjectTraditionValues, so the steadfastness coverage denominator is identical in both paths.
+  const nScenariosOf = new Map(manifest.traditions.map((t) => [t.id, t.nScenarios]));
   const standings = manifest.subjects.map((subject) => {
     const contributions: TraditionValue[] = [];
     for (const shard of Object.values(shards)) {
-      const expectedCells = shard.nScenarios * perScenario;
+      const expectedCells = (nScenariosOf.get(shard.tradition) ?? shard.nScenarios) * perScenario;
       const tv = traditionValue(shard, judgeModel, subject, sel.framing, sel.metric, sel.pressure, expectedCells);
       if (tv !== null) contributions.push(tv);
     }

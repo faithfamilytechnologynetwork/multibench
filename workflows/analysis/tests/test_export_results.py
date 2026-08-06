@@ -361,6 +361,13 @@ def test_write_dataset_shard_ceiling_enforced(tmp_path, monkeypatch):
     assert not (tmp_path / "r1" / "buddhism.json").exists()  # nothing partial written
 
 
+def test_write_dataset_rejects_unsafe_run_id(tmp_path):
+    exports = _build_fixture_exports()
+    for bad in ("../escape", "a/b", "..", ".hidden"):
+        with pytest.raises(AnalysisInputError, match="unsafe run-id"):
+            write_dataset(exports, tmp_path, bad, "2026-08-06T00:00:00+00:00")
+
+
 def test_write_dataset_total_ceiling_enforced(tmp_path, monkeypatch):
     exports = _build_fixture_exports()
     monkeypatch.setattr("analysis.export_results.MAX_TOTAL_BYTES", 10)  # force overflow
