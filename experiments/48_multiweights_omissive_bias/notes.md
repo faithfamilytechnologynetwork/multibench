@@ -145,7 +145,7 @@ raise it with the architect before training.
 4. Capability-panel config (IFEval/MMLU/GSM8K) forwarded by architect 08-05.
 
 **Open decisions (spec §7, architect/Waleed's to make — not mine):** funding source
-(David's CEFEAI key vs out-of-pocket); AFB judge-of-record (Terra vs Sonnet-5); naming;
+(the funded key vs out-of-pocket); AFB judge-of-record (Terra vs Sonnet-5); naming;
 green-light for the prerequisite gemma collection.
 
 ## Smoke results (2026-08-04, OpenRouter, 2 cells, negligible spend)
