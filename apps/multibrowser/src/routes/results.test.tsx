@@ -30,7 +30,8 @@ function shardFor(t: string) {
   const gemini = {
     "claude-sonnet-5": {
       unstated: {
-        full: { all: [v.sonnetFull, 2, 12], secularize: [v.sonnetSecularize, 2, 2], false_authority: [v.sonnetFA, 2, 2] },
+        // "all" pools 6 pressures × 2 scenarios = 12 judged CELLS (n_judged 12); n_scenarios is 2.
+        full: { all: [v.sonnetFull, 12, 12], secularize: [v.sonnetSecularize, 2, 2], false_authority: [v.sonnetFA, 2, 2] },
         turn1: { all: [v.sonnetTurn1, 2, 12] },
       },
       stated: { full: { all: [v.sonnetStated, 2, 12] } },
@@ -236,8 +237,10 @@ describe("/results leaderboard", () => {
     await screen.findAllByTestId("standings-row");
     const sonnet = () => screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
     const budCell = () => within(sonnet()).getAllByTestId("strip-cell").find((c) => c.getAttribute("data-tradition") === "buddhism")!;
-    // buddhism sonnet @ all: Post 0.6, First(turn1) 0.2, Δ(stead) 0.4, n_judged 2 — display name title-cased.
+    // buddhism sonnet @ all: Post 0.6, First(turn1) 0.2, Δ(stead) 0.4. The count is n_SCENARIOS (2),
+    // NOT the 12 judged cells (2 scenarios × 6 pressures) — the unit-mislabel Waleed caught.
     expect(budCell()).toHaveAttribute("aria-label", "Buddhism — Post +0.60 · First +0.20 · Δ +0.40 · 2 scenarios");
+    expect(budCell().getAttribute("aria-label")).not.toContain("12 scenarios"); // guards the fix
     // an all-null subject (no data) → dashed "no data" square.
     const qwen = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject")?.includes("Qwen"))!;
     const qCell = within(qwen).getAllByTestId("strip-cell")[0]!;
@@ -301,7 +304,7 @@ describe("/results leaderboard", () => {
     expect(within(bud).getByTestId("drill-delta")).toHaveTextContent("0.400");
     expect(within(bud).getByTestId("drill-stated")).toHaveTextContent("0.900");
     expect(within(bud).getByTestId("drill-guided")).toHaveTextContent("—"); // no guided data
-    expect(within(bud).getByTestId("drill-coverage")).toHaveTextContent("2/12"); // Post-slice numerator
+    expect(within(bud).getByTestId("drill-coverage")).toHaveTextContent("12/12"); // Post-slice n_judged (full grid at "all")
   });
 
   it("expansion is keyboard-operable and round-trips through the URL (?expanded=)", async () => {

@@ -286,3 +286,14 @@ scenarios". Implemented on new branch builder/spir-55-strip-tooltip off origin/m
 Tests: rewrote heat-strip label test to rich format; +tooltip test (hover+focus+drill-down consistency);
 +strip initial/delta unit assertion. 182 tests green, check-types + build OK. This is verify iter-1 on
 OPEN #55 (not scope creep). PR against main → architect low-risk review → merge → redeploy → Waleed re-check.
+
+## 2026-08-06 — Verify iter2 (Waleed live screenshot): 2 tooltip defects. Fixed.
+
+(1) UNIT MISLABEL: "312 scenarios" was 52×6 judged CELLS. CHOSE to show true n_scenarios labeled
+"scenarios" (reader-friendly, correct, pressure-stable; strip is Gemini full-grid so all covered) —
+NOT "cells". Added StripCell.nScenarios (from manifest t.nScenarios); tooltip + aria-label use it
+(singular/plural). Test now distinguishes: fixture "all" cell n_judged=12 (2 scenarios×6 pressures)
+so "2 scenarios" proves nScenarios not nJudged (+ not.toContain "12 scenarios"); drill-coverage 2/12→12/12.
+(2) EDGE CLIPPING: custom tooltip added edge-aware positioning — useLayoutEffect measures at neutral
+translateX(-50%) and clamps within viewport (shift left/right); inert in jsdom (0-rects), verified by
+inspection per architect. 182 tests green, check-types + build OK. Branched off origin/main (has #60).
