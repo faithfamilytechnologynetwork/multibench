@@ -77,3 +77,16 @@ inclusion=any-non-null + coverage-from-Post-slice (Opus sample path); test-plan 
 precision formatting test; API-budget call-log owned by Phase 2); Phase 2 removes opus-caption as
 one clean unit + reframed as intermediate non-shipped state; Post==framings[0] visual-grouping note.
 Rebuttal written. Committing iter-2, signaling done → plan-approval gate.
+
+## 2026-08-06 — Plan iter 2 (Codex REQUEST_CHANGES, Claude COMMENT — iter-1 fixes verified). All incorporated.
+
+Codex: (1) add run selector UI + two-run switch test (spec TS11 had no page affordance); (2) drill-down
+coverage — nExpected always manifest-derived, nJudged from Post slice or null (—/N), inclusion any-non-null.
+Claude (verified source, moved to COMMENT): (1) POSITIONAL-ZIP BUG — computeStandings returns per-column
+sorted arrays; row builder must join by subject id (Map), not index (passes post-only test but misattaches
+Initial/Δ/framing); added column-attribution test. (2) drop judgeModel from computeLeaderboardRows →
+hardwire rankingJudgeModel (judge-never-reranks now structural). (3) byFraming all-keys for
+noUncheckedIndexedAccess. (4) Phase 4 smoke → local pnpm build && preview (REF=main, identical runtime
+path), prod railway up AFTER merge. Minor: retain #49 drill-down in Phase 2 via Slice literal (no dangling
+opus-caption), Phase 3 upgrades it; strip pressure-reframe test. Rebuttal written. Committing iter-3,
+signaling → plan-approval gate.

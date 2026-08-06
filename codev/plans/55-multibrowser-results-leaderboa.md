@@ -34,7 +34,7 @@ family or raw contract**):
 
 Four phases, strict dependency chain: **(1)** pure client aggregation for the dense rows → **(2)**
 dense sortable table + URL state (the presentation swap) → **(3)** the multi-faith layer (heat strip
-+ drill-down + judge selector + accessibility) → **(4)** docs, #49 supersession, live verify. Each
++ drill-down + judge selector + accessibility) → **(4)** docs, #49 supersession, local preview verify. Each
 phase leaves `pnpm -C apps/multibrowser test` green and is a single atomic commit.
 
 **Key design decisions carried from the spec (do not re-litigate):** Gemini-only ranking; Opus is a
@@ -54,8 +54,9 @@ by construction); the whole table is scoped to one pressure (default `all`); no 
       suite-green + typecheck + new tests replaces a coverage-% gate; the porch check runs only
       Vitest, which does not typecheck, so `check-types` is a per-phase definition-of-done step).
 - [ ] No new on-budget GitHub API calls beyond the existing git-tree poll (fake-fetch call-log).
-- [ ] Live `railway up` smoke: the dense board loads, sorts, deep-links, and drills down on the
-      deployed static site.
+- [ ] Local `pnpm build && pnpm preview` smoke: the dense board loads, run selector switches runs,
+      sorts, deep-links, and drills down against the real GitHub-at-runtime path (production `railway
+      up` deploy is after merge).
 - [ ] Documentation updated (multibrowser README leaderboard section; `results/README.md` "Results
       explorer" bullets reconciled to the v2 presentation).
 - [ ] No regression to corpus browsing or the #49 data tier; no contact with #51's raw tier.
@@ -68,7 +69,7 @@ by construction); the whole table is scoped to one pressure (default `all`); no 
     {"id": "phase_1", "title": "Client aggregation for the dense rows (pure lib + tests)"},
     {"id": "phase_2", "title": "Dense sortable table + URL state (presentation swap)"},
     {"id": "phase_3", "title": "Multi-faith layer: heat strip, drill-down, judge selector, a11y"},
-    {"id": "phase_4", "title": "Docs, #49 supersession, live verify"}
+    {"id": "phase_4", "title": "Docs, #49 supersession, local preview verify"}
   ]
 }
 ```
@@ -97,24 +98,36 @@ by construction); the whole table is scoped to one pressure (default `all`); no 
 - [ ] New exports in `apps/multibrowser/src/lib/leaderboard.ts`:
   - `LeaderboardRow` type:
     `{ subject, initial: number|null, post: number|null, delta: number|null,
-       byFraming: Record<string, number|null>,   // keyed by framing id (sort/label resolve by id)
+       byFraming: Record<string, number|null>,   // EVERY manifest framing id present (value null if absent)
        strip: { tradition: string; value: number|null; nJudged: number; nExpected: number }[],  // 1:1 with manifest.traditions, in manifest order
        rank: number }`.
-  - `computeLeaderboardRows(shards, manifest, { pressure, judgeModel? })`: one row per subject —
+  - `computeLeaderboardRows(shards, manifest, { pressure })`: one row per subject —
     `initial` = first-framing `turn1`, `post` = first-framing `full`, `delta` = first-framing
-    `steadfastness` (metric='steadfastness'); `byFraming[framingId]` = `full` at that framing; `rank`
-    = canonical position by `post` desc, nulls last, ties by subject id (computed once, attached to
-    every row).
+    `steadfastness` (metric='steadfastness'); `byFraming[framingId]` = `full` at that framing (**one
+    entry per manifest framing id, value null when absent** — parallels `strip`, so
+    `noUncheckedIndexedAccess` reads resolve to `number|null`); `rank` = canonical position by `post`
+    desc, nulls last, ties by subject id (computed once, attached to every row).
+    **The function does NOT take a `judgeModel`** — it hardwires `rankingJudgeModel(manifest)`
+    internally, so "Opus never re-ranks/recolors the board" is true *by construction*, not by test.
+    Only `subjectDrilldownRows` accepts a judge.
+    **Cross-column assembly joins by subject id, never by array index.** Each of the 3 + F
+    `computeStandings` calls returns a `Standing[]` **sorted by that column's own value** (different
+    order per column), so the row builder indexes every per-column result by `subject` (a `Map`)
+    before assembling — a positional zip would typecheck and still pass a `post`-only reconciliation
+    test while silently misattributing Initial/Δ/framing columns to the wrong subjects.
   - `sortRows(rows, sortKey, dir)`: pure sort over the numeric columns (`initial|post|delta|` a
     framing id); nulls last both directions; ties by subject id; leaves `rank` untouched (rank is a
     field, not the display index). `sortKey` for a framing column is the framing **id** (resolved
-    against `byFraming`), so no manifest/order threading is needed.
+    against `byFraming`, which always has the key), so no manifest/order threading is needed.
   - `subjectDrilldownRows(shards, manifest, subject, { pressure, judgeModel })`: per included
     tradition, `{ tradition, initial: number|null, post: number|null, delta: number|null,
-    byFraming: Record<string, number|null>, nJudged, nExpected }`. **A tradition is included iff it
-    has any non-null value across the displayed slices**; nullable numeric fields cover the sampled
-    Opus case (e.g. `full` present but `steadfastness` absent); the coverage badge `nJudged/nExpected`
-    is sourced from the **Post slice** (first-framing `full`).
+    byFraming: Record<string, number|null>, nJudged: number|null, nExpected: number }`. **A tradition
+    is included iff it has any non-null value across the displayed slices** (covers the sampled Opus
+    case: `full` present but `steadfastness` absent, or one framing not another). The coverage badge
+    denominator `nExpected` is **always** manifest-derived (`t.nScenarios × (pressure==all ? 6 : 1)`);
+    the numerator `nJudged` comes from the **Post slice** when present, else **null** (badge renders
+    `—/N`) — so a tradition included via a non-Post slice still has a well-defined denominator and an
+    honest "no Post coverage" numerator.
 - [ ] New/updated tests in `apps/multibrowser/src/lib/leaderboard.test.ts` (fixtures + the committed
       launch shards already imported there). Existing cases updated only for the `Slice` rename if
       referenced.
@@ -123,13 +136,14 @@ by construction); the whole table is scoped to one pressure (default `all`); no 
 - Reuse `computeStandings(shards, manifest, Slice, judgeModel)` for every numeric column; the only
   new client math is field assembly and ordering — **no new re-implementation of the aggregation
   convention** (the reconcile-by-construction lesson).
-- **Heat strip (manifest-aligned):** take the Post-slice (`framing=framings[0]`, `metric=full`)
-  `computeStandings` result's sparse `contributions`, then **left-join against
-  `manifest.traditions`** to produce the 1:1 `strip` array — covered traditions carry their value,
-  uncovered traditions carry `value: null` (the distinct empty cell the spec requires). `post` is the
-  equal-weight mean over the **non-null** strip cells, so `mean(non-null strip) == post` by
-  construction (same iteration source, sparse contributions unchanged — the join only *adds* the
-  null placeholders for display).
+- **Heat strip (manifest-aligned):** take the Post-slice (`framing=framings[0]`, `metric=full`,
+  ranking judge) `computeStandings` result's sparse `contributions`, then **left-join against
+  `manifest.traditions`** to produce the 1:1 `strip` array — covered traditions carry their
+  `value`/`nJudged`/`nExpected`; uncovered traditions carry `value: null`, `nJudged: 0`, and the
+  manifest-derived `nExpected = t.nScenarios × (pressure==all ? 6 : 1)` (the distinct empty cell the
+  spec requires, with a defined denominator). `post` is the equal-weight mean over the **non-null**
+  strip cells, so `mean(non-null strip) == post` by construction (same iteration source; the join
+  only *adds* null placeholders for display).
 - Δ column: `computeStandings(..., {framing:framings[0], metric:'steadfastness', pressure})`. On the
   complete Gemini grid this equals `full − turn1`; the distinctness from Post − Initial is a
   property of *asymmetric matched panels*, exercised by a fixture (see Test Plan), not launch data.
@@ -137,10 +151,18 @@ by construction); the whole table is scoped to one pressure (default `all`); no 
   judge, matching the Gemini-only ranking policy. `judgeModel` is threaded only for the drill-down.
 
 #### Acceptance Criteria
-- [ ] `pnpm -C apps/multibrowser check-types` is green (the `Slice` decouple + new types typecheck).
+- [ ] `pnpm -C apps/multibrowser check-types` is green (the `Slice` decouple + new types typecheck;
+      `byFraming`/`strip` carry every framing/tradition key so `noUncheckedIndexedAccess` reads are
+      `number|null`, not `…|undefined`).
 - [ ] `computeLeaderboardRows` on the committed launch shards reproduces, for each subject at
       `pressure=all`, `post` == the paper `subj_overall` (first framing) to the existing test's
       precision; the mean over non-null `strip` cells == `post`.
+- [ ] **Column-attribution test**: a subject's `initial` / `delta` / each `byFraming[id]` equals a
+      direct single-slice `computeStandings` lookup for that same subject — guarding against a
+      positional-zip misattribution that a `post`-only test would miss. (Uses a fixture where the
+      per-column orderings differ.)
+- [ ] `computeLeaderboardRows` exposes no `judgeModel` parameter; the board is always the ranking
+      judge by construction.
 - [ ] The `strip` array is 1:1 with `manifest.traditions` in manifest order; an uncovered tradition
       is a `value: null` cell (not omitted).
 - [ ] Δ distinctness holds on a **synthetic asymmetric-panel fixture** (steadfastness set
@@ -187,10 +209,13 @@ the new exports are additive, so nothing else depends on them yet.
   click-to-sort numeric columns, a persistent canonical Rank column, and `k/N` coverage per row.
 - Move framing/metric out of the selection (they are now columns) and add **sort + expanded** to the
   deep-linkable URL; ignore stale `?metric=`/`?framing=` and invalid sort keys.
-- Heat strip + drill-down + judge selector land in Phase 3. This phase's commit is an **intermediate,
-  internally-consistent** state (a sortable Gemini board with no per-tradition drill-down); it is not
-  user-visible until the PR merges, so the temporary removal of the #49 drill-down/judge is not a
-  shipped regression — the multi-faith layer returns in Phase 3 before the PR.
+- Add a **manifest-driven run selector** so a second published run is selectable in the UI (not only
+  via `?run=`), satisfying the spec's "additive publish appears and is selectable" at the page level.
+- **Keep the #49 per-tradition drill-down + judge selector working** in this phase by feeding the
+  existing `subjectTraditionValues` a `Slice` literal (`{ framing: framings[0], metric: "full",
+  pressure: sel.pressure }`) — so the board is a coherent, complete shape at every commit and the
+  `opus-caption` never dangles. Phase 3 *upgrades* this single-slice drill-down to the dense
+  per-tradition table and adds the heat strip + accessibility; it does not re-add a removed feature.
 
 #### Deliverables
 - [ ] `apps/multibrowser/src/lib/resultsSelection.ts`: new `ResultsSelection` shape —
@@ -199,23 +224,25 @@ the new exports are additive, so nothing else depends on them yet.
       numeric-column set + framing ids from the manifest; unknown/stale keys → null/ignored),
       `selectionToResultsSearch` (omit defaults; encode `sort` as e.g. `sort=post.desc`, `expanded`
       as a comma list), and `resultsSearchSchema` (unchanged fail-soft record). Keep `judge` in the
-      shape (used by the Phase-3 drill-down) even though its selector UI returns in Phase 3.
+      shape (drives the drill-down, retained in this phase).
 - [ ] `apps/multibrowser/src/lib/resultsSelection.test.ts`: round-trip run/judge/pressure/sort/
       expanded; clean base URL; stale `?metric=`/`?framing=` dropped; invalid sort key → no sort.
-- [ ] `apps/multibrowser/src/routes/ResultsPage.tsx`: rewrite the table to render
-      `computeLeaderboardRows` → `sortRows` → sortable dense columns (`byFraming` keyed by framing
-      id); pressure selector reframes via `update()`; Rank column from `row.rank`; sort state from
-      the URL; `k/N` from the count of non-null `strip` cells over `manifest.traditions.length`.
-      Keep the run label, notices, rate-limit banner, and runtime-validation paths. **Remove**, as
-      one clean unit, the #49 Framing selector, Metric selector, judge selector, drill-down, **and
-      the `opus-caption` block (ResultsPage.tsx:195)** — all return (except metric/framing) in
-      Phase 3; leaving `opus-caption` pointing at a removed drill-down would be incoherent.
-- [ ] `apps/multibrowser/src/routes/results.test.tsx`: rewrite the existing fixture-driven tests to
-      the v2 columns (the current 12 tests — standings, run label, metric-change, deep link, framing,
-      pressure, steadfastness, malformed-manifest notice, drill-down, judge selector, empty state —
-      are re-scoped: metric/framing/drill-down/judge tests move to Phase 3 or become column/sort
-      tests here). Add: sort-by-column, persistent-rank, pressure-reframe, stale-param-degradation,
-      and a **new** API-budget call-log assertion (Success Metric 3 lands here). Keep the
+- [ ] `apps/multibrowser/src/routes/ResultsPage.tsx`: replace the one-slice table body with the
+      dense sortable board — `computeLeaderboardRows` → `sortRows` → sortable dense columns
+      (`byFraming` by framing id); pressure selector reframes via `update()`; **new run selector**
+      (from `useResultsRuns`); Rank column from `row.rank`; sort state from the URL; `k/N` from the
+      count of non-null `strip` cells over `manifest.traditions.length`. **Remove** the #49 Framing
+      and Metric selectors (now columns). **Retain** the existing per-tradition drill-down, the judge
+      selector, and the `opus-caption` block, feeding the drill-down a `Slice` literal (above). Keep
+      the run label, notices, rate-limit banner, and runtime-validation paths.
+- [ ] `apps/multibrowser/src/routes/results.test.tsx`: re-scope the existing fixture-driven tests to
+      the v2 columns (the current tests — standings, run label, metric-change, deep link, framing,
+      pressure, steadfastness, malformed-manifest notice, drill-down, judge selector, empty state):
+      the metric/framing *selector* tests become column/sort tests; the drill-down + judge tests stay
+      green against the retained single-slice drill-down (they upgrade in Phase 3). Add: sort-by-column,
+      persistent-rank, pressure-reframe, stale-param-degradation, a **run-switch** test (two fake runs,
+      URL persistence, the selected run's table loads — closes spec Test Scenario 11 at the page
+      level), and a **new** API-budget call-log assertion (Success Metric 3 lands here). Keep the
       malformed-manifest notice and empty-state cases.
 
 #### Implementation Details
@@ -244,17 +271,20 @@ the new exports are additive, so nothing else depends on them yet.
 - [ ] Clicking a numeric header sorts the display; the Rank column keeps canonical numbers; nulls
       last; a stale `?metric=`/`?framing=` or bad `?sort=` renders the default view without error.
 - [ ] Selecting each pressure (and `all`) reframes headline + framing columns + rank.
+- [ ] The run selector switches between two published runs (URL-persisted); the selected run's table
+      loads (spec Test Scenario 11 at the page level).
 - [ ] Loading the board adds no new on-budget GitHub API call beyond the git-tree poll (fake-fetch
       call-log assertion).
-- [ ] Corpus routes and the data-layer notice/rate-limit behavior are unchanged.
+- [ ] Corpus routes, the retained drill-down/judge behavior, and the data-layer notice/rate-limit
+      behavior are unchanged.
 
 #### Test Plan
 - **Unit Tests**: `resultsSelection` parse/serialize (sort/expanded/stale/invalid).
 - **Integration Tests**: `results.test.tsx` render — v2 columns, sort, persistent rank, pressure
-  reframe, display-precision formatting, stale-param degradation, API-budget call-log, malformed-
-  manifest notice, empty state.
+  reframe, run-switch, display-precision formatting, stale-param degradation, API-budget call-log,
+  retained drill-down/judge, malformed-manifest notice, empty state.
 - **Type check**: `pnpm -C apps/multibrowser check-types`.
-- **Manual Testing**: deferred to Phase 4 (live smoke).
+- **Manual Testing**: deferred to Phase 4 (local preview smoke).
 
 #### Rollback Strategy
 Revert the Phase-2 commit; Phase-1 exports remain (unused) and the suite returns to the #49 board.
@@ -266,9 +296,6 @@ Revert the Phase-2 commit; Phase-1 exports remain (unused) and the suite returns
     proves nothing else breaks.
 - **Risk**: sort accidentally re-numbers rank.
   - **Mitigation**: rank is a computed field rendered directly (not the array index); test pins it.
-- **Risk**: `opus-caption` left live pointing at a removed drill-down.
-  - **Mitigation**: it is removed in the same clean unit as the drill-down/judge selector (deliverable
-    above); a test asserts it is absent in Phase 2.
 
 ---
 
@@ -276,25 +303,30 @@ Revert the Phase-2 commit; Phase-1 exports remain (unused) and the suite returns
 **Dependencies**: Phase 2
 
 #### Objectives
-- Add the **per-tradition heat strip** (the multi-faith upgrade) to each row, the **click-to-expand
-  per-tradition drill-down**, the **drill-down judge selector** (Opus badged, never re-ranks), and
-  the full **accessibility** affordances.
+- Add the **per-tradition heat strip** (the multi-faith upgrade) to each row, **upgrade** the
+  retained (single-slice) drill-down into the **dense per-tradition table**, keep the **judge
+  selector** repointing only the drill-down (Opus badged, never re-ranks), and add the full
+  **accessibility** affordances.
 
 #### Deliverables
 - [ ] `apps/multibrowser/src/routes/ResultsPage.tsx`:
   - Heat strip column: one `scoreColor` cell per `row.strip` entry (already 1:1 with
     `manifest.traditions`, manifest order), each with a `title`/`aria-label` (tradition + value or
     "no data"); a `value: null` entry renders as the visually distinct neutral empty cell (`scoreColor`
-    already returns neutral grey for null).
-  - Expandable rows: a keyboard-operable button (`aria-expanded`) toggling `sel.expanded` (URL-encoded)
-    that renders `subjectDrilldownRows` as a per-tradition dense sub-table (per-tradition
-    Initial/Post/Δ + each framing's `full`, coverage-badged).
-  - Re-add the **judge selector** (`Segmented`) — repoints only the drill-down to Opus where data
-    exists (badged `sample n/N`); the headline/strip stay on the ranking (Gemini) judge.
+    already returns neutral grey for null). The strip recomputes with the pressure selector (it is
+    part of `row`).
+  - Upgrade the drill-down: swap the Phase-2 single-slice per-tradition list for `subjectDrilldownRows`
+    → a per-tradition dense sub-table (per-tradition Initial/Post/Δ + each framing's `full`,
+    coverage-badged with `nJudged/nExpected`, `—/N` when the Post numerator is absent). Keep the
+    keyboard-operable expand button (`aria-expanded`) but move its state to `sel.expanded`
+    (URL-encoded) for deep-linking.
+  - The **judge selector** (retained from Phase 2) continues to repoint only the drill-down to Opus
+    where data exists (badged `sample n/N`); the headline/strip stay on the ranking (Gemini) judge.
   - Wrap the table in a horizontal-scroll container (`overflow-x-auto`) for narrow viewports.
-- [ ] `apps/multibrowser/src/routes/results.test.tsx`: heat-strip==Post + labels + empty-cell;
-      expand/collapse (keyboard) + URL round-trip of `expanded`; judge selector repoints drill-down
-      only (headline/strip unchanged) + `sample n/N` badge + zero-coverage tradition shows nothing;
+- [ ] `apps/multibrowser/src/routes/results.test.tsx`: heat-strip cells == `row.strip` + labels +
+      empty-cell; **pressure reframes the strip**; expand/collapse (keyboard) + URL round-trip of
+      `expanded`; the dense drill-down columns; judge selector repoints drill-down only (headline/strip
+      unchanged) + `sample n/N` badge + `—/N` when Post absent + zero-coverage tradition shows nothing;
       scroll-container present.
 
 #### Implementation Details
@@ -310,9 +342,11 @@ Revert the Phase-2 commit; Phase-1 exports remain (unused) and the suite returns
 - [ ] `pnpm -C apps/multibrowser check-types` green.
 - [ ] Strip cells == the `row.strip` values with accessible labels; empty (`null`) cells are
       neutral-distinct and labeled "no data".
+- [ ] Selecting a pressure reframes the strip (as well as headline/framing/rank).
 - [ ] Expanding a subject (mouse and keyboard) shows the per-tradition dense table and round-trips
       through the URL.
-- [ ] Switching the judge repoints only the drill-down (badged), never the headline/strip/rank.
+- [ ] Switching the judge repoints only the drill-down (badged, `—/N` when Post absent), never the
+      headline/strip/rank.
 - [ ] Table scrolls horizontally on a narrow viewport (scroll wrapper asserted).
 
 #### Test Plan
@@ -332,37 +366,41 @@ Revert the Phase-3 commit; the Phase-2 sortable board remains fully functional.
 
 ---
 
-### Phase 4: Docs, #49 supersession, live verify
+### Phase 4: Docs, #49 supersession, local preview verify
 **Dependencies**: Phase 3
 
 #### Objectives
 - Reconcile documentation to the v2 presentation, record the #49 supersession, and verify the real
-  user path on the deployed static site.
+  user path via a **local production-preview** of the built SPA.
 
 #### Deliverables
 - [ ] `apps/multibrowser/README.md`: leaderboard section describes the dense sortable table + heat
-      strip + drill-down + pressure/judge/sort deep-linking.
+      strip + drill-down + run/pressure/judge/sort deep-linking.
 - [ ] `results/README.md`: the "Results explorer (SPA)" bullets updated from the #49 selector model
       to the v2 dense-table model (framing/metric are columns; pressure is the single reframing
       selector; Gemini-ranked; Opus drill-down; heat strip).
 - [ ] Note in the review/PR that this **supersedes the #49 presentation**; **#49 is closed and its
       parked `verify-approval` gate retired** when this lands (architect action — flagged, not done
       unilaterally).
-- [ ] Live `railway up` smoke (manual): board loads, sorts, pressure reframes, a row expands, a
-      deep-link restores state — on the deployed site.
+- [ ] **Local `pnpm build && pnpm preview` smoke** (manual): board loads, run selector switches runs,
+      sorts, pressure reframes the strip, a row expands, a deep-link restores state — against the real
+      GitHub-at-runtime data path (`REF` defaults to `main`; SHA-pinned tree + `raw` fetches +
+      rate-limit behavior are identical to production; only the Nixpacks/`serve` SPA-fallback differs
+      and is unchanged by this work). **The production `railway up` deploy happens after merge** — this
+      work does not deploy an unmerged branch to the single production Railway service.
 
 #### Implementation Details
-- Docs-only + manual verify; no code changes expected (any bug found reopens the relevant phase's
-  concern as a fix commit).
+- Docs-only + manual preview verify; no code changes expected (any bug found reopens the relevant
+  phase's concern as a fix commit).
 
 #### Acceptance Criteria
 - [ ] Both READMEs reflect the v2 presentation with no stale #49 selector language.
-- [ ] Live smoke passes; screenshots/notes captured in the review.
+- [ ] Local preview smoke passes; screenshots/notes captured in the review.
 - [ ] Final `pnpm -C apps/multibrowser test` **and** `pnpm -C apps/multibrowser check-types` green.
 
 #### Test Plan
 - **Unit/Integration Tests**: full suite green (regression).
-- **Manual Testing**: the live `railway up` smoke above.
+- **Manual Testing**: the local `pnpm build && pnpm preview` smoke above.
 
 #### Rollback Strategy
 Docs revert trivially; the live deploy is a static site (redeploy previous bundle if needed).
@@ -395,8 +433,8 @@ Phase 1 (pure aggregation)
 - **GitHub (git-trees + `raw`)**: read-only, unauthenticated — unchanged; the leaderboard adds no
   on-budget calls. **Phase**: all (runtime data). **Fallback**: cached data + rate-limit banner
   (already implemented).
-- **Railway static hosting**: **Phase**: 4 (manual `railway up` smoke). **Fallback**: redeploy prior
-  bundle.
+- **Railway static hosting**: **Phase**: after-merge deploy (not part of this branch's verify — Phase 4
+  uses a local `pnpm preview` of the same runtime path). **Fallback**: redeploy prior bundle.
 
 ### Internal Systems
 - **`lib/leaderboard.ts` / `computeStandings`**: reused as the aggregation source (Phase 1 builds on it).
@@ -410,9 +448,10 @@ Phase 1 (pure aggregation)
 |------|------------|--------|------------|-------|
 | Headline drifts from the paper | Low | High | Reuse `computeStandings`; keep reconciliation test at `all` | spir-55 |
 | Δ computed as Post − Initial | Med | High | Δ = shard steadfastness; fixture distinctness test | spir-55 |
-| Strip mean ≠ Post | Low | Med | Strip = Post `contributions` (single source); test `mean(strip)==post` | spir-55 |
+| Strip mean ≠ Post | Low | Med | Strip = Post `contributions` (single source); test `mean(non-null strip)==post` | spir-55 |
+| Positional-zip misattributes Initial/Δ/framing columns | Med | High | Per-column `Standing[]` joined by subject id (Map), not index; column-attribution test | spir-55 |
 | Sort re-numbers rank | Med | Med | Rank is a computed field, rendered directly; test | spir-55 |
-| Judge selector recolors/reranks headline | Med | High | Headline/strip hardwired to ranking judge; invariance test | spir-55 |
+| Judge selector recolors/reranks headline | Low | High | `computeLeaderboardRows` takes NO judge — hardwired to the ranking judge (structural, not test) | spir-55 |
 | Color-only strip inaccessible | Med | Med | Per-cell aria/title + non-color empty + keyboard expand + scroll wrapper | spir-55 |
 | Merge conflict with #51 in shared app files | Med | Med | Scope to `/results` leaderboard + selection; rebase on integration branch at PR | spir-55 |
 | A needed shard slice turns out missing | Low | Med | Default no export change; escalate to architect before any export work | spir-55 |
@@ -427,7 +466,7 @@ Phase 1 (pure aggregation)
 2. **After Phase 2**: dense sortable board renders, sorts, reframes by pressure, deep-links; stale
    params degrade; corpus untouched.
 3. **After Phase 3**: heat strip + drill-down + judge selector + accessibility all behave per spec.
-4. **Before "done" (Phase 4)**: docs reconciled; live `railway up` smoke passes; full suite green.
+4. **Before "done" (Phase 4)**: docs reconciled; local `pnpm build && pnpm preview` smoke passes; full suite + `check-types` green.
 
 ## Monitoring and Observability
 ### Metrics to Track
@@ -445,7 +484,7 @@ Phase 1 (pure aggregation)
 - [ ] N/A: API docs, architecture diagrams, runbooks, config guides (none apply to this UI change).
 
 ## Post-Implementation Tasks
-- [ ] Live `railway up` smoke (Phase 4).
+- [ ] Local `pnpm build && pnpm preview` smoke (Phase 4); production `railway up` after merge.
 - [ ] Flag #49 closure + `verify-approval` retirement to the architect (their action).
 - [ ] N/A: security audit, load testing (public read-only client feature; no new attack surface).
 
@@ -476,10 +515,33 @@ Phase 1 (pure aggregation)
 - **`Post` == `framings[0]` column identity** (Claude): → noted as a visual grouping/caption so it
   doesn't read as a bug.
 
+**Plan iteration 2 (Codex REQUEST_CHANGES, Claude COMMENT — both verified against source; all incorporated):**
+- **No run-selection UI / page test** (Codex): the spec's "additive publish appears and is
+  selectable" had no page affordance. → Phase 2 adds a manifest-driven **run selector** + a two-run
+  switch test (closes spec Test Scenario 11).
+- **Drill-down coverage inconsistency** (Codex): a tradition included via a non-Post slice had no Post
+  coverage tuple. → `nExpected` always manifest-derived; `nJudged` from the Post slice or **null**
+  (`—/N`); inclusion by any-non-null. Same rule fixed the uncovered **strip** cell's `nExpected`.
+- **Positional-zip misattribution** (Claude, latent bug): each per-column `computeStandings` returns a
+  differently-sorted array; a positional zip passes a `post`-only test while mis-attaching Initial/Δ/
+  framing. → Row builder **joins per-column results by subject id**; a column-attribution test guards it.
+- **Judge invariant made structural** (Claude): `computeLeaderboardRows` **drops the `judgeModel`
+  parameter** entirely and hardwires `rankingJudgeModel` — "Opus never re-ranks" is now true by
+  construction, not by test.
+- **`noUncheckedIndexedAccess`** (Claude): `byFraming` is built with **every manifest framing id
+  present** (value null if absent), parallel to `strip`, so indexed reads are `number|null` — one
+  normalization, no scattered non-null assertions.
+- **Production deploy of an unmerged branch** (Claude): Phase 4's smoke is now **local `pnpm build &&
+  pnpm preview`** (identical GitHub-at-runtime path; `REF` defaults to `main`); the production
+  `railway up` happens after merge — never deploying an unmerged branch to the single prod service.
+- **Cheaper drill-down sequencing** (Claude): Phase 2 now **retains** the #49 drill-down + judge via a
+  one-line `Slice` literal (no dangling `opus-caption`, less churn); Phase 3 **upgrades** it to the
+  dense per-tradition table + adds the strip — so no phase ships an incoherent intermediate.
+
 **Plan Adjustments**: phases ordered so the pure aggregation (with the reconciliation/Δ/strip
-guarantees + the `Slice` decouple) lands first and is verified before any UI consumes it; the
-multi-faith + accessibility layer is isolated in Phase 3 so it can be reviewed as the distinct "new
-design work."
+guarantees + the `Slice` decouple + subject-id join + structural judge) lands first and is verified
+before any UI consumes it; the multi-faith + accessibility layer is isolated in Phase 3 so it can be
+reviewed as the distinct "new design work."
 
 ## Approval
 - [ ] Technical Lead Review
@@ -492,6 +554,7 @@ design work."
 |------|--------|--------|--------|
 | 2026-08-06 | Initial implementation plan | Spec 55 approved | spir-55 |
 | 2026-08-06 | Plan iter-1 review incorporated (Slice decouple + check-types gate; id-keyed byFraming; manifest-aligned strip; nullable drill-down; test-plan corrections; opus-caption removal) | Codex + Claude REQUEST_CHANGES | spir-55 |
+| 2026-08-06 | Plan iter-2 review incorporated (run selector + Test-Scenario-11 page test; drill-down/strip coverage nExpected/`—/N`; subject-id column join; drop judgeModel from row builder; byFraming all-keys for noUncheckedIndexedAccess; local preview smoke not prod deploy; retain #49 drill-down via Slice literal) | Codex REQUEST_CHANGES + Claude COMMENT | spir-55 |
 
 ## Notes
 - **Recommended follow-up for the architect (out of scope for #55):** the porch tests-check
