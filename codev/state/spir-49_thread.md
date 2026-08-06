@@ -334,6 +334,21 @@ share the URL for a smoke-test. Holding `porch done 49` until the live check pas
 Verify passes). Deterministic coverage already proves the behaviors: leaderboard==paper (real committed
 shards, all 5×3), Gemini-only-ranking structural, deep-link + drill-down + selector + SPA-fallback tests.
 
+### LIVE VERIFY DONE (architect deployed; I ran the checklist). URL: multibrowser-production.up.railway.app
+Architect ran `railway up --ci` (main workspace apps/multibrowser linked to multibrowser/production, per #46).
+My checks:
+- **Runtime data path** (the SPA's actual read): fetched main SHA (099ac7d) + results/20260803/ manifest+7
+  shards from raw.githubusercontent.com — recomputed the leaderboard mean-of-means → == paper subj_overall
+  for ALL 15 subject×framing, 7/7 traditions (1e-9). Gemini full_grid 15570/15570; Opus stated 2250/15570
+  (~14.5%, honest sample). This is the live data the deployed site renders.
+- **Deployed shell + routing**: / title "MultiBrowser…", #root + JS bundle (real SPA). HTTP 200 for /,
+  /results, /results?judge=opus&metric=steadfastness (deep link), /t/sunni-islam/JLS-001, and a bogus
+  deep link (SPA fallback → index). 
+- **Limitation**: can't drive the client-rendered DOM here (no headless browser), so the interactive
+  clicks (judge→Opus drill-down re-render, toggle re-render) are covered by the vitest suite, not a live
+  DOM assertion. Data path + routes + code are all live and correct.
+→ porch done 49 (verify-approval gate — architect approves to close out).
+
 **Phase 5 consult: BOTH APPROVE first iteration** (judge selector structurally can't re-rank; steadfastness
 denominators correct; zero-coverage omission verified vs real shards). Only cosmetic suggestions.
 
