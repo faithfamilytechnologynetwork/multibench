@@ -32,6 +32,9 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
 ## Success Metrics
 - [ ] All specification Success Criteria met (esp. **leaderboard reconciles with the paper to displayed
       precision**, judge/pressure selectors, Gemini-only ranking, honest Opus coverage badging).
+- [ ] **Steadfastness metric** (matched-cell full − turn1) ships as a pressure-filterable leaderboard mode +
+      per-tradition drill-down; Gemini steadfastness reconciles with `report.json` (headline +
+      by-pressure); Opus steadfastness follows the badged-validation rules.
 - [ ] Parity test green: export's per-tradition means match `report.json`/`stats_bundle.json` within tolerance,
       and mean-of-per-tradition-means == `subj_overall` for all framings.
 - [ ] Committed dataset ≤ 8 MB total, ≤ 1 MB per tradition shard (CI-asserted).
@@ -51,8 +54,8 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
     {"id": "phase_1", "title": "Export core: normalization, aggregation & parity"},
     {"id": "phase_2", "title": "Export writer, manifest, CLI & committed launch dataset"},
     {"id": "phase_3", "title": "SPA results data layer: discovery, loader, validation & truncation fallback"},
-    {"id": "phase_4", "title": "Leaderboard route + framing/scope/pressure selectors (Gemini-ranked)"},
-    {"id": "phase_5", "title": "Per-tradition drill-down + judge selector + Opus validation layer"},
+    {"id": "phase_4", "title": "Leaderboard route + framing / scope+steadfastness / pressure selectors (Gemini-ranked)"},
+    {"id": "phase_5", "title": "Per-tradition drill-down (incl. steadfastness) + judge selector + Opus validation layer"},
     {"id": "phase_6", "title": "Documentation: results data-contract README + multibrowser README"}
   ]
 }
@@ -72,7 +75,8 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
       a **purpose-built judgment-row reader** for the source runs, subject/judge alias maps
       (`normalize_subject`, `normalize_judge`), `judgments_v2.jsonl` overlay + Opus identity-dedup, and a
       builder that produces, per (tradition, subject, framing, scope, pressure-incl-"all", judge), the
-      breakdown **mean** + **coverage** (`n_judged`, `n_expected`).
+      breakdown **mean** + **coverage** (`n_judged`, `n_expected`), **and** a matched-cell **steadfastness**
+      (full − turn1) per (tradition, subject, framing, pressure-incl-"all", judge) with matched-cell coverage.
 - [ ] A **small refactor of `aggregate.py`**: promote the private `_mean_over` to a **public** breakdown-mean
       helper (e.g. `breakdown_mean(cells, subject, *, framing, scope, pressure=None, scenarios=None)`), so the
       export reuses the canonical semantics instead of importing a private symbol or re-implementing it.
@@ -111,10 +115,15 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
   (deriving it from a ~2-cell Opus panel would report ~100% coverage and silently defeat honest degradation).
   Then specific pressure → `n_expected = n_scenarios`; pooled "all" → `n_scenarios × 6`. Validate that Opus
   scenario ids are a **subset** of that universe; fail on an inconsistent tradition/scenario universe.
-- **Steadfastness (full − turn1) is OUT OF SCOPE for v1** (not a spec Success Criterion). The scope toggle
-  selects the `turn1` *or* `full` standings independently (each a valid mean); the export publishes both
-  scopes' means but does **not** compute a matched-cell difference. This sidesteps the asymmetric-panel issue
-  (unstated-opus has slightly more turn1 than full cells) cleanly. (Recorded in Notes.)
+- **Steadfastness (full − turn1) is IN v1 scope** (architect decision 2026-08-06), computed with the
+  **matched-cell** definition (spec Test Scenario 5): for each slice (tradition, subject, framing,
+  pressure-incl-"all", judge), restrict to the cells that have **both** a `turn1` and a `full` score, then
+  steadfastness = `mean(full over matched cells) − mean(turn1 over matched cells)`. Published as a third
+  metric alongside the two scope means, with its own matched-cell coverage. For **Gemini** the turn1/full
+  panels are balanced (both 4,680/tradition), so matched-cell equals the difference-of-means and thus equals
+  `aggregate_tradition`'s `steadfastness` — a direct parity anchor against `report.json`. For **Opus**
+  (slightly asymmetric panels) the matched-cell restriction is what keeps it honest; it follows the same
+  badged-validation rules and carries matched-cell coverage.
 
 #### Acceptance Criteria
 - [ ] Merging the three runs yields **exactly five** subjects; `qwen/qwen3-235b-a22b-2507` →
@@ -126,14 +135,20 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
 - [ ] The `aggregate.py` refactor leaves the existing analysis test suite green.
 - [ ] **Parity (real-data, `skipif` symlink absent)**: for judge=Gemini, `mean over traditions of
       per-tradition by_framing[full]` equals `stats_bundle.subj_overall[subject|framing][0]` within 1e-9 for
-      all subjects × framings; per-tradition means match `report.json.scorecard` within tolerance.
+      all subjects × framings (re-verified against the refreshed, v2-then-dedupe stats bundle); per-tradition
+      means match `report.json.scorecard` within tolerance.
+- [ ] **Steadfastness parity**: for judge=Gemini at framing=unstated, per-tradition matched-cell steadfastness
+      equals `report.json.scorecard[subject].steadfastness`, and the pressure-filtered values equal
+      `steadfastness_by_pressure`, within tolerance.
 - [ ] **Deterministic (committed fixture)**: fixed expected numbers on the miniature fixtures pass in CI /
       for any builder (no dependence on `tmp/judging-runs/`).
 - [ ] All tests pass.
 
 #### Test Plan
 - **Unit Tests** (committed fixtures, always run): alias maps (incl. Qwen + unmapped-raises), v2 overlay,
-  dedup (disjoint + collision), coverage/`n_expected` from the pinned full grid, per-slice means.
+  dedup (disjoint + collision), coverage/`n_expected` from the pinned full grid, per-slice means, and
+  matched-cell steadfastness (incl. an asymmetric-panel fixture where turn1/full cell sets differ, proving the
+  intersection is taken).
 - **Integration Tests** (`@pytest.mark.skipif` when the `tmp/judging-runs/` symlink is absent): parity against
   the real sealed launch runs (mean-of-means == `subj_overall`; per-tradition == `report.json`).
 - **Manual Testing**: run the parity helper in a REPL against `20260803-merged` + the Opus layers.
@@ -178,8 +193,10 @@ references the export yet.
   provenance), `framings`, `pressures`, `scopes`, per-tradition `n_scenarios`, and roll-up `counts` (judgments
   per judge, coverage summary). Records that the Opus stated/guided layer is a sample.
 - **Shard** (per tradition): the slice table {subject × framing × scope × pressure-incl-"all" × judge →
-  {mean, n_judged, n_expected}} — Gemini full, Opus where present. Compact keys; floats only; **no transcript
-  turns, no rationale** (Approved Decision 5). **Deliberate v1 exclusions** (all fine against Success Criteria):
+  {mean, n_judged, n_expected}} — Gemini full, Opus where present — **plus a steadfastness slice** {subject ×
+  framing × pressure-incl-"all" × judge → {steadfastness, matched_n}} (matched-cell full − turn1). Compact
+  keys; floats only; **no transcript turns, no rationale** (Approved Decision 5). **Deliberate v1 exclusions**
+  (all fine against Success Criteria):
   per-subject score distributions and judge-agreement context are not in the shard; pooled-Gemini bootstrap CIs
   are an optional SHOULD (Approved Decision 6) — include only if trivially cheap.
 - **Run-id**: single combined id for the launch (e.g. `20260803`) so one `results/<run-id>/` holds both judges;
@@ -271,12 +288,13 @@ Revert the new hooks/types and the `github.ts` fallback change; the corpus route
 
 ---
 
-### Phase 4: Leaderboard route + framing/scope/pressure selectors (Gemini-ranked)
+### Phase 4: Leaderboard route + framing / scope+steadfastness / pressure selectors (Gemini-ranked)
 **Dependencies**: Phase 3
 
 #### Objectives
 - Ship the acceptance-critical view: a Gemini-ranked leaderboard (mean-of-per-tradition-means) at a new
-  `/results` route, with deep-linkable framing, scope, and pressure selectors.
+  `/results` route, with deep-linkable framing, **metric** (first-response / post-pressure / steadfastness),
+  and pressure selectors.
 
 #### Deliverables
 - [ ] `resultsRoute` (`/results`, `validateSearch`) added in `src/router.tsx` + a nav link in
@@ -284,7 +302,8 @@ Revert the new hooks/types and the `github.ts` fallback change; the corpus route
 - [ ] `src/routes/ResultsPage.tsx` — loads the latest run + shards, computes the **equal-weight mean across
       the seven tradition-means** for the current selection, renders the standings table (subjects ranked,
       scores colored via the score palette).
-- [ ] `src/lib/resultsSelection.ts` — the selection/deep-link model (judge, framing, scope, pressure), mirroring
+- [ ] `src/lib/resultsSelection.ts` — the selection/deep-link model (judge, framing, **metric** ∈
+      {first-response=`turn1`, post-pressure=`full`, `steadfastness`}, pressure), mirroring
       `filtering.ts`/`searchParams.ts` (typed search params, fail-soft).
 - [ ] `src/lib/scoreColor.ts` — TS port of the diverging score palette stops from
       `workflows/analysis/analysis/colors.py` (single source of truth documented), `TwoSlopeNorm(−1,0,1)` linear.
@@ -297,15 +316,23 @@ Revert the new hooks/types and the `github.ts` fallback change; the corpus route
   regardless of the judge selector (which affects only the Phase-5 drill-down/inspection layer). Because
   Gemini is full-grid, all seven traditions contribute for every selection — no coverage gating.
 - **pressure="all"** reads the pooled cell-mean slice directly from the shard (never pools cells client-side).
-- Selectors: framing (unstated/stated/guided) and scope (turn1=first-response / full=post-pressure) as toggles;
-  pressure as the six + "all". All deep-linkable via `validateSearch`, exactly like the corpus filters.
+- Selectors: framing (unstated/stated/guided) and a **metric** toggle with three values — first-response
+  (`turn1` mean), post-pressure (`full` mean), and **steadfastness** (matched-cell full − turn1); pressure as
+  the six + "all". All deep-linkable via `validateSearch`, exactly like the corpus filters.
+- **Steadfastness ranking**: when metric=steadfastness, the leaderboard ranks subjects by the mean-of-
+  per-tradition steadfastness (Gemini), pressure-filterable; it reads the shard's steadfastness slice directly
+  (no client-side turn1/full subtraction, so the matched-cell definition is preserved). Steadfastness can be
+  negative (degradation under pressure) — the diverging palette handles that natively.
 - **No band-name labels** anywhere; numeric −1…+1 with the diverging palette.
 
 #### Acceptance Criteria
-- [ ] For the committed launch dataset, standings at framing∈{unstated,stated,guided}, scope=full,
+- [ ] For the committed launch dataset, standings at framing∈{unstated,stated,guided}, metric=post-pressure,
       pressure=all match the paper's `subj_overall` to displayed precision (a test asserts this against a
       fixture derived from the real numbers).
-- [ ] Changing any selector updates the table and the URL search string (deep-link round-trips).
+- [ ] metric=steadfastness ranks by mean-of-per-tradition steadfastness (Gemini), pressure-filterable, and
+      (unstated, pressure=all) reconciles with the paper's steadfastness figures.
+- [ ] Changing any selector (framing, metric, pressure) updates the table and the URL search string
+      (deep-link round-trips).
 - [ ] The leaderboard is unaffected by the judge selector's presence (ranking stays Gemini).
 - [ ] All tests pass.
 
@@ -331,19 +358,22 @@ Remove the route + nav link + new files; the SPA reverts to corpus-only.
 
 ---
 
-### Phase 5: Per-tradition drill-down + judge selector + Opus validation layer
+### Phase 5: Per-tradition drill-down (incl. steadfastness) + judge selector + Opus validation layer
 **Dependencies**: Phase 4
 
 #### Objectives
-- Add the per-tradition drill-down and the **judge selector** as an inspection/validation switch: show Opus
-  per-tradition means (coverage-badged) where Opus data exists, without ever re-ranking the board.
+- Add the per-tradition drill-down (for every metric, including steadfastness) and the **judge selector** as
+  an inspection/validation switch: show Opus per-tradition means/steadfastness (coverage-badged) where Opus
+  data exists, without ever re-ranking the board.
 
 #### Deliverables
-- [ ] Per-tradition drill-down UI (each tradition's contributing mean for the current selection), reachable
-      from the leaderboard.
+- [ ] Per-tradition drill-down UI (each tradition's contributing value for the current selection — mean for
+      the scope metrics, matched-cell steadfastness for the steadfastness metric), reachable from the
+      leaderboard, pressure-filterable.
 - [ ] Judge selector control: Gemini (default) | Opus. Selecting Opus swaps the **drill-down/inspection**
-      numbers to the normalized Opus judge where present, each badged `sample (n/N)`; zero-coverage traditions
-      show nothing (never 0). The top-level standings remain Gemini-ranked and labeled as such.
+      numbers (means **and** steadfastness) to the normalized Opus judge where present, each badged
+      `sample (n/N)` — steadfastness uses its matched-cell coverage; zero-coverage traditions show nothing
+      (never 0). The top-level standings remain Gemini-ranked and labeled as such.
 - [ ] Optional (SHOULD): judge-agreement context and/or pooled-Gemini CIs if carried by the dataset.
 - [ ] Tests: judge selector switches inspection (not ranking), coverage badges render, zero-coverage hidden.
 
@@ -465,7 +495,8 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 
 1. **After Phase 1**: parity green against the real runs (mean-of-means == `subj_overall`).
 2. **After Phase 2**: committed dataset within size ceilings; Gemini standings recomputed from shards == paper.
 3. **After Phase 3**: results discovered + validated, incl. under a truncated tree.
-4. **After Phase 4**: leaderboard reconciles to displayed precision; selectors deep-link.
+4. **After Phase 4**: leaderboard reconciles to displayed precision (post-pressure standings **and**
+   steadfastness); framing/metric/pressure selectors deep-link.
 5. **After Phase 5**: judge selector switches inspection only; Opus coverage badged honestly.
 6. **Before Production (Verify phase)**: `railway up` deploy; judge & pressure selectors work live; a fresh
    run-id appears without a code change.
@@ -518,8 +549,9 @@ confidence. Every point verified against the actual codebase/data before incorpo
   `load_run_dir`); **promote `_mean_over` to a public breakdown helper** in `aggregate.py`; handle
   `judgments_v2.jsonl` overlay with normalize-judge-**first** ordering; **pin `n_scenarios`/coverage to the
   Gemini full grid** (`report.json.by_scenario`), validate Opus scenarios ⊆ it; committed **miniature
-  fixtures** for deterministic tests + `skipif` real-data parity; declared **steadfastness out of scope for
-  v1** (scope toggle shows turn1/full standings independently, not their difference).
+  fixtures** for deterministic tests + `skipif` real-data parity. (Steadfastness was briefly scoped out at
+  iter1, then **brought back into v1 scope by the architect** — see Change Log — as a matched-cell metric;
+  the matched-cell definition is exactly what neutralizes the reviewer's asymmetric-panel concern.)
 - **Phase 2**: canonical-model-id shards + UI-key mapping with consistency validation; sealed-data single
   export (no interim); reworded size enforcement as dispatcher/local (not GitHub CI); score-dist/agreement/CIs
   as explicit v1 exclusions/SHOULDs; fixture-based deterministic tests + `skipif` integration.
@@ -538,6 +570,7 @@ confidence. Every point verified against the actual codebase/data before incorpo
 | 2026-08-06 | Initial plan | Spec approved with simplifying decisions (Gemini-only ranking) | builder |
 | 2026-08-06 | Iteration-1 revisions | Codex+Claude REQUEST_CHANGES: ingestion seam, v2 overlay, coverage denominator, fixtures/skipif, steadfastness scope, minor fixes | builder |
 | 2026-08-06 | Data sealed | Architect confirmed Opus tail-fill complete + collision live → single clean export | builder |
+| 2026-08-06 | Steadfastness INTO v1 scope | Waleed conditional-approval: add matched-cell steadfastness (full−turn1) as a pressure-filterable leaderboard metric + drill-down, Gemini-ranked, Opus badged-validation | architect |
 
 ## Notes
 - **Spec/plan boundary**: exact JSON key names, component names, and file splits may adjust during
@@ -547,10 +580,12 @@ confidence. Every point verified against the actual codebase/data before incorpo
   cells), so Phase 2 is a **single clean export** — the interim/re-export dance in Approved Decision 8 is no
   longer needed. The alias collision is **live** (~1,810 sunni-islam cells under both aliases), so the
   later-`ts`-wins dedup path runs on real data and is covered by a dedicated test.
-- **Steadfastness out of scope for v1**: `full − turn1` is not a spec Success Criterion. The scope toggle
-  selects the `turn1` (first-response) or `full` (post-pressure) standings independently — each a valid mean —
-  and the export publishes both scopes' means without computing a matched-cell difference. This avoids the
-  asymmetric-panel pitfall (unstated-opus has slightly more turn1 than full cells) that a naive difference
-  would hit.
+- **Steadfastness IS in v1 scope** (architect decision 2026-08-06, superseding the earlier scope-out): it is a
+  third leaderboard **metric** (alongside first-response and post-pressure), computed with the **matched-cell**
+  definition (spec Test Scenario 5) — restrict to cells present in both `turn1` and `full`, then
+  `mean(full) − mean(turn1)`. The export publishes it as a dedicated slice (so the SPA never subtracts client-
+  side and the matched-cell definition is preserved). This is what defuses the asymmetric-panel pitfall the
+  reviewers raised (Gemini panels are balanced anyway → parity with `report.json.scorecard.steadfastness`;
+  Opus panels use the matched-cell restriction and follow the badged-validation rules).
 - **Per-phase consult** here is `[codex, claude]` (Gemini can't see the worktree); the full 3-way runs only
   where the diff is fed inline (the PR integration CMAP).

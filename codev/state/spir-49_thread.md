@@ -150,3 +150,16 @@ mean-of-per-tradition-means == current `subj_overall[·][0]` to <1e-9 — merged
 Gemini leaderboard target (the acceptance-critical one) is unmoved. **Phase 1 parity anchor: judge=Gemini
 mean-of-means must equal stats_bundle.subj_overall exactly (1e-9).** Opus parity is the dual-judge stats, not
 a ranking.
+
+### Plan CONDITIONAL APPROVAL (Waleed, 2026-08-06): steadfastness INTO v1 scope.
+Reversed my iter1 scope-out. Amended plan (pre-approval, no rollback): steadfastness = matched-cell
+(full−turn1, cells present in BOTH scopes) added as a third leaderboard METRIC (first-response/post-pressure/
+steadfastness), pressure-filterable, per-tradition drill-down, Gemini-ranked, Opus badged-validation.
+- Export (Phase 1/2): new steadfastness slice {subject×framing×pressure-incl-all×judge → {steadfastness,
+  matched_n}}. Gemini panels balanced → matched-cell == report.json scorecard.steadfastness (+by_pressure) =
+  parity anchor. Opus matched-cell handles asymmetry.
+- UI (Phase 4/5): metric toggle (turn1/full/steadfastness); reads shard steadfastness slice directly (no
+  client subtraction → preserves matched-cell def). NOTE: spec Test 5 already specified matched-cell, so plan
+  now MATCHES spec (my iter1 scope-out had diverged).
+Architect said NO re-consult needed (not structural). Committing amended plan → message architect → they
+approve gate.
