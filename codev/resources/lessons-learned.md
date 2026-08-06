@@ -23,6 +23,15 @@ pattern, gotcha, or constraint.
 - **Porch force-advances a phase at its review safety ceiling (iter 3)** even if a reviewer's last
   verdict was REQUEST_CHANGES. Address the points and commit before the ceiling; note in the review
   that the phase force-advanced so the final PR CMAP re-checks the full diff.
+- **Railway `railway up` respects `.gitignore` by default.** To ship a gitignored, deploy-only
+  bundle (e.g. the #51 baked raw tier under `public/data-raw/`), force-upload with `--no-gitignore`
+  and re-exclude `node_modules`/`dist` via `.railwayignore` — otherwise the "primary" source
+  silently never ships. Keep the bake OUT of `pnpm build` (a separate script) so the test build
+  (`deploy.test`) never copies hundreds of MB into `dist/`.
+- **A localStorage-persisted TanStack cache must exclude big/volatile queries.** Large per-item
+  payloads (the ~0.7 MB raw shards) or transient source-selection results silently blow the quota →
+  TanStack stops persisting the WHOLE cache. Gate with `dehydrateOptions.shouldDehydrateQuery`; and
+  never cache a class instance (hydration drops its methods) — cache serializable data + reconstruct.
 
 ## Data-format design
 
@@ -32,6 +41,23 @@ pattern, gotcha, or constraint.
 - **Closed + strict schemas pay for themselves.** Pydantic closed schemas (unknown key = error)
   with no string coercion give precise, located errors almost for free and catch typos a permissive
   parser would silently swallow.
+- **Keep a browsable data contract catalog-generic when a second dataset type will reuse the viewer.**
+  Ship the score scale + color ramp, subjects, judges, condition **axes**, grouping axis, and items as
+  catalog DATA (not hardcoded UI vocab); cells carry `conditions: Record<axisKey,value>`, not fixed
+  field names. Guard it with a static check (no domain literals / no hardcoded ramp in the view) AND a
+  behavioral render of a synthetic off-domain catalog. (Spec 51 raw viewer → the AFB 0–4 catalog #54.)
+- **Two tiers that must agree: stamp a shared source fingerprint** (a hash over the resolved-input
+  stream) in BOTH manifests and assert equality per run — upgrades "same loaders" from convention to a
+  checkable invariant. Keep the tiers timestamp-free so re-exports are byte-identical (sorted keys,
+  gzip `mtime=0`); a wall-clock field defeats it and churns the SHA the viewer pins.
+- **Client gzip: sniff the magic bytes (`0x1f 0x8b`) before `DecompressionStream`** — some hosts serve
+  `.gz` already-decompressed (Content-Encoding), others raw bytes; never trust Content-Type. One sniff
+  path handles both a same-origin baked `.json` and a GitHub `.gz`. Feature-detect DecompressionStream
+  (Safari ≥16.4) → message, don't polyfill.
+- **Size a browsable tier from the real data, not the issue estimate.** The #51 raw tier measured
+  ~126 MB gz/run (uncompressed ~3.7×), vs a 30–80 MB guess; per-shard/per-run ceilings must sit above
+  the measured p99 (validate-before-write, no partial tier), and a per-scenario granularity keeps a
+  refresh to changed-shard-only commits.
 
 ## Testing LLM pipelines
 

@@ -1,0 +1,5 @@
+# `railway up --no-gitignore` disables .gitignore (needed to force-upload the baked
+# public/data-raw/ gz tier). Re-exclude the heavy build artifacts here so they aren't uploaded.
+node_modules
+dist
+dist-ssr

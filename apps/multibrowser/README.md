@@ -26,6 +26,26 @@ command live in [`results/README.md`](../../results/README.md).
 - Display-first: a malformed/missing manifest or shard, unknown vocab, or a dropped tradition
   renders an inline notice — never a blank page.
 
+## Raw-results browser (`/results/$runId/$groupId/$itemId`, #51)
+
+The evidence behind the scores: per-scenario **transcripts + judge verdicts**, read from the
+[`results-raw/<run-id>/`](../../results-raw/README.md) tier (per-scenario gzip shards, lazy-loaded).
+Reached by drilling in from `/results` → a tradition → a scenario's live **ResultsRegion** link.
+
+- **Cell-score grid** — subjects × condition-tuples, chips colored by the **catalog-declared** ramp
+  for the selected **judge + scope**; the grid *is* the navigation (click a chip → that cell).
+- **A/B compare** — pin a second subject to see two transcripts + verdict sets side by side.
+- **Presets** — export-computed curated deep links (Models split / Judges differed / Steadfastness
+  cliff), each a shareable URL that may target another scenario.
+- **Deep links** — the full view state (run, group, item, A/B, condition axes, scope, judge) lives
+  in the URL. **No band names** — numeric scores + the catalog ramp only.
+- **Catalog-generic** (issue #54): scale, ramp, subjects, judges, condition **axes**, grouping axis,
+  and items are all catalog-declared, so a non-MultiBench catalog (e.g. the AFB 0–4 explorer) rides
+  the same viewer with zero component changes. The view is also independent of the `results/` score
+  tier — that's consulted only for an optional cross-tier coherence fingerprint.
+- **Dual-source** (see below): served baked-first (same-origin), GitHub-committed tier as the
+  authoritative fallback; fail-soft notices throughout.
+
 ## Architecture (in one breath)
 
 - **Stack:** Vite 6 + React 19 + TypeScript + Tailwind 4 + HeroUI + **TanStack Router**
@@ -86,18 +106,42 @@ Point a Railway service at this directory (`apps/multibrowser`). It uses Nixpack
 - **start:** `pnpm start` → `serve -s dist -l $PORT` — a static server with **SPA history
   fallback**, so deep links like `/t/sunni-islam/JLS-001` resolve to the app.
 
-`railway.json` pins this. The data stays live from GitHub at runtime, so this is **not** a
-data-baking static build — new traditions appear without redeploying.
+`railway.json` pins this. The corpus + `results/` score tier stay live from GitHub at runtime, so
+new traditions/runs appear **without redeploying**.
+
+### Baking the raw tier (#51 dual-source)
+
+The `results-raw/` tier is served from **two public sources of identical gz content**: the
+SHA-pinned **GitHub committed tier** (authoritative + fallback) and a **same-origin baked bundle**
+(the fast primary — no GitHub rate limits). To refresh the baked copy:
+
+```bash
+apps/multibrowser/scripts/bake-and-deploy.sh <run-id> <run-root>...
+```
+
+This exports the gz raw tier into `public/data-raw/` (gitignored — deploy-only, never committed)
+and runs `railway up --no-gitignore` (Railway honors `.gitignore` by default, so the baked dir must
+be force-uploaded; `.railwayignore` re-excludes `node_modules`/`dist`). Vite copies `public/` into
+`dist/`, so it's served same-origin at `/data-raw/<run-id>/`.
+
+**Trade-off:** unlike the corpus/score tiers, the **baked** copy refreshes only on
+`bake-and-deploy` — the **GitHub** copy still updates live on commit and is the fallback. **Partial
+rate-limit immunity:** the baked-first fast path is chosen after a small GitHub read of the run's
+coherence fingerprint, so immunity applies to the heavy per-scenario shards, not that one manifest
+read.
 
 ## Layout
 
 ```
 src/lib/      constants, model, parse (tolerant parsers), github (fetch boundary),
-              queries (TanStack Query), filtering (pure filter/sort), results (inert #8 seam),
-              resultsModel (results manifest/shard parsers), resultsSelection (explorer deep-link
-              model), leaderboard (mean-of-means standings), scoreColor (diverging palette)
-src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, ResultsPage, NotFound (+ tests)
+              queries (TanStack Query), filtering (pure filter/sort), results (deprecated #8 seam),
+              resultsModel/resultsSelection/leaderboard/scoreColor (the #49 score explorer),
+              rawModel (generic raw contract + parsers), rawSource (dual-source resolver + gunzip
+              sniff), rawSelection (raw-view deep-link state), rampColor (catalog-generic ramp) [#51]
+src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, ResultsPage,
+              RawResultsPage (#51), NotFound (+ tests)
 src/components/  Markdown, Notice, ErrorBoundary, RateLimitBanner, TraditionCard, FilterBar,
                  ScenarioList/Row, ScenarioHeader, PressureSection, FramingsPanel,
-                 ResultsRegion, Collapsible, Loading
+                 ResultsRegion (live #51 drill-in), Collapsible, Loading
+scripts/      bake-and-deploy.sh (#51 raw-tier bake + deploy)
 ```

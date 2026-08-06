@@ -358,3 +358,45 @@ tier-lacks-cell-scores). Also fixed: RawResultsPage shard-load-fail shows 'unava
 'No cell'); back-link to scenario/judge-guidance; /results→/t/<tradition> drill-path disclosed
 in spec+plan. Multi-run: drill-link + ResultsRegion use defaultRunId (run not propagated) —
 phase-7 deep-link item. 206 SPA tests.
+
+### 2026-08-06 — phase_6 APPROVED; architect ruled option (b): ADD cell-score grid (phase_7)
+Rationale (REVIEW-DOC): selector-only repeats the one-at-a-time pattern Waleed rejected in #49's
+leaderboard; his preference is dense-at-a-glance (#55 board + heat strip + tooltip). The raw view
+already holds the full shard → grid is fetch-free. Shape: subjects × (pressure×framing) chips
+colored by the catalog ramp (judge-selectable + scope), each chip=cell score, click chip → that
+cell's transcript+verdicts (grid IS the navigation; selectors/URL-state underneath). A/B = pin two
+subjects from the grid. Phase-8 doc: baked-first needs a GitHub fingerprint read → partial
+rate-limit immunity (document exactly). loadResults seam annotated deprecated (review/simplify TODO).
+
+### 2026-08-06 — IMPLEMENT phase_7: cell-score grid + A/B + deep-links + presets
+- rawSelection.ts: URL state (fail-soft) with GENERIC per-axis conditions (not hardcoded
+  framing/pressure) — a=subject, b?, conditions:Record<axisKey,value>, scope, judge; each axis a
+  flat search param; out-of-vocab → catalog defaults. Wired validateSearch on rawResultsRoute.
+- RawResultsPage rewrite: cell-score GRID (subjects × condition-tuple product, chips colored by
+  the catalog ramp for the selected judge+scope; click chip = navigate to that cell → the grid IS
+  the navigation, per architect ruling); judge+scope pills; A/B compare (pin subject B → two
+  CellDetail columns); presets rendered as deep-links (may target other scenarios); full view
+  state in the URL.
+- Tests: grid navigates, A/B two columns, deep-link write (via router.state.location.search) +
+  restore, preset deep-link, generic 0-4 grid, rawSelection unit (defaults/fail-soft/round-trip/
+  generic axes). 214 SPA tests green; tsc clean; deploy.test (real build) passes.
+
+### 2026-08-06 — phase_7 APPROVED (both, 2 iters). Grid+A/B+deep-links+presets done.
+Non-blocking nits folded: preset Link spreads conditions FIRST so reserved keys win (matches
+rawSelectionToSearch). Compare-B URL covered transitively. Dead loadResults seam annotated
+(review/simplify TODO). Next: phase_8 (Railway gz-baked deploy wiring + deploy-test safety + docs
++ arch-docs). Phase-8 doc TODO: partial rate-limit immunity (baked coherence needs GH fingerprint).
+
+### 2026-08-06 — IMPLEMENT phase_8: Railway gz-baked deploy wiring + docs + arch-docs
+- apps/multibrowser/scripts/bake-and-deploy.sh: export-raw gz into public/data-raw + `railway up
+  --no-gitignore`; .railwayignore (node_modules/dist); .gitignore public/data-raw/ (deploy-only).
+- deploy.test guard: a normal build carries NO dist/data-raw (bake is deploy-only) + gitignored.
+  VERIFIED manually: export-raw --limit → public/data-raw → pnpm build → dist/data-raw served;
+  cleaned up (gitignored). Production `railway up` is architect-driven post-merge (wiring only here).
+- README: raw-browser section + dual-source bake flow + partial-rate-limit-immunity note.
+- arch-docs (update-arch-docs skill): +1 arch-critical fact (raw tier + dual-source, at cap 10);
+  arch.md analysis-workflow raw-tier paragraph; lessons-learned +catalog-generic/fingerprint/
+  gunzip-sniff/size-from-real-data/Railway-.gitignore/persist-quota. Hot lessons stayed at cap.
+218 SPA + 177 analysis tests green.
+REVIEW-DOC TODOs (Review phase): round-robin presets refinement; link-only ResultsRegion (220KB);
+partial rate-limit immunity; loadResults dead-seam cleanup.
