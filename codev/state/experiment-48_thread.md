@@ -369,3 +369,9 @@ Architect corrected my lean cut: capability MUST re-run on +DPO (MMLU −2.3 is 
 3. **DPO + full battery** (adds descriptive re-run + faith) ≈ 390–420 — over the 320-340 gate.
 Decision waits for the yield + descriptive numbers. SFT alone already delivers the headline
 (P≥2 1%→27%), so stop-at-SFT is a real option.
+
+**CEILING RAISED to 400 USD all-in (Waleed, 2026-08-06, supersedes 320-340).** Option 2 (DPO+lean
+~340-360) comfortably inside; option 3 (DPO+full ~390-420) viable ONLY if it pins ≤400 — price
+precisely from the pilot yield. Keep all three options; architect decides at the checkpoint.
+Progress: descriptive 4/7 traditions clean (1,692 sit / 1,673 jud, 0 failed); mining sampling
+1,506/1,680. On both done → band mining → yield → assemble checkpoint report.
