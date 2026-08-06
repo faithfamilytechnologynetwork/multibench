@@ -8,7 +8,7 @@
 import { useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { latestSha, raw, tree, type TreeEntry } from "./github";
 import { BakedRawSource, GitHubRawSource, loadRawShard, resolveRawSource, type RawDataSource } from "./rawSource";
-import type { RawCatalog, RawShard } from "./rawModel";
+import { rawShardConsistencyNotices, type RawCatalog, type RawShard } from "./rawModel";
 import {
   parseIndex,
   parseManifest,
@@ -561,7 +561,8 @@ export async function loadRawScenario(
     return { catalog, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" in this run`)] };
   }
   const { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
-  return { catalog, shard, notices: [...notices, ...sn] };
+  const consistency = shard ? rawShardConsistencyNotices(shard, catalog, `results-raw/${runId}/${it.shard}`) : [];
+  return { catalog, shard, notices: [...notices, ...sn, ...consistency] };
 }
 
 export function useRawScenario(

@@ -188,6 +188,56 @@ export function parseRawCatalog(text: string, where: string): { catalog: RawCata
   };
 }
 
+/**
+ * Cross-validate a shard against its catalog (display-first): verdict scores within the
+ * catalog-declared `scale`; subjects/judges/scopes/condition-axis keys+values in the catalog's
+ * declared vocabulary; every `contextKey` resolvable in the shard's `contexts` pool. Unknown/
+ * out-of-range values become `Notice`s (the shard still renders — the UI only selects known
+ * values). One notice per category (deduped), not per stray value.
+ */
+export function rawShardConsistencyNotices(shard: RawShard, catalog: RawCatalog, where: string): Notice[] {
+  const notices: Notice[] = [];
+  const subjects = new Set(catalog.subjects.map((s) => s.id));
+  const judges = new Set(catalog.judges.map((j) => j.key));
+  const scopes = new Set(catalog.scopes.map((s) => s.id));
+  const axisValues = new Map(catalog.conditionAxes.map((a) => [a.key, new Set(a.values.map((v) => v.id))]));
+  const { min, max } = catalog.scale;
+
+  const unknown: Record<string, Set<string>> = {
+    subject: new Set(), judge: new Set(), scope: new Set(),
+    "condition axis": new Set(), "condition value": new Set(), contextKey: new Set(),
+  };
+  let outOfRange = 0;
+
+  for (const cell of shard.cells) {
+    if (!subjects.has(cell.subject)) unknown.subject!.add(cell.subject);
+    for (const [axis, value] of Object.entries(cell.conditions)) {
+      const vals = axisValues.get(axis);
+      if (!vals) unknown["condition axis"]!.add(axis);
+      else if (!vals.has(value)) unknown["condition value"]!.add(`${axis}=${value}`);
+    }
+    if (cell.contextKey !== undefined && !(cell.contextKey in shard.contexts)) {
+      unknown.contextKey!.add(cell.contextKey);
+    }
+    for (const v of cell.verdicts) {
+      if (!judges.has(v.judge)) unknown.judge!.add(v.judge);
+      if (!scopes.has(v.scope)) unknown.scope!.add(v.scope);
+      if (v.score < min || v.score > max) outOfRange++;
+    }
+  }
+  for (const [category, vals] of Object.entries(unknown)) {
+    if (vals.size > 0) {
+      notices.push(notice("warning", "results-raw", where,
+        `unknown ${category}(s) not in catalog: ${[...vals].sort().join(", ")}`));
+    }
+  }
+  if (outOfRange > 0) {
+    notices.push(notice("warning", "results-raw", where,
+      `${outOfRange} verdict score(s) outside the catalog scale [${min}, ${max}]`));
+  }
+  return notices;
+}
+
 /** Parse one scenario shard. Returns `{ shard: null, notices }` on any problem. */
 export function parseRawShard(text: string, where: string): { shard: RawShard | null; notices: Notice[] } {
   const { data, notice: jsonNotice } = parseJson(text, where);

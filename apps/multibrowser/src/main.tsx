@@ -2,6 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { defaultShouldDehydrateQuery } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./router";
 import { queryClient } from "./lib/queryClient";
@@ -22,7 +23,18 @@ if (root) {
       <ErrorBoundary>
         <PersistQueryClientProvider
           client={queryClient}
-          persistOptions={{ persister, maxAge: 1000 * 60 * 60 * 24 }}
+          persistOptions={{
+            persister,
+            maxAge: 1000 * 60 * 60 * 24,
+            // Don't persist the large per-scenario raw shards (~0.7 MB each): a few drill-ins
+            // would blow the localStorage quota and TanStack would then silently stop persisting
+            // the WHOLE cache, killing the rate-limit mitigation for the score/traditions tiers.
+            // Raw shards are re-fetchable on demand; everything else persists.
+            dehydrateOptions: {
+              shouldDehydrateQuery: (q) =>
+                q.queryKey[0] !== "rawScenario" && defaultShouldDehydrateQuery(q),
+            },
+          }}
         >
           <RouterProvider router={router} />
         </PersistQueryClientProvider>

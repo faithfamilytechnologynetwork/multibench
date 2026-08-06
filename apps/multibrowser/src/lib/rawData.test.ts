@@ -5,7 +5,10 @@ import {
   isSafeRelPath,
   parseRawCatalog,
   parseRawShard,
+  rawShardConsistencyNotices,
   RAW_SUPPORTED_SCHEMA_VERSION,
+  type RawCatalog,
+  type RawShard,
 } from "./rawModel";
 import {
   BakedRawSource,
@@ -26,7 +29,10 @@ const MB_CATALOG = {
   ramp: ["#9E1B32", "#D9D2C5", "#1B7837"],
   subjects: [{ id: "claude-sonnet-5", label: "claude-sonnet-5" }],
   judges: [{ key: "gemini", label: "gemini", fullGrid: true }],
-  conditionAxes: [{ key: "framing", label: "Framing", values: [{ id: "unstated", label: "Unstated" }] }],
+  conditionAxes: [
+    { key: "framing", label: "Framing", values: [{ id: "unstated", label: "Unstated" }, { id: "stated", label: "Stated" }] },
+    { key: "pressure", label: "Pressure", values: [{ id: "secularize", label: "Secularize" }] },
+  ],
   groupBy: { key: "tradition", label: "Tradition" },
   scopes: [{ id: "turn1", label: "turn1" }],
   items: [{ id: "BUD-001", label: "BUD-001", group: "buddhism", shard: "buddhism/BUD-001.json.gz" }],
@@ -124,6 +130,43 @@ describe("parseRawShard", () => {
     const { shard, notices } = parseRawShard(JSON.stringify({ ...SHARD, schema_version: 2 }), "s");
     expect(shard).toBeNull();
     expect(notices[0]?.message).toMatch(/unsupported schema_version/);
+  });
+});
+
+// ── catalog-aware shard consistency ──────────────────────────────────────────────────
+
+describe("rawShardConsistencyNotices", () => {
+  const catalog = parseRawCatalog(JSON.stringify(MB_CATALOG), "m").catalog as RawCatalog;
+  const okShard = parseRawShard(JSON.stringify(SHARD), "s").shard as RawShard;
+
+  it("passes a shard whose values are all catalog-declared", () => {
+    expect(rawShardConsistencyNotices(okShard, catalog, "s")).toHaveLength(0);
+  });
+
+  it("flags an out-of-scale verdict score", () => {
+    const bad: RawShard = { ...okShard, cells: [{ ...okShard.cells[0]!, verdicts: [{ judge: "gemini", scope: "turn1", score: 4, summary: "x" }] }] };
+    const n = rawShardConsistencyNotices(bad, catalog, "s");
+    expect(n.some((x) => /outside the catalog scale/.test(x.message))).toBe(true);
+  });
+
+  it("flags unknown subject / judge / scope / condition value / contextKey", () => {
+    const bad: RawShard = {
+      schemaVersion: 1,
+      contexts: {},
+      cells: [{
+        subject: "who?",
+        conditions: { framing: "nope", galaxy: "x" },
+        transcript: [],
+        contextKey: "missing",
+        verdicts: [{ judge: "wat", scope: "midturn", score: 0, summary: "s" }],
+      }],
+    };
+    const msgs = rawShardConsistencyNotices(bad, catalog, "s").map((n) => n.message).join(" | ");
+    expect(msgs).toMatch(/subject/);
+    expect(msgs).toMatch(/judge/);
+    expect(msgs).toMatch(/scope/);
+    expect(msgs).toMatch(/condition axis|condition value/);
+    expect(msgs).toMatch(/contextKey/);
   });
 });
 
