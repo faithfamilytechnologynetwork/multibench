@@ -274,3 +274,15 @@ export function parseRawShard(text: string, where: string): { shard: RawShard | 
     notices: [],
   };
 }
+
+// ---- pure cell lookup (shared by the raw view + the scenario-page section) -------------------
+
+/** True when two condition maps are identical (same axes + values). */
+export function sameConditions(a: Record<string, string>, b: Record<string, string>): boolean {
+  return Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, v]) => b[k] === v);
+}
+
+/** The cell for a subject at an exact condition tuple, or undefined. */
+export function findCell(shard: RawShard, subject: string, conditions: Record<string, string>): RawCell | undefined {
+  return shard.cells.find((c) => c.subject === subject && sameConditions(c.conditions, conditions));
+}

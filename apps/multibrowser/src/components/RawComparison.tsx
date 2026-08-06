@@ -1,17 +1,8 @@
 import type { ReactNode } from "react";
 import { catalogScoreColor } from "../lib/rampColor";
-import type { RawCatalog, RawCell, RawShard } from "../lib/rawModel";
+import { findCell, type RawCatalog, type RawCell, type RawShard } from "../lib/rawModel";
 import { Collapsible } from "./Collapsible";
 import { Markdown } from "./Markdown";
-
-// ── shared cell helpers (used here and by the raw route's grid) ──────────────────────────────
-
-export const sameConditions = (a: Record<string, string>, b: Record<string, string>) =>
-  Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, v]) => b[k] === v);
-
-export function findCell(shard: RawShard, subject: string, conditions: Record<string, string>): RawCell | undefined {
-  return shard.cells.find((c) => c.subject === subject && sameConditions(c.conditions, conditions));
-}
 
 /** One judge verdict: score chip + judge (sample-badged) + scope + summary + collapsible rationale. */
 export function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"][number]; catalog: RawCatalog }) {
@@ -56,10 +47,13 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
   const labelB = b ? (catalog.subjects.find((s) => s.id === b)?.label ?? b) : "";
   const maxTurns = Math.max(cellA?.transcript.length ?? 0, cellB?.transcript.length ?? 0);
 
-  // Two scopes → initial = first (turn-1), post = last (full). One scope → post only.
+  // Scope interleave (generic over any count): the FIRST scope (turn-1) sits after the first
+  // assistant response; ALL remaining scopes sit after the last. With 2 scopes that's turn-1 then
+  // full (the MB case); with ≥3 scopes no middle scope is ever dropped (catalog-generic invariant,
+  // AFB #54); with 1 scope only the first stage renders.
   const scopes = catalog.scopes;
-  const postScope = scopes[scopes.length - 1];
-  const initialScope = scopes.length > 1 ? scopes[0] : undefined;
+  const initialScope = scopes[0];
+  const restScopes = scopes.slice(1);
 
   const roleAt = (i: number) => cellA?.transcript[i]?.role ?? cellB?.transcript[i]?.role;
   const assistantIdx: number[] = [];
@@ -109,7 +103,7 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
         </div>,
       );
       if (i === firstAssistant) rows.push(verdictStage(initialScope, `v-init-${i}`));
-      if (i === lastAssistant) rows.push(verdictStage(postScope, `v-post-${i}`));
+      if (i === lastAssistant) restScopes.forEach((sc, k) => rows.push(verdictStage(sc, `v-rest-${i}-${k}`)));
     }
   }
 

@@ -15,7 +15,9 @@ Delivered as two additive pieces mirroring the #49 score tier:
    equal **source fingerprint** so cross-tier agreement is a checkable invariant, not a hope.
 2. **A catalog-generic raw viewer** in `apps/multibrowser` (`/results/$runId/$groupId/$itemId`)
    served **dual-source** (same-origin gz-baked bundle primary, SHA-pinned GitHub committed
-   tier authoritative + fallback), with the `ResultsRegion` seam upgraded to a live drill-in.
+   tier authoritative + fallback). The **scenario page** additionally embeds the responses in
+   context (verify iter-2 — see Deviation 2), so a reader answers "how did model X respond?"
+   without leaving the page.
 
 The contract and viewer are **catalog-generic** (issue #54): score scale + ramp, subjects,
 judges, condition axes, grouping axis, and items are all catalog-declared, so a non-MultiBench
@@ -45,9 +47,9 @@ Every Success Criterion in the spec is met. Highlights:
 - **Field allowlist** (positive list only) — no `usage`/`raw`/`attempts`/`ts`/`sitting_key`/
   `model` leak. ✔
 - **`dataset.license = CC-BY-4.0`** (SPDX). ✔
-- **Live `ResultsRegion`**, raw route, **A/B compare**, **deep links incl. run-id**,
-  **presets** (Models split / Judges differed / Steadfastness cliff), **magic-byte gunzip sniff
-  verbatim** + `DecompressionStream` feature-detect. ✔
+- **In-context scenario-page responses section** (verify iter-2), raw route, **A/B compare**,
+  **deep links incl. run-id**, **presets** (Models split / Judges differed / Steadfastness cliff),
+  **magic-byte gunzip sniff verbatim** + `DecompressionStream` feature-detect. ✔
 - **No band names** anywhere; catalog-declared ramp (not a hardcoded viewer constant). ✔
 - **Catalog-genericity (#54)** — static no-vocab check + synthetic off-domain render + a drift
   guard against the real committed `.gz`. ✔
@@ -64,12 +66,15 @@ Every Success Criterion in the spec is met. Highlights:
    the committed tier (~126 MB), so the client's magic-byte sniff still exercises the
    `DecompressionStream` path on both sources. Identical content + fingerprint; only the image
    size changes.
-2. **`ResultsRegion` is a live link, not an eager cell-score grid (architect-approved,
-   perf-driven).** A per-scenario summary grid on the scenario page would fetch that scenario's
-   ~220 KB raw shard on **every** scenario load, and the score tier carries no per-scenario cell
-   scores to build one without it. The region is instead a **contentful link** ("N models × M
-   conditions" from the already-loaded score manifest — no raw fetch); the full grid + transcripts
-   live one tap away in the raw view.
+2. **~~`ResultsRegion` is a live link, not an eager cell-score grid.~~ SUPERSEDED by verify iter-2
+   (architect-approved).** *Originally* (perf-driven): the scenario page carried only a contentful
+   **link** into the raw view, because an eager per-scenario summary grid would fetch the ~220 KB
+   shard on every scenario load. **Waleed's iter-2 redirect rejected the separation** — results must
+   live *in context* on the scenario page (JaleesBench unification). The link is now replaced by an
+   embedded **`ScenarioResponses`** section: transcripts + interleaved verdicts, with pickers, that
+   **lazy-loads the shard only on expand** — preserving the original "don't tax plain browsing"
+   perf intent while putting the responses on the page. The generic explorer route stays (grid,
+   presets, deep links) and the two cross-link; both share the `RawComparison` renderer.
 3. **Cell-score grid moved into the raw view (architect ruling b).** The grid overview
    (subjects × condition-tuples, chips colored by the catalog ramp, judge-selectable, click =
    navigate; A/B pins two subjects) lives in the **raw view**, where the shard is already
@@ -176,6 +181,16 @@ catalog/shards + fixtures; the interactive human walkthrough is Waleed's live lo
 - **Phase 8** (deploy wiring + docs) — **iter 1**: Codex REQUEST_CHANGES (unsafe `rm -rf`,
   leftover bake dir, doc drift), Claude COMMENT (serve-s fallback notice, narrow `.railwayignore`,
   hot-tier placement, nits); **iter 2**: **Codex APPROVE, Claude APPROVE** — all items fixed.
+
+### Verify phase (post-merge, Waleed live looks)
+- **Verify iter-1 (UX):** demote the operational source banner to a footer; redesign presets from a
+  flat sea-of-links into compact cards + "show all"; fix the invisible selected pill
+  (`bg-primary text-white` → the #55 `border-primary bg-primary text-primary-foreground` pattern).
+- **Verify iter-2 (structural):** **JaleesBench unification** — the scenario page now embeds the
+  responses in context (Deviation 2). Integration review then required: fix middle-scope verdict
+  drop for ≥3-scope catalogs (generic invariant); doc drift; move pure `findCell`/`sameConditions`
+  to `lib/rawModel`; exclude Model A from "Compare with"; and unify the explorer onto the shared
+  `RawComparison` renderer (one renderer over one shape).
 
 ## Architecture Updates
 Applied via the `update-arch-docs` skill:

@@ -19,6 +19,10 @@ import { CenteredSpinner } from "./Loading";
 export function ScenarioResponses({ traditionId, scenarioId }: { traditionId: string; scenarioId: string }) {
   const sha = useLatestSha().data;
   const runsQ = useResultsRuns(sha);
+  // `engaged` PERSISTS across scenario navigations (same route component, changing params) — so once
+  // a reader opts in, later scenarios auto-load too. That's intended: the lazy-load guarantee is
+  // "plain corpus browsing never pays," not "re-collapse on every scenario." Per-scenario shards
+  // still fetch only on demand (keyed by scenario), and each is cached.
   const [engaged, setEngaged] = useState(false);
 
   const runsSettled = !!sha && !runsQ.isLoading;
@@ -100,7 +104,7 @@ function ResponsesBody({ rawQ, runId, traditionId, scenarioId }: {
   }
 
   const a = selA ?? catalog.subjects[0]?.id ?? "";
-  const b = selB || null;
+  const b = selB && selB !== a ? selB : null; // never compare a model against itself
   const conditions = Object.fromEntries(
     catalog.conditionAxes.map((ax) => [ax.key, selCond[ax.key] ?? ax.values[0]?.id ?? ""]),
   );
@@ -114,7 +118,7 @@ function ResponsesBody({ rawQ, runId, traditionId, scenarioId }: {
         <Picker label="Model" value={a} onChange={setSelA}
           options={catalog.subjects.map((s) => ({ value: s.id, label: s.label }))} />
         <Picker label="Compare with" value={selB} onChange={setSelB}
-          options={[{ value: "", label: "— none —" }, ...catalog.subjects.map((s) => ({ value: s.id, label: s.label }))]} />
+          options={[{ value: "", label: "— none —" }, ...catalog.subjects.filter((s) => s.id !== a).map((s) => ({ value: s.id, label: s.label }))]} />
         {catalog.conditionAxes.map((ax) => (
           <Picker key={ax.key} label={ax.label} value={conditions[ax.key] ?? ""}
             onChange={(v) => setSelCond((c) => ({ ...c, [ax.key]: v }))}

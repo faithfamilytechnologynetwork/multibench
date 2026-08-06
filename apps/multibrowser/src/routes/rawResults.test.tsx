@@ -75,15 +75,14 @@ describe("raw-results view", () => {
     expect(screen.getByText(/weigh it against your values/)).toBeInTheDocument(); // the new transcript
   });
 
-  it("A/B compare: pinning a second subject shows two cell detail columns", async () => {
+  it("A/B compare: pinning a second subject shows two response columns", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001`);
     await screen.findByRole("heading", { name: "BUD-001" });
-    expect(screen.getAllByTestId("cell-detail")).toHaveLength(1);
+    expect(screen.getAllByTestId("cmp-column")).toHaveLength(1); // single-model view
     fireEvent.change(screen.getByLabelText(/Compare/), { target: { value: "gpt-5.6-terra" } });
-    await waitFor(() => expect(screen.getAllByTestId("cell-detail")).toHaveLength(2));
-    const details = screen.getAllByTestId("cell-detail");
-    expect(details.map((d) => d.getAttribute("data-subject"))).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
+    await waitFor(() => expect(screen.getAllByTestId("cmp-column")).toHaveLength(2));
+    expect(screen.getAllByTestId("cmp-column").map((d) => d.textContent)).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
   });
 
   it("selection is a deep link: the search carries a/scope/judge + condition axes", async () => {
@@ -120,8 +119,8 @@ describe("raw-results view", () => {
     const { router } = renderApp(`/results/${RUN}/buddhism/BUD-001`);
     await screen.findByRole("heading", { name: "BUD-001" });
     await userEvent.click(within(screen.getByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ }));
-    await waitFor(() => expect(screen.getAllByTestId("cell-detail")).toHaveLength(2)); // A vs B restored
-    expect(screen.getAllByTestId("cell-detail").map((d) => d.getAttribute("data-subject"))).toEqual(["gpt-5.6-terra", "claude-sonnet-5"]);
+    await waitFor(() => expect(screen.getAllByTestId("cmp-column")).toHaveLength(2)); // A vs B restored
+    expect(screen.getAllByTestId("cmp-column").map((d) => d.textContent)).toEqual(["gpt-5.6-terra", "claude-sonnet-5"]);
     expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // gpt/unstated transcript
     const s = router.state.location.search as Record<string, string>;
     expect(s).toMatchObject({ a: "gpt-5.6-terra", b: "claude-sonnet-5", framing: "unstated", scope: "turn1" });
@@ -131,8 +130,8 @@ describe("raw-results view", () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001?a=claude-sonnet-5&b=gpt-5.6-terra&framing=unstated&pressure=secularize&scope=turn1`);
     await screen.findByRole("heading", { name: "BUD-001" });
-    const details = await screen.findAllByTestId("cell-detail");
-    expect(details.map((d) => d.getAttribute("data-subject"))).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
+    await screen.findByTestId("raw-comparison");
+    expect(screen.getAllByTestId("cmp-column").map((d) => d.textContent)).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
     expect(screen.getByText(/thinking about leaving/)).toBeInTheDocument();       // A (claude)
     expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // B (gpt)
   });
