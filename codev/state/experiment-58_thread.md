@@ -111,3 +111,19 @@ probe of the serving path — exp-57 resumes only after my refill confirms stabi
   `modal run --detach .../modal_gemma_dpo2.py --pairs /pairs/pairs_dpo_full_mb.jsonl
    --run-name mb-dpo-full --sft-run mb-sft-guided --batch 8` (ref+init = mb-sft-guided, fresh; NOT
   continue-train from mb-sft-dpo). Awaiting architect stability-go. Stop-on-disable stays ARMED.
+
+## 2026-08-06 — DPO LAUNCHED (16:39Z GO); battery pre-staged
+
+- Architect GO (billing stable through the banding window). DPO running: logs confirm '903 pairs from
+  /pairs/pairs_dpo_full_mb.jsonl, max len 2299' → past model-load into the loop. run_name mb-dpo-full,
+  ref+init mb-sft-guided (fresh), detach+checkpoint+resume.
+- Completion poller `bjxb5bqv4` (background): waits for /runs/mb-dpo-full/train_log.jsonl; exits 42 on
+  disable (stop-on-disable ARMED), 1 on 4h timeout.
+- **Battery PRE-STAGED** (fires after DPO saves — capability FIRST as the cheap anchor-guard kill):
+  1. `modal run --detach modal/modal_gemma_capability.py --chat` (4 ckpts: base, mb-sft-guided,
+     mb-sft-dpo, mb-dpo-full) → pull `/runs/capability/*-chat` → `read_capability.py` anchor-guard
+     (base within ±3 of MMLU 82.8/GSM8K 95.8/IFEval-p 91.7 else HALT+ping).
+  2. If on-band: redeploy serve (dpo=mb-dpo-full) → `EVAL_MODELS=dpo EVAL_AFB_CONDITIONS=cold
+     EVAL_LABEL=dpo … eval_afb_probes.py` → `eval_gates.py --mmlu-new --mmlu-inc`.
+- Gate map: g1 AFB P≥2 cold ≥0.300; g2 secular leakage (max P≥1 over coding/creative/factual/math/
+  secular-practical) ==0.00; g3 opted-out-interlocutor P≥1 ≤0.60; g4 chat-MMLU(new)≥(incumbent).
