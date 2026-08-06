@@ -65,6 +65,19 @@ approval of the live leaderboard's look-and-feel after the post-merge `railway u
 it looks right, **both issue #55 and the parked #49 `verify-approval` gate stay open**. Any changes he
 requests are **follow-up iterations on the open issue, not scope creep**.
 
+## Integration review — codex REQUEST_CHANGES overruled (architect, 2026-08-06)
+
+The architect's integration CMAP on PR #59 was **gemini + claude APPROVE; codex REQUEST_CHANGES
+OVERRULED**. Codex's concern was that the single `k/N` "traditions contributing" count could diverge
+per column (a tradition covered for one column but not another), making one count misleading.
+
+**Overrule rationale (recorded):** the **#50 "earned full_grid" invariant** precludes per-column
+coverage divergence — a judge either covers a shard's entire grid or is excluded from that shard
+wholesale, so whole-shard exclusion is **uniform across all columns**. The Post-slice strip's non-null
+count therefore equals every other column's count, and a single `k/N` is correct. This dependency is
+now documented at the derivation site in `ResultsPage.tsx` (revisit to a per-column count only if that
+invariant is ever relaxed to allow partial per-column coverage).
+
 ## Architecture Updates
 
 **No hot-tier `arch-critical.md` change is warranted** — and that is the point worth recording. #55 is a

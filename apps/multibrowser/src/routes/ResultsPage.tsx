@@ -241,7 +241,7 @@ function SortHeader({
   const active = sort?.key === colKey;
   const ariaSort = active ? (sort!.dir === "desc" ? "descending" : "ascending") : "none";
   return (
-    <th className="py-2 pr-2 font-medium" aria-sort={ariaSort} data-testid={`col-${colKey}`}>
+    <th scope="col" className="py-2 pr-2 font-medium" aria-sort={ariaSort} data-testid={`col-${colKey}`}>
       <button type="button" className="hover:text-primary" onClick={() => onSort(colKey)}>
         {label}
         {active ? (sort!.dir === "desc" ? " ↓" : " ↑") : ""}
@@ -322,15 +322,15 @@ function Leaderboard({
       <table className="w-full border-collapse text-sm" data-testid="leaderboard">
         <thead>
           <tr className="border-b border-default-200 text-left text-xs uppercase text-default-500">
-            <th className="py-2 pr-2 font-medium">#</th>
-            <th className="py-2 pr-2 font-medium">Subject</th>
+            <th scope="col" className="py-2 pr-2 font-medium">#</th>
+            <th scope="col" className="py-2 pr-2 font-medium">Subject</th>
             {HEADLINE_COLS.map((c) => (
               <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
             ))}
             {framingCols.map((c) => (
               <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
             ))}
-            <th className="py-2 pr-2 font-medium" title="Per-tradition Post scores, in manifest order; hover a square for its value">
+            <th scope="col" className="py-2 pr-2 font-medium" title="Per-tradition Post scores, in manifest order; hover a square for its value">
               Traditions
             </th>
           </tr>
@@ -338,6 +338,11 @@ function Leaderboard({
         <tbody>
           {display.map((r) => {
             const open = expanded.has(r.subject);
+            // A single k/N (traditions contributing) is derived from the Post-slice strip and is valid
+            // for the whole row: the #50 "earned full_grid" invariant means a judge either covers a
+            // shard's entire grid or is excluded from it wholesale, so coverage cannot diverge column
+            // by column — the Post strip's non-null count equals every other column's. If that
+            // invariant is ever relaxed (partial per-column coverage), revisit this to a per-column count.
             const nContributing = r.strip.filter((c) => c.value !== null).length;
             const drillId = `drill-${r.subject.replace(/[^\w-]/g, "-")}`;
             const drill = open
@@ -345,7 +350,12 @@ function Leaderboard({
               : [];
             return (
               <Fragment key={r.subject}>
-                <tr className="border-b border-default-100" data-testid="standings-row" data-subject={r.subject}>
+                <tr
+                  className={"border-b border-default-100" + (nContributing === 0 ? " opacity-50" : "")}
+                  data-testid="standings-row"
+                  data-subject={r.subject}
+                  data-void={nContributing === 0 ? "true" : undefined}
+                >
                   <td className="py-2 pr-2 tabular-nums text-default-400" data-testid="standings-rank">{r.rank}</td>
                   <td className="py-2 pr-2">
                     <button
@@ -387,12 +397,12 @@ function Leaderboard({
                             <table className="text-xs" data-testid="drill-table">
                               <thead>
                                 <tr className="text-left text-default-500">
-                                  <th className="pr-3 font-medium">Tradition</th>
-                                  <th className="pr-2 font-medium">Init</th>
-                                  <th className="pr-2 font-medium">Post</th>
-                                  <th className="pr-2 font-medium">Δ</th>
-                                  {framingCols.map((c) => <th key={c.key} className="pr-2 font-medium">{c.label}</th>)}
-                                  <th className="pr-2 font-medium">Coverage</th>
+                                  <th scope="col" className="pr-3 font-medium">Tradition</th>
+                                  <th scope="col" className="pr-2 font-medium">Init</th>
+                                  <th scope="col" className="pr-2 font-medium">Post</th>
+                                  <th scope="col" className="pr-2 font-medium">Δ</th>
+                                  {framingCols.map((c) => <th key={c.key} scope="col" className="pr-2 font-medium">{c.label}</th>)}
+                                  <th scope="col" className="pr-2 font-medium">Coverage</th>
                                 </tr>
                               </thead>
                               <tbody>

@@ -252,3 +252,12 @@ fixture: 2 valid + 1 malformed-newest). Codex #2: spec/plan Status draft→appro
 checked (Success Criteria boxes stay unchecked — acceptance = Waleed's post-merge live approval per
 exception). Claude latent nits documented (DEFAULTS.pressure hardcode / sort-key namespace / stale
 run-switch params) — non-blocking, rationale in rebuttal. 180 tests green. Pushing to update PR #59.
+
+## 2026-08-06 — Architect integration CMAP: gemini+claude APPROVE, codex RC OVERRULED. 3 items done.
+
+Architect overruled codex's per-column-coverage RC (the #50 earned-full_grid invariant → whole-shard
+exclusion uniform across columns → single k/N valid). Applied 3 required: (1) code comment at k/N
+derivation documenting the full_grid dependency (revisit if invariant relaxes); (2) overrule rationale
+recorded in review doc; (3) spec/plan Status draft→approved (done prior commit). Optional nits folded:
+scope="col" on all table headers (main + drill sub-table); void rows (nContributing===0) muted
+opacity-50 + data-void. 180 tests green. Pushing to PR #59, pinging architect → pr gate to Waleed.
