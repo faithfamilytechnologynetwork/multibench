@@ -1,7 +1,7 @@
 id: '49'
 title: multibrowser-results-explorer-
 protocol: spir
-phase: implement
+phase: review
 plan_phases:
   - id: phase_1
     title: 'Export core: normalization, aggregation & parity'
@@ -20,8 +20,8 @@ plan_phases:
     status: complete
   - id: phase_6
     title: 'Documentation: results data-contract README + multibrowser README'
-    status: in_progress
-current_plan_phase: phase_6
+    status: complete
+current_plan_phase: null
 gates:
   spec-approval:
     status: approved
@@ -35,8 +35,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -135,7 +135,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-49/codev/projects/49-multibrowser-results-explorer-/49-phase_6-iter1-claude.txt
 started_at: '2026-08-05T23:42:45.960Z'
-updated_at: '2026-08-06T02:54:21.582Z'
+updated_at: '2026-08-06T02:57:13.399Z'
 force_advanced:
   phase: phase_3
   iteration: 3
