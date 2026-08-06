@@ -17,7 +17,7 @@ import {
   proseSection,
   resolveScenarioSet,
 } from "./parse";
-import { FILE, REF, REPO, SHA_POLL_MS, PRESSURES } from "./constants";
+import { FILE, REF, REPO, SHA_POLL_MS, PRESSURES, RAW_SOURCE_QK, RAW_SCENARIO_QK } from "./constants";
 import {
   emptyPressureMap,
   notice,
@@ -545,7 +545,7 @@ export async function loadRawScenario(
   // RawDataSource instance: the cache is persisted to localStorage, and a hydrated class instance
   // loses its methods. The instance is reconstructed from `kind` after the (possibly hydrated) read.
   const resolved = await qc.ensureQueryData({
-    queryKey: ["rawSource", REPO, sha, runId, expectedFingerprint],
+    queryKey: [RAW_SOURCE_QK, REPO, sha, runId, expectedFingerprint],
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: async (): Promise<{ kind: RawDataSource["kind"]; catalog: RawCatalog | null; notices: Notice[] }> => {
@@ -614,7 +614,7 @@ export function useRawScenario(
   return useQuery({
     // expectedFingerprint IS in the key: a late-arriving score-tier fingerprint (null → known)
     // busts the infinitely-fresh cache so the baked-first coherence check can re-run.
-    queryKey: ["rawScenario", REPO, sha, runId, group, item, expectedFingerprint],
+    queryKey: [RAW_SCENARIO_QK, REPO, sha, runId, group, item, expectedFingerprint],
     enabled: !!sha && !!runId,
     staleTime: Infinity,
     gcTime: GC_TIME,

@@ -64,7 +64,8 @@ AFB 0–4 explorer) uses the identical structure with different values. Nothing 
 | `scopes` | `[{id, label}]` — `turn1` (initial) / `full` (post-pressure). |
 | `items` | `[{id, label, group, shard}]` — one per scenario; `shard` is the manifest-declared path. |
 | `presets` | curated deep-link lists (below). |
-| `fingerprint` | `sha256:<hex>` over the resolved-judgments stream — see below. |
+| `fingerprint` | `sha256:<hex>` over the resolved-**judgments** stream — cross-tier reconciliation with `results/`; see below. |
+| `content_fingerprint` | `sha256:<hex>` over the **shard byte stream** (transcripts + `contexts` + verdicts) — baked-vs-GitHub coherence; see below. |
 
 There is **no `generated_at`/timestamp** anywhere in this tier — provenance is the fingerprint,
 so re-exports are byte-identical.
@@ -128,13 +129,22 @@ review doc). Each entry's `params` carry `{group, item, scope, a, b?, conditions
 condition-axis values are **nested** under `conditions` (matching the cell shape) so the viewer
 applies them generically; `b` (the compare subject) is optional.
 
-## Source fingerprint (cross-tier agreement)
+## Two fingerprints, two jobs
 
-Both this tier's `manifest.json` **and** the `results/` manifest stamp the **same**
-`fingerprint` — a `sha256` over the sorted resolved-judgments stream (the shared
-`analysis.fingerprint`). The viewer/CI asserts they are equal for a given `<run-id>`; a mismatch
-means the two tiers were exported from different input states and is surfaced as a notice. This
-upgrades "produced by the same loaders" into a checkable invariant.
+The manifest stamps **two** independent `sha256` fingerprints (both from `analysis.fingerprint`):
+
+- **`fingerprint` — cross-tier agreement (judgments).** Over the sorted resolved-**judgments**
+  stream. This tier's `manifest.json` **and** the `results/` manifest stamp the **same** value; the
+  viewer/CI asserts they are equal for a `<run-id>`. A mismatch means the two tiers were exported
+  from different input states and is surfaced as a notice — upgrading "produced by the same loaders"
+  into a checkable invariant.
+- **`content_fingerprint` — baked-vs-GitHub coherence (content).** Over the **shard byte stream**
+  (each shard's canonical pre-gzip bytes: transcripts + `contexts` + verdicts). The viewer uses it to
+  decide whether a same-origin **baked** bundle is coherent with the authoritative GitHub tier: it
+  serves baked **only** when the two `content_fingerprint`s match, else falls back with a notice.
+  This catches a **transcript/context correction that leaves the judgments unchanged** — which the
+  judgment `fingerprint` alone would miss, silently serving stale baked transcripts. (Hashing the
+  pre-gzip bytes keeps it independent of the zlib version.)
 
 **Determinism caveat:** byte-identical re-export holds within one Python/zlib toolchain. Export
 with the pinned `workflows/analysis` environment (`uv --project workflows/analysis`).
@@ -166,3 +176,20 @@ from the same run roots so their fingerprints match.
 
 The raw view is reached **run-scoped** from `/results` (which selects the run). A raw view whose
 `results-raw/<run-id>/` counterpart is absent degrades to a notice.
+
+## Retention policy
+
+This is a **committed** tier — each `results-raw/<run-id>/` is ~126 MB, so runs accumulate weight
+in git history. **Intent: keep the last N run-ids** (default **N = 2** — the current published run
+plus the immediately prior one for A/B and rollback), and prune older run directories.
+
+- **What to keep:** the run(s) the SPA can select from `/results` (the score tier's committed runs)
+  — the raw tier must exist for any run a reader can drill into. Keep the raw `<run-id>` for every
+  score `<run-id>` still published; drop raw dirs whose score run has been retired.
+- **How to prune:** delete the whole `results-raw/<old-run-id>/` directory in a dedicated commit
+  (`git rm -r results-raw/<old-run-id>`), paired with retiring the same `results/<old-run-id>/`. Do
+  **not** delete individual shards — a partial run breaks the manifest's declared item set.
+- **History note:** `git rm` removes the files going forward but not from history; if repo size
+  becomes a problem, that's a separate history-rewrite decision (out of scope for a routine prune)
+  and must go through the architect. This section is **policy/intent** — pruning is a deliberate,
+  human-initiated action, not automated by the exporter.

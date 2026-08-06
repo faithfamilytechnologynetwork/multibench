@@ -128,12 +128,22 @@ function errNotice(e: unknown, where: string): Notice {
 }
 
 /**
- * Choose the source for a run. Uses the baked bundle ONLY when present AND provably coherent —
- * its catalog fingerprint equals `expectedFingerprint` (the authoritative score-tier fingerprint
- * for this run). Otherwise (baked absent / unreadable / unconfirmable / stale) it serves the
- * SHA-pinned GitHub tier and surfaces a `Notice` that the fallback is in use. On the GitHub path
- * it ALSO checks the fingerprint against `expectedFingerprint` so a raw↔score tier mismatch is
- * flagged. Returns the parsed catalog so the caller needn't refetch.
+ * Choose the source for a run. Two independent fingerprints, two jobs:
+ *
+ * - **Baked-vs-GitHub coherence** is decided by the **content fingerprint** (over the shard byte
+ *   stream — transcripts+contexts+verdicts). The baked bundle is used ONLY when its
+ *   `contentFingerprint` equals the authoritative GitHub tier's. This catches a transcript/context
+ *   correction that leaves the resolved-judgment stream unchanged — the judgment fingerprint alone
+ *   would miss it and serve stale baked shards silently.
+ * - **Cross-tier (raw↔score) reconciliation** is a separate advisory: the GitHub catalog's judgment
+ *   `fingerprint` is checked against `expectedFingerprint` (the score-tier fingerprint) and a
+ *   `Notice` is surfaced on mismatch. It does NOT gate the source choice.
+ *
+ * Because coherence compares baked against the authoritative GitHub content, this ALWAYS reads the
+ * GitHub catalog (a small manifest fetch via `raw`, off the API budget — the heavy per-scenario
+ * shards still come from the fast same-origin baked source). When the authoritative content
+ * fingerprint is unavailable (GitHub catalog missing, or either side lacks the field), baked cannot
+ * be confirmed → serve GitHub with a `Notice`. Returns the parsed catalog so the caller needn't refetch.
  */
 export async function resolveRawSource(
   baked: RawDataSource,
@@ -143,6 +153,10 @@ export async function resolveRawSource(
 ): Promise<ResolvedRawSource> {
   const where = rawPath(runId, MANIFEST);
 
+  // Authoritative GitHub catalog: source of the authoritative CONTENT fingerprint (baked coherence)
+  // and of the judgment-fingerprint cross-tier check vs the score tier.
+  const gh = await loadGitHubCatalogChecked(github, runId, where, expectedFingerprint);
+
   let bakedText: string | null = null;
   try {
     bakedText = await baked.catalogText(runId);
@@ -151,16 +165,22 @@ export async function resolveRawSource(
   }
 
   if (bakedText !== null) {
-    const { catalog, notices: bakedNotices } = parseRawCatalog(bakedText, where);
-    if (catalog && expectedFingerprint !== null && catalog.fingerprint === expectedFingerprint) {
-      return { source: baked, catalog, notices: bakedNotices }; // fast path: coherent same-origin baked
+    const { catalog: bakedCat, notices: bakedNotices } = parseRawCatalog(bakedText, where);
+    const coherent =
+      !!bakedCat && !!gh.catalog &&
+      !!bakedCat.contentFingerprint && bakedCat.contentFingerprint === gh.catalog.contentFingerprint;
+    if (coherent) {
+      // Fast path: same-origin baked whose content matches the authoritative tier. Carry any
+      // cross-tier (raw↔score) notice from the authoritative check — it's source-independent.
+      return { source: baked, catalog: bakedCat, notices: [...bakedNotices, ...gh.notices] };
     }
-    const reason = !catalog
+    const reason = !bakedCat
       ? "the baked data is unreadable"
-      : expectedFingerprint === null
-        ? "the baked data can't be confirmed (no run fingerprint)"
-        : "the baked data is stale (fingerprint mismatch)";
-    const gh = await loadGitHubCatalogChecked(github, runId, where, expectedFingerprint);
+      : !gh.catalog
+        ? "the baked data can't be confirmed (the authoritative copy is unavailable)"
+        : !bakedCat.contentFingerprint || !gh.catalog.contentFingerprint
+          ? "the baked data can't be confirmed (no content fingerprint)"
+          : "the baked data is stale (content fingerprint mismatch)";
     return {
       source: github,
       catalog: gh.catalog,
@@ -169,7 +189,6 @@ export async function resolveRawSource(
   }
 
   // baked absent → GitHub (the authoritative fallback); note that the fast path isn't in use.
-  const gh = await loadGitHubCatalogChecked(github, runId, where, expectedFingerprint);
   return {
     source: github,
     catalog: gh.catalog,

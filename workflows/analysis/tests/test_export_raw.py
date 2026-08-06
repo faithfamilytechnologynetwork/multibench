@@ -499,3 +499,29 @@ def test_fingerprint_matches_resolved_stream_and_changes_on_edit(tmp_path):
     mutated = [dict(r) for r in corpus.resolved]
     mutated[0]["score"] = mutated[0]["score"] - 0.5
     assert source_fingerprint(mutated) != source_fingerprint(corpus.resolved)
+
+
+def test_content_fingerprint_changes_on_transcript_only_edit(tmp_path):
+    """A transcript-only correction (judgments untouched) must change the CONTENT fingerprint
+    while leaving the judgment fingerprint stable — so the viewer's baked-vs-GitHub coherence
+    check busts a stale baked bundle instead of serving old transcripts silently. (#51 integration.)
+    """
+    base, sittings = _grid(["gpt-5.6-terra"])
+    subjects, judges = ["gpt-5.6-terra"], ["gemini-3.6-flash"]
+    root_a = _full_grid(tmp_path / "a", base=base, sittings=sittings, subjects=subjects, judges=judges)
+    cat_a = build_catalog(build_raw_corpus([root_a]))
+
+    # Same judgments (base unchanged); rewrite ONE cell's transcript content.
+    sittings_b = [dict(s) for s in sittings]
+    sittings_b[0] = dict(sittings_b[0], turns=[
+        {"role": "user", "content": "CORRECTED prompt."},
+        {"role": "assistant", "content": "CORRECTED reply."},
+    ])
+    root_b = _full_grid(tmp_path / "b", base=base, sittings=sittings_b, subjects=subjects, judges=judges)
+    cat_b = build_catalog(build_raw_corpus([root_b]))
+
+    assert cat_a["fingerprint"] == cat_b["fingerprint"]                  # judgments identical
+    assert cat_a["content_fingerprint"] != cat_b["content_fingerprint"]  # transcript changed
+    assert cat_a["content_fingerprint"].startswith("sha256:")
+    # And the content fingerprint is stable when nothing changes (deterministic).
+    assert cat_a["content_fingerprint"] == build_catalog(build_raw_corpus([root_a]))["content_fingerprint"]

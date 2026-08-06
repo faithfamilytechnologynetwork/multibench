@@ -55,3 +55,18 @@ def source_fingerprint(resolved: list[dict]) -> str:
     is the exact serialized line that is hashed, so the result is order-independent.
     """
     return combine_fingerprint(fingerprint_line(r) for r in resolved)
+
+
+def content_fingerprint_line(relpath: str, shard_bytes: bytes) -> str:
+    """One shard's contribution to the raw **content** fingerprint: its path + a hash of its
+    canonical (pre-gzip) bytes.
+
+    This is DISTINCT from the judgment :func:`source_fingerprint`: it hashes the shipped shard
+    CONTENT — transcripts, the per-shard ``contexts`` pool, AND verdicts — so a
+    transcript/context correction that leaves the resolved-judgment stream unchanged still
+    changes this hash. The viewer compares the baked bundle's content fingerprint against the
+    authoritative GitHub tier's, so such a correction busts a stale baked bundle instead of
+    serving it silently. Hashing the pre-gzip bytes keeps it independent of the zlib version.
+    Combine the per-shard lines with :func:`combine_fingerprint` (sorted → order-independent).
+    """
+    return relpath + "\t" + hashlib.sha256(shard_bytes).hexdigest()

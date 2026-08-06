@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
 import { loadRawScenario, type RawSources } from "./queries";
 import { GitHubRawSource } from "./rawSource";
+import { RAW_PERSIST_EXCLUDED, RAW_SOURCE_QK } from "./constants";
 import {
   RAW_FIXTURE_FINGERPRINT,
   fakeRawSource,
@@ -13,8 +14,9 @@ function qc() {
   return new QueryClient({ defaultOptions: { queries: { retry: false } } });
 }
 
-/** Injected sources: baked serves the fixture (fingerprint overridable); GitHub serves fixture gz over a fake fetch. */
-function sources(bakedFingerprint?: string): RawSources {
+/** Injected sources: baked serves the fixture (content fingerprint overridable to simulate a stale
+ * bake); GitHub serves the fixture catalog + gz over a fake fetch (the authoritative tier). */
+function sources(staleBakedContent?: string): RawSources {
   const gz = rawFixtureShardGz();
   const fetchImpl = (async (url: string) => {
     if (url.endsWith("manifest.json")) return new Response(JSON.stringify(rawFixtureCatalog), { status: 200 });
@@ -22,7 +24,7 @@ function sources(bakedFingerprint?: string): RawSources {
     return new Response(null, { status: 404 });
   }) as unknown as typeof fetch;
   return {
-    baked: fakeRawSource("baked", bakedFingerprint ? { fingerprint: bakedFingerprint } : {}),
+    baked: fakeRawSource("baked", staleBakedContent ? { contentFingerprint: staleBakedContent } : {}),
     github: new GitHubRawSource("owner/repo", "sha", fetchImpl),
   };
 }
@@ -49,24 +51,39 @@ describe("loadRawScenario (integration)", () => {
     expect(r.notices[0]?.message).toMatch(/unsafe run id/);
   });
 
-  it("re-resolves when the fingerprint transitions null → known (different query keys)", async () => {
+  it("re-resolves when the score fingerprint transitions null → known (distinct cache keys)", async () => {
     const client = qc();
     const src = sources();
-    // null fingerprint → can't confirm baked → GitHub fallback (with a notice)
+    // Baked-vs-GitHub coherence is by CONTENT fingerprint, independent of the score fingerprint, so
+    // baked is served in BOTH cases; the score fingerprint is part of the query key, so the two
+    // loads resolve under DISTINCT cache entries (a late-arriving score fp busts the first).
     const first = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001", null, src);
-    expect(first.notices.some((n) => /can't be confirmed/.test(n.message))).toBe(true);
-    // known matching fingerprint → coherent baked (no fallback notice); a DIFFERENT cache key
+    expect(first.notices).toHaveLength(0);
+    expect(first.shard?.cells).toHaveLength(3);
     const second = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001",
       RAW_FIXTURE_FINGERPRINT, src);
     expect(second.notices).toHaveLength(0);
     expect(second.shard?.cells).toHaveLength(3);
+    const sourceKeys = client.getQueryCache().getAll().filter((q) => q.queryKey[0] === RAW_SOURCE_QK);
+    expect(sourceKeys).toHaveLength(2); // two distinct resolutions, keyed by the score fingerprint
   });
 
-  it("serves the GitHub gz shard when baked is stale", async () => {
+  it("serves the GitHub gz shard when baked CONTENT is stale (transcript correction)", async () => {
+    // Same judgment fingerprint, but the baked bundle's content fingerprint is old → fall back.
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001",
-      RAW_FIXTURE_FINGERPRINT, sources("sha256:STALE"));
-    expect(r.notices.some((n) => /stale/.test(n.message))).toBe(true);
+      RAW_FIXTURE_FINGERPRINT, sources("sha256:STALE-CONTENT"));
+    expect(r.notices.some((n) => /stale \(content fingerprint mismatch\)/.test(n.message))).toBe(true);
     expect(r.shard?.cells).toHaveLength(3); // still renders — from the GitHub gz fallback
+  });
+
+  it("the resolved query key is in the persistence-exclusion set (guards a silent rename)", async () => {
+    // If the rawSource query key in queries.ts ever drifts from RAW_PERSIST_EXCLUDED (constants.ts),
+    // main.tsx would silently stop excluding it → a persisted source selection / eventual quota blowup.
+    const client = qc();
+    await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, sources());
+    const sourceKey = client.getQueryCache().getAll().find((q) => q.queryKey[0] === RAW_SOURCE_QK);
+    expect(sourceKey, "loadRawScenario must create a RAW_SOURCE_QK-rooted query").toBeDefined();
+    expect(RAW_PERSIST_EXCLUDED.has(sourceKey!.queryKey[0] as string)).toBe(true);
   });
 
   it("survives cache persistence/hydration (no class instance is cached)", async () => {
@@ -121,18 +138,22 @@ describe("loadRawScenario (integration)", () => {
     expect(r.notices.some((n) => /GitHub raw tier disagrees/.test(n.message))).toBe(true);
   });
 
-  it("does NOT touch the GitHub source when baked is coherent", async () => {
-    let githubCalls = 0;
+  it("reads the GitHub catalog for coherence but never the heavy GitHub SHARD when baked is coherent", async () => {
+    // Content coherence compares baked against the authoritative GitHub catalog, so the small
+    // manifest IS read once — but the ~0.7 MB per-scenario shard stays same-origin baked. That's the
+    // documented "partial rate-limit immunity": the heavy fetches, not the one manifest, are immune.
+    let catalogCalls = 0, shardCalls = 0;
     const src: RawSources = {
       baked: fakeRawSource("baked"),
       github: {
         kind: "github",
-        catalogText: async () => { githubCalls++; return null; },
-        shardText: async () => { githubCalls++; return null; },
+        catalogText: async () => { catalogCalls++; return JSON.stringify(rawFixtureCatalog); },
+        shardText: async () => { shardCalls++; return null; },
       },
     };
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
-    expect(r.shard?.cells).toHaveLength(3);
-    expect(githubCalls).toBe(0); // coherent baked → no GitHub fetch (rate-limit immunity)
+    expect(r.shard?.cells).toHaveLength(3); // served from baked
+    expect(catalogCalls).toBe(1);           // one small manifest read to confirm content coherence
+    expect(shardCalls).toBe(0);             // heavy shard stays same-origin baked (rate-limit immunity)
   });
 });

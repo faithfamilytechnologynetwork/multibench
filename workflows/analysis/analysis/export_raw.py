@@ -46,7 +46,12 @@ from analysis.export_results import (
     normalize_subject,
     resolve_judgments,
 )
-from analysis.fingerprint import combine_fingerprint, fingerprint_line, source_fingerprint
+from analysis.fingerprint import (
+    combine_fingerprint,
+    content_fingerprint_line,
+    fingerprint_line,
+    source_fingerprint,
+)
 from analysis.loaders import AnalysisInputError
 
 SCHEMA_VERSION = 1
@@ -493,12 +498,18 @@ def _shard_path(tradition: str, scenario_id: str) -> str:
 
 
 def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str],
-                 fingerprint: str, presets: list[dict] | None = None) -> dict:
+                 fingerprint: str, content_fingerprint: str,
+                 presets: list[dict] | None = None) -> dict:
     """The generic run catalog (manifest) from lightweight pieces — no transcripts held.
 
     Nothing MultiBench-specific is baked into the *shape* — a non-MultiBench catalog (AFB 0–4)
     uses the identical structure with different values. ``items`` are sorted by (group, id) for
     a deterministic manifest.
+
+    Two fingerprints, two jobs: ``fingerprint`` (the resolved-judgment stream) is shared with
+    the ``results/`` score tier for cross-tier reconciliation; ``content_fingerprint`` (the
+    shard byte stream — transcripts+contexts+verdicts) is raw-tier-only and drives baked-vs-GitHub
+    coherence, catching transcript/context corrections the judgment fingerprint misses.
     """
     judges = []
     for model in judge_models:
@@ -525,6 +536,7 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
         "items": sorted(items, key=lambda it: (it["group"], it["id"])),
         "presets": presets or [],
         "fingerprint": fingerprint,
+        "content_fingerprint": content_fingerprint,
     }
 
 
@@ -701,8 +713,14 @@ def build_catalog(corpus: RawCorpus) -> dict:
     items = [_item_ref(s) for export in corpus.per_tradition.values() for s in export.scenarios]
     cells: dict[PresetCell, dict[str, float]] = {}
     accumulate_cell_scores(corpus.resolved, cells)
+    # Content fingerprint over the same canonical shard bytes the writer would emit (order-independent).
+    content_lines = [
+        content_fingerprint_line(_shard_path(s.group, s.scenario_id), _json_bytes(build_shard(s)))
+        for export in corpus.per_tradition.values() for s in export.scenarios
+    ]
     return _catalog_doc(items, corpus.subjects, corpus.judges,
-                        source_fingerprint(corpus.resolved), compute_presets(cells))
+                        source_fingerprint(corpus.resolved), combine_fingerprint(content_lines),
+                        compute_presets(cells))
 
 
 # ── Deterministic streaming writer ─────────────────────────────────────────────────
@@ -773,6 +791,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     subjects_present: set[str] = set()
     judges_present: set[str] = set()
     fp_lines: list[str] = []             # small serialized lines, not full resolved dicts
+    content_lines: list[str] = []        # per-shard (path + hash of canonical bytes) for the content fp
     cells: dict[PresetCell, dict[str, float]] = {}  # per-cell judge scores (numbers only) for presets
     n_scenarios = 0
     max_shard = 0
@@ -792,6 +811,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
             raw = _json_bytes(build_shard(scenario))
             payload = gzip.compress(raw, compresslevel=9, mtime=0)  # deterministic (mtime=0)
             docs[relpath] = payload
+            content_lines.append(content_fingerprint_line(relpath, raw))  # content fp over pre-gz bytes
             items.append(_item_ref(scenario))
             written_here.add(scenario.scenario_id)
             n_scenarios += 1
@@ -810,7 +830,8 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
 
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
     catalog = _catalog_doc(items, subjects, sorted(judges_present),
-                           combine_fingerprint(fp_lines), compute_presets(cells))
+                           combine_fingerprint(fp_lines), combine_fingerprint(content_lines),
+                           compute_presets(cells))
     manifest_bytes = _json_bytes(catalog)
     docs[_MANIFEST] = manifest_bytes
 

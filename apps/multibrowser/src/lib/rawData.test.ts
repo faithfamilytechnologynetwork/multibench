@@ -38,6 +38,7 @@ const MB_CATALOG = {
   items: [{ id: "BUD-001", label: "BUD-001", group: "buddhism", shard: "buddhism/BUD-001.json.gz" }],
   presets: [],
   fingerprint: "sha256:abc",
+  content_fingerprint: "sha256:content-abc",
 };
 
 // A NON-MultiBench catalog (issue #54): 0–4 scale, non-tradition items, non-leaderboard subjects.
@@ -229,18 +230,34 @@ function githubFrom(catalog: unknown | null): RawDataSource {
 }
 
 describe("resolveRawSource", () => {
-  it("uses baked when present and fingerprint-coherent (no notice)", async () => {
+  it("uses baked when its CONTENT fingerprint matches the authoritative GitHub tier (no notice)", async () => {
     const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", "sha256:abc");
     expect(r.source.kind).toBe("baked");
     expect(r.notices).toHaveLength(0);
   });
 
-  it("falls back to GitHub with a notice when baked is stale (fingerprint mismatch)", async () => {
-    const staleBaked = { ...MB_CATALOG, fingerprint: "sha256:OLD" };
-    const r = await resolveRawSource(bakedFrom(staleBaked), githubFrom(MB_CATALOG), "run1", "sha256:abc");
+  it("falls back when baked JUDGMENT fp matches but CONTENT is stale (transcript-only correction)", async () => {
+    // This is the case the judgment-only fingerprint missed: judgments unchanged, transcripts
+    // corrected → the content fingerprint differs → the stale baked bundle must NOT be served.
+    const bakedStaleContent = { ...MB_CATALOG, content_fingerprint: "sha256:OLD-CONTENT" };
+    const r = await resolveRawSource(bakedFrom(bakedStaleContent), githubFrom(MB_CATALOG), "run1", "sha256:abc");
     expect(r.source.kind).toBe("github");
-    expect(r.notices[0]?.message).toMatch(/stale.*live GitHub/);
-    expect(r.catalog?.fingerprint).toBe("sha256:abc");
+    expect(r.notices[0]?.message).toMatch(/stale \(content fingerprint mismatch\).*live GitHub/);
+    expect(r.catalog?.contentFingerprint).toBe("sha256:content-abc");
+  });
+
+  it("falls back when baked lacks a content fingerprint (can't confirm coherence)", async () => {
+    const { content_fingerprint: _drop, ...bakedNoContent } = MB_CATALOG;
+    const r = await resolveRawSource(bakedFrom(bakedNoContent), githubFrom(MB_CATALOG), "run1", "sha256:abc");
+    expect(r.source.kind).toBe("github");
+    expect(r.notices[0]?.message).toMatch(/no content fingerprint.*live GitHub/);
+  });
+
+  it("uses baked on content coherence even when the score fingerprint is unknown", async () => {
+    // Baked-vs-GitHub coherence is independent of the (optional) cross-tier score fingerprint.
+    const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", null);
+    expect(r.source.kind).toBe("baked");
+    expect(r.notices).toHaveLength(0);
   });
 
   it("falls back to GitHub WITH a notice when baked is absent (serving fallback)", async () => {
@@ -250,17 +267,11 @@ describe("resolveRawSource", () => {
     expect(r.catalog).not.toBeNull();
   });
 
-  it("flags a raw↔score fingerprint mismatch on the GitHub path", async () => {
+  it("flags a raw↔score fingerprint mismatch on the GitHub path (cross-tier, independent of source)", async () => {
     const wrongGh = { ...MB_CATALOG, fingerprint: "sha256:WRONG" };
     const r = await resolveRawSource(bakedFrom(null), githubFrom(wrongGh), "run1", "sha256:abc");
     expect(r.source.kind).toBe("github");
     expect(r.notices.some((n) => /raw and score tiers disagree/.test(n.message))).toBe(true);
-  });
-
-  it("does NOT use baked when the run fingerprint is unavailable (can't confirm coherence)", async () => {
-    const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", null);
-    expect(r.source.kind).toBe("github");
-    expect(r.notices.some((n) => /can't be confirmed/.test(n.message))).toBe(true);
   });
 
   it("errors when neither source has the run", async () => {
@@ -362,6 +373,9 @@ describe("committed real catalog", () => {
     expect(catalog!.items.length).toBe(519);
     expect(catalog!.dataset.license).toBe("CC-BY-4.0");
     expect(catalog!.fingerprint).toMatch(/^sha256:/);
+    // The content fingerprint (baked-vs-GitHub coherence) is present and distinct from the judgment one.
+    expect(catalog!.contentFingerprint).toMatch(/^sha256:/);
+    expect(catalog!.contentFingerprint).not.toBe(catalog!.fingerprint);
     expect(notices).toHaveLength(0);
   });
 

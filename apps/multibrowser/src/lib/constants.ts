@@ -80,3 +80,16 @@ export const REF = (import.meta.env?.VITE_MULTIBENCH_REF ?? "main").trim();
 /** SHA-poll interval (ms). Conservative default — the unauthenticated 60/hr budget may be
  * NAT-shared, so we poll gently and rely on focus/reconnect refetch for snappier updates. */
 export const SHA_POLL_MS = Number(import.meta.env?.VITE_SHA_POLL_MS ?? 300_000) || 300_000;
+
+/**
+ * Query-key roots for the big/volatile raw-tier queries that MUST NOT be persisted to
+ * localStorage (a few ~0.7 MB shards would blow the quota → TanStack silently stops persisting the
+ * WHOLE cache; a transient source selection would lock a run onto GitHub). These are the SINGLE
+ * source of truth: `queries.ts` builds each query key from the matching constant, and `main.tsx`'s
+ * persistence exclusion (`shouldDehydrateQuery`) tests `queryKey[0]` against `RAW_PERSIST_EXCLUDED`.
+ * Sharing the literal here means a rename can never silently disable the exclusion (and with it ALL
+ * persistence). Guarded by a test that reconstructs a real query key and asserts it is excluded.
+ */
+export const RAW_SOURCE_QK = "rawSource" as const;
+export const RAW_SCENARIO_QK = "rawScenario" as const;
+export const RAW_PERSIST_EXCLUDED: ReadonlySet<string> = new Set([RAW_SOURCE_QK, RAW_SCENARIO_QK]);

@@ -6,6 +6,7 @@ import { defaultShouldDehydrateQuery } from "@tanstack/react-query";
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./router";
 import { queryClient } from "./lib/queryClient";
+import { RAW_PERSIST_EXCLUDED } from "./lib/constants";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import "./styles.css";
 
@@ -32,9 +33,11 @@ if (root) {
             // persisting a transient baked-absent → GitHub fallback would lock a run onto GitHub
             // even after the baked bundle is deployed. Both are cheap to re-resolve; everything
             // else (score tiers, traditions) still persists for cross-session rate-limit relief.
+            // The excluded key roots live in `constants.ts` (RAW_PERSIST_EXCLUDED), shared with the
+            // query definitions in `queries.ts`, so a rename can't silently disable this exclusion.
             dehydrateOptions: {
               shouldDehydrateQuery: (q) =>
-                q.queryKey[0] !== "rawScenario" && q.queryKey[0] !== "rawSource" && defaultShouldDehydrateQuery(q),
+                !RAW_PERSIST_EXCLUDED.has(q.queryKey[0] as string) && defaultShouldDehydrateQuery(q),
             },
           }}
         >

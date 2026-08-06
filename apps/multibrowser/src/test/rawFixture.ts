@@ -9,7 +9,8 @@ import { gzipSync } from "node:zlib";
 import type { RawDataSource } from "../lib/rawSource";
 
 export const RAW_FIXTURE_RUN_ID = "fixt-run";
-export const RAW_FIXTURE_FINGERPRINT = "sha256:fixture0000";
+export const RAW_FIXTURE_FINGERPRINT = "sha256:fixture0000";           // judgment (cross-tier)
+export const RAW_FIXTURE_CONTENT_FINGERPRINT = "sha256:fixtcontent00"; // shard content (baked coherence)
 
 /** A minimal MultiBench-shaped catalog (one item → one shard). */
 export const rawFixtureCatalog = {
@@ -44,6 +45,7 @@ export const rawFixtureCatalog = {
     },
   ],
   fingerprint: RAW_FIXTURE_FINGERPRINT,
+  content_fingerprint: RAW_FIXTURE_CONTENT_FINGERPRINT,
 };
 
 /** The one shard the fixture catalog declares. */
@@ -92,13 +94,17 @@ export function rawFixtureShardGz(): ArrayBuffer {
   return gz.buffer.slice(gz.byteOffset, gz.byteOffset + gz.byteLength);
 }
 
-/** A fake in-memory `RawDataSource` serving the fixture (optionally with an overridden fingerprint). */
+/** A fake in-memory `RawDataSource` serving the fixture (optionally with overridden fingerprints). */
 export function fakeRawSource(
   kind: "baked" | "github",
-  opts: { catalog?: unknown | null; fingerprint?: string } = {},
+  opts: { catalog?: unknown | null; fingerprint?: string; contentFingerprint?: string } = {},
 ): RawDataSource {
   const catalog = opts.catalog === undefined
-    ? { ...rawFixtureCatalog, fingerprint: opts.fingerprint ?? RAW_FIXTURE_FINGERPRINT }
+    ? {
+        ...rawFixtureCatalog,
+        fingerprint: opts.fingerprint ?? RAW_FIXTURE_FINGERPRINT,
+        content_fingerprint: opts.contentFingerprint ?? RAW_FIXTURE_CONTENT_FINGERPRINT,
+      }
     : opts.catalog;
   return {
     kind,

@@ -67,6 +67,10 @@ const CatalogSchema = z.object({
     })),
   })).default([]),
   fingerprint: z.string(),
+  // Content fingerprint (over the shard byte stream: transcripts+contexts+verdicts). Optional so a
+  // minimal external catalog still parses; when present on BOTH sources it drives baked-vs-GitHub
+  // coherence (a transcript/context correction the judgment `fingerprint` misses). See rawSource.ts.
+  content_fingerprint: z.string().optional(),
 });
 
 const TurnSchema = z.object({ role: z.enum(["user", "assistant"]), content: z.string() });
@@ -117,6 +121,7 @@ export interface RawCatalog {
   items: RawItem[];
   presets: RawPreset[];
   fingerprint: string;
+  contentFingerprint?: string;
 }
 
 export interface RawTurn { role: "user" | "assistant"; content: string }
@@ -191,6 +196,7 @@ export function parseRawCatalog(text: string, where: string): { catalog: RawCata
       items: safeItems,
       presets: c.presets,
       fingerprint: c.fingerprint,
+      contentFingerprint: c.content_fingerprint,
     },
     notices,
   };
