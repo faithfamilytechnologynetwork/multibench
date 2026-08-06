@@ -188,3 +188,16 @@ overshoot). Committed 51b262b, notes.md Status=COMPLETE.
 **Deliverables:** `mb-sft-split50` + `mb-dpo-split50` (companion split adapters; #48 shipped model
 untouched); notes.md (full writeup); fig_transfer_{sft,dpo}.pdf; split lists; G2 memo.
 **NEXT:** report completion to architect → review doc (`codev/reviews/57-…`) + PR.
+
+## 2026-08-06 — PR #68 UP (awaiting architect review → Waleed merge word)
+
+Architect approved review-doc + PR (no changes; keep the DPO judge-alignment caveat verbatim). Done:
+- **Review doc** `codev/reviews/57-multiweights-split.md` (final-analysis framed): outcome, #53
+  revision, caveats, spend, lessons, + §8 data inventory + §5 G1/G2/G3 gate reconciles.
+- **Data persistence (#48 scar rule satisfied):** adapters mb-sft-split50/mb-dpo-split50 + pairs +
+  train-subset volume-persisted (confirmed); 107MB raw audit trail tar.gz **archived sha-verified**
+  to `/exp57-archive/data_output.tar.gz` (d1f18169…). Safe to cleanup on architect's word.
+- **PR #68** (Closes #57): https://github.com/faithfamilytechnologynetwork/multibench/pull/68 — pushed
+  builder/experiment-57 (16 commits). **NOT merging** — architect reviews, then Waleed gives merge word.
+
+**EXPERIMENT DONE. Standing by for PR review / merge word. Worktree clean, no stray processes.**
