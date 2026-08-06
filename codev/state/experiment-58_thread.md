@@ -183,3 +183,5 @@ Post-DPO plan revised to run concurrently (~45-60 min vs 2.5-3h), stop-on-disabl
   scaling-negative: 903 pairs @ pref_acc~0.5 = 2x steps on noise; 487 near-optimal.
 - Serve endpoint torn down (URL 404s). mb-dpo-full inert on volume. Final spend ~$115 vs $300.
 - Review written (codev/reviews/58-multiweights-full-grid-dpo.md). Preparing PR.
+
+- **PR #63 opened**: https://github.com/faithfamilytechnologynetwork/multibench/pull/63 (Closes #58). Awaiting architect review; will not self-merge.
