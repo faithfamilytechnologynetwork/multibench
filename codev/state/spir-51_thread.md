@@ -148,3 +148,55 @@ reusing #49 loaders + new sitting reader + shared fingerprint helper. Also decid
 drop results/ generated_at (default-run selection needs it; only ADD fingerprint). plan
 checks pass (6 phase ids). Committing; plan-phase consult next, then plan-approval gate →
 Waleed.
+
+### 2026-08-06 — plan iter-1 reviews (Codex + Claude), both REQUEST_CHANGES → revise
+Both converge; Claude verified against codebase (+ Railway docs) and found real defects:
+- **Generic-contract contradiction**: Phase-1 cells emit literal framing/pressure fields vs
+  Phase-3 "no such literals". FIX: adopt jaleesbench generic `conditionAxes` (catalog-
+  declared) + cells `conditions: Record<string,string>`; schemas/components iterate axes,
+  never hardcode names. Prohibition = no hardcoded MB axis names/enums, dynamic keys OK.
+- **Fingerprint NOT additive**: build_manifest only sees aggregated TraditionExport;
+  build_tradition_export discards resolve_judgments (line 370). Must thread ONE shared
+  global-stream hash fn through BOTH exporters (same input shape) or the invariant silently
+  fails. resultsModel.ts must expose fingerprint (currently strips unknown).
+- **Railway deploy BROKEN** (Claude, sourced): `railway up` respects .gitignore by default →
+  gitignored public/data-raw never uploads → primary source silently never ships. FIX:
+  `railway up --no-gitignore` + `.railwayignore` (re-exclude node_modules/dist).
+- **Baked size WRONG**: bake is UNCOMPRESSED; measured ratio ~3.7× → ~400-550 MB baked,
+  ~1 GB in image after public/→dist/. Waleed's "uncompressed" directive predates this.
+  FLAGGING to architect/Waleed; RECOMMEND baking the GZ shards same-origin instead (~115MB,
+  same speed/no-rate-limit, reuses the gunzip sniff we already carry). Measure in Phase 2.
+- isSafePathSegment rejects '/' but shard paths are <group>/<item>.json.gz → need multi-
+  segment safe-relpath validator (Py + TS).
+- build_scenario_shard needed titles/taxonomy from traditions/ but corpus-root not passed →
+  DROP title/taxonomy from shard; item labels live in the CATALOG (id-based for MB); SPA
+  enriches MB context from its existing tradition/scenario query via a (group,item) adapter.
+  Removes the corpus-root dependency.
+- URL ownership: run/group/item = ROUTE PATH params; A/B/framing/pressure/scope = validated
+  SEARCH (route validateSearch zod, NOT searchParams.ts alone).
+- Memory: build_raw_corpus holds 430MB sittings in RAM. Stream per-tradition (build→
+  serialize→gzip→hold compressed bytes→write after full validation); ~115MB buffered.
+- Split presets into their own phase (Phase 2 was oversized).
+- Fixture in src/test/ (NOT public/data-raw, which collides w/ bake + slows deploy.test's
+  real pnpm build). --limit fixture can't be fingerprint-coherent → injectable expected
+  fingerprint for the baked-coherent test.
+- Bake = separate predeploy script (NOT in `pnpm build`) so deploy.test's build is unaffected.
+Revised plan → 8 phases. Sending architect an afx flag on the baked-representation (gz vs
+uncompressed / ~1GB image) decision.
+
+### 2026-08-06 — Railway spir-51 test project deleted (architect-directed)
+A Railway project `spir-51` (ID 47f5e095-6392-4947-aa76-12835e52aab5, workspace Haadi) had
+been created + linked to this worktree by the plan-review consult's Railway verification —
+NOT a builder-authorized action. Architect directed deletion. I verified first (railway
+status showed it linked, empty: Service None / no resources — matched the description), then
+`railway delete --project <id> --yes` (accepted, exit 0), `railway unlink --yes` (worktree
+now unlinked). Authoritative confirmation: a re-delete by ID returns "Project not found" and
+`railway status` = no linked project. `railway list` still shows it — Railway deletion is
+SCHEDULED/async, list purges on a lag. RULE GOING FORWARD (architect): any Railway/external-
+account action goes through the architect FIRST. gz-baked also APPROVED by architect (encoding
+is implementation; measurement settles it) — folding into the plan revision.
+
+### 2026-08-06 — plan revised (8 phases) + rebuttal → plan-approval gate
+Revised plan committed (f3af4bf) folding in both plan reviews; rebuttal written. gz-baked
+approved by architect; Railway test project deleted + confirmed by architect. plan checks
+pass (8 phase ids). Reached plan-approval gate → STOP, awaiting Waleed. Not approving.
