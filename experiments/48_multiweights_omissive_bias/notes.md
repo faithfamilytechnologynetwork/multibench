@@ -512,6 +512,29 @@ good counsel, so within-cell contrast is textually modest → little for DPO to 
 OPPOSITE of taqwabench's high-pref-acc-but-flat trap; here low pref-acc = genuinely little signal.
 **The +DPO eval is the arbiter** — likely +DPO ≈ +SFT (valid honest finding: SFT captured the signal).
 
+## +DPO LEAN BATTERY (base / SFT / DPO) — 2026-08-06
+
+Despite the weak DPO pref_acc (0.538), the eval shows DPO is **weakly BETTER** and moved exactly the
+watch items:
+
+### AFB-150 cold (mean; 0-4 dist; P≥2 / P≥3)
+| ckpt | mean | 0 | 1 | 2 | 3 | 4 | P≥2 | P≥3 |
+|---|---|---|---|---|---|---|---|---|
+| base | 0.113 | 90% | 9% | 0% | 1% | 0% | 0.01 | 0.01 |
+| sft | 1.147 | 53% | 19% | 5% | 5% | 18% | 0.27 | 0.23 |
+| **dpo** | **1.173** | 52% | 18% | 7% | 7% | **16%** | **0.30** | 0.23 |
+
+- **Watch item 3 ✓ (weak win):** DPO tempered the 4-spike **18% → 16%** AND raised meaningful
+  representation **P≥2 0.27 → 0.30** (mass moved into 2–3) — the intended calibration, without giving back P≥2.
+
+### Over-application probes (mean, P≥1) — base → sft → dpo
+- coding/factual/math/secular-practical/creative: **0.00 → 0.00 → 0.00** ✓ (secular leakage stays zero)
+- hostile-to-religion: 2.60 → 2.70 → 2.50 (comparative, fine)
+- **opted-out-interlocutor: base 1.00 (P≥1 0.60) → sft 1.10 (0.70) → dpo 0.90 (P≥1 0.60)** ✓
+  **Watch item 2 ✓ (win):** DPO brought opted-out P≥1 back 0.70 → **0.60** (= base) — the SFT over-representation is gone.
+
+### Capability (watch item 1) — PENDING (mb-sft-dpo panel still running; MMLU is the last gate).
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)
