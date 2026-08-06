@@ -206,4 +206,52 @@ describe("raw-results view", () => {
     const link = await screen.findByTestId("drill-link");
     expect(link).toHaveAttribute("href", expect.stringContaining("/t/buddhism"));
   });
+
+  // ── iter-1 UX regressions (Waleed's live look) ──────────────────────────────────────
+
+  it("demotes the operational source note to a footer, never a top banner", async () => {
+    // Baked is absent in tests → the 'no baked bundle — serving the live GitHub copy' note fires.
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    const footer = await screen.findByTestId("source-notes");
+    expect(within(footer).getByText(/no baked bundle/)).toBeInTheDocument(); // lives in the footer
+    const top = screen.queryByTestId("notices"); // the prominent top region (absent when no data problems)
+    if (top) expect(within(top).queryByText(/no baked bundle/)).toBeNull();
+  });
+
+  it("renders presets as compact cards with a header + a show-all toggle (not a sea of links)", async () => {
+    const manyPreset = {
+      ...rawFixtureCatalog,
+      presets: [{
+        key: "models-split", label: "Models split", description: "widest turn-1 spread",
+        entries: Array.from({ length: 8 }, (_, i) => ({
+          key: `ms-${i}`, label: `BUD-00${i} · subject-${i} vs other`,
+          params: { group: "buddhism", item: "BUD-001", scope: "turn1", a: "gpt-5.6-terra",
+                    conditions: { framing: "unstated", pressure: "secularize" } },
+        })),
+      }],
+    };
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(manyPreset, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    const card = await screen.findByTestId("preset-card");
+    expect(within(card).getByRole("heading", { name: "Models split" })).toBeInTheDocument();
+    expect(within(card).getAllByRole("link")).toHaveLength(6); // collapsed → first 6
+    await userEvent.click(within(card).getByTestId("preset-toggle"));
+    expect(within(card).getAllByRole("link")).toHaveLength(8); // expanded → all 8
+  });
+
+  it("styles the selected Judge/Scope pill visibly — no invisible text-white regression", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    const controls = screen.getByTestId("raw-controls");
+    const pressed = within(controls).getAllByRole("button", { pressed: true }); // selected judge + scope
+    expect(pressed.length).toBe(2);
+    for (const b of pressed) {
+      expect(b.className).toContain("bg-primary");
+      expect(b.className).toContain("text-primary-foreground"); // readable on-primary token
+      expect(b.className).not.toContain("text-white");          // the old washed-out class
+    }
+  });
 });

@@ -1,5 +1,6 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
+import { Info } from "lucide-react";
 import { useLatestSha, useRawScenario, useResultsRuns } from "../lib/queries";
 import { asRateLimit } from "../lib/rateLimit";
 import { catalogScoreColor } from "../lib/rampColor";
@@ -100,6 +101,11 @@ export function RawResultsPage() {
   const catalog = rawQ.data?.catalog ?? null;
   const shard = rawQ.data?.shard ?? null;
   const notices = rawQ.data?.notices ?? [];
+  // Separate USER-facing data problems (prominent, top) from OPERATIONAL source notes — which copy
+  // is serving (baked vs GitHub fallback). The latter are maintainer plumbing, not user concerns,
+  // so they go to an unobtrusive footer, never a top-of-page banner (Waleed, iter-1 UX).
+  const dataNotices = notices.filter((n) => n.kind !== "source");
+  const sourceNotices = notices.filter((n) => n.kind === "source");
 
   const sel: RawSelection | null = useMemo(() => (catalog ? parseRawSelection(search, catalog) : null), [catalog, search]);
   const setSel = (patch: Partial<RawSelection>) => {
@@ -148,7 +154,7 @@ export function RawResultsPage() {
         <p className="text-sm text-default-500">{catalog.groupBy.label}: {groupId} · {catalog.dataset.title}</p>
       </header>
 
-      <Notices notices={notices} />
+      <Notices notices={dataNotices} />
 
       {/* Judge + scope + compare controls (generic over catalog vocab). */}
       <section className="flex flex-wrap items-end gap-3" data-testid="raw-controls">
@@ -210,23 +216,12 @@ export function RawResultsPage() {
         </section>
       )}
 
-      {/* Presets — export-computed curated deep links (may target other items). */}
+      {/* Presets — export-computed curated deep links (may target other items). Rendered as an
+          index of compact cards (header + aligned rows + show-all), not a flat sea of links. */}
       {catalog.presets.length > 0 && (
-        <section className="flex flex-col gap-2" data-testid="presets">
+        <section className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3" data-testid="presets">
           {catalog.presets.map((p) => (
-            <div key={p.key} className="flex flex-wrap items-center gap-2 text-xs">
-              <span className="font-medium text-default-600" title={p.description}>{p.label}:</span>
-              {p.entries.map((e) => (
-                <Link key={e.key}
-                  to="/results/$runId/$groupId/$itemId"
-                  params={{ runId, groupId: e.params.group, itemId: e.params.item }}
-                  // conditions first so the reserved keys always win (matches rawSelectionToSearch)
-                  search={{ ...e.params.conditions, a: e.params.a, ...(e.params.b ? { b: e.params.b } : {}), scope: e.params.scope, judge: sel.judge }}
-                  className="rounded bg-default-100 px-2 py-0.5 text-primary hover:underline">
-                  {e.label}
-                </Link>
-              ))}
-            </div>
+            <PresetCard key={p.key} preset={p} runId={runId} judge={sel.judge} />
           ))}
         </section>
       )}
@@ -240,6 +235,62 @@ export function RawResultsPage() {
           {sel.b && <CellDetail subject={sel.b} catalog={catalog} shard={shard} conditions={sel.conditions} label="B" />}
         </section>
       )}
+
+      {/* Operational source note (baked vs GitHub fallback) — unobtrusive footer, not a top banner. */}
+      {sourceNotices.length > 0 && (
+        <footer className="mt-2 flex flex-col gap-0.5 border-t border-default-100 pt-2 text-xs text-default-400"
+                data-testid="source-notes">
+          {sourceNotices.map((n, i) => (
+            <span key={i} className="flex items-center gap-1">
+              <Info size={12} className="shrink-0" aria-hidden />
+              <span>{n.message}</span>
+            </span>
+          ))}
+        </footer>
+      )}
+    </div>
+  );
+}
+
+/** One preset as a compact, scannable card: header + an aligned list of a few entries + show-all. */
+function PresetCard({ preset, runId, judge }: {
+  preset: RawCatalog["presets"][number]; runId: string; judge: string;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const VISIBLE = 6;
+  const shown = expanded ? preset.entries : preset.entries.slice(0, VISIBLE);
+  return (
+    <div className="flex flex-col gap-1.5 rounded-lg border border-default-200 p-3" data-testid="preset-card">
+      <div>
+        <h3 className="text-sm font-semibold text-default-700">{preset.label}</h3>
+        {preset.description && <p className="text-xs text-default-500">{preset.description}</p>}
+      </div>
+      <ul className="flex flex-col">
+        {shown.map((e) => {
+          const sep = e.label.indexOf(" · ");
+          const desc = sep >= 0 ? e.label.slice(sep + 3) : e.label; // strip the leading "ID · " (item id shown separately)
+          return (
+            <li key={e.key}>
+              <Link
+                to="/results/$runId/$groupId/$itemId"
+                params={{ runId, groupId: e.params.group, itemId: e.params.item }}
+                // conditions first so the reserved keys always win (matches rawSelectionToSearch)
+                search={{ ...e.params.conditions, a: e.params.a, ...(e.params.b ? { b: e.params.b } : {}), scope: e.params.scope, judge }}
+                className="group flex items-baseline gap-2 rounded px-1.5 py-1 hover:bg-default-100"
+              >
+                <span className="w-20 shrink-0 font-mono text-xs text-primary group-hover:underline">{e.params.item}</span>
+                <span className="truncate text-xs text-default-600" title={desc}>{desc}</span>
+              </Link>
+            </li>
+          );
+        })}
+      </ul>
+      {preset.entries.length > VISIBLE && (
+        <button type="button" onClick={() => setExpanded((v) => !v)}
+          className="self-start text-xs text-primary hover:underline" data-testid="preset-toggle">
+          {expanded ? "Show fewer" : `Show all ${preset.entries.length}`}
+        </button>
+      )}
     </div>
   );
 }
@@ -248,12 +299,19 @@ function Pills({ label, value, options, onSelect }: {
   label: string; value: string; options: { id: string; label: string }[]; onSelect: (id: string) => void;
 }) {
   return (
-    <div className="flex flex-col text-xs text-default-500">
+    <div className="flex flex-col text-xs font-medium text-default-500">
       {label}
       <div className="mt-1 flex gap-1" role="group" aria-label={label}>
         {options.map((o) => (
-          <button key={o.id} type="button" onClick={() => onSelect(o.id)}
-            className={`rounded px-2 py-1 text-sm ${o.id === value ? "bg-primary text-white" : "bg-default-100 text-default-700"}`}>
+          // Active/inactive styling mirrors the reviewed #55 Segmented/FilterBar pattern — the old
+          // `bg-primary text-white` rendered the SELECTED pill near-invisible (Waleed iter-1).
+          <button key={o.id} type="button" onClick={() => onSelect(o.id)} aria-pressed={o.id === value}
+            className={
+              "rounded-full border px-2.5 py-1 text-sm transition-colors " +
+              (o.id === value
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-default-200 bg-default-50 text-default-600 hover:border-default-300")
+            }>
             {o.label}
           </button>
         ))}

@@ -17,6 +17,12 @@ export interface Notice {
   /** A human-locating hint, e.g. "sunni-islam/scenarios/JLS-001/pressures.md". */
   where: string;
   message: string;
+  /**
+   * `"source"` marks an OPERATIONAL note about which data copy is serving (baked vs GitHub
+   * fallback) — plumbing detail for maintainers, not a user-facing data problem. The UI demotes
+   * these to an unobtrusive footer instead of a prominent top banner. Absent = a normal notice.
+   */
+  kind?: "source";
 }
 
 export interface CanonicalSource {

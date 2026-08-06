@@ -572,7 +572,7 @@ export async function loadRawScenario(
       return {
         catalog,
         shard: gh.shard,
-        notices: [...notices, notice("warning", "results-raw", shardWhere, "baked shard unavailable — served from GitHub"),
+        notices: [...notices, { ...notice("warning", "results-raw", shardWhere, "baked shard unavailable — served from GitHub"), kind: "source" as const },
                   ...gh.notices, ...rawShardConsistencyNotices(gh.shard, gh.catalog, shardWhere)],
       };
     }
