@@ -1,0 +1,14 @@
+id: '53'
+title: experiment-exposure-stratified
+protocol: experiment
+phase: hypothesis
+plan_phases: []
+current_plan_phase: null
+gates:
+  experiment-complete:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-06T09:42:40.302Z'
+updated_at: '2026-08-06T09:42:40.303Z'
