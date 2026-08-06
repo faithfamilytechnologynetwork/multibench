@@ -1,0 +1,14 @@
+id: '58'
+title: experiment-multiweights-full-g
+protocol: experiment
+phase: hypothesis
+plan_phases: []
+current_plan_phase: null
+gates:
+  experiment-complete:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-06T10:06:11.221Z'
+updated_at: '2026-08-06T10:06:11.222Z'
