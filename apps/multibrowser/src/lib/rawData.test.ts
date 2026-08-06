@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { gzipSync } from "node:zlib";
+import { RateLimitError } from "./github";
 import {
   isSafeRelPath,
   parseRawCatalog,
@@ -10,9 +11,11 @@ import {
   BakedRawSource,
   GitHubRawSource,
   decodeGzText,
+  loadRawShard,
   resolveRawSource,
   type RawDataSource,
 } from "./rawSource";
+import { fakeRawSource } from "../test/rawFixture";
 
 // ── fixtures ──────────────────────────────────────────────────────────────────────
 
@@ -171,26 +174,71 @@ describe("resolveRawSource", () => {
     expect(r.catalog?.fingerprint).toBe("sha256:abc");
   });
 
-  it("uses GitHub silently when baked is absent", async () => {
+  it("falls back to GitHub WITH a notice when baked is absent (serving fallback)", async () => {
     const r = await resolveRawSource(bakedFrom(null), githubFrom(MB_CATALOG), "run1", "sha256:abc");
     expect(r.source.kind).toBe("github");
-    expect(r.notices).toHaveLength(0);
+    expect(r.notices.some((n) => /no baked bundle/.test(n.message))).toBe(true);
     expect(r.catalog).not.toBeNull();
+  });
+
+  it("flags a raw↔score fingerprint mismatch on the GitHub path", async () => {
+    const wrongGh = { ...MB_CATALOG, fingerprint: "sha256:WRONG" };
+    const r = await resolveRawSource(bakedFrom(null), githubFrom(wrongGh), "run1", "sha256:abc");
+    expect(r.source.kind).toBe("github");
+    expect(r.notices.some((n) => /raw and score tiers disagree/.test(n.message))).toBe(true);
+  });
+
+  it("does NOT use baked when the run fingerprint is unavailable (can't confirm coherence)", async () => {
+    const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", null);
+    expect(r.source.kind).toBe("github");
+    expect(r.notices.some((n) => /can't be confirmed/.test(n.message))).toBe(true);
   });
 
   it("errors when neither source has the run", async () => {
     const r = await resolveRawSource(bakedFrom(null), githubFrom(null), "run1", null);
     expect(r.catalog).toBeNull();
-    expect(r.notices[0]?.message).toMatch(/no raw dataset/);
-  });
-
-  it("accepts baked without an expected fingerprint (null → skip coherence check)", async () => {
-    const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", null);
-    expect(r.source.kind).toBe("baked");
+    expect(r.notices.some((n) => /no raw dataset/.test(n.message))).toBe(true);
   });
 });
 
 // ── source impls (URL shape) ─────────────────────────────────────────────────────────
+
+describe("loadRawShard (fail-soft)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("loads + parses a shard from the fixture source", async () => {
+    const { shard, notices } = await loadRawShard(fakeRawSource("baked"), "run1", "buddhism/BUD-001.json.gz");
+    expect(shard?.cells).toHaveLength(2);
+    expect(notices).toHaveLength(0);
+  });
+
+  it("returns a notice (no throw) when the shard is absent (404)", async () => {
+    const { shard, notices } = await loadRawShard(fakeRawSource("baked"), "run1", "buddhism/MISSING.json.gz");
+    expect(shard).toBeNull();
+    expect(notices[0]?.message).toMatch(/not found/);
+  });
+
+  it("converts a GitHub rate-limit into an error notice (no throw)", async () => {
+    const src: RawDataSource = {
+      kind: "github",
+      catalogText: async () => null,
+      shardText: async () => { throw new RateLimitError(null); },
+    };
+    const { shard, notices } = await loadRawShard(src, "run1", "buddhism/BUD-001.json.gz");
+    expect(shard).toBeNull();
+    expect(notices[0]?.message).toMatch(/rate limit/);
+  });
+
+  it("converts a missing DecompressionStream into a fail-soft notice (feature-detect, no polyfill)", async () => {
+    vi.stubGlobal("DecompressionStream", undefined);
+    const gz = gzipSync(Buffer.from(JSON.stringify(SHARD)));
+    const fetchImpl = (async () => new Response(gz, { status: 200 })) as unknown as typeof fetch;
+    const src = new GitHubRawSource("owner/repo", "deadbeef", fetchImpl);
+    const { shard, notices } = await loadRawShard(src, "run1", "buddhism/BUD-001.json.gz");
+    expect(shard).toBeNull();
+    expect(notices[0]?.message).toMatch(/DecompressionStream|can't decompress/i);
+  });
+});
 
 describe("GitHubRawSource / BakedRawSource fetch shapes", () => {
   it("GitHubRawSource gunzips a shard fetched via raw bytes", async () => {

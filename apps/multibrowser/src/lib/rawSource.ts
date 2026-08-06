@@ -11,8 +11,8 @@
 // plain JSON.
 
 import { notice, type Notice } from "./model";
-import { raw, rawBytes, type FetchImpl } from "./github";
-import { parseRawCatalog, type RawCatalog } from "./rawModel";
+import { GitHubError, RateLimitError, raw, rawBytes, type FetchImpl } from "./github";
+import { parseRawCatalog, parseRawShard, type RawCatalog, type RawShard } from "./rawModel";
 
 /** Thrown when the browser lacks `DecompressionStream` (Safari < 16.4). Feature-detect, don't polyfill. */
 export class DecompressionUnsupportedError extends Error {
@@ -101,11 +101,24 @@ export interface ResolvedRawSource {
   notices: Notice[];
 }
 
+/** Map a GitHub fetch error to a display-first Notice (never let it reject out of a loader). */
+function errNotice(e: unknown, where: string): Notice {
+  if (e instanceof RateLimitError) {
+    return notice("error", "github", where, "GitHub's rate limit was reached and nothing is cached yet.");
+  }
+  if (e instanceof GitHubError) {
+    return notice("error", "github", where, `GitHub error (${e.status}).`);
+  }
+  return notice("error", "results-raw", where, `couldn't load: ${(e as Error).message}`);
+}
+
 /**
- * Choose the source for a run. Prefers the baked bundle when present AND coherent (its catalog
- * fingerprint matches `expectedFingerprint`, the authoritative run the user drilled in from);
- * otherwise the SHA-pinned GitHub tier. A baked bundle that is present but stale/mismatched, or a
- * GitHub-served run, surfaces a `Notice`. Returns the parsed catalog so the caller needn't refetch.
+ * Choose the source for a run. Uses the baked bundle ONLY when present AND provably coherent —
+ * its catalog fingerprint equals `expectedFingerprint` (the authoritative score-tier fingerprint
+ * for this run). Otherwise (baked absent / unreadable / unconfirmable / stale) it serves the
+ * SHA-pinned GitHub tier and surfaces a `Notice` that the fallback is in use. On the GitHub path
+ * it ALSO checks the fingerprint against `expectedFingerprint` so a raw↔score tier mismatch is
+ * flagged. Returns the parsed catalog so the caller needn't refetch.
  */
 export async function resolveRawSource(
   baked: RawDataSource,
@@ -121,38 +134,79 @@ export async function resolveRawSource(
   } catch {
     bakedText = null; // baked errors → treat as absent, fall back
   }
+
   if (bakedText !== null) {
-    const { catalog, notices } = parseRawCatalog(bakedText, where);
-    if (catalog && (expectedFingerprint === null || catalog.fingerprint === expectedFingerprint)) {
-      return { source: baked, catalog, notices }; // fast path: same-origin baked
+    const { catalog } = parseRawCatalog(bakedText, where);
+    if (catalog && expectedFingerprint !== null && catalog.fingerprint === expectedFingerprint) {
+      return { source: baked, catalog, notices: [] }; // fast path: coherent same-origin baked
     }
-    // present but unparseable or fingerprint-mismatched → live GitHub copy + a notice
-    const gh = await loadGitHubCatalog(github, runId, where);
+    const reason = !catalog
+      ? "the baked data is unreadable"
+      : expectedFingerprint === null
+        ? "the baked data can't be confirmed (no run fingerprint)"
+        : "the baked data is stale (fingerprint mismatch)";
+    const gh = await loadGitHubCatalogChecked(github, runId, where, expectedFingerprint);
     return {
       source: github,
       catalog: gh.catalog,
-      notices: [
-        notice("warning", "results-raw", where,
-          catalog
-            ? "baked data is stale (fingerprint mismatch) — serving the live GitHub copy"
-            : "baked data is unreadable — serving the live GitHub copy"),
-        ...gh.notices,
-      ],
+      notices: [notice("warning", "results-raw", where, `${reason} — serving the live GitHub copy`), ...gh.notices],
     };
   }
-  // baked absent (deployed without a bake) → GitHub is authoritative; no notice needed
-  const gh = await loadGitHubCatalog(github, runId, where);
-  return { source: github, catalog: gh.catalog, notices: gh.notices };
+
+  // baked absent → GitHub (the authoritative fallback); note that the fast path isn't in use.
+  const gh = await loadGitHubCatalogChecked(github, runId, where, expectedFingerprint);
+  return {
+    source: github,
+    catalog: gh.catalog,
+    notices: [notice("warning", "results-raw", where, "no baked bundle — serving the live GitHub copy"), ...gh.notices],
+  };
 }
 
-async function loadGitHubCatalog(
+async function loadGitHubCatalogChecked(
   github: RawDataSource,
   runId: string,
   where: string,
+  expectedFingerprint: string | null,
 ): Promise<{ catalog: RawCatalog | null; notices: Notice[] }> {
-  const text = await github.catalogText(runId);
+  let text: string | null;
+  try {
+    text = await github.catalogText(runId);
+  } catch (e) {
+    return { catalog: null, notices: [errNotice(e, where)] };
+  }
   if (text === null) {
     return { catalog: null, notices: [notice("error", "results-raw", where, `no raw dataset for run "${runId}"`)] };
   }
-  return parseRawCatalog(text, where);
+  const { catalog, notices } = parseRawCatalog(text, where);
+  if (catalog && expectedFingerprint !== null && catalog.fingerprint !== expectedFingerprint) {
+    notices.push(notice("warning", "results-raw", where,
+      "raw and score tiers disagree (fingerprint mismatch) for this run"));
+  }
+  return { catalog, notices };
+}
+
+/**
+ * Load one scenario shard from the resolved source, fail-soft: a 404, rate-limit, decompression-
+ * unsupported, malformed JSON, or version mismatch each yields `{ shard: null, notices }`, never
+ * a throw.
+ */
+export async function loadRawShard(
+  source: RawDataSource,
+  runId: string,
+  relPath: string,
+): Promise<{ shard: RawShard | null; notices: Notice[] }> {
+  const where = rawPath(runId, relPath);
+  let text: string | null;
+  try {
+    text = await source.shardText(runId, relPath);
+  } catch (e) {
+    if (e instanceof DecompressionUnsupportedError) {
+      return { shard: null, notices: [notice("error", "results-raw", where, e.message)] };
+    }
+    return { shard: null, notices: [errNotice(e, where)] };
+  }
+  if (text === null) {
+    return { shard: null, notices: [notice("error", "results-raw", where, "shard not found")] };
+  }
+  return parseRawShard(text, where);
 }

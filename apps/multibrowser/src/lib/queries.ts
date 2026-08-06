@@ -7,6 +7,8 @@
 
 import { useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { latestSha, raw, tree, type TreeEntry } from "./github";
+import { BakedRawSource, GitHubRawSource, loadRawShard, resolveRawSource } from "./rawSource";
+import type { RawCatalog, RawShard } from "./rawModel";
 import {
   parseIndex,
   parseManifest,
@@ -497,5 +499,54 @@ export function useScenario(sha: string | undefined, tid: string, sid: string, d
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadScenario(qc, sha as string, tid, sid, declaredAxes),
+  });
+}
+
+// ── Raw-results tier (#51): resolve baked-vs-GitHub source + load one scenario shard ─────────
+
+export interface LoadedRawScenario {
+  catalog: RawCatalog | null;
+  shard: RawShard | null;
+  notices: Notice[];
+}
+
+/**
+ * Load one scenario's raw shard: resolve the source (baked-first / GitHub-fallback, keyed to the
+ * authoritative score-tier `expectedFingerprint`), find the item in the catalog, and load its
+ * shard — all fail-soft (every failure becomes a `Notice`, never a throw).
+ */
+export async function loadRawScenario(
+  sha: string,
+  runId: string,
+  group: string,
+  item: string,
+  expectedFingerprint: string | null,
+): Promise<LoadedRawScenario> {
+  const github = new GitHubRawSource(REPO, sha);
+  const baked = new BakedRawSource();
+  const { source, catalog, notices } = await resolveRawSource(baked, github, runId, expectedFingerprint);
+  if (!catalog) return { catalog: null, shard: null, notices };
+  const where = `results-raw/${runId}/manifest.json`;
+  const it = catalog.items.find((i) => i.id === item && i.group === group);
+  if (!it) {
+    return { catalog, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" in this run`)] };
+  }
+  const { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
+  return { catalog, shard, notices: [...notices, ...sn] };
+}
+
+export function useRawScenario(
+  sha: string | undefined,
+  runId: string | undefined,
+  group: string,
+  item: string,
+  expectedFingerprint: string | null,
+) {
+  return useQuery({
+    queryKey: ["rawScenario", REPO, sha, runId, group, item],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadRawScenario(sha as string, runId as string, group, item, expectedFingerprint),
   });
 }
