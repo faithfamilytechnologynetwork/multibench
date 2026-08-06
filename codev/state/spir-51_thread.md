@@ -437,3 +437,14 @@ context (iter-1 reviews + rebuttal) and ran the consults:
   all align, prior findings addressed.
 - **Claude:** running in background (bz1pcnojo). Will record verdicts via porch on completion,
   then advance to Review phase (R) if both non-REQUEST_CHANGES.
+
+### 2026-08-06 — phase_8 APPROVED → Review phase → PR #62
+Both phase_8 iter-2 verdicts **APPROVE** (Codex + Claude); folded Claude's one trivially-safe
+nit (`.railwayignore` .DS_Store/*.sw?). Advanced out of implement → **Review**.
+- Wrote `codev/reviews/51-multibrowser-raw-results-brows.md` (spec compliance, all 6 deviations,
+  lessons, per-phase consult history, `## Architecture Updates` + `## Lessons Learned Updates`).
+- Review-phase checks green (pr_exists, review_has_arch_updates, review_has_lessons_updates, e2e).
+- Pushed builder/spir-51; opened **PR #62** (base main); recorded it in porch pr_history.
+- Running the review-phase 2-way PR consult (`--type pr`, codex+claude, iter1) in background.
+Next: on both non-REQUEST_CHANGES → porch reaches the **PR gate** (needs Waleed's approval; I do
+NOT merge/approve). Notify architect PR ready.
