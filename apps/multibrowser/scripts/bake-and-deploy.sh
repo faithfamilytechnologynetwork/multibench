@@ -20,12 +20,18 @@ set -euo pipefail
 
 RUN_ID="${1:?usage: bake-and-deploy.sh <run-id> <run-root>...}"; shift
 [ "$#" -ge 1 ] || { echo "error: at least one run-root is required" >&2; exit 2; }
+# Validate RUN_ID as a safe single path segment BEFORE any rm/mkdir (it's interpolated into paths).
+[[ "$RUN_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || { echo "error: unsafe run-id '$RUN_ID'" >&2; exit 2; }
 
 OUT="apps/multibrowser/public/data-raw"
+# The baked dir is deploy-only (gitignored). Always remove it on exit so a later `pnpm build`
+# (e.g. deploy.test) never copies it into dist/ — the baked copy lives ONLY in the uploaded bundle.
+trap 'rm -rf "${OUT:?apps/multibrowser/public/data-raw}"' EXIT
+
 echo "› baking gz raw tier for run '$RUN_ID' into $OUT/$RUN_ID …"
 rm -rf "${OUT:?}/$RUN_ID"
 uv --project workflows/analysis run python -m analysis export-raw "$@" --run-id "$RUN_ID" --out "$OUT"
 
 echo "› deploying (railway up --no-gitignore) …"
 ( cd apps/multibrowser && railway up --no-gitignore )
-echo "✓ done. The baked bundle is served same-origin at /data-raw/$RUN_ID/."
+echo "✓ done. The baked bundle is served same-origin at /data-raw/$RUN_ID/ (local bake dir cleaned)."

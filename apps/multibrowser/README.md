@@ -70,8 +70,9 @@ Reached by drilling in from `/results` → a tradition → a scenario's live **R
 - **Results explorer (#49).** The `/results` explorer reads committed `results/<run-id>/` datasets
   at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
   run shown defaults to the newest by `generated_at`; a specific run can be pinned with `?run=<id>`.
-  The **per-scenario** `ResultsRegion` seam (optional `Scenario.results`, `loadResults()` → `none`)
-  remains inert — the explorer is a separate route-level feature, not that seam.
+  The per-scenario `ResultsRegion` is now the **live** raw-results drill-in (#51, above); the old
+  `loadResults()`/`Scenario.results` seam is deprecated (always `null`, unread) and slated for
+  cleanup.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable
   setup; corpus filters and results selectors live in the URL as flat params
   (`?pillars=a&pillars=b`, `?framing=stated&metric=steadfastness`).

@@ -50,10 +50,10 @@ pattern, gotcha, or constraint.
   stream) in BOTH manifests and assert equality per run — upgrades "same loaders" from convention to a
   checkable invariant. Keep the tiers timestamp-free so re-exports are byte-identical (sorted keys,
   gzip `mtime=0`); a wall-clock field defeats it and churns the SHA the viewer pins.
-- **Client gzip: sniff the magic bytes (`0x1f 0x8b`) before `DecompressionStream`** — some hosts serve
-  `.gz` already-decompressed (Content-Encoding), others raw bytes; never trust Content-Type. One sniff
-  path handles both a same-origin baked `.json` and a GitHub `.gz`. Feature-detect DecompressionStream
-  (Safari ≥16.4) → message, don't polyfill.
+- **Client gzip: sniff the magic bytes (`0x1f 0x8b`) before `DecompressionStream`** — both tiers ship
+  `.gz`, but some hosts serve `.gz` already-decompressed (Content-Encoding) and others hand back raw
+  bytes; never trust Content-Type. One sniff path handles both cases (same-origin baked and GitHub).
+  Feature-detect DecompressionStream (Safari ≥16.4) → message, don't polyfill.
 - **Size a browsable tier from the real data, not the issue estimate.** The #51 raw tier measured
   ~126 MB gz/run (uncompressed ~3.7×), vs a 30–80 MB guess; per-shard/per-run ceilings must sit above
   the measured p99 (validate-before-write, no partial tier), and a per-scenario granularity keeps a
