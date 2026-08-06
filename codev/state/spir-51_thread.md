@@ -486,3 +486,11 @@ not rebase — branch is published/reviewed). Two conflicts resolved:
 Other files (resultsModel/leaderboard/resultsSelection + docs/paper + sibling specs) auto-merged.
 Green after merge: vitest **251**, pytest **178**, tsc clean; no stray conflict markers. Pushed.
 Next: ping architect → pr gate goes to Waleed. I do NOT merge PR / self-approve.
+
+### 2026-08-06 — PR #62 MERGED → verify phase
+Waleed approved the pr gate; architect authorized a merge commit. Merged PR #62 via porch's
+pr-merge.sh (regular merge commit 6e5bba3, no squash). porch recorded --merged 62; phase = verify.
+Post-merge steps are architect-driven: production `railway up --no-gitignore` (bake the ~126 MB gz
+tier + confirm image size live) + hand Waleed the live raw browser, then the verify-approval gate
+(architect approves — I don't). Handing off. (This note is post-merge/local; the main-landed thread
+is complete through 11c8811.)
