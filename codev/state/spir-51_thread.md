@@ -400,3 +400,15 @@ rawSelectionToSearch). Compare-B URL covered transitively. Dead loadResults seam
 218 SPA + 177 analysis tests green.
 REVIEW-DOC TODOs (Review phase): round-robin presets refinement; link-only ResultsRegion (220KB);
 partial rate-limit immunity; loadResults dead-seam cleanup.
+
+### 2026-08-06 — phase_8 iter-1 (deploy wiring + docs)
+Ran `porch done 51` → 2-way impl consult on phase_8. **Codex REQUEST_CHANGES** (3 items),
+all addressed + committed:
+1. `bake-and-deploy.sh` interpolated an unvalidated `RUN_ID` into `rm -rf` → added
+   `[[ RUN_ID =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]` guard before any deletion.
+2. Script left `public/data-raw/` behind → conflicts with deploy.test's "no dist/data-raw"
+   guard → added `trap 'rm -rf "$OUT"' EXIT` so the baked dir is always cleaned.
+3. Doc drift: README said ResultsRegion "inert" (now: live drill-in, loadResults deprecated);
+   lessons-learned said baked `.json` (now: both tiers ship `.gz`, one sniff path).
+Green: check-types + deploy.test (6/6). **Claude iter-1 verdict still generating** — waiting
+on the background consult; will re-consult (iter2) against the now-fixed committed state.
