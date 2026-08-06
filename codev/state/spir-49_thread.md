@@ -282,3 +282,15 @@ judge selector re-points ONLY the drill-down; leaderboard ranking stays Gemini (
 always uses rankingJudgeModel). Tests: subjectTraditionValues unit + drill-down + judge-switch-doesn't-rerank
 + Opus partial-coverage (taoism omitted, buddhism badged sample). 150 tests pass, typecheck + build clean.
 Phase 6 next: docs (results/README data contract + multibrowser README). Then Review + PR (gate for WALEED).
+
+**Phase 5 consult: BOTH APPROVE first iteration** (judge selector structurally can't re-rank; steadfastness
+denominators correct; zero-coverage omission verified vs real shards). Only cosmetic suggestions.
+
+### Phase 6 (docs) — DONE.
+- results/README.md: full data contract (layout, export command, manifest+shard schema, cell arrays,
+  semantics [cell/pooled-all/steadfastness/coverage], normalization [subject/judge alias+dedup+v2], explorer
+  behavior, size ceilings).
+- apps/multibrowser/README.md: added Results explorer section (leaderboard mean-of-means Gemini-ranked,
+  deep-linkable framing/metric/pressure selectors, judge selector = Opus validation drill-down never re-ranks,
+  display-first notices).
+Docs only. → porch done → consult. Then Review phase (arch-docs via update-arch-docs skill) + PR (WALEED gate).

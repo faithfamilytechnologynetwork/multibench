@@ -8,6 +8,24 @@ taxonomy tag, `identity_signal`, and source locus.
 It is read-only and **reads the corpus live from GitHub at runtime** (not from a local copy and
 not from a pre-baked bundle), so **new or edited traditions on `main` appear without a redeploy**.
 
+It also hosts a **Results explorer** (`/results`) over committed judging-run datasets (see below).
+
+## Results explorer (`/results`)
+
+Browses `results/<run-id>/` datasets the same runtime way it reads the corpus (SHA-pinned git-trees
++ `raw`), so a newly committed run appears **without a redeploy** — the data contract and export
+command live in [`results/README.md`](../../results/README.md).
+
+- **Leaderboard** — cross-tradition standings = the **mean of per-tradition means**, ranked on the
+  full-grid **Gemini** judge; reconciles with the paper's standings to displayed precision.
+- **Selectors** (all deep-linkable): **framing** (unstated/stated/guided), **metric**
+  (first-response / post-pressure / **steadfastness** = full − turn1), **pressure** (six + "all").
+- **Judge selector** — points the **per-tradition drill-down** at **Opus** (the validation judge)
+  where Opus data exists, badged `sample n/N`. It **never re-ranks** the board; Opus stated/guided
+  is only a sample, so ranking always stays Gemini.
+- Display-first: a malformed/missing manifest or shard, unknown vocab, or a dropped tradition
+  renders an inline notice — never a blank page.
+
 ## Architecture (in one breath)
 
 - **Stack:** Vite 6 + React 19 + TypeScript + Tailwind 4 + HeroUI + **TanStack Router**
