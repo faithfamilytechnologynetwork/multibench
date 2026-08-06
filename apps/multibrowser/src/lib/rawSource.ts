@@ -187,6 +187,22 @@ async function loadGitHubCatalogChecked(
   return { catalog, notices };
 }
 
+/** Fetch + parse one source's catalog, fail-soft (fetch errors → Notice). No fingerprint check. */
+export async function loadRawCatalog(
+  source: RawDataSource,
+  runId: string,
+): Promise<{ catalog: RawCatalog | null; notices: Notice[] }> {
+  const where = rawPath(runId, MANIFEST);
+  let text: string | null;
+  try {
+    text = await source.catalogText(runId);
+  } catch (e) {
+    return { catalog: null, notices: [errNotice(e, where)] };
+  }
+  if (text === null) return { catalog: null, notices: [notice("error", "results-raw", where, `no raw dataset for run "${runId}"`)] };
+  return parseRawCatalog(text, where);
+}
+
 /**
  * Load one scenario shard from the resolved source, fail-soft: a 404, rate-limit, decompression-
  * unsupported, malformed JSON, or version mismatch each yields `{ shard: null, notices }`, never

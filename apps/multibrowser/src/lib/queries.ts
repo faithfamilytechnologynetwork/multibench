@@ -7,7 +7,7 @@
 
 import { useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { latestSha, raw, tree, type TreeEntry } from "./github";
-import { BakedRawSource, GitHubRawSource, loadRawShard, resolveRawSource, type RawDataSource } from "./rawSource";
+import { BakedRawSource, GitHubRawSource, loadRawCatalog, loadRawShard, resolveRawSource, type RawDataSource } from "./rawSource";
 import { rawShardConsistencyNotices, type RawCatalog, type RawShard } from "./rawModel";
 import {
   parseIndex,
@@ -561,23 +561,46 @@ export async function loadRawScenario(
     return { catalog, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" in this run`)] };
   }
   const shardWhere = `results-raw/${runId}/${it.shard}`;
-  let { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
-  // Per-shard fallback: a coherent baked bundle can still be partially uploaded — if THIS shard
-  // is missing/corrupt on baked, try the authoritative GitHub copy before giving up.
+  const { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
+  // Per-shard fallback: a coherent baked bundle can still be partially uploaded — if THIS shard is
+  // missing/corrupt on baked, try the authoritative GitHub copy. But ONLY if the GitHub catalog is
+  // ITSELF coherent (its fingerprint matches this run's), and use ITS declared shard path — never
+  // splice a baked path onto an incoherent GitHub tier.
   if (shard === null && source.kind === "baked" && sources.github !== source) {
-    const gh = await loadRawShard(sources.github, runId, it.shard);
-    if (gh.shard !== null) {
-      const consistency = rawShardConsistencyNotices(gh.shard, catalog, shardWhere);
+    const gh = await loadGitHubShardCoherent(sources.github, runId, group, item, expectedFingerprint);
+    if (gh.shard !== null && gh.catalog !== null) {
       return {
         catalog,
         shard: gh.shard,
-        notices: [...notices, notice("warning", "results-raw", shardWhere, "baked shard unavailable — served from GitHub"), ...gh.notices, ...consistency],
+        notices: [...notices, notice("warning", "results-raw", shardWhere, "baked shard unavailable — served from GitHub"),
+                  ...gh.notices, ...rawShardConsistencyNotices(gh.shard, gh.catalog, shardWhere)],
       };
     }
-    sn = [...sn, ...gh.notices];
+    return { catalog, shard: null, notices: [...notices, ...sn, ...gh.notices] };
   }
   const consistency = shard ? rawShardConsistencyNotices(shard, catalog, shardWhere) : [];
   return { catalog, shard, notices: [...notices, ...sn, ...consistency] };
+}
+
+/** GitHub per-shard fallback, gated on GitHub-catalog coherence (its own fingerprint + declared path). */
+async function loadGitHubShardCoherent(
+  github: RawDataSource,
+  runId: string,
+  group: string,
+  item: string,
+  expectedFingerprint: string | null,
+): Promise<{ catalog: RawCatalog | null; shard: RawShard | null; notices: Notice[] }> {
+  const where = `results-raw/${runId}/manifest.json`;
+  const { catalog, notices } = await loadRawCatalog(github, runId);
+  if (!catalog) return { catalog: null, shard: null, notices };
+  if (expectedFingerprint === null || catalog.fingerprint !== expectedFingerprint) {
+    return { catalog: null, shard: null, notices: [...notices,
+      notice("warning", "results-raw", where, "GitHub raw tier disagrees with this run (fingerprint mismatch) — cannot serve the missing baked shard")] };
+  }
+  const it = catalog.items.find((i) => i.id === item && i.group === group);
+  if (!it) return { catalog: null, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" on GitHub`)] };
+  const { shard, notices: sn } = await loadRawShard(github, runId, it.shard);
+  return { catalog, shard, notices: [...notices, ...sn] };
 }
 
 export function useRawScenario(

@@ -88,9 +88,12 @@ describe("loadRawScenario (integration)", () => {
 
   it("falls back to the GitHub shard when a coherent baked bundle is missing that shard", async () => {
     const gz = rawFixtureShardGz();
-    const ghFetch = (async (url: string) =>
-      url.endsWith(".json.gz") ? new Response(gz, { status: 200 }) : new Response(null, { status: 404 })
-    ) as unknown as typeof fetch;
+    // GitHub serves a COHERENT catalog (matching fingerprint) + the gz shard.
+    const ghFetch = (async (url: string) => {
+      if (url.endsWith("manifest.json")) return new Response(JSON.stringify(rawFixtureCatalog), { status: 200 });
+      if (url.endsWith(".json.gz")) return new Response(gz, { status: 200 });
+      return new Response(null, { status: 404 });
+    }) as unknown as typeof fetch;
     const src: RawSources = {
       // baked catalog is coherent, but this shard isn't uploaded (partial bake) → shardText null
       baked: { kind: "baked", catalogText: fakeRawSource("baked").catalogText, shardText: async () => null },
@@ -99,6 +102,23 @@ describe("loadRawScenario (integration)", () => {
     const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
     expect(r.shard?.cells).toHaveLength(2); // served from GitHub
     expect(r.notices.some((n) => /baked shard unavailable — served from GitHub/.test(n.message))).toBe(true);
+  });
+
+  it("declines the per-shard GitHub fallback when the GitHub catalog is incoherent", async () => {
+    const gz = rawFixtureShardGz();
+    const ghFetch = (async (url: string) => {
+      // GitHub catalog has a DIFFERENT fingerprint than the run (drifted tier)
+      if (url.endsWith("manifest.json")) return new Response(JSON.stringify({ ...rawFixtureCatalog, fingerprint: "sha256:GH-DRIFT" }), { status: 200 });
+      if (url.endsWith(".json.gz")) return new Response(gz, { status: 200 });
+      return new Response(null, { status: 404 });
+    }) as unknown as typeof fetch;
+    const src: RawSources = {
+      baked: { kind: "baked", catalogText: fakeRawSource("baked").catalogText, shardText: async () => null },
+      github: new GitHubRawSource("owner/repo", "sha", ghFetch),
+    };
+    const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
+    expect(r.shard).toBeNull(); // did NOT mix an incoherent GitHub shard with the baked catalog
+    expect(r.notices.some((n) => /GitHub raw tier disagrees/.test(n.message))).toBe(true);
   });
 
   it("does NOT touch the GitHub source when baked is coherent", async () => {

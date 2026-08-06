@@ -346,4 +346,19 @@ describe("committed real catalog", () => {
     expect(notices).toHaveLength(0);
     expect(rawShardConsistencyNotices(shard!, catalog!, "real-shard")).toHaveLength(0);
   });
+
+  it("committed results/ and results-raw/ manifests stamp EQUAL fingerprints (cross-tier drift guard)", async () => {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const repo = path.resolve(here, "../../../..");
+    const scorePath = path.join(repo, "results/20260803/manifest.json");
+    const rawPathManifest = path.join(repo, "results-raw/20260803/manifest.json");
+    if (!fs.existsSync(scorePath) || !fs.existsSync(rawPathManifest)) return; // absent — skip
+    const scoreFp = JSON.parse(fs.readFileSync(scorePath, "utf8")).fingerprint as string;
+    const rawFp = parseRawCatalog(fs.readFileSync(rawPathManifest, "utf8"), "raw").catalog!.fingerprint;
+    expect(scoreFp).toMatch(/^sha256:/);
+    expect(rawFp).toBe(scoreFp);
+  });
 });
