@@ -560,8 +560,23 @@ export async function loadRawScenario(
   if (!it) {
     return { catalog, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" in this run`)] };
   }
-  const { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
-  const consistency = shard ? rawShardConsistencyNotices(shard, catalog, `results-raw/${runId}/${it.shard}`) : [];
+  const shardWhere = `results-raw/${runId}/${it.shard}`;
+  let { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
+  // Per-shard fallback: a coherent baked bundle can still be partially uploaded — if THIS shard
+  // is missing/corrupt on baked, try the authoritative GitHub copy before giving up.
+  if (shard === null && source.kind === "baked" && sources.github !== source) {
+    const gh = await loadRawShard(sources.github, runId, it.shard);
+    if (gh.shard !== null) {
+      const consistency = rawShardConsistencyNotices(gh.shard, catalog, shardWhere);
+      return {
+        catalog,
+        shard: gh.shard,
+        notices: [...notices, notice("warning", "results-raw", shardWhere, "baked shard unavailable — served from GitHub"), ...gh.notices, ...consistency],
+      };
+    }
+    sn = [...sn, ...gh.notices];
+  }
+  const consistency = shard ? rawShardConsistencyNotices(shard, catalog, shardWhere) : [];
   return { catalog, shard, notices: [...notices, ...sn, ...consistency] };
 }
 

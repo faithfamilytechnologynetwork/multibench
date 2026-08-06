@@ -327,4 +327,23 @@ describe("committed real catalog", () => {
     expect(catalog!.fingerprint).toMatch(/^sha256:/);
     expect(notices).toHaveLength(0);
   });
+
+  it("a real committed .gz shard gunzips, parses, and is catalog-consistent (drift guard)", async () => {
+    const fs = await import("node:fs");
+    const zlib = await import("node:zlib");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const root = path.resolve(here, "../../../../results-raw/20260803");
+    const manifestPath = path.join(root, "manifest.json");
+    if (!fs.existsSync(manifestPath)) return; // committed dataset absent — skip
+    const { catalog } = parseRawCatalog(fs.readFileSync(manifestPath, "utf8"), "real");
+    const item = catalog!.items[0]!;
+    const shardPath = path.join(root, item.shard);
+    const text = zlib.gunzipSync(fs.readFileSync(shardPath)).toString("utf8");
+    const { shard, notices } = parseRawShard(text, "real-shard");
+    expect(shard).not.toBeNull();
+    expect(notices).toHaveLength(0);
+    expect(rawShardConsistencyNotices(shard!, catalog!, "real-shard")).toHaveLength(0);
+  });
 });

@@ -86,6 +86,21 @@ describe("loadRawScenario (integration)", () => {
     expect(r.notices).toHaveLength(0);
   });
 
+  it("falls back to the GitHub shard when a coherent baked bundle is missing that shard", async () => {
+    const gz = rawFixtureShardGz();
+    const ghFetch = (async (url: string) =>
+      url.endsWith(".json.gz") ? new Response(gz, { status: 200 }) : new Response(null, { status: 404 })
+    ) as unknown as typeof fetch;
+    const src: RawSources = {
+      // baked catalog is coherent, but this shard isn't uploaded (partial bake) → shardText null
+      baked: { kind: "baked", catalogText: fakeRawSource("baked").catalogText, shardText: async () => null },
+      github: new GitHubRawSource("owner/repo", "sha", ghFetch),
+    };
+    const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
+    expect(r.shard?.cells).toHaveLength(2); // served from GitHub
+    expect(r.notices.some((n) => /baked shard unavailable — served from GitHub/.test(n.message))).toBe(true);
+  });
+
   it("does NOT touch the GitHub source when baked is coherent", async () => {
     let githubCalls = 0;
     const src: RawSources = {

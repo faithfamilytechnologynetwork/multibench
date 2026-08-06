@@ -26,13 +26,15 @@ if (root) {
           persistOptions={{
             persister,
             maxAge: 1000 * 60 * 60 * 24,
-            // Don't persist the large per-scenario raw shards (~0.7 MB each): a few drill-ins
-            // would blow the localStorage quota and TanStack would then silently stop persisting
-            // the WHOLE cache, killing the rate-limit mitigation for the score/traditions tiers.
-            // Raw shards are re-fetchable on demand; everything else persists.
+            // Don't persist: the large per-scenario raw shards (`rawScenario`, ~0.7 MB each —
+            // a few drill-ins would blow the localStorage quota and TanStack would then silently
+            // stop persisting the WHOLE cache); and the raw source *selection* (`rawSource`) —
+            // persisting a transient baked-absent → GitHub fallback would lock a run onto GitHub
+            // even after the baked bundle is deployed. Both are cheap to re-resolve; everything
+            // else (score tiers, traditions) still persists for cross-session rate-limit relief.
             dehydrateOptions: {
               shouldDehydrateQuery: (q) =>
-                q.queryKey[0] !== "rawScenario" && defaultShouldDehydrateQuery(q),
+                q.queryKey[0] !== "rawScenario" && q.queryKey[0] !== "rawSource" && defaultShouldDehydrateQuery(q),
             },
           }}
         >

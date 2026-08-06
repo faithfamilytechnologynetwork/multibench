@@ -138,9 +138,9 @@ export async function resolveRawSource(
   }
 
   if (bakedText !== null) {
-    const { catalog } = parseRawCatalog(bakedText, where);
+    const { catalog, notices: bakedNotices } = parseRawCatalog(bakedText, where);
     if (catalog && expectedFingerprint !== null && catalog.fingerprint === expectedFingerprint) {
-      return { source: baked, catalog, notices: [] }; // fast path: coherent same-origin baked
+      return { source: baked, catalog, notices: bakedNotices }; // fast path: coherent same-origin baked
     }
     const reason = !catalog
       ? "the baked data is unreadable"
