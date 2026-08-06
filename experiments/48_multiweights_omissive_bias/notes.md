@@ -431,7 +431,33 @@ descriptive → assemble base-vs-SFT table → pre-DPO checkpoint report.
 - Base matches taqwabench's base closely (0.467/0.789/0.271 vs their 0.467/0.792/0.273) → harness
   + same-stack control validated.
 
-### MultiBench-descriptive — PENDING (job bewydkbql still running).
+### K=4-from-distilled MINING YIELD (pilot: 10 scenarios/tradition, gemini full-scope band)
+
+Pair = within-cell max-gap (chosen=best of 4, rejected=worst) with full-score gap ≥ 1.0 (= taqwabench's
+≥2 rungs on the 0.5-step ladder).
+
+| tradition | cells | pairs | yield | | tradition | cells | pairs | yield |
+|---|---|---|---|---|---|---|---|---|
+| judaism | 60 | 34 | 57% | | eastern-christianity | 60 | 21 | 35% |
+| buddhism | 60 | 29 | 48% | | secular-sage | 60 | 17 | 28% |
+| sunni-islam | 60 | 26 | 43% | | taoism | 60 | 16 | 27% |
+| roman-catholicism | 60 | 15 | 25% | | **TOTAL** | **420** | **158** | **38%** |
+
+- gap histogram: 0.0→180 cells (all 4 same), 0.5→82, 1.0→17, 1.5→50, **2.0→91**. So 158/420 (38%) yield a
+  usable pair; 91 cells have the max gap (2.0) — strong contrast where it exists.
+- **Extrapolated full-grid (38% × 3,114 cells): ~1,171 pairs** — ample for a 1-epoch DPO.
+- **Full mining cost is prohibitive (~160):** 12,456 sittings (endpoint GPU, cheap) + 12,456 gemini
+  full-scope judgments (~150). **Scoped mining fits:** e.g. mine to ~30–50 scenarios/tradition →
+  ~480–800 pairs at +40–80 judging. That is what keeps DPO+lean ≤ 400.
+
+### MultiBench-descriptive — running (bij4m15e7, sunni-islam/taoism left); gradient table on completion.
+
+### Pre-DPO checkpoint — pinned costs (two-way; ceiling 400)
+- **STOP-AT-SFT ≈ 280** (current 260 + pilot mining band 20, already spent for the yield figure). SFT
+  already delivers the headline (AFB P≥2 1%→27%, over-application clean).
+- **DPO+LEAN ≈ 350–390** (280 + scoped mining 40–80 + DPO B200 ~7 + lean +DPO eval [AFB cold + probes
+  + capability] ~22). Comfortably ≤ 400; buys the calibration sharpening (tempering the AFB 4-spike)
+  + pressure-robustness, with post-DPO capability as the number of record.
 
 ## Progress log
 
