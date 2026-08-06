@@ -471,3 +471,18 @@ with a SEMANTIC conflict in ResultsPage.tsx (Spec 55 dense-table rewrite carries
 drill-down entry) + trivial README. Architect's 3-item synthesis did NOT include the merge;
 pinging to confirm whether I should merge origin/main + re-apply the drill-down hunk (delicate —
 feature entry point) or they'll handle it at the gate.
+
+### 2026-08-06 — merged origin/main (Spec 55) + re-applied raw drill-down
+Architect authorized the merge. Merged origin/main INTO builder/spir-51 (merge commit b172757,
+not rebase — branch is published/reviewed). Two conflicts resolved:
+- **ResultsPage.tsx**: took #55's dense sortable-table rewrite; re-applied the #51 raw drill-down
+  as a per-tradition `<Link to="/t/$traditionId">` in #55's new `drill-row`. **Level choice
+  (noted):** the leaderboard is per-tradition and #55's drill-row IS the tradition level, so the
+  entry lives there (no scenario-level granularity in the board); the scenario page's ResultsRegion
+  still injects the run-scoped raw entry. Added a test asserting the drill-link renders with
+  href `/t/buddhism` from #55's structure (the exact seam a silent regression would hide).
+- **README.md**: kept #55's run-selector + dense-table copy AND the #51 live-ResultsRegion note;
+  drill-down bullet now mentions the per-tradition raw link.
+Other files (resultsModel/leaderboard/resultsSelection + docs/paper + sibling specs) auto-merged.
+Green after merge: vitest **251**, pytest **178**, tsc clean; no stray conflict markers. Pushed.
+Next: ping architect → pr gate goes to Waleed. I do NOT merge PR / self-approve.
