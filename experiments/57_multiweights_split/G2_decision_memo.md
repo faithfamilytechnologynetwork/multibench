@@ -73,16 +73,19 @@ is genuinely slow) — which the throughput re-measure on resume will catch earl
 4. **Reconcile**: sum `mining/*/judgments.jsonl` usage → exact band $; add resumed-sampling GPU →
    `S_G2`. Apply the rule above → **RUN or DEFER** the split-DPO descriptive.
 5. `uv --project workflows/judging run python .../build_dpo_pairs_split.py` → pairs + yield table.
-   Upload + launch DPO (reuses #48's `modal_gemma_dpo2.py` unchanged; input format verified compatible):
+   Upload + launch DPO (reuses #48's `modal_gemma_dpo2.py` unchanged; input format verified compatible).
+   **VERIFIED upload — `modal volume put` silently truncates/corrupts (exp-58 scar); MUST sha-round-trip:**
    ```
-   modal volume put gemma-dpo \
+   bash experiments/57_multiweights_split/verified_put.sh \
      experiments/57_multiweights_split/data/output/mining/pairs_sft2_mb_split50.jsonl \
-     /pairs/pairs_sft2_mb_split50.jsonl
+     /pairs/pairs_sft2_mb_split50.jsonl        # puts + volume-side sha/lines compare + retry×3
    modal run --detach experiments/48_multiweights_omissive_bias/modal/modal_gemma_dpo2.py \
      --pairs /pairs/pairs_sft2_mb_split50.jsonl --sft-run mb-sft-split50 \
      --run-name mb-dpo-split50 --batch 8
    ```
-   Poll `/runs/mb-dpo-split50/adapter` for completion → **G3** reconcile (DPO GPU wall-clock).
+   **Also confirm the training log's `"<N> pairs from …"` == the built pair count** (implicit
+   load-count verify — a second guard against a bad upload). Poll `/runs/mb-dpo-split50/adapter`
+   for completion → **G3** reconcile (DPO GPU wall-clock).
 6. If RUN: redeploy endpoint (now serves `dpo`) → `run_descriptive.sh …_dpo` → `analyze.py --model dpo`.
    If DEFER: note `mb-dpo-split50` as trained + mining-characterized, descriptive **deferred**.
 
