@@ -253,8 +253,8 @@ baked primary's speed and rate-limit immunity.
       list per-scenario shards (only catalog discovery may walk the tree).
 - [ ] The export ships **only an explicit field allowlist** (below); no `usage`, `raw`,
       `attempts`, `ts`, `sitting_key`, `model`, or `context_prefix`-internals leak.
-- [ ] The `dataset` block carries an explicit **license** field with a concrete SPDX
-      identifier confirmed by Waleed at the gate.
+- [ ] The `dataset` block carries an explicit **license** field of **`CC-BY-4.0`** (SPDX;
+      Waleed, 2026-08-06).
 - [ ] The **`ResultsRegion` seam is live** as an in-page entry; the **raw view route**
       renders per-cell transcripts + verdicts on drill-in, lazy-loading only the one
       scenario's shard.
@@ -313,7 +313,7 @@ baked primary's speed and rate-limit immunity.
    (notably judgment `usage`/`raw`/`ts`/`sitting_key`; sitting `attempts`/`usage`/`ts`/
    `model`). This replaces "sanitize if sensitive" — see *Security*.
 6. **`context_prefix`** → per-shard `contexts` pool keyed by framing (ruling b).
-7. **License field** in the `dataset` block (concrete SPDX id, confirmed by Waleed).
+7. **License field** in the `dataset` block: **`CC-BY-4.0`** (SPDX; Waleed, 2026-08-06).
 8. **No band names anywhere** — numeric −1…+1 + the #49 `scoreColor` ramp (MultiBench
    policy). Expressed as **catalog data** (see decision 13): MultiBench's catalog declares
    the −1…+1 scale + the `scoreColor` stops with **no rung labels**; the ramp is not a
@@ -429,8 +429,9 @@ baked dev-fixture).
       git-LFS / subset needed at this time.
 
 ### Important (Affects Design)
-- [ ] **License identifier:** the concrete SPDX id / text and its approval source for
-      `dataset.license` (Waleed). Placeholder until then.
+- [x] **License identifier — RESOLVED by Waleed (2026-08-06): `CC-BY-4.0`** (SPDX) for
+      `dataset.license`. (#54's AFB *items* are MIT — that is #54's own concern; #51's
+      MultiBench corpus/responses/judgments are CC-BY-4.0.)
 - [ ] **Dropping `results/` `generated_at`:** the reviewer recommends removing it so the
       score tier is byte-identical too (backward-compat via a tolerant zod parser), and
       replacing the "newest by timestamp" default-run signal with run-id ordering or an
@@ -473,7 +474,8 @@ baked dev-fixture).
 - **Path-injection**: manifest-declared shard paths and run/tradition/scenario ids are
   validated as safe single path segments before being spliced into a `raw` URL (reuse
   `_require_safe_segment` / `isSafePathSegment`).
-- **License**: `dataset.license` states the corpus's terms on the public export.
+- **License**: `dataset.license = CC-BY-4.0` (SPDX) states the corpus's terms on the public
+  export.
 
 ## Test Scenarios
 ### Functional Tests
@@ -611,9 +613,12 @@ static bundle as the same-origin **primary** source; the viewer resolves baked-f
 the source fingerprint deciding coherence and a `Notice` on fallback. Disclosed trade: the
 baked copy refreshes only on `railway up`; the GitHub copy still updates live.
 
+**Pre-gate amendment 3 (2026-08-06, Waleed):** `dataset.license = CC-BY-4.0` (SPDX),
+closing the last open decision.
+
 ## Approval
 - [x] Repo-weight decision (Waleed) — RESOLVED via dual-source architecture (Decision 14)
-- [ ] License identifier (Waleed) — still open
+- [x] License identifier (Waleed) — RESOLVED: `CC-BY-4.0`
 - [ ] Technical Lead / Architect Review
 - [ ] Product Owner Review (Waleed)
 - [x] Cross-workspace review (taqwabench architect) — approve-with-defect, folded in
@@ -625,8 +630,8 @@ baked copy refreshes only on `railway up`; the GitHub copy still updates live.
   `contexts`-pool wire shape, the fingerprint's exact hash construction, size-ceiling
   final values, and the `results/` `generated_at` change are Plan-phase decisions, seeded
   by the *Open Questions* and *Constraints* above.
-- The **repo-weight** decision is resolved (dual-source, Decision 14). **One** decision
-  still awaits Waleed at the gate: the **license** identifier for `dataset.license`.
+- Both gate decisions are now resolved: **repo-weight** (dual-source, Decision 14) and
+  **license** (`CC-BY-4.0`, Decision 7). No open decisions remain for the spec-approval gate.
 - Plan-level items introduced by the dual-source ruling: the exporter emitting both a gz and
   an uncompressed representation of identical content/fingerprint; the Railway deploy step
   baking the full bundle into the static site; the SPA's source-resolution layer above the

@@ -121,3 +121,9 @@ appears without a deploy); GH fallback still updates live on commit.
 Folded into Baked Decision 14 + Desired-State ruling + criteria + tests 16/17 + risks +
 closed the repo-weight open question. LICENSE SPDX still OPEN (flagged). Re-committing; gate
 re-queues for Waleed — now ONE decision left at the gate (license id).
+
+### 2026-08-06 — pre-gate amendment 3: license resolved
+Waleed: dataset.license = CC-BY-4.0 (SPDX). Closes the last open decision. (#54's AFB items
+are MIT — that's #54's concern; #51's MultiBench corpus/responses/judgments = CC-BY-4.0.)
+Folded into Baked Decision 7 + criteria + security + open questions + approval. NO open
+decisions remain for the spec-approval gate — ready for Waleed's word.
