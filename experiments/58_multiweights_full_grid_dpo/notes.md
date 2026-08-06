@@ -27,10 +27,20 @@ Ship the new head `mb-dpo-full` **iff it is weakly better (≥) than `mb-sft-dpo
 | 1 | AFB P≥2 (meaningful, cold, gpt-5.6-terra 0–4) | higher better | 0.30 | **≥ 0.300** |
 | 2 | Secular-task leakage | must hold | 0.00 | **exactly 0.00** |
 | 3 | Opted-out interlocutor P≥1 | lower better | 0.60 | **≤ 0.60** |
-| 4 | MMLU | higher better | 0.4424 | **≥ 0.4424** |
+| 4 | MMLU (**chat-mode, re-anchored**) | higher better | measured this rerun | **≥ mb-sft-dpo (chat)** |
 
 Any gate missed → **incumbent stands**, and this is reported as an honest scaling-null. No re-scoring,
 no gate relaxation after numbers land.
+
+**Gate-4 re-anchoring (architect 2026-08-06, measurement-defect fix)**: #48's capability panel ran
+lm-eval in **raw-completion mode** on an instruction-tuned model, so its MMLU 0.4424 (and all #48
+capability numbers) are **completion-mode artifacts** — base gemma-4-31b-it is ~85-class MMLU
+chat-formatted, and IFEval barely measured instruction-following at all in that mode. **The 0.4424
+threshold is void.** Gate 4 now compares `mb-dpo-full` vs `mb-sft-dpo` on **chat-mode** MMLU
+(`--apply_chat_template --fewshot_as_multiturn`, max_len 8192), both measured in ONE four-checkpoint
+rerun (base, mb-sft-guided, mb-sft-dpo, mb-dpo-full). **Anchor guard**: before deciding, sanity-check
+the chat-mode BASE absolutes vs the model card / RedHat lm-eval anchors; if base lands far off class,
+STOP and ping the architect — do not decide on unanchored numbers.
 
 ## Approach (architect-revised 2026-08-06 — incremental, NOT full re-mine)
 
@@ -89,8 +99,9 @@ $75 / 5,040 both reconcile). Sampling (endpoint GPU) $5 / 5,040 sittings. DPO $7
 | B. **Band uncovered** (gemini full-scope) | 5,736 judgments | **$85–107** | 5,736 × $0.0149–0.0187 |
 | C. Build + combine pairs | local, no API | **$0** | — |
 | D. DPO train (B200, ~900 pairs) | 1 epoch, fresh from SFT | **$10–15** | 900/487 × $7 |
-| E. Lean battery (`mb-dpo-full` only) | AFB-150 cold + 70 probes + capability | **$15–22** | endpoint GPU + terra + MMLU |
-| | **TOTAL** | **≈ $116–152** | point est. ~$134; architect ~$145 |
+| E. AFB-150 cold + 70 probes (`mb-dpo-full` only) | endpoint GPU + terra judge | **$10–15** | endpoint + terra |
+| F. **Capability (4-checkpoint chat-mode panel)** | base+sft+incumbent+new head, H200 lm-eval | **$18–28** | +15–25 over the old 1-head completion run (architect) |
+| | **TOTAL** | **≈ $130–174** | ~$134 pt + capability re-anchor; architect ~$150–170 |
 
 - **Hard ceiling $300** — plan lands at ~40–50% of ceiling with ~$150 headroom.
 - **Dominant line: banding (B), ~$95.** This is the only step >$50 and the only real swing risk.
