@@ -264,6 +264,10 @@ describe("/results leaderboard", () => {
     await userEvent.hover(budCell);
     const tip = await screen.findByTestId("strip-tooltip");
     expect(tip).toHaveAttribute("role", "tooltip");
+    // Regression guard (iter-3): the panel must be OPAQUE — an inline background, not a `bg-*` class
+    // (HeroUI has no `default-900` shade, so the class produced no surface and text bled through).
+    expect(tip.style.backgroundColor).not.toBe("");
+    expect(tip.style.color).not.toBe("");
     expect(tip).toHaveTextContent("Buddhism — Post +0.60 · First +0.20 · Δ +0.40 · 2 scenarios");
     await userEvent.unhover(budCell);
     await waitFor(() => expect(screen.queryByTestId("strip-tooltip")).not.toBeInTheDocument());

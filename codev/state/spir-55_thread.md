@@ -297,3 +297,17 @@ so "2 scenarios" proves nScenarios not nJudged (+ not.toContain "12 scenarios");
 (2) EDGE CLIPPING: custom tooltip added edge-aware positioning — useLayoutEffect measures at neutral
 translateX(-50%) and clamps within viewport (shift left/right); inert in jsdom (0-rects), verified by
 inspection per architect. 182 tests green, check-types + build OK. Branched off origin/main (has #60).
+
+## 2026-08-06 — Verify iter3 (Waleed screenshot tmp/tooltip-iter3.png): tooltip TRANSPARENT (text bled through header).
+
+Root cause (from screenshot + reasoning): tooltip used `bg-default-900 text-default-50` classes, but
+HeroUI v3 has NO `default-900` shade → the class generated no rule → transparent panel. Score cells /
+badges render fine because they use INLINE style (scoreColor) — proven-working mechanism. Was always
+broken; iter2's positioning shift put the tooltip over the header text, making the transparency glaring.
+FIX: replaced bg-default-900/text-default-50 classes with inline concrete colors (bg #18181b, text
+#fafafa, subtle border) + z-30. Same inline-style mechanism as the (visibly-working) score cells →
+guaranteed opaque. +regression test (tip.style.backgroundColor/color not empty). Positioning (iter2)
+untouched — screenshot showed it renders (not clipped), only the surface was missing. 251 tests green,
+check-types + build OK. Branch off origin/main (has #51/#54/#61). NOTE: can't drive a real browser
+headless; verifying via inline-style-parity-with-working-cells + tests + build. Deploy: architect asked
+me to railway up — checking CLI availability; will report.
