@@ -47,3 +47,38 @@ retro). Read all of it plus the real reference code before drafting.
 
 Next: draft spec → commit → **ping architect BEFORE the gate** (taqwabench offered a
 cross-workspace pre-gate spec review).
+
+### 2026-08-06 — three reviews in (iter 1), all converge → major spec revision
+- **taqwabench cross-workspace** (architect-arranged, authoritative): APPROVE w/ 1 defect
+  + rulings. DEFECT: determinism self-contradiction → ban wall-clock ENTIRELY, identity =
+  run-id + deterministic SOURCE FINGERPRINT (hash over resolved-judgments stream);
+  fingerprint stamped in BOTH tiers' manifests + checked equal per run-id (makes "cannot
+  disagree" checkable). RULED (a) sibling `export-raw`; (b) context_prefix = per-shard
+  `contexts` pool keyed by framing. Adds: shard enum manifest-declared (never trees API);
+  export-time fail-loud on a resolved judgment with no full-grid sitting. PROMOTE
+  steadfastness-cliff preset into spec.
+- **Codex CMAP** REQUEST_CHANGES: determinism/timestamp; run-id missing from deep-link
+  state; presets not testable (need score/scope/threshold/cap/sort/tie-break/sparse-Opus);
+  perf ceilings unspecified; agreement test mathematically misstated (cell mean ≠
+  cross-scenario slice mean); licensing needs actionable rule (allowlist, not "sanitize
+  if sensitive"); name the preserved parity fields.
+- **Claude CMAP** REQUEST_CHANGES (measured against real data — caught my factual errors):
+  (1) SIZE WRONG — per-scenario shard 161–300 KB gz (median ~221), Gemini grid ~110–130
+  MB gz, tier ~110–150 MB w/ Opus — NOT 30–80 MB (2–4×). (2) FACTUAL: `framings-opus-
+  sample` DOES have sittings.jsonl (verified) — only `unstated-opus` lacks them; must rule
+  which sittings win. (3) transcript↔verdict join: #49 loaders read judgments ONLY (no
+  sitting loader) → transcript reading is NEW code; subject spellings differ across roots
+  (verified) → key transcripts by NORMALIZED subject, unmatched verdict = loud fail. (4)
+  run-id missing from view state. (5) entry-point ambiguous (ResultsRegion is 1-line
+  inline; A/B is a full view). (6) minor: #49 tier=184KB not "single-digit MB"; Opus
+  judgments=42,711; placeholder string literally says "bands" (must edit).
+
+**Rulings I'm baking into iter 2:** transcript source = EXCLUSIVELY the full-grid
+(report.json) merged run; other roots' sittings ignored. Sittings keyed by normalized
+subject; unmatched verdict = abort. No wall-clock in raw tier; fingerprint identity.
+sibling `export-raw`; per-shard contexts pool keyed by framing. New run+scenario-scoped
+route for the full raw view; ResultsRegion becomes a live in-page entry. Corrected sizes
+(~110–150 MB gz/run) — flagging to Waleed at gate as a repo-weight decision (4× the
+issue estimate). Field allowlist replaces vestigial sanitization (scenario corpus already
+public in traditions/). Presets fully specified. Agreement test = field-level equality +
+independent aggregate recompute + fingerprint equality.
