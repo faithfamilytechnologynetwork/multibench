@@ -57,6 +57,15 @@ def test_write_dataset_layout_and_gunzip(tmp_path):
     assert len(doc["cells"]) == 1 * 3 * 6
 
 
+def test_raw_manifest_has_no_wallclock_field(tmp_path):
+    """The raw tier carries no timestamp at all (Decision 2) — provenance is the fingerprint."""
+    write_dataset([_grid_root(tmp_path)], tmp_path / "out", "run1")
+    manifest = _read_manifest(tmp_path / "out" / "run1")
+    for banned in ("generated_at", "timestamp", "created", "date", "time"):
+        assert banned not in manifest
+    assert "fingerprint" in manifest and "schema_version" in manifest
+
+
 def test_write_dataset_byte_identical_reexport(tmp_path):
     root = _grid_root(tmp_path, subjects=("gpt-5.6-terra", "claude-sonnet-5"))
     write_dataset([root], tmp_path / "a", "run1")

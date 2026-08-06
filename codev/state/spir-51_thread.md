@@ -218,3 +218,40 @@ green; full analysis suite 125 green). Implements:
   scope,score,direction,rationale) — shared helper; Phase 2 wires it into export_results.
 - Verdict = allowlisted {judge(UI key),scope,score,summary(=direction),rationale?}.
 Next: porch done → verify (codex+claude consult) → phase_2.
+
+### 2026-08-06 — phase_1 APPROVED (3 consult iters) → phase_2
+phase_1 ✓ (Claude APPROVE, Codex issues all resolved over iters 1-3). Real-data smoke passed
+(buddhism 52×90, eastern-christianity 106×90, both judges). Now on phase_2: fingerprint
+cross-tier plumbing + streaming writer + export-raw CLI + size measurement. Deferred-from-
+phase_1 memory items land here: per-tradition judgment reads (drop raw/usage) + streaming
+catalog so peak memory is bounded (Claude measured 1.87GB with whole-root reads).
+Plan: put source_fingerprint in a neutral analysis/fingerprint.py (both exporters import it,
+no circular dep); thread resolved stream through export_results.build_manifest.
+
+### 2026-08-06 — IMPLEMENT phase_2 built: writer + CLI + fingerprint plumbing
+- analysis/fingerprint.py (NEW): shared source_fingerprint + fingerprint_line/combine_
+  fingerprint (both tiers use it; no circular dep). Tuple = (tradition,subject,scenario,
+  pressure,framing,judge,scope,score,direction,rationale).
+- export_results (#49 additive): TraditionExport carries fingerprint_lines (lightweight, not
+  full dicts); build_manifest stamps the combined fingerprint. Kept generated_at (default-run
+  selection needs it) — its fingerprint is wall-clock-independent (test proves it).
+- export_raw: per-tradition streaming reads (drop raw/usage at read) replacing whole-root
+  read_run_root — bounds memory; deterministic streaming write_dataset (gz lvl9 mtime=0,
+  validate-all-sizes-before-write, prune stale, multi-seg safe-relpath); --limit fixture.
+- cli.py: `analysis export-raw` command.
+- MEASURED real export (all 3 roots): 519 scenarios, 126.2MB gz total, max shard 533KB,
+  median 233KB, p99 401KB. Ceilings RAISED to per-shard 1MB / per-run 200MB (real max 545KB
+  → the initial 512KB ceiling correctly ABORTED before any write; validate-before-write works).
+  Peak RSS 1.66GB (was ~1.9GB) — streaming caps it to one tradition + compressed buffer;
+  acceptable for a one-off batch export. Raw manifest fingerprint == results/ manifest
+  fingerprint (cross-tier equality test).
+- Tests: test_export_raw_writer.py (12) — determinism, ceilings (both, no partial tier),
+  safe-path guards, --limit, prune, cross-tier fingerprint equality, wall-clock-independence,
+  CLI. Full analysis suite 163 green.
+
+### 2026-08-06 — phase_2 APPROVED (Codex+Claude); nits folded
+Phase 2 approved both. Folded Claude's non-blocking nits: import _require_safe_segment from
+export_results (no forked traversal guard); moved gzip import to top + dropped unused re;
+removed misleading __all__; prune removes now-empty group dirs; added no-wall-clock manifest
+assertion test. Deferred to Phase 4: document exporting toolchain (Python/zlib) in
+results-raw/README (determinism is per-build). 159 tests green. Next: phase_3 (presets).

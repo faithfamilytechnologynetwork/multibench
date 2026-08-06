@@ -22,6 +22,7 @@ documents. The deterministic writer, the ``export-raw`` CLI, and presets are Pha
 
 from __future__ import annotations
 
+import gzip
 import json
 from collections import defaultdict
 from collections.abc import Iterator
@@ -39,18 +40,13 @@ from analysis.export_results import (
     _JUDGMENTS_V2,
     _REPORT,
     _read_rows,
+    _require_safe_segment,  # shared traversal guard (don't fork it)
     _scenario_universe,
     normalize_subject,
     resolve_judgments,
 )
-from analysis.fingerprint import (  # shared with export_results (source_fingerprint re-exported)
-    combine_fingerprint,
-    fingerprint_line,
-    source_fingerprint,
-)
+from analysis.fingerprint import combine_fingerprint, fingerprint_line, source_fingerprint
 from analysis.loaders import AnalysisInputError
-
-__all__ = ["source_fingerprint"]  # noqa: PLE0604 -- explicit re-export
 
 SCHEMA_VERSION = 1
 
@@ -551,25 +547,11 @@ def build_catalog(corpus: RawCorpus) -> dict:
 # so all sizes can be validated before any write (no partial tier), then writes + prunes
 # stale files. No wall-clock anywhere → byte-identical re-exports.
 
-import gzip  # noqa: E402 -- kept next to the writer that uses it
-import re  # noqa: E402
-
 # Guardrails calibrated ABOVE the real p99 (measured max shard 545,560 bytes ≈ 533 KB on
 # roman-catholicism), not on it — they catch a pathological blowup, not normal data.
 MAX_SHARD_BYTES = 1024 * 1024         # ≤ 1 MB per per-scenario gz shard
 MAX_TOTAL_BYTES = 200 * 1024 * 1024   # ≤ 200 MB per run (above the ~110–150 MB observed)
 _MANIFEST = "manifest.json"
-
-# A safe single path segment (mirrors export_results._require_safe_segment): no separators,
-# no '..', no leading dot/dash. Guards the writer's mkdir/unlink against traversal.
-_SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
-
-
-def _require_safe_segment(name: str, kind: str) -> None:
-    if not _SAFE_SEGMENT.match(name) or ".." in name:
-        raise AnalysisInputError(
-            f"unsafe {kind} {name!r} — must match [A-Za-z0-9][A-Za-z0-9._-]* (no separators/'..')"
-        )
 
 
 def _require_safe_relpath(relpath: str) -> None:
@@ -685,6 +667,11 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         existing = {p.relative_to(run_dir).as_posix() for p in run_dir.rglob("*") if p.is_file()}
         for rel in existing - set(docs):
             (run_dir / rel).unlink()
+        # remove any now-empty group dirs (deepest first) so a dropped tradition leaves nothing
+        for d in sorted((p for p in run_dir.rglob("*") if p.is_dir()),
+                        key=lambda p: len(p.parts), reverse=True):
+            if not any(d.iterdir()):
+                d.rmdir()
     for name, payload in docs.items():
         path = run_dir / name
         path.parent.mkdir(parents=True, exist_ok=True)
