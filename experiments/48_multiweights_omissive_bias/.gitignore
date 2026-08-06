@@ -1,0 +1,5 @@
+# All run artifacts are regenerable — keep the entire output tree out of git (protocol: commit
+# summaries in notes.md, not heavy data: sittings/judgments/sft-set/logs/status/checkpoints).
+data/output/
+# scratch reference clones
+reference/afb-clone/
