@@ -414,5 +414,12 @@ Budget track: 280 → scoped-mining band +65 (→345) → DPO +7 (→352) → le
   band new sittings (full-scope gemini, ~60) → `build_dpo_pairs.py` (~632 pairs) → upload → DPO run.
 
 Scoped mining sampled: 6,720 total (960/tradition = 40×6×4), 5,040 new + 1,680 pilot reused, 0 failed.
-**Banding the new 5,040 (bp6oiay0z, resumable — skips pilot)** ~60. On done → build_dpo_pairs → upload
-pairs to gemma-dpo `/pairs/pairs_sft2_mb.jsonl` → DPO (modal_gemma_dpo2.py, bf16 B200, SFT ref).
+Banded (bp6oiay0z). **Pairs built: 487** (29% yield — lower than pilot's 38%, more representative;
+sunni-islam contributes most, 98). Uploaded to `/pairs/pairs_sft2_mb.jsonl`.
+**DPO RUNNING** (ap-HkapoJeENOdk3jxoCSKptM, bf16 B200, SFT ref, mb-sft-dpo); 487 pairs, max len 2102;
+~61 steps. Poller b41aytc13.
+
+**BUDGET UPDATE (actuals):** mining band ACTUAL = 100 total / ~75 for the new 5,040 (vs 60 est).
+Current ≈ **360**. Projected final: DPO ~7 + lean eval ~12 = **~379** (under 400, ~20 margin — tighter
+than the ~374 quoted). Flagged to architect (transparency; not threatening the ceiling). Lean eval is
+the last discretionary spend.
