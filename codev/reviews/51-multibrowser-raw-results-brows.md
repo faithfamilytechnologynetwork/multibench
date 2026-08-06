@@ -133,6 +133,36 @@ Every Success Criterion in the spec is met. Highlights:
 - **Post-merge, architect-driven:** the actual production `railway up --no-gitignore` and the
   ~126 MB upload / image-size confirmation happen through the architect after merge (phase 8 is
   wiring + docs only).
+- **⚠ OPEN — baked-primary upload times out at ~126 MB (2026-08-06 deploy).** The post-merge
+  production deploy reproducibly failed the baked-bundle upload (2× `operation timed out` at
+  `backboard.railway.com`) — the ~126 MB gz bundle exceeds the `railway up` CLI's tolerance.
+  **Production therefore runs WITHOUT the baked primary, serving the raw tier from the committed
+  GitHub fallback — the dual-source design's exact graceful path** (verified live: the app treats
+  the absent baked path's `200 + index.html` as "absent" and serves GitHub with the "no baked
+  bundle — serving the live GitHub copy" notice; deep links, catalog, and gz shards all resolve at
+  the pinned `main` SHA). The wiring is correct; only the baked *primary* is not yet live.
+  **Follow-up options for enabling baked-primary:** a newer `railway` CLI, an off-peak retry, a
+  chunked/asset-based upload, or a Railway support ticket for the source-upload size limit. Until
+  then the GitHub fallback carries production (correct, just without the same-origin speed / full
+  rate-limit immunity).
+
+## Verification (post-merge, live — 2026-08-06)
+
+Client-side data-path verification against `https://multibrowser-production.up.railway.app`:
+
+- **App shell + deployed bundle** — served (HTTP 200); the deployed JS (`index-*.js`, ~685 KB)
+  contains the raw-browser + dual-source code, including the literal `no baked bundle — serving the
+  live GitHub copy` notice and `content_fingerprint`.
+- **Baked absent → graceful GitHub fallback** — `/data-raw/20260803/manifest.json` returns
+  `200 + text/html` (the `serve -s` SPA history fallback), which the client's `isHtmlResponse` guard
+  treats as "absent" → the clean GitHub fallback path (exactly the deploy deviation above).
+- **GitHub fallback tier** — reachable at the pinned `main` SHA `6e5bba3`: manifest (519 items, both
+  `fingerprint` and `content_fingerprint`) + gz shards with valid `1f 8b` magic bytes.
+- **Deep-link route** — `/results/20260803/sunni-islam/JLS-001` resolves to the app (SPA fallback).
+
+The rendered interaction layer (raw view render, A/B, presets, cell-score grid, fallback-notice
+display, deep-link restore) is covered by the **251 vitest tests** against the real committed
+catalog/shards + fixtures; the interactive human walkthrough is Waleed's live look at the gate.
 
 ## Consultation Feedback (per-phase `[codex, claude]`)
 - **Phase 1** (export core) — 3 rounds → APPROVE/APPROVE.
