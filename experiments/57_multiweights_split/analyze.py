@@ -175,46 +175,75 @@ def main():
 
 
 def make_figure(model, hm, hlo, hhi, tm, tlo, thi, per_trad, hold_post):
-    """Three-way comparison + per-tradition held-out lift (MB-paper style)."""
+    """Three-way comparison + per-tradition held-out lift (MultiBench-paper style)."""
     plt.rcParams.update({"font.size": 11, "axes.spines.top": False, "axes.spines.right": False,
-                         "figure.dpi": 150})
-    fig, (axL, axR) = plt.subplots(1, 2, figsize=(11.5, 4.8), gridspec_kw={"width_ratios": [1, 1.25]})
-    C_HOLD, C_TRAIN, C_REF = "#2b6cb0", "#c05621", "#718096"
+                         "figure.dpi": 150, "svg.fonttype": "none"})
+    fig, (axL, axR) = plt.subplots(1, 2, figsize=(12.0, 5.0), gridspec_kw={"width_ratios": [1, 1.3]})
+    C_HOLD, C_TRAIN, C_REF, C_HARD = "#2b6cb0", "#c05621", "#a0aec0", "#1a365d"
 
-    # left: three-way bars
-    labels = ["Held-out\n(transfer)", "Train-half\n(memorization)", "#48 full\n(+0.83)", "#53 zero-exp\n(+0.22)"]
+    # ---- left: three-way bars (this retrain | references) ----
+    labels = ["Held-out\n(transfer)", "Train-half\n(memorization)", "#48 full-data\n(aggregate)",
+              "#53 zero-exp\n(biased LB)"]
     vals = [hm, tm, REF48_AGG, REF53_ZERO]
     errs = [[hm - hlo, tm - tlo, 0, 0], [hhi - hm, thi - tm, 0, 0]]
     colors = [C_HOLD, C_TRAIN, C_REF, C_REF]
     axL.axhline(0, color="#cbd5e0", lw=1)
     axL.axhline(TAU, color="#a0aec0", lw=1, ls=":")
-    axL.bar(range(4), vals, color=colors, yerr=errs, capsize=4, width=0.66)
-    axL.annotate(f"τ={TAU}", (3.4, TAU), fontsize=8, color="#4a5568", va="bottom")
-    axL.set_xticks(range(4)); axL.set_xticklabels(labels, fontsize=8.5)
-    axL.set_ylabel("base → split-model descriptive lift\n(unstated, post-pressure; band scale)")
-    axL.set_title(f"On-bench lift: transfer vs memorization ({model})", fontsize=10.5)
+    axL.annotate(f"τ={TAU}", (3.45, TAU + 0.01), fontsize=8, color="#4a5568", va="bottom", ha="right")
+    bars = axL.bar(range(4), vals, color=colors, yerr=errs, capsize=4, width=0.66,
+                   hatch=[None, None, None, "///"], edgecolor="white")
+    for i, v in enumerate(vals):
+        axL.annotate(f"{v:+.2f}", (i, v + (errs[1][i] if i < 2 else 0) + 0.03),
+                     ha="center", va="bottom", fontsize=9,
+                     fontweight="bold" if i == 0 else "normal",
+                     color=colors[i] if i >= 2 else [C_HOLD, C_TRAIN][i])
+    # memorization gap Δ between held-out and train-half
+    ytop = max(tm + errs[1][1], hm + errs[1][0]) + 0.10
+    axL.annotate("", xy=(1, ytop), xytext=(0, ytop),
+                 arrowprops=dict(arrowstyle="<->", color="#4a5568", lw=1))
+    axL.annotate(f"Δ={tm - hm:+.2f}\n(memorization,\nsmall)", (0.5, ytop + 0.015),
+                 ha="center", va="bottom", fontsize=7.8, color="#4a5568")
+    axL.text(0.5, -0.165, "this retrain (half data)", transform=axL.get_xaxis_transform(),
+             ha="center", fontsize=8, color="#2d3748", style="italic")
+    axL.text(2.5, -0.165, "references", transform=axL.get_xaxis_transform(),
+             ha="center", fontsize=8, color="#718096", style="italic")
+    axL.axvline(1.5, color="#e2e8f0", lw=1)
+    axL.set_xticks(range(4)); axL.set_xticklabels(labels, fontsize=8.3)
+    axL.set_ylim(0, 1.35)
+    axL.set_ylabel("base → split-model descriptive lift\n(unstated, post-pressure; signed band scale)")
+    axL.set_title("On-bench lift is ~85% transfer, not memorization", fontsize=10.5)
 
-    # right: per-tradition held-out lift with CI
-    trs = [p["tradition"] for p in per_trad]
-    m = [p["lift_holdout"] for p in per_trad]
-    lo = [p["lift_holdout"] - p["lo"] for p in per_trad]
-    hi = [p["hi"] - p["lift_holdout"] for p in per_trad]
+    # ---- right: per-tradition held-out lift, sorted desc, pooled reference ----
     hard = {"sunni-islam", "roman-catholicism"}
-    y = range(len(trs))
+    order = sorted(per_trad, key=lambda p: p["lift_holdout"])  # ascending -> bottom-to-top
+    trs = [p["tradition"] for p in order]
+    m = [p["lift_holdout"] for p in order]
+    lo = [p["lift_holdout"] - p["lo"] for p in order]
+    hi = [p["hi"] - p["lift_holdout"] for p in order]
+    cols = [C_HARD if t in hard else C_HOLD for t in trs]
+    y = list(range(len(trs)))
+    axR.axvspan(-0.02, TAU, color="#f7fafc", zorder=0)
     axR.axvline(0, color="#cbd5e0", lw=1)
-    axR.errorbar(m, list(y), xerr=[lo, hi], fmt="o", color=C_HOLD, capsize=3)
-    for i, p in enumerate(per_trad):
-        if p["tradition"] in hard:
-            axR.get_yticklabels()  # styled below
-    axR.set_yticks(list(y))
+    axR.axvline(hm, color=C_HOLD, lw=1.2, ls="--", alpha=0.7)
+    axR.annotate(f"pooled held-out {hm:+.2f}", (hm, len(trs) - 0.4), fontsize=7.8,
+                 color=C_HOLD, ha="center")
+    for yi, mi, l, h, c in zip(y, m, lo, hi, cols):
+        axR.errorbar(mi, yi, xerr=[[l], [h]], fmt="o", color=c, capsize=3, ms=6)
+    axR.set_yticks(y)
     axR.set_yticklabels([f"★ {t}" if t in hard else t for t in trs], fontsize=9)
-    axR.set_xlabel("held-out lift (95% CI)")
-    axR.set_title("Per-tradition held-out transfer (★ = hard tier)", fontsize=10.5)
+    for tick, t in zip(axR.get_yticklabels(), trs):
+        if t in hard:
+            tick.set_fontweight("bold"); tick.set_color(C_HARD)
+    axR.set_ylim(-0.6, len(trs) - 0.2)
+    axR.set_xlim(-0.05, 1.35)
+    axR.set_xlabel("held-out transfer lift (95% CI)   —   all 7 traditions > 0")
+    axR.set_title("Every tradition transfers (★ = hard tier)", fontsize=10.5)
 
-    fig.suptitle("MultiWeights-split: does the recipe help on the actual benchmark, measured properly?\n"
-                 f"(Exp 57, gemma-4-31b, clean 50/50 scenario holdout, N=519; held-out post-{model} "
-                 f"mean {hold_post:+.2f})", fontsize=11)
-    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    fig.suptitle("MultiWeights-split (Exp 57): does the recipe help on the benchmark itself, measured "
+                 "on a clean holdout?\n"
+                 f"gemma-4-31b · seeded 50/50 scenario split · N=519 · held-out post-{model} mean "
+                 f"{hold_post:+.2f} (crosses positive)", fontsize=10.5)
+    fig.tight_layout(rect=[0, 0, 1, 0.92])
     fig.savefig(os.path.join(OUT, f"fig_transfer_{model}.png"), bbox_inches="tight")
     fig.savefig(os.path.join(OUT, f"fig_transfer_{model}.pdf"), bbox_inches="tight")
     plt.close(fig)
