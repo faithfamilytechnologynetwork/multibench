@@ -153,3 +153,11 @@ Claude verified all deliverables present + 171 green; issues were 1 real bug + 2
    couldn't change → unobservable. Added false_authority fixture (sonnet 0.1/gemini 0.9 flips order) +
    test asserting headline reframe + RANK recompute (gemini→1, sonnet→2) + framing col reframe (stated→—).
 check-types green, 172 tests. Touched resultsModel/leaderboard/resultsSelection/ResultsPage/results.test.
+
+## 2026-08-06 — Phase 2 APPROVED (codex COMMENT, claude APPROVE).
+
+Only non-blocking note: drill-down colSpan is one short — should be `5 + framingCols.length` (currently
+4+F). Header = 6+F cols; drill row = <td/> (rank) + <td colSpan> over remaining 5+F. FOLDING INTO PHASE 3
+(which rewrites the drill-down into the dense per-tradition sub-table — colSpan set correctly there).
+Also Phase-3 TODO: wire sel.expanded to URL (currently useState, ?expanded inert). Phase-4 TODO: rebase
+onto origin/main (docs/paper leak). Advancing to phase_3.
