@@ -257,4 +257,31 @@ describe("GitHubRawSource / BakedRawSource fetch shapes", () => {
     const src = new BakedRawSource("data-raw", fetchImpl);
     expect(await src.catalogText("run1")).toBeNull();
   });
+
+  it("BakedRawSource resolves root-anchored URLs (not relative to a deep route)", async () => {
+    let seen = "";
+    const fetchImpl = (async (url: string) => { seen = url; return new Response("{}", { status: 200 }); }) as unknown as typeof fetch;
+    // Simulate the viewer sitting on a deep route — the baked URL must still be /data-raw/…
+    window.history.pushState({}, "", "/results/run1/buddhism/BUD-001");
+    await new BakedRawSource("data-raw", fetchImpl).catalogText("run1");
+    expect(new URL(seen).pathname).toBe("/data-raw/run1/manifest.json");
+    expect(new URL(seen).origin).toBe(location.origin);
+  });
+});
+
+describe("committed real catalog", () => {
+  it("the shipped results-raw/20260803 manifest parses through parseRawCatalog", async () => {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const manifest = path.resolve(here, "../../../../results-raw/20260803/manifest.json");
+    if (!fs.existsSync(manifest)) return; // committed dataset absent in this checkout — skip
+    const { catalog, notices } = parseRawCatalog(fs.readFileSync(manifest, "utf8"), "real");
+    expect(catalog).not.toBeNull();
+    expect(catalog!.items.length).toBe(519);
+    expect(catalog!.dataset.license).toBe("CC-BY-4.0");
+    expect(catalog!.fingerprint).toMatch(/^sha256:/);
+    expect(notices).toHaveLength(0);
+  });
 });

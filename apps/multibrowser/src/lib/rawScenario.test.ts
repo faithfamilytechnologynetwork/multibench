@@ -1,0 +1,71 @@
+import { describe, expect, it } from "vitest";
+import { QueryClient } from "@tanstack/react-query";
+import { loadRawScenario, type RawSources } from "./queries";
+import { GitHubRawSource } from "./rawSource";
+import {
+  RAW_FIXTURE_FINGERPRINT,
+  fakeRawSource,
+  rawFixtureCatalog,
+  rawFixtureShardGz,
+} from "../test/rawFixture";
+
+function qc() {
+  return new QueryClient({ defaultOptions: { queries: { retry: false } } });
+}
+
+/** Injected sources: baked serves the fixture (fingerprint overridable); GitHub serves fixture gz over a fake fetch. */
+function sources(bakedFingerprint?: string): RawSources {
+  const gz = rawFixtureShardGz();
+  const fetchImpl = (async (url: string) => {
+    if (url.endsWith("manifest.json")) return new Response(JSON.stringify(rawFixtureCatalog), { status: 200 });
+    if (url.endsWith(".json.gz")) return new Response(gz, { status: 200 });
+    return new Response(null, { status: 404 });
+  }) as unknown as typeof fetch;
+  return {
+    baked: fakeRawSource("baked", bakedFingerprint ? { fingerprint: bakedFingerprint } : {}),
+    github: new GitHubRawSource("owner/repo", "sha", fetchImpl),
+  };
+}
+
+describe("loadRawScenario (integration)", () => {
+  it("loads catalog + shard via the coherent baked source", async () => {
+    const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001",
+      RAW_FIXTURE_FINGERPRINT, sources());
+    expect(r.catalog?.items).toHaveLength(1);
+    expect(r.shard?.cells).toHaveLength(2);
+    expect(r.notices).toHaveLength(0); // coherent baked → no fallback notice
+  });
+
+  it("notices a missing item", async () => {
+    const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "NOPE",
+      RAW_FIXTURE_FINGERPRINT, sources());
+    expect(r.shard).toBeNull();
+    expect(r.notices.some((n) => /no item/.test(n.message))).toBe(true);
+  });
+
+  it("rejects an unsafe run id before any fetch", async () => {
+    const r = await loadRawScenario(qc(), "sha", "../evil", "buddhism", "BUD-001", null, sources());
+    expect(r.catalog).toBeNull();
+    expect(r.notices[0]?.message).toMatch(/unsafe run id/);
+  });
+
+  it("re-resolves when the fingerprint transitions null → known (different query keys)", async () => {
+    const client = qc();
+    const src = sources();
+    // null fingerprint → can't confirm baked → GitHub fallback (with a notice)
+    const first = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001", null, src);
+    expect(first.notices.some((n) => /can't be confirmed/.test(n.message))).toBe(true);
+    // known matching fingerprint → coherent baked (no fallback notice); a DIFFERENT cache key
+    const second = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001",
+      RAW_FIXTURE_FINGERPRINT, src);
+    expect(second.notices).toHaveLength(0);
+    expect(second.shard?.cells).toHaveLength(2);
+  });
+
+  it("serves the GitHub gz shard when baked is stale", async () => {
+    const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001",
+      RAW_FIXTURE_FINGERPRINT, sources("sha256:STALE"));
+    expect(r.notices.some((n) => /stale/.test(n.message))).toBe(true);
+    expect(r.shard?.cells).toHaveLength(2); // still renders — from the GitHub gz fallback
+  });
+});

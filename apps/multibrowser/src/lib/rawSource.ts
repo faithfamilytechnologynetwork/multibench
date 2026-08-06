@@ -12,7 +12,7 @@
 
 import { notice, type Notice } from "./model";
 import { GitHubError, RateLimitError, raw, rawBytes, type FetchImpl } from "./github";
-import { parseRawCatalog, parseRawShard, type RawCatalog, type RawShard } from "./rawModel";
+import { isSafeRelPath, parseRawCatalog, parseRawShard, type RawCatalog, type RawShard } from "./rawModel";
 
 /** Thrown when the browser lacks `DecompressionStream` (Safari < 16.4). Feature-detect, don't polyfill. */
 export class DecompressionUnsupportedError extends Error {
@@ -61,8 +61,10 @@ export class BakedRawSource implements RawDataSource {
   constructor(private readonly base: string = "data-raw", private readonly fetchImpl: FetchImpl = fetch) {}
 
   private url(runId: string, rel: string): string {
-    // Resolve relative to the document base so it works under any host subpath.
-    return new URL(`${this.base}/${runId}/${rel}`, document.baseURI).href;
+    // Root-anchored against the ORIGIN (+ Vite base) — NOT document.baseURI, which on a deep
+    // route like /results/<run>/<group>/<item> would resolve to <route>/data-raw/… and miss.
+    const viteBase = (import.meta.env?.BASE_URL ?? "/").replace(/\/*$/, "/");
+    return new URL(`${viteBase}${this.base}/${runId}/${rel}`, location.origin).href;
   }
   async catalogText(runId: string): Promise<string | null> {
     const res = await this.fetchImpl(this.url(runId, MANIFEST));
@@ -196,6 +198,10 @@ export async function loadRawShard(
   relPath: string,
 ): Promise<{ shard: RawShard | null; notices: Notice[] }> {
   const where = rawPath(runId, relPath);
+  // Defensive: relPath comes from the (validated) catalog, but never splice an unsafe path into a URL.
+  if (!isSafeRelPath(relPath)) {
+    return { shard: null, notices: [notice("error", "results-raw", where, `unsafe shard path "${relPath}"`)] };
+  }
   let text: string | null;
   try {
     text = await source.shardText(runId, relPath);

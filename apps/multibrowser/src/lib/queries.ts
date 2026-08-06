@@ -7,7 +7,7 @@
 
 import { useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { latestSha, raw, tree, type TreeEntry } from "./github";
-import { BakedRawSource, GitHubRawSource, loadRawShard, resolveRawSource } from "./rawSource";
+import { BakedRawSource, GitHubRawSource, loadRawShard, resolveRawSource, type RawDataSource } from "./rawSource";
 import type { RawCatalog, RawShard } from "./rawModel";
 import {
   parseIndex,
@@ -510,23 +510,44 @@ export interface LoadedRawScenario {
   notices: Notice[];
 }
 
+/** The two sources the raw loader resolves between (injectable for network-free tests). */
+export interface RawSources {
+  baked: RawDataSource;
+  github: RawDataSource;
+}
+
+function defaultRawSources(sha: string): RawSources {
+  return { baked: new BakedRawSource(), github: new GitHubRawSource(REPO, sha) };
+}
+
 /**
  * Load one scenario's raw shard: resolve the source (baked-first / GitHub-fallback, keyed to the
  * authoritative score-tier `expectedFingerprint`), find the item in the catalog, and load its
- * shard — all fail-soft (every failure becomes a `Notice`, never a throw).
+ * shard — all fail-soft (every failure becomes a `Notice`, never a throw). The source+catalog
+ * resolution is deduped through the QueryClient so drill-ins within a run don't refetch the
+ * (63 KB) catalog. ``runId`` is safe-segment-guarded before any fetch.
  */
 export async function loadRawScenario(
+  qc: QueryClient,
   sha: string,
   runId: string,
   group: string,
   item: string,
   expectedFingerprint: string | null,
+  sources: RawSources = defaultRawSources(sha),
 ): Promise<LoadedRawScenario> {
-  const github = new GitHubRawSource(REPO, sha);
-  const baked = new BakedRawSource();
-  const { source, catalog, notices } = await resolveRawSource(baked, github, runId, expectedFingerprint);
-  if (!catalog) return { catalog: null, shard: null, notices };
   const where = `results-raw/${runId}/manifest.json`;
+  if (!isSafePathSegment(runId)) {
+    return { catalog: null, shard: null, notices: [notice("error", "results-raw", where, `unsafe run id "${runId}"`)] };
+  }
+  // Dedupe the source resolution (catalog fetch/parse) per (sha, runId, fingerprint).
+  const { source, catalog, notices } = await qc.ensureQueryData({
+    queryKey: ["rawSource", REPO, sha, runId, expectedFingerprint],
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => resolveRawSource(sources.baked, sources.github, runId, expectedFingerprint),
+  });
+  if (!catalog) return { catalog: null, shard: null, notices };
   const it = catalog.items.find((i) => i.id === item && i.group === group);
   if (!it) {
     return { catalog, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" in this run`)] };
@@ -542,11 +563,14 @@ export function useRawScenario(
   item: string,
   expectedFingerprint: string | null,
 ) {
+  const qc = useQueryClient();
   return useQuery({
-    queryKey: ["rawScenario", REPO, sha, runId, group, item],
+    // expectedFingerprint IS in the key: a late-arriving score-tier fingerprint (null → known)
+    // busts the infinitely-fresh cache so the baked-first coherence check can re-run.
+    queryKey: ["rawScenario", REPO, sha, runId, group, item, expectedFingerprint],
     enabled: !!sha && !!runId,
     staleTime: Infinity,
     gcTime: GC_TIME,
-    queryFn: () => loadRawScenario(sha as string, runId as string, group, item, expectedFingerprint),
+    queryFn: () => loadRawScenario(qc, sha as string, runId as string, group, item, expectedFingerprint),
   });
 }
