@@ -30,8 +30,11 @@ image = (
 )
 
 # The four-gate re-anchoring panel: base + the three heads, all measured in the SAME chat-mode rerun.
+# NB: base is keyed "mb-base" (not "base") so it writes /runs/capability/mb-base-chat — a DISTINCT path
+# that never collides with the TAQWABENCH programme's base-chat on the shared gemma-dpo volume
+# (architect 2026-08-06: don't clobber theirs; the guard must measure OUR invocation, not read theirs).
 CHECKPOINTS = {
-    "base": None,
+    "mb-base": None,
     "mb-sft-guided": "/vol/runs/mb-sft-guided/adapter",
     "mb-sft-dpo": "/vol/runs/mb-sft-dpo/adapter",       # incumbent
     "mb-dpo-full": "/vol/runs/mb-dpo-full/adapter",     # exp-58 new head

@@ -18,7 +18,8 @@ from pathlib import Path
 
 ANCHORS = {"mmlu": 82.8, "gsm8k_strict": 95.8, "ifeval_prompt": 91.7}
 TOL = 3.0
-CKPTS = ["base", "mb-sft-guided", "mb-sft-dpo", "mb-dpo-full"]
+# base is "mb-base" (distinct path from taqwabench's base-chat on the shared volume) — guard reads this.
+CKPTS = ["mb-base", "mb-sft-guided", "mb-sft-dpo", "mb-dpo-full"]
 
 
 def _find_results(d: Path):
