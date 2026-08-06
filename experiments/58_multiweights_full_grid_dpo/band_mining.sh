@@ -2,7 +2,9 @@
 # exp-58 banding: full-scope gemini judge over the mined sittings, per tradition (resumable).
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
-set -a; source /Users/mwk/Development/fftn/taqwabench/.env; set +a
+# OPENROUTER_API_KEY for the gemini judge — point TAQWABENCH_ENV at your taqwabench .env (or export
+# OPENROUTER_API_KEY yourself). Kept out of the repo: no absolute paths / credential locations committed.
+set -a; source "${TAQWABENCH_ENV:?set TAQWABENCH_ENV to the path of your taqwabench .env (holds OPENROUTER_API_KEY)}"; set +a
 CFG=experiments/58_multiweights_full_grid_dpo/configs/samplability.yaml
 M=experiments/58_multiweights_full_grid_dpo/data/output/mining
 for t in buddhism eastern-christianity judaism roman-catholicism secular-sage sunni-islam taoism; do
