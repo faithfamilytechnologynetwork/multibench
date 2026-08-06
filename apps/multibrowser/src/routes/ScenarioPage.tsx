@@ -7,7 +7,7 @@ import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { ScenarioHeader } from "../components/ScenarioHeader";
 import { PressureSection } from "../components/PressureSection";
 import { FramingsPanel } from "../components/FramingsPanel";
-import { ResultsRegion } from "../components/ResultsRegion";
+import { ScenarioResponses } from "../components/ScenarioResponses";
 import { Collapsible } from "../components/Collapsible";
 import { Markdown } from "../components/Markdown";
 import { Notices, Notice } from "../components/Notice";
@@ -124,7 +124,7 @@ export function ScenarioPage() {
         )}
       </Collapsible>
 
-      <ResultsRegion traditionId={traditionId} scenarioId={scenarioId} />
+      <ScenarioResponses traditionId={traditionId} scenarioId={scenarioId} />
 
       <FramingsPanel adherentNoun={tradition.manifest?.adherentNoun ?? ""} guide={tradition.prose.guide} />
     </div>

@@ -8,6 +8,7 @@ import { parseRawSelection, rawSelectionToSearch, type RawSelection } from "../l
 import type { RawCatalog, RawCell, RawShard } from "../lib/rawModel";
 import { Markdown } from "../components/Markdown";
 import { Collapsible } from "../components/Collapsible";
+import { findCell, VerdictCard } from "../components/RawComparison";
 import { Notices, Notice } from "../components/Notice";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
@@ -23,35 +24,10 @@ function conditionColumns(catalog: RawCatalog): Record<string, string>[] {
   return cols;
 }
 const condKey = (c: Record<string, string>) => Object.entries(c).map(([k, v]) => `${k}=${v}`).join("|");
-const sameConditions = (a: Record<string, string>, b: Record<string, string>) =>
-  Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, v]) => b[k] === v);
 
-function findCell(shard: RawShard, subject: string, conditions: Record<string, string>): RawCell | undefined {
-  return shard.cells.find((c) => c.subject === subject && sameConditions(c.conditions, conditions));
-}
 function cellScore(cell: RawCell | undefined, judge: string, scope: string): number | null {
   const v = cell?.verdicts.find((vd) => vd.judge === judge && vd.scope === scope);
   return v ? v.score : null;
-}
-
-function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"][number]; catalog: RawCatalog }) {
-  const judge = catalog.judges.find((j) => j.key === verdict.judge);
-  const scope = catalog.scopes.find((s) => s.id === verdict.scope);
-  return (
-    <div className="rounded-md border border-default-200 p-3 flex flex-col gap-1" data-testid="verdict">
-      <div className="flex items-center gap-2 text-sm">
-        <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }} aria-hidden />
-        <span className="font-mono tabular-nums">{verdict.score}</span>
-        <span className="font-medium">{judge?.label ?? verdict.judge}</span>
-        {judge && !judge.fullGrid && (
-          <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-700" title="honest-sample judge (not a full grid)">sample</span>
-        )}
-        <span className="text-default-400">· {scope?.label ?? verdict.scope}</span>
-      </div>
-      {verdict.summary && <p className="text-sm text-default-700">{verdict.summary}</p>}
-      {verdict.rationale && <Collapsible title="Rationale"><Markdown>{verdict.rationale}</Markdown></Collapsible>}
-    </div>
-  );
 }
 
 /** One cell's detail column (context + transcript + verdicts). */
