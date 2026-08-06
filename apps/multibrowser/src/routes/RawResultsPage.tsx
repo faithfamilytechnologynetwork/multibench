@@ -110,9 +110,11 @@ export function RawResultsPage() {
   return (
     <div className="flex flex-col gap-6">
       {rl && <RateLimitBanner error={rl} />}
-      <nav className="text-sm">
+      <nav className="flex items-center gap-3 text-sm">
         <Link to="/results" className="text-primary hover:underline">← Results</Link>
-        <span className="text-default-400"> · run {runId}</span>
+        <Link to="/t/$traditionId/$scenarioId" params={{ traditionId: groupId, scenarioId: itemId }}
+              className="text-primary hover:underline">Scenario &amp; judge guidance →</Link>
+        <span className="text-default-400">run {runId}</span>
       </nav>
 
       <header className="flex flex-col gap-1">
@@ -143,8 +145,10 @@ export function RawResultsPage() {
         ))}
       </section>
 
-      {!cell ? (
-        <Notice notice={{ severity: "warning", scope: "results-raw", where: itemId, message: "No cell for this selection." }} />
+      {!shard ? (
+        <p className="text-sm text-default-500">Raw data for this scenario is unavailable — see the notices above.</p>
+      ) : !cell ? (
+        <Notice notice={{ severity: "warning", scope: "results-raw", where: itemId, message: "No cell for this subject / condition selection." }} />
       ) : (
         <div className="flex flex-col gap-4">
           {contextText && (

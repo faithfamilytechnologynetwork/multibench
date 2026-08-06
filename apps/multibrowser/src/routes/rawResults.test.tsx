@@ -104,6 +104,24 @@ describe("raw-results view", () => {
     const link = await screen.findByRole("link", { name: /raw responses/i });
     expect(link).toHaveAttribute("href", expect.stringContaining(`/results/${RUN}/buddhism/BUD-001`));
     expect(screen.getByTestId("results-region")).toHaveAttribute("data-has-results", "true");
+    // contentful from the score manifest (5 subjects × 3 framings × 6 pressures = 18), no raw fetch
+    expect(link).toHaveTextContent(/5 models × 18 conditions/);
+  });
+
+  it("shows an 'unavailable' message (not 'no cell') when the shard fails to load", async () => {
+    // catalog present, but the shard is 404 (not in the served files)
+    const score = resultsFiles(RUN, {});
+    const sm = JSON.parse(score[`results/${RUN}/manifest.json`]!);
+    sm.fingerprint = rawFixtureCatalog.fingerprint;
+    score[`results/${RUN}/manifest.json`] = JSON.stringify(sm);
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {
+      ...traditionFiles("buddhism", ["BUD-001"]),
+      ...score,
+      [`results-raw/${RUN}/manifest.json`]: JSON.stringify(rawFixtureCatalog),
+    }));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    expect(await screen.findByText(/Raw data for this scenario is unavailable/)).toBeInTheDocument();
+    expect(screen.queryByText(/No cell for this/)).not.toBeInTheDocument();
   });
 
   it("/results drills down into a tradition (toward the raw browser)", async () => {

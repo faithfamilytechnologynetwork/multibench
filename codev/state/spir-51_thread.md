@@ -318,3 +318,43 @@ results-raw/20260803 + README + results/20260803/manifest.json.
 - 17 rawData tests (parsers incl. 0-4 genericity, gunzip both cases, resolver baked/stale/absent,
   source impls). Full multibrowser suite 170 green; typecheck clean. Dev render fixture deferred
   to phase_6 (view tests).
+
+### 2026-08-06 — phase_5 APPROVED (both) after 7 iters. Data layer hardened:
+generic zod contract (0-4 AFB catalog parses unchanged); dual-source resolver (baked-first,
+fingerprint coherence on BOTH paths, per-shard GitHub fallback gated on GitHub coherence);
+fail-soft loaders (404/rate-limit/decompression/malformed/version); catalog-aware shard
+consistency; cache-only-serializable (persistence-safe) + rawScenario/rawSource excluded from
+localStorage persistence (quota); useRawScenario hook w/ fingerprint in key. Drift guards: real
+committed catalog + .gz shard parse + results/↔results-raw/ fingerprint equality. 191 SPA tests.
+Phase-6 carry-forwards: gate useRawScenario on expectedFingerprint!==null (avoid wasted GH fetch +
+misleading flash); static genericity check must ignore comments; consider friendlier scope labels
+in catalog (manifest re-export).
+
+### 2026-08-06 — IMPLEMENT phase_6: raw view route + live ResultsRegion
+- rampColor.ts (NEW): catalogScoreColor(scale, ramp, value) — generic two-slope interpolator over
+  the CATALOG-declared scale+ramp (NOT scoreColor's hardcoded −1..1). Same score → different color
+  under different scales (genericity proven in tests).
+- routes/RawResultsPage.tsx (NEW) at /results/$runId/$groupId/$itemId: loads via useRawScenario
+  (gated on runs-settled so the score-tier fingerprint is known before fetch); renders subject +
+  per-conditionAxis selectors (generic, no hardcoded axes), the selected cell's context prefix +
+  transcript (Markdown) + verdict cards (score colored by catalog ramp, Opus 'sample' badge).
+  Fail-soft notices; NotFound on missing run.
+- ResultsRegion.tsx: now a LIVE in-page entry — links to the raw view for the default results run
+  (data-has-results); placeholder when no run; dropped the "bands" wording. ScenarioPage passes
+  traditionId/scenarioId.
+- router.tsx: added rawResultsRoute.
+- Tests: MB render (transcript+verdicts), NON-MB 0-4 catalog render (genericity, no component
+  change), live ResultsRegion link, rampColor (generic + null-neutral). scenario.test updated
+  (no "bands"). 201 SPA tests green; tsc clean; deploy.test (real vite build) passes.
+Note: #49 loadResults() inert seam (returns null; scenario.results) is now vestigial (ResultsRegion
+no longer reads it) — flag for Review/simplify cleanup.
+
+### 2026-08-06 — phase_6 iter-2: ResultsRegion link-only APPROVED by architect
+Architect ruled option (a): ResultsRegion is a live LINK, no eager shard fetch (perf: a grid
+needs the ~220KB shard on every scenario page; score tier has no per-scenario cell scores).
+Made it CONTENTFUL from the run's score manifest ("N models × M conditions", no fetch).
+REVIEW-DOC TODO: record this as a perf-driven plan deviation (220KB/page rationale + score-
+tier-lacks-cell-scores). Also fixed: RawResultsPage shard-load-fail shows 'unavailable' (not
+'No cell'); back-link to scenario/judge-guidance; /results→/t/<tradition> drill-path disclosed
+in spec+plan. Multi-run: drill-link + ResultsRegion use defaultRunId (run not propagated) —
+phase-7 deep-link item. 206 SPA tests.

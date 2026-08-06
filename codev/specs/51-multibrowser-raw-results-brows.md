@@ -136,10 +136,21 @@ Delivered by two additive pieces that mirror the #49 architecture:
 **Entry-point ruling (resolves the iter-1 ambiguity):** the full raw view — transcripts,
 per-cell verdicts, A/B compare, presets — lives on a **new run+scenario-scoped route**
 (a dedicated view, not the one-line inline region). The existing `ResultsRegion` on
-`ScenarioPage` is **upgraded to a live in-page entry**: a compact per-scenario summary
-(e.g. the cell score grid) that links into the raw view. `/results` gains a drill-down
-into the same route. Exact route path and component decomposition are Plan-level; the
-*shape* (dedicated view + live entry, run-scoped) is fixed here.
+`ScenarioPage` is **upgraded to a live in-page entry** linking into the raw view.
+
+> **Amendment (architect-approved, 2026-08-06):** `ResultsRegion` is a **live link**, not an
+> eager cell-score summary grid. A per-scenario grid would require fetching that scenario's
+> **~220 KB raw shard on every scenario page load**, and the score tier carries **no
+> per-scenario cell scores** to build a grid without it. The link is made *contentful* from the
+> run's score manifest (e.g. "N models × M conditions") with **no** raw-shard fetch; the full
+> grid + transcripts + verdicts are one tap away. This is a perf-driven deviation from the
+> plan's "compact summary grid" wording.
+
+`/results` gains a **drill-down** toward the raw browser: the leaderboard has only
+per-tradition granularity, so its per-tradition rows link to `/t/<tradition>` (→ scenario →
+`ResultsRegion` → raw view) rather than directly into the item route. Exact route path and
+component decomposition are Plan-level; the *shape* (dedicated view + live entry, run-scoped)
+is fixed here.
 
 **Agreement, made checkable (not just "same loaders"):** both exporters stamp a
 deterministic **source fingerprint** — a hash over the resolved-judgments stream (the

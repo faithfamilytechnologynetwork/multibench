@@ -320,10 +320,13 @@ New lib modules + a one-line `WALK_DIRS` change + an additive `resultsModel` fie
   cell grid iterating `conditionAxes` (no hardcoded axis names).
 - [ ] A **generic ramp interpolator** seeded by the catalog scale+stops (not importing the
   `scoreColor` constant); `null` → neutral.
-- [ ] Upgrade `components/ResultsRegion.tsx` to a **live in-page entry** (per-scenario summary
-  linking into the route) via a `(group,item)→(tradition,scenario)` **adapter**; **edit the
-  placeholder string to drop "bands."**
-- [ ] Drill-down from `/results`.
+- [ ] Upgrade `components/ResultsRegion.tsx` to a **live in-page entry** linking into the raw
+  route; **edit the placeholder string to drop "bands."** **Architect-approved deviation
+  (2026-08-06):** a **link** (made contentful from the run's score manifest — "N models × M
+  conditions", no fetch), NOT an eager cell-score grid — a grid needs the ~220 KB shard on every
+  scenario page and the score tier has no per-scenario cell scores.
+- [ ] Drill-down from `/results`: the leaderboard's per-tradition rows link to `/t/<tradition>`
+  (→ scenario → ResultsRegion → raw), matching the leaderboard's per-tradition granularity.
 
 #### Acceptance Criteria
 - [ ] Renders MultiBench cells (both judges, Opus badged).
