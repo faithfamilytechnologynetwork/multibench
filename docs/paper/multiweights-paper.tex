@@ -346,7 +346,16 @@ Catholicism $+1.07$, Sunni Islam $+0.67$, both crossing positive
 post-SFT), and the held-out mean crosses positive ($-0.20 \to +0.57$).
 The reconciled picture: transfer is strong in general and weak
 specifically on the filter-failure scenarios --- the $+0.22$ was the
-biased lower bound its own caveat predicted. One scope note: the
+biased lower bound its own caveat predicted (\cref{fig:transfer}).
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{figures/fig_transfer_sft.pdf}
+\caption{Companion 50/50-split retrain: per-tradition base $\to$ SFT
+lift on randomly held-out scenarios vs.\ the train-half memorization
+reference. Held-out CIs are above zero in all seven traditions.}
+\label{fig:transfer}
+\end{figure} One scope note: the
 transfer estimate comes from the companion half-data retrain, not the
 shipped full-data model, whose unseen-scenario behavior is accordingly
 bounded by $[+0.22, \sim+0.78]$. The out-of-distribution instruments
