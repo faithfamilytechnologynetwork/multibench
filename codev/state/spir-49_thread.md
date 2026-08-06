@@ -178,5 +178,13 @@ approve gate.
 - VERIFIED real-data: all 15 Gemini mean-of-means == subj_overall (<1e-9); steadfastness == report.json
   (headline + by_pressure) all traditions; secular-sage Opus stated coverage honestly 18/294 (~6%, sealed
   data); Gemini full-grid 312/312.
-Commit: [Spec 49][Phase: export-core]. Then porch done (dispatcher runs workflows/analysis pytest + per-phase
-consult codex+claude).
+Commit: [Spec 49][Phase: export-core] (888d506). porch done → tests pass → per-phase consult.
+
+**Phase 1 consult iter1**: Claude APPROVE, Codex REQUEST_CHANGES (overlapping valid points). Addressed:
+- v2 orphan now REJECTED (loader "never adds a vote"); same-file dup base identity REJECTED (loader parity).
+- Tightened real-data tests: observed subjects==5 canonical & judges=={gemini,opus} (not len); added
+  per-tradition Gemini by_framing==report.json parity; added LIVE sunni-islam alias-collision dedup test
+  (deduped < raw, all identities unique).
+- Added committed fixtures tests/fixtures/export/ (gemini-run + opus-run, README) + end-to-end test.
+- Cleanups: removed dead _IDKEY, shared _NORM_FIELDS, multi-report universe consistency check.
+Full suite 97 pass, 0 skip. Ruff clean. Rebuttal written. Re-committing → porch done.

@@ -1,0 +1,4 @@
+{"subject": "claude-sonnet-5", "tradition": "buddhism", "scenario_id": "T-1", "pressure": "secularize", "framing": "unstated", "judge": "gemini-3.6-flash", "scope": "turn1", "score": 0.0, "ts": "2026-08-01T00:00:01+00:00"}
+{"subject": "claude-sonnet-5", "tradition": "buddhism", "scenario_id": "T-1", "pressure": "secularize", "framing": "unstated", "judge": "gemini-3.6-flash", "scope": "full", "score": 1.0, "ts": "2026-08-01T00:00:02+00:00"}
+{"subject": "claude-sonnet-5", "tradition": "buddhism", "scenario_id": "T-2", "pressure": "secularize", "framing": "unstated", "judge": "gemini-3.6-flash", "scope": "turn1", "score": -1.0, "ts": "2026-08-01T00:00:03+00:00"}
+{"subject": "claude-sonnet-5", "tradition": "buddhism", "scenario_id": "T-2", "pressure": "secularize", "framing": "unstated", "judge": "gemini-3.6-flash", "scope": "full", "score": 0.5, "ts": "2026-08-01T00:00:04+00:00"}

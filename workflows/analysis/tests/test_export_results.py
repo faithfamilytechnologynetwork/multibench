@@ -196,6 +196,53 @@ def test_matched_cell_steadfastness_takes_intersection(tmp_path):
     assert st.value == pytest.approx(2.0)
 
 
+# ── Committed multi-run fixture (end-to-end, always runs) ─────────────────────────
+
+_FIXTURE = Path(__file__).parent / "fixtures" / "export"
+
+
+def test_committed_fixture_end_to_end():
+    exp = build_corpus_export([_FIXTURE / "gemini-run", _FIXTURE / "opus-run"])["buddhism"]
+    assert exp.n_scenarios == 2
+    assert set(exp.judges) == {"gemini-3.6-flash", "claude-opus-4-8"}
+    S, PR, FR = "claude-sonnet-5", "secularize", "unstated"
+    # Gemini full grid: mean of full scores (1.0, 0.5) = 0.75, full coverage 2/2
+    g = exp.means[("gemini-3.6-flash", S, FR, "full", PR)]
+    assert g.mean == pytest.approx(0.75) and (g.n_judged, g.n_expected) == (2, 2)
+    # Gemini steadfastness: full mean 0.75 − turn1 mean (-0.5) = 1.25 over 2 matched cells
+    gst = exp.steadfastness[("gemini-3.6-flash", S, FR, PR)]
+    assert gst.value == pytest.approx(1.25) and gst.matched_n == 2
+    # Opus: variant subject normalized; alias collision on T-1 overridden by v2 → 1.0;
+    # honest coverage 1/2 (only T-1 judged).
+    o = exp.means[("claude-opus-4-8", S, FR, "full", PR)]
+    assert o.mean == pytest.approx(1.0) and (o.n_judged, o.n_expected) == (1, 2)
+
+
+def test_committed_fixture_v2_orphan_rejected(tmp_path):
+    # A v2 row with no matching base identity must be rejected (never adds a vote).
+    root = tmp_path / "gem"
+    _write_run(
+        root,
+        base=[_row("claude-sonnet-5", "T-1", "secularize", "unstated", "full",
+                   "gemini-3.6-flash", 1.0, "a")],
+        v2=[_row("claude-sonnet-5", "T-2", "secularize", "unstated", "full",
+                 "gemini-3.6-flash", 0.5, "b")],  # T-2 has no base → orphan
+        report=_report(["T-1", "T-2"], ["claude-sonnet-5"], ["gemini-3.6-flash"]),
+    )
+    with pytest.raises(AnalysisInputError, match="never adds a vote"):
+        build_corpus_export([root])
+
+
+def test_same_file_duplicate_base_identity_rejected(tmp_path):
+    root = tmp_path / "gem"
+    dup = _row("claude-sonnet-5", "T-1", "secularize", "unstated", "full",
+               "gemini-3.6-flash", 1.0, "a")
+    _write_run(root, base=[dup, dict(dup, score=0.5, ts="b")],
+               report=_report(["T-1"], ["claude-sonnet-5"], ["gemini-3.6-flash"]))
+    with pytest.raises(AnalysisInputError, match="duplicate base identity"):
+        build_corpus_export([root])
+
+
 # ── Real-data parity (sealed launch runs) ─────────────────────────────────────────
 
 _REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -213,9 +260,45 @@ def launch_export():
 
 @_skip
 def test_launch_two_judges_five_subjects(launch_export):
+    # Assert the OBSERVED normalized sets from the real merged data — not just constants.
+    observed_judges: set[str] = set()
+    observed_subjects: set[str] = set()
     for exp in launch_export.values():
-        assert set(exp.judges) <= {"gemini-3.6-flash", "claude-opus-4-8"}
-    assert len(CANONICAL_SUBJECTS) == 5
+        observed_judges |= set(exp.judges)
+        observed_subjects |= {key[1] for key in exp.means}  # subject is means-key[1]
+    assert observed_judges == {"gemini-3.6-flash", "claude-opus-4-8"}
+    assert observed_subjects == set(CANONICAL_SUBJECTS)
+    assert len(observed_subjects) == 5
+
+
+@_skip
+def test_launch_opus_alias_collision_deduped():
+    # The live sunni-islam collision: many identities appear under BOTH Opus aliases.
+    # After normalization the export must count each once — so the deduped Opus cell
+    # count is strictly less than the raw row count by exactly the collision count.
+    from analysis.export_results import read_run_root, resolve_judgments
+    raws = [root["sunni-islam"] for root in
+            (read_run_root(_FRAMINGS_OPUS),) if "sunni-islam" in root]
+    rows = resolve_judgments(raws)
+    opus = [r for r in rows if r["judge"] == "claude-opus-4-8"]
+    raw_opus = sum(1 for r in raws[0].base) + sum(1 for r in raws[0].v2)
+    # dedup actually removed rows (the collision is real, not theoretical)
+    assert len(opus) < raw_opus
+    # every surviving identity is unique
+    ids = {(r["subject"], r["scenario_id"], r["pressure"], r["framing"], r["scope"])
+           for r in opus}
+    assert len(ids) == len(opus)
+
+
+@_skip
+def test_launch_gemini_by_framing_matches_report(launch_export):
+    for trad, exp in launch_export.items():
+        rep = json.loads((_MERGED / trad / "report.json").read_text())
+        for subj in CANONICAL_SUBJECTS:
+            for fr in ("unstated", "stated", "guided"):
+                got = exp.means[("gemini-3.6-flash", subj, fr, "full", "all")].mean
+                assert got == pytest.approx(rep["scorecard"][subj]["by_framing"][fr],
+                                            abs=1e-9), f"{trad}/{subj}/{fr}"
 
 
 @_skip

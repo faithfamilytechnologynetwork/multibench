@@ -127,9 +127,21 @@ def _iter_jsonl(path: Path):
             yield lineno, json.loads(line)
 
 
-def _read_rows(path: Path, tradition: str) -> list[dict]:
-    """Read + minimally validate judgment rows (reuses the loader's row contract)."""
+# Raw identity within a single file — matches the loader's ``_JKEY`` (raw judge alias),
+# used to reject same-file duplicate base identities exactly as ``load_run_dir`` does.
+_RAW_JKEY: tuple[str, ...] = ("subject", "scenario_id", "pressure", "framing", "judge", "scope")
+
+
+def _read_rows(path: Path, tradition: str, *, reject_dupes: bool) -> list[dict]:
+    """Read + minimally validate judgment rows (reuses the loader's row contract).
+
+    With ``reject_dupes`` (base files), a repeated raw identity in one file is a hard
+    error — matching ``load_run_dir``. The expected Opus *alias* collision is a
+    *cross-alias* case (different raw judge) resolved later in ``resolve_judgments``,
+    not a same-file duplicate, so this stays strict without rejecting the collision.
+    """
     rows: list[dict] = []
+    seen: set[tuple] = set()
     for lineno, row in _iter_jsonl(path):
         where = f"{path}:{lineno}"
         for k in _REQUIRED_JUDGMENT_KEYS:
@@ -144,6 +156,14 @@ def _read_rows(path: Path, tradition: str) -> list[dict]:
             raise AnalysisInputError(
                 f"{where}: judgment tradition {row['tradition']!r} != dir tradition {tradition!r}"
             )
+        if reject_dupes:
+            rk = tuple(row[k] for k in _RAW_JKEY)
+            if rk in seen:
+                raise AnalysisInputError(
+                    f"{where}: duplicate base identity {dict(zip(_RAW_JKEY, rk))} "
+                    f"(each raw identity must be unique within a file)"
+                )
+            seen.add(rk)
         rows.append(row)
     return rows
 
@@ -159,9 +179,10 @@ def read_run_root(root: str | Path) -> dict[str, RawTradition]:
         if not jpath.is_file():
             continue  # not a tradition dir (e.g. analysis-out/)
         tradition = sub.name
-        base = _read_rows(jpath, tradition)
+        base = _read_rows(jpath, tradition, reject_dupes=True)
         v2_path = sub / _JUDGMENTS_V2
-        v2 = _read_rows(v2_path, tradition) if v2_path.is_file() else []
+        # v2 tolerates repeated keys (last wins, per the loader), so no dup-rejection.
+        v2 = _read_rows(v2_path, tradition, reject_dupes=False) if v2_path.is_file() else []
         report_path = sub / _REPORT
         report = (
             json.loads(report_path.read_text(encoding="utf-8"))
@@ -175,11 +196,12 @@ def read_run_root(root: str | Path) -> dict[str, RawTradition]:
 
 
 # ── Normalize + overlay + dedup ───────────────────────────────────────────────────
-# Identity for the overlay/dedup — includes judge, excludes tradition (matches the
-# loader's ``_JKEY``). Judge MUST be normalized before keying, so the two Opus aliases
-# collide onto one identity and the later-``ts`` winner is chosen (the collision is
-# real: ~1,800 sunni-islam cells appear under both aliases).
-_IDKEY: tuple[str, ...] = ("subject", "scenario_id", "pressure", "framing", "judge", "scope")
+# Normalized identity — includes judge, excludes tradition (matches the loader's
+# ``_JKEY``). Judge MUST be normalized before keying, so the two Opus aliases collide
+# onto one identity and the later-``ts`` winner is chosen (the collision is real:
+# ~1,800 sunni-islam cells appear under both aliases). Field order is shared with
+# ``_canon_row`` below so the two never drift.
+_NORM_FIELDS: tuple[str, ...] = ("subject", "scenario_id", "pressure", "framing", "judge", "scope")
 
 
 def _normalized_id(row: dict) -> tuple:
@@ -193,25 +215,45 @@ def _normalized_id(row: dict) -> tuple:
     )
 
 
+def _canon_row(row: dict, key: tuple) -> dict:
+    """Row copy with ``subject``/``judge`` rewritten to their canonical ids."""
+    out = dict(row)
+    out["subject"], out["judge"] = key[0], key[4]
+    return out
+
+
 def resolve_judgments(raws: list[RawTradition]) -> list[dict]:
     """Normalize, overlay v2, and dedup one tradition's rows across run roots.
 
     Winner rule (``v2-then-dedupe``): a ``judgments_v2.jsonl`` row (tier 1) beats a base
     row (tier 0) for the same normalized identity; within a tier the later ``ts`` wins.
+    A v2 row whose identity has no base judgment is rejected — v2 is an override that
+    **never adds a vote** (the loader's invariant, preserved after normalization).
     Returns rows with ``subject``/``judge`` rewritten to their canonical ids.
     """
+    base_rows = [r for t in raws for r in t.base]
+    v2_rows = [r for t in raws for r in t.v2]
     winners: dict[tuple, tuple[int, str, dict]] = {}  # id → (tier, ts, normalized_row)
-    for tier, rows in ((0, [r for t in raws for r in t.base]),
-                       (1, [r for t in raws for r in t.v2])):
-        for row in rows:
-            key = _normalized_id(row)
-            ts = str(row.get("ts", ""))
-            cur = winners.get(key)
-            if cur is None or (tier, ts) >= (cur[0], cur[1]):
-                norm = dict(row)
-                norm["subject"] = key[0]
-                norm["judge"] = key[4]
-                winners[key] = (tier, ts, norm)
+
+    for row in base_rows:
+        key = _normalized_id(row)
+        ts = str(row.get("ts", ""))
+        cur = winners.get(key)
+        if cur is None or (0, ts) >= (cur[0], cur[1]):
+            winners[key] = (0, ts, _canon_row(row, key))
+    base_keys = set(winners)
+
+    for row in v2_rows:
+        key = _normalized_id(row)
+        if key not in base_keys:
+            raise AnalysisInputError(
+                f"v2 override {dict(zip(_NORM_FIELDS, key))} references no base judgment "
+                f"(v2 overrides only — it never adds a vote)"
+            )
+        ts = str(row.get("ts", ""))
+        cur = winners.get(key)
+        if cur is None or (1, ts) >= (cur[0], cur[1]):
+            winners[key] = (1, ts, _canon_row(row, key))
     return [w[2] for w in winners.values()]
 
 
@@ -295,6 +337,12 @@ def _scenario_universe(raws: list[RawTradition], tradition: str) -> list[str]:
     universe = set(reports[0].get("by_scenario", {}))
     if not universe:
         raise AnalysisInputError(f"{tradition}: report.json has an empty by_scenario universe")
+    # If more than one run supplies a report, they must agree on the universe.
+    for other in reports[1:]:
+        if set(other.get("by_scenario", {})) != universe:
+            raise AnalysisInputError(
+                f"{tradition}: run roots disagree on the full-grid scenario universe"
+            )
     return sorted(universe)
 
 
