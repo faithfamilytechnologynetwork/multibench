@@ -96,3 +96,18 @@ split endpoint, temp 1.3. Endpoint-GPU only (~$8), NO gemini yet. Writing sittin
 (zero-spend): `run_mining_judge.sh` (the ~$90 G2 gemini band), `build_dpo_pairs_split.py` (max-gap
 pairs, gap≥1.0). NEXT: sampling done → G2 band → reconcile → pairs → mb-dpo-split50 → G3 → decide the
 split-DPO descriptive add-on (headroom will be ~76 ≥ 50 → likely affordable).
+
+## 2026-08-06 — BLOCKED: Modal workspace DISABLED (architect advisory risk hit my run)
+
+Architect advisory (14:46): Modal briefly disabled for exp-58 (~15m, billing/spend-cap suspected),
+my DPO B200 shares the risk; if it disables during my run, STOP + ping, do NOT auto-retry.
+
+**It disabled during my mining sampling.** Endpoint returns `workspace ac-l0vME5OV7qKzfAPu2VRZ3n is
+disabled`; sampler stalled at **360/6,216** sittings (calls hanging). Per instruction I **STOPPED the
+sampler, did NOT auto-retry, pinged architect.** State safe: 360 sittings saved (keyed dedup →
+resume = zero rework); SFT deliverable already complete+committed; no spend lost (endpoint-GPU only,
+nothing banded). Running total still ~$58/250.
+
+**HOLDING for architect's "Modal re-enabled" signal.** Not polling Modal (that's the forbidden
+auto-retry + could worsen a spend-cap). On recovery: redeploy endpoint → resume `mine_dpo_split.py`
+(resumable) → G2 band → DPO. Local analysis/writeup is unblocked if needed meanwhile.
