@@ -412,3 +412,18 @@ all addressed + committed:
    lessons-learned said baked `.json` (now: both tiers ship `.gz`, one sniff path).
 Green: check-types + deploy.test (6/6). **Claude iter-1 verdict still generating** — waiting
 on the background consult; will re-consult (iter2) against the now-fixed committed state.
+
+### 2026-08-06 — phase_8 iter-1 verdicts + iter-2 fixes
+Both iter-1 verdicts in: **Codex REQUEST_CHANGES** (3 items, all fixed in iter-1 commit),
+**Claude COMMENT** (verified bake→build→serve end-to-end; non-blocking but 4 real findings).
+Folded Claude's findings (iter-2 commit):
+1. `serve -s dist` answers a MISSING baked file with 200+index.html (SPA history fallback),
+   so BakedRawSource's 404 check never fired in prod → misleading "baked unreadable" notice
+   on every load until first bake. Now treat text/html as absent (catalog+shard) + tests.
+2. `.railwayignore` mirrors `.gitignore` (add .vite/coverage/*.local) — `--no-gitignore`
+   un-excludes everything else, so a stale cache/secret could ride along.
+3. deploy-test guard now names the remediation; bake script asserts repo-root CWD.
+4. Plan asked the deploy/gunzip/fingerprint/genericity lessons for the HOT tier; hot is at
+   cap 10, so folded the Railway-`.gitignore` + serve-s traps into the SPA-data-layer hot
+   entry (no net slot) — the rest stay in cold lessons-learned. Recording in the review.
+Full suite green: check-types + vitest 219/219. Launching `porch done 51` (iter-2 consult).
