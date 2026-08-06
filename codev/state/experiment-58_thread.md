@@ -43,3 +43,24 @@ DPO ~$10–15 + lean battery ~$15–22 = **~$116–152** (pt ~$134). Well under 
   - **Anchor guard**: sanity-check chat-mode BASE vs model-card/RedHat before deciding; off-class → STOP+ping.
   - Budget +15–25 for the 4-checkpoint panel → revised total **~$130–174**; ceiling 300 unchanged.
 - Mining/banding/DPO legs unaffected — continuing.
+
+## 2026-08-06 — INCIDENT: Modal workspace disabled mid-mine (transient); resumed
+
+- Mine `b6b02mw2u` exited 0 but with **702 failures** from ~sitting 5,000: `modal-http: workspace
+  ac-l0vME5OV7qKzfAPu2VRZ3n is disabled`. The Modal **workspace went disabled mid-run** (billing/quota/
+  admin unknown), which tore down the serve endpoint too (it dropped off `modal app list`).
+- **No data lost**: mine writes locally + dedups per cell. On disk: **5,034/5,736** (buddhism 288,
+  eastern-christianity 1584, judaism 192, roman-catholicism 864, secular-sage 216, sunni-islam 1890/2400,
+  taoism 0/192). Missing 702 = sunni-islam tail (510) + all taoism (192).
+- **Workspace is BACK** (`modal app list` works again). Redeployed serve (same URL), resumed mine
+  `bc3t5rcyl` → fills only the 702 missing (dedup).
+- **Risk flagged to architect**: the disable could recur. The exposed long job is DPO training (~2–3h
+  B200) — but `modal_gemma_dpo2.py` is checkpoint+resume+spawn/detach, so a mid-run disable is
+  recoverable, not fatal. Banding is on OpenRouter → immune to Modal state.
+
+**Architect directives (14:46Z)** — likely cause a Modal spend-cap/billing trip on Waleed's account
+(~100+ GPU this week); he's checking the dashboard. Recovery was correct. Standing rules for this run:
+1. Finish 702 refill + banding as planned.
+2. **PING architect BEFORE launching the ~2–3h DPO B200 run** (stability check). If billing state
+   unconfirmed by then, launch anyway (checkpoint+resume+detach = recoverable) but eyes-open.
+3. **A SECOND workspace-disable → STOP EVERYTHING and ping.** Twice is a pattern, not a blip.
