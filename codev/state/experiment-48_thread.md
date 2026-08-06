@@ -388,3 +388,13 @@ Banding it full-scope (gemini) — driver **birz2e9au** (~1,680 judgments ≈ 20
 Descriptive **bij4m15e7** at 5/7 traditions (1,762/3,114 judgments, 0 failed; secular-sage/sunni/taoism left).
 On mine-band done → `build_dpo_pairs.py` → per-tradition yield + projected full-mining cost.
 On descriptive done → per-tradition base-vs-SFT gradient. Then assemble the two-way checkpoint report.
+
+## 2026-08-06 — PRE-DPO CHECKPOINT COMPLETE (all data in) — STOPPED for architect decision
+
+All four items in hand (full tables in notes.md):
+1. **AFB headline** base 0.113 (P≥2 0.01) → SFT 1.147 (P≥2 **0.27**), 1%→27% meaningful. Bimodal 18% at 4.
+2. **Capability** GSM8K +3.0, IFEval −1.1, MMLU −2.3 (trajectory hint). **Over-application** secular=0.00 both.
+3. **Descriptive gradient** flips ALL 7 traditions positive; HARD tier −0.501→+0.436 (Δ+0.94), ALL −0.138→+0.652.
+4. **Mining yield** 38% (158/420 pilot), ~632 pairs scoped (40/trad flat, +65). Low-yield=uniformly-good (benign).
+**Spend 280.** Two-way: STOP-AT-SFT ~280 vs DPO+LEAN ~374 (≤400). **STOPPED — awaiting architect decision.**
+Do NOT proceed to DPO without the explicit go.

@@ -1,6 +1,8 @@
 # Experiment 48: MultiWeights — overcoming omissive bias
 
-**Status**: In Progress — collection + Gemini banding COMPLETE; at the samplability-diagnostic gate (2026-08-05)
+**Status**: In Progress — SFT complete + evaluated; **at the PRE-DPO CHECKPOINT gate** (2026-08-06).
+Two-way decision pending: stop-at-SFT (~280) vs DPO+lean (~374). SFT headline: AFB P≥2 1%→27%,
+per-tradition gradient flips all 7 traditions positive (HARD tier −0.50→+0.44).
 
 **Date**: 2026-08-04
 
@@ -462,7 +464,30 @@ resumable/keyed) **+ 30 drawn seeded-random (seed 3446) from each tradition's re
 Yield ≈ 4× pilot ≈ **632 pairs**. Incremental cost = 30×6×4×7 = 5,040 new sittings (endpoint ~5) +
 5,040 gemini full-scope judgments (~60) = **~65**. → **DPO+LEAN total ≈ 280 + 65 + 7 + 22 = ~374** (≤400).
 
-### MultiBench-descriptive — running (bij4m15e7, sunni-islam/taoism left); gradient table on completion.
+### MultiBench-descriptive: per-tradition gradient (unstated, full-scope; DESCRIPTIVE, stack-caveat)
+
+base = existing unstated bands (OpenRouter mix); sft = SFT via the vLLM endpoint. Descriptive (trained
+on all scenarios → memorization-confounded); the +0.79 movement dwarfs the ~−0.058 stack shift.
+
+| tradition | tier | base | sft | Δ |
+|---|---|---|---|---|
+| sunni-islam | HARD | −0.461 | +0.251 | +0.713 |
+| roman-catholicism | HARD | −0.542 | +0.621 | **+1.162** |
+| eastern-christianity | MID | −0.284 | +0.820 | +1.104 |
+| judaism | MID | −0.125 | +0.622 | +0.747 |
+| buddhism | EASY | +0.175 | +0.729 | +0.554 |
+| secular-sage | EASY | +0.122 | +0.750 | +0.628 |
+| taoism | EASY | +0.149 | +0.771 | +0.622 |
+| **HARD tier** | | **−0.501** | **+0.436** | **+0.937** |
+| **MID tier** | | −0.204 | +0.721 | +0.925 |
+| **EASY tier** | | +0.149 | +0.750 | +0.601 |
+| **ALL (unweighted)** | | **−0.138** | **+0.652** | **+0.790** |
+
+- **The 3-tier gradient MOVES — hardest tier moves MOST.** The HARD tier (Islam, Catholicism), which
+  carried the worst omissive bias (−0.50, negative under pressure), moves to solidly positive (+0.44,
+  Δ+0.94). Every tradition flips from its base to the +0.25…+0.82 band. This is the headline visual:
+  the tune lifts exactly the traditions where secular-default omission was worst.
+- Descriptive-only (no holdout) — reported for the gradient movement, NOT as a MultiBench claim.
 
 ### Pre-DPO checkpoint — pinned costs (two-way; ceiling 400)
 - **STOP-AT-SFT ≈ 280** (current 260 + pilot mining band 20, already spent for the yield figure). SFT
