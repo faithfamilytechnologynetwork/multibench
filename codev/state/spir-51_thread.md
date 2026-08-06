@@ -200,3 +200,21 @@ is implementation; measurement settles it) — folding into the plan revision.
 Revised plan committed (f3af4bf) folding in both plan reviews; rebuttal written. gz-baked
 approved by architect; Railway test project deleted + confirmed by architect. plan checks
 pass (8 phase ids). Reached plan-approval gate → STOP, awaiting Waleed. Not approving.
+
+### 2026-08-06 — IMPLEMENT phase_1 done: raw export core (pure transform)
+Wrote workflows/analysis/analysis/export_raw.py + tests/test_export_raw.py (12 tests, all
+green; full analysis suite 125 green). Implements:
+- read_full_grid_sittings: NEW sitting reader over the report.json-bearing run only; keys by
+  NORMALIZED subject; drops harness fields (attempts/usage/ts/model); rejects dup identity +
+  conflicting context_prefix; context_prefix null→None (verified unstated=null).
+- build_raw_corpus/build_tradition_raw: reuse read_run_root+resolve_judgments for verdicts;
+  join to full-grid transcripts; ABORT on orphan verdict, out-of-universe sitting, ambiguous
+  (2 report-bearing roots). Resolve once per tradition, reuse for global fingerprint stream.
+- Generic shard (schema_version, contexts pool keyed by framing, cells w/ conditions:{framing,
+  pressure}, transcript, verdicts) + generic catalog (scale/ramp from colors.STOPS, subjects,
+  judges w/ fullGrid flag, conditionAxes, contextAxis, groupBy, manifest-declared items,
+  fingerprint). No title/taxonomy in shard (no corpus-root dep).
+- source_fingerprint(resolved): sha256 over sorted (subj,scenario,pressure,framing,judge,
+  scope,score,direction,rationale) — shared helper; Phase 2 wires it into export_results.
+- Verdict = allowlisted {judge(UI key),scope,score,summary(=direction),rationale?}.
+Next: porch done → verify (codex+claude consult) → phase_2.
