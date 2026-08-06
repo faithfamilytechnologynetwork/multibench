@@ -239,8 +239,38 @@ for this mechanism**; more of the same pairs pushed the head off-calibration rat
 Side observation (non-gated): **hostile-to-religion P≥1 = 1.00** (mean 2.90) — the head always engages
 religiously even with anti-religion prompts. Not one of the four locked gates; flagged for the record.
 
-Capability (gate 4 chat-MMLU + base anchor-guard) completes for the paper's capability section of
-record (the defect-remediation four-checkpoint chat panel) — it **cannot reverse** the locked decision.
+### Capability — chat-mode four-checkpoint panel (defect-remediation; paper section of record)
+
+Base **anchor-guard PASSES** — mb-base MMLU 82.8 (anchor 82.8), GSM8K-s 95.83 (95.8), IFEval-p 91.68
+(91.7), all within ±3 → **the measurement is valid; the AFB regression is real, not a config artifact.**
+
+| checkpoint | MMLU | GSM8K-CoT strict | IFEval prompt-strict | IFEval inst-strict |
+|---|---:|---:|---:|---:|
+| mb-base | 82.80 | 95.83 | 91.68 | 94.24 |
+| mb-sft-guided | 83.28 | 95.15 | 90.57 | 93.41 |
+| mb-sft-dpo (incumbent) | 83.14 | 95.07 | 89.28 | 92.45 |
+| **mb-dpo-full** | **83.41** | 95.15 | 90.76 | 93.65 |
+
+- **MMLU flat ~83 across all four** (no capability regression either way). Confirms the #48
+  completion-mode MMLU 0.4424 was a pure artifact — real chat-mode MMLU is ~83, on-anchor.
+- **GSM8K ceiling-flat ~95** (expected; matches taqwabench's chat-mode collapse of raw-mode gains).
+- **IFEval-prompt**: base 91.68 → sft 90.57 → dpo(incumbent) 89.28 → **dpo-full 90.76** — same
+  dip-then-recover shape as taqwabench (91.7/89.8/91.3); within noise, no real regression.
+- **Gate 4 (chat MMLU): mb-dpo-full 83.41 ≥ incumbent 83.14 → PASS.** But gates 1–2 fail, so the
+  decision is unchanged.
+
+### Final four-gate verdict (locked rule)
+
+| gate | mb-dpo-full | threshold | verdict |
+|---|---:|---|:--:|
+| 1. AFB P≥2 cold | 0.233 | ≥ 0.300 | **FAIL** |
+| 2. secular leakage (max P≥1) | 0.20 | == 0.00 | **FAIL** |
+| 3. opted-out P≥1 | 0.60 | ≤ 0.60 | PASS |
+| 4. chat MMLU vs incumbent | 83.41 ≥ 83.14 | ≥ incumbent | PASS |
+
+**DECISION: INCUMBENT `mb-sft-dpo` STANDS.** Capability held (gate 4 passes) — the head fails *only* on
+representation/calibration (gates 1–2). That sharpens the mechanism read: the extra 416 pairs didn't
+break capability, they **eroded AFB calibration** — 2× optimization steps on near-zero-signal contrast.
 
 ## Next step — **PRE-SPEND GATE**
 

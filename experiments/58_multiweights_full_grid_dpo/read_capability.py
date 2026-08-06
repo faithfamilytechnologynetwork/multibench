@@ -59,7 +59,7 @@ def main():
         print(f"{c:<16}{m['mmlu']:>8}{m['gsm8k_strict']:>9}{m['ifeval_prompt']:>10}{m['ifeval_inst']:>10}")
     print(f"\ntaqwabench base anchor: MMLU {ANCHORS['mmlu']} / GSM8K-s {ANCHORS['gsm8k_strict']} / "
           f"IFEval-p {ANCHORS['ifeval_prompt']}  (±{TOL})")
-    b = rows["base"]
+    b = rows["mb-base"]
     if not b:
         print("ANCHOR-GUARD: base-chat MISSING — cannot verify. HALT+ping.")
         sys.exit(2)
