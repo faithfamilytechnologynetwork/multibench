@@ -307,6 +307,20 @@ describe("/results leaderboard", () => {
     expect(within(bud).getByTestId("drill-coverage")).toHaveTextContent("12/12"); // Post-slice n_judged (full grid at "all")
   });
 
+  it("each drill-row links into the raw browser (#51 drill-down, in #55's dense table)", async () => {
+    // Guards the merge seam: #55 rewrote the drill-down as a dense table; the #51 raw entry must
+    // survive as a per-tradition link (leaderboard is per-tradition; /t/<id> → scenario → raw view).
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    const rows = await screen.findAllByTestId("standings-row");
+    await userEvent.click(within(rows[0]!).getByTestId("standings-expand"));
+    const drill = await screen.findByTestId("drilldown");
+    const bud = within(drill).getAllByTestId("drill-row").find((r) => r.getAttribute("data-tradition") === "buddhism")!;
+    const link = within(bud).getByTestId("drill-link");
+    expect(link).toHaveAttribute("href", "/t/buddhism");
+    expect(link).toHaveTextContent("buddhism");
+  });
+
   it("expansion is keyboard-operable and round-trips through the URL (?expanded=)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     const { router } = renderApp("/results");

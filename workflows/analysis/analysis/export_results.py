@@ -31,6 +31,7 @@ from pathlib import Path
 
 from analysis.aggregate import Cell, breakdown_mean, cell_scores, mean
 from analysis.core_imports import FRAMINGS, PRESSURES
+from analysis.fingerprint import combine_fingerprint, fingerprint_line
 from analysis.loaders import (
     AnalysisInputError,
     _REQUIRED_JUDGMENT_KEYS,
@@ -307,6 +308,11 @@ class TraditionExport:
     means: dict[tuple, Slice]
     # keyed by (judge, subject, framing, pressure_or_"all")
     steadfastness: dict[tuple, Steadfastness]
+    # per-row fingerprint LINES for this tradition — retained (instead of the full resolved
+    # dicts) so build_manifest computes the cross-tier source fingerprint (#51) from the SAME
+    # rows the aggregates were built from, without holding every judgment dict live. Required
+    # (no default) so a manifest can never be stamped with a silently-empty fingerprint.
+    fingerprint_lines: list[str]
 
 
 def _count_cells(cs: dict[Cell, float], subject: str, framing: str, scope: str,
@@ -415,6 +421,7 @@ def build_tradition_export(tradition: str, raws: list[RawTradition]) -> Traditio
         n_judgments=n_judgments,
         means=means,
         steadfastness=steadfast,
+        fingerprint_lines=[fingerprint_line(r) for r in judgments],
     )
 
 
@@ -566,6 +573,12 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
         "generated_at": generated_at,
+        # Cross-tier source fingerprint (#51): computed from the SAME resolved-judgments stream
+        # the aggregates were built from, so the raw tier's manifest fingerprint must match this
+        # for the same run-id. (The raw tier omits generated_at entirely — this is the stable
+        # provenance both tiers share.)
+        "fingerprint": combine_fingerprint(
+            line for exp in exports.values() for line in exp.fingerprint_lines),
         "subjects": list(CANONICAL_SUBJECTS),
         "judges": judges_meta,
         "framings": list(FRAMINGS),

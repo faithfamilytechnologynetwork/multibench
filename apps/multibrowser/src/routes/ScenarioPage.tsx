@@ -124,7 +124,7 @@ export function ScenarioPage() {
         )}
       </Collapsible>
 
-      <ResultsRegion scenario={scenario} />
+      <ResultsRegion traditionId={traditionId} scenarioId={scenarioId} />
 
       <FramingsPanel adherentNoun={tradition.manifest?.adherentNoun ?? ""} guide={tradition.prose.guide} />
     </div>

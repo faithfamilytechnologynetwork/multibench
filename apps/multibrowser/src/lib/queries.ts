@@ -7,6 +7,8 @@
 
 import { useQueries, useQuery, useQueryClient, type QueryClient } from "@tanstack/react-query";
 import { latestSha, raw, tree, type TreeEntry } from "./github";
+import { BakedRawSource, GitHubRawSource, loadRawCatalog, loadRawShard, resolveRawSource, type RawDataSource } from "./rawSource";
+import { rawShardConsistencyNotices, type RawCatalog, type RawShard } from "./rawModel";
 import {
   parseIndex,
   parseManifest,
@@ -15,7 +17,7 @@ import {
   proseSection,
   resolveScenarioSet,
 } from "./parse";
-import { FILE, REF, REPO, SHA_POLL_MS, PRESSURES } from "./constants";
+import { FILE, REF, REPO, SHA_POLL_MS, PRESSURES, RAW_SOURCE_QK, RAW_SCENARIO_QK } from "./constants";
 import {
   emptyPressureMap,
   notice,
@@ -497,5 +499,125 @@ export function useScenario(sha: string | undefined, tid: string, sid: string, d
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadScenario(qc, sha as string, tid, sid, declaredAxes),
+  });
+}
+
+// ── Raw-results tier (#51): resolve baked-vs-GitHub source + load one scenario shard ─────────
+
+export interface LoadedRawScenario {
+  catalog: RawCatalog | null;
+  shard: RawShard | null;
+  notices: Notice[];
+}
+
+/** The two sources the raw loader resolves between (injectable for network-free tests). */
+export interface RawSources {
+  baked: RawDataSource;
+  github: RawDataSource;
+}
+
+function defaultRawSources(sha: string): RawSources {
+  return { baked: new BakedRawSource(), github: new GitHubRawSource(REPO, sha) };
+}
+
+/**
+ * Load one scenario's raw shard: resolve the source (baked-first / GitHub-fallback, keyed to the
+ * authoritative score-tier `expectedFingerprint`), find the item in the catalog, and load its
+ * shard — all fail-soft (every failure becomes a `Notice`, never a throw). The source+catalog
+ * resolution is deduped through the QueryClient so drill-ins within a run don't refetch the
+ * (63 KB) catalog. ``runId`` is safe-segment-guarded before any fetch.
+ */
+export async function loadRawScenario(
+  qc: QueryClient,
+  sha: string,
+  runId: string,
+  group: string,
+  item: string,
+  expectedFingerprint: string | null,
+  sources: RawSources = defaultRawSources(sha),
+): Promise<LoadedRawScenario> {
+  const where = `results-raw/${runId}/manifest.json`;
+  if (!isSafePathSegment(runId)) {
+    return { catalog: null, shard: null, notices: [notice("error", "results-raw", where, `unsafe run id "${runId}"`)] };
+  }
+  // Dedupe the source resolution (catalog fetch/parse) per (sha, runId, fingerprint). Cache ONLY
+  // SERIALIZABLE data — the winning source's KIND, the catalog, and notices — never the
+  // RawDataSource instance: the cache is persisted to localStorage, and a hydrated class instance
+  // loses its methods. The instance is reconstructed from `kind` after the (possibly hydrated) read.
+  const resolved = await qc.ensureQueryData({
+    queryKey: [RAW_SOURCE_QK, REPO, sha, runId, expectedFingerprint],
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: async (): Promise<{ kind: RawDataSource["kind"]; catalog: RawCatalog | null; notices: Notice[] }> => {
+      const r = await resolveRawSource(sources.baked, sources.github, runId, expectedFingerprint);
+      return { kind: r.source.kind, catalog: r.catalog, notices: r.notices };
+    },
+  });
+  const { catalog, notices } = resolved;
+  const source = resolved.kind === "baked" ? sources.baked : sources.github;
+  if (!catalog) return { catalog: null, shard: null, notices };
+  const it = catalog.items.find((i) => i.id === item && i.group === group);
+  if (!it) {
+    return { catalog, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" in this run`)] };
+  }
+  const shardWhere = `results-raw/${runId}/${it.shard}`;
+  const { shard, notices: sn } = await loadRawShard(source, runId, it.shard);
+  // Per-shard fallback: a coherent baked bundle can still be partially uploaded — if THIS shard is
+  // missing/corrupt on baked, try the authoritative GitHub copy. But ONLY if the GitHub catalog is
+  // ITSELF coherent (its fingerprint matches this run's), and use ITS declared shard path — never
+  // splice a baked path onto an incoherent GitHub tier.
+  if (shard === null && source.kind === "baked" && sources.github !== source) {
+    const gh = await loadGitHubShardCoherent(sources.github, runId, group, item, expectedFingerprint);
+    if (gh.shard !== null && gh.catalog !== null) {
+      return {
+        catalog,
+        shard: gh.shard,
+        notices: [...notices, notice("warning", "results-raw", shardWhere, "baked shard unavailable — served from GitHub"),
+                  ...gh.notices, ...rawShardConsistencyNotices(gh.shard, gh.catalog, shardWhere)],
+      };
+    }
+    return { catalog, shard: null, notices: [...notices, ...sn, ...gh.notices] };
+  }
+  const consistency = shard ? rawShardConsistencyNotices(shard, catalog, shardWhere) : [];
+  return { catalog, shard, notices: [...notices, ...sn, ...consistency] };
+}
+
+/** GitHub per-shard fallback, gated on GitHub-catalog coherence (its own fingerprint + declared path). */
+async function loadGitHubShardCoherent(
+  github: RawDataSource,
+  runId: string,
+  group: string,
+  item: string,
+  expectedFingerprint: string | null,
+): Promise<{ catalog: RawCatalog | null; shard: RawShard | null; notices: Notice[] }> {
+  const where = `results-raw/${runId}/manifest.json`;
+  const { catalog, notices } = await loadRawCatalog(github, runId);
+  if (!catalog) return { catalog: null, shard: null, notices };
+  if (expectedFingerprint === null || catalog.fingerprint !== expectedFingerprint) {
+    return { catalog: null, shard: null, notices: [...notices,
+      notice("warning", "results-raw", where, "GitHub raw tier disagrees with this run (fingerprint mismatch) — cannot serve the missing baked shard")] };
+  }
+  const it = catalog.items.find((i) => i.id === item && i.group === group);
+  if (!it) return { catalog: null, shard: null, notices: [...notices, notice("error", "results-raw", where, `no item "${group}/${item}" on GitHub`)] };
+  const { shard, notices: sn } = await loadRawShard(github, runId, it.shard);
+  return { catalog, shard, notices: [...notices, ...sn] };
+}
+
+export function useRawScenario(
+  sha: string | undefined,
+  runId: string | undefined,
+  group: string,
+  item: string,
+  expectedFingerprint: string | null,
+) {
+  const qc = useQueryClient();
+  return useQuery({
+    // expectedFingerprint IS in the key: a late-arriving score-tier fingerprint (null → known)
+    // busts the infinitely-fresh cache so the baked-first coherence check can re-run.
+    queryKey: [RAW_SCENARIO_QK, REPO, sha, runId, group, item, expectedFingerprint],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadRawScenario(qc, sha as string, runId as string, group, item, expectedFingerprint),
   });
 }

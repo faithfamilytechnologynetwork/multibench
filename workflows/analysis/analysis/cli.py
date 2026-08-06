@@ -155,6 +155,60 @@ def export(
     )
 
 
+@app.command(name="export-raw")
+def export_raw(
+    run_roots: list[str] = typer.Argument(
+        ...,
+        metavar="RUN_ROOT...",
+        help="Judging run ROOTS. The full-grid Gemini run (report.json + sittings.jsonl) is "
+             "the sole transcript source; report-less Opus layers contribute verdicts only.",
+    ),
+    run_id: str = typer.Option(
+        ..., "--run-id", help="Dataset id — the results-raw/<run-id>/ directory name."
+    ),
+    out: str = typer.Option(
+        "results-raw", "--out",
+        help="Root output dir; writes <out>/<run-id>/manifest.json + <tradition>/<scenario>.json.gz.",
+    ),
+    limit: int = typer.Option(
+        None, "--limit",
+        help="Write at most N scenarios — a small dev fixture (fingerprint is over the subset).",
+    ),
+) -> None:
+    """Export judging runs into the browsable results-raw/<run-id>/ tier (#51).
+
+    Per-scenario gzip shards of transcripts + judge verdicts, plus a generic catalog. Reuses
+    the #49 loaders (normalization, v2 overlay, Opus-alias dedup) so the raw tier and the
+    results/ score tier share one source fingerprint. Deterministic (no wall-clock; gzip
+    mtime=0) → byte-identical re-exports.
+    """
+    import json as _json
+    from pathlib import Path
+
+    from analysis.export_raw import write_dataset
+    from analysis.loaders import AnalysisInputError
+
+    try:
+        summary = write_dataset(list(run_roots), out, run_id, limit=limit)
+    except AnalysisInputError as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    typer.echo(
+        _json.dumps({
+            "run_id": run_id,
+            "out": str(Path(out) / run_id),
+            "scenarios": summary.scenarios,
+            "shard_bytes": summary.shard_bytes,
+            "shard_uncompressed_bytes": summary.shard_uncompressed_bytes,
+            "compression_ratio": round(summary.compression_ratio, 2),
+            "max_shard_bytes": summary.max_shard_bytes,
+            "manifest_bytes": summary.manifest_bytes,
+            "total_bytes": summary.total_bytes,
+        })
+    )
+
+
 def _emit_figures(aggregates, all_stats, out_dir, fig_format) -> None:
     """Render matplotlib PNG/PDF figures under ``<out>/figures``.
 

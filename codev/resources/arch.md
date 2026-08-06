@@ -93,6 +93,19 @@ static inline SVG** (every artifact string escaped through one chokepoint → in
 construction); **matplotlib is import-isolated** behind `--figures` so the default path never loads
 it. See its [README](../../workflows/analysis/README.md).
 
+Two committed, SPA-browsable tiers are exported from the same loaders (so they can't disagree):
+the **score tier** `results/<run-id>/` (`analysis export`, scores+metadata, single-digit MB;
+`/results` leaderboard, Gemini-ranked, Opus badged) and the **raw tier** `results-raw/<run-id>/`
+(`analysis export-raw`, per-scenario gz shards of transcripts+verdicts, ~126 MB/run). Both stamp an
+equal **source fingerprint** (a hash over the resolved-judgments stream; a per-run equality check
+makes agreement checkable). The raw browser (`/results/$runId/$groupId/$itemId`) is **catalog-
+generic** — score scale/ramp, subjects, judges, condition axes, grouping axis, and items are all
+catalog-declared, so a non-MultiBench catalog (the AFB 0–4 explorer, #54) rides the same viewer —
+and served **dual-source**: a same-origin baked bundle (primary; `railway up --no-gitignore`) with
+the committed GitHub tier as authoritative fallback (client sniffs gzip magic bytes before
+`DecompressionStream`). Contracts: [`results/README.md`](../../results/README.md),
+[`results-raw/README.md`](../../results-raw/README.md) (Specs 49, 51).
+
 ## tradition_validator
 
 `apps/tradition_validator/` (Python / uv / Typer / Pydantic v2 / PyYAML) is the mechanical gate a

@@ -1,5 +1,5 @@
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, Link } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { CenteredSpinner } from "../components/Loading";
@@ -476,7 +476,16 @@ function Leaderboard({
                               <tbody>
                                 {drill.map((d) => (
                                   <tr key={d.tradition} data-testid="drill-row" data-tradition={d.tradition}>
-                                    <td className="pr-3 text-default-600">{d.tradition}</td>
+                                    {/* Drill-down toward the raw browser (#51): the leaderboard has
+                                        only per-tradition granularity, so — matching #55's drill-row
+                                        level — the tradition links to /t/<tradition>, from which a
+                                        scenario's ResultsRegion opens its raw transcripts + verdicts. */}
+                                    <td className="pr-3 text-default-600">
+                                      <Link to="/t/$traditionId" params={{ traditionId: d.tradition }}
+                                            className="text-primary hover:underline" data-testid="drill-link">
+                                        {d.tradition}
+                                      </Link>
+                                    </td>
                                     <td className="pr-2"><ScoreCell value={d.initial} testid="drill-initial" /></td>
                                     <td className="pr-2"><ScoreCell value={d.post} testid="drill-post" /></td>
                                     <td className="pr-2"><ScoreCell value={d.delta} testid="drill-delta" /></td>

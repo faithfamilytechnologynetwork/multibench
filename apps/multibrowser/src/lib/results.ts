@@ -1,10 +1,8 @@
-// Inert results-ready seam (anticipating the judging workflow #8).
-//
-// v1 ALWAYS returns null — no judgement results exist yet, and none are fabricated. This is
-// the SINGLE place #8's per-scenario output will be read once its schema firms up; nothing
-// else in the app loads results. The render side reserves a region (ResultsRegion) that stays
-// empty while this returns null. Keeping the seam present makes the future results layer an
-// additive change, not a rewrite.
+// DEPRECATED inert seam (superseded by #51). The per-scenario results layer now lives in the
+// raw tier: `queries.ts::loadRawScenario` + the `ResultsRegion` live drill-in link + the
+// `/results/$runId/$groupId/$itemId` view. This function still ALWAYS returns null and nothing
+// reads `Scenario.results` anymore — retained only to avoid touching the `loadScenario` shape
+// mid-feature. TODO(review/simplify): remove `loadResults` + `Scenario.results`/`ScenarioResults`.
 
 import type { Scenario, ScenarioResults } from "./model";
 

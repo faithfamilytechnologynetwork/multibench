@@ -1,18 +1,41 @@
-import type { Scenario } from "../lib/model";
+import { Link } from "@tanstack/react-router";
+import { useLatestSha, useResultsRuns } from "../lib/queries";
 
-// The reserved, currently-INERT results region (the §4.1 seam for the judging workflow #8).
-// In v1 `scenario.results` is always absent, so this renders only a subtle placeholder — no
-// scores/bands/verdicts markup. When #8 lands, this is where its per-scenario output renders,
-// beside the judge-guidance it is anchored to. The presence of this component is the whole
-// point: the results layer slots in here additively, not as a rewrite.
-export function ResultsRegion({ scenario }: { scenario: Scenario }) {
-  if (!scenario.results) {
+// The per-scenario results entry (#51). Once a results run is published, this becomes a live
+// drill-in to the raw-results view (transcripts + judge verdicts); until then it's a subtle
+// placeholder. The generic raw browser lives at /results/$runId/$groupId/$itemId; this is the
+// in-page seam that links into it, keyed to the default (most recent) results run.
+export function ResultsRegion({ traditionId, scenarioId }: { traditionId: string; scenarioId: string }) {
+  const sha = useLatestSha().data;
+  const runsQ = useResultsRuns(sha);
+  // While runs are still loading, render nothing — don't flash the "no results yet" placeholder
+  // (a false claim) before flipping to the live link.
+  if (!sha || runsQ.isLoading) return <span data-testid="results-region" />;
+  const runs = runsQ.data;
+  const runId = runs?.defaultRunId ?? null;
+  if (!runId) {
     return (
       <p data-testid="results-region" className="text-xs italic text-default-400">
-        No judgement results yet — model scores, bands, and verdicts will appear here once available.
+        No judging results yet — model transcripts and judge verdicts will appear here once a results run is published.
       </p>
     );
   }
-  // #8 integration point (not reached in v1).
-  return <div data-testid="results-region" data-has-results="true" />;
+  // Make the entry contentful from the run's SCORE manifest — no raw-shard fetch (the per-scenario
+  // shard is ~220 KB; loading it just to summarize would tax every scenario page). The full
+  // cell-score grid lives one tap away in the raw view (architect-approved perf deviation, #51).
+  const manifest = runs?.runs.find((r) => r.id === runId)?.manifest;
+  const nSubjects = manifest?.subjects.length ?? 0;
+  const nConditions = manifest ? manifest.framings.length * manifest.pressures.length : 0;
+  const detail = nSubjects && nConditions ? ` — ${nSubjects} models × ${nConditions} conditions` : "";
+  return (
+    <div data-testid="results-region" data-has-results="true" className="text-sm">
+      <Link
+        to="/results/$runId/$groupId/$itemId"
+        params={{ runId, groupId: traditionId, itemId: scenarioId }}
+        className="text-primary hover:underline"
+      >
+        Browse the models&rsquo; raw responses &amp; our judging{detail} &rarr;
+      </Link>
+    </div>
+  );
 }

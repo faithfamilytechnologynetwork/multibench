@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
@@ -68,6 +68,19 @@ describe("build / deploy invariants", () => {
 
   it("vite base is '/' (absolute assets so deep links resolve on a root-served host)", () => {
     expect(readFileSync("vite.config.ts", "utf8")).toMatch(/base:\s*["']\/["']/);
+  });
+
+  it("a normal build bundles NO baked raw tier — public/data-raw/ is deploy-only (#51)", () => {
+    // The ~126 MB gz raw tier is baked into `public/data-raw/` ONLY at `railway up` time (see
+    // scripts/bake-and-deploy.sh) and gitignored; a normal `pnpm build` (this test's beforeAll)
+    // must not carry it into `dist/`, or every CI/dev build would balloon.
+    expect(
+      existsSync("dist/data-raw"),
+      "dist/data-raw exists — you have a leftover local bake. Run `rm -rf apps/multibrowser/public/data-raw` " +
+        "and rebuild; the baked tier is deploy-only (bake-and-deploy.sh cleans it via an EXIT trap).",
+    ).toBe(false);
+    // And the baked dir is gitignored so it never lands in git.
+    expect(readFileSync(".gitignore", "utf8")).toMatch(/public\/data-raw\//);
   });
 
   it("the start command uses serve -s dist (SPA fallback) with serve as a RUNTIME dep", () => {

@@ -87,6 +87,9 @@ const ManifestSchema = z.object({
   schema_version: z.number(),
   run_id: z.string(),
   generated_at: z.string(),
+  // Cross-tier source fingerprint (#51) — optional so pre-#51 manifests still parse. Lets the
+  // raw browser check its baked bundle against this run's authoritative score-tier fingerprint.
+  fingerprint: z.string().optional(),
   subjects: z.array(z.string()),
   judges: z.array(JudgeMetaSchema),
   framings: z.array(z.string()),
@@ -125,6 +128,8 @@ export interface ResultsManifest {
   schemaVersion: number;
   runId: string;
   generatedAt: string;
+  /** Cross-tier source fingerprint (#51); undefined on pre-#51 datasets. */
+  fingerprint?: string;
   subjects: string[];
   judges: JudgeMeta[];
   framings: string[];
@@ -208,6 +213,7 @@ export function parseResultsManifest(
       schemaVersion: m.schema_version,
       runId: m.run_id,
       generatedAt: m.generated_at,
+      fingerprint: m.fingerprint,
       subjects: m.subjects,
       judges: m.judges.map((j) => ({ key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid })),
       framings: m.framings,
