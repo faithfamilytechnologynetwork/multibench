@@ -36,16 +36,24 @@ no gate relaxation after numbers land.
 taqwabench's independent base run, same model + harness mode (lm-eval vllm, `--apply_chat_template
 --fewshot_as_multiturn`, max_len 8192):
 
-| metric (chat mode) | taqwabench base anchor | external anchors | my base must land |
-|---|---|---|---|
-| MMLU | **82.8 (±0.3)** | RedHat 85.4 / Google 85.2 (MMLU-Pro) | within ~±3 pts |
-| GSM8K-CoT strict | **95.8** | — | within ~±3 pts |
-| IFEval prompt-strict | **91.7** | — | within ~±3 pts |
+**Full taqwabench 3-way chat-mode reference (same model + harness; architect 2026-08-06)** — for
+cross-programme calibration only; my numbers are my numbers, guard rule unchanged:
 
-**Guard**: my `base` checkpoint (this rerun) must land within ~±3 pts of all three. Outside that band =
-**CONFIG problem, not model → HALT and ping**; do NOT proceed to the tuned checkpoints on an off-band
-base. Record taqwabench's numbers + mine side-by-side here as the calibration. For the four-gate
-comparison, report **BOTH prompt-strict AND inst-strict IFEval** (don't compare across metric variants).
+| metric (chat mode) | tq base | tq sft | tq dpo | external anchors | my base guard |
+|---|---:|---:|---:|---|---|
+| MMLU | **82.8** | 84.0 | 83.8 | RedHat 85.4 / Google 85.2 (Pro) | within ~±3 of 82.8 |
+| GSM8K-CoT strict | **95.8** | 95.7 | 95.8 | — | within ~±3 of 95.8 |
+| IFEval prompt-strict | **91.7** | 89.8 | 91.3 | — | within ~±3 of 91.7 |
+
+Notes: **GSM8K is CEILING-FLAT (~96)** — taqwabench's raw-mode stage-gains vanished in chat mode; a flat
+GSM8K row here is the EXPECTED outcome, not a regression. IFEval sft dip (91.7→89.8) is within noise,
+dpo recovers (91.3). Their verdict: no deployment-mode regression across the whole chain.
+
+**Guard**: my `base` (this rerun) must land within ~±3 pts of MMLU 82.8 / GSM8K 95.8 / IFEval-prompt
+91.7. Outside that band = **CONFIG problem, not model → HALT and ping**; do NOT proceed to the tuned
+checkpoints on an off-band base. Report **BOTH prompt-strict AND inst-strict IFEval** for the gate
+comparison (don't mix metric variants). **If OUR sft/dpo shows a real chat-mode regression where
+taqwabench's didn't** (bigger pooled set) — that's a FINDING; report it plainly, don't hide it.
 
 **Gate-4 re-anchoring (architect 2026-08-06, measurement-defect fix)**: #48's capability panel ran
 lm-eval in **raw-completion mode** on an instruction-tuned model, so its MMLU 0.4424 (and all #48
