@@ -447,3 +447,11 @@ DELIVERABLE: mb-sft-dpo (two-stage SFT+DPO) is the weakly-better head — all 4 
 descriptive judging (~45) and mining band came in at 100 (vs 60-75 est); true base into DPO+lean was
 ~305 not 280. All spend REALIZED (jobs done). Tracking failure: should have reconciled computed-from-
 usage actuals before the mining-band spend. Flagged to architect immediately on discovery.
+
+## 2026-08-06 — WRAP-UP: figures + integration PR
+Paper figures (no-spend, uv run --with matplotlib from saved data, MB paper style): (a) AFB-150 cold
+distribution base/SFT/DPO grouped bars + P>=2 per head; (b) per-tradition base->SFT unstated-mean
+gradient dotplot, tier-ordered. Vector PDFs in experiments/.../figures/. Visually verified.
+Review doc at codev/reviews/48-*.md. Integration PR #52 opened (base main) — run outputs/datasets
+excluded per gitignore. Spend FROZEN throughout wrap-up (all from on-disk data + local matplotlib).
+EXPERIMENT COMPLETE. Deliverable mb-sft-dpo on the gemma-dpo volume.
