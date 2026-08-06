@@ -447,8 +447,20 @@ Pair = within-cell max-gap (chosen=best of 4, rejected=worst) with full-score ga
   usable pair; 91 cells have the max gap (2.0) — strong contrast where it exists.
 - **Extrapolated full-grid (38% × 3,114 cells): ~1,171 pairs** — ample for a 1-epoch DPO.
 - **Full mining cost is prohibitive (~160):** 12,456 sittings (endpoint GPU, cheap) + 12,456 gemini
-  full-scope judgments (~150). **Scoped mining fits:** e.g. mine to ~30–50 scenarios/tradition →
-  ~480–800 pairs at +40–80 judging. That is what keeps DPO+lean ≤ 400.
+  full-scope judgments (~150).
+- **Low-yield traditions are benign (uniformly GOOD, not bad):** the no-pair cells' 4-sample cluster
+  mean is HIGH in every tradition (RC 0.658, sunni-islam 0.544, others 0.65–0.90) — where SFT yields
+  no within-cell contrast it's because **all 4 samples are already good**, not because SFT fails. So
+  RC's low 25% pair yield = SFT succeeds there (little to sharpen), NOT a hard-tier collapse. The hard
+  tier is mildly under-represented in the PAIR set, but for a benign reason — a known, acceptable DPO
+  limitation (DPO sharpens where contrast exists; SFT already carries the saturated-good cells).
+
+**SCOPED-MINING RECOMMENDATION (concrete):** **40 scenarios/tradition, FLAT count** (not proportional
+— balances the pair set across traditions, mitigating the SFT-pool imbalance). **Selection rule:**
+the pilot's 10 scenarios (reused — already sampled + banded, NOT re-judged; sampler + banding are
+resumable/keyed) **+ 30 drawn seeded-random (seed 3446) from each tradition's remaining scenarios.**
+Yield ≈ 4× pilot ≈ **632 pairs**. Incremental cost = 30×6×4×7 = 5,040 new sittings (endpoint ~5) +
+5,040 gemini full-scope judgments (~60) = **~65**. → **DPO+LEAN total ≈ 280 + 65 + 7 + 22 = ~374** (≤400).
 
 ### MultiBench-descriptive — running (bij4m15e7, sunni-islam/taoism left); gradient table on completion.
 
