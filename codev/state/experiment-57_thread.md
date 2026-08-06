@@ -111,3 +111,17 @@ nothing banded). Running total still ~$58/250.
 **HOLDING for architect's "Modal re-enabled" signal.** Not polling Modal (that's the forbidden
 auto-retry + could worsen a spend-cap). On recovery: redeploy endpoint → resume `mine_dpo_split.py`
 (resumable) → G2 band → DPO. Local analysis/writeup is unblocked if needed meanwhile.
+
+**Architect confirmed hold correct (14:50); both experiments' Modal legs paused pending Waleed's
+billing check (2 disables in ~2h = spend-cap pattern). Directed local work — DONE:**
+- **Figure polished to paper-grade** (`fig_transfer_sft.pdf`, committed): left panel states the finding
+  ("~85% transfer, not memorization") with the Δ+0.12 gap annotated + #53 biased-LB hatched; right
+  panel sorted, hard tier highlighted, pooled-held-out line. Numbers reproduce identically.
+- **G2 decision memo pre-drafted** (`G2_decision_memo.md`, committed): plug-in-actuals decision for
+  the split-DPO descriptive add-on. Reconciled SFT-stage $57.8; exact arithmetic (run iff headroom
+  ≥ ~$59, i.e. S_G2 ≤ ~$191); pre-computed outcomes (RUNS under every non-pathological case, lands
+  ≤ ~$230; only DEFERs if resumed sampling GPU is pathologically hot); exact G2 command checklist
+  incl. verified DPO launch (`--sft-run mb-sft-split50 --run-name mb-dpo-split50`).
+- DPO input format verified compatible (build_dpo_pairs_split → chosen_turns/rejected_turns).
+
+**All local work complete. Genuinely blocked on Modal; awaiting architect's re-enable ping.**
