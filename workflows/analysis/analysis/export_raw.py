@@ -554,9 +554,8 @@ def build_catalog(corpus: RawCorpus) -> dict:
 import gzip  # noqa: E402 -- kept next to the writer that uses it
 import re  # noqa: E402
 
-SCHEMA_VERSION_WRITER = SCHEMA_VERSION  # (documentary alias; the version lives in the docs)
-# Guardrails calibrated ABOVE the real p99 (measured max shard ≈ 545 KB on roman-catholicism),
-# not on it — they catch a pathological blowup, not normal data.
+# Guardrails calibrated ABOVE the real p99 (measured max shard 545,560 bytes ≈ 533 KB on
+# roman-catholicism), not on it — they catch a pathological blowup, not normal data.
 MAX_SHARD_BYTES = 1024 * 1024         # ≤ 1 MB per per-scenario gz shard
 MAX_TOTAL_BYTES = 200 * 1024 * 1024   # ≤ 200 MB per run (above the ~110–150 MB observed)
 _MANIFEST = "manifest.json"
@@ -620,6 +619,8 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     subset — it will NOT match the full ``results/`` fingerprint; tests inject an expected one).
     """
     _require_safe_segment(run_id, "run-id")
+    if limit is not None and limit < 1:
+        raise AnalysisInputError(f"--limit must be >= 1 (got {limit})")
 
     docs: dict[str, bytes] = {}          # relpath → bytes (manifest + gz shards)
     items: list[dict] = []
@@ -676,11 +677,14 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         raise AnalysisInputError(f"dataset total {total} bytes (> {MAX_TOTAL_BYTES} ceiling)")
 
     # Write, pruning any stale files (from a prior export of this run-id) not in the new set.
+    # Prune ONLY on a full export: a --limit fixture is purely additive so a mistyped
+    # `--limit` re-export can never delete files from a real (committed) tier.
     run_dir = Path(out_root) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
-    existing = {p.relative_to(run_dir).as_posix() for p in run_dir.rglob("*") if p.is_file()}
-    for rel in existing - set(docs):
-        (run_dir / rel).unlink()
+    if limit is None:
+        existing = {p.relative_to(run_dir).as_posix() for p in run_dir.rglob("*") if p.is_file()}
+        for rel in existing - set(docs):
+            (run_dir / rel).unlink()
     for name, payload in docs.items():
         path = run_dir / name
         path.parent.mkdir(parents=True, exist_ok=True)

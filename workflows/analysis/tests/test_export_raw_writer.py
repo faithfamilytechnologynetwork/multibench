@@ -17,15 +17,13 @@ from typer.testing import CliRunner
 
 from analysis import export_raw
 from analysis.export_raw import (
-    MAX_SHARD_BYTES,
-    MAX_TOTAL_BYTES,
     _require_safe_relpath,
     _require_safe_segment,
     write_dataset,
 )
 from analysis.export_results import CANONICAL_SUBJECTS, export_dataset
 from analysis.loaders import AnalysisInputError
-from tests.test_export_raw import _TRAD, _grid, _grid_root, _full_grid
+from tests.test_export_raw import _grid, _grid_root, _full_grid
 
 runner = CliRunner()
 
@@ -167,7 +165,29 @@ def test_limit_writes_subset(tmp_path):
     assert lim_fp == sub_fp != full_fp
 
 
-def test_reexport_prunes_stale_shards(tmp_path):
+def test_full_reexport_prunes_stale_shards(tmp_path):
+    base, sittings = [], []
+    for sc in ("BUD-001", "BUD-002"):
+        b, s = _grid(["gpt-5.6-terra"], scenario=sc)
+        base += b
+        sittings += s
+    two = _full_grid(tmp_path / "two", base=base, sittings=sittings,
+                     subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
+                     scenarios=("BUD-001", "BUD-002"))
+    write_dataset([two], tmp_path / "out", "run1")  # both scenarios
+    assert (tmp_path / "out" / "run1" / "buddhism" / "BUD-002.json.gz").is_file()
+    # a later FULL export from a fixture with only BUD-001 prunes the stale BUD-002 shard
+    b1, s1 = _grid(["gpt-5.6-terra"], scenario="BUD-001")
+    one = _full_grid(tmp_path / "one", base=b1, sittings=s1,
+                     subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
+                     scenarios=("BUD-001",))
+    write_dataset([one], tmp_path / "out", "run1")
+    assert (tmp_path / "out" / "run1" / "buddhism" / "BUD-001.json.gz").is_file()
+    assert not (tmp_path / "out" / "run1" / "buddhism" / "BUD-002.json.gz").is_file()
+
+
+def test_limit_reexport_does_not_prune(tmp_path):
+    """A --limit fixture is additive — it must NOT delete files from an existing tier."""
     base, sittings = [], []
     for sc in ("BUD-001", "BUD-002"):
         b, s = _grid(["gpt-5.6-terra"], scenario=sc)
@@ -176,11 +196,15 @@ def test_reexport_prunes_stale_shards(tmp_path):
     root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
                       subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
                       scenarios=("BUD-001", "BUD-002"))
-    write_dataset([root], tmp_path / "out", "run1")  # both scenarios
-    assert (tmp_path / "out" / "run1" / "buddhism" / "BUD-002.json.gz").is_file()
-    write_dataset([root], tmp_path / "out", "run1", limit=1)  # now only BUD-001
-    assert (tmp_path / "out" / "run1" / "buddhism" / "BUD-001.json.gz").is_file()
-    assert not (tmp_path / "out" / "run1" / "buddhism" / "BUD-002.json.gz").is_file()
+    write_dataset([root], tmp_path / "out", "run1")  # both
+    write_dataset([root], tmp_path / "out", "run1", limit=1)  # limited re-export
+    assert (tmp_path / "out" / "run1" / "buddhism" / "BUD-002.json.gz").is_file()  # NOT pruned
+
+
+def test_non_positive_limit_aborts(tmp_path):
+    root = _grid_root(tmp_path)
+    with pytest.raises(AnalysisInputError, match="--limit must be >= 1"):
+        write_dataset([root], tmp_path / "out", "run1", limit=0)
 
 
 # ── Cross-tier fingerprint equality ─────────────────────────────────────────────────
@@ -244,4 +268,33 @@ def test_export_raw_cli_runs(tmp_path):
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
     assert payload["run_id"] == "run1" and payload["scenarios"] == 1
+    assert payload["compression_ratio"] > 1.0
+    assert payload["shard_uncompressed_bytes"] > payload["shard_bytes"]
     assert (tmp_path / "out" / "run1" / "manifest.json").is_file()
+
+
+def test_export_raw_cli_with_limit(tmp_path):
+    from analysis.cli import app
+    base, sittings = [], []
+    for sc in ("BUD-001", "BUD-002", "BUD-003"):
+        b, s = _grid(["gpt-5.6-terra"], scenario=sc)
+        base += b
+        sittings += s
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
+                      scenarios=("BUD-001", "BUD-002", "BUD-003"))
+    result = runner.invoke(app, ["export-raw", str(root), "--run-id", "run1",
+                                 "--out", str(tmp_path / "out"), "--limit", "2"])
+    assert result.exit_code == 0, result.output
+    assert json.loads(result.output)["scenarios"] == 2
+    items = _read_manifest(tmp_path / "out" / "run1")["items"]
+    assert [it["id"] for it in items] == ["BUD-001", "BUD-002"]
+
+
+def test_export_raw_cli_rejects_non_positive_limit(tmp_path):
+    from analysis.cli import app
+    root = _grid_root(tmp_path)
+    result = runner.invoke(app, ["export-raw", str(root), "--run-id", "run1",
+                                 "--out", str(tmp_path / "out"), "--limit", "0"])
+    assert result.exit_code == 2
+    assert "--limit must be >= 1" in result.output

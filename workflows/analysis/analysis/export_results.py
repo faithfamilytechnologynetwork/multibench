@@ -26,7 +26,7 @@ from __future__ import annotations
 
 import json
 import re
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 
 from analysis.aggregate import Cell, breakdown_mean, cell_scores, mean
@@ -310,8 +310,9 @@ class TraditionExport:
     steadfastness: dict[tuple, Steadfastness]
     # per-row fingerprint LINES for this tradition — retained (instead of the full resolved
     # dicts) so build_manifest computes the cross-tier source fingerprint (#51) from the SAME
-    # rows the aggregates were built from, without holding every judgment dict live.
-    fingerprint_lines: list[str] = field(default_factory=list)
+    # rows the aggregates were built from, without holding every judgment dict live. Required
+    # (no default) so a manifest can never be stamped with a silently-empty fingerprint.
+    fingerprint_lines: list[str]
 
 
 def _count_cells(cs: dict[Cell, float], subject: str, framing: str, scope: str,
