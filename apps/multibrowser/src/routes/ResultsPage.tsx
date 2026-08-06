@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -275,11 +275,14 @@ function ScoreCell({ value, testid }: { value: number | null; testid: string }) 
   );
 }
 
-/** The rich text for a strip square's hover/focus tooltip (also its accessible name). */
+/** The rich text for a strip square's hover/focus tooltip (also its accessible name). The trailing
+ *  count is the tradition's scenario count (`nScenarios`) — the reader-facing "n" — NOT the pooled
+ *  judged-cell count (which is nScenarios × pressures at pressure="all"). */
 function stripSummary(c: StripCell): string {
   const name = traditionDisplayName(c.tradition);
-  if (c.value === null) return `${name} — no data at this selection`;
-  return `${name} — Post ${fmtSigned(c.value)} · First ${fmtSigned(c.initial)} · Δ ${fmtSigned(c.delta)} · ${c.nJudged} scenarios`;
+  const n = `${c.nScenarios} ${c.nScenarios === 1 ? "scenario" : "scenarios"}`;
+  if (c.value === null) return `${name} — no data at this selection (${n})`;
+  return `${name} — Post ${fmtSigned(c.value)} · First ${fmtSigned(c.initial)} · Δ ${fmtSigned(c.delta)} · ${n}`;
 }
 
 /**
@@ -293,7 +296,27 @@ function stripSummary(c: StripCell): string {
  */
 function HeatStrip({ strip, subject }: { strip: StripCell[]; subject: string }) {
   const [active, setActive] = useState<string | null>(null);
+  const tipRef = useRef<HTMLSpanElement | null>(null);
+  const [shift, setShift] = useState(0);
   const safe = subject.replace(/[^\w-]/g, "-");
+
+  // Edge-aware positioning: when a tooltip opens, measure it at the neutral (centered) position and
+  // clamp it within the viewport so right- or left-edge squares don't clip mid-word. jsdom has no
+  // layout (all rects are 0), so this is inert in tests — positioning is verified by inspection.
+  useLayoutEffect(() => {
+    const el = tipRef.current;
+    if (active === null || !el) {
+      setShift(0);
+      return;
+    }
+    el.style.transform = "translateX(-50%)"; // neutral for measurement
+    const rect = el.getBoundingClientRect();
+    const margin = 8;
+    if (rect.right > window.innerWidth - margin) setShift(window.innerWidth - margin - rect.right);
+    else if (rect.left < margin) setShift(margin - rect.left);
+    else setShift(0);
+  }, [active]);
+
   return (
     <div className="flex items-center gap-0.5" role="group" aria-label={`Per-tradition scores for ${subject}`} data-testid="strip">
       {strip.map((c) => {
@@ -322,10 +345,12 @@ function HeatStrip({ strip, subject }: { strip: StripCell[]; subject: string }) 
             />
             {open && (
               <span
+                ref={tipRef}
                 role="tooltip"
                 id={tipId}
                 data-testid="strip-tooltip"
-                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 w-max max-w-xs -translate-x-1/2 whitespace-nowrap rounded bg-default-900 px-2 py-1 text-xs text-default-50 shadow-lg"
+                style={{ transform: `translateX(calc(-50% + ${shift}px))` }}
+                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 w-max max-w-xs rounded bg-default-900 px-2 py-1 text-xs text-default-50 shadow-lg"
               >
                 {summary}
               </span>

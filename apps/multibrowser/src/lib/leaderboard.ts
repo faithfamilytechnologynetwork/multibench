@@ -124,6 +124,8 @@ export interface StripCell {
   delta: number | null;
   nJudged: number;
   nExpected: number;
+  /** the tradition's scenario count (judge- and pressure-independent) — the reader-facing "n". */
+  nScenarios: number;
 }
 
 /** One dense leaderboard row (one subject), all columns at a fixed pressure, ranking judge. */
@@ -227,8 +229,8 @@ export function computeLeaderboardRows(
       const c = contribBy.get(t.id);
       const initial = initById?.get(t.id) ?? null;
       const delta = deltaById?.get(t.id) ?? null;
-      if (c) return { tradition: t.id, value: c.value, initial, delta, nJudged: c.nJudged, nExpected: c.nExpected };
-      return { tradition: t.id, value: null, initial, delta, nJudged: 0, nExpected: t.nScenarios * perScenarioFactor(manifest, pressure) };
+      if (c) return { tradition: t.id, value: c.value, initial, delta, nJudged: c.nJudged, nExpected: c.nExpected, nScenarios: t.nScenarios };
+      return { tradition: t.id, value: null, initial, delta, nJudged: 0, nExpected: t.nScenarios * perScenarioFactor(manifest, pressure), nScenarios: t.nScenarios };
     });
 
     return {
