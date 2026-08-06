@@ -9,6 +9,7 @@ import { IndexPage } from "./routes/IndexPage";
 import { TraditionPage } from "./routes/TraditionPage";
 import { ScenarioPage } from "./routes/ScenarioPage";
 import { ResultsPage } from "./routes/ResultsPage";
+import { RawResultsPage } from "./routes/RawResultsPage";
 import { NotFound } from "./routes/NotFound";
 import { parseSearch, stringifySearch } from "./lib/searchParams";
 import { searchSchema } from "./lib/filtering";
@@ -47,7 +48,15 @@ export const resultsRoute = createRoute({
   validateSearch: resultsSearchSchema,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, traditionRoute, scenarioRoute, resultsRoute]);
+// The #51 raw-results view: run + group (tradition) + item (scenario). Search state (A/B
+// subjects, condition axes, scope) is added in Phase 7 via `validateSearch`.
+export const rawResultsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/results/$runId/$groupId/$itemId",
+  component: RawResultsPage,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, traditionRoute, scenarioRoute, resultsRoute, rawResultsRoute]);
 
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({

@@ -1,18 +1,29 @@
-import type { Scenario } from "../lib/model";
+import { Link } from "@tanstack/react-router";
+import { useLatestSha, useResultsRuns } from "../lib/queries";
 
-// The reserved, currently-INERT results region (the §4.1 seam for the judging workflow #8).
-// In v1 `scenario.results` is always absent, so this renders only a subtle placeholder — no
-// scores/bands/verdicts markup. When #8 lands, this is where its per-scenario output renders,
-// beside the judge-guidance it is anchored to. The presence of this component is the whole
-// point: the results layer slots in here additively, not as a rewrite.
-export function ResultsRegion({ scenario }: { scenario: Scenario }) {
-  if (!scenario.results) {
+// The per-scenario results entry (#51). Once a results run is published, this becomes a live
+// drill-in to the raw-results view (transcripts + judge verdicts); until then it's a subtle
+// placeholder. The generic raw browser lives at /results/$runId/$groupId/$itemId; this is the
+// in-page seam that links into it, keyed to the default (most recent) results run.
+export function ResultsRegion({ traditionId, scenarioId }: { traditionId: string; scenarioId: string }) {
+  const sha = useLatestSha().data;
+  const runId = useResultsRuns(sha).data?.defaultRunId ?? null;
+  if (!runId) {
     return (
       <p data-testid="results-region" className="text-xs italic text-default-400">
-        No judgement results yet — model scores, bands, and verdicts will appear here once available.
+        No judging results yet — model transcripts and judge verdicts will appear here once a results run is published.
       </p>
     );
   }
-  // #8 integration point (not reached in v1).
-  return <div data-testid="results-region" data-has-results="true" />;
+  return (
+    <div data-testid="results-region" data-has-results="true" className="text-sm">
+      <Link
+        to="/results/$runId/$groupId/$itemId"
+        params={{ runId, groupId: traditionId, itemId: scenarioId }}
+        className="text-primary hover:underline"
+      >
+        Browse the models&rsquo; raw responses &amp; our judging &rarr;
+      </Link>
+    </div>
+  );
 }
