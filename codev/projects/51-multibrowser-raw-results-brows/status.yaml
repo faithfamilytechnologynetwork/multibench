@@ -1,9 +1,37 @@
 id: '51'
 title: multibrowser-raw-results-brows
 protocol: spir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: >-
+      Raw export core: normalized sitting reader + validation, verdict join, generic shard/catalog build, shared
+      fingerprint (pure transform)
+    status: in_progress
+  - id: phase_2
+    title: Fingerprint cross-tier plumbing + streaming writer + export-raw CLI + size measurement
+    status: pending
+  - id: phase_3
+    title: 'Presets (export-computed): Models split, Judges differed, Steadfastness cliff'
+    status: pending
+  - id: phase_4
+    title: Committed launch dataset + results-raw/README (data contract)
+    status: pending
+  - id: phase_5
+    title: >-
+      SPA raw data layer: generic zod contract, dual-source resolver, gunzip sniff, version+fingerprint checks, safe
+      paths, dev fixture
+    status: pending
+  - id: phase_6
+    title: 'Raw view route: transcripts + verdicts (catalog-generic ramp) + live ResultsRegion entry + drill-down'
+    status: pending
+  - id: phase_7
+    title: A/B compare + deep-link URL state (path params + validated search, incl. run-id) + preset navigation
+    status: pending
+  - id: phase_8
+    title: Railway gz-baked deploy wiring (--no-gitignore) + deploy-test safety + documentation + arch-docs
+    status: pending
+current_plan_phase: phase_1
 gates:
   spec-approval:
     status: approved
@@ -18,7 +46,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-08-06T07:30:57.553Z'
-updated_at: '2026-08-06T13:37:48.004Z'
+updated_at: '2026-08-06T13:38:04.180Z'
