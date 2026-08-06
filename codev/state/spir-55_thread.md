@@ -318,3 +318,8 @@ railway CLI installed + logged in (Waleed), but `railway status` = "No linked pr
 `railway up` without `railway link` (needs project ID I don't have) — and it'd deploy an UNMERGED branch
 to the single prod service (architect's domain for iter1/2). Reported to architect: fix+verify+PR done,
 need them to link/authorize or redeploy. porch NOT advanced (architect said don't until Waleed confirms).
+
+## 2026-08-06 — Verify iter3 surface fix: PR #65 MERGED (merge commit 5e6e34a).
+
+Opaque tooltip surface on main. Architect runs prod railway up from main workspace (I do NOT deploy).
+Pinged merge SHA. #55 + parked #49 verify gate stay open until Waleed confirms the live tooltip.
