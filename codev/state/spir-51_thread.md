@@ -494,3 +494,19 @@ Post-merge steps are architect-driven: production `railway up --no-gitignore` (b
 tier + confirm image size live) + hand Waleed the live raw browser, then the verify-approval gate
 (architect approves — I don't). Handing off. (This note is post-merge/local; the main-landed thread
 is complete through 11c8811.)
+
+### 2026-08-06 — post-merge deploy + live verify
+Architect deployed; the ~126MB baked upload TIMED OUT reproducibly (2× at backboard.railway.com) →
+production runs WITHOUT the baked primary, serving the raw tier from the committed GitHub fallback —
+the dual-source graceful path. Filed baked-primary upload as an OPEN follow-up in the review doc.
+Live client-side verify (HTTP) of https://multibrowser-production.up.railway.app — ALL GREEN:
+- app shell + deployed bundle served; bundle contains raw-browser + "no baked bundle — serving the
+  live GitHub copy" + content_fingerprint code.
+- /data-raw/20260803/manifest.json → 200 text/html (SPA fallback) → client treats as absent (my
+  isHtmlResponse fix) → GitHub fallback. The exact fix, validated in production.
+- GitHub tier reachable at pinned main SHA 6e5bba3: manifest 519 items (both fingerprints) + gz
+  shard valid magic bytes.
+- deep-link /results/20260803/sunni-islam/JLS-001 resolves to the app.
+Rendered interactions (A/B, presets, cell grid, fallback notice) covered by 251 vitest tests vs
+real committed data; human walkthrough = Waleed's live look. Running porch done 51 → verify gate
+(architect approves after Waleed's look; I do NOT approve).
