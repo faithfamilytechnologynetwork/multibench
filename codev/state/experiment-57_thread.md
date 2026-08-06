@@ -201,3 +201,12 @@ Architect approved review-doc + PR (no changes; keep the DPO judge-alignment cav
   builder/experiment-57 (16 commits). **NOT merging** — architect reviews, then Waleed gives merge word.
 
 **EXPERIMENT DONE. Standing by for PR review / merge word. Worktree clean, no stray processes.**
+
+## 2026-08-06 — PR #68 REQUEST_CHANGES addressed (science passed recomputation; hygiene only)
+
+Pushed 8cd7151: (1) 4× taqwabench .env → `${TAQWABENCH_ENV:-…}` (exp-58 convention, unset-safe
+fallback); (2) hardcoded worktree ROOT → dirname idiom in run_mining_judge/resume_mining/verified_put/
+run_mining_sample (all 7 scripts pass `bash -n`); (3) status.yaml → terminal (phase complete /
+build_complete true / gate passed); (4) bound reconciled to **[+0.22, ~+0.90]** across review+notes
+(SFT-only +0.78, SFT+DPO +0.90 — single downstream bound for the paper). Commented on PR + pinged
+architect for re-review. **Still NOT merging — Waleed's word.** Standing by.
