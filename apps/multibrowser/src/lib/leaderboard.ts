@@ -232,6 +232,10 @@ export function computeLeaderboardRows(
 
     // Heat strip: left-join the sparse Post contributions against the manifest tradition order, so
     // uncovered traditions become a distinct null cell (with a manifest-derived denominator).
+    // The join key is the tradition id: `computeStandings` keys each contribution by `shard.tradition`
+    // and the shard loader keys shards by `manifest.traditions[].id`; the exporter writes them equal
+    // (and `shardConsistencyNotices` flags any divergence at load), so every covered contribution
+    // lands in a manifest cell and `mean(non-null strip) == post` holds.
     const contribBy = new Map((contributionsBy.get(subject) ?? []).map((c) => [c.tradition, c]));
     const strip: StripCell[] = manifest.traditions.map((t) => {
       const c = contribBy.get(t.id);

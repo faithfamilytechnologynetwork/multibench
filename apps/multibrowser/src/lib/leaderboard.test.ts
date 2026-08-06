@@ -131,7 +131,8 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
     "thinkingmachines/Inkling": { unstated: 0.5434524040736548, stated: 0.8140794388849457, guided: 0.971569450432777 },
   };
 
-  it.runIf(hasCommitted)("all 5 subjects × 3 framings (full/all) mean-of-means == subj_overall", () => {
+  // Load the committed manifest + shards once (shape mirrors what queries.ts produces at runtime).
+  function loadCommitted(): { m: ResultsManifest; realShards: Record<string, ResultsShard> } {
     const realManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     const m: ResultsManifest = {
       ...manifest,
@@ -150,6 +151,11 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
       const s = JSON.parse(readFileSync(`${root}/${t.shard}`, "utf8"));
       realShards[t.id] = { tradition: s.tradition, nScenarios: s.n_scenarios, judges: s.judges, means: s.means, steadfastness: s.steadfastness };
     }
+    return { m, realShards };
+  }
+
+  it.runIf(hasCommitted)("all 5 subjects × 3 framings (full/all) mean-of-means == subj_overall", () => {
+    const { m, realShards } = loadCommitted();
     for (const framing of ["unstated", "stated", "guided"]) {
       const st = computeStandings(realShards, m, { framing, metric: "full", pressure: "all" });
       for (const subject of Object.keys(PAPER)) {
@@ -160,28 +166,26 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
     }
   });
 
+  // The named Phase-1 acceptance: the ROW BUILDER's post + strip reconcile with the paper on the
+  // committed shards (Phase 2's page test defers exhaustive reconciliation here, so it must live here
+  // against computeLeaderboardRows, not only computeStandings).
+  it.runIf(hasCommitted)("computeLeaderboardRows: post == paper unstated, mean(non-null strip) == post (all 5)", () => {
+    const { m, realShards } = loadCommitted();
+    const rows = computeLeaderboardRows(realShards, m, { pressure: "all" });
+    for (const subject of Object.keys(PAPER)) {
+      const r = rows.find((x) => x.subject === subject)!;
+      expect(r.post).toBeCloseTo(PAPER[subject]!.unstated!, 9); // headline == paper (unstated is framings[0])
+      const nn = r.strip.map((c) => c.value).filter((v): v is number => v !== null);
+      expect(nn).toHaveLength(7); // all 7 traditions covered for Gemini
+      expect(nn.reduce((x, y) => x + y, 0) / nn.length).toBeCloseTo(r.post!, 9); // mean(non-null strip) == post
+    }
+  });
+
   // Companion to the Δ-distinctness fixture test: on the COMPLETE Gemini grid, matched-cell
   // steadfastness coincides with (full − turn1) to machine precision — so the distinctness the UI
   // must preserve is a property of asymmetric panels (Opus samples), not the Gemini launch data.
   it.runIf(hasCommitted)("Gemini Δ == post − initial on the committed (complete) grid", () => {
-    const realManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-    const m: ResultsManifest = {
-      ...manifest,
-      subjects: realManifest.subjects,
-      judges: realManifest.judges.map((j: { key: string; model: string; aliases: string[]; full_grid: boolean }) => ({
-        key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid,
-      })),
-      pressures: realManifest.pressures,
-      pressureAll: realManifest.pressure_all,
-      traditions: realManifest.traditions.map((t: { id: string; n_scenarios: number; shard: string }) => ({
-        id: t.id, nScenarios: t.n_scenarios, shard: t.shard,
-      })),
-    };
-    const realShards: Record<string, ResultsShard> = {};
-    for (const t of m.traditions) {
-      const s = JSON.parse(readFileSync(`${root}/${t.shard}`, "utf8"));
-      realShards[t.id] = { tradition: s.tradition, nScenarios: s.n_scenarios, judges: s.judges, means: s.means, steadfastness: s.steadfastness };
-    }
+    const { m, realShards } = loadCommitted();
     const rows = computeLeaderboardRows(realShards, m, { pressure: "all" });
     for (const r of rows) {
       if (r.post !== null && r.initial !== null && r.delta !== null) {
@@ -253,26 +257,42 @@ describe("computeLeaderboardRows — dense rows", () => {
     expect(rows[rows.length - 1]!.rank).toBe(rows.length);
   });
 
-  it("cross-column assembly joins by subject id, NOT array index (positional-zip guard)", () => {
-    // Sonnet has the HIGHER post but the LOWER initial; gemini-subject the reverse. So the
-    // post-sorted order and the initial-sorted order disagree — a positional zip over post-order
-    // would attach gemini's initial to sonnet. The by-id join must not.
+  it("cross-column assembly joins by subject id, NOT array index — for EVERY column (positional-zip guard)", () => {
+    // Each column's ordering between the two subjects differs from the post-order, so a positional
+    // zip over post-order would misattribute that column. Orderings (sonnet vs gemini-subject):
+    //   post(full):   sonnet 0.9 > gemini 0.5   (this is the row/rank order)
+    //   initial:      gemini 0.7 > sonnet 0.1
+    //   delta(stead): gemini 0.8 > sonnet 0.2
+    //   stated:       gemini 0.6 > sonnet 0.3
+    //   guided:       sonnet 0.95 > gemini 0.05
     const cross = {
       a: mkShard("a", {
-        "claude-sonnet-5": { full: 0.9, turn1: 0.1 },
-        "gemini-3.6-flash": { full: 0.5, turn1: 0.7 },
+        "claude-sonnet-5": { full: 0.9, turn1: 0.1, stead: 0.2, stated: 0.3, guided: 0.95 },
+        "gemini-3.6-flash": { full: 0.5, turn1: 0.7, stead: 0.8, stated: 0.6, guided: 0.05 },
       }),
     };
     const rows = computeLeaderboardRows(cross, manifest, { pressure: "all" });
+    // For each column, assert BOTH subjects' values equal a direct single-slice computeStandings lookup.
+    const direct = (framing: string, metric: "turn1" | "full" | "steadfastness") => {
+      const st = computeStandings(cross, manifest, { framing, metric, pressure: "all" });
+      return (s: string) => st.find((x) => x.subject === s)!.value;
+    };
+    const initOf = direct("unstated", "turn1");
+    const deltaOf = direct("unstated", "steadfastness");
+    const statedOf = direct("stated", "full");
+    const guidedOf = direct("guided", "full");
+    for (const s of ["claude-sonnet-5", "gemini-3.6-flash"]) {
+      const row = rows.find((r) => r.subject === s)!;
+      expect(row.initial).toBeCloseTo(initOf(s)!, 10);
+      expect(row.delta).toBeCloseTo(deltaOf(s)!, 10);
+      expect(row.byFraming.stated).toBeCloseTo(statedOf(s)!, 10);
+      expect(row.byFraming.guided).toBeCloseTo(guidedOf(s)!, 10);
+    }
+    // Spot-check the exact misattribution a zip would produce: sonnet must keep its OWN low values.
     const sonnet = rows.find((r) => r.subject === "claude-sonnet-5")!;
-    const gemini = rows.find((r) => r.subject === "gemini-3.6-flash")!;
-    // Each subject's Initial equals a DIRECT single-slice lookup for that same subject.
-    const initStandings = computeStandings(cross, manifest, { framing: "unstated", metric: "turn1", pressure: "all" });
-    const initOf = (s: string) => initStandings.find((x) => x.subject === s)!.value;
-    expect(sonnet.initial).toBeCloseTo(initOf("claude-sonnet-5")!, 10); // 0.1, not gemini's 0.7
-    expect(gemini.initial).toBeCloseTo(initOf("gemini-3.6-flash")!, 10); // 0.7
-    expect(sonnet.initial).toBeCloseTo(0.1, 10);
-    expect(gemini.initial).toBeCloseTo(0.7, 10);
+    expect(sonnet.initial).toBeCloseTo(0.1, 10); // not gemini's 0.7
+    expect(sonnet.delta).toBeCloseTo(0.2, 10); // not gemini's 0.8
+    expect(sonnet.byFraming.stated).toBeCloseTo(0.3, 10); // not gemini's 0.6
   });
 
   it("takes no judgeModel argument — the board is always the ranking judge by construction", () => {
@@ -299,13 +319,28 @@ describe("sortRows — display sort over numeric columns, canonical rank untouch
     { subject: "z", initial: null, post: null, delta: null, byFraming: { unstated: null, stated: null, guided: null }, strip: [], rank: 3 },
   ];
 
-  it("sorts by a headline key, nulls last both directions, and preserves rank", () => {
-    const desc = sortRows(rows, "post", "desc");
-    expect(desc.map((r) => r.subject)).toEqual(["y", "x", "z"]); // 0.9, 0.5, null-last
-    const asc = sortRows(rows, "post", "asc");
-    expect(asc.map((r) => r.subject)).toEqual(["x", "y", "z"]); // 0.5, 0.9, null STILL last
+  it("sorts by EVERY numeric key in both directions, nulls last both ways, preserves rank", () => {
+    // The three subjects order differently per column; z is null everywhere (must sort last both ways).
+    //   post:    y 0.9 > x 0.5   |  initial: y 0.3 > x 0.1  |  delta: y 0.1 > x 0.0
+    //   unstated:y 0.9 > x 0.5   |  stated:  y 0.8 > x 0.2
+    const cases: { key: string; descNonNull: string[] }[] = [
+      { key: "post", descNonNull: ["y", "x"] },
+      { key: "initial", descNonNull: ["y", "x"] },
+      { key: "delta", descNonNull: ["y", "x"] },
+      { key: "unstated", descNonNull: ["y", "x"] },
+      { key: "stated", descNonNull: ["y", "x"] },
+    ];
+    for (const { key, descNonNull } of cases) {
+      const desc = sortRows(rows, key, "desc");
+      expect(desc.map((r) => r.subject)).toEqual([...descNonNull, "z"]); // null (z) last
+      const asc = sortRows(rows, key, "asc");
+      expect(asc.map((r) => r.subject)).toEqual([...descNonNull.slice().reverse(), "z"]); // null STILL last
+    }
+    // guided has a null (x) among non-nulls: y 0.4 present, x null, z null → y first, then nulls by id.
+    expect(sortRows(rows, "guided", "desc").map((r) => r.subject)).toEqual(["y", "x", "z"]);
+    expect(sortRows(rows, "guided", "asc").map((r) => r.subject)).toEqual(["y", "x", "z"]); // nulls last both
     // rank field is never rewritten by sorting.
-    expect(desc.find((r) => r.subject === "x")!.rank).toBe(2);
+    expect(sortRows(rows, "post", "desc").find((r) => r.subject === "x")!.rank).toBe(2);
   });
 
   it("sorts by a framing id, tie-breaks by subject id", () => {

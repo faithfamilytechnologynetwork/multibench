@@ -104,3 +104,13 @@ Phase 1 (pure client aggregation) implemented in leaderboard.ts:
 Tests: +12 (positional-zip guard via crossing post/initial orderings; strip 1:1 + mean==post; Δ-distinct
 fixture + Gemini-grid coincidence on committed data; sortRows nulls/ties/rank; drilldown Opus-sample path).
 check-types green; full suite 165 passed. Only leaderboard.ts + leaderboard.test.ts touched.
+
+## 2026-08-06 — Phase 1 impl consult (codex + claude, both RC — test completeness only)
+
+Claude verified impl well-built + both gates green; RC items were TEST gaps, no behavior change:
+- Column-attribution now covers delta + every framing (fixture where each column ordering differs).
+- Added computeLeaderboardRows paper reconciliation on committed data (post==paper.unstated + strip
+  len 7 + mean(non-null strip)==post) — Phase 2 defers exhaustive reconciliation here.
+- sortRows now tests every numeric key both directions + null-among-non-nulls.
+- Extracted loadCommitted() helper (dedup ~40 lines); comment at strip join re: tradition-id key match.
+check-types green, 166 tests. Rebuttal written. Re-running porch done.
