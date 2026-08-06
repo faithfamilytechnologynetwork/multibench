@@ -430,3 +430,11 @@ good → little contrast to sharpen; opposite of taqwabench's high-pref-flat tra
 with dpo model, warming (br51m6irr) → then lean battery (AFB cold + probes on dpo, capability --only
 mb-sft-dpo). +DPO eval is the arbiter; likely ≈ SFT. Budget ~367; lean ~12 → ~379. Watch items: MMLU,
 opted-out P≥1, 4-spike vs P≥2.
+
+## 2026-08-06 — DELIVERABLE DECISION RULE (architect, locked)
+Ship whichever adapter is WEAKLY BETTER on the lean battery. DPO preferred ONLY if non-regressing on
+ALL of (AFB P>=2, secular leakage 0.00, opted-out, MMLU). If DPO moves nothing → SFT is the named
+MultiWeights deliverable; DPO documented as a NULL stage with pref_acc 0.538 evidence + the
+samplability/uniformly-good mechanism (interpretable null = good null). NO respin with different
+hyperparams without pinging (respin unjustified by a mechanism we understand; budget ~379). Waiting on
+dpo warmup (br51m6irr) → lean battery → apply rule → name deliverable → report.
