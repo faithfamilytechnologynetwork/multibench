@@ -188,3 +188,10 @@ Commit: [Spec 49][Phase: export-core] (888d506). porch done → tests pass → p
 - Added committed fixtures tests/fixtures/export/ (gemini-run + opus-run, README) + end-to-end test.
 - Cleanups: removed dead _IDKEY, shared _NORM_FIELDS, multi-report universe consistency check.
 Full suite 97 pass, 0 skip. Ruff clean. Rebuttal written. Re-committing → porch done.
+
+Phase 1 consult iter2: Codex REQUEST_CHANGES (v2 dup precedence should be file-order not ts; add disjoint-
+alias test), Claude APPROVE. Fixed: v2 same-identity dedup = file-order last-wins (loader parity), later-ts
+only for base cross-alias collision; added disjoint-alias (count==sum) + v2 file-order regression tests.
+Phase 1 consult iter3: **BOTH APPROVE** (unanimous). 99 pass, 0 skip. Commits 888d506, +2 fix commits.
+Advancing to Phase 2 (export writer/manifest/CLI + committed launch dataset — must PING ARCHITECT before
+committing the dataset to eyeball size+manifest).
