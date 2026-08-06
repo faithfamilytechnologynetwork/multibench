@@ -375,3 +375,8 @@ Decision waits for the yield + descriptive numbers. SFT alone already delivers t
 precisely from the pilot yield. Keep all three options; architect decides at the checkpoint.
 Progress: descriptive 4/7 traditions clean (1,692 sit / 1,673 jud, 0 failed); mining sampling
 1,506/1,680. On both done → band mining → yield → assemble checkpoint report.
+
+**LEAN CONFIRMED (Waleed, 2026-08-06): stage-2 evals = AFB-150 cold + 70 probes + capability ONLY.
+DROP option 3.** Checkpoint is now a TWO-WAY decision: **stop-at-SFT (~280)** vs **DPO+lean
+(~340-360)**, gated on mining yield + total ≤400. Writeup note: SFT-stage MMLU (−2.3) is a
+trajectory HINT only — **post-DPO capability is the number of record.**
