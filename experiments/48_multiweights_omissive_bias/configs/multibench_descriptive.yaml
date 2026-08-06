@@ -12,7 +12,10 @@
 # EVAL_KEY=EMPTY at run time — vLLM ignores it). base_url is the deployed endpoint + /v1.
 
 subjects:
-  - {model: sft, provider: openai, base_url: https://waleedkadous--multibench-gemma-eval-serve-serve.modal.run/v1, api_key_env: EVAL_KEY}
+  # max_tokens MUST be < the endpoint's max_model_len (16384) minus the prompt — the SubjectSpec
+  # default (16384) == the context window and vLLM 400s ("requested 16384 output tokens"). 4096 is
+  # ample for a counsel reply (original collection replies were ~700-840 tok).
+  - {model: sft, provider: openai, base_url: https://waleedkadous--multibench-gemma-eval-serve-serve.modal.run/v1, api_key_env: EVAL_KEY, max_tokens: 4096}
 
 framings: [unstated]
 scopes: [full]

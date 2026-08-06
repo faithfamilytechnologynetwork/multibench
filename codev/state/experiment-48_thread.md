@@ -343,3 +343,17 @@ timeouts; buddhism gave up). Killed it, lowered concurrency 32→16, re-ran (byt
 endpoint now dedicated (AFB+capability done). Cold-start latency but no errors; collecting. Will
 compute per-tradition base-vs-sft gradient on completion.
 Next: on descriptive done → assemble full table → build+run K=4 mining pilot → pre-DPO checkpoint.
+
+## 2026-08-06 — descriptive root cause fixed; mining pilot running
+
+**Descriptive failures root-caused (BOTH runs):** NOT contention — the SubjectSpec default
+`max_tokens=16384` == the endpoint's `max_model_len=16384`, so vLLM 400s ("requested 16384 output
+tokens"). AFB worked because its runner sets max_tokens=1024. Fix: `max_tokens: 4096` on the subject
+in `multibench_descriptive.yaml`. Verified (2 written, 0 failed). Descriptive re-running (bij4m15e7),
+writing cleanly.
+**Mining pilot BUILT + RUNNING (bjef48nqd):** `mine_dpo_sample.py` (K=4 from the SFT endpoint at
+temp 1.3, per cell) + `build_dpo_pairs.py` (within-cell max-gap pairs, gap ≥ 1.0 = taqwabench's
+≥2 rungs → yield). PILOT = 10 scenarios/tradition (1,680 sittings) for a cheap yield estimate before
+the architect green-lights full mining. Both jobs share the endpoint (64-concurrent capacity; the
+earlier failures were the max_tokens bug, not contention). On both done → band mining → yield table →
+assemble pre-DPO checkpoint report.
