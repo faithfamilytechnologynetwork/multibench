@@ -184,7 +184,7 @@ export async function resolveRawSource(
     return {
       source: github,
       catalog: gh.catalog,
-      notices: [notice("warning", "results-raw", where, `${reason} — serving the live GitHub copy`), ...gh.notices],
+      notices: [{ ...notice("warning", "results-raw", where, `${reason} — serving the live GitHub copy`), kind: "source" }, ...gh.notices],
     };
   }
 
@@ -192,7 +192,7 @@ export async function resolveRawSource(
   return {
     source: github,
     catalog: gh.catalog,
-    notices: [notice("warning", "results-raw", where, "no baked bundle — serving the live GitHub copy"), ...gh.notices],
+    notices: [{ ...notice("warning", "results-raw", where, "no baked bundle — serving the live GitHub copy"), kind: "source" }, ...gh.notices],
   };
 }
 
