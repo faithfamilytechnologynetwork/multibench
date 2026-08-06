@@ -210,3 +210,9 @@ run_mining_sample (all 7 scripts pass `bash -n`); (3) status.yaml → terminal (
 build_complete true / gate passed); (4) bound reconciled to **[+0.22, ~+0.90]** across review+notes
 (SFT-only +0.78, SFT+DPO +0.90 — single downstream bound for the paper). Commented on PR + pinged
 architect for re-review. **Still NOT merging — Waleed's word.** Standing by.
+
+**Correction (3693dc6):** architect flagged fix (1) — my `${TAQWABENCH_ENV:-/Users/…}` fallback kept
+the absolute credential path committed in the PUBLIC repo (defeats the finding + breaks the standing
+fail-fast/no-fallback rule). Fixed to **`${TAQWABENCH_ENV:?…}`** (fail-fast, no path in file) in all 4
+scripts. Verified: zero absolute /Users or taqwabench/.env paths anywhere in exp57 scripts+docs; all 9
+scripts pass bash -n. Items 2-4 unchanged. Commented + pinged. Awaiting re-verify → Waleed merge word.
