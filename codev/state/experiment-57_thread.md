@@ -36,3 +36,44 @@ mandates gemini for comparability → every judging line is full price, so the $
 
 **→ GATED to architect. STOP. Nothing trained or judged yet; zero spend so far. Awaiting Waleed's
 $250 authorization before any Modal/gemini spend.**
+
+## 2026-08-06 — GO (core path authorized ~185, DPO-descriptive contingent on G2 headroom>=50)
+
+Architect approved. Executing core path; three reconciled gates G1/G2/G3; stop+ping on projection
+breach. Writeup req: report held-out lift + CI alongside BOTH refs (train-half memorization ref +
+#48 +0.83 / #53 +0.22) — that three-way is the deliverable.
+
+- **Train-half SFT subset BUILT on volume** (`modal_split_subset.py`): kept **1,362 == expected**
+  (validates the exposure-derived costing!). 251/259 train scen present (8 zero-exposure). Rows carry
+  scenario_id+tradition. → `/pairs/sft_guided_mb_split50train.jsonl`.
+- **SFT LAUNCHED** `mb-sft-split50` (detached+spawn, app ap-w2qY9dwyHUQn7fDunsKRzt), reusing #48's
+  `modal_gemma_sft.py` unchanged (bf16 LoRA r32 B200, ~341 steps, 2 epochs, seed 3446). Distinct run
+  name — does NOT touch #48 adapters (gemma-sft-guided/gemma-sft-dpo). ~55 min expected (~half #48).
+  Polling volume for completion (config.json marker) via background task.
+
+**G1 — SFT COMPLETE + reconciled (PASS).** 341 steps (=1,362×2/8 exact), 2 epochs, loss **2.72 →
+0.48** (near-identical to #48's 2.64→0.47 — recipe behaves the same on half-data). bf16/B200 peak
+65GB, clean (config.json written, state file gone). **Wall-clock 06:15:25 → ~07:09:30 ≈ 54 min B200
+@ $6.25/hr ≈ $5.6–6.0.** Actual ≤ $8 plan. **Running total ≈ $6 / $250.** No breach → proceeding
+(directive: ping only on breach). Loss log saved to scratchpad.
+
+**Descriptive phase (held-out transfer measurement) STARTED.** Deployed `serve_split_eval.py` (app
+multibench-gemma-eval-serve-split, base + sft=mb-sft-split50, DPO-tolerant) →
+`…-serve-split-serve.modal.run/v1`. Config `multibench_descriptive_split.yaml` (subject "sft",
+unstated/full, gemini judge, max_tokens 4096 to dodge #48's 16384→400 bug). Base REUSED from #53
+per_scenario.csv (same OpenRouter base → lift directly comparable). Running a 1-scenario buddhism
+**smoke** (bg btprpib5q) to validate the seam before the ~$45 full 3,114-cell run.
+
+**Smoke PASSED**: collect 6/6, judge 6/6, 0 failed, scores clean 5-pt bands (5×+1.0, 1×+0.5 for a
+buddhism scenario — recipe working). Seam validated, no max_tokens bug.
+
+**Full descriptive run** (all 519 scen, unstated/full, gemini): first launch failed INSTANTLY on a
+bash empty-array quirk (`set -u` + macOS bash 3.2) at line 28 — **before any collect/judge, zero
+spend**. Fixed with the safe `${arr[@]+…}` idiom; relaunched (bg bpt4tmuwx), buddhism collect running
+(endpoint cold-start). Self-completing driver → notifies on all-7-traditions done.
+
+**Analysis script READY** (`analyze.py`, zero-spend prep during the wait): aggregates split-SFT
+per-cell→per-scenario, joins reused base, partitions by committed split, emits the **three-way
+deliverable** (held-out lift+CI vs train-half memo ref vs #48 +0.83 / #53 +0.22), per-tradition
+held-out CIs (★ hard tier), base-balance check, and the pre-registered verdict. Reuses #53's
+bootstrap machinery; scenario-clustered CIs.

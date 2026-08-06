@@ -201,7 +201,63 @@ ceiling is genuinely tight and the plan is structured to hold it.
 - *(pending gate)* train-half SFT-set subsetter, mining driver, descriptive collect, analysis.
 
 ## Results
-*(pending spend authorization — nothing trained or judged yet)*
+
+### SFT stage — held-out transfer measurement (2026-08-06)
+
+**`mb-sft-split50`** trained clean on the 1,362-example train half (341 steps, loss 2.72 → 0.48,
+near-identical to #48's 2.64 → 0.47). Descriptive collected over all 519 scenarios (unstated/full,
+gemini judge), **3,114 cells, 0 failed**. Base reused from #53's `per_scenario.csv`.
+
+#### THE THREE-WAY (this experiment's deliverable)
+
+| quantity | value | 95% CI | note |
+|---|---|---|---|
+| **HELD-OUT transfer lift** | **+0.778** | **[+0.700, +0.856]** | n=260; post-SFT mean **+0.574 (crosses positive)**; base −0.204 |
+| TRAIN-half memorization-ref lift | +0.900 | [+0.819, +0.979] | n=259; post-SFT +0.643; base −0.257 |
+| Δ (train − held-out) = memorization inflation | **+0.122** | [+0.005, +0.238] | ≈ τ; small |
+| *ref:* #48 full-model aggregate | +0.83 | — | memorization-confounded |
+| *ref:* #53 zero-exposure transferable | +0.22 | [+0.11, +0.35] | biased holdout (13 scen, mostly sunni) |
+
+Base balance across halves: holdout −0.204 vs train −0.257 (Δ +0.053 — clean random split; the train
+half is if anything slightly *harder*, so the true memorization gap is even smaller than +0.122).
+
+**PRE-REGISTERED VERDICT: TRANSFER CONFIRMED (STRONG)** — held-out lift CI excludes 0, lower bound
+(+0.700) > τ, **and** held-out post-SFT mean (+0.574) crosses into positive counsel (the bar #53's
+strict arm failed at −0.65).
+
+#### This materially REVISES #53
+#53 concluded the +0.83 aggregate was "memorization-driven," overstating transfer "≈4×" (+0.22
+transferable). That estimate came from an **adversarially-biased holdout**: its zero-exposure cells
+were exactly the samplability-filter *failures* (hardest, mostly-sunni), and it could not separate
+memorization from latent trainability. The **clean random 50/50 retrain breaks that confound** and
+shows the on-bench lift is **~85% genuine cross-tradition transfer** (+0.778 of the +0.90 train-half),
+not memorization — the inflation is only Δ+0.12, not 4×. #53's +0.22 was a depressed lower bound from
+its biased sample, exactly as #53 itself cautioned ("bounds rather than evenly estimates transfer").
+
+#### Per-tradition held-out lift (all 7 CIs exclude 0; ★ = hard tier)
+
+| tradition | n | held-out lift | 95% CI | post-SFT | train lift |
+|---|---|---|---|---|---|
+| ★ roman-catholicism | 38 | **+1.068** | [+0.864, +1.274] | +0.568 | +1.371 |
+| ★ sunni-islam | 70 | +0.673 | [+0.539, +0.810] | +0.167 | +0.796 |
+| eastern-christianity | 53 | +0.972 | [+0.813, +1.123] | +0.858 | +1.234 |
+| secular-sage | 25 | +0.737 | [+0.470, +1.010] | +0.807 | +0.542 |
+| buddhism | 26 | +0.679 | [+0.426, +0.929] | +0.792 | +0.532 |
+| taoism | 24 | +0.583 | [+0.392, +0.778] | +0.778 | +0.542 |
+| judaism | 24 | +0.542 | [+0.233, +0.837] | +0.458 | +0.830 |
+
+- **Every tradition transfers** (CI excludes 0) — the clean cross-tradition generalization #53's
+  13-scenario holdout could not establish (4 traditions had no held-out scenario there).
+- **The hard tier transfers strongly** — RC held-out +1.07, sunni +0.67. Both cross positive
+  post-SFT (RC +0.57, sunni +0.17 — sunni closest to the line, its base being most negative).
+
+Spend reconciled (usage-exact where gemini): SFT ~$6 (B200 54 min) + descriptive gemini **$45.75**
+(3,114 judgments, 14.94M in / 3.11M out @ #48 rates) + endpoint H200 ~$6 + subset ~$0 = **≈ $58 / $250**.
+
+Artifacts: `data/output/summary_57_sft.json`, `per_scenario_57_sft.csv`, `fig_transfer_sft.pdf`.
+
+### DPO stage
+*(next: full-grid train-half mining → G2 → `mb-dpo-split50` → G3 → optional split-DPO descriptive)*
 
 ## Next Steps
 1. **[GATE]** Send split + costed plan to architect → await Waleed's $250 authorization.
