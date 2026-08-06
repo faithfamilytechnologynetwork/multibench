@@ -206,6 +206,9 @@ export function shardConsistencyNotices(
     judge: new Set(), subject: new Set(), framing: new Set(), scope: new Set(), pressure: new Set(),
   };
 
+  for (const judge of shard.judges) {
+    if (!judges.has(judge)) unknown.judge!.add(judge);
+  }
   for (const [judge, bySubj] of Object.entries(shard.means)) {
     if (!judges.has(judge)) unknown.judge!.add(judge);
     for (const [subject, byFr] of Object.entries(bySubj)) {

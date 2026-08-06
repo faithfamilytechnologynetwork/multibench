@@ -150,6 +150,21 @@ describe("loadResultsShard / loadResultsManifest", () => {
     expect(msgs).toMatch(/unknown pressure\(s\).*bogus_pressure/);
   });
 
+  it("an unknown judge in the shard's declared judges[] list surfaces even with empty tables", async () => {
+    const files = resultsFiles("r1", {
+      traditions: ["buddhism"],
+      shard: (t) => ({
+        tradition: t, n_scenarios: 2,
+        judges: ["gemini-3.6-flash", "unknown-judge"], // unknown, but tables are empty
+        means: {}, steadfastness: {},
+      }),
+    });
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard).not.toBeNull();
+    expect(notices.map((n) => n.message).join(" | ")).toMatch(/unknown judge\(s\).*unknown-judge/);
+  });
+
   it("a missing manifest yields a notice", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {}));
     const { manifest, notices } = await loadResultsManifest(newQc(), SHA, "ghost");
