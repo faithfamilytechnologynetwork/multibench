@@ -448,3 +448,26 @@ nit (`.railwayignore` .DS_Store/*.sw?). Advanced out of implement → **Review**
 - Running the review-phase 2-way PR consult (`--type pr`, codex+claude, iter1) in background.
 Next: on both non-REQUEST_CHANGES → porch reaches the **PR gate** (needs Waleed's approval; I do
 NOT merge/approve). Notify architect PR ready.
+
+### 2026-08-06 — PR #62 integration review → 3 required items done
+Architect posted the integration CMAP (claude APPROVE deep-verify; codex REQUEST_CHANGES).
+Architect synthesized THREE required items — all done + committed:
+1. **Raw-content fingerprint** — judgment-only fp missed transcript/context corrections →
+   stale baked served silently. Added `content_fingerprint` (sha256 over the shard byte
+   stream, pre-gzip→zlib-independent) to the raw manifest; resolver serves baked ONLY when
+   its content fp matches the authoritative GitHub tier's, else falls back w/ notice. Kept
+   the judgment `fingerprint` for cross-tier reconciliation. Re-exported committed manifest
+   (519 shards byte-identical). Tests: transcript-only edit → content fp changes, judgment
+   fp stable → fallback fires (Python + TS). NOTE: resolver now always reads the GitHub
+   *catalog* for coherence (small, off-budget); heavy *shards* stay baked (immunity intact).
+2. **Persistence-key guard** — moved the excluded query-key roots to a shared
+   `RAW_PERSIST_EXCLUDED` const (constants.ts) used by both queries.ts + main.tsx, + an
+   e2e test that the real resolved key is in the exclusion set.
+3. **Retention policy** — documented in results-raw/README.md (keep-N intent, docs only).
+Green: vitest 221, pytest 178, tsc clean.
+
+**Open (raised to architect):** raw consult also flagged the branch is ~136 behind origin/main
+with a SEMANTIC conflict in ResultsPage.tsx (Spec 55 dense-table rewrite carries the raw
+drill-down entry) + trivial README. Architect's 3-item synthesis did NOT include the merge;
+pinging to confirm whether I should merge origin/main + re-apply the drill-down hunk (delicate —
+feature entry point) or they'll handle it at the gate.
