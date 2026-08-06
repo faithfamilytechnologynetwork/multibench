@@ -54,6 +54,30 @@ export function traditionValue(
 }
 
 /**
+ * One subject's per-tradition values for the selection under a SPECIFIC judge — the drill-down /
+ * inspection data. Iterates traditions in manifest order (stable display). A tradition with no
+ * value for this judge/slice is omitted (honest: zero coverage shows nothing, never a 0). This is
+ * what the judge selector re-points to Opus without ever changing the Gemini-ranked leaderboard.
+ */
+export function subjectTraditionValues(
+  shards: Record<string, ResultsShard>,
+  manifest: ResultsManifest,
+  subject: string,
+  sel: Pick<ResultsSelection, "framing" | "metric" | "pressure">,
+  judgeModel: string,
+): TraditionValue[] {
+  const perScenario = sel.pressure === manifest.pressureAll ? manifest.pressures.length : 1;
+  const out: TraditionValue[] = [];
+  for (const t of manifest.traditions) {
+    const shard = shards[t.id];
+    if (!shard) continue;
+    const tv = traditionValue(shard, judgeModel, subject, sel.framing, sel.metric, sel.pressure, t.nScenarios * perScenario);
+    if (tv !== null) out.push(tv);
+  }
+  return out;
+}
+
+/**
  * Standings for the given selection, ranked by the equal-weight mean of per-tradition means,
  * descending. `judgeModel` defaults to the ranking (full-grid) judge — the leaderboard always
  * ranks on Gemini; the judge selector (Phase 5) only re-points the drill-down/inspection layer.

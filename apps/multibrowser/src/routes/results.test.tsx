@@ -23,22 +23,29 @@ const VALS: Record<string, {
 
 function shardFor(t: string) {
   const v = VALS[t]!;
+  const gemini = {
+    "claude-sonnet-5": {
+      unstated: {
+        full: { all: [v.sonnetFull, 2, 12], secularize: [v.sonnetSecularize, 2, 2] },
+        turn1: { all: [v.sonnetTurn1, 2, 12] },
+      },
+      stated: { full: { all: [v.sonnetStated, 2, 12] } },
+    },
+    "gemini-3.6-flash": { unstated: { full: { all: [v.geminiFull, 2, 12] } } },
+  };
+  const means: Record<string, unknown> = { "gemini-3.6-flash": gemini };
+  // Opus (validation) data ONLY for buddhism → taoism is omitted in the Opus drill-down, and the
+  // buddhism cell is a sample (5/12) so it earns a badge.
+  if (t === "buddhism") {
+    means["claude-opus-4-8"] = {
+      "claude-sonnet-5": { unstated: { full: { all: [0.7, 5, 12] } } },
+    };
+  }
   return {
     tradition: t,
     n_scenarios: 2,
-    judges: ["gemini-3.6-flash"],
-    means: {
-      "gemini-3.6-flash": {
-        "claude-sonnet-5": {
-          unstated: {
-            full: { all: [v.sonnetFull, 2, 12], secularize: [v.sonnetSecularize, 2, 2] },
-            turn1: { all: [v.sonnetTurn1, 2, 12] },
-          },
-          stated: { full: { all: [v.sonnetStated, 2, 12] } },
-        },
-        "gemini-3.6-flash": { unstated: { full: { all: [v.geminiFull, 2, 12] } } },
-      },
-    },
+    judges: t === "buddhism" ? ["gemini-3.6-flash", "claude-opus-4-8"] : ["gemini-3.6-flash"],
+    means,
     steadfastness: {
       "gemini-3.6-flash": { "claude-sonnet-5": { unstated: { all: [v.sonnetStead, 2] } } },
     },
@@ -131,6 +138,41 @@ describe("/results leaderboard", () => {
     renderApp("/results");
     expect(await screen.findByTestId("results-notices")).toBeInTheDocument();
     expect(screen.queryByTestId("leaderboard")).not.toBeInTheDocument();
+  });
+
+  it("expanding a subject shows the per-tradition drill-down (Gemini)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    const rows = await screen.findAllByTestId("standings-row");
+    await userEvent.click(within(rows[0]!).getByTestId("standings-expand")); // claude-sonnet-5
+    const drill = await screen.findByTestId("drilldown");
+    const drillRows = within(drill).getAllByTestId("drill-row");
+    // both traditions have Gemini data (0.6 buddhism, 0.8 taoism)
+    expect(drillRows).toHaveLength(2);
+    const bud = drillRows.find((r) => r.getAttribute("data-tradition") === "buddhism")!;
+    expect(within(bud).getByTestId("drill-score")).toHaveTextContent("0.600");
+  });
+
+  it("the judge selector switches the drill-down to Opus WITHOUT re-ranking the leaderboard", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results");
+    let rows = await screen.findAllByTestId("standings-row");
+    // top score before: Gemini claude-sonnet-5 = 0.700
+    expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.700");
+    await userEvent.click(within(screen.getByTestId("sel-judge")).getByText(/opus/));
+    await screen.findByTestId("opus-caption");
+    // ranking UNCHANGED (still Gemini 0.700) — judge selector only affects the drill-down
+    rows = screen.getAllByTestId("standings-row");
+    expect(rows[0]).toHaveAttribute("data-subject", "claude-sonnet-5");
+    expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.700");
+    expect(router.state.location.searchStr).toContain("judge=opus");
+    // drill-down now shows ONLY buddhism (taoism has no Opus data), badged as a sample
+    await userEvent.click(within(rows[0]!).getByTestId("standings-expand"));
+    const drill = await screen.findByTestId("drilldown");
+    const drillRows = within(drill).getAllByTestId("drill-row");
+    expect(drillRows).toHaveLength(1);
+    expect(drillRows[0]).toHaveAttribute("data-tradition", "buddhism");
+    expect(within(drillRows[0]!).getByTestId("sample-badge")).toBeInTheDocument();
   });
 
   it("shows an empty-state when no results runs are published", async () => {

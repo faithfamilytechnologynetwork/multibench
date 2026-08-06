@@ -273,3 +273,12 @@ coverage = full-grid denom + framing/pressure/steadfastness UI tests. iter2 **BO
 Judge selector switches drill-down/inspection to Opus (badged sample n/N) where data exists; NEVER re-ranks
 (leaderboard stays Gemini). Per-tradition drill-down (means + steadfastness), pressure-filterable. contributions
 already computed in computeStandings (Phase 4). Coverage badges from n_judged/n_expected per slice.
+
+**Phase 5 DONE.** leaderboard.ts: subjectTraditionValues (per-tradition values for a specific judge, omits
+missing → honest zero-coverage hidden). ResultsPage: judge selector (Segmented, "gemini (ranking)"/"opus
+(validation)"), Opus caption when non-full-grid judge selected, expandable standings rows → per-tradition
+drill-down (score-colored + n/N coverage + "sample" badge when nJudged<nExpected & judge is sample). KEY:
+judge selector re-points ONLY the drill-down; leaderboard ranking stays Gemini (structurally — computeStandings
+always uses rankingJudgeModel). Tests: subjectTraditionValues unit + drill-down + judge-switch-doesn't-rerank
++ Opus partial-coverage (taoism omitted, buddhism badged sample). 150 tests pass, typecheck + build clean.
+Phase 6 next: docs (results/README data contract + multibrowser README). Then Review + PR (gate for WALEED).

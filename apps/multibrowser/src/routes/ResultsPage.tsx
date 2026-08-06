@@ -1,3 +1,4 @@
+import { Fragment, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -10,9 +11,15 @@ import {
   type Metric,
   type ResultsSelection,
 } from "../lib/resultsSelection";
-import { computeStandings } from "../lib/leaderboard";
+import {
+  computeStandings,
+  rankingJudgeModel,
+  judgeModelForKey,
+  subjectTraditionValues,
+} from "../lib/leaderboard";
 import { scoreColor, scoreTextColor } from "../lib/scoreColor";
 import { notice, type Notice as NoticeT } from "../lib/model";
+import type { ResultsManifest, ResultsShard } from "../lib/resultsModel";
 
 const routeApi = getRouteApi("/results");
 
@@ -166,7 +173,25 @@ export function ResultsPage() {
                 ...manifest.pressures.map((p) => ({ value: p, label: p })),
               ]}
             />
+            <Segmented
+              label="Drill-down judge"
+              testid="sel-judge"
+              value={sel.judge}
+              onChange={(judge) => update({ judge })}
+              options={manifest.judges.map((j) => ({
+                value: j.key,
+                label: j.fullGrid ? `${j.key} (ranking)` : `${j.key} (validation)`,
+              }))}
+            />
           </div>
+
+          {!manifest.judges.find((j) => j.key === sel.judge)?.fullGrid && (
+            <p className="text-xs text-warning-700" data-testid="opus-caption">
+              Showing <span className="font-medium">{sel.judge}</span> as the validation judge in the
+              per-tradition drill-down — coverage is a sample (badged <span className="font-mono">n/N</span>).
+              The leaderboard ranking always stays on the full-grid Gemini judge.
+            </p>
+          )}
 
           <Leaderboard manifest={manifest} shards={runQ.data!.shards} sel={sel} />
         </>
@@ -175,16 +200,39 @@ export function ResultsPage() {
   );
 }
 
+function ScoreCell({ value, testid }: { value: number | null; testid: string }) {
+  return (
+    <span
+      className="inline-block min-w-16 rounded px-2 py-0.5 text-center font-mono tabular-nums"
+      style={{ backgroundColor: scoreColor(value), color: scoreTextColor(value) }}
+      data-testid={testid}
+    >
+      {fmt(value)}
+    </span>
+  );
+}
+
 function Leaderboard({
   manifest, shards, sel,
 }: {
-  manifest: NonNullable<ReturnType<typeof useResultsRun>["data"]>["manifest"];
-  shards: NonNullable<ReturnType<typeof useResultsRun>["data"]>["shards"];
+  manifest: ResultsManifest;
+  shards: Record<string, ResultsShard>;
   sel: ResultsSelection;
 }) {
-  if (!manifest) return null;
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const total = manifest.traditions.length;
   const standings = computeStandings(shards, manifest, sel);
+  const drillJudge = judgeModelForKey(manifest, sel.judge) ?? rankingJudgeModel(manifest);
+  const isSample = !manifest.judges.find((j) => j.key === sel.judge)?.fullGrid;
+
+  const toggle = (subject: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(subject)) next.delete(subject);
+      else next.add(subject);
+      return next;
+    });
+
   return (
     <table className="w-full border-collapse text-sm" data-testid="leaderboard">
       <thead>
@@ -196,25 +244,63 @@ function Leaderboard({
         </tr>
       </thead>
       <tbody>
-        {standings.map((s, i) => (
-          <tr key={s.subject} className="border-b border-default-100" data-testid="standings-row"
-              data-subject={s.subject}>
-            <td className="py-2 pr-2 tabular-nums text-default-400">{i + 1}</td>
-            <td className="py-2 pr-2 font-medium">{s.subject}</td>
-            <td className="py-2 pr-2">
-              <span
-                className="inline-block min-w-16 rounded px-2 py-0.5 text-center font-mono tabular-nums"
-                style={{ backgroundColor: scoreColor(s.value), color: scoreTextColor(s.value) }}
-                data-testid="standings-score"
-              >
-                {fmt(s.value)}
-              </span>
-            </td>
-            <td className="py-2 pr-2 tabular-nums text-default-500">
-              {s.nContributing}/{total}
-            </td>
-          </tr>
-        ))}
+        {standings.map((s, i) => {
+          const open = expanded.has(s.subject);
+          const perTradition = open
+            ? subjectTraditionValues(shards, manifest, s.subject, sel, drillJudge)
+            : [];
+          return (
+            <Fragment key={s.subject}>
+              <tr className="border-b border-default-100" data-testid="standings-row"
+                  data-subject={s.subject}>
+                <td className="py-2 pr-2 tabular-nums text-default-400">{i + 1}</td>
+                <td className="py-2 pr-2">
+                  <button
+                    type="button"
+                    aria-expanded={open}
+                    onClick={() => toggle(s.subject)}
+                    className="font-medium hover:text-primary"
+                    data-testid="standings-expand"
+                  >
+                    {open ? "▾ " : "▸ "}{s.subject}
+                  </button>
+                </td>
+                <td className="py-2 pr-2"><ScoreCell value={s.value} testid="standings-score" /></td>
+                <td className="py-2 pr-2 tabular-nums text-default-500">{s.nContributing}/{total}</td>
+              </tr>
+              {open && (
+                <tr data-testid="drilldown" data-subject={s.subject}>
+                  <td />
+                  <td colSpan={3} className="pb-3">
+                    <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
+                      <div className="mb-1 text-xs text-default-500">
+                        Per-tradition ({isSample ? `${sel.judge} — validation sample` : `${sel.judge}`})
+                        {perTradition.length === 0 && " — no data for this judge/selection"}
+                      </div>
+                      <ul className="flex flex-col gap-1">
+                        {perTradition.map((tv) => (
+                          <li key={tv.tradition} className="flex items-center gap-2 text-xs"
+                              data-testid="drill-row" data-tradition={tv.tradition}>
+                            <span className="w-40 truncate text-default-600">{tv.tradition}</span>
+                            <ScoreCell value={tv.value} testid="drill-score" />
+                            <span className="tabular-nums text-default-400">
+                              {tv.nJudged}/{tv.nExpected}
+                            </span>
+                            {isSample && tv.nJudged < tv.nExpected && (
+                              <span className="rounded bg-warning-100 px-1 text-warning-800" data-testid="sample-badge">
+                                sample
+                              </span>
+                            )}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </Fragment>
+          );
+        })}
       </tbody>
     </table>
   );
