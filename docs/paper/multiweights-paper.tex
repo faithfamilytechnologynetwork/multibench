@@ -65,12 +65,13 @@ decisively above the published 0--2\% frontier ceiling
 factual, mathematical, or secular-practical tasks and general capability
 essentially preserved (GSM8K $+3.0$, IFEval $-1.1$, MMLU $-2.3$ points).
 On MultiBench's own descriptive read, the distilled model's unstated
-means flip positive in all seven traditions in aggregate; an
-exposure-stratified holdout analysis shows that in-distribution read is
-roughly 4$\times$ exposure-concentrated, with a smaller but real
-transferable component ($+0.22$ on strictly untrained scenarios) --- the
-paper's load-bearing claims therefore rest on the out-of-distribution
-instruments. The on-policy preference stage then calibrates the
+means flip positive in all seven traditions, and a companion 50/50-split
+retrain shows this is predominantly \emph{genuine transfer}: randomly
+held-out scenarios lift $+0.78$ (95\% CI $[+0.70, +0.86]$) against a
+train-half reference of $+0.90$, with every tradition's held-out CI
+above zero and the hard tier transferring strongly; only the hardest
+filter-failure scenarios transfer weakly ($+0.22$ on an earlier
+13-scenario pseudo-holdout). The on-policy preference stage then calibrates the
 shape: meaningful representation rises further (27\% $\to$ 30\%) while
 the maximal-representation spike tempers and the opted-out over-mention
 regression repairs fully to the base rate, with capability still flat ---
@@ -320,31 +321,37 @@ prompt-level holdout.}
 \label{fig:dose}
 \end{figure}
 
-How much of this is generalization rather than memorization
-(\cref{fig:dose})? Because the
-judge filter operates per cell, scenarios entered training with anywhere
-from all six to \emph{none} of their cells, and training examples are
-rendered bare --- so the 13 zero-exposure scenarios constitute a true
-prompt-level holdout inside the descriptive run. An exposure-stratified
-analysis (interpretation rule pre-registered before computing)
-decomposes the lift: the strictly untrained scenarios improve by a real
-\textbf{+0.22} (95\% CI $[+0.11, +0.35]$), while lift rises
-monotonically with exposure (to $+0.86$ at full exposure) and a
-base-difficulty-matched contrast does not flatten it ($\Delta_{\text{matched}}
-\approx +1.01$). Two consequences are stated plainly: the aggregate
-$+0.79$ overstates the \emph{transferable} effect by roughly 4$\times$;
-and the zero-exposure scenarios improve without flipping sign (base
-$-0.87 \to \approx -0.65$) --- the all-seven-positive result includes
-trained scenarios. Two caveats bound the decomposition itself: the strict holdout is small
-and skewed (13 scenarios across 3 traditions, 9 of them Sunni Islam ---
-the cell-level matched arm, $n = 382$, carries the cross-tradition
-coverage); and unexposed cells are exactly the guided-band filter
-failures, i.e.\ the samplability boundary, so memorization and
-trainability are confounded \emph{with each other} here --- both
-readings imply the same bottom line. That bottom
-line is why the paper's load-bearing claims rest on the
-out-of-distribution instruments (\cref{sec:afb,sec:overapp,sec:capability}),
-which this analysis does not touch.
+How much of this is generalization rather than memorization? Two
+companion analyses answer, and their sequence is instructive. First, an
+exposure-stratified analysis of the full-data model itself
+(\cref{fig:dose}; interpretation rule pre-registered): because the judge
+filter operates per cell, 13 scenarios entered training with \emph{no}
+cells at all, and on that strict pseudo-holdout the lift is only
+$+0.22$ (95\% CI $[+0.11, +0.35]$) against a matched trained-scenario
+contrast of $\approx +1.01$ --- suggesting heavy memorization. But that
+holdout is exactly the guided-band \emph{filter failures} --- the
+hardest, most samplability-starved scenarios, 9 of 13 from Sunni Islam
+--- so memorization and trainability were confounded, as the analysis
+itself disclosed. Second, a clean test: a \textbf{companion 50/50
+retrain} (scenario-level split, stratified by tradition, seeded), which
+breaks that confound by holding out 260 \emph{randomly chosen} scenarios
+(24--70 per tradition; base-difficulty balanced, $\Delta = 0.05$). The
+result reverses the pessimistic reading: held-out scenarios lift
+\textbf{+0.78} (95\% CI $[+0.70, +0.86]$) against a train-half
+memorization reference of $+0.90$ --- roughly \textbf{85\% of the
+on-bench lift is genuine cross-tradition transfer}, with a memorization
+inflation of only $+0.12$ $[+0.01, +0.24]$. Every tradition's held-out
+CI is above zero; the hard tier transfers \emph{strongly} (Roman
+Catholicism $+1.07$, Sunni Islam $+0.67$, both crossing positive
+post-SFT), and the held-out mean crosses positive ($-0.20 \to +0.57$).
+The reconciled picture: transfer is strong in general and weak
+specifically on the filter-failure scenarios --- the $+0.22$ was the
+biased lower bound its own caveat predicted. One scope note: the
+transfer estimate comes from the companion half-data retrain, not the
+shipped full-data model, whose unseen-scenario behavior is accordingly
+bounded by $[+0.22, \sim+0.78]$. The out-of-distribution instruments
+(\cref{sec:afb,sec:overapp}) remain the headline evidence and are
+untouched by either analysis.
 
 Three further disclosures bound this read. It is \emph{descriptive only}: the
 model was trained on its own counsel for these same scenarios (no
@@ -409,21 +416,20 @@ tradition: the capability panel is flat, and the training data is the
 model's \emph{own} counsel. What moved is the decision to use what it
 already knew.
 
-\textbf{The samplability ordering is mechanism evidence --- with a
-bound.} Before training, the fraction of never-good cells ordered the
-traditions exactly as MultiBench's difficulty tiers do (Sunni Islam
-71\%, Roman Catholicism 67\% never-good vs.\ Buddhism 29\%); after
-distillation, the descriptive lift is largest on precisely those
-traditions, and stage-2 mining finds its no-contrast cells are uniformly
-good --- including on the hard tier, which contributes the most
-preference pairs at scale. The exposure analysis (\cref{sec:mbdesc})
-bounds how far to push this: on-bench, the transferable component is
-$+0.22$, not the aggregate $+0.79$, so the within-benchmark repair is
-partly training-set-specific. The cross-instrument story is what
-survives unqualified: the same model that memorably repairs its trained
-scenarios also moves 1\% $\to$ 30\% on an instrument it never trained
-on, with zero leakage --- recognition transfer that is real but, on
-in-distribution counsel, thinner than the aggregate suggests.
+\textbf{The samplability ordering is mechanism evidence.} Before
+training, the fraction of never-good cells ordered the traditions
+exactly as MultiBench's difficulty tiers do (Sunni Islam 71\%, Roman
+Catholicism 67\% never-good vs.\ Buddhism 29\%); after distillation, the
+descriptive lift is largest on precisely those traditions --- and the
+50/50-split retrain (\cref{sec:mbdesc}) shows this is transfer, not
+memorization: the hard tier's \emph{randomly held-out} scenarios lift
+most of all (Roman Catholicism $+1.07$). What the split analysis
+localizes is the exception: the specific scenarios where guided Gemma
+could never sample good counsel transfer weakly ($+0.22$) --- the
+recognition deficit's deepest pockets resist both training \emph{and}
+transfer, a heterogeneity the aggregate hides. The cross-instrument
+story compounds it: the same recipe moves 1\% $\to$ 30\% on an
+instrument the model never trained on, with zero leakage.
 
 \textbf{Distillation transfers a decision; preference optimization
 calibrates it.} Stage 1's shift is bimodal --- items either stay at 0 or
