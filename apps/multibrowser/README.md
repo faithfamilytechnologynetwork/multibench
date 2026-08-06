@@ -63,7 +63,8 @@ command live in [`results/README.md`](../../results/README.md).
   hardcoded, so 2-axis and 5-axis traditions both work.
 - **Results explorer (#49).** The `/results` explorer reads committed `results/<run-id>/` datasets
   at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
-  run shown defaults to the newest by `generated_at`; a specific run can be pinned with `?run=<id>`.
+  run shown defaults to the newest by `generated_at`; a **run selector** (shown when more than one run
+  is published) switches runs, and a specific run can also be pinned with `?run=<id>`.
   The **per-scenario** `ResultsRegion` seam (optional `Scenario.results`, `loadResults()` → `none`)
   remains inert — the explorer is a separate route-level feature, not that seam.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable

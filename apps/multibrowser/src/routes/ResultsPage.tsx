@@ -347,7 +347,7 @@ function Leaderboard({
                     <button
                       type="button"
                       aria-expanded={open}
-                      aria-controls={drillId}
+                      aria-controls={open ? drillId : undefined}
                       onClick={() => onToggleExpand(r.subject)}
                       className="font-medium hover:text-primary"
                       data-testid="standings-expand"
