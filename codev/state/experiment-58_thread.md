@@ -127,3 +127,17 @@ probe of the serving path — exp-57 resumes only after my refill confirms stabi
      EVAL_LABEL=dpo … eval_afb_probes.py` → `eval_gates.py --mmlu-new --mmlu-inc`.
 - Gate map: g1 AFB P≥2 cold ≥0.300; g2 secular leakage (max P≥1 over coding/creative/factual/math/
   secular-practical) ==0.00; g3 opted-out-interlocutor P≥1 ≤0.60; g4 chat-MMLU(new)≥(incumbent).
+
+## 2026-08-06 — battery PARALLELIZED (17:31Z, Waleed's call, cost-neutral ~3x wall-clock)
+
+Post-DPO plan revised to run concurrently (~45-60 min vs 2.5-3h), stop-on-disable stays ARMED:
+- **Capability**: `modal run --detach modal/modal_gemma_capability.py --chat` already spawns the 4
+  checkpoints as 4 CONCURRENT jobs (own H200 each; B200 buys nothing for eval). Launch all 4; when
+  results land READ base's anchor-guard FIRST — base off-class → discard all four + HALT (accepted
+  at-risk ~$15; taqwabench validated this config on-class, so guard is now belt-and-braces).
+- **AFB-150 cold + probes**: run CONCURRENTLY with capability on the serve endpoint (separate GPU, no
+  contention). Redeploy serve (dpo=mb-dpo-full) first. AFB then probes SEQUENTIAL against the one
+  endpoint (#48 lesson: don't hammer a single endpoint with two heavy suites). Terra+gemini at proven
+  CONCURRENCY=16 (429 lesson).
+- Both fire the moment DPO writes train_log.jsonl (poller bjxb5bqv4). Then read_capability.py (guard +
+  gate4) ∥ eval_gates.py (gates 1-3) → 4-gate verdict.
