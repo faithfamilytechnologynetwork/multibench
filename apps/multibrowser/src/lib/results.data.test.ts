@@ -213,6 +213,38 @@ describe("parseResultsManifest / parseResultsShard validation (fail-soft)", () =
     expect(parseResultsShard("{oops", "s").shard).toBeNull();
     expect(parseResultsManifest("{oops", "m").manifest).toBeNull();
   });
+
+  it("flags an unknown framing/pressure/scope/metric in the manifest's OWN vocab", () => {
+    const m = JSON.parse(resultsFiles("r1")["results/r1/manifest.json"]!);
+    m.framings = ["unstated", "sideways"]; // sideways is not a known framing
+    m.pressures = [...m.pressures, "bribery"];
+    m.scopes = ["turn1", "full", "turn7"];
+    m.metrics = ["turn1", "full", "steadfastness", "vibes"];
+    const { manifest, notices } = parseResultsManifest(JSON.stringify(m), "m");
+    expect(manifest).not.toBeNull(); // display-first: still usable
+    const msgs = notices.map((n) => n.message).join(" | ");
+    expect(msgs).toMatch(/unknown framing.*sideways/);
+    expect(msgs).toMatch(/unknown pressure.*bribery/);
+    expect(msgs).toMatch(/unknown scope.*turn7/);
+    expect(msgs).toMatch(/unknown metric.*vibes/);
+  });
+
+  it("does NOT restrict subjects/judges (new models must appear without a code change)", () => {
+    const m = JSON.parse(resultsFiles("r1")["results/r1/manifest.json"]!);
+    m.subjects = [...m.subjects, "some/new-model-7"];
+    m.judges = [...m.judges, { key: "newjudge", model: "new-judge-9", aliases: ["new-judge-9"], full_grid: false }];
+    const { manifest, notices } = parseResultsManifest(JSON.stringify(m), "m");
+    expect(manifest).not.toBeNull();
+    expect(notices.map((n) => n.message).join(" ")).not.toMatch(/subject|judge/);
+  });
+
+  it("warns (does not fail) when required counts fields are absent", () => {
+    const m = JSON.parse(resultsFiles("r1")["results/r1/manifest.json"]!);
+    delete m.counts;
+    const { manifest, notices } = parseResultsManifest(JSON.stringify(m), "m");
+    expect(manifest).not.toBeNull();
+    expect(notices.some((n) => /missing counts/.test(n.message))).toBe(true);
+  });
 });
 
 describe("truncation fallback discovers results/", () => {

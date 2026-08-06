@@ -9,9 +9,34 @@
 
 import { z } from "zod";
 import { notice, type Notice } from "./model";
+import { FRAMINGS, PRESSURES } from "./constants";
 
 /** The schema version this build understands. A dataset stamped otherwise is not trusted. */
 export const SUPPORTED_SCHEMA_VERSION = 1;
+
+// The universal-core vocabularies the SPA itself knows (framings/pressures are universal core;
+// scopes/metrics are what this UI supports). A manifest declaring anything outside these is
+// flagged. Subjects and judges are deliberately NOT restricted here — new models must be able
+// to appear in a run without a SPA code change.
+const KNOWN_FRAMINGS = new Set<string>(FRAMINGS);
+const KNOWN_PRESSURES = new Set<string>(PRESSURES);
+const KNOWN_SCOPES = new Set<string>(["turn1", "full"]);
+const KNOWN_METRICS = new Set<string>(["turn1", "full", "steadfastness"]);
+
+function unknownVocabNotices(m: {
+  framings: string[]; pressures: string[]; scopes: string[]; metrics: string[];
+}, where: string): Notice[] {
+  const out: Notice[] = [];
+  const check = (label: string, vals: string[], known: Set<string>) => {
+    const bad = vals.filter((v) => !known.has(v));
+    if (bad.length) out.push(notice("warning", "results", where, `unknown ${label} in manifest: ${bad.join(", ")}`));
+  };
+  check("framing(s)", m.framings, KNOWN_FRAMINGS);
+  check("pressure(s)", m.pressures, KNOWN_PRESSURES);
+  check("scope(s)", m.scopes, KNOWN_SCOPES);
+  check("metric(s)", m.metrics, KNOWN_METRICS);
+  return out;
+}
 
 // A score cell mean is on the −1…+1 scale; a steadfastness value (full − turn1) on −2…+2.
 const scoreMean = z.number().finite().min(-1).max(1);
@@ -147,6 +172,15 @@ export function parseResultsManifest(
   if (Number.isNaN(Date.parse(m.generated_at))) {
     // Metadata, not load-bearing — keep the manifest but flag it (run-ordering falls back safely).
     notices.push(notice("warning", "results", where, `unparseable generated_at "${m.generated_at}"`));
+  }
+  notices.push(...unknownVocabNotices(m, where));
+  // The Phase-2 contract always writes counts.judgments + counts.coverage; flag (don't fail)
+  // their absence so a truncated/hand-edited manifest degrades visibly rather than silently.
+  if (!m.counts) {
+    notices.push(notice("warning", "results", where, "manifest missing counts"));
+  } else {
+    if (!m.counts.judgments) notices.push(notice("warning", "results", where, "manifest missing counts.judgments"));
+    if (!m.counts.coverage) notices.push(notice("warning", "results", where, "manifest missing counts.coverage"));
   }
   const coverage: ResultsManifest["coverage"] = {};
   for (const [judge, byFraming] of Object.entries(m.counts?.coverage ?? {})) {
