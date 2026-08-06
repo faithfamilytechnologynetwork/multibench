@@ -151,3 +151,14 @@ Post-DPO plan revised to run concurrently (~45-60 min vs 2.5-3h), stop-on-disabl
   - dpo endpoint smoke `bujuzponq` (warming cold start; on success → launch AFB+probes)
 - On smoke OK → AFB-150 cold + probes (EVAL_MODELS=dpo, sequential AFB→probes on serve). On capability
   done → read_capability.py anchor-guard (base first). Then eval_gates.py → 4-gate verdict.
+
+## 2026-08-06 — collision fixed; both battery legs live
+
+- base-chat collision resolved: base->mb-base (distinct /runs/capability/mb-base-chat); taqwabench's
+  base-chat untouched. Couldn't ID base container surgically → stopped capability app + relaunched all
+  4 (no results lost, all were still loading). read_capability reads mb-base. ~$4-6 re-cost accepted.
+- dpo smoke OK (22min cold start under concurrent GPU load; warm sensible counsel).
+- BOTH legs live: capability `b8ojo8czg` (4 jobs: mb-base/mb-sft-guided/mb-sft-dpo/mb-dpo-full) ∥
+  AFB-150 cold + probes `bzhvunyzn` (EVAL_MODELS=dpo, AFB->probes sequential, terra CONCURRENCY=16).
+- On capability done → read_capability.py (base anchor-guard FIRST). On AFB done → eval_gates.py g1-3.
+  ~5 concurrent H200 on the account; stop-on-disable ARMED.
