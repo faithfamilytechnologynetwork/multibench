@@ -124,7 +124,10 @@ class RawTradition:
 def _iter_jsonl(path: Path):
     for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
         if line.strip():
-            yield lineno, json.loads(line)
+            try:
+                yield lineno, json.loads(line)
+            except json.JSONDecodeError as e:
+                raise AnalysisInputError(f"{path}:{lineno}: malformed JSON ({e})") from e
 
 
 # Raw identity within a single file — matches the loader's ``_JKEY`` (raw judge alias),
@@ -474,17 +477,40 @@ def serialize_tradition(exp: TraditionExport) -> dict:
     }
 
 
+def _coverage_summary(exports: dict[str, TraditionExport]) -> dict:
+    """Per (judge, framing) coverage pooled over traditions+subjects at scope=full,
+    pressure=all — a headline honesty signal (Gemini full-grid; Opus stated/guided sample).
+
+    NOTE: this is a *summary* only. The SPA must badge each view from the per-slice
+    ``n_judged/n_expected`` in the shards, not from this roll-up (Opus *unstated* is full
+    while stated/guided is a sample — a single per-judge flag would misrepresent that).
+    """
+    cov: dict[str, dict[str, dict[str, int]]] = {}
+    for exp in exports.values():
+        for (judge, _subject, framing, scope, pressure), sl in exp.means.items():
+            if scope != "full" or pressure != PRESSURE_ALL:
+                continue
+            cell = cov.setdefault(judge, {}).setdefault(framing, {"n_judged": 0, "n_expected": 0})
+            cell["n_judged"] += sl.n_judged
+            cell["n_expected"] += sl.n_expected
+    return cov
+
+
 def build_manifest(exports: dict[str, TraditionExport], run_id: str,
                    generated_at: str) -> dict:
     """The run-level manifest (subjects, judges, framings, pressures, scopes, counts)."""
     all_judges = sorted({j for exp in exports.values() for j in exp.judges})
     judges_meta = []
     for model in all_judges:
-        ui = JUDGE_UI.get(model, {"key": model, "full_grid": False})
+        if model not in JUDGE_UI:  # fail-fast — a normalized judge is always known here
+            raise AnalysisInputError(f"no UI metadata for judge {model!r}")
+        ui = JUDGE_UI[model]
         aliases = sorted({model, *_JUDGE_VARIANTS.get(model, ())})
         judges_meta.append({
             "key": ui["key"], "model": model, "aliases": aliases,
-            "full_grid": ui["full_grid"], "sample": not ui["full_grid"],
+            # full_grid = guaranteed full across ALL framings (Gemini yes; Opus no —
+            # its stated/guided layer is a sample). Per-view sampling is read per-slice.
+            "full_grid": ui["full_grid"],
         })
     counts: dict[str, int] = {}
     for exp in exports.values():
@@ -505,7 +531,7 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
             {"id": t, "n_scenarios": exports[t].n_scenarios, "shard": f"{t}.json"}
             for t in sorted(exports)
         ],
-        "counts": {"judgments": counts},
+        "counts": {"judgments": counts, "coverage": _coverage_summary(exports)},
     }
 
 
@@ -517,36 +543,42 @@ def write_dataset(exports: dict[str, TraditionExport], out_root: str | Path,
                   run_id: str, generated_at: str) -> list[Path]:
     """Write ``<out_root>/<run_id>/{manifest.json, <tradition>.json}``; enforce size ceilings.
 
-    Returns the written paths. Raises if any shard exceeds ``MAX_SHARD_BYTES`` or the run
-    total exceeds ``MAX_TOTAL_BYTES``.
+    Serializes and **validates all sizes before writing anything**, so a size violation
+    never leaves a partial dataset, and the total is computed over the full new set (not
+    just newly-written files). Stale ``*.json`` from a prior export of the same run-id are
+    pruned, so regeneration does not depend on prior directory contents. Returns the
+    written paths.
     """
+    # 1. Serialize everything in memory.
+    docs: dict[str, bytes] = {
+        _MANIFEST: _dump(build_manifest(exports, run_id, generated_at)).encode("utf-8")
+    }
+    for tradition in sorted(exports):
+        docs[f"{tradition}.json"] = _dump(serialize_tradition(exports[tradition])).encode("utf-8")
+
+    # 2. Validate sizes BEFORE any write.
+    total = 0
+    for name, payload in docs.items():
+        if name != _MANIFEST and len(payload) > MAX_SHARD_BYTES:
+            raise AnalysisInputError(
+                f"{name} is {len(payload)} bytes (> {MAX_SHARD_BYTES} shard ceiling)"
+            )
+        total += len(payload)
+    if total > MAX_TOTAL_BYTES:
+        raise AnalysisInputError(f"dataset total {total} bytes (> {MAX_TOTAL_BYTES} ceiling)")
+
+    # 3. Write, pruning any stale *.json not in the new set.
     run_dir = Path(out_root) / run_id
     run_dir.mkdir(parents=True, exist_ok=True)
+    for old in run_dir.glob("*.json"):
+        if old.name not in docs:
+            old.unlink()
     written: list[Path] = []
-    total = 0
-
-    manifest = build_manifest(exports, run_id, generated_at)
-    m_bytes = _dump(manifest).encode("utf-8")
-    (run_dir / _MANIFEST).write_bytes(m_bytes)
-    written.append(run_dir / _MANIFEST)
-    total += len(m_bytes)
-
-    for tradition in sorted(exports):
-        payload = _dump(serialize_tradition(exports[tradition])).encode("utf-8")
-        if len(payload) > MAX_SHARD_BYTES:
-            raise AnalysisInputError(
-                f"{tradition} shard is {len(payload)} bytes (> {MAX_SHARD_BYTES} ceiling)"
-            )
-        path = run_dir / f"{tradition}.json"
+    for name, payload in docs.items():
+        path = run_dir / name
         path.write_bytes(payload)
         written.append(path)
-        total += len(payload)
-
-    if total > MAX_TOTAL_BYTES:
-        raise AnalysisInputError(
-            f"dataset total {total} bytes (> {MAX_TOTAL_BYTES} ceiling)"
-        )
-    return written
+    return sorted(written)
 
 
 def export_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,

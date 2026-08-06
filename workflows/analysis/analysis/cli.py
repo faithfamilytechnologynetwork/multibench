@@ -129,6 +129,7 @@ def export(
     """
     import json as _json
     from datetime import datetime, timezone
+    from pathlib import Path
 
     from analysis.export_results import export_dataset
     from analysis.loaders import AnalysisInputError
@@ -139,8 +140,6 @@ def export(
     except AnalysisInputError as e:  # fail-fast, spec M7
         typer.echo(f"input error: {e}", err=True)
         raise typer.Exit(code=2) from e
-
-    from pathlib import Path
 
     total = sum(p.stat().st_size for p in written)
     typer.echo(

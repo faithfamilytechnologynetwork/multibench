@@ -301,29 +301,34 @@ def test_manifest_has_required_fields_and_judge_consistency():
     # judges carry key/model/aliases/full_grid; opus absorbs both aliases
     by_model = {j["model"]: j for j in m["judges"]}
     assert by_model["claude-opus-4-8"]["key"] == "opus"
-    assert by_model["claude-opus-4-8"]["sample"] is True
+    assert by_model["claude-opus-4-8"]["full_grid"] is False
     assert set(by_model["claude-opus-4-8"]["aliases"]) == {
         "claude-opus-4-8", "anthropic/claude-opus-4.8"}
     assert by_model["gemini-3.6-flash"]["full_grid"] is True
+    assert "sample" not in by_model["claude-opus-4-8"]  # dropped: badge per-slice instead
     # every shard judge is declared in the manifest
     manifest_models = set(by_model)
     for exp in exports.values():
         assert set(exp.judges) <= manifest_models
     # per-tradition entries carry n_scenarios + shard filename
     assert m["traditions"] == [{"id": "buddhism", "n_scenarios": 2, "shard": "buddhism.json"}]
+    # coverage summary present (scope=full, pressure=all → n_expected = n_scenarios*6 = 12).
+    # The fixture only carries the 'secularize' pressure, so Gemini judged 2 of 12 and Opus
+    # 1 of 12 — the roll-up honestly reflects the (degenerate) fixture grid.
+    cov = m["counts"]["coverage"]
+    assert cov["gemini-3.6-flash"]["unstated"] == {"n_judged": 2, "n_expected": 12}
+    assert cov["claude-opus-4-8"]["unstated"] == {"n_judged": 1, "n_expected": 12}
 
 
-def test_shard_round_trips_and_matches_in_memory():
+def test_shard_written_to_disk_matches_serialize(tmp_path):
     exports = _build_fixture_exports()
-    exp = exports["buddhism"]
-    shard = serialize_tradition(exp)
-    # a means entry round-trips as [mean, n_judged, n_expected]
-    g = shard["means"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["full"]["secularize"]
+    write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+    on_disk = json.loads((tmp_path / "r1" / "buddhism.json").read_text())
+    assert on_disk == serialize_tradition(exports["buddhism"])  # real disk round-trip
+    g = on_disk["means"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["full"]["secularize"]
     assert g == [pytest.approx(0.75), 2, 2]
-    st = shard["steadfastness"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["secularize"]
+    st = on_disk["steadfastness"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["secularize"]
     assert st == [pytest.approx(1.25), 2]
-    # JSON serialization is byte-stable (sorted keys)
-    assert json.dumps(shard, sort_keys=True) == json.dumps(shard, sort_keys=True)
 
 
 def test_write_dataset_layout_and_deterministic(tmp_path):
@@ -334,15 +339,32 @@ def test_write_dataset_layout_and_deterministic(tmp_path):
     assert (run_dir / "buddhism.json").is_file()
     assert {p.name for p in written} == {"manifest.json", "buddhism.json"}
     first = (run_dir / "buddhism.json").read_bytes()
-    # re-writing yields byte-identical output (deterministic serialization)
     write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
-    assert (run_dir / "buddhism.json").read_bytes() == first
+    assert (run_dir / "buddhism.json").read_bytes() == first  # byte-identical re-export
 
 
-def test_write_dataset_size_ceiling_enforced(tmp_path, monkeypatch):
+def test_write_dataset_prunes_stale_shards(tmp_path):
+    exports = _build_fixture_exports()
+    run_dir = tmp_path / "r1"
+    run_dir.mkdir(parents=True)
+    stale = run_dir / "atlantis.json"  # a tradition not in this export
+    stale.write_text("{}")
+    write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+    assert not stale.exists()  # stale shard pruned on re-export
+
+
+def test_write_dataset_shard_ceiling_enforced(tmp_path, monkeypatch):
     exports = _build_fixture_exports()
     monkeypatch.setattr("analysis.export_results.MAX_SHARD_BYTES", 5)  # force overflow
-    with pytest.raises(AnalysisInputError, match="ceiling"):
+    with pytest.raises(AnalysisInputError, match="shard ceiling"):
+        write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
+    assert not (tmp_path / "r1" / "buddhism.json").exists()  # nothing partial written
+
+
+def test_write_dataset_total_ceiling_enforced(tmp_path, monkeypatch):
+    exports = _build_fixture_exports()
+    monkeypatch.setattr("analysis.export_results.MAX_TOTAL_BYTES", 10)  # force overflow
+    with pytest.raises(AnalysisInputError, match="total .* ceiling"):
         write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
 
 
@@ -435,3 +457,52 @@ def test_launch_gemini_steadfastness_matches_report(launch_export):
             for pr, want in rep["scorecard"][subj]["steadfastness_by_pressure"].items():
                 got = exp.steadfastness[("gemini-3.6-flash", subj, "unstated", pr)]
                 assert got.value == pytest.approx(want, abs=1e-9), f"{trad}/{subj}/{pr}"
+
+
+# ── The COMMITTED launch dataset (the real artifact, not the in-memory export) ─────
+
+_COMMITTED = _REPO_ROOT / "results" / "20260803"
+_has_committed = pytest.mark.skipif(
+    not (_COMMITTED / "manifest.json").is_file(),
+    reason="committed results/20260803/ dataset not present",
+)
+
+
+@_has_committed
+def test_committed_dataset_sizes_and_consistency():
+    """Assert on the committed results/<run-id>/ artifact — sizes + manifest↔shard
+    consistency. Runs without the gitignored launch symlink (the data is committed)."""
+    from analysis.export_results import MAX_TOTAL_BYTES
+
+    manifest = json.loads((_COMMITTED / "manifest.json").read_text())
+    manifest_models = {j["model"] for j in manifest["judges"]}
+    assert manifest["subjects"] == list(CANONICAL_SUBJECTS)
+    total = (_COMMITTED / "manifest.json").stat().st_size
+    for entry in manifest["traditions"]:
+        shard_path = _COMMITTED / entry["shard"]
+        assert shard_path.is_file(), entry["shard"]
+        assert shard_path.stat().st_size <= MAX_SHARD_BYTES
+        total += shard_path.stat().st_size
+        shard = json.loads(shard_path.read_text())
+        assert shard["n_scenarios"] == entry["n_scenarios"]  # manifest ↔ shard agree
+        assert set(shard["judges"]) <= manifest_models       # every shard judge declared
+        assert set(shard["means"]) <= manifest_models        # no un-normalized judge id
+    assert total <= MAX_TOTAL_BYTES
+
+
+@_skip
+@_has_committed
+def test_committed_dataset_reconciles_with_paper():
+    """The committed artifact (not the in-memory export) must match the paper's standings."""
+    sb = json.loads((_MERGED / "analysis-out" / "figures-report-v2" /
+                     "stats_bundle.json").read_text())
+    shards = {}
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        shards[entry["id"]] = json.loads((_COMMITTED / entry["shard"]).read_text())
+    for subj in CANONICAL_SUBJECTS:
+        for fr in ("unstated", "stated", "guided"):
+            vals = [shard["means"]["gemini-3.6-flash"][subj][fr]["full"]["all"][0]
+                    for shard in shards.values()
+                    if subj in shard["means"].get("gemini-3.6-flash", {})]
+            mom = sum(vals) / len(vals)
+            assert mom == pytest.approx(sb["subj_overall"][f"{subj}|{fr}"][0], abs=1e-9)
