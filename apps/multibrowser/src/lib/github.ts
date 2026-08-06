@@ -94,7 +94,7 @@ const TreeSchema = z.object({
  * the committed results datasets (`results/`, #49) must survive a truncated recursive tree —
  * omitting `results/` here would make every results run silently vanish on a large repo.
  */
-const WALK_DIRS = ["traditions", "results"] as const;
+const WALK_DIRS = ["traditions", "results", "results-raw"] as const;
 
 /**
  * Full repo tree (recursive, one call). If GitHub reports `truncated`, fall back to a
@@ -162,4 +162,20 @@ export async function raw(
   if (res.status === 404) return null;
   if (!res.ok) throw new GitHubError(res.status, `raw ${res.status} for ${path}`);
   return res.text();
+}
+
+/**
+ * Fetch a file's raw bytes pinned to `sha` (for gzip shards — the caller sniffs + decompresses).
+ * Returns null on 404. Off the API rate budget, same as `raw`.
+ */
+export async function rawBytes(
+  repo: string,
+  sha: string,
+  path: string,
+  fetchImpl: FetchImpl = fetch,
+): Promise<ArrayBuffer | null> {
+  const res = await timedFetch(fetchImpl, `${RAW}/${repo}/${sha}/${path}`);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new GitHubError(res.status, `raw ${res.status} for ${path}`);
+  return res.arrayBuffer();
 }

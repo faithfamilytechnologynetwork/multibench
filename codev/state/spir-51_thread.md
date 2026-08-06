@@ -294,3 +294,27 @@ gz-baked ~4× smaller than uncompressed). Wrote results-raw/README.md (contract,
 allowlist, dual-source gz-baked, deploy-flow --no-gitignore, presets round-robin + conditions-
 nested params, fingerprint, CC-BY-4.0, toolchain-determinism caveat, produce/refresh). Committed
 results-raw/20260803 + README + results/20260803/manifest.json.
+
+### 2026-08-06 — phase_4 APPROVED (both). Forward notes for phases 5-7:
+- Catalog scopes label=id ("turn1"/"full"); consider friendly labels ("initial"/"post-pressure")
+  in Phase 6 (manifest-only re-export). Subjects id==label is CORRECT per retro (canonical slugs).
+- Subject ids contain "/" → Phase 7 deep-links MUST URL-encode; test a slashed id round-trip.
+- Phase 5 zod schemas must be written against the COMMITTED shard/catalog shapes (shard-shape
+  changes later would rewrite ~126MB history). Committed shapes are the contract now.
+
+### 2026-08-06 — IMPLEMENT phase_5: SPA raw data layer
+- rawModel.ts (NEW): GENERIC zod contract (catalog + shard) + tolerant parsers. Score is
+  z.number().finite() (bounds from catalog.scale, NOT hardcoded −1..1 → genericity). No
+  tradition/scenario/framing/pressure literals; conditions = Record<string,string>. isSafeRelPath
+  (every component). Version-mismatch/unsafe-path/malformed → Notice, never throw. Verified a
+  synthetic 0-4 AFB catalog parses with no code change.
+- rawSource.ts (NEW): decodeGzText (magic-byte sniff 0x1f8b carried VERBATIM from jaleesbrowser
+  + DecompressionStream feature-detect → DecompressionUnsupportedError, no polyfill); RawDataSource
+  seam + BakedRawSource (same-origin) + GitHubRawSource (SHA-pinned); resolveRawSource (baked-first,
+  fingerprint coherence via score-tier fingerprint, GitHub fallback + Notice on stale/absent).
+- github.ts: added rawBytes() (ArrayBuffer for gz shards) + results-raw to WALK_DIRS.
+- resultsModel.ts: tolerant optional `fingerprint` field (so raw view gets the authoritative
+  score-tier fingerprint; pre-#51 manifests still parse).
+- 17 rawData tests (parsers incl. 0-4 genericity, gunzip both cases, resolver baked/stale/absent,
+  source impls). Full multibrowser suite 170 green; typecheck clean. Dev render fixture deferred
+  to phase_6 (view tests).

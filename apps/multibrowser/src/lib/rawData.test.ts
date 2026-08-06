@@ -1,0 +1,212 @@
+import { describe, expect, it } from "vitest";
+import { gzipSync } from "node:zlib";
+import {
+  isSafeRelPath,
+  parseRawCatalog,
+  parseRawShard,
+  RAW_SUPPORTED_SCHEMA_VERSION,
+} from "./rawModel";
+import {
+  BakedRawSource,
+  GitHubRawSource,
+  decodeGzText,
+  resolveRawSource,
+  type RawDataSource,
+} from "./rawSource";
+
+// ── fixtures ──────────────────────────────────────────────────────────────────────
+
+const MB_CATALOG = {
+  schema_version: 1,
+  dataset: { title: "MultiBench raw results", language: "en", license: "CC-BY-4.0" },
+  scale: { min: -1, center: 0, max: 1 },
+  ramp: ["#9E1B32", "#D9D2C5", "#1B7837"],
+  subjects: [{ id: "claude-sonnet-5", label: "claude-sonnet-5" }],
+  judges: [{ key: "gemini", label: "gemini", fullGrid: true }],
+  conditionAxes: [{ key: "framing", label: "Framing", values: [{ id: "unstated", label: "Unstated" }] }],
+  groupBy: { key: "tradition", label: "Tradition" },
+  scopes: [{ id: "turn1", label: "turn1" }],
+  items: [{ id: "BUD-001", label: "BUD-001", group: "buddhism", shard: "buddhism/BUD-001.json.gz" }],
+  presets: [],
+  fingerprint: "sha256:abc",
+};
+
+// A NON-MultiBench catalog (issue #54): 0–4 scale, non-tradition items, non-leaderboard subjects.
+const AFB_CATALOG = {
+  schema_version: 1,
+  dataset: { title: "AFB before/after", license: "MIT" },
+  scale: { min: 0, center: 2, max: 4 },
+  ramp: ["#000", "#888", "#fff"],
+  subjects: [{ id: "gemma-4-31b-it", label: "gemma-4-31b-it" }, { id: "mb-sft-dpo", label: "mb-sft-dpo" }],
+  judges: [{ key: "terra", label: "gpt-5.6-terra", fullGrid: true }],
+  conditionAxes: [{ key: "condition", label: "Condition", values: [{ id: "cold", label: "Cold" }] }],
+  groupBy: { key: "instrument", label: "Instrument" },
+  scopes: [{ id: "single", label: "single" }],
+  items: [{ id: "AFB-001", label: "AFB-001", group: "afb-150", shard: "afb-150/AFB-001.json.gz" }],
+  presets: [],
+  fingerprint: "sha256:xyz",
+};
+
+const SHARD = {
+  schema_version: 1,
+  contexts: { stated: "[Context …]" },
+  cells: [{
+    subject: "claude-sonnet-5",
+    conditions: { framing: "unstated", pressure: "secularize" },
+    transcript: [{ role: "user", content: "hi" }, { role: "assistant", content: "hello" }],
+    verdicts: [{ judge: "gemini", scope: "turn1", score: 1.0, summary: "held" }],
+  }],
+};
+
+// ── isSafeRelPath ───────────────────────────────────────────────────────────────────
+
+describe("isSafeRelPath", () => {
+  it("accepts <group>/<item>.json.gz and rejects traversal / wrong extension", () => {
+    expect(isSafeRelPath("buddhism/BUD-001.json.gz")).toBe(true);
+    expect(isSafeRelPath("buddhism/BUD-001.json")).toBe(false);
+    expect(isSafeRelPath("../evil.json.gz")).toBe(false);
+    expect(isSafeRelPath("good/../../evil.json.gz")).toBe(false);
+    expect(isSafeRelPath("solo.json.gz")).toBe(false); // needs ≥2 segments
+  });
+});
+
+// ── parsers ───────────────────────────────────────────────────────────────────────
+
+describe("parseRawCatalog", () => {
+  it("parses a MultiBench catalog", () => {
+    const { catalog, notices } = parseRawCatalog(JSON.stringify(MB_CATALOG), "m");
+    expect(catalog?.schemaVersion).toBe(RAW_SUPPORTED_SCHEMA_VERSION);
+    expect(catalog?.dataset.license).toBe("CC-BY-4.0");
+    expect(catalog?.items[0]?.shard).toBe("buddhism/BUD-001.json.gz");
+    expect(notices).toHaveLength(0);
+  });
+
+  it("parses a NON-MultiBench 0–4 catalog with no code change (genericity, #54)", () => {
+    const { catalog, notices } = parseRawCatalog(JSON.stringify(AFB_CATALOG), "m");
+    expect(catalog).not.toBeNull();
+    expect(catalog?.scale).toEqual({ min: 0, center: 2, max: 4 });
+    expect(catalog?.groupBy.key).toBe("instrument"); // not "tradition"
+    expect(catalog?.conditionAxes[0]?.key).toBe("condition"); // not framing/pressure
+    expect(notices).toHaveLength(0);
+  });
+
+  it("rejects an unsupported schema_version", () => {
+    const { catalog, notices } = parseRawCatalog(JSON.stringify({ ...MB_CATALOG, schema_version: 99 }), "m");
+    expect(catalog).toBeNull();
+    expect(notices[0]?.message).toMatch(/unsupported schema_version/);
+  });
+
+  it("drops an item with an unsafe shard path (with a notice)", () => {
+    const bad = { ...MB_CATALOG, items: [{ id: "X", label: "X", group: "g", shard: "../evil.json.gz" }] };
+    const { catalog, notices } = parseRawCatalog(JSON.stringify(bad), "m");
+    expect(catalog?.items).toHaveLength(0);
+    expect(notices[0]?.message).toMatch(/unsafe shard path/);
+  });
+
+  it("flags malformed JSON", () => {
+    const { catalog, notices } = parseRawCatalog("{not json", "m");
+    expect(catalog).toBeNull();
+    expect(notices[0]?.severity).toBe("error");
+  });
+});
+
+describe("parseRawShard", () => {
+  it("parses a shard and keeps contexts + generic conditions", () => {
+    const { shard } = parseRawShard(JSON.stringify(SHARD), "s");
+    expect(shard?.contexts.stated).toMatch(/Context/);
+    expect(shard?.cells[0]?.conditions).toEqual({ framing: "unstated", pressure: "secularize" });
+    expect(shard?.cells[0]?.verdicts[0]?.summary).toBe("held");
+  });
+  it("rejects an unsupported version", () => {
+    const { shard, notices } = parseRawShard(JSON.stringify({ ...SHARD, schema_version: 2 }), "s");
+    expect(shard).toBeNull();
+    expect(notices[0]?.message).toMatch(/unsupported schema_version/);
+  });
+});
+
+// ── gunzip sniff ────────────────────────────────────────────────────────────────────
+
+describe("decodeGzText", () => {
+  it("decompresses raw gzip bytes (0x1f 0x8b)", async () => {
+    const gz = gzipSync(Buffer.from(JSON.stringify(SHARD)));
+    const text = await decodeGzText(gz.buffer.slice(gz.byteOffset, gz.byteOffset + gz.byteLength));
+    expect(JSON.parse(text).cells).toHaveLength(1);
+  });
+  it("passes through already-decompressed bytes (host set Content-Encoding)", async () => {
+    const plain = new TextEncoder().encode(JSON.stringify(SHARD));
+    const text = await decodeGzText(plain.buffer);
+    expect(JSON.parse(text).schema_version).toBe(1);
+  });
+});
+
+// ── resolver (baked-first / GitHub-fallback / stale) ─────────────────────────────────
+
+function bakedFrom(catalog: unknown | null): RawDataSource {
+  return {
+    kind: "baked",
+    catalogText: async () => (catalog === null ? null : JSON.stringify(catalog)),
+    shardText: async () => null,
+  };
+}
+function githubFrom(catalog: unknown | null): RawDataSource {
+  return {
+    kind: "github",
+    catalogText: async () => (catalog === null ? null : JSON.stringify(catalog)),
+    shardText: async () => null,
+  };
+}
+
+describe("resolveRawSource", () => {
+  it("uses baked when present and fingerprint-coherent (no notice)", async () => {
+    const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", "sha256:abc");
+    expect(r.source.kind).toBe("baked");
+    expect(r.notices).toHaveLength(0);
+  });
+
+  it("falls back to GitHub with a notice when baked is stale (fingerprint mismatch)", async () => {
+    const staleBaked = { ...MB_CATALOG, fingerprint: "sha256:OLD" };
+    const r = await resolveRawSource(bakedFrom(staleBaked), githubFrom(MB_CATALOG), "run1", "sha256:abc");
+    expect(r.source.kind).toBe("github");
+    expect(r.notices[0]?.message).toMatch(/stale.*live GitHub/);
+    expect(r.catalog?.fingerprint).toBe("sha256:abc");
+  });
+
+  it("uses GitHub silently when baked is absent", async () => {
+    const r = await resolveRawSource(bakedFrom(null), githubFrom(MB_CATALOG), "run1", "sha256:abc");
+    expect(r.source.kind).toBe("github");
+    expect(r.notices).toHaveLength(0);
+    expect(r.catalog).not.toBeNull();
+  });
+
+  it("errors when neither source has the run", async () => {
+    const r = await resolveRawSource(bakedFrom(null), githubFrom(null), "run1", null);
+    expect(r.catalog).toBeNull();
+    expect(r.notices[0]?.message).toMatch(/no raw dataset/);
+  });
+
+  it("accepts baked without an expected fingerprint (null → skip coherence check)", async () => {
+    const r = await resolveRawSource(bakedFrom(MB_CATALOG), githubFrom(MB_CATALOG), "run1", null);
+    expect(r.source.kind).toBe("baked");
+  });
+});
+
+// ── source impls (URL shape) ─────────────────────────────────────────────────────────
+
+describe("GitHubRawSource / BakedRawSource fetch shapes", () => {
+  it("GitHubRawSource gunzips a shard fetched via raw bytes", async () => {
+    const gz = gzipSync(Buffer.from(JSON.stringify(SHARD)));
+    const fetchImpl = (async (url: string) => {
+      if (url.endsWith(".json.gz")) return new Response(gz, { status: 200 });
+      return new Response(null, { status: 404 });
+    }) as unknown as typeof fetch;
+    const src = new GitHubRawSource("owner/repo", "deadbeef", fetchImpl);
+    const text = await src.shardText("run1", "buddhism/BUD-001.json.gz");
+    expect(JSON.parse(text!).cells).toHaveLength(1);
+  });
+
+  it("BakedRawSource returns null on a 404 catalog", async () => {
+    const fetchImpl = (async () => new Response(null, { status: 404 })) as unknown as typeof fetch;
+    const src = new BakedRawSource("data-raw", fetchImpl);
+    expect(await src.catalogText("run1")).toBeNull();
+  });
+});
