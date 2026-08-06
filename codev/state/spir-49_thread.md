@@ -263,4 +263,13 @@ were fixed); the final PR CMAP will re-review the full diff. deploy.test.ts hard
   pressure), standings table with score-colored cells + k/N traditions.
 - Tests: scoreColor(4) + resultsSelection(7) + leaderboard(6) + results route(5) = 22. Full suite 141 pass,
   typecheck + build clean. Deep-link verified (metric=turn1 in URL); Gemini-ranked; empty-state.
-Phase 5 next: judge selector (Opus validation layer) + per-tradition drill-down + coverage badges.
+Phase 4 consult: iter1 both REQUEST_CHANGES (page swallowed notices → blank on malformed; missing real-number
+reconciliation; steadfastness coverage always 100%; selector coverage). Fixed: surface all data notices +
+validate ?run= + real committed-dataset reconciliation test (gemini==paper all framings/7 trads) + steadfast
+coverage = full-grid denom + framing/pressure/steadfastness UI tests. iter2 **BOTH APPROVE** (unanimous).
+147 tests pass. Commits under [Phase: leaderboard].
+
+### Phase 5 (drill-down + judge selector + Opus validation layer) — STARTING.
+Judge selector switches drill-down/inspection to Opus (badged sample n/N) where data exists; NEVER re-ranks
+(leaderboard stays Gemini). Per-tradition drill-down (means + steadfastness), pressure-filterable. contributions
+already computed in computeStandings (Phase 4). Coverage badges from n_judged/n_expected per slice.
