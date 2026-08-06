@@ -218,6 +218,28 @@ export async function loadResultsRuns(qc: QueryClient, sha: string): Promise<Res
   return { runs, defaultRunId: valid[0]?.id ?? null };
 }
 
+export interface LoadedResultsRun {
+  manifest: ResultsManifest | null;
+  shards: Record<string, ResultsShard>;
+  notices: Notice[];
+}
+
+/** Load a run's manifest + all its tradition shards (for the leaderboard's mean-of-means). */
+export async function loadResultsRun(qc: QueryClient, sha: string, runId: string): Promise<LoadedResultsRun> {
+  const { manifest, notices } = await loadResultsManifest(qc, sha, runId);
+  if (manifest === null) return { manifest: null, shards: {}, notices };
+  const all: Notice[] = [...notices];
+  const shards: Record<string, ResultsShard> = {};
+  await Promise.all(
+    manifest.traditions.map(async (t) => {
+      const { shard, notices: sn } = await loadResultsShard(qc, sha, runId, t.id);
+      if (shard) shards[t.id] = shard;
+      all.push(...sn);
+    }),
+  );
+  return { manifest, shards, notices: all };
+}
+
 export async function loadResultsShard(
   qc: QueryClient,
   sha: string,
@@ -405,6 +427,18 @@ export function useResultsShard(sha: string | undefined, runId: string | undefin
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadResultsShard(qc, sha as string, runId as string, tradition),
+  });
+}
+
+/** A whole run: manifest + all shards (drives the leaderboard). */
+export function useResultsRun(sha: string | undefined, runId: string | undefined) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["results", "run", REPO, sha, runId],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadResultsRun(qc, sha as string, runId as string),
   });
 }
 

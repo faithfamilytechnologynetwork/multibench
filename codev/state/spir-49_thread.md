@@ -242,3 +242,25 @@ Deploy smoke now passes (554ms), full multibrowser suite 110/110 green, port 419
 Applied architect-requested HARDENING to deploy.test.ts (authorized): (1) spawn detached:true + finally kills
 the process GROUP (process.kill(-pid,SIGTERM) try/catch → server.kill()); (2) assertPortFree(4199) pre-flight
 with fail-fast diagnostic naming the leaked-serve cause. To note in review doc. → porch done Phase 3.
+
+**Phase 3 consult**: Claude APPROVE all 3 iters; Codex REQUEST_CHANGES each iter (incremental hardening, all
+addressed): iter1 shard↔manifest cross-validation + instant date sort; iter2 shard.judges[] validation;
+iter3 manifest-own-vocab validation + absent-counts degradation notices. Porch hit its **iter-3 SAFETY
+CEILING and force-advanced to Phase 4** (eb272eb) — iter3 fixes committed (e2e71eb) but not formally
+re-reviewed. All Codex points addressed in good faith; 119 multibrowser tests pass, typecheck+build clean.
+NOTE FOR REVIEW/PR: Phase 3 force-advanced (Codex's final verdict was still REQUEST_CHANGES though its points
+were fixed); the final PR CMAP will re-review the full diff. deploy.test.ts hardening to note in review too.
+
+### Phase 4 (leaderboard route + framing/metric/pressure selectors, Gemini-ranked) — DONE.
+- scoreColor.ts: TS port of colors.py 7-stop diverging palette (TwoSlopeNorm −1,0,1 linear) + text color.
+- resultsSelection.ts: Metric type, ResultsSelection, resultsSearchSchema (fail-soft), parse (defaults +
+  manifest-vocab clamping) / serialize (omit defaults → clean URL).
+- leaderboard.ts: computeStandings = equal-weight mean of per-tradition means (Gemini full-grid judge),
+  turn1/full read means slice, steadfastness reads steadfastness slice (no client subtraction); null
+  coverage excluded not zeroed; contributions kept for Phase 5 drill-down.
+- queries.ts: loadResultsRun/useResultsRun (manifest + all shards).
+- ResultsPage.tsx + /results route + RootLayout nav link. Segmented single-select controls (framing/metric/
+  pressure), standings table with score-colored cells + k/N traditions.
+- Tests: scoreColor(4) + resultsSelection(7) + leaderboard(6) + results route(5) = 22. Full suite 141 pass,
+  typecheck + build clean. Deep-link verified (metric=turn1 in URL); Gemini-ranked; empty-state.
+Phase 5 next: judge selector (Opus validation layer) + per-tradition drill-down + coverage badges.

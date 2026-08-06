@@ -8,9 +8,11 @@ import { RootLayout } from "./routes/RootLayout";
 import { IndexPage } from "./routes/IndexPage";
 import { TraditionPage } from "./routes/TraditionPage";
 import { ScenarioPage } from "./routes/ScenarioPage";
+import { ResultsPage } from "./routes/ResultsPage";
 import { NotFound } from "./routes/NotFound";
 import { parseSearch, stringifySearch } from "./lib/searchParams";
 import { searchSchema } from "./lib/filtering";
+import { resultsSearchSchema } from "./lib/resultsSelection";
 
 // Code-based routing (deliberate, documented deviation from the plan's "file-based" choice):
 // avoids the router-plugin codegen step, keeps the route tree explicit, and is fully unit-
@@ -38,7 +40,14 @@ export const scenarioRoute = createRoute({
   component: ScenarioPage,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, traditionRoute, scenarioRoute]);
+export const resultsRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/results",
+  component: ResultsPage,
+  validateSearch: resultsSearchSchema,
+});
+
+const routeTree = rootRoute.addChildren([indexRoute, traditionRoute, scenarioRoute, resultsRoute]);
 
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({
