@@ -69,54 +69,86 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
 
 #### Deliverables
 - [ ] New module `workflows/analysis/analysis/export_results.py` with pure functions:
-      subject/judge alias maps, `normalize_subject`, `normalize_judge`, Opus identity-dedup (later-`ts`
-      overlay), and a builder that produces, per (tradition, subject, framing, scope, pressure-incl-"all",
-      judge), the breakdown **mean** + **coverage** (`n_judged`, `n_expected`) using the canonical
-      `analysis.aggregate` semantics (import and reuse `aggregate.py`; do not re-derive the convention).
+      a **purpose-built judgment-row reader** for the source runs, subject/judge alias maps
+      (`normalize_subject`, `normalize_judge`), `judgments_v2.jsonl` overlay + Opus identity-dedup, and a
+      builder that produces, per (tradition, subject, framing, scope, pressure-incl-"all", judge), the
+      breakdown **mean** + **coverage** (`n_judged`, `n_expected`).
+- [ ] A **small refactor of `aggregate.py`**: promote the private `_mean_over` to a **public** breakdown-mean
+      helper (e.g. `breakdown_mean(cells, subject, *, framing, scope, pressure=None, scenarios=None)`), so the
+      export reuses the canonical semantics instead of importing a private symbol or re-implementing it.
+      `aggregate_tradition`/`check_parity` keep calling it — no behavior change, verified by the existing
+      analysis tests.
+- [ ] Committed **miniature fixtures** under `workflows/analysis/tests/fixtures/` (a few traditions/subjects,
+      both judges, incl. an alias-collision row and a v2-overlay row) with fixed expected numbers.
 - [ ] Tests `workflows/analysis/tests/test_export_results.py`.
-- [ ] No disk output in this phase (functions return in-memory structures).
+- [ ] No disk output of the *dataset* in this phase (functions return in-memory structures).
 
 #### Implementation Details
+- **Ingestion seam (do NOT use `loaders.load_run_dir`)**: the two Opus runs have **no `report.json`**
+  (`load_run_dir` fail-fasts on that; `load_corpus` also rejects the duplicate tradition ids across three
+  runs). Instead read `<run>/<tradition>/judgments.jsonl` directly with a purpose-built reader that reuses
+  `loaders.is_valid_score` / the `_REQUIRED_JUDGMENT_KEYS` validation semantics, and read the top-level
+  numeric `score`, never the `raw` string. Discover traditions by globbing each run's tradition subdirs.
+- **`judgments_v2.jsonl` overlay** (present in the Opus sample: buddhism 6, secular-sage 2, sunni-islam 2
+  rows): apply it with the loader's overlay identity `(subject, scenario_id, pressure, framing, judge, scope)`
+  — note this key **includes `judge`, excludes `tradition`**. **Ordering matters**: normalize the judge id
+  **first**, then apply v2 overlay + alias dedup, so the two Opus aliases collide correctly. Skipping v2 would
+  publish superseded verdicts on exactly the tiny sample panels.
 - **Alias maps (explicit, not algorithmic)**:
   - Subjects → 5 canonical: `Qwen/Qwen3-235B-A22B-Instruct-2507`, `claude-sonnet-5`, `gemini-3.6-flash`,
     `gpt-5.6-terra`, `thinkingmachines/Inkling`. Map every source variant (provider-prefixed / lowercased /
-    Qwen-without-`-Instruct`) to these; **fail loudly** on an unmapped subject id (fail-fast, no silent
-    passthrough).
-  - Judges → 2 canonical: `gemini-3.6-flash`; `claude-opus-4-8` (absorbing `anthropic/claude-opus-4.8`).
-- **Opus dedup**: normalized identity `(subject, tradition, scenario_id, pressure, framing, judge, scope)`;
-  the two aliases are expected disjoint (sum), but on collision keep the later `ts` (overlay), count once.
-- **Aggregation**: reuse `analysis.aggregate` cell/breakdown functions so a "cell" = mean of present judges
-  and a breakdown = unweighted mean of in-scope cells (uncovered excluded, never 0). Produce per-tradition
-  means for every slice the UI needs; the leaderboard's cross-tradition mean is *not* computed here (the SPA
-  does it) — but a parity helper computes it for the test.
-- **Coverage / `n_expected`**: per the spec data contract — specific pressure → `n_scenarios(tradition)`;
-  pooled "all" → `n_scenarios × 6`. `n_scenarios` derived from the run (distinct `scenario_id` per tradition).
-- Read the top-level numeric `score`, never the `raw` string.
+    Qwen-without-`-Instruct`) to these; **fail loudly** on an unmapped subject id (no silent passthrough).
+  - Judges → canonical model ids: `gemini-3.6-flash`; `claude-opus-4-8` (absorbing `anthropic/claude-opus-4.8`).
+- **Opus dedup (live, not theoretical)**: normalized identity `(subject, tradition, scenario_id, pressure,
+  framing, judge, scope)`; ~1,810 sunni-islam cells exist under **both** aliases (architect-confirmed), so the
+  later-`ts`-wins overlay path runs on real data — count each identity **once**.
+- **Aggregation**: reuse `aggregate.cell_scores` + `aggregate.mean` + the newly-public breakdown helper, so a
+  "cell" = mean of present judges and a breakdown = unweighted mean of in-scope cells (uncovered excluded,
+  never 0). The leaderboard's cross-tradition mean is **not** computed here (the SPA does it); a test-only
+  parity helper computes it to assert against `subj_overall`.
+- **Coverage / `n_expected` — pinned to the judge-independent full grid**: `n_scenarios(tradition)` comes from
+  the **merged Gemini `report.json.by_scenario`** universe (authoritative full grid), **not** from Opus rows
+  (deriving it from a ~2-cell Opus panel would report ~100% coverage and silently defeat honest degradation).
+  Then specific pressure → `n_expected = n_scenarios`; pooled "all" → `n_scenarios × 6`. Validate that Opus
+  scenario ids are a **subset** of that universe; fail on an inconsistent tradition/scenario universe.
+- **Steadfastness (full − turn1) is OUT OF SCOPE for v1** (not a spec Success Criterion). The scope toggle
+  selects the `turn1` *or* `full` standings independently (each a valid mean); the export publishes both
+  scopes' means but does **not** compute a matched-cell difference. This sidesteps the asymmetric-panel issue
+  (unstated-opus has slightly more turn1 than full cells) cleanly. (Recorded in Notes.)
 
 #### Acceptance Criteria
 - [ ] Merging the three runs yields **exactly five** subjects; `qwen/qwen3-235b-a22b-2507` →
       `Qwen/Qwen3-235B-A22B-Instruct-2507` (explicit test on the `-Instruct` case); an unmapped id raises.
-- [ ] Opus alias dedup: disjoint aliases → count == sum; same identity under both → counted once (later `ts`).
-- [ ] **Parity**: for judge=Gemini, `mean over traditions of per-tradition by_framing[full]` equals
-      `stats_bundle.subj_overall[subject|framing][0]` within 1e-9 for all subjects × framings; per-tradition
-      means match `report.json.scorecard` within tolerance.
+- [ ] Opus alias dedup: disjoint aliases → count == sum; same identity under both → counted once (later `ts`);
+      a v2-overlay row supersedes its base row.
+- [ ] `n_scenarios`/coverage come from the Gemini full grid; a 2-cell Opus panel reports low coverage
+      (not ~100%).
+- [ ] The `aggregate.py` refactor leaves the existing analysis test suite green.
+- [ ] **Parity (real-data, `skipif` symlink absent)**: for judge=Gemini, `mean over traditions of
+      per-tradition by_framing[full]` equals `stats_bundle.subj_overall[subject|framing][0]` within 1e-9 for
+      all subjects × framings; per-tradition means match `report.json.scorecard` within tolerance.
+- [ ] **Deterministic (committed fixture)**: fixed expected numbers on the miniature fixtures pass in CI /
+      for any builder (no dependence on `tmp/judging-runs/`).
 - [ ] All tests pass.
 
 #### Test Plan
-- **Unit Tests**: alias maps (incl. Qwen + unmapped-raises), dedup (disjoint + collision), coverage/`n_expected`,
-  per-slice means on a small hand-built fixture.
-- **Integration Tests**: parity against the real launch runs under `tmp/judging-runs/` (mean-of-means ==
-  `subj_overall`; per-tradition == `report.json`).
-- **Manual Testing**: run the parity helper in a REPL against `20260803-merged` and eyeball a couple of cells.
+- **Unit Tests** (committed fixtures, always run): alias maps (incl. Qwen + unmapped-raises), v2 overlay,
+  dedup (disjoint + collision), coverage/`n_expected` from the pinned full grid, per-slice means.
+- **Integration Tests** (`@pytest.mark.skipif` when the `tmp/judging-runs/` symlink is absent): parity against
+  the real sealed launch runs (mean-of-means == `subj_overall`; per-tradition == `report.json`).
+- **Manual Testing**: run the parity helper in a REPL against `20260803-merged` + the Opus layers.
 
 #### Rollback Strategy
-Delete the new module + test; nothing else references it yet.
+Delete the new module + fixtures + test and revert the small `aggregate.py` symbol promotion; nothing else
+references the export yet.
 
 #### Risks
-- **Risk**: An unmapped subject/judge variant appears in the (still-filling) sample run.
-  - **Mitigation**: fail-fast with the offending id; the map is the single place to extend; re-export at seal.
+- **Risk**: An unmapped subject/judge variant appears.
+  - **Mitigation**: fail-fast with the offending id; the map is the single place to extend.
+- **Risk**: v2-overlay/alias ordering wrong → superseded or double-counted verdicts.
+  - **Mitigation**: normalize judge first, then overlay+dedup; explicit collision + overlay tests.
 - **Risk**: Re-deriving aggregation drifts from canonical semantics.
-  - **Mitigation**: import `analysis.aggregate` directly; the parity test is the guard.
+  - **Mitigation**: reuse `aggregate.cell_scores`/`mean` + the promoted breakdown helper; parity test guards it.
 
 ---
 
@@ -138,30 +170,40 @@ Delete the new module + test; nothing else references it yet.
       generated by running the CLI against `tmp/judging-runs/` (commit only the OUTPUT, never from the symlink).
 
 #### Implementation Details
+- **Judge id separation**: shards and manifest use **canonical model ids** (`gemini-3.6-flash`,
+  `claude-opus-4-8`); the SPA maps short **UI keys** (`gemini`, `opus`) → those model ids. Define the mapping
+  in one place and validate manifest/shard consistency (every shard judge ∈ manifest `judges`).
 - **Manifest** fields: `schema_version`, `run_id`, `generated_at` (passed in / stamped post-run — do not call
-  `Date.now()` in library code), `subjects` (5 canonical), `judges` (`gemini`, `opus` with source-alias
-  provenance), `framings`, `pressures`, `scopes`, per-tradition `n_scenarios`, and roll-up `counts`
-  (judgments per judge, coverage summary). Records that the Opus stated/guided layer is a sample.
+  `Date.now()` in library code), `subjects` (5 canonical), `judges` (canonical model ids, each with source-alias
+  provenance), `framings`, `pressures`, `scopes`, per-tradition `n_scenarios`, and roll-up `counts` (judgments
+  per judge, coverage summary). Records that the Opus stated/guided layer is a sample.
 - **Shard** (per tradition): the slice table {subject × framing × scope × pressure-incl-"all" × judge →
   {mean, n_judged, n_expected}} — Gemini full, Opus where present. Compact keys; floats only; **no transcript
-  turns, no rationale** (Approved Decision 5). Optional (SHOULD): pooled-Gemini bootstrap CIs if they fit.
-- **Run-id**: single combined id for the launch (e.g. `20260803`) so one `results/<run-id>/` holds both
-  judges; document the choice in the shard/manifest.
-- **Size**: assert ≤ 8 MB total and ≤ 1 MB/shard in a test; if exceeded, trim optional fields (CIs first).
-- **Interim + re-export**: the committed dataset is interim; a `porch`-independent re-run of the same CLI at
-  seal regenerates it (Approved Decision 8) — no schema change, just fresher numbers.
+  turns, no rationale** (Approved Decision 5). **Deliberate v1 exclusions** (all fine against Success Criteria):
+  per-subject score distributions and judge-agreement context are not in the shard; pooled-Gemini bootstrap CIs
+  are an optional SHOULD (Approved Decision 6) — include only if trivially cheap.
+- **Run-id**: single combined id for the launch (e.g. `20260803`) so one `results/<run-id>/` holds both judges;
+  document the choice in the manifest.
+- **Size**: the slice space is ≈ 5×3×2×7×2 ≈ 420 entries/tradition (tens of KB — three orders under the ceiling),
+  so size is not a real risk; still assert ≤ 8 MB total and ≤ 1 MB/shard as a guard.
+- **Sealed data**: the Opus tail-fill is **sealed** (architect-confirmed, full 9,000-judgment design, zero
+  missing cells), so this is a **single clean export** — no interim/re-export dance needed.
 
 #### Acceptance Criteria
 - [ ] CLI `uv --project workflows/analysis run python -m analysis export <runs…> --run-id … --out results/`
       writes a valid dataset; re-reading it round-trips.
-- [ ] Committed `results/<run-id>/` is ≤ 8 MB total, every shard ≤ 1 MB; manifest carries all required fields.
-- [ ] Regenerating is deterministic (same inputs → byte-stable output, modulo the passed timestamp).
+- [ ] Committed `results/<run-id>/` is ≤ 8 MB total, every shard ≤ 1 MB; manifest carries all required fields;
+      every shard judge ∈ manifest `judges`.
+- [ ] Regenerating is deterministic (same inputs → byte-stable output, modulo the passed timestamp; sorted keys).
 - [ ] All tests pass.
 
 #### Test Plan
-- **Unit Tests**: manifest/shard schema, size ceilings, round-trip, deterministic serialization (sorted keys).
-- **Integration Tests**: full export of the launch runs; assert size + that Gemini standings recomputed from
-  the shards still equal `subj_overall`.
+- **Unit Tests** (committed fixtures, always run): manifest/shard schema, size ceilings, round-trip,
+  deterministic serialization (sorted keys), judge-id consistency.
+- **Integration Tests** (`skipif` symlink absent): full export of the sealed launch runs; assert size + that
+  Gemini standings recomputed from the shards still equal `subj_overall`. Note: there is **no GitHub CI pytest
+  job** (only the tradition-validator workflow); these run via porch's dispatcher when a builder touches
+  `workflows/analysis`, so the size/parity assertions are **dispatcher/local-enforced**, not GitHub-CI-enforced.
 - **Manual Testing**: inspect `results/<run-id>/manifest.json` and one shard by eye.
 
 #### Rollback Strategy
@@ -184,8 +226,9 @@ Delete the new module + test; nothing else references it yet.
   SHA-pinned GitHub layer — with the truncation fallback extended so results never silently vanish.
 
 #### Deliverables
-- [ ] New result-model types + a zod schema in `apps/multibrowser/src/lib/model.ts` (or a new
-      `resultsModel.ts`): manifest + shard shapes, mirroring the Phase-2 contract.
+- [ ] New result-model types + a zod schema in a new `apps/multibrowser/src/lib/resultsModel.ts`: manifest +
+      shard shapes, mirroring the Phase-2 contract. **Name the parser `parseResultsManifest`** — `parse.ts`
+      already exports `parseManifest` for the *tradition* manifest; do not shadow it.
 - [ ] Discovery + loader hooks in `src/lib/queries.ts`: `resultsRunIds(entries)` (regex over
       `results/([^/]+)/manifest.json`), `useResultsRuns(sha)` (list + latest-by-`generated_at`),
       `useResultsShard(sha, runId, tradition)` — SHA-keyed, `staleTime: Infinity`, off-budget `raw` fetches.
@@ -215,7 +258,9 @@ Delete the new module + test; nothing else references it yet.
   generalized truncation walk.
 - **Integration Tests**: `fakeFetch` serving a two-run `results/` tree (normal + truncated) via `renderApp`-level
   hook tests.
-- **Manual Testing**: point a dev build at the committed launch dataset; confirm the run loads.
+- **Manual Testing**: the SPA reads `REF="main"` by default, so the branch's committed dataset isn't visible
+  pre-merge — set `VITE_MULTIBENCH_REF` (`constants.ts`, `.env.example`) to the builder branch for a dev build
+  that loads the committed dataset; confirm the run loads.
 
 #### Rollback Strategy
 Revert the new hooks/types and the `github.ts` fallback change; the corpus routes are untouched.
@@ -268,7 +313,11 @@ Revert the new hooks/types and the `github.ts` fallback change; the corpus route
 - **Unit Tests**: `resultsSelection` parse/serialize; `scoreColor` boundaries (−1, 0, +1).
 - **Integration Tests**: `fakeFetch` + `renderApp("/results")` — reconciliation table, selector clicks assert
   DOM + `router.state.location.searchStr`.
-- **Manual Testing**: dev build against the committed dataset; compare a column to the paper's table.
+- **Compile/build checks**: `pnpm -C apps/multibrowser check-types` (tsc) **and** a production build
+  (`pnpm -C apps/multibrowser build`) — Vitest alone does not validate the new TanStack route or full app
+  compilation.
+- **Manual Testing**: dev build (with `VITE_MULTIBENCH_REF`=branch) against the committed dataset; compare a
+  column to the paper's table.
 
 #### Rollback Strategy
 Remove the route + nav link + new files; the SPA reverts to corpus-only.
@@ -317,6 +366,7 @@ Remove the route + nav link + new files; the SPA reverts to corpus-only.
 - **Unit Tests**: coverage-badge formatting; selection model with `judge`.
 - **Integration Tests**: `fakeFetch` dataset with uneven Opus coverage (mirror secular-sage ~2-cell case) →
   assert badge + hidden zero-coverage + unchanged ranking on judge toggle.
+- **Compile/build checks**: `pnpm -C apps/multibrowser check-types` + `pnpm -C apps/multibrowser build`.
 - **Manual Testing**: dev build; switch to Opus on stated framing; confirm badges + that standings don't move.
 
 #### Rollback Strategy
@@ -409,7 +459,7 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 
 ### Schedule Risks
 | Risk | Probability | Impact | Mitigation | Owner |
 |------|------------|--------|------------|-------|
-| Opus tail-fill not sealed at first export | H | L | Interim export is valid + self-describing; re-export at seal (same command) | architect/builder |
+| ~~Opus tail-fill not sealed at first export~~ (RESOLVED 2026-08-06: data sealed, zero missing cells) | — | — | Single clean export; no interim needed | — |
 
 ## Validation Checkpoints
 1. **After Phase 1**: parity green against the real runs (mean-of-means == `subj_overall`).
@@ -445,13 +495,36 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 
 - [ ] Monitoring validation — N/A.
 
 ## Expert Review
-**Date**: (pending — porch runs the 2-way plan consultation: Codex + Claude)
-**Model**: Codex, Claude
-**Key Feedback**:
-- (to be filled after consultation)
+**Date**: 2026-08-06
+**Model**: Codex + Claude (2-way; Gemini can't see the worktree here). Both **REQUEST_CHANGES**, HIGH
+confidence. Every point verified against the actual codebase/data before incorporation.
 
-**Plan Adjustments**:
-- (to be filled after consultation)
+**Key Feedback (iteration 1):**
+- **Ingestion path was wrong**: `loaders.load_run_dir` hard-fails on the two Opus runs (no `report.json`) and
+  `load_corpus` rejects three runs of the same seven traditions; `aggregate._mean_over` is private and
+  `aggregate_tradition` only exposes headline slices, not the needed grid.
+- **`judgments_v2.jsonl` overlays** in the Opus sample were unmentioned; overlay-vs-alias ordering must be
+  explicit (normalize judge first).
+- **Coverage denominator** ("derived from the run") could make a 2-cell Opus panel look ~100% covered,
+  inverting honest degradation.
+- **Tests depended on the gitignored `tmp/judging-runs/`** symlink → break CI / other builders.
+- **Matched-cell steadfastness** (spec Test Scenario 5) was unaddressed.
+- Minor: judge model-id vs UI-key ambiguity; `parseManifest` name collision; add `check-types`+build; "CI-
+  asserted" size ceiling overstated (no GitHub pytest job); `VITE_MULTIBENCH_REF` for pre-merge verification;
+  size-risk over-weighted; score-distributions/agreement demoted (state as deliberate v1 exclusions).
+
+**Plan Adjustments:**
+- **Phase 1** rewritten: purpose-built row reader (reuse `is_valid_score`/`_REQUIRED_JUDGMENT_KEYS`, not
+  `load_run_dir`); **promote `_mean_over` to a public breakdown helper** in `aggregate.py`; handle
+  `judgments_v2.jsonl` overlay with normalize-judge-**first** ordering; **pin `n_scenarios`/coverage to the
+  Gemini full grid** (`report.json.by_scenario`), validate Opus scenarios ⊆ it; committed **miniature
+  fixtures** for deterministic tests + `skipif` real-data parity; declared **steadfastness out of scope for
+  v1** (scope toggle shows turn1/full standings independently, not their difference).
+- **Phase 2**: canonical-model-id shards + UI-key mapping with consistency validation; sealed-data single
+  export (no interim); reworded size enforcement as dispatcher/local (not GitHub CI); score-dist/agreement/CIs
+  as explicit v1 exclusions/SHOULDs; fixture-based deterministic tests + `skipif` integration.
+- **Phase 3**: `parseResultsManifest` (no collision); `VITE_MULTIBENCH_REF` manual-test note.
+- **Phases 4–5**: added `check-types` + production build to the test plans.
 
 ## Approval
 - [ ] Technical Lead Review
@@ -463,12 +536,21 @@ Phase 1 ──→ Phase 2 ──→ Phase 3 ──→ Phase 4 ──→ Phase 5 
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
 | 2026-08-06 | Initial plan | Spec approved with simplifying decisions (Gemini-only ranking) | builder |
+| 2026-08-06 | Iteration-1 revisions | Codex+Claude REQUEST_CHANGES: ingestion seam, v2 overlay, coverage denominator, fixtures/skipif, steadfastness scope, minor fixes | builder |
+| 2026-08-06 | Data sealed | Architect confirmed Opus tail-fill complete + collision live → single clean export | builder |
 
 ## Notes
 - **Spec/plan boundary**: exact JSON key names, component names, and file splits may adjust during
   implementation as long as the data contract (Phase 2/6 README), the Gemini-only ranking, the Opus
   validation-layer model, and the acceptance criteria hold.
-- **Re-export at seal** (Approved Decision 8): a single re-run of the Phase-2 CLI regenerates
-  `results/<run-id>/` with the sealed Opus sample — no schema change, no code change, a fresh commit.
+- **Data is sealed** (2026-08-06): the Opus tail-fill is complete (full 9,000-judgment design, zero missing
+  cells), so Phase 2 is a **single clean export** — the interim/re-export dance in Approved Decision 8 is no
+  longer needed. The alias collision is **live** (~1,810 sunni-islam cells under both aliases), so the
+  later-`ts`-wins dedup path runs on real data and is covered by a dedicated test.
+- **Steadfastness out of scope for v1**: `full − turn1` is not a spec Success Criterion. The scope toggle
+  selects the `turn1` (first-response) or `full` (post-pressure) standings independently — each a valid mean —
+  and the export publishes both scopes' means without computing a matched-cell difference. This avoids the
+  asymmetric-panel pitfall (unstated-opus has slightly more turn1 than full cells) that a naive difference
+  would hit.
 - **Per-phase consult** here is `[codex, claude]` (Gemini can't see the worktree); the full 3-way runs only
   where the diff is fed inline (the PR integration CMAP).

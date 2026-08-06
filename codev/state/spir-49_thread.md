@@ -112,7 +112,26 @@ Dispatcher note: `.codev/checks/test.sh` ALREADY registers workflows/analysis (u
 (pnpm test) — no dispatcher change needed. Export tool → `workflows/analysis` (Typer `export` cmd), reuses
 aggregate.py.
 
-**Plan drafted** (codev/plans/49-...md) — 6 phases: (1) export core normalization+aggregation+parity,
-(2) export writer+manifest+CLI+committed dataset, (3) SPA data layer (discovery/loader/validation/truncation
-fallback), (4) leaderboard route + framing/scope/pressure selectors (Gemini-ranked), (5) drill-down + judge
-selector + Opus validation layer, (6) docs. Linear deps. Committing → porch done → 2-way plan consult.
+**Plan drafted + revised through 2-way consult** (codex+claude, both REQUEST_CHANGES HIGH, all verified).
+6 phases: (1) export core, (2) writer+manifest+CLI+dataset, (3) SPA data layer, (4) leaderboard+selectors
+(Gemini-ranked), (5) drill-down+judge/Opus, (6) docs. Linear deps.
+
+Iter-1 plan fixes (load-bearing, verified against code/data):
+- **Ingestion**: `loaders.load_run_dir` HARD-FAILS on the 2 Opus runs (no report.json); `load_corpus` rejects
+  dup traditions. → purpose-built row reader (reuse is_valid_score/_REQUIRED_JUDGMENT_KEYS); PROMOTE private
+  `_mean_over` → public breakdown helper in aggregate.py.
+- **judgments_v2.jsonl overlays** exist (buddhism 6, secular-sage 2, sunni 2) → handle overlay; normalize
+  judge FIRST then overlay+dedup (overlay key includes judge, excludes tradition).
+- **Coverage denominator**: pin n_scenarios to Gemini full grid (report.json.by_scenario), NOT Opus rows
+  (else 2-cell panel = ~100% → defeats honest degradation). Validate Opus scenarios ⊆ full grid.
+- **Tests**: committed miniature fixtures (deterministic) + skipif real-data parity (tmp/ is gitignored/CI-
+  unavailable).
+- **Steadfastness OUT OF SCOPE v1** (not a Success Criterion; avoids asymmetric turn1/full panel pitfall).
+- Minor: canonical-model-id shards + UI-key map; parseResultsManifest (parseManifest name collision);
+  add check-types+build to SPA phases; "CI-asserted" → dispatcher/local (no GitHub pytest job);
+  VITE_MULTIBENCH_REF for pre-merge live view.
+
+**DATA SEALED (2026-08-06)**: Opus tail-fill complete (9000 judgments, 0 missing). Collision LIVE: ~1810
+sunni-islam cells under both aliases → later-ts dedup runs on real data. Single clean export (no interim).
+
+Commits: spec 00a871a/940d12c/525d843; plan draft (initial). Committing revised plan → porch done → rebuttal.
