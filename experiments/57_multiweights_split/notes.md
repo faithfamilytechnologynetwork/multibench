@@ -1,6 +1,9 @@
 # Experiment 57: MultiWeights-split — 50/50 scenario holdout SFT+DPO (does fine-tuning help on the benchmark itself?)
 
-**Status**: In Progress — **PRE-TRAINING GATE** (split built; costed plan below; awaiting spend authorization from Waleed).
+**Status**: **COMPLETE** (2026-08-06). Held-out transfer CONFIRMED (STRONG) for both stages — SFT
++0.778, DPO +0.897, both cross positive, all 7 traditions transfer. Revises #53's memorization
+reading. Landed **≈ $216 / $250**. `mb-sft-split50` + `mb-dpo-split50` are the companion split
+adapters (the shipped #48 `mb-sft-dpo` untouched).
 
 **Date**: 2026-08-06
 
@@ -264,8 +267,53 @@ split)]**. The paper states this explicitly: the half-data companion establishes
 *generalizes* (heterogeneity, not contradiction with #53 — #53's +0.22 was the biased-sample lower
 bound its own caveat predicted); it does not re-measure the shipped model itself.
 
-### DPO stage
-*(next: full-grid train-half mining → G2 → `mb-dpo-split50` → G3 → optional split-DPO descriptive)*
+### DPO stage — `mb-dpo-split50` (2026-08-06)
+
+Full-grid train-half mining (6,216 sittings, 0 failed) → **480 max-gap pairs** (gap≥1.0, 31% of
+1,554 cells; sunni-islam 168 = most; 846 cells gap=0 → SFT already uniformly good, the #48 pattern).
+DPO: 60 steps (=480/8), β0.1, lr1e-5, ref=`mb-sft-split50`. **Training signal weak** (pref_acc ~0.5,
+noisy) — the same near-null contrast as #48 (SFT already good). Descriptive over all 519 (0 failed).
+
+#### Held-out DPO transfer (three-way)
+
+| quantity | value | 95% CI | note |
+|---|---|---|---|
+| **HELD-OUT DPO lift** | **+0.897** | [+0.820, +0.972] | post-DPO **+0.693** (crosses positive) |
+| TRAIN-half DPO lift | +1.020 | [+0.940, +1.099] | Δ (train−held) +0.123 — same small memo gap as SFT |
+| **DPO increment on held-out (vs SFT)** | **+0.119** | — | 0.897 − 0.778; uniform across both halves |
+
+Per-tradition held-out DPO (all CI>0): RC **+1.151**, EC +1.042, sunni **+0.846**, buddhism +0.788,
+judaism +0.785, secular-sage +0.753, taoism +0.701. Verdict: **TRANSFER CONFIRMED (STRONG)** for DPO too.
+
+#### ⚠️ Same-judge caveat on the DPO increment (report plainly)
+The +0.12 DPO increment is **not** the near-null #48 saw. But DPO was trained on **gemini-banded**
+preference pairs and evaluated by the **same gemini** judge (the sole selection+eval judge — #48's
+known caveat), so part of this increment is plausibly **selection-judge alignment**, not unambiguous
+counsel quality. This experiment **cannot separate** the two on a gemini metric; the OOD arbiter of
+DPO's real value is the AFB battery (different judge, gpt-5.6-terra) — **Experiment B's territory,
+already answered for the shipped full-data model, NOT re-run here.** So we report the DPO held-out
+lift as STRONG transfer with the honest caveat that the SFT→DPO increment specifically is
+judge-alignment-confounded. Artifacts: `summary_57_dpo.json`, `per_scenario_57_dpo.csv`, `fig_transfer_dpo.pdf`.
+
+## Final spend — reconciled (landed UNDER the $250 ceiling)
+
+**Gemini (usage-EXACT):** SFT descriptive 45.75 + mining band 92.25 + DPO descriptive 43.86 =
+**$181.86**. **GPU (wall-clock est):** SFT train ~6 (54m B200) + DPO train ~3 (29m B200) + endpoint
+H200 ~25 (SFT-desc + mining-sample ~2.8h + 2 dpo smokes + DPO-desc) = **~$34**. **TOTAL ≈ $216 / 250**
+(~$34 margin) — a clean landing, unlike #48's overshoot (the three usage-reconciled gates + the
+batch-unavailable honesty upfront held it). Dominant line: mining band ($92). Subset/analysis: ~$0.
+
+## Conclusion
+
+The MultiWeights recipe **genuinely improves counsel on the actual benchmark for never-trained
+scenarios, across all 7 traditions** — held-out SFT +0.78 / DPO +0.90, both crossing positive, both
+STRONG under the pre-registered rule. Memorization inflation is small (Δ≈+0.12). This **revises #53's
+memorization-driven reading** (its +0.22 was the biased-holdout lower bound its own caveat predicted;
+the clean random split shows ~85–88% genuine cross-tradition transfer). Caveats stated plainly:
+(1) this is the **companion half-data retrain**, bounding the shipped full-data model's unseen
+behavior in **[+0.22, ~+0.9]**, not re-measuring it; (2) the **SFT→DPO increment is
+judge-alignment-confounded** (same gemini judge for banding + eval); (3) inherited same-stack
+(OpenRouter-base vs vLLM-eval) caveat, small vs the lifts.
 
 ## Next Steps
 1. **[GATE]** Send split + costed plan to architect → await Waleed's $250 authorization.
