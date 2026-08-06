@@ -16,12 +16,12 @@ plan_phases:
     status: complete
   - id: phase_4
     title: Committed launch dataset + results-raw/README (data contract)
-    status: in_progress
+    status: complete
   - id: phase_5
     title: >-
       SPA raw data layer: generic zod contract, dual-source resolver, gunzip sniff, version+fingerprint checks, safe
       paths, dev fixture
-    status: pending
+    status: in_progress
   - id: phase_6
     title: 'Raw view route: transcripts + verdicts (catalog-generic ramp) + live ResultsRegion entry + drill-down'
     status: pending
@@ -31,7 +31,7 @@ plan_phases:
   - id: phase_8
     title: Railway gz-baked deploy wiring (--no-gitignore) + deploy-test safety + documentation + arch-docs
     status: pending
-current_plan_phase: phase_4
+current_plan_phase: phase_5
 gates:
   spec-approval:
     status: approved
@@ -45,8 +45,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -145,7 +145,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-51/codev/projects/51-multibrowser-raw-results-brows/51-phase_4-iter1-claude.txt
 started_at: '2026-08-06T07:30:57.553Z'
-updated_at: '2026-08-06T15:28:50.930Z'
+updated_at: '2026-08-06T15:34:34.046Z'
 force_advanced:
   phase: phase_1
   iteration: 3
