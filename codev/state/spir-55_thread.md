@@ -47,3 +47,17 @@ accessibility (title/aria-label, keyboard expand, non-color empty, narrow-viewpo
 coverage visibility; Δ reuses −1…+1 ramp which CLAMPS (verified scoreColor.ts); dropped
 coverage-% gate (no provider) → suite-green + new tests; stale ?metric/?framing ignored.
 Committing iter-2, re-running consult.
+
+## 2026-08-06 — Spec approved (gate cleared by Waleed). Plan phase.
+
+Architect confirmed spec approval + coordinate-with-#51 reminder (scope to /results leaderboard
+components + client aggregation, rebase at PR). Wrote plan: 4 phases —
+1) pure client aggregation (computeLeaderboardRows/sortRows/subjectDrilldownRows; additive to
+   leaderboard.ts; reconciliation + Δ-fixture + strip==Post all verified before any UI consumes it),
+2) dense sortable table + URL state (resultsSelection gains sort+expanded, drops metric/framing;
+   ResultsPage swap; pressure reframes whole table incl. rank),
+3) multi-faith layer (heat strip from contributions + click-to-expand drill-down + judge selector
+   Opus-badged-never-reranks + a11y: aria/title, keyboard expand, non-color empty, scroll wrapper),
+4) docs + #49 supersession flag + live railway smoke.
+Files confined: leaderboard.ts, resultsSelection.ts, ResultsPage.tsx, their tests, 2 READMEs. No
+contact with #51 raw tier / #49 export. Committing, running plan consult.
