@@ -77,18 +77,32 @@ export function RawResultsPage() {
   }, [catalog, conditions]);
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(runsQ.error) ?? asRateLimit(rawQ.error);
+  const otherError = !rl && (shaQ.error || runsQ.error || rawQ.error);
 
   if ((shaQ.isLoading || runsQ.isLoading || rawQ.isLoading) && !catalog) return <CenteredSpinner label="Loading raw results…" />;
-  if (runsSettled && !run) return <NotFound what={`Results run “${runId}”`} />;
-  if (!catalog) {
+  // Rate-limit / fetch error before NotFound — never show a bare 404 for a transient failure.
+  if (!catalog && (rl || otherError)) {
     return (
       <div className="flex flex-col gap-4">
         {rl && <RateLimitBanner error={rl} />}
+        <Notice notice={{ severity: "error", scope: "results-raw", where: runId,
+          message: rl ? "Couldn't load raw results — GitHub's rate limit was reached and nothing is cached yet."
+                      : `Couldn't load raw results: ${(otherError as Error).message}` }} />
+        <Link to="/results" className="text-primary hover:underline">← Results</Link>
+      </div>
+    );
+  }
+  // Only a genuine "run not found" (runs loaded OK, run absent) is a NotFound.
+  if (runsQ.data && !run) return <NotFound what={`Results run “${runId}”`} />;
+  if (!catalog) {
+    return (
+      <div className="flex flex-col gap-4">
         <Notices notices={notices.length ? notices : [{ severity: "error", scope: "results-raw", where: runId, message: "No raw results for this run." }]} />
         <Link to="/results" className="text-primary hover:underline">← Results</Link>
       </div>
     );
   }
+  const itemLabel = catalog.items.find((i) => i.id === itemId && i.group === groupId)?.label ?? itemId;
 
   const cell = shard ? findCell(shard, selSubject, selConditions) : undefined;
   const contextText = cell?.contextKey && shard ? shard.contexts[cell.contextKey] : undefined;
@@ -102,7 +116,7 @@ export function RawResultsPage() {
       </nav>
 
       <header className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold">{itemId}</h1>
+        <h1 className="text-xl font-semibold">{itemLabel}</h1>
         <p className="text-sm text-default-500">{catalog.groupBy.label}: {groupId} · {catalog.dataset.title}</p>
       </header>
 

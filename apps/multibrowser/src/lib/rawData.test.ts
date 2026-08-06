@@ -133,6 +133,28 @@ describe("parseRawShard", () => {
   });
 });
 
+// ── static genericity check (#54) ────────────────────────────────────────────────────
+
+describe("raw contract + view are catalog-generic (static check)", () => {
+  it("no MultiBench vocab literals or a hardcoded ramp in the raw modules", async () => {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "../routes/RawResultsPage.tsx"];
+    const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
+    for (const f of files) {
+      const code = stripComments(fs.readFileSync(path.join(here, f), "utf8"));
+      // no MultiBench-specific vocab as quoted literals (values arrive in the catalog data)
+      for (const lit of ['"tradition"', "'tradition'", '"scenario"', "'scenario'", '"framing"', "'framing'", '"pressure"', "'pressure'"]) {
+        expect(code, `${f} must not hardcode ${lit}`).not.toContain(lit);
+      }
+      // no hardcoded scoreColor ramp constant (colors come from catalog.ramp)
+      expect(code, `${f} must not import the hardcoded scoreColor`).not.toMatch(/from ["']\.\/scoreColor["']/);
+    }
+  });
+});
+
 // ── catalog-aware shard consistency ──────────────────────────────────────────────────
 
 describe("rawShardConsistencyNotices", () => {

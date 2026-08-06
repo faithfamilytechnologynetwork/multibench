@@ -1,5 +1,5 @@
 import { Fragment, useState } from "react";
-import { getRouteApi } from "@tanstack/react-router";
+import { getRouteApi, Link } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { CenteredSpinner } from "../components/Loading";
@@ -288,7 +288,12 @@ function Leaderboard({
                         {perTradition.map((tv) => (
                           <li key={tv.tradition} className="flex items-center gap-2 text-xs"
                               data-testid="drill-row" data-tradition={tv.tradition}>
-                            <span className="w-40 truncate text-default-600">{tv.tradition}</span>
+                            {/* Drill-down toward the raw browser: tradition → its scenarios →
+                                each scenario's raw responses & verdicts (via ResultsRegion). */}
+                            <Link to="/t/$traditionId" params={{ traditionId: tv.tradition }}
+                                  className="w-40 truncate text-primary hover:underline" data-testid="drill-link">
+                              {tv.tradition}
+                            </Link>
                             <ScoreCell value={tv.value} testid="drill-score" />
                             <span className="tabular-nums text-default-400">
                               {tv.nJudged}/{tv.nExpected}

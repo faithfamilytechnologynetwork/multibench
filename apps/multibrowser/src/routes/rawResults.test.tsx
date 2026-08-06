@@ -1,5 +1,6 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, fireEvent, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, resultsFiles, traditionFiles } from "../test/fakeRepo";
 import { REPO } from "../lib/constants";
@@ -58,6 +59,28 @@ describe("raw-results view", () => {
     expect(verdicts.length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("gemini")).toBeInTheDocument(); // judge label
     expect(screen.getByText("opus")).toBeInTheDocument();
+    expect(screen.getByText("sample")).toBeInTheDocument(); // Opus (non-full-grid) badge on the default cell
+  });
+
+  it("shows the context-prefix panel + switches cells via the condition-axis selectors", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    // default cell (claude-sonnet-5 / unstated) has no context prefix
+    expect(screen.queryByText(/what the model was told/i)).not.toBeInTheDocument();
+    // switch to the stated gpt-5.6-terra cell → its context panel + transcript appear
+    fireEvent.change(screen.getByLabelText(/Subject/), { target: { value: "gpt-5.6-terra" } });
+    fireEvent.change(screen.getByLabelText(/Framing/), { target: { value: "stated" } });
+    expect(await screen.findByText(/what the model was told/i)).toBeInTheDocument();
+    expect(screen.getByText(/practising Buddhist/)).toBeInTheDocument(); // the context text
+    expect(screen.getByText(/weigh it against your values/)).toBeInTheDocument(); // the new transcript
+  });
+
+  it("shows the catalog-declared item LABEL, not the route id", async () => {
+    const labeled = { ...rawFixtureCatalog, items: [{ id: "BUD-001", label: "The firearms job", group: "buddhism", shard: "buddhism/BUD-001.json.gz" }] };
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(labeled, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    expect(await screen.findByRole("heading", { name: "The firearms job" })).toBeInTheDocument();
   });
 
   it("renders a NON-MultiBench 0–4 catalog with no component change (genericity, #54)", async () => {
@@ -81,5 +104,14 @@ describe("raw-results view", () => {
     const link = await screen.findByRole("link", { name: /raw responses/i });
     expect(link).toHaveAttribute("href", expect.stringContaining(`/results/${RUN}/buddhism/BUD-001`));
     expect(screen.getByTestId("results-region")).toHaveAttribute("data-has-results", "true");
+  });
+
+  it("/results drills down into a tradition (toward the raw browser)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, { ...traditionFiles("buddhism", ["BUD-001"]), ...resultsFiles(RUN, {}) }));
+    renderApp("/results");
+    const rows = await screen.findAllByTestId("standings-row");
+    for (const row of rows) await userEvent.click(within(row).getByRole("button")); // expand all subjects
+    const link = await screen.findByTestId("drill-link");
+    expect(link).toHaveAttribute("href", expect.stringContaining("/t/buddhism"));
   });
 });
