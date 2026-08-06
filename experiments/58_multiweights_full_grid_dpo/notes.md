@@ -193,7 +193,17 @@ $75 / 5,040 both reconcile). Sampling (endpoint GPU) $5 / 5,040 sittings. DPO $7
 | Lean battery (AFB+probes + 4-ckpt chat capability) — pending | ~$28–43 | |
 | **projected total** | **~$127–150** | vs $300 ceiling |
 
-_(DPO + battery pending — at the ping-before-DPO gate.)_
+### DPO training (complete)
+
+`mb-dpo-full`: 113 steps / full 1-epoch over **903 pairs**, final loss 0.43, pref_acc ~0.5 throughout
+(near-chance = the expected weak-signal regime, matching #48's 0.538 — the SFT already emits good
+counsel). ref+init = `mb-sft-guided` (fresh; NOT continue-trained from the incumbent). bf16, β0.1,
+lr1e-5, seed 3446. Clean completion (resume marker unlinked). Adapter on volume `/runs/mb-dpo-full`.
+
+Running spend: sampling ~$8-11 + banding $80.99 + DPO ~$6 (B200 ~56 min wall) = **~$95-98**. Battery
+pending (~$28-43) → projected total **~$123-141** vs $300.
+
+_(Lean battery running: capability 4-ckpt chat panel ∥ AFB cold + probes.)_
 
 ## Next step — **PRE-SPEND GATE**
 

@@ -141,3 +141,13 @@ Post-DPO plan revised to run concurrently (~45-60 min vs 2.5-3h), stop-on-disabl
   CONCURRENCY=16 (429 lesson).
 - Both fire the moment DPO writes train_log.jsonl (poller bjxb5bqv4). Then read_capability.py (guard +
   gate4) ∥ eval_gates.py (gates 1-3) → 4-gate verdict.
+
+## 2026-08-06 — DPO DONE; parallel battery FIRING
+
+- DPO complete: 113 steps, 903-pair epoch, final loss 0.43, clean (resume unlinked). config confirms
+  ref+init mb-sft-guided fresh. Adapter on volume. DPO cost ~$6 (B200 ~56min). Running ~$95-98.
+- Serve redeployed (dpo=mb-dpo-full). Battery legs launched CONCURRENTLY:
+  - capability `brnxanc4a` (4 H200 chat jobs: base/sft/dpo/dpo-full)
+  - dpo endpoint smoke `bujuzponq` (warming cold start; on success → launch AFB+probes)
+- On smoke OK → AFB-150 cold + probes (EVAL_MODELS=dpo, sequential AFB→probes on serve). On capability
+  done → read_capability.py anchor-guard (base first). Then eval_gates.py → 4-gate verdict.
