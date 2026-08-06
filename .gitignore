@@ -43,3 +43,6 @@ tmp/
 # Codev (added by codev update 2026-07-22)
 codev/state/*.md
 !codev/state/*_thread.md
+
+# Harness-local hooks (worktree write-guard etc.) — not a repo artifact
+.claude/hooks/

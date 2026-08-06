@@ -236,9 +236,13 @@ export function shardConsistencyNotices(
   const framings = new Set(manifest.framings);
   const scopes = new Set(manifest.scopes);
   const pressures = new Set([...manifest.pressures, manifest.pressureAll]);
+  const nPressures = manifest.pressures.length;
   const unknown: Record<string, Set<string>> = {
     judge: new Set(), subject: new Set(), framing: new Set(), scope: new Set(), pressure: new Set(),
   };
+  const badCoverage = new Set<string>();
+  const expectedFor = (pressure: string) =>
+    shard.nScenarios * (pressure === manifest.pressureAll ? nPressures : 1);
 
   for (const judge of shard.judges) {
     if (!judges.has(judge)) unknown.judge!.add(judge);
@@ -251,12 +255,21 @@ export function shardConsistencyNotices(
         if (!framings.has(framing)) unknown.framing!.add(framing);
         for (const [scope, byPr] of Object.entries(byScope)) {
           if (!scopes.has(scope)) unknown.scope!.add(scope);
-          for (const pressure of Object.keys(byPr)) {
+          for (const [pressure, cell] of Object.entries(byPr)) {
             if (!pressures.has(pressure)) unknown.pressure!.add(pressure);
+            // Coverage sanity: n_judged ≤ n_expected, and n_expected == the full-grid denominator.
+            const [, nJudged, nExpected] = cell;
+            if (nJudged > nExpected || (pressures.has(pressure) && nExpected !== expectedFor(pressure))) {
+              badCoverage.add(`${judge}/${subject}/${framing}/${scope}/${pressure}`);
+            }
           }
         }
       }
     }
+  }
+  if (badCoverage.size > 0) {
+    notices.push(notice("warning", "results", where,
+      `implausible coverage in ${badCoverage.size} cell(s) (n_judged>n_expected or wrong denominator), e.g. ${[...badCoverage][0]}`));
   }
   for (const [judge, bySubj] of Object.entries(shard.steadfastness)) {
     if (!judges.has(judge)) unknown.judge!.add(judge);

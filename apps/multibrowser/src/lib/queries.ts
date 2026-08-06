@@ -264,7 +264,15 @@ export async function loadResultsShard(
   }
   const { shard, notices } = parseResultsShard(text, where);
   if (shard === null) return { shard: null, notices };
-  return { shard, notices: [...notices, ...shardConsistencyNotices(shard, manifest, tradition, where)] };
+  const consistency = shardConsistencyNotices(shard, manifest, tradition, where);
+  const all = [...notices, ...consistency];
+  // A contract-breaking shard (error-severity notice — e.g. a tradition mismatch) is EXCLUDED
+  // from the data so it can't be counted under the wrong tradition; unknown-vocab/coverage
+  // warnings are display-only and keep the shard.
+  if (consistency.some((n) => n.severity === "error")) {
+    return { shard: null, notices: all };
+  }
+  return { shard, notices: all };
 }
 
 export async function loadTradition(qc: QueryClient, sha: string, id: string): Promise<Tradition | null> {

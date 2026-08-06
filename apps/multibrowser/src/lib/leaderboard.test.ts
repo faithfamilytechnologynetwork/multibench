@@ -111,9 +111,17 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
   const root = resolve(process.cwd(), "../../results/20260803");
   const manifestPath = `${root}/manifest.json`;
   const hasCommitted = existsSync(manifestPath);
-  const PAPER: Record<string, number> = { unstated: 0.13878992434644954, stated: 0.5552255169248714, guided: 0.9392007764689806 };
+  // Paper standings (subj_overall) for ALL five subjects × three framings — committed here so the
+  // reconciliation runs portably (no gitignored launch data needed).
+  const PAPER: Record<string, Record<string, number>> = {
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": { unstated: -0.44739844429738396, stated: -0.13956766723971545, guided: 0.4360177612491137 },
+    "claude-sonnet-5": { unstated: 0.5460820873085531, stated: 0.8389174367798489, guided: 0.955169687941307 },
+    "gemini-3.6-flash": { unstated: 0.13878992434644954, stated: 0.5552255169248714, guided: 0.9392007764689806 },
+    "gpt-5.6-terra": { unstated: 0.3665434394791269, stated: 0.6595724833623953, guided: 0.8600802417700205 },
+    "thinkingmachines/Inkling": { unstated: 0.5434524040736548, stated: 0.8140794388849457, guided: 0.971569450432777 },
+  };
 
-  it.runIf(hasCommitted)("gemini-3.6-flash full/all mean-of-means == subj_overall for every framing", () => {
+  it.runIf(hasCommitted)("all 5 subjects × 3 framings (full/all) mean-of-means == subj_overall", () => {
     const realManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     const m: ResultsManifest = {
       ...manifest,
@@ -134,9 +142,11 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
     }
     for (const framing of ["unstated", "stated", "guided"]) {
       const st = computeStandings(realShards, m, { framing, metric: "full", pressure: "all" });
-      const gem = st.find((s) => s.subject === "gemini-3.6-flash")!;
-      expect(gem.value).toBeCloseTo(PAPER[framing]!, 9);
-      expect(gem.nContributing).toBe(7);
+      for (const subject of Object.keys(PAPER)) {
+        const row = st.find((s) => s.subject === subject)!;
+        expect(row.value).toBeCloseTo(PAPER[subject]![framing]!, 9);
+        expect(row.nContributing).toBe(7);
+      }
     }
   });
 });

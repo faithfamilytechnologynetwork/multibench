@@ -2,7 +2,7 @@
 
 ## Metadata
 - **ID**: plan-2026-08-06-multibrowser-results-explorer
-- **Status**: draft
+- **Status**: approved & implemented (all 6 phases complete — see the review)
 - **Specification**: [codev/specs/49-multibrowser-results-explorer-.md](../specs/49-multibrowser-results-explorer-.md)
 - **Created**: 2026-08-06
 
@@ -37,7 +37,8 @@ and re-exported (same command) once the architect confirms the Opus tail-fill is
       by-pressure); Opus steadfastness follows the badged-validation rules.
 - [ ] Parity test green: export's per-tradition means match `report.json`/`stats_bundle.json` within tolerance,
       and mean-of-per-tradition-means == `subj_overall` for all framings.
-- [ ] Committed dataset ≤ 8 MB total, ≤ 1 MB per tradition shard (CI-asserted).
+- [x] Committed dataset ≤ 8 MB total, ≤ 1 MB per tradition shard (test-asserted via the porch
+      dispatcher / local suite — there is no GitHub Actions job for the JS/Python suites yet).
 - [ ] Exactly five normalized subjects and two judges; Opus alias dedup verified (disjoint-sum + collision).
 - [ ] A second `results/<run-id>/` appears in the browser with no code change, incl. under a truncated tree.
 - [ ] Touched-app suites pass (`uv --project workflows/analysis run pytest`, `pnpm -C apps/multibrowser test`);

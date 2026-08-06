@@ -198,7 +198,8 @@ export function resultsFiles(
           judges: ["gemini-3.6-flash"],
           means: {
             "gemini-3.6-flash": {
-              "claude-sonnet-5": { unstated: { full: { all: [0.5, 2, 2] } } },
+              // n_expected for the pooled "all" slice = n_scenarios(2) × 6 pressures = 12
+              "claude-sonnet-5": { unstated: { full: { all: [0.5, 2, 12] } } },
             },
           },
           steadfastness: {},

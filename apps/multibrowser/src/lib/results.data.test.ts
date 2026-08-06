@@ -91,7 +91,7 @@ describe("loadResultsShard / loadResultsManifest", () => {
     const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
     expect(notices).toEqual([]);
     expect(shard?.tradition).toBe("buddhism");
-    expect(shard?.means?.["gemini-3.6-flash"]?.["claude-sonnet-5"]?.unstated?.full?.all).toEqual([0.5, 2, 2]);
+    expect(shard?.means?.["gemini-3.6-flash"]?.["claude-sonnet-5"]?.unstated?.full?.all).toEqual([0.5, 2, 12]);
   });
 
   it("a tradition absent from the manifest yields a notice", async () => {
@@ -127,12 +127,12 @@ describe("loadResultsShard / loadResultsManifest", () => {
     expect(notices).toEqual([]);
   });
 
-  it("unknown selector keys + tradition/n_scenarios mismatch surface as notices (shard still returned)", async () => {
+  it("unknown vocab + n_scenarios mismatch are warnings; the shard is still returned (display-first)", async () => {
     const files = resultsFiles("r1", {
       traditions: ["buddhism"],
       shard: () => ({
-        tradition: "WRONG", // mismatch
-        n_scenarios: 99, // mismatch (manifest says 2)
+        tradition: "buddhism", // correct
+        n_scenarios: 99, // warning: manifest says 2
         judges: ["gemini-3.6-flash"],
         means: {
           "mystery-judge": { "claude-sonnet-5": { unstated: { full: { bogus_pressure: [0.5, 1, 1] } } } },
@@ -142,12 +142,42 @@ describe("loadResultsShard / loadResultsManifest", () => {
     });
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
     const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
-    expect(shard).not.toBeNull(); // display-first: still returned
+    expect(shard).not.toBeNull(); // warnings keep the shard
     const msgs = notices.map((n) => n.message).join(" | ");
-    expect(msgs).toMatch(/does not match requested/);
     expect(msgs).toMatch(/n_scenarios 99/);
     expect(msgs).toMatch(/unknown judge\(s\).*mystery-judge/);
     expect(msgs).toMatch(/unknown pressure\(s\).*bogus_pressure/);
+  });
+
+  it("a tradition-mismatched shard is EXCLUDED (never counted under the wrong tradition)", async () => {
+    const files = resultsFiles("r1", {
+      traditions: ["buddhism"],
+      shard: () => ({
+        tradition: "WRONG", // contract-breaking → error
+        n_scenarios: 2, judges: ["gemini-3.6-flash"],
+        means: { "gemini-3.6-flash": { "claude-sonnet-5": { unstated: { full: { all: [0.5, 2, 12] } } } } },
+        steadfastness: {},
+      }),
+    });
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard).toBeNull(); // excluded from standings
+    expect(notices.some((n) => n.severity === "error" && /does not match requested/.test(n.message))).toBe(true);
+  });
+
+  it("flags implausible coverage (n_judged > n_expected or wrong denominator)", async () => {
+    const files = resultsFiles("r1", {
+      traditions: ["buddhism"],
+      shard: () => ({
+        tradition: "buddhism", n_scenarios: 2, judges: ["gemini-3.6-flash"],
+        means: { "gemini-3.6-flash": { "claude-sonnet-5": { unstated: { full: { all: [0.5, 99, 12] } } } } }, // 99 > 12
+        steadfastness: {},
+      }),
+    });
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard).not.toBeNull(); // warning, not fatal
+    expect(notices.some((n) => /implausible coverage/.test(n.message))).toBe(true);
   });
 
   it("an unknown judge in the shard's declared judges[] list surfaces even with empty tables", async () => {

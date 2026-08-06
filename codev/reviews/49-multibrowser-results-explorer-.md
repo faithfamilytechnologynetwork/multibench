@@ -24,7 +24,8 @@ paper's standings to displayed precision, verified against the real committed sh
   omitted, never 0; full-grid coverage denominators (Phases 1–5).
 - [x] AC: **Additive, no-redeploy publish** — a new `results/<run-id>/` appears via the same git-trees
   + `raw` path, incl. under a truncated tree; corpus browsing intact (Phase 3).
-- [x] AC: **Size** — committed dataset 174 KB (≤ 8 MB total, ≤ 1 MB/shard, CI-asserted) (Phase 2).
+- [x] AC: **Size** — committed dataset 174 KB (≤ 8 MB total, ≤ 1 MB/shard; **test-asserted** via the
+  porch dispatcher / local suite — no GitHub Actions job runs the JS/Python suites yet) (Phase 2).
 - [x] AC: **Alias normalization** — Opus `claude-opus-4-8` + `anthropic/claude-opus-4.8` collapse to
   one, deduped; subject-id aliases normalized to five canonical (Phase 1).
 - [ ] AC: **Live Railway deploy** (`railway up`, judge/pressure selectors live) — deferred to the
@@ -44,7 +45,8 @@ paper's standings to displayed precision, verified against the real committed sh
 
 ## Key Metrics
 
-- **Commits**: 64 on the branch (17 `[Phase]` feature/data commits + spec/plan/thread/porch).
+- **Commits**: ~70 on the branch (17 `[Phase]` feature/data commits + spec/plan/thread/porch/review;
+  count keeps growing through the review consult rounds).
 - **Tests**: 260 passing (Python 110 = 81 existing + ~29 new; JS 150 = ~97 existing + ~53 new).
 - **Files created**: `workflows/analysis/analysis/export_results.py` (+ test + `tests/fixtures/export/`);
   `results/20260803/**` (dataset) + `results/README.md`;
@@ -102,6 +104,7 @@ consistent first-round blocker on validation completeness and test coverage.
 | Phase 4 | 2 | Codex + Claude | surfacing data notices, real-number reconciliation, steadfastness coverage |
 | Phase 5 | 1 | — | both APPROVE first round |
 | Phase 6 | 2 | Claude | doc↔implementation contradictions (run selection, stale bullet, score ranges) |
+| Review (PR) | 1+ | Codex | exclude contract-breaking shards, coverage sanity, all-5×3 reconciliation, doc/metadata accuracy |
 
 **Most frequent blocker**: Codex — first-round REQUEST_CHANGES on most phases, focused on validation
 completeness (reject bad input; cross-check against the contract) and exhaustive test coverage.
@@ -152,6 +155,10 @@ was verified against the real data/code before being incorporated.
 #### Claude — **Addressed**: document run selection, replace stale "no results UI" bullet, byte-stable caveat, means-vs-steadfastness ranges, sorted judges example.
 #### Codex — APPROVE.
 
+### Review / PR (Round 1)
+#### Claude — APPROVE (reconciliation/reproducibility/size/coverage independently verified).
+#### Codex — **Addressed**: contract-breaking (tradition-mismatch) shards now **excluded** from standings, not just flagged; coverage sanity (`n_judged>n_expected` / wrong denominator) flagged; committed-artifact reconciliation extended to **all 5 subjects × 3 framings**; plan `Status`, commit count, and the "CI" wording corrected; `.claude/hooks/` gitignored. **Rebutted/Deferred**: adding a GitHub Actions job for the JS/Python suites is a repo-wide gap recorded as Technical Debt (out of this feature's scope).
+
 ## Lessons Learned
 
 ### What Went Well
@@ -200,6 +207,12 @@ was verified against the real data/code before being incorporated.
 
 ## Technical Debt
 
+- **No GitHub Actions job runs the JS/Python suites.** `.github/workflows/validate.yml` only validates
+  traditions. The size ceilings, reconciliation, and all new tests are enforced by the **porch
+  per-builder dispatcher** (`.codev/checks/test.sh`) at `porch done` and locally — not by GitHub CI on
+  the PR. Adding CI jobs for `workflows/analysis` (pytest) and `apps/multibrowser` (vitest) is worthwhile
+  follow-up so these guarantees hold on every push, not just at the porch gate. (Repo-wide gap, surfaced
+  by this PR's review; the spec's "CI-checked" wording means this automated test gate.)
 - Live Railway `railway up` verification is deferred to the Verify phase (manual, human-run).
 - The `/results` bundle grows the main chunk (Vite's >500 KB warning, pre-existing); code-splitting the
   results route is a future optimization, not required for this feature.
