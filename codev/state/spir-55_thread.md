@@ -90,3 +90,17 @@ noUncheckedIndexedAccess. (4) Phase 4 smoke → local pnpm build && preview (REF
 path), prod railway up AFTER merge. Minor: retain #49 drill-down in Phase 2 via Slice literal (no dangling
 opus-caption), Phase 3 upgrades it; strip pressure-reframe test. Rebuttal written. Committing iter-3,
 signaling → plan-approval gate.
+
+## 2026-08-06 — Plan approved (Waleed). Implement phase_1 DONE.
+
+Phase 1 (pure client aggregation) implemented in leaderboard.ts:
+- Slice interface + migrated the two Pick<ResultsSelection,...> sites (structural; all 153 pre-existing
+  tests still green → decouple confirmed).
+- computeLeaderboardRows (NO judgeModel param — ranking judge hardwired; by-subject-id column join,
+  not positional zip), sortRows (numeric cols, nulls-last both dirs, ties by subject, rank untouched),
+  isSortableColumn, subjectDrilldownRows (nullable per-slice, inclusion=any-non-null, coverage nExpected
+  manifest-derived / nJudged from Post-slice-or-null), StripCell/LeaderboardRow/DrilldownRow types.
+- Heat strip = Post contributions left-joined to manifest.traditions (null cell for uncovered).
+Tests: +12 (positional-zip guard via crossing post/initial orderings; strip 1:1 + mean==post; Δ-distinct
+fixture + Gemini-grid coincidence on committed data; sortRows nulls/ties/rank; drilldown Opus-sample path).
+check-types green; full suite 165 passed. Only leaderboard.ts + leaderboard.test.ts touched.
