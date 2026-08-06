@@ -142,12 +142,15 @@ def export(
         raise typer.Exit(code=2) from e
 
     total = sum(p.stat().st_size for p in written)
+    manifest = _json.loads((Path(out) / run_id / "manifest.json").read_text())
     typer.echo(
         _json.dumps({
             "run_id": run_id,
             "out": str(Path(out) / run_id),
             "files": len(written),
             "total_bytes": total,
+            "traditions": [t["id"] for t in manifest["traditions"]],
+            "counts": manifest["counts"],
         })
     )
 

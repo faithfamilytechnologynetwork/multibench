@@ -459,6 +459,40 @@ def test_launch_gemini_steadfastness_matches_report(launch_export):
                 assert got.value == pytest.approx(want, abs=1e-9), f"{trad}/{subj}/{pr}"
 
 
+# ── CLI command-level test ────────────────────────────────────────────────────────
+
+
+def test_export_cli_command(tmp_path):
+    from typer.testing import CliRunner
+
+    from analysis.cli import app
+
+    result = CliRunner().invoke(app, [
+        "export", str(_FIXTURE / "gemini-run"), str(_FIXTURE / "opus-run"),
+        "--run-id", "cli1", "--out", str(tmp_path),
+    ])
+    assert result.exit_code == 0, result.output
+    out = json.loads(result.output)
+    assert out["run_id"] == "cli1"
+    assert out["traditions"] == ["buddhism"]
+    assert out["counts"]["judgments"]["gemini-3.6-flash"] == 4  # CLI reports counts
+    assert "coverage" in out["counts"]
+    assert (tmp_path / "cli1" / "manifest.json").is_file()
+
+
+def test_export_cli_input_error_exits_cleanly(tmp_path):
+    from typer.testing import CliRunner
+
+    from analysis.cli import app
+
+    # opus-only (no report.json to pin the universe) → clean exit code 2, not a traceback
+    result = CliRunner().invoke(app, [
+        "export", str(_FIXTURE / "opus-run"), "--run-id", "bad", "--out", str(tmp_path),
+    ])
+    assert result.exit_code == 2
+    assert "input error" in result.output
+
+
 # ── The COMMITTED launch dataset (the real artifact, not the in-memory export) ─────
 
 _COMMITTED = _REPO_ROOT / "results" / "20260803"
