@@ -22,7 +22,6 @@ documents. The deterministic writer, the ``export-raw`` CLI, and presets are Pha
 
 from __future__ import annotations
 
-import hashlib
 import json
 from collections import defaultdict
 from collections.abc import Iterator
@@ -36,12 +35,22 @@ from analysis.export_results import (
     JUDGE_UI,
     SCOPES,
     RawTradition,
+    _JUDGMENTS,
+    _JUDGMENTS_V2,
+    _REPORT,
+    _read_rows,
     _scenario_universe,
     normalize_subject,
-    read_run_root,
     resolve_judgments,
 )
+from analysis.fingerprint import (  # shared with export_results (source_fingerprint re-exported)
+    combine_fingerprint,
+    fingerprint_line,
+    source_fingerprint,
+)
 from analysis.loaders import AnalysisInputError
+
+__all__ = ["source_fingerprint"]  # noqa: PLE0604 -- explicit re-export
 
 SCHEMA_VERSION = 1
 
@@ -66,46 +75,6 @@ _SITTINGS = "sittings.jsonl"
 def _humanize(value: str) -> str:
     """`false_authority` -> `False Authority`; `unstated` -> `Unstated`."""
     return value.replace("_", " ").title()
-
-
-# ── Fingerprint (shared with export_results in Phase 2) ────────────────────────────
-# A deterministic hash over the resolved-judgments stream. Both tiers compute it from the
-# SAME input shape so a per-run equality check upgrades "same loaders" to a checkable
-# invariant (spec Decision 2). Field order is fixed here and must never change silently.
-
-
-def _fingerprint_tuple(row: dict) -> list:
-    """One resolved judgment reduced to its fingerprinted fields (canonical order).
-
-    ``tradition`` is included so the identity is globally unique even if two traditions ever
-    shared a ``scenario_id``. export_results must build the same tuple from the same rows.
-    """
-    return [
-        row["tradition"], row["subject"], row["scenario_id"], row["pressure"], row["framing"],
-        row["judge"], row["scope"],
-        # score as a JSON number; direction/rationale as "" when absent (stable).
-        row["score"],
-        row.get("direction") or "",
-        row.get("rationale") or "",
-    ]
-
-
-def source_fingerprint(resolved: list[dict]) -> str:
-    """`sha256:<hex>` over the sorted resolved-judgments stream.
-
-    ``resolved`` is the **global** list of canonical (normalized) resolved judgments across
-    all traditions — exactly what ``resolve_judgments`` returns, concatenated. Each row is
-    serialized to its canonical JSON form and the stream is sorted on that exact serialization
-    (so the sort key and the hashed bytes agree), making the hash order-independent and
-    byte-stable. export_results must call THIS function on the same global stream (Phase 2)
-    for the tiers to agree.
-    """
-    lines = sorted(
-        json.dumps(_fingerprint_tuple(r), ensure_ascii=False, separators=(",", ":"))
-        for r in resolved
-    )
-    blob = "\n".join(lines)
-    return "sha256:" + hashlib.sha256(blob.encode("utf-8")).hexdigest()
 
 
 # ── Reading full-grid transcripts ──────────────────────────────────────────────────
@@ -254,26 +223,36 @@ class RawCorpus:
     resolved: list[dict]                           # global resolved-judgments stream (fingerprint)
 
 
-def _full_grid_root_for(tradition: str, per_root: list[tuple[Path, dict[str, RawTradition]]]) -> Path:
-    """The single run-root path whose ``<root>/<tradition>/`` provided ``report.json``.
+# Judgment fields the raw tier never ships and never needs downstream (dedup uses `ts`; the
+# aggregate/verdict paths use score/direction/rationale) — dropped at read to bound memory.
+_HEAVY_JUDGMENT_FIELDS = ("raw", "usage")
 
-    That run is the transcript source. More than one report-bearing root would be ambiguous;
-    ``_scenario_universe`` separately enforces the universes agree, but the transcript source
-    must be exactly one directory, so we require a single report-bearing root here.
+
+def _tradition_dirs(root: Path) -> set[str]:
+    """Names of ``<root>/<tradition>/`` subdirs that carry a ``judgments.jsonl`` (no parsing)."""
+    if not root.is_dir():
+        raise AnalysisInputError(f"run root not found: {root}")
+    return {sub.name for sub in root.iterdir()
+            if sub.is_dir() and (sub / _JUDGMENTS).is_file()}
+
+
+def _read_tradition_dir(sub: Path, tradition: str) -> RawTradition:
+    """Read ONE ``<root>/<tradition>/`` into a ``RawTradition``, dropping heavy judgment fields.
+
+    Reuses the #49 row reader/validator (``_read_rows``) so the raw and score tiers share the
+    same row contract; then strips ``raw``/``usage`` (never shipped, never needed) so streaming
+    one tradition at a time keeps peak memory bounded.
     """
-    roots = [root for root, parsed in per_root
-             if tradition in parsed and parsed[tradition].report is not None]
-    if not roots:
-        raise AnalysisInputError(
-            f"{tradition}: no run root provides report.json — cannot source transcripts "
-            f"(the full-grid run must supply it)"
-        )
-    if len(roots) > 1:
-        raise AnalysisInputError(
-            f"{tradition}: {len(roots)} run roots provide report.json — ambiguous transcript "
-            f"source; exactly one full-grid run is expected"
-        )
-    return roots[0]
+    base = _read_rows(sub / _JUDGMENTS, tradition, reject_dupes=True)
+    v2_path = sub / _JUDGMENTS_V2
+    v2 = _read_rows(v2_path, tradition, reject_dupes=False) if v2_path.is_file() else []
+    for rows in (base, v2):
+        for row in rows:
+            for f in _HEAVY_JUDGMENT_FIELDS:
+                row.pop(f, None)
+    report_path = sub / _REPORT
+    report = json.loads(report_path.read_text(encoding="utf-8")) if report_path.is_file() else None
+    return RawTradition(tradition=tradition, base=base, v2=v2, report=report)
 
 
 def _verdict(row: dict, tradition: str) -> dict:
@@ -433,17 +412,34 @@ def iter_tradition_raw(
     """Yield ``(tradition, RawTraditionExport, resolved_rows)`` one tradition at a time.
 
     The **streaming** entry point (Phase 2's writer consumes this so only ONE tradition's
-    transcripts are live at a time — the whole corpus is ~430 MB of source sittings). The
-    resolved rows are small (no transcripts) and are what the caller accumulates for the
-    global :func:`source_fingerprint`.
+    judgments + transcripts are live at a time — the whole corpus is ~430 MB of source
+    sittings and the judgment files are large too). Judgments are read **per tradition** (not
+    whole-root) with ``raw``/``usage`` dropped; the resolved rows are small (no transcripts)
+    and are what the caller accumulates for the global :func:`source_fingerprint`.
     """
-    per_root: list[tuple[Path, dict[str, RawTradition]]] = [
-        (Path(r), read_run_root(r)) for r in roots
-    ]
-    for tradition in sorted({t for _root, parsed in per_root for t in parsed}):
-        raws = [parsed[tradition] for _root, parsed in per_root if tradition in parsed]
-        fg_root = _full_grid_root_for(tradition, per_root)
-        sittings = read_full_grid_sittings(fg_root / tradition / _SITTINGS, tradition)
+    roots = [Path(r) for r in roots]
+    per_root_trads = {root: _tradition_dirs(root) for root in roots}
+    all_traditions = sorted(set().union(*per_root_trads.values())) if per_root_trads else []
+    if not all_traditions:
+        raise AnalysisInputError("no tradition subdirs with judgments.jsonl under any run root")
+
+    for tradition in all_traditions:
+        pairs = [(root, _read_tradition_dir(root / tradition, tradition))
+                 for root in roots if tradition in per_root_trads[root]]
+        raws = [rt for _root, rt in pairs]
+        # The full-grid (report.json-bearing) run is the SOLE transcript source; exactly one.
+        fg_roots = [root for root, rt in pairs if rt.report is not None]
+        if not fg_roots:
+            raise AnalysisInputError(
+                f"{tradition}: no run root provides report.json — cannot source transcripts "
+                f"(the full-grid run must supply it)"
+            )
+        if len(fg_roots) > 1:
+            raise AnalysisInputError(
+                f"{tradition}: {len(fg_roots)} run roots provide report.json — ambiguous "
+                f"transcript source; exactly one full-grid run is expected"
+            )
+        sittings = read_full_grid_sittings(fg_roots[0] / tradition / _SITTINGS, tradition)
         resolved = resolve_judgments(raws)  # resolve once; reused for export + fingerprint
         export = build_tradition_raw(tradition, raws, sittings, resolved)
         yield tradition, export, resolved
@@ -492,25 +488,16 @@ def _shard_path(tradition: str, scenario_id: str) -> str:
     return f"{tradition}/{scenario_id}.json.gz"
 
 
-def build_catalog(corpus: RawCorpus) -> dict:
-    """The generic run catalog (manifest): scale/ramp, subjects, judges, axes, items, fingerprint.
+def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str],
+                 fingerprint: str) -> dict:
+    """The generic run catalog (manifest) from lightweight pieces — no transcripts held.
 
     Nothing MultiBench-specific is baked into the *shape* — a non-MultiBench catalog (AFB 0–4)
-    uses the identical structure with different values.
+    uses the identical structure with different values. ``items`` are sorted by (group, id) for
+    a deterministic manifest.
     """
-    items = []
-    for tradition in sorted(corpus.per_tradition):
-        export = corpus.per_tradition[tradition]
-        for scenario in export.scenarios:
-            items.append({
-                "id": scenario.scenario_id,
-                "label": scenario.scenario_id,
-                "group": scenario.group,
-                "shard": _shard_path(scenario.group, scenario.scenario_id),
-            })
-
     judges = []
-    for model in corpus.judges:
+    for model in judge_models:
         ui = JUDGE_UI.get(model)
         if ui is None:
             raise AnalysisInputError(f"no UI metadata for judge {model!r}")
@@ -521,7 +508,7 @@ def build_catalog(corpus: RawCorpus) -> dict:
         "dataset": dict(_DATASET),
         "scale": dict(_SCALE),
         "ramp": list(RAMP_STOPS),
-        "subjects": [{"id": s, "label": s} for s in corpus.subjects],
+        "subjects": [{"id": s, "label": s} for s in subjects],
         "judges": judges,
         "conditionAxes": [
             {"key": "framing", "label": "Framing",
@@ -531,6 +518,159 @@ def build_catalog(corpus: RawCorpus) -> dict:
         ],
         "groupBy": {"key": "tradition", "label": "Tradition"},
         "scopes": [{"id": s, "label": s} for s in SCOPES],
-        "items": items,
-        "fingerprint": source_fingerprint(corpus.resolved),
+        "items": sorted(items, key=lambda it: (it["group"], it["id"])),
+        "fingerprint": fingerprint,
     }
+
+
+def _item_ref(scenario: RawScenario) -> dict:
+    return {
+        "id": scenario.scenario_id,
+        "label": scenario.scenario_id,
+        "group": scenario.group,
+        "shard": _shard_path(scenario.group, scenario.scenario_id),
+    }
+
+
+def build_catalog(corpus: RawCorpus) -> dict:
+    """Build the catalog from a whole in-memory corpus (test/small-run convenience)."""
+    items = [_item_ref(s) for export in corpus.per_tradition.values() for s in export.scenarios]
+    return _catalog_doc(items, corpus.subjects, corpus.judges, source_fingerprint(corpus.resolved))
+
+
+# ── Deterministic streaming writer ─────────────────────────────────────────────────
+# Writes `<out_root>/<run_id>/{manifest.json, <group>/<item>.json.gz}`. Streams one tradition
+# at a time (only that tradition's transcripts are live), buffering just the COMPRESSED bytes
+# so all sizes can be validated before any write (no partial tier), then writes + prunes
+# stale files. No wall-clock anywhere → byte-identical re-exports.
+
+import gzip  # noqa: E402 -- kept next to the writer that uses it
+import re  # noqa: E402
+
+SCHEMA_VERSION_WRITER = SCHEMA_VERSION  # (documentary alias; the version lives in the docs)
+# Guardrails calibrated ABOVE the real p99 (measured max shard ≈ 545 KB on roman-catholicism),
+# not on it — they catch a pathological blowup, not normal data.
+MAX_SHARD_BYTES = 1024 * 1024         # ≤ 1 MB per per-scenario gz shard
+MAX_TOTAL_BYTES = 200 * 1024 * 1024   # ≤ 200 MB per run (above the ~110–150 MB observed)
+_MANIFEST = "manifest.json"
+
+# A safe single path segment (mirrors export_results._require_safe_segment): no separators,
+# no '..', no leading dot/dash. Guards the writer's mkdir/unlink against traversal.
+_SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
+
+
+def _require_safe_segment(name: str, kind: str) -> None:
+    if not _SAFE_SEGMENT.match(name) or ".." in name:
+        raise AnalysisInputError(
+            f"unsafe {kind} {name!r} — must match [A-Za-z0-9][A-Za-z0-9._-]* (no separators/'..')"
+        )
+
+
+def _require_safe_relpath(relpath: str) -> None:
+    """Validate a multi-segment shard path (`<group>/<item>.json.gz`): each segment safe + ext."""
+    parts = relpath.split("/")
+    if not relpath.endswith(".json.gz") or len(parts) < 2:
+        raise AnalysisInputError(f"unsafe shard path {relpath!r} — expected <group>/<item>.json.gz")
+    _require_safe_segment(parts[0], "group")
+    leaf = parts[-1]
+    if not _SAFE_SEGMENT.match(leaf) or ".." in leaf:
+        raise AnalysisInputError(f"unsafe shard leaf {leaf!r}")
+
+
+def _json_bytes(obj) -> bytes:
+    """Deterministic JSON (sorted keys, compact separators) as UTF-8 bytes."""
+    return (json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
+
+
+def _gzip_bytes(obj) -> bytes:
+    """Deterministic gzip of the JSON (mtime=0 → constant header → byte-identical re-runs)."""
+    return gzip.compress(_json_bytes(obj), compresslevel=9, mtime=0)
+
+
+@dataclass(frozen=True)
+class WriteSummary:
+    """Sizes recorded by the writer (for the CLI's size measurement)."""
+
+    scenarios: int
+    manifest_bytes: int
+    shard_bytes: int
+    max_shard_bytes: int
+    total_bytes: int
+
+
+def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
+                  limit: int | None = None) -> WriteSummary:
+    """Stream the raw tier to ``<out_root>/<run_id>/`` deterministically; enforce size ceilings.
+
+    Serializes everything (validating sizes) BEFORE writing anything, so a violation never
+    leaves a partial tier. Stale files from a prior export of the same run-id are pruned.
+    ``limit`` caps the number of scenarios written (a small dev fixture); the manifest
+    fingerprint is then over exactly the written scenarios (self-consistent, but — being a
+    subset — it will NOT match the full ``results/`` fingerprint; tests inject an expected one).
+    """
+    _require_safe_segment(run_id, "run-id")
+
+    docs: dict[str, bytes] = {}          # relpath → bytes (manifest + gz shards)
+    items: list[dict] = []
+    subjects_present: set[str] = set()
+    judges_present: set[str] = set()
+    fp_lines: list[str] = []             # small serialized lines, not full resolved dicts
+    n_scenarios = 0
+    max_shard = 0
+    shard_total = 0
+
+    for tradition, export, resolved in iter_tradition_raw(roots):
+        _require_safe_segment(tradition, "tradition")
+        # Extract the small fingerprint lines now; the full `resolved` dicts are freed when this
+        # tradition's iteration ends (keeps peak memory to one tradition + the compressed docs).
+        fp_lines.extend(fingerprint_line(r) for r in resolved)
+        judges_present.update(r["judge"] for r in resolved)
+        for scenario in export.scenarios:
+            if limit is not None and n_scenarios >= limit:
+                break
+            _require_safe_segment(scenario.scenario_id, "scenario")
+            subjects_present.update(c["subject"] for c in scenario.cells)
+            relpath = _shard_path(scenario.group, scenario.scenario_id)
+            _require_safe_relpath(relpath)
+            payload = _gzip_bytes(build_shard(scenario))
+            docs[relpath] = payload
+            items.append(_item_ref(scenario))
+            n_scenarios += 1
+            shard_total += len(payload)
+            max_shard = max(max_shard, len(payload))
+        if limit is not None and n_scenarios >= limit:
+            break
+
+    subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
+    # For a full export, fp_lines covers every resolved row → matches the results/ tier. For a
+    # --limit fixture it covers the iterated traditions (a self-consistent superset of the
+    # written shards; tests inject an expected fingerprint for the baked-coherent path).
+    catalog = _catalog_doc(items, subjects, sorted(judges_present), combine_fingerprint(fp_lines))
+    manifest_bytes = _json_bytes(catalog)
+    docs[_MANIFEST] = manifest_bytes
+
+    # Validate sizes BEFORE any write (no partial tier).
+    for name, payload in docs.items():
+        if name != _MANIFEST and len(payload) > MAX_SHARD_BYTES:
+            raise AnalysisInputError(
+                f"{name} is {len(payload)} bytes (> {MAX_SHARD_BYTES} per-shard ceiling)"
+            )
+    total = sum(len(p) for p in docs.values())
+    if total > MAX_TOTAL_BYTES:
+        raise AnalysisInputError(f"dataset total {total} bytes (> {MAX_TOTAL_BYTES} ceiling)")
+
+    # Write, pruning any stale files (from a prior export of this run-id) not in the new set.
+    run_dir = Path(out_root) / run_id
+    run_dir.mkdir(parents=True, exist_ok=True)
+    existing = {p.relative_to(run_dir).as_posix() for p in run_dir.rglob("*") if p.is_file()}
+    for rel in existing - set(docs):
+        (run_dir / rel).unlink()
+    for name, payload in docs.items():
+        path = run_dir / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(payload)
+
+    return WriteSummary(
+        scenarios=n_scenarios, manifest_bytes=len(manifest_bytes), shard_bytes=shard_total,
+        max_shard_bytes=max_shard, total_bytes=total,
+    )
