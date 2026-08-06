@@ -200,6 +200,8 @@ def export_raw(
             "out": str(Path(out) / run_id),
             "scenarios": summary.scenarios,
             "shard_bytes": summary.shard_bytes,
+            "shard_uncompressed_bytes": summary.shard_uncompressed_bytes,
+            "compression_ratio": round(summary.compression_ratio, 2),
             "max_shard_bytes": summary.max_shard_bytes,
             "manifest_bytes": summary.manifest_bytes,
             "total_bytes": summary.total_bytes,

@@ -229,11 +229,18 @@ _HEAVY_JUDGMENT_FIELDS = ("raw", "usage")
 
 
 def _tradition_dirs(root: Path) -> set[str]:
-    """Names of ``<root>/<tradition>/`` subdirs that carry a ``judgments.jsonl`` (no parsing)."""
+    """Names of ``<root>/<tradition>/`` subdirs that carry a ``judgments.jsonl`` (no parsing).
+
+    Fails loudly if the root exists but contains no such subdir (matching #49's
+    ``read_run_root``) — a mis-mounted/empty run root must not be silently skipped.
+    """
     if not root.is_dir():
         raise AnalysisInputError(f"run root not found: {root}")
-    return {sub.name for sub in root.iterdir()
-            if sub.is_dir() and (sub / _JUDGMENTS).is_file()}
+    trads = {sub.name for sub in root.iterdir()
+             if sub.is_dir() and (sub / _JUDGMENTS).is_file()}
+    if not trads:
+        raise AnalysisInputError(f"no tradition subdirs with {_JUDGMENTS} under {root}")
+    return trads
 
 
 def _read_tradition_dir(sub: Path, tradition: str) -> RawTradition:
@@ -567,24 +574,22 @@ def _require_safe_segment(name: str, kind: str) -> None:
 
 
 def _require_safe_relpath(relpath: str) -> None:
-    """Validate a multi-segment shard path (`<group>/<item>.json.gz`): each segment safe + ext."""
+    """Validate a multi-segment shard path (`<group>/<item>.json.gz`): EVERY component safe + ext.
+
+    Each path component must be a safe single segment (so an intermediate ``..`` such as
+    ``good/../../evil.json.gz`` is rejected, not just leading/trailing ones), and the leaf must
+    carry the ``.json.gz`` extension.
+    """
     parts = relpath.split("/")
     if not relpath.endswith(".json.gz") or len(parts) < 2:
         raise AnalysisInputError(f"unsafe shard path {relpath!r} — expected <group>/<item>.json.gz")
-    _require_safe_segment(parts[0], "group")
-    leaf = parts[-1]
-    if not _SAFE_SEGMENT.match(leaf) or ".." in leaf:
-        raise AnalysisInputError(f"unsafe shard leaf {leaf!r}")
+    for part in parts:
+        _require_safe_segment(part, "shard path component")
 
 
 def _json_bytes(obj) -> bytes:
     """Deterministic JSON (sorted keys, compact separators) as UTF-8 bytes."""
     return (json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
-
-
-def _gzip_bytes(obj) -> bytes:
-    """Deterministic gzip of the JSON (mtime=0 → constant header → byte-identical re-runs)."""
-    return gzip.compress(_json_bytes(obj), compresslevel=9, mtime=0)
 
 
 @dataclass(frozen=True)
@@ -593,9 +598,15 @@ class WriteSummary:
 
     scenarios: int
     manifest_bytes: int
-    shard_bytes: int
+    shard_bytes: int                 # gzipped shard total
+    shard_uncompressed_bytes: int    # pre-gzip shard total (for the ratio)
     max_shard_bytes: int
     total_bytes: int
+
+    @property
+    def compression_ratio(self) -> float:
+        """Uncompressed ÷ compressed shard bytes (0.0 if nothing written)."""
+        return self.shard_uncompressed_bytes / self.shard_bytes if self.shard_bytes else 0.0
 
 
 def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
@@ -605,7 +616,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     Serializes everything (validating sizes) BEFORE writing anything, so a violation never
     leaves a partial tier. Stale files from a prior export of the same run-id are pruned.
     ``limit`` caps the number of scenarios written (a small dev fixture); the manifest
-    fingerprint is then over exactly the written scenarios (self-consistent, but — being a
+    fingerprint then covers exactly the **written** scenarios (self-consistent, but — being a
     subset — it will NOT match the full ``results/`` fingerprint; tests inject an expected one).
     """
     _require_safe_segment(run_id, "run-id")
@@ -618,13 +629,11 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     n_scenarios = 0
     max_shard = 0
     shard_total = 0
+    shard_uncompressed = 0
 
     for tradition, export, resolved in iter_tradition_raw(roots):
         _require_safe_segment(tradition, "tradition")
-        # Extract the small fingerprint lines now; the full `resolved` dicts are freed when this
-        # tradition's iteration ends (keeps peak memory to one tradition + the compressed docs).
-        fp_lines.extend(fingerprint_line(r) for r in resolved)
-        judges_present.update(r["judge"] for r in resolved)
+        written_here: set[str] = set()
         for scenario in export.scenarios:
             if limit is not None and n_scenarios >= limit:
                 break
@@ -632,19 +641,26 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
             subjects_present.update(c["subject"] for c in scenario.cells)
             relpath = _shard_path(scenario.group, scenario.scenario_id)
             _require_safe_relpath(relpath)
-            payload = _gzip_bytes(build_shard(scenario))
+            raw = _json_bytes(build_shard(scenario))
+            payload = gzip.compress(raw, compresslevel=9, mtime=0)  # deterministic (mtime=0)
             docs[relpath] = payload
             items.append(_item_ref(scenario))
+            written_here.add(scenario.scenario_id)
             n_scenarios += 1
             shard_total += len(payload)
+            shard_uncompressed += len(raw)
             max_shard = max(max_shard, len(payload))
+        # Fingerprint + judges over exactly the WRITTEN scenarios of this tradition (for a full
+        # export that is every row → matches the results/ tier; for a --limit fixture, the
+        # written subset). The full `resolved` dicts are freed as the loop moves on.
+        fp_lines.extend(fingerprint_line(r) for r in resolved
+                        if r["scenario_id"] in written_here)
+        judges_present.update(r["judge"] for r in resolved
+                              if r["scenario_id"] in written_here)
         if limit is not None and n_scenarios >= limit:
             break
 
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
-    # For a full export, fp_lines covers every resolved row → matches the results/ tier. For a
-    # --limit fixture it covers the iterated traditions (a self-consistent superset of the
-    # written shards; tests inject an expected fingerprint for the baked-coherent path).
     catalog = _catalog_doc(items, subjects, sorted(judges_present), combine_fingerprint(fp_lines))
     manifest_bytes = _json_bytes(catalog)
     docs[_MANIFEST] = manifest_bytes
@@ -672,5 +688,5 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
 
     return WriteSummary(
         scenarios=n_scenarios, manifest_bytes=len(manifest_bytes), shard_bytes=shard_total,
-        max_shard_bytes=max_shard, total_bytes=total,
+        shard_uncompressed_bytes=shard_uncompressed, max_shard_bytes=max_shard, total_bytes=total,
     )

@@ -51,7 +51,7 @@ Ordered producer → consumer so each phase is an independently testable, commit
 
 ### Two spec-flagged plan decisions — resolved
 - **`context_prefix`**: per-shard `contexts` object keyed by framing (`{stated,guided}`;
-  unstated absent) — measured ~2–3 KB gz/shard, negligible vs the 512 KB ceiling.
+  unstated absent) — measured ~2–3 KB gz/shard, negligible vs the 1 MB shard ceiling.
 - **`export-raw` wiring**: sibling Typer command reusing #49 loaders + a new normalized
   sitting reader + the shared fingerprint helper.
 - **`results/` `generated_at`** (spec Important open Q): **kept** (default-run selection needs
@@ -168,7 +168,8 @@ New module + tests only; revert the commit.
   prunes stale shards; **no wall-clock**; `schema_version` in catalog + every shard;
   **manifest-declared** shard paths; safe **multi-segment** path guard
   (`_require_safe_relpath`: per-component `_SAFE_SEGMENT` + extension + no `..`); ceilings
-  (per-shard ≤ 512 KB, per-run ≤ 200 MB).
+  (per-shard **≤ 1 MB**, per-run ≤ 200 MB — calibrated from real data: measured 519 shards,
+  126 MB gz total, median 233 KB, **max 533 KB**; the ceiling sits above the p99, not on it).
 - [ ] `--limit N` mode (small dev fixture for the SPA).
 - [ ] `analysis export-raw` Typer command in `analysis/cli.py` (run roots; `--run-id`,
   `--out results-raw`, `--limit`).
