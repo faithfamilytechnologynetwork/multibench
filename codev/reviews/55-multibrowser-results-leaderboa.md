@@ -43,6 +43,28 @@ This **supersedes the #49 leaderboard presentation**. When this PR merges:
 
 Both are **architect actions** flagged here (the builder does not close #49 or touch its gate).
 
+## Plan exception — pre-merge live smoke deferred to post-merge Verify (architect, 2026-08-06)
+
+The plan's Phase 4 called for a **manual local-preview browser click-through against the real GitHub
+runtime**. A headless builder cannot drive a real browser, so the architect **granted an explicit plan
+exception**: the pre-merge live click-through is **deferred to the post-merge Verify phase**, and the
+following automated evidence is **accepted** in its place:
+
+- The **20-test `results.test.tsx` integration suite** exercises every board interaction (sort +
+  persistent rank, whole-table pressure reframe, run switch, heat strip, dense drill-down, keyboard
+  expansion + URL round-trip, deep-link restore, judge invariance) against a **byte-faithful GitHub
+  fetch stand-in**.
+- `pnpm build` succeeds and `pnpm preview` serves the `/results` shell.
+- The **real GitHub runtime data path is verified live** — at `main` SHA `7f2c34c` the recursive
+  git-tree (non-truncated) lists all 8 `results/20260803/` files and both `manifest.json` (5 subjects,
+  7 traditions) and a shard fetch + parse via `raw`. This is the exact runtime dependency the deployed
+  board executes.
+
+**Acceptance criterion for #55 (recorded per the architect):** #55 is accepted only on **Waleed's
+approval of the live leaderboard's look-and-feel after the post-merge `railway up`**. Until he confirms
+it looks right, **both issue #55 and the parked #49 `verify-approval` gate stay open**. Any changes he
+requests are **follow-up iterations on the open issue, not scope creep**.
+
 ## Lessons learned
 
 - **A type break can ship green here.** The porch tests-check runs only Vitest, and neither Vitest nor

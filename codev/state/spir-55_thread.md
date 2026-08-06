@@ -233,3 +233,12 @@ byte-faithful GitHub stand-in + build + shell-serve + real-data-path curl check.
 for the decision Codex itself offers ("obtain an explicit plan exception"): accept automated evidence +
 defer live click-through to post-merge Railway (plan sequences prod railway up after merge), OR require a
 human click-through pre-merge. NOT looping porch (would just re-block on the same unsatisfiable-headless item).
+
+## 2026-08-06 — PLAN EXCEPTION GRANTED (architect). Proceeding to PR.
+
+Architect accepted the automated evidence (20-test suite + build/preview + verified real data path @
+7f2c34c); pre-merge live click-through deferred to post-merge Verify. Recorded in review doc: exception
++ evidence + rationale + ACCEPTANCE CRITERION = Waleed's approval of the LIVE leaderboard look-and-feel
+after post-merge railway up; #55 AND parked #49 verify gate stay open until he confirms; his changes =
+follow-up iterations, not scope creep. Flow: PR → architect integration review (expect high-risk CMAP,
+it rewrites /results UX) → pr gate to Waleed. Committing exception, then opening PR.
