@@ -141,3 +141,12 @@ Commits: spec 00a871a/940d12c/525d843; plan draft (initial) + revised (with mult
 Wrote plan rebuttal (porch-tracked), `porch done` → `porch gate 49`. Notifying architect. Will NOT
 self-approve. Next (after `porch approve 49 plan-approval`): plan→implement transition, then Phase 1
 (export core). NOTE: porch only re-extracts plan phases at plan→implement — 6 phases are locked in now.
+
+### Parity target confirmed (architect, 2026-08-06)
+Architect applied v2-then-dedupe to the paper's stats bundle (same semantics as plan) → export parity
+reconciles against CURRENT `stats_bundle.json`. Dual-judge/framings_sample: r=0.777, n=9000 (that's the Opus
+correlation metric, not Gemini standings). RE-VERIFIED just now: all 15 Gemini subject×framing
+mean-of-per-tradition-means == current `subj_overall[·][0]` to <1e-9 — merged run has NO v2 overlay so the
+Gemini leaderboard target (the acceptance-critical one) is unmoved. **Phase 1 parity anchor: judge=Gemini
+mean-of-means must equal stats_bundle.subj_overall exactly (1e-9).** Opus parity is the dual-judge stats, not
+a ranking.
