@@ -81,4 +81,15 @@ Deliverables (all committed): `experiments/53_exposure_stratified_holdout/`
 {notes.md, analyze.py, data/output/{fig_dose_response.png, dose_response.csv,
 per_scenario.csv, summary.json}} + this thread. Zero API/GPU spend; `tmp/` symlinks
 gitignored (never staged). Architect is revising paper 3.4/abstract/discussion from the
-§3.4 paragraph — no PR expected (experiment integrates via the paper, not code).
+§3.4 paragraph.
+
+## 2026-08-06 — architect requested PR; opened #56
+
+Architect (09:53Z): open a small additive PR so §3.4's citation resolves (readers find
+analyze.py + the pre-registered rule), plus two asks: (1) vector PDF alongside PNG, (2)
+holdout-composition limitation prominent (13 scen / 3 traditions, mostly sunni-islam).
+Both done: added `fig_dose_response.pdf` (vector, PDF 1.4), promoted the limitation to a
+⚠️ callout under Results Summary + a qualifier in the §3.4 paragraph. Committed e04b04f,
+pushed, opened **PR #56** (Closes #53). Additive-only (experiments/53_.../ + this thread);
+touches no app suite so the per-builder test dispatcher has nothing to run. Awaiting the
+quick low-risk review.
