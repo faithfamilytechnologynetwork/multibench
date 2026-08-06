@@ -492,7 +492,7 @@ def _shard_path(tradition: str, scenario_id: str) -> str:
 
 
 def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str],
-                 fingerprint: str) -> dict:
+                 fingerprint: str, presets: list[dict] | None = None) -> dict:
     """The generic run catalog (manifest) from lightweight pieces — no transcripts held.
 
     Nothing MultiBench-specific is baked into the *shape* — a non-MultiBench catalog (AFB 0–4)
@@ -522,8 +522,145 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
         "groupBy": {"key": "tradition", "label": "Tradition"},
         "scopes": [{"id": s, "label": s} for s in SCOPES],
         "items": sorted(items, key=lambda it: (it["group"], it["id"])),
+        "presets": presets or [],
         "fingerprint": fingerprint,
     }
+
+
+# ── Presets (export-computed deep-links) ───────────────────────────────────────────
+# Curated navigation, computed at export from fixed thresholds: deterministic, capped, one
+# entry per item (a dramatic scenario can't flood a preset), stable-keyed, sparse-safe (a
+# candidate that lacks the required judge/scope is simply skipped). Entries are deep-link
+# param maps the viewer feeds into the raw-view route (group/item + a/b/framing/pressure/scope).
+
+PRESET_CAP = 12
+_GEMINI = JUDGE_UI["gemini-3.6-flash"]["key"]  # "gemini"
+_OPUS = JUDGE_UI["claude-opus-4-8"]["key"]     # "opus"
+
+# A cell's per-judge scores, keyed by (tradition, scenario, subject, pressure, framing, scope).
+PresetCell = tuple
+
+
+def accumulate_cell_scores(resolved: list[dict], into: dict[PresetCell, dict[str, float]]) -> None:
+    """Fold one tradition's resolved rows into the compact per-cell judge-score map (numbers only)."""
+    for r in resolved:
+        ui = JUDGE_UI.get(r["judge"])
+        if ui is None:
+            raise AnalysisInputError(f"no UI metadata for judge {r['judge']!r}")
+        key = (r["tradition"], r["scenario_id"], r["subject"], r["pressure"], r["framing"], r["scope"])
+        into.setdefault(key, {})[ui["key"]] = r["score"]
+
+
+def _entry(preset_key: str, group: str, item: str, *, framing: str, pressure: str, scope: str,
+           a: str, b: str | None, label: str) -> dict:
+    params = {"group": group, "item": item, "framing": framing, "pressure": pressure,
+              "scope": scope, "a": a}
+    if b is not None:
+        params["b"] = b
+    return {"key": f"{preset_key}:{item}", "label": label, "params": params}
+
+
+def _dedup_per_item(sorted_entries) -> list[dict]:
+    """Keep the first (highest-magnitude) entry per item; cap at PRESET_CAP."""
+    seen: set[str] = set()
+    out: list[dict] = []
+    for e in sorted_entries:
+        if e["params"]["item"] in seen:
+            continue
+        seen.add(e["params"]["item"])
+        out.append(e)
+        if len(out) >= PRESET_CAP:
+            break
+    return out
+
+
+def _top_gemini_subject(group_scores: dict[str, float], exclude: str) -> str | None:
+    """The highest-gemini-score subject in a (scenario,pressure,framing) group, != ``exclude``."""
+    others = {s: v for s, v in group_scores.items() if s != exclude}
+    if not others:
+        return None
+    return max(others, key=lambda s: (others[s], s))
+
+
+def _models_split(cells: dict[PresetCell, dict[str, float]]) -> dict | None:
+    """Widest cross-subject Gemini spread at turn-1 (pre-pressure)."""
+    groups: dict[tuple, dict[str, float]] = defaultdict(dict)
+    for (trad, scen, subj, pr, fr, scope), js in cells.items():
+        if scope == "turn1" and _GEMINI in js:
+            groups[(trad, scen, pr, fr)][subj] = js[_GEMINI]
+    cands = []
+    for (trad, scen, pr, fr), subs in groups.items():
+        if len(subs) < 2:
+            continue
+        hi = max(subs, key=lambda s: (subs[s], s))
+        lo = min(subs, key=lambda s: (subs[s], s))
+        spread = subs[hi] - subs[lo]
+        if spread <= 0:
+            continue
+        cands.append((spread, trad, scen, pr, fr, hi, lo))
+    cands.sort(key=lambda e: (-e[0], e[2], e[3], e[4]))
+    entries = _dedup_per_item(
+        _entry("models-split", trad, scen, framing=fr, pressure=pr, scope="turn1",
+               a=hi, b=lo, label=f"{scen} · {hi} vs {lo}")
+        for (_spread, trad, scen, pr, fr, hi, lo) in cands
+    )
+    if not entries:
+        return None
+    return {"key": "models-split", "label": "Models split",
+            "description": "widest turn-1 spread across models", "entries": entries}
+
+
+def _judges_differed(cells: dict[PresetCell, dict[str, float]]) -> dict | None:
+    """Cells (post-pressure) where the two judges' scores differ by ≥ 1.0 on the −1…+1 scale."""
+    full_gemini: dict[tuple, dict[str, float]] = defaultdict(dict)
+    for (trad, scen, subj, pr, fr, scope), js in cells.items():
+        if scope == "full" and _GEMINI in js:
+            full_gemini[(trad, scen, pr, fr)][subj] = js[_GEMINI]
+    cands = []
+    for (trad, scen, subj, pr, fr, scope), js in cells.items():
+        if scope == "full" and _GEMINI in js and _OPUS in js and abs(js[_GEMINI] - js[_OPUS]) >= 1.0:
+            cands.append((abs(js[_GEMINI] - js[_OPUS]), trad, scen, pr, fr, subj))
+    cands.sort(key=lambda e: (-e[0], e[2], e[3], e[4], e[5]))
+    entries = _dedup_per_item(
+        _entry("judges-differed", trad, scen, framing=fr, pressure=pr, scope="full",
+               a=subj, b=_top_gemini_subject(full_gemini[(trad, scen, pr, fr)], subj),
+               label=f"{scen} · judges split on {subj}")
+        for (_diff, trad, scen, pr, fr, subj) in cands
+    )
+    if not entries:
+        return None
+    return {"key": "judges-differed", "label": "Judges differed",
+            "description": "the two judges ≥1 point apart", "entries": entries}
+
+
+def _steadfastness_cliff(cells: dict[PresetCell, dict[str, float]]) -> dict | None:
+    """Largest post-pressure Gemini drop (full − turn1 most negative)."""
+    by_cell: dict[tuple, dict[str, float]] = defaultdict(dict)
+    for (trad, scen, subj, pr, fr, scope), js in cells.items():
+        if _GEMINI in js:
+            by_cell[(trad, scen, subj, pr, fr)][scope] = js[_GEMINI]
+    cands = []
+    for (trad, scen, subj, pr, fr), sc in by_cell.items():
+        if "turn1" in sc and "full" in sc:
+            drop = sc["full"] - sc["turn1"]
+            if drop < 0:
+                cands.append((drop, trad, scen, pr, fr, subj))
+    cands.sort(key=lambda e: (e[0], e[2], e[3], e[4], e[5]))  # most negative first
+    entries = _dedup_per_item(
+        _entry("steadfastness-cliff", trad, scen, framing=fr, pressure=pr, scope="full",
+               a=subj, b=None, label=f"{scen} · {subj} buckled under pressure")
+        for (_drop, trad, scen, pr, fr, subj) in cands
+    )
+    if not entries:
+        return None
+    return {"key": "steadfastness-cliff", "label": "Steadfastness cliff",
+            "description": "biggest post-pressure drop (Gemini)", "entries": entries}
+
+
+def compute_presets(cells: dict[PresetCell, dict[str, float]]) -> list[dict]:
+    """The three export-computed presets (a preset with no qualifying entries is omitted)."""
+    return [p for p in (_models_split(cells), _judges_differed(cells),
+                        _steadfastness_cliff(cells)) if p is not None]
 
 
 def _item_ref(scenario: RawScenario) -> dict:
@@ -538,7 +675,10 @@ def _item_ref(scenario: RawScenario) -> dict:
 def build_catalog(corpus: RawCorpus) -> dict:
     """Build the catalog from a whole in-memory corpus (test/small-run convenience)."""
     items = [_item_ref(s) for export in corpus.per_tradition.values() for s in export.scenarios]
-    return _catalog_doc(items, corpus.subjects, corpus.judges, source_fingerprint(corpus.resolved))
+    cells: dict[PresetCell, dict[str, float]] = {}
+    accumulate_cell_scores(corpus.resolved, cells)
+    return _catalog_doc(items, corpus.subjects, corpus.judges,
+                        source_fingerprint(corpus.resolved), compute_presets(cells))
 
 
 # ── Deterministic streaming writer ─────────────────────────────────────────────────
@@ -609,6 +749,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     subjects_present: set[str] = set()
     judges_present: set[str] = set()
     fp_lines: list[str] = []             # small serialized lines, not full resolved dicts
+    cells: dict[PresetCell, dict[str, float]] = {}  # per-cell judge scores (numbers only) for presets
     n_scenarios = 0
     max_shard = 0
     shard_total = 0
@@ -636,15 +777,16 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         # Fingerprint + judges over exactly the WRITTEN scenarios of this tradition (for a full
         # export that is every row → matches the results/ tier; for a --limit fixture, the
         # written subset). The full `resolved` dicts are freed as the loop moves on.
-        fp_lines.extend(fingerprint_line(r) for r in resolved
-                        if r["scenario_id"] in written_here)
-        judges_present.update(r["judge"] for r in resolved
-                              if r["scenario_id"] in written_here)
+        written_rows = [r for r in resolved if r["scenario_id"] in written_here]
+        fp_lines.extend(fingerprint_line(r) for r in written_rows)
+        judges_present.update(r["judge"] for r in written_rows)
+        accumulate_cell_scores(written_rows, cells)  # for presets (numbers only)
         if limit is not None and n_scenarios >= limit:
             break
 
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
-    catalog = _catalog_doc(items, subjects, sorted(judges_present), combine_fingerprint(fp_lines))
+    catalog = _catalog_doc(items, subjects, sorted(judges_present),
+                           combine_fingerprint(fp_lines), compute_presets(cells))
     manifest_bytes = _json_bytes(catalog)
     docs[_MANIFEST] = manifest_bytes
 

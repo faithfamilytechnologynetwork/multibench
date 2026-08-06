@@ -255,3 +255,13 @@ export_results (no forked traversal guard); moved gzip import to top + dropped u
 removed misleading __all__; prune removes now-empty group dirs; added no-wall-clock manifest
 assertion test. Deferred to Phase 4: document exporting toolchain (Python/zlib) in
 results-raw/README (determinism is per-build). 159 tests green. Next: phase_3 (presets).
+
+### 2026-08-06 — IMPLEMENT phase_3: presets (export-computed)
+compute_presets() in export_raw: Models split (widest turn1 Gemini cross-subject spread),
+Judges differed (full-scope |gemini-opus|>=1.0, contrast vs top-gemini subject), Steadfastness
+cliff (biggest negative gemini full-turn1 drop). Each: deterministic sort, one-entry-per-
+scenario dedup, cap 12, stable keys (preset:scenario), sparse-safe (skip missing judge/scope),
+deep-link param maps {group,item,framing,pressure,scope,a,b?}. Accumulated from a compact
+per-cell judge-score map (numbers only) during streaming (written scenarios only) — no extra
+memory. Wired into catalog (build_catalog + write_dataset). Real data: all 3 presets, 12
+entries each, sensible. 9 preset tests; full suite 168 green.
