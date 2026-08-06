@@ -311,3 +311,10 @@ untouched — screenshot showed it renders (not clipped), only the surface was m
 check-types + build OK. Branch off origin/main (has #51/#54/#61). NOTE: can't drive a real browser
 headless; verifying via inline-style-parity-with-working-cells + tests + build. Deploy: architect asked
 me to railway up — checking CLI availability; will report.
+
+## 2026-08-06 — iter3: PR #65 open; railway BLOCKED (no linked project).
+
+railway CLI installed + logged in (Waleed), but `railway status` = "No linked project found". Can't
+`railway up` without `railway link` (needs project ID I don't have) — and it'd deploy an UNMERGED branch
+to the single prod service (architect's domain for iter1/2). Reported to architect: fix+verify+PR done,
+need them to link/authorize or redeploy. porch NOT advanced (architect said don't until Waleed confirms).
