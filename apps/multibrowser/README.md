@@ -45,7 +45,10 @@ command live in [`results/README.md`](../../results/README.md).
 
 The evidence behind the scores: per-scenario **transcripts + judge verdicts**, read from the
 [`results-raw/<run-id>/`](../../results-raw/README.md) tier (per-scenario gzip shards, lazy-loaded).
-Reached by drilling in from `/results` → a tradition → a scenario's live **ResultsRegion** link.
+Two ways in: the **scenario page** (`/t/<tradition>/<scenario>`) embeds the responses in context
+(see below) — the primary, context-first path; and this **generic explorer** route adds the
+cell-score grid, presets, and deep links. Both render responses with the same jalees-style
+interleaved comparison (`RawComparison`) and cross-link to each other.
 
 - **Cell-score grid** — subjects × condition-tuples, chips colored by the **catalog-declared** ramp
   for the selected **judge + scope**; the grid *is* the navigation (click a chip → that cell).
@@ -86,7 +89,8 @@ Reached by drilling in from `/results` → a tradition → a scenario's live **R
   at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
   run shown defaults to the newest by `generated_at`; a **run selector** (shown when more than one run
   is published) switches runs, and a specific run can also be pinned with `?run=<id>`.
-  The per-scenario `ResultsRegion` is now the **live** raw-results drill-in (#51, above); the old
+  Each scenario page (`/t/<tradition>/<scenario>`) embeds a **`ScenarioResponses`** section (#51,
+  above) — the models' transcripts + judge verdicts, in context, lazy-loaded on expand. The old
   `loadResults()`/`Scenario.results` seam is deprecated (always `null`, unread) and slated for cleanup.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable
   setup; corpus filters and results selection live in the URL as flat params
@@ -157,7 +161,8 @@ src/lib/      constants, model, parse (tolerant parsers), github (fetch boundary
 src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, ResultsPage,
               RawResultsPage (#51), NotFound (+ tests)
 src/components/  Markdown, Notice, ErrorBoundary, RateLimitBanner, TraditionCard, FilterBar,
-                 ScenarioList/Row, ScenarioHeader, PressureSection, FramingsPanel,
-                 ResultsRegion (live #51 drill-in), Collapsible, Loading
+                 ScenarioList/Row, ScenarioHeader, PressureSection, FramingsPanel, Collapsible, Loading,
+                 RawComparison (jalees-style interleaved responses+verdicts) + ScenarioResponses
+                 (the scenario page's embedded, lazy results section) [#51]
 scripts/      bake-and-deploy.sh (#51 raw-tier bake + deploy)
 ```

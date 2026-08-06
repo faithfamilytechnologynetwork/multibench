@@ -5,9 +5,8 @@ import { useLatestSha, useRawScenario, useResultsRuns } from "../lib/queries";
 import { asRateLimit } from "../lib/rateLimit";
 import { catalogScoreColor } from "../lib/rampColor";
 import { parseRawSelection, rawSelectionToSearch, type RawSelection } from "../lib/rawSelection";
-import type { RawCatalog, RawCell, RawShard } from "../lib/rawModel";
-import { Markdown } from "../components/Markdown";
-import { Collapsible } from "../components/Collapsible";
+import { findCell, type RawCatalog, type RawCell } from "../lib/rawModel";
+import { RawComparison } from "../components/RawComparison";
 import { Notices, Notice } from "../components/Notice";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
@@ -23,67 +22,10 @@ function conditionColumns(catalog: RawCatalog): Record<string, string>[] {
   return cols;
 }
 const condKey = (c: Record<string, string>) => Object.entries(c).map(([k, v]) => `${k}=${v}`).join("|");
-const sameConditions = (a: Record<string, string>, b: Record<string, string>) =>
-  Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, v]) => b[k] === v);
 
-function findCell(shard: RawShard, subject: string, conditions: Record<string, string>): RawCell | undefined {
-  return shard.cells.find((c) => c.subject === subject && sameConditions(c.conditions, conditions));
-}
 function cellScore(cell: RawCell | undefined, judge: string, scope: string): number | null {
   const v = cell?.verdicts.find((vd) => vd.judge === judge && vd.scope === scope);
   return v ? v.score : null;
-}
-
-function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"][number]; catalog: RawCatalog }) {
-  const judge = catalog.judges.find((j) => j.key === verdict.judge);
-  const scope = catalog.scopes.find((s) => s.id === verdict.scope);
-  return (
-    <div className="rounded-md border border-default-200 p-3 flex flex-col gap-1" data-testid="verdict">
-      <div className="flex items-center gap-2 text-sm">
-        <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }} aria-hidden />
-        <span className="font-mono tabular-nums">{verdict.score}</span>
-        <span className="font-medium">{judge?.label ?? verdict.judge}</span>
-        {judge && !judge.fullGrid && (
-          <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-700" title="honest-sample judge (not a full grid)">sample</span>
-        )}
-        <span className="text-default-400">· {scope?.label ?? verdict.scope}</span>
-      </div>
-      {verdict.summary && <p className="text-sm text-default-700">{verdict.summary}</p>}
-      {verdict.rationale && <Collapsible title="Rationale"><Markdown>{verdict.rationale}</Markdown></Collapsible>}
-    </div>
-  );
-}
-
-/** One cell's detail column (context + transcript + verdicts). */
-function CellDetail({ subject, catalog, shard, conditions, label }: {
-  subject: string; catalog: RawCatalog; shard: RawShard; conditions: Record<string, string>; label: string;
-}) {
-  const cell = findCell(shard, subject, conditions);
-  const subj = catalog.subjects.find((s) => s.id === subject);
-  const contextText = cell?.contextKey ? shard.contexts[cell.contextKey] : undefined;
-  return (
-    <div className="flex flex-col gap-3" data-testid="cell-detail" data-subject={subject}>
-      <h3 className="text-base font-semibold">{subj?.label ?? subject} <span className="text-xs font-normal text-default-400">({label})</span></h3>
-      {!cell ? (
-        <Notice notice={{ severity: "warning", scope: "results-raw", where: subject, message: "No cell for this subject / condition." }} />
-      ) : (
-        <>
-          {contextText && <Collapsible title="Context — what the model was told"><Markdown>{contextText}</Markdown></Collapsible>}
-          <div className="flex flex-col gap-2">
-            {cell.transcript.map((t, i) => (
-              <div key={i} className={`rounded-md p-3 ${t.role === "user" ? "bg-default-100" : "bg-primary-50"}`}>
-                <div className="text-xs uppercase tracking-wide text-default-400">{t.role}</div>
-                <Markdown>{t.content}</Markdown>
-              </div>
-            ))}
-          </div>
-          <div className="grid gap-2">
-            {cell.verdicts.map((v, i) => <VerdictCard key={i} verdict={v} catalog={catalog} />)}
-          </div>
-        </>
-      )}
-    </div>
-  );
 }
 
 export function RawResultsPage() {
@@ -226,13 +168,13 @@ export function RawResultsPage() {
         </section>
       )}
 
-      {/* Selected cell detail — A alone, or A vs B side by side. */}
+      {/* Selected cell detail — the SAME jalees-style interleaved comparison as the scenario page
+          (one renderer over one shape, no divergence). A alone, or A vs B side by side. */}
       {!shard ? (
         <p className="text-sm text-default-500">Raw data for this item is unavailable — see the notices above.</p>
       ) : (
-        <section className={`grid gap-6 ${sel.b ? "md:grid-cols-2" : ""}`} data-testid="cell-details">
-          <CellDetail subject={sel.a} catalog={catalog} shard={shard} conditions={sel.conditions} label="A" />
-          {sel.b && <CellDetail subject={sel.b} catalog={catalog} shard={shard} conditions={sel.conditions} label="B" />}
+        <section data-testid="cell-details">
+          <RawComparison catalog={catalog} shard={shard} a={sel.a} b={sel.b ?? null} conditions={sel.conditions} />
         </section>
       )}
 

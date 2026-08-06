@@ -8,7 +8,7 @@ const SHA = "deadbeef";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("scenario detail", () => {
-  it("renders turn-1, the six pressures in canonical order, judge-guidance, framings, and an inert results region", async () => {
+  it("renders turn-1, the six pressures in canonical order, judge-guidance, framings, and the results section", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"])));
     const { container } = renderApp("/t/sunni-islam/JLS-001");
 
@@ -27,12 +27,12 @@ describe("scenario detail", () => {
     // Guided framing renders the tradition's actual guide.md content.
     expect(screen.getByText(/guide of sunni-islam/)).toBeInTheDocument();
 
-    // Results entry: with no results run committed, the placeholder shows once the runs query
-    // settles (no drill-in link, no "bands" wording — #51 numeric-only policy).
+    // Results section: with no results run committed, the placeholder shows once the runs query
+    // settles (no drill-in, no "bands" wording — #51 numeric-only policy).
     expect(await screen.findByText(/No judging results yet/)).toBeInTheDocument();
-    const region = screen.getByTestId("results-region");
+    const region = screen.getByTestId("scenario-responses");
     expect(region.textContent ?? "").not.toMatch(/bands/i);
-    expect(region).not.toHaveAttribute("data-has-results");
+    expect(region.querySelector('[data-testid="responses-expand"]')).toBeNull(); // no run → no expander
   });
 
   it("offers prev/next navigation in declared order", async () => {

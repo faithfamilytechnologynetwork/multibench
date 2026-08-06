@@ -488,7 +488,7 @@ function Leaderboard({
                                     {/* Drill-down toward the raw browser (#51): the leaderboard has
                                         only per-tradition granularity, so — matching #55's drill-row
                                         level — the tradition links to /t/<tradition>, from which a
-                                        scenario's ResultsRegion opens its raw transcripts + verdicts. */}
+                                        scenario's embedded responses section shows its raw transcripts + verdicts. */}
                                     <td className="pr-3 text-default-600">
                                       <Link to="/t/$traditionId" params={{ traditionId: d.tradition }}
                                             className="text-primary hover:underline" data-testid="drill-link">
