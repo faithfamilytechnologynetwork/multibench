@@ -318,6 +318,28 @@ describe("/results leaderboard", () => {
     expect(within(drillRows[0]!).getByTestId("sample-badge")).toBeInTheDocument();
   });
 
+  it("switching the judge to Opus leaves the heat strip (Gemini) unchanged", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    const sonnet = () => screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    await screen.findAllByTestId("standings-row");
+    const before = within(sonnet()).getAllByTestId("strip-cell").map((c) => c.getAttribute("aria-label"));
+    await userEvent.click(within(screen.getByTestId("sel-judge")).getByText(/opus/));
+    await screen.findByTestId("opus-caption");
+    const after = within(sonnet()).getAllByTestId("strip-cell").map((c) => c.getAttribute("aria-label"));
+    expect(after).toEqual(before); // strip stays on the ranking (Gemini) judge — never recolored
+  });
+
+  it("collapsing an expanded subject removes the drill-down and clears the URL", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results?expanded=claude-sonnet-5");
+    const rows = await screen.findAllByTestId("standings-row");
+    expect(screen.getByTestId("drilldown")).toBeInTheDocument();
+    await userEvent.click(within(rows[0]!).getByTestId("standings-expand")); // collapse
+    await waitFor(() => expect(screen.queryByTestId("drilldown")).not.toBeInTheDocument());
+    expect(router.state.location.searchStr).not.toContain("expanded=");
+  });
+
   it("shows an empty-state when no results runs are published", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {}));
     renderApp("/results");

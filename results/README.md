@@ -103,11 +103,20 @@ Source runs spell ids inconsistently; the export normalizes to a single canonica
 
 ## The Results explorer (SPA)
 
+The `/results` leaderboard is a **dense, whole-picture-at-a-glance table** (jaleesbrowser-style,
+Spec 55) — one row per subject:
+
 - The **leaderboard ranks on Gemini only** (the full-grid judge) — the mean of per-tradition means.
-- The **judge selector** switches the **per-tradition drill-down** to Opus **where Opus data exists**
-  (badged `sample n/N`); it never re-ranks the board. Opus stated/guided is a sample.
-- **Framing** (unstated/stated/guided), **metric** (first-response / post-pressure / steadfastness),
-  and **pressure** selectors filter every view and are deep-linkable.
+- **Framing and metric are columns, not selectors.** Each row shows **First-response / Post-pressure /
+  Δ (steadfastness)** on the paper's published slice (the first framing), plus one post-pressure column
+  per framing (the staircase). Δ is the shard's matched-cell steadfastness, not post − initial.
+- A **per-tradition heat strip** in each row (a `scoreColor` square per tradition) shows the spread
+  behind the Post-pressure mean; every square is accessibly labelled with its value (or "no data").
+- Any numeric column is **sortable**; a **canonical rank** column persists while sorted.
+- A single **pressure** selector reframes the whole table (headline, framing columns, strip, rank) to
+  one of the six pressures or `"all"`. The **judge selector** switches the **per-tradition drill-down**
+  to Opus **where Opus data exists** (badged `sample n/N`); it never re-ranks or recolors the board.
+- **Run, pressure, judge, column sort, and expanded subjects are all deep-linkable** in the URL.
 - Numbers reconcile with the paper's standings (`tab_standings` / `subj_overall`) to displayed
   precision.
 

@@ -9,7 +9,6 @@ import {
   rankingJudgeModel,
   sortRows,
   subjectDrilldownRows,
-  subjectTraditionValues,
   traditionValue,
 } from "./leaderboard";
 import type { ResultsManifest, ResultsShard } from "./resultsModel";
@@ -86,19 +85,6 @@ describe("computeStandings — mean of per-tradition means", () => {
 
   it("rankingJudgeModel is the full-grid judge (Gemini)", () => {
     expect(rankingJudgeModel(manifest)).toBe("gemini-3.6-flash");
-  });
-
-  it("subjectTraditionValues returns per-tradition values for a judge, omitting missing ones", () => {
-    const partial = { a: shards.a }; // only tradition a has data
-    const tvs = subjectTraditionValues(
-      partial, manifest, "claude-sonnet-5", { framing: "unstated", metric: "full", pressure: "all" },
-      "gemini-3.6-flash",
-    );
-    expect(tvs).toHaveLength(1);
-    expect(tvs[0]).toMatchObject({ tradition: "a", value: 0.6 });
-    // a judge with no data → empty (honest: nothing, not zeros)
-    expect(subjectTraditionValues(partial, manifest, "claude-sonnet-5",
-      { framing: "unstated", metric: "full", pressure: "all" }, "claude-opus-4-8")).toEqual([]);
   });
 
   it("traditionValue returns coverage for a means cell and null for a missing one", () => {

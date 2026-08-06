@@ -195,3 +195,15 @@ Phase-4 checklist (docs + cleanup + polish + verify):
 - #49 supersession note (close #49 + retire its verify gate — architect action, flag it).
 - Rebase spir-55 commits onto origin/main (drops docs/paper leak) at PR prep.
 - Local `pnpm build && pnpm preview` smoke.
+
+## 2026-08-06 — Phase 4: docs + cleanup + polish + smoke.
+
+Cleanup: removed app-dead subjectTraditionValues (export + test); fixed the stale comment referencing it.
+A11y polish (claude minors): unique strip-group aria-label per row (`Per-tradition scores for <subject>`);
+aria-controls on expand button → sanitized drill row id; +2 tests (heat strip unchanged on judge→Opus;
+collapse path removes drilldown + clears URL). Docs: apps/multibrowser/README leaderboard section →
+dense-table v2 (headline/framing columns, heat strip, sort, canonical rank, pressure reframe, drill-down,
+deep-link params) + fixed stale ?framing/?metric URL example; results/README "Results explorer" bullets → v2.
+Smoke: `pnpm build` OK (bundle builds); `pnpm preview` serves /results SPA shell (200 + root div + JS) via
+fallback; deploy.test REAL smoke green in suite. check-types green, 179 tests. PR prep TODO: rebase onto
+origin/main (drops docs/paper base leak); #49 supersession note in PR/review.

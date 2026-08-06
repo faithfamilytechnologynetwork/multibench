@@ -264,9 +264,9 @@ function ScoreCell({ value, testid }: { value: number | null; testid: string }) 
  * square carries a `title`/`aria-label` with the tradition and its exact value, and an uncovered
  * (null) tradition renders a visually distinct dashed square labelled "no data".
  */
-function HeatStrip({ strip }: { strip: StripCell[] }) {
+function HeatStrip({ strip, subject }: { strip: StripCell[]; subject: string }) {
   return (
-    <div className="flex items-center gap-0.5" role="group" aria-label="Per-tradition scores" data-testid="strip">
+    <div className="flex items-center gap-0.5" role="group" aria-label={`Per-tradition scores for ${subject}`} data-testid="strip">
       {strip.map((c) => {
         const label = c.value === null ? `${c.tradition}: no data` : `${c.tradition}: ${fmt(c.value)}`;
         return (
@@ -335,6 +335,7 @@ function Leaderboard({
           {display.map((r) => {
             const open = expanded.has(r.subject);
             const nContributing = r.strip.filter((c) => c.value !== null).length;
+            const drillId = `drill-${r.subject.replace(/[^\w-]/g, "-")}`;
             const drill = open
               ? subjectDrilldownRows(shards, manifest, r.subject, { pressure: sel.pressure, judgeModel: drillJudge })
               : [];
@@ -346,6 +347,7 @@ function Leaderboard({
                     <button
                       type="button"
                       aria-expanded={open}
+                      aria-controls={drillId}
                       onClick={() => onToggleExpand(r.subject)}
                       className="font-medium hover:text-primary"
                       data-testid="standings-expand"
@@ -363,13 +365,13 @@ function Leaderboard({
                   ))}
                   <td className="py-2 pr-2">
                     <div className="flex items-center gap-2">
-                      <HeatStrip strip={r.strip} />
+                      <HeatStrip strip={r.strip} subject={r.subject} />
                       <span className="tabular-nums text-default-400" data-testid="standings-kn">{nContributing}/{total}</span>
                     </div>
                   </td>
                 </tr>
                 {open && (
-                  <tr data-testid="drilldown" data-subject={r.subject}>
+                  <tr id={drillId} data-testid="drilldown" data-subject={r.subject}>
                     <td colSpan={totalCols} className="pb-3">
                       <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
                         <div className="mb-1 text-xs text-default-500">

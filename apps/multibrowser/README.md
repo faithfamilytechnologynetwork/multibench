@@ -16,13 +16,27 @@ Browses `results/<run-id>/` datasets the same runtime way it reads the corpus (S
 + `raw`), so a newly committed run appears **without a redeploy** — the data contract and export
 command live in [`results/README.md`](../../results/README.md).
 
-- **Leaderboard** — cross-tradition standings = the **mean of per-tradition means**, ranked on the
-  full-grid **Gemini** judge; reconciles with the paper's standings to displayed precision.
-- **Selectors** (all deep-linkable): **framing** (unstated/stated/guided), **metric**
-  (first-response / post-pressure / **steadfastness** = full − turn1), **pressure** (six + "all").
-- **Judge selector** — points the **per-tradition drill-down** at **Opus** (the validation judge)
-  where Opus data exists, badged `sample n/N`. It **never re-ranks** the board; Opus stated/guided
-  is only a sample, so ranking always stays Gemini.
+- **Dense leaderboard** (jaleesbrowser-style, Spec 55) — one row per subject, the whole picture at a
+  glance. Cross-tradition standings = the **mean of per-tradition means**, ranked on the full-grid
+  **Gemini** judge; reconciles with the paper's standings to displayed precision.
+  - **Headline columns** — **First-response / Post-pressure / Δ (steadfastness)** on the paper's
+    published slice (the first framing, i.e. unstated); Δ is the matched-cell steadfastness read from
+    the shard, **not** post − initial.
+  - **Framing columns** — one post-pressure column per framing (unstated/stated/guided); the
+    Post-pressure headline equals the first-framing column by definition.
+  - **Per-tradition heat strip** — a `scoreColor` square per tradition (manifest order) in each row;
+    its non-null mean *is* the Post-pressure column. Color is never the only encoding — each square
+    carries an accessible label with the tradition and its value (or "no data" for an uncovered one).
+  - **Sortable** by any numeric column (ascending/descending); a **canonical rank** column persists
+    while sorted (it never re-numbers). Nulls sort last.
+- **Pressure selector** (deep-linkable) — reframes the **whole table** (headline, framing columns,
+  strip, and rank) to one of the six pressures or the pooled `"all"` (the default).
+- **Drill-down** — click a subject (or deep-link `?expanded=`) for a **dense per-tradition table**
+  (First/Post/Δ + framings + coverage `n/N`, `—/N` where the post numerator is absent).
+- **Judge selector** — points the **drill-down** at **Opus** (the validation judge) where Opus data
+  exists, badged `sample n/N`. It **never re-ranks or recolors** the board; ranking/strip stay Gemini.
+- **Deep-linkable state** — run, pressure, judge, **column sort**, and **expanded subjects** all live
+  in the URL; the bare `/results` link carries no default params.
 - Display-first: a malformed/missing manifest or shard, unknown vocab, or a dropped tradition
   renders an inline notice — never a blank page.
 
@@ -53,8 +67,8 @@ command live in [`results/README.md`](../../results/README.md).
   The **per-scenario** `ResultsRegion` seam (optional `Scenario.results`, `loadResults()` → `none`)
   remains inert — the explorer is a separate route-level feature, not that seam.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable
-  setup; corpus filters and results selectors live in the URL as flat params
-  (`?pillars=a&pillars=b`, `?framing=stated&metric=steadfastness`).
+  setup; corpus filters and results selection live in the URL as flat params
+  (`?pillars=a&pillars=b`, `?pressure=flattery&sort=post.desc&expanded=claude-sonnet-5`).
 
 ## Develop
 
