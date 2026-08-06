@@ -20,6 +20,9 @@ pattern, gotcha, or constraint.
   mid-implement needs `porch rollback <id> plan` + plan re-approval.
 - A consult run occasionally fails to write its output — a tooling hiccup, not a real failure;
   re-run that single model (porch's "run remaining consultations" handles it).
+- **Porch force-advances a phase at its review safety ceiling (iter 3)** even if a reviewer's last
+  verdict was REQUEST_CHANGES. Address the points and commit before the ceiling; note in the review
+  that the phase force-advanced so the final PR CMAP re-checks the full diff.
 
 ## Data-format design
 
@@ -100,3 +103,9 @@ pattern, gotcha, or constraint.
 - **Test-first against fixtures, then the real artifact as the acceptance test.** Building the
   format against fixtures and then porting the real 140-scenario tradition as the final gate proved
   the format expresses a real tradition with no gaps.
+- **Builder worktrees share the host port namespace.** A real-server test (`serve -s dist`) that
+  killed only the pnpm wrapper left a `serve` grandchild squatting on a fixed port for *days* after
+  its worktree was gone — new serves silently fell back to ephemeral ports and the smoke test timed
+  out with a misleading (node-version/PORT) cause. A spawned-server test must spawn `detached` and
+  reap the process **group** (`process.kill(-pid, …)`) in `finally`, and pre-flight that the port is
+  free with a diagnostic that names the leaked-serve cause.
