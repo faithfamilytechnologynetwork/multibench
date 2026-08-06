@@ -6,7 +6,7 @@
 # Usage: verified_put.sh <local-file> <volume-dest e.g. /pairs/pairs_sft2_mb_split50.jsonl>
 set -uo pipefail
 LOCAL="$1"; DEST="$2"
-ROOT=/Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/experiment-57
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$ROOT"
 [ -f "$LOCAL" ] || { echo "local file missing: $LOCAL"; exit 1; }
 

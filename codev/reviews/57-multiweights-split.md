@@ -35,7 +35,8 @@ not 4× memorization. #53's +0.22 was the biased-sample **lower bound its own ca
 - **Both split adapters are the deliverable**; the shipped #48 `mb-sft-dpo` is unchanged (hard rule).
 - **Shipped-vs-companion (paper must state):** +0.78/+0.90 is the **half-data companion** retrain, not
   the shipped full-data model. The shipped model has no clean holdout; its unseen-scenario behavior is
-  **bounded [+0.22, ~+0.9]**. The companion establishes the recipe *generalizes*; it does not
+  **bounded [+0.22, ~+0.90]** (SFT-only clean-split point +0.78; SFT+DPO +0.90). The companion
+  establishes the recipe *generalizes*; it does not
   re-measure the shipped model.
 - **DPO increment (+0.12) is judge-alignment-confounded:** DPO pairs were gemini-banded and the
   descriptive is gemini-judged (sole selection+eval judge — #48's caveat), so the SFT→DPO increment is

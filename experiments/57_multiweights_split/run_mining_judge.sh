@@ -5,10 +5,10 @@
 #
 # Usage: run_mining_judge.sh
 set -uo pipefail
-ENVFILE=/Users/mwk/Development/fftn/taqwabench/.env
+ENVFILE="${TAQWABENCH_ENV:-/Users/mwk/Development/fftn/taqwabench/.env}"
 CFG=experiments/57_multiweights_split/configs/multibench_descriptive_split.yaml
 MINE=experiments/57_multiweights_split/data/output/mining
-ROOT=/Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/experiment-57
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TRADS=(buddhism eastern-christianity judaism roman-catholicism secular-sage sunni-islam taoism)
 
 set -a; source "$ENVFILE"; set +a

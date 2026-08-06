@@ -262,8 +262,10 @@ Artifacts: `data/output/summary_57_sft.json`, `per_scenario_57_sft.csv`, `fig_tr
 **⚠️ Writeup caveat (architect 2026-08-06):** this +0.778 is the transfer of the **companion split
 retrain — `mb-sft-split50`, trained on HALF the data** — NOT the shipped full-data model
 (`mb-sft-dpo`). The shipped model was trained on all 519 scenarios so it has no clean holdout; its
-unseen-scenario behavior is **bounded by [+0.22 (#53 hardest-cells lower bound), ~+0.78 (this clean
-split)]**. The paper states this explicitly: the half-data companion establishes that the recipe
+unseen-scenario behavior is **bounded by [+0.22 (#53 hardest-cells lower bound), ~+0.90 (this clean
+split, SFT+DPO)]** — the SFT-only clean-split point is +0.78, the full SFT+DPO recipe reaches +0.90
+(see the DPO stage below); the single bound used everywhere downstream is **[+0.22, ~+0.90]**. The
+paper states this explicitly: the half-data companion establishes that the recipe
 *generalizes* (heterogeneity, not contradiction with #53 — #53's +0.22 was the biased-sample lower
 bound its own caveat predicted); it does not re-measure the shipped model itself.
 
@@ -311,7 +313,7 @@ STRONG under the pre-registered rule. Memorization inflation is small (Δ≈+0.1
 memorization-driven reading** (its +0.22 was the biased-holdout lower bound its own caveat predicted;
 the clean random split shows ~85–88% genuine cross-tradition transfer). Caveats stated plainly:
 (1) this is the **companion half-data retrain**, bounding the shipped full-data model's unseen
-behavior in **[+0.22, ~+0.9]**, not re-measuring it; (2) the **SFT→DPO increment is
+behavior in **[+0.22, ~+0.90]**, not re-measuring it; (2) the **SFT→DPO increment is
 judge-alignment-confounded** (same gemini judge for banding + eval); (3) inherited same-stack
 (OpenRouter-base vs vLLM-eval) caveat, small vs the lifts.
 

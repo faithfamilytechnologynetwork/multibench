@@ -8,7 +8,7 @@
 #
 # Run ONLY after the architect confirms Modal is stable. Usage: bash .../resume_mining.sh
 set -uo pipefail
-ROOT=/Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/experiment-57
+ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 URL=https://waleedkadous--multibench-gemma-eval-serve-split-serve.modal.run
 cd "$ROOT"
 

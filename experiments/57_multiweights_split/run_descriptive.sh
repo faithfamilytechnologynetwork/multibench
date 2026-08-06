@@ -9,7 +9,7 @@
 set -uo pipefail
 
 CONFIG="$1"; SUB="$2"; SCAP="${3:-}"
-ENVFILE=/Users/mwk/Development/fftn/taqwabench/.env
+ENVFILE="${TAQWABENCH_ENV:-/Users/mwk/Development/fftn/taqwabench/.env}"
 ROOT="$(cd "$(dirname "$0")/../.." && pwd)"     # multibench repo root (worktree)
 OUTBASE="experiments/57_multiweights_split/data/output/$SUB"
 TRADS=(buddhism eastern-christianity judaism roman-catholicism secular-sage sunni-islam taoism)

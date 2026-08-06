@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -uo pipefail
-ENVFILE=/Users/mwk/Development/fftn/taqwabench/.env
+ENVFILE="${TAQWABENCH_ENV:-/Users/mwk/Development/fftn/taqwabench/.env}"
 CFG=experiments/57_multiweights_split/configs/multibench_descriptive_split.yaml
 RD=experiments/57_multiweights_split/data/output/descriptive_sft_smoke/buddhism
 set -a; source "$ENVFILE"; set +a; export EVAL_KEY=EMPTY
