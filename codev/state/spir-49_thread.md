@@ -283,6 +283,19 @@ always uses rankingJudgeModel). Tests: subjectTraditionValues unit + drill-down 
 + Opus partial-coverage (taoism omitted, buddhism badged sample). 150 tests pass, typecheck + build clean.
 Phase 6 next: docs (results/README data contract + multibrowser README). Then Review + PR (gate for WALEED).
 
+Phase 6 consult: iter1 Claude REQUEST_CHANGES (doc↔impl contradictions: run selection, stale "no results UI"
+bullet, byte-stable overclaim, score ranges, judges order), Codex APPROVE → all fixed. iter2 **BOTH APPROVE**.
+
+### REVIEW phase — DONE. PR #50 OPEN.
+- Review doc written (codev/reviews/49-...md): spec compliance, deviations, metrics (64 commits, 260 tests),
+  consultation summary, lessons.
+- Arch/lessons routed via update-arch-docs skill: HOT arch-critical (+results-tier fact, 7→8), HOT
+  lessons-critical (+reconciliation pattern, 9→10), COLD lessons-learned (+porch force-advance, +shared-port
+  zombie-serve reap-group).
+- e2e green: py 110, js 150, typecheck+build clean. Branch pushed. **PR #50** created (Closes #49).
+- (.claude/hooks/ untracked = harness local config, pre-existing, NOT committed — not my deliverable.)
+- **PR gate is held for WALEED** (architect said so). Notifying. Do NOT merge myself.
+
 **Phase 5 consult: BOTH APPROVE first iteration** (judge selector structurally can't re-rank; steadfastness
 denominators correct; zero-coverage omission verified vs real shards). Only cosmetic suggestions.
 
