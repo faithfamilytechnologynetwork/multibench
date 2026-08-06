@@ -1,9 +1,27 @@
 id: '49'
 title: multibrowser-results-explorer-
 protocol: spir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: 'Export core: normalization, aggregation & parity'
+    status: in_progress
+  - id: phase_2
+    title: Export writer, manifest, CLI & committed launch dataset
+    status: pending
+  - id: phase_3
+    title: 'SPA results data layer: discovery, loader, validation & truncation fallback'
+    status: pending
+  - id: phase_4
+    title: Leaderboard route + framing / scope+steadfastness / pressure selectors (Gemini-ranked)
+    status: pending
+  - id: phase_5
+    title: Per-tradition drill-down (incl. steadfastness) + judge selector + Opus validation layer
+    status: pending
+  - id: phase_6
+    title: 'Documentation: results data-contract README + multibrowser README'
+    status: pending
+current_plan_phase: phase_1
 gates:
   spec-approval:
     status: approved
@@ -18,7 +36,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-08-05T23:42:45.960Z'
-updated_at: '2026-08-06T00:56:52.956Z'
+updated_at: '2026-08-06T00:57:08.828Z'
