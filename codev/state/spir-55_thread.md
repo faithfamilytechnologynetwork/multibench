@@ -269,3 +269,13 @@ Removed (kept the await for render sync). My opacity-50/data-void addition: arch
 degradation) but wanted it tested + documented. Added test "mutes a zero-contribution subject row"
 (Qwen data-void=true + opacity-50; sonnet not void). Noted in review doc as reviewed-and-kept deviation.
 181 tests green. Pushing to PR #59, pinging architect → pr gate to Waleed.
+
+## 2026-08-06 — MERGED (#59, merge commit 2bf8f5e). Verify phase.
+
+pr gate approved by Waleed; merged with a merge commit (NOT squash) per protocol. Pulled origin/main
+into worktree (only ahead by the PR merge — no concurrent merges) = true integrated state. Post-merge
+verification GREEN: check-types clean, 181 tests, bundle builds. Signaling verify-ready → verify-approval
+gate registers for the human. ACCEPTANCE stays with Waleed: architect runs production railway up →
+Waleed's live look-and-feel check → then verify-approval. #55 + parked #49 verify gate stay open until
+Waleed confirms; on merge architect closes #49 + retires its gate. Builder-side work is DONE; staying
+alive through verify.
