@@ -233,7 +233,7 @@ describe("/results leaderboard", () => {
   it("renders the per-tradition heat strip (labels + values), and it reframes with pressure", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     renderApp("/results");
-    let rows = await screen.findAllByTestId("standings-row");
+    await screen.findAllByTestId("standings-row");
     const sonnet = () => screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
     // sonnet strip: buddhism 0.600, taoism 0.800 — color is never the only encoding (aria-label carries the value).
     let cells = within(sonnet()).getAllByTestId("strip-cell");
@@ -252,7 +252,19 @@ describe("/results leaderboard", () => {
       const b = cells.find((c) => c.getAttribute("data-tradition") === "buddhism")!;
       expect(b).toHaveAttribute("aria-label", "buddhism: 0.100");
     });
-    void rows;
+  });
+
+  it("mutes a zero-contribution subject row (honest degradation: data-void + opacity)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    // Qwen has no data in the fixture → 0/N contributing → the row is marked void and visually muted.
+    const qwen = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject")?.includes("Qwen"))!;
+    expect(qwen).toHaveAttribute("data-void", "true");
+    expect(qwen.className).toContain("opacity-50");
+    // a subject WITH data for the selection is NOT marked void.
+    const sonnet = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    expect(sonnet).not.toHaveAttribute("data-void");
   });
 
   it("expanding a subject shows the DENSE per-tradition drill-down (Init/Post/Δ/framings + coverage)", async () => {

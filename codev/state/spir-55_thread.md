@@ -261,3 +261,11 @@ derivation documenting the full_grid dependency (revisit if invariant relaxes); 
 recorded in review doc; (3) spec/plan Status draft→approved (done prior commit). Optional nits folded:
 scope="col" on all table headers (main + drill sub-table); void rows (nContributing===0) muted
 opacity-50 + data-void. 180 tests green. Pushing to PR #59, pinging architect → pr gate to Waleed.
+
+## 2026-08-06 — Architect correction: void-rows nit was DEAD CODE. Fixed.
+
+Misread "void rows" nit = dead `void rows;` no-op at results.test.tsx:255 (+ its unused `let rows`).
+Removed (kept the await for render sync). My opacity-50/data-void addition: architect KEEPS it (honest
+degradation) but wanted it tested + documented. Added test "mutes a zero-contribution subject row"
+(Qwen data-void=true + opacity-50; sonnet not void). Noted in review doc as reviewed-and-kept deviation.
+181 tests green. Pushing to PR #59, pinging architect → pr gate to Waleed.

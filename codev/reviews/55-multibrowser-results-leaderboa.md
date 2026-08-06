@@ -78,6 +78,16 @@ count therefore equals every other column's count, and a single `k/N` is correct
 now documented at the derivation site in `ResultsPage.tsx` (revisit to a per-column count only if that
 invariant is ever relaxed to allow partial per-column coverage).
 
+## Reviewed-and-kept deviation — muted "void" rows
+
+An **unrequested UI addition** the architect reviewed and **kept**: a subject row with **zero
+contributing traditions** for the current selection (no data at this run/pressure) renders at
+`opacity-50` with a `data-void="true"` attribute — an honest-degradation cue that the row is empty
+rather than genuinely low-scoring. It arose from a misread of the "void rows" nit (which was actually
+dead test code, since removed); the architect judged the touch sensible and retained it. It is now
+**covered by a test** ("mutes a zero-contribution subject row …") and noted here so the deviation is on
+the record before Waleed's look-and-feel review.
+
 ## Architecture Updates
 
 **No hot-tier `arch-critical.md` change is warranted** — and that is the point worth recording. #55 is a
