@@ -276,3 +276,21 @@ all 3 presets now span all 7 traditions. This refines the spec's fixed "(scenari
 framing) tie-break" — flagging the architect (serves the spec's curation goal; both reviewers
 required it). Added cross-group diversity+determinism tests + write_dataset-emits-presets +
 --limit-confines-preset-entries tests. 176 green.
+
+### 2026-08-06 — architect APPROVED round-robin (CMAP-required spec refinement)
+Architect ruled round-robin approved; must be recorded in the REVIEW DOC (codev/reviews/51-*)
+as a CMAP-required spec refinement WITH the real-data evidence (all-36-in-buddhism → spans 7
+traditions). [TODO in Review phase.] Optional within-slot tie-break by "matched n" then
+lexicographic: SKIPPED — needs coverage(n_judged) threaded into the compact preset cell map
+(scores-only today), so NOT a one-liner; architect said one-liner-only. Noted here + will note
+in review. Proceeding phases 4-8.
+
+### 2026-08-06 — phase_4: committed launch dataset + README
+Re-exported BOTH tiers for run 20260803 from the same roots so their committed fingerprints
+MATCH (sha256:53c8ac98…): results/20260803/manifest.json gains `fingerprint` (+ new
+generated_at; shards byte-stable) — safe for the live SPA (resultsModel z.object strips unknown
+keys); results-raw/20260803/ = 519 gz shards, 126MB (uncompressed 449MB, ratio 3.56 → confirms
+gz-baked ~4× smaller than uncompressed). Wrote results-raw/README.md (contract, layout,
+allowlist, dual-source gz-baked, deploy-flow --no-gitignore, presets round-robin + conditions-
+nested params, fingerprint, CC-BY-4.0, toolchain-determinism caveat, produce/refresh). Committed
+results-raw/20260803 + README + results/20260803/manifest.json.

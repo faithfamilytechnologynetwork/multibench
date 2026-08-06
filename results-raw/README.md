@@ -1,0 +1,147 @@
+# `results-raw/` — committed, browsable **raw** judging-run datasets (transcripts + verdicts)
+
+Each `results-raw/<run-id>/` is a per-scenario export of a judging run that the **multibrowser**
+raw-results viewer reads at runtime — the raw counterpart to the scores-only [`results/`](../results/README.md)
+tier (Spec 49). Where `results/` carries aggregate slice tables, `results-raw/` carries, for
+every scenario, each **subject × framing × pressure** cell's **transcript** and its
+per-(judge, scope) **judge verdicts** (score, direction summary, rationale). Spec 51.
+
+Drop a new `results-raw/<run-id>/` in and it appears in the browser with **no code change**
+(same drop-in principle as `traditions/` and `results/`).
+
+## Layout
+
+```
+results-raw/<run-id>/
+  manifest.json                    # generic catalog (see below); no transcripts
+  <tradition>/<scenario>.json.gz   # one gzip shard per scenario (transcripts + verdicts)
+```
+
+- **519 shards** for the launch run (`20260803`), ~**126 MB gz** total (median 233 KB/shard,
+  max ≈ 533 KB). Shard paths are **manifest-declared** — the viewer never lists them via the
+  GitHub API.
+
+## Two public sources, identical content (dual-source, Spec 51 Decision 14)
+
+The exact same slimmed content is served from two places:
+
+1. **Committed GitHub tier** (this directory) — the **authoritative** copy and the **fallback**.
+   Read at runtime over SHA-pinned `raw.githubusercontent.com`.
+2. **Baked deploy bundle** — `railway up` bakes these **same gz shards** into the static site
+   (same-origin `public/data-raw/`), the **primary** source when present (no rate limits, no
+   API budget). Deploy is from the local machine, so the bundle is not constrained by what is
+   committed.
+
+The viewer resolves **baked-first, GitHub-fallback**, using the **source fingerprint** (below)
+to decide coherence, and shows a notice when serving the fallback. Refreshing the **baked**
+copy requires **re-export + `railway up --no-gitignore`** (Railway respects `.gitignore` by
+default, so the bake dir must be force-uploaded); the **GitHub** copy updates live on commit.
+
+## `manifest.json` (generic catalog)
+
+The catalog shape is **catalog-generic** (issue #54) — a non-MultiBench catalog (e.g. the
+AFB 0–4 explorer) uses the identical structure with different values. Nothing MultiBench-specific
+(`tradition`/`scenario`/framing/pressure names, the −1…+1 ramp) is baked into the *shape*.
+
+| field | meaning |
+|---|---|
+| `schema_version` | dataset schema version (currently **1**); the viewer rejects other versions with a notice. Stamped in the catalog **and every shard**. |
+| `dataset` | `{title, description, language, license}` — `license` is **`CC-BY-4.0`** (SPDX). |
+| `scale` | numeric score domain `{min, center, max}` (MultiBench: `-1 / 0 / +1`). No band names. |
+| `ramp` | the diverging color-ramp stops (the `scoreColor` colormap), catalog-declared data. |
+| `subjects` | `[{id, label}]` — catalog-declared (the run's subjects, not a leaderboard set). |
+| `judges` | `[{key, label, fullGrid}]` — `key` is the UI short name (`gemini`/`opus`); `fullGrid=false` (Opus honest-sample) is badged by the viewer. |
+| `conditionAxes` | `[{key, label, values:[{id,label}]}]` — MultiBench ships `framing` + `pressure`; the viewer iterates these generically. |
+| `groupBy` | the item grouping axis (`{key:"tradition", label}`). |
+| `scopes` | `[{id, label}]` — `turn1` (initial) / `full` (post-pressure). |
+| `items` | `[{id, label, group, shard}]` — one per scenario; `shard` is the manifest-declared path. |
+| `presets` | curated deep-link lists (below). |
+| `fingerprint` | `sha256:<hex>` over the resolved-judgments stream — see below. |
+
+There is **no `generated_at`/timestamp** anywhere in this tier — provenance is the fingerprint,
+so re-exports are byte-identical.
+
+## `<tradition>/<scenario>.json.gz` (shard)
+
+```jsonc
+{
+  "schema_version": 1,
+  "contexts": {                      // per-framing "what the model was told" text (deduped)
+    "stated": "[Context …]", "guided": "[Context …]"   // unstated has none
+  },
+  "cells": [
+    {
+      "subject": "claude-sonnet-5",
+      "conditions": {"framing": "unstated", "pressure": "secularize"},
+      "transcript": [{"role": "user", "content": "…"}, {"role": "assistant", "content": "…"}],
+      "contextKey": "stated",        // present only for stated/guided → contexts["stated"]
+      "verdicts": [
+        {"judge": "gemini", "scope": "turn1", "score": 1.0, "summary": "…", "rationale": "…"}
+      ]
+    }
+  ]
+}
+```
+
+- **Verdict** = `{judge, scope, score, summary, rationale?}`. `score` is a **number on −1…+1**
+  (the `is_valid_score` five-point scale, no rescale); `summary` is the judge's direction and is
+  **always present**; `rationale` is present when recorded. **Both judges** appear where present.
+- Transcripts come **only** from the full-grid (report.json-bearing) run; other roots contribute
+  verdicts only.
+
+### Export field allowlist (the only fields that ship)
+
+Per cell: `subject`, `conditions`, `transcript` (turns' `role`/`content` only), `contextKey`,
+`verdicts`. Per verdict: `judge`, `scope`, `score`, `summary`, `rationale?`. **Everything else is
+excluded** — judgment `usage`/`raw`/`ts`/`sitting_key`; sitting `attempts`/`usage`/`ts`/`model`.
+
+## Presets
+
+`manifest.presets` is a list of curated deep-link views (a preset with no qualifying entries is
+omitted): **Models split** (widest turn-1 cross-model spread), **Judges differed** (the two
+judges ≥ 1.0 apart at full scope), **Steadfastness cliff** (biggest post-pressure Gemini drop).
+Each is deterministic, capped at 12, one entry per scenario, and — because hundreds of scenarios
+tie at the max magnitude — **round-robined across traditions** so a preset is a genuinely
+cross-tradition curated view (a CMAP-required refinement of the spec's literal tie-break;
+verified to span all 7 traditions). Each entry's `params` carry
+`{group, item, scope, a, b?, conditions:{…}}` — condition-axis values are **nested** under
+`conditions` (matching the cell shape) so the viewer applies them generically.
+
+## Source fingerprint (cross-tier agreement)
+
+Both this tier's `manifest.json` **and** the `results/` manifest stamp the **same**
+`fingerprint` — a `sha256` over the sorted resolved-judgments stream (the shared
+`analysis.fingerprint`). The viewer/CI asserts they are equal for a given `<run-id>`; a mismatch
+means the two tiers were exported from different input states and is surfaced as a notice. This
+upgrades "produced by the same loaders" into a checkable invariant.
+
+**Determinism caveat:** byte-identical re-export holds within one Python/zlib toolchain. Export
+with the pinned `workflows/analysis` environment (`uv --project workflows/analysis`).
+
+## Producing / refreshing a dataset
+
+The exporter lives in `workflows/analysis` and **reuses the `results/` (#49) judgment loaders**
+(normalization, `judgments_v2` overlay, Opus-alias dedup). Run from the repo root against the
+full-grid **Gemini** run root (which carries `report.json` + `sittings.jsonl`) plus any
+report-less **Opus** judge layers:
+
+```bash
+uv --project workflows/analysis run python -m analysis export-raw \
+  tmp/judging-runs/20260803-merged \
+  tmp/judging-runs/20260803-unstated-opus \
+  tmp/judging-runs/20260803-framings-opus-sample \
+  --run-id 20260803 --out results-raw
+```
+
+Commit **only** the `results-raw/<run-id>/` output (never from the gitignored
+`tmp/judging-runs/`). Re-running with the same inputs is **byte-stable** (sorted keys, gzip
+`mtime=0`, no timestamp), so only shards whose scenarios changed rewrite. Add `--limit N` for a
+small dev fixture (its fingerprint covers only the written subset).
+
+**Keep the two tiers in sync:** refresh `results/` and `results-raw/` for the same `--run-id`
+from the same run roots so their fingerprints match.
+
+## Which run the SPA shows
+
+The raw view is reached **run-scoped** from `/results` (which selects the run). A raw view whose
+`results-raw/<run-id>/` counterpart is absent degrades to a notice.
