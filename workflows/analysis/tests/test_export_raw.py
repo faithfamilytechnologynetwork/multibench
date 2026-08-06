@@ -15,8 +15,8 @@ from pathlib import Path
 
 import pytest
 
+from analysis.aggregate import breakdown_mean, cell_scores
 from analysis.export_raw import (
-    CONTEXT_AXIS,
     SCHEMA_VERSION,
     build_catalog,
     build_raw_corpus,
@@ -24,7 +24,12 @@ from analysis.export_raw import (
     read_full_grid_sittings,
     source_fingerprint,
 )
-from analysis.export_results import JUDGE_UI, resolve_judgments
+from analysis.export_results import (
+    JUDGE_UI,
+    build_tradition_export,
+    read_run_root,
+    resolve_judgments,
+)
 from analysis.loaders import AnalysisInputError
 
 _TRAD = "buddhism"
@@ -187,8 +192,41 @@ def test_contexts_pool_present_for_stated_absent_for_unstated(tmp_path):
     shard = build_shard(scenario)
     assert shard["schema_version"] == SCHEMA_VERSION
     assert shard["contexts"]["stated"].startswith("[Context")
-    # the unstated cell references a framing not in the contexts pool
     assert "unstated" not in shard["contexts"]
+    # the stated cell carries an explicit contextKey into the pool; the unstated cell doesn't
+    by_framing = {c["conditions"]["framing"]: c for c in shard["cells"]}
+    assert by_framing["stated"]["contextKey"] == "stated"
+    assert "contextKey" not in by_framing["unstated"]
+
+
+def test_conflicting_context_prefix_across_cells_aborts(tmp_path):
+    # two subjects, same (scenario, stated framing), DIFFERENT prefix → pool is ambiguous
+    base = [
+        _jrow("gpt-5.6-terra", "BUD-001", "secularize", "stated", "turn1",
+              "gemini-3.6-flash", 1.0, "t1"),
+        _jrow("claude-sonnet-5", "BUD-001", "secularize", "stated", "turn1",
+              "gemini-3.6-flash", 1.0, "t2"),
+    ]
+    sittings = [
+        _srow("gpt-5.6-terra", "BUD-001", "secularize", "stated", context_prefix="[A]"),
+        _srow("claude-sonnet-5", "BUD-001", "secularize", "stated", context_prefix="[B]"),
+    ]
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra", "claude-sonnet-5"], judges=["gemini-3.6-flash"])
+    with pytest.raises(AnalysisInputError, match="conflicting context_prefix for framing"):
+        build_raw_corpus([root])
+
+
+def test_report_scenario_without_sittings_aborts(tmp_path):
+    # report lists BUD-001 and BUD-002 but only BUD-001 has sittings → partial full-grid run
+    base = [_jrow("gpt-5.6-terra", "BUD-001", "secularize", "unstated", "turn1",
+                  "gemini-3.6-flash", 1.0, "t1")]
+    sittings = [_srow("gpt-5.6-terra", "BUD-001", "secularize", "unstated")]
+    root = _write_run(
+        tmp_path / "fg", base=base, sittings=sittings,
+        report=_report(["BUD-001", "BUD-002"], ["gpt-5.6-terra"], ["gemini-3.6-flash"]))
+    with pytest.raises(AnalysisInputError, match="have no full-grid sittings"):
+        build_raw_corpus([root])
 
 
 def test_orphan_verdict_without_transcript_aborts(tmp_path):
@@ -273,7 +311,6 @@ def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
     assert cat["dataset"]["license"] == "CC-BY-4.0"
     assert cat["scale"] == {"min": -1.0, "center": 0.0, "max": 1.0}
     assert cat["ramp"][0].startswith("#") and len(cat["ramp"]) == 7  # scoreColor stops, no labels
-    assert cat["contextAxis"] == CONTEXT_AXIS
     assert cat["subjects"] == [{"id": "gpt-5.6-terra", "label": "gpt-5.6-terra"}]
     assert {a["key"] for a in cat["conditionAxes"]} == {"framing", "pressure"}
     assert cat["judges"] == [{"key": "gemini", "label": "gemini", "fullGrid": True}]
@@ -288,6 +325,56 @@ def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
 # ── Fingerprint ─────────────────────────────────────────────────────────────────────
 
 
+# ── Agreement with the score tier + field allowlist ─────────────────────────────────
+
+
+def test_raw_verdicts_reconcile_with_score_tier_aggregate(tmp_path):
+    """Spec Test 2: a score-tier slice recomputed from the raw verdict stream equals the
+    #49 export's slice — the raw and score tiers cannot disagree (same resolved stream)."""
+    root = _one_cell_corpus(tmp_path)
+    corpus = build_raw_corpus([root])
+    raws = [read_run_root(root)[_TRAD]]
+    te = build_tradition_export(_TRAD, raws)  # the #49 score-tier export
+
+    # recompute the (gemini, gpt-5.6-terra, unstated, full, secularize) slice from raw verdicts
+    cs = cell_scores([r for r in corpus.resolved if r["judge"] == "gemini-3.6-flash"])
+    recomputed = breakdown_mean(cs, "gpt-5.6-terra", framing="unstated", scope="full",
+                                pressure="secularize")
+    slice_key = ("gemini-3.6-flash", "gpt-5.6-terra", "unstated", "full", "secularize")
+    assert recomputed == te.means[slice_key].mean == 0.5
+
+
+def _all_keys(obj, acc):
+    if isinstance(obj, dict):
+        acc.update(obj.keys())
+        for v in obj.values():
+            _all_keys(v, acc)
+    elif isinstance(obj, list):
+        for v in obj:
+            _all_keys(v, acc)
+    return acc
+
+
+def test_field_allowlist_no_disallowed_keys_in_shards_or_catalog(tmp_path):
+    """Spec Test 8: harness-only fields never leave the exporter."""
+    root = _one_cell_corpus(tmp_path)
+    corpus = build_raw_corpus([root])
+    scenario = corpus.per_tradition[_TRAD].scenarios[0]
+    shard = build_shard(scenario)
+    catalog = build_catalog(corpus)
+    disallowed = {"usage", "raw", "attempts", "ts", "sitting_key", "model", "context_prefix"}
+    assert not (_all_keys(shard, set()) & disallowed)
+    assert not (_all_keys(catalog, set()) & disallowed)
+    # positive: cell + verdict keys are within the allowed sets
+    for cell in shard["cells"]:
+        assert set(cell) <= {"subject", "conditions", "transcript", "verdicts", "contextKey"}
+        assert set(cell["conditions"]) == {"framing", "pressure"}
+        for turn in cell["transcript"]:
+            assert set(turn) == {"role", "content"}
+        for v in cell["verdicts"]:
+            assert set(v) <= {"judge", "scope", "score", "summary", "rationale"}
+
+
 def test_fingerprint_deterministic_order_independent(tmp_path):
     root = _one_cell_corpus(tmp_path)
     corpus = build_raw_corpus([root])
@@ -300,7 +387,6 @@ def test_fingerprint_matches_resolved_stream_and_changes_on_edit(tmp_path):
     root = _one_cell_corpus(tmp_path)
     corpus = build_raw_corpus([root])
     # the corpus stream equals resolve_judgments over the same root (one tradition here)
-    from analysis.export_results import read_run_root
     raws = [read_run_root(root)[_TRAD]]
     assert source_fingerprint(corpus.resolved) == source_fingerprint(resolve_judgments(raws))
     # mutating a score changes the fingerprint

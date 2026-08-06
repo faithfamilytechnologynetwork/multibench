@@ -34,6 +34,7 @@ from analysis.export_results import (
     JUDGE_UI,
     SCOPES,
     RawTradition,
+    _scenario_universe,
     normalize_subject,
     read_run_root,
     resolve_judgments,
@@ -41,11 +42,6 @@ from analysis.export_results import (
 from analysis.loaders import AnalysisInputError
 
 SCHEMA_VERSION = 1
-
-# The single context axis (framing) whose per-value prefix text ("what the model was told")
-# is shipped in each shard's `contexts` pool. Declared in the catalog so the viewer resolves
-# `contexts[cell.conditions[contextAxis]]` generically; a catalog may omit it.
-CONTEXT_AXIS = "framing"
 
 # The dataset block for the MultiBench catalog. License is CC-BY-4.0 (spec Decision 7).
 _DATASET = {
@@ -74,10 +70,6 @@ def _humanize(value: str) -> str:
 # A deterministic hash over the resolved-judgments stream. Both tiers compute it from the
 # SAME input shape so a per-run equality check upgrades "same loaders" to a checkable
 # invariant (spec Decision 2). Field order is fixed here and must never change silently.
-
-_FINGERPRINT_FIELDS: tuple[str, ...] = (
-    "subject", "scenario_id", "pressure", "framing", "judge", "scope",
-)
 
 
 def _fingerprint_tuple(row: dict) -> list:
@@ -217,11 +209,10 @@ class RawScenario:
 
 @dataclass(frozen=True)
 class RawTraditionExport:
-    """One tradition's raw scenarios + the judges present."""
+    """One tradition's raw scenarios (sorted by scenario_id)."""
 
     tradition: str
-    scenarios: list[RawScenario]    # sorted by scenario_id
-    judges: list[str]               # canonical judge model-ids present (sorted)
+    scenarios: list[RawScenario]
 
 
 @dataclass(frozen=True)
@@ -292,8 +283,6 @@ def _build_scenario(scenario_id: str, tradition: str,
     for (subj, sc, pr, fr), sitting in sittings.items():
         if sc != scenario_id:
             continue
-        if sitting.context_prefix is not None:
-            contexts.setdefault(fr, sitting.context_prefix)
         cell = {
             "subject": subj,
             "conditions": {"framing": fr, "pressure": pr},
@@ -303,6 +292,17 @@ def _build_scenario(scenario_id: str, tradition: str,
                 key=lambda v: (v["judge"], _SCOPE_ORDER.get(v["scope"], 99)),
             ),
         }
+        if sitting.context_prefix is not None:
+            # Pool by framing; a differing prefix for the same framing within a scenario is a
+            # run inconsistency (never silently first-wins — the pool must be unambiguous).
+            existing = contexts.get(fr)
+            if existing is not None and existing != sitting.context_prefix:
+                raise AnalysisInputError(
+                    f"{scenario_id}: conflicting context_prefix for framing {fr!r} "
+                    f"(the per-shard contexts pool is keyed by framing and must be unambiguous)"
+                )
+            contexts[fr] = sitting.context_prefix
+            cell["contextKey"] = fr  # opaque key into the shard's contexts pool
         cells.append(cell)
     cells.sort(key=lambda c: (
         _SUBJECT_ORDER.get(c["subject"], 99),
@@ -323,7 +323,7 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
     (orphan — a half-copied run root), and a sitting scenario outside the report universe
     (an inconsistent run).
     """
-    universe = _resolve_universe(tradition, raws)
+    universe = set(_scenario_universe(raws, tradition))  # reuse #49's helper (no fork)
 
     sitting_scenarios = {sc for (_su, sc, _pr, _fr) in full_grid_sittings}
     stray = sitting_scenarios - universe
@@ -331,6 +331,12 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
         raise AnalysisInputError(
             f"{tradition}: full-grid sittings reference scenarios {sorted(stray)} outside the "
             f"report universe ({len(universe)} scenarios) — inconsistent run"
+        )
+    missing = universe - sitting_scenarios
+    if missing:
+        raise AnalysisInputError(
+            f"{tradition}: report universe scenarios {sorted(missing)} have no full-grid "
+            f"sittings — a partial full-grid run must not produce a partial public tier"
         )
 
     verdicts_by_cell: dict[tuple, list[dict]] = {}
@@ -347,22 +353,7 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
         _build_scenario(sc, tradition, full_grid_sittings, verdicts_by_cell)
         for sc in sorted(sitting_scenarios)
     ]
-    judges = sorted({row["judge"] for row in resolved})
-    return RawTraditionExport(tradition=tradition, scenarios=scenarios, judges=judges)
-
-
-def _resolve_universe(tradition: str, raws: list[RawTradition]) -> set[str]:
-    """The full-grid scenario universe from report.json (reuses export_results' semantics)."""
-    reports = [r.report for r in raws if r.report is not None]
-    if not reports:
-        raise AnalysisInputError(f"{tradition}: no report.json to pin the scenario universe")
-    universe = set(reports[0].get("by_scenario", {}))
-    if not universe:
-        raise AnalysisInputError(f"{tradition}: report.json has an empty by_scenario universe")
-    for other in reports[1:]:
-        if set(other.get("by_scenario", {})) != universe:
-            raise AnalysisInputError(f"{tradition}: run roots disagree on the scenario universe")
-    return universe
+    return RawTraditionExport(tradition=tradition, scenarios=scenarios)
 
 
 def build_raw_corpus(roots: list[str | Path]) -> RawCorpus:
@@ -450,7 +441,6 @@ def build_catalog(corpus: RawCorpus) -> dict:
             {"key": "pressure", "label": "Pressure",
              "values": [{"id": p, "label": _humanize(p)} for p in PRESSURES]},
         ],
-        "contextAxis": CONTEXT_AXIS,
         "groupBy": {"key": "tradition", "label": "Tradition"},
         "scopes": [{"id": s, "label": s} for s in SCOPES],
         "items": items,
