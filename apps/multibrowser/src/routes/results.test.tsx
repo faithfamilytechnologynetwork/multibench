@@ -10,15 +10,16 @@ const SHA = "deadbeef";
 // Per-tradition means so the leaderboard's mean-of-means is a clean number:
 //   claude-sonnet-5 unstated/full/all: buddhism 0.6, taoism 0.8 → 0.700 (rank 1)
 //   gemini-3.6-flash unstated/full/all: buddhism 0.2, taoism 0.4 → 0.300 (rank 2)
-//   claude-sonnet-5 unstated/turn1/all: buddhism 0.2, taoism 0.0 → 0.100
-//   claude-sonnet-5 stated/full/all:    buddhism 0.9, taoism 0.9 → 0.900
-// sonnetSecularize: unstated/full/secularize (a specific pressure); sonnetStead: unstated steadfastness/all
+//   claude-sonnet-5 unstated/turn1/all: buddhism 0.2, taoism 0.0 → 0.100 (Initial column)
+//   gemini-3.6-flash unstated/turn1/all: 0.5, 0.5 → 0.500 (so sorting by Initial REORDERS vs post-rank)
+//   claude-sonnet-5 stated/full/all:    buddhism 0.9, taoism 0.9 → 0.900 (Stated column)
+//   sonnetSecularize: unstated/full/secularize (a specific pressure); sonnetStead: unstated steadfastness/all
 const VALS: Record<string, {
-  sonnetFull: number; sonnetTurn1: number; geminiFull: number; sonnetStated: number;
-  sonnetSecularize: number; sonnetStead: number;
+  sonnetFull: number; sonnetTurn1: number; geminiFull: number; geminiTurn1: number;
+  sonnetStated: number; sonnetSecularize: number; sonnetStead: number;
 }> = {
-  buddhism: { sonnetFull: 0.6, sonnetTurn1: 0.2, geminiFull: 0.2, sonnetStated: 0.9, sonnetSecularize: 0.5, sonnetStead: 0.4 },
-  taoism: { sonnetFull: 0.8, sonnetTurn1: 0.0, geminiFull: 0.4, sonnetStated: 0.9, sonnetSecularize: 0.3, sonnetStead: 0.8 },
+  buddhism: { sonnetFull: 0.6, sonnetTurn1: 0.2, geminiFull: 0.2, geminiTurn1: 0.5, sonnetStated: 0.9, sonnetSecularize: 0.5, sonnetStead: 0.4 },
+  taoism: { sonnetFull: 0.8, sonnetTurn1: 0.0, geminiFull: 0.4, geminiTurn1: 0.5, sonnetStated: 0.9, sonnetSecularize: 0.3, sonnetStead: 0.8 },
 };
 
 function shardFor(t: string) {
@@ -31,7 +32,9 @@ function shardFor(t: string) {
       },
       stated: { full: { all: [v.sonnetStated, 2, 12] } },
     },
-    "gemini-3.6-flash": { unstated: { full: { all: [v.geminiFull, 2, 12] } } },
+    "gemini-3.6-flash": {
+      unstated: { full: { all: [v.geminiFull, 2, 12] }, turn1: { all: [v.geminiTurn1, 2, 12] } },
+    },
   };
   const means: Record<string, unknown> = { "gemini-3.6-flash": gemini };
   // Opus (validation) data ONLY for buddhism → taoism is omitted in the Opus drill-down, and the
@@ -56,6 +59,16 @@ function files() {
   return resultsFiles("20260803", { traditions: ["buddhism", "taoism"], shard: shardFor });
 }
 
+/** A counting wrapper to assert the leaderboard adds no on-budget GitHub API calls for results data. */
+function countingFetch(base: ReturnType<typeof fakeFetch>) {
+  const calls: string[] = [];
+  const wrapped = ((input: RequestInfo | URL) => {
+    calls.push(typeof input === "string" ? input : input.toString());
+    return base(input as RequestInfo);
+  }) as typeof fetch;
+  return { wrapped, calls };
+}
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe("/results leaderboard", () => {
@@ -70,6 +83,19 @@ describe("/results leaderboard", () => {
     expect(within(gem).getByTestId("standings-score")).toHaveTextContent("0.300");
   });
 
+  it("renders the dense columns (Initial / Post / Δ + per-framing) at a glance", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    const rows = await screen.findAllByTestId("standings-row");
+    const sonnet = rows.find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    expect(within(sonnet).getByTestId("cell-initial")).toHaveTextContent("0.100");
+    expect(within(sonnet).getByTestId("standings-score")).toHaveTextContent("0.700"); // Post
+    expect(within(sonnet).getByTestId("cell-delta")).toHaveTextContent("0.600"); // shard steadfastness, not post−initial
+    expect(within(sonnet).getByTestId("cell-unstated")).toHaveTextContent("0.700"); // == Post by definition
+    expect(within(sonnet).getByTestId("cell-stated")).toHaveTextContent("0.900");
+    expect(within(sonnet).getByTestId("cell-guided")).toHaveTextContent("—"); // no guided data
+  });
+
   it("the run label names the run + tradition count", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     renderApp("/results");
@@ -77,58 +103,73 @@ describe("/results leaderboard", () => {
     expect(screen.getByTestId("results-run-label")).toHaveTextContent("2 traditions");
   });
 
-  it("changing the metric to first-response updates the table AND the URL (deep-link)", async () => {
+  it("sorting a column reorders the display, but the canonical rank persists (+ deep-links)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     const { router } = renderApp("/results");
-    await screen.findAllByTestId("standings-row");
-    await userEvent.click(within(screen.getByTestId("sel-metric")).getByText("First response"));
-    await waitFor(() =>
-      expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.100"),
-    );
-    expect(router.state.location.searchStr).toContain("metric=turn1");
+    let rows = await screen.findAllByTestId("standings-row");
+    // canonical (post desc): sonnet rank 1, gemini rank 2
+    expect(rows[0]).toHaveAttribute("data-subject", "claude-sonnet-5");
+    // sort by Initial desc: gemini (0.500) > sonnet (0.100) → gemini displays first
+    await userEvent.click(within(screen.getByTestId("col-initial")).getByRole("button"));
+    await waitFor(() => {
+      rows = screen.getAllByTestId("standings-row");
+      expect(rows[0]).toHaveAttribute("data-subject", "gemini-3.6-flash");
+    });
+    // …but the Rank column is unchanged: gemini still shows canonical rank 2, sonnet rank 1.
+    const gem = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "gemini-3.6-flash")!;
+    const son = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    expect(within(gem).getByTestId("standings-rank")).toHaveTextContent("2");
+    expect(within(son).getByTestId("standings-rank")).toHaveTextContent("1");
+    expect(router.state.location.searchStr).toContain("sort=initial.desc");
   });
 
-  it("honors a deep-linked framing+metric on first load", async () => {
-    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
-    renderApp("/results?framing=stated&metric=full");
-    const rows = await screen.findAllByTestId("standings-row");
-    // claude-sonnet-5 stated/full/all = 0.900
-    expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.900");
-  });
-
-  it("the framing selector updates the table AND the URL", async () => {
-    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
-    const { router } = renderApp("/results");
-    await screen.findAllByTestId("standings-row");
-    await userEvent.click(within(screen.getByTestId("sel-framing")).getByText("Stated"));
-    await waitFor(() =>
-      expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.900"),
-    );
-    expect(router.state.location.searchStr).toContain("framing=stated");
-  });
-
-  it("the pressure selector filters + updates the URL", async () => {
+  it("the pressure selector reframes the whole table + updates the URL", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     const { router } = renderApp("/results");
     await screen.findAllByTestId("standings-row");
     await userEvent.click(within(screen.getByTestId("sel-pressure")).getByText("secularize"));
-    // claude-sonnet-5 unstated/full/secularize: (0.5 + 0.3)/2 = 0.400
+    // claude-sonnet-5 unstated/full/secularize: (0.5 + 0.3)/2 = 0.400 (Post column reframed)
     await waitFor(() =>
       expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.400"),
     );
     expect(router.state.location.searchStr).toContain("pressure=secularize");
   });
 
-  it("the steadfastness metric reads the steadfastness slice", async () => {
+  it("ignores a stale ?framing=/?metric= deep link (renders the default board, no crash)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results?framing=stated&metric=turn1");
+    const rows = await screen.findAllByTestId("standings-row");
+    // stale v1 params ignored: canonical board, sonnet Post 0.700 first.
+    expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.700");
+  });
+
+  it("a second published run is selectable and loads its own table", async () => {
+    const two = {
+      ...resultsFiles("20260803", { generatedAt: "2026-08-03T00:00:00+00:00", traditions: ["buddhism", "taoism"], shard: shardFor }),
+      ...resultsFiles("20260901", { generatedAt: "2026-09-01T00:00:00+00:00", traditions: ["buddhism"], shard: shardFor }),
+    };
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, two));
     const { router } = renderApp("/results");
+    // newest (20260901) is the default.
+    expect(await screen.findByTestId("results-run-label")).toHaveTextContent("20260901");
+    await userEvent.click(within(screen.getByTestId("sel-run")).getByText("20260803"));
+    await waitFor(() => expect(screen.getByTestId("results-run-label")).toHaveTextContent("20260803"));
+    expect(screen.getByTestId("results-run-label")).toHaveTextContent("2 traditions"); // 20260803 has both
+    expect(router.state.location.searchStr).toContain("run=20260803");
+  });
+
+  it("adds no on-budget GitHub API call for results data (all shards via raw)", async () => {
+    const { wrapped, calls } = countingFetch(fakeFetch(REPO, SHA, files()));
+    vi.stubGlobal("fetch", wrapped);
+    renderApp("/results");
     await screen.findAllByTestId("standings-row");
-    await userEvent.click(within(screen.getByTestId("sel-metric")).getByText("Steadfastness (Δ)"));
-    // claude-sonnet-5 unstated steadfastness/all: (0.4 + 0.8)/2 = 0.600
-    await waitFor(() =>
-      expect(within(screen.getByTestId("leaderboard")).getAllByTestId("standings-score")[0]).toHaveTextContent("0.600"),
-    );
-    expect(router.state.location.searchStr).toContain("metric=steadfastness");
+    const recursiveTrees = calls.filter((u) => u.includes("/git/trees/") && u.includes("recursive=1"));
+    expect(recursiveTrees.length).toBe(1); // one snapshot tree, not per-shard
+    // No results manifest/shard was fetched through the api.github.com budget — only via raw.
+    const apiResults = calls.filter((u) => u.includes("api.github.com") && u.includes("results/"));
+    expect(apiResults).toHaveLength(0);
+    const rawResults = calls.filter((u) => u.includes("raw.githubusercontent.com") && u.includes("results/"));
+    expect(rawResults.length).toBeGreaterThan(0); // manifest + shards, all off-budget
   });
 
   it("renders a notice (not a blank page) on a malformed manifest", async () => {

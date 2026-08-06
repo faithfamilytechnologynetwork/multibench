@@ -125,3 +125,18 @@ drill-down inclusion via a non-first-framing slice (framings.some branch). 167 t
 on origin/main → 27 docs/paper/* files would ride in my PR. This is the known branch-from-local-HEAD
 leak. Plan: rebase spir-55 commits onto origin/main at PR prep (Phase 4) so the PR carries only my
 changes. Flagged to architect. NOT rebasing mid-implement.
+
+## 2026-08-06 — Phase 2 DONE: dense sortable table + URL state (presentation swap).
+
+resultsSelection.ts: new shape {runId, judge, pressure, sort:{key,dir}|null, expanded[]} — dropped
+framing/metric; parseSort (headline|framing-id validation, dir defaults desc, invalid→null; framing
+ids accepted optimistically w/o manifest since page re-parses); parseExpanded (dedupe/trim); stale
+?framing/?metric ignored. ResultsPage.tsx: dense board — computeLeaderboardRows→sortRows; columns
+#|Subject|Initial|Post|Δ|<framings>|Traditions(k/N from non-null strip); sortable numeric headers
+(aria-sort, desc→asc toggle) w/ persistent canonical rank; NEW run selector (when >1 run); pressure
+reframes whole table; RETAINED #49 drill-down + judge selector + opus-caption via Slice literal
+{framings[0],full,pressure} (no dangling caption); caption noting Post==first-framing column.
+results.test.tsx: +geminiTurn1 so Initial-sort reorders; rewrote metric/framing-selector tests →
+dense-columns, sort+persistent-rank, stale-param, run-switch (2 runs), API-budget call-log (1 tree,
+0 results-via-api, shards via raw). resultsSelection.test.ts rewritten for new shape.
+check-types green; 171 tests. Only the 4 intended files touched. expanded[] wired to URL in Phase 3.
