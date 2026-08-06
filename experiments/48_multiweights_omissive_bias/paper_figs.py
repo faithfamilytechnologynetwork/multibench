@@ -11,13 +11,17 @@ Out: experiments/48_multiweights_omissive_bias/figures/{afb_distribution,traditi
 """
 import json
 import pathlib
-from collections import defaultdict
+import sys
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import numpy as np
 
 EXP = pathlib.Path(__file__).resolve().parent
+# Single source of truth for the diverging score palette — import the analysis colors module
+# (pure-python, no matplotlib) instead of duplicating the stops.
+sys.path.insert(0, str(EXP.parent.parent / "workflows" / "analysis"))
+from analysis.colors import STOPS  # noqa: E402
 EVAL = EXP / "data" / "output" / "eval"
 COLL = EXP / "data" / "output" / "collection"
 DESC = EXP / "data" / "output" / "descriptive"
@@ -29,8 +33,7 @@ SURFACE, INK, INK2, MUTED = "#ffffff", "#0b0b0b", "#52514e", "#898781"
 GRID, BASELINE = "#e1e0d9", "#c3c2b7"
 HEAD = {"base": "#c3c2b7", "sft": "#3987e5", "dpo": "#1c5cab"}   # progression: grey → mid → dark blue
 HEAD_LAB = {"base": "base", "sft": "+SFT", "dpo": "+SFT+DPO"}
-# diverging score stops (colors.py) for the gradient dots
-STOPS = ("#9E1B32", "#D6604D", "#F4A582", "#D9D2C5", "#A6D49A", "#5AAE61", "#1B7837")
+# diverging score stops for the gradient dots come from analysis.colors.STOPS (imported above).
 TLAB = {"sunni-islam": "Sunni Islam", "buddhism": "Buddhism", "taoism": "Taoism",
         "secular-sage": "Secular sage", "roman-catholicism": "R. Catholicism",
         "eastern-christianity": "E. Christianity", "judaism": "Judaism"}

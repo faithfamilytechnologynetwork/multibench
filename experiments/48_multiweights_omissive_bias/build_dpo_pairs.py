@@ -35,7 +35,9 @@ def main():
         sfile = MINE / t / "sittings.jsonl"
         jfile = MINE / t / "judgments.jsonl"
         if not sfile.exists() or not jfile.exists():
-            continue
+            raise FileNotFoundError(
+                f"mining data missing for {t}: {sfile} / {jfile} — run mine_dpo_sample.py "
+                "and band the output before build_dpo_pairs.py (fail-fast, no silent skip)")
         # full-scope score per (subject, scenario, pressure)
         score = {}
         for line in jfile.open():

@@ -5,7 +5,7 @@ Soft-mode EXPERIMENT builder. Spec: `codev/specs/48-multiweights-omissive-bias.m
 ## 2026-08-04 — startup & orientation
 
 Read spec + taqwabench methodology doc
-(`/Users/mwk/Development/fftn/taqwabench/tmp/dpo-experiment/methodology-for-multibench.md`)
+(`<taqwabench>/tmp/dpo-experiment/methodology-for-multibench.md`)
 + reference DPO script suite (same dir) + `docs/therapeutic-priors.md`.
 
 **Architect sequencing constraints (2026-08-04T21:47Z):**
@@ -75,7 +75,7 @@ speculative ahead of the samplability GATE. Ending turn to stay reachable; will 
   stack) ABSORBS the collection-vs-eval shift; (2) OpenRouter may serve a quantized host →
   record serving host from response metadata per call (verify field at smoke, don't guess);
   (3) my Modal/vLLM work = the eval stack + same-stack control, not wasted.
-- Key: `set -a; source /Users/mwk/Development/fftn/taqwabench/.env; set +a`. NEVER into repo/logs/PR.
+- Key: `set -a; source <taqwabench>/.env; set +a`. NEVER into repo/logs/PR.
 
 **TIMING reset:** collection now shares the framings key+quota → collection AND banding both
 wait for architect's word (mop-up done within hours). Earlier "smoke cleared now" is superseded

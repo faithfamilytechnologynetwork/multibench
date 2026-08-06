@@ -9,7 +9,7 @@ opted-out while holding secular/MMLU; per-tradition gradient flips all 7 traditi
 
 Spec: [`codev/specs/48-multiweights-omissive-bias.md`](../../codev/specs/48-multiweights-omissive-bias.md)
 Reference recipe (JaleesModel / taqwabench):
-`/Users/mwk/Development/fftn/taqwabench/tmp/dpo-experiment/methodology-for-multibench.md`
+`<taqwabench>/tmp/dpo-experiment/methodology-for-multibench.md`
 + script suite in the same directory. Public trail: `github.com/iaser-ai/jaleesbench` issue 21.
 
 ## Goal
@@ -129,7 +129,7 @@ collection runs, **record the per-call provider distribution as a table** (below
 if one host dominates pathologically OR the mix looks wrong at the samplability-diagnostic stage,
 raise it with the architect before training.
 
-**Keys**: `OPENROUTER_API_KEY` via `(set -a; source /Users/mwk/Development/fftn/taqwabench/.env; set +a)`.
+**Keys**: `OPENROUTER_API_KEY` via `(set -a; source <taqwabench>/.env; set +a)`.
 **NEVER** copy the key into repo / logs / PR text — public repo, funded key.
 
 ## Gates & sequencing (architect, 2026-08-04)
