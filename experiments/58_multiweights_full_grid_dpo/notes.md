@@ -32,6 +32,21 @@ Ship the new head `mb-dpo-full` **iff it is weakly better (≥) than `mb-sft-dpo
 Any gate missed → **incumbent stands**, and this is reported as an honest scaling-null. No re-scoring,
 no gate relaxation after numbers land.
 
+**Chat-mode capability ANCHOR GUARD (architect 2026-08-06, cross-programme calibration)** — from
+taqwabench's independent base run, same model + harness mode (lm-eval vllm, `--apply_chat_template
+--fewshot_as_multiturn`, max_len 8192):
+
+| metric (chat mode) | taqwabench base anchor | external anchors | my base must land |
+|---|---|---|---|
+| MMLU | **82.8 (±0.3)** | RedHat 85.4 / Google 85.2 (MMLU-Pro) | within ~±3 pts |
+| GSM8K-CoT strict | **95.8** | — | within ~±3 pts |
+| IFEval prompt-strict | **91.7** | — | within ~±3 pts |
+
+**Guard**: my `base` checkpoint (this rerun) must land within ~±3 pts of all three. Outside that band =
+**CONFIG problem, not model → HALT and ping**; do NOT proceed to the tuned checkpoints on an off-band
+base. Record taqwabench's numbers + mine side-by-side here as the calibration. For the four-gate
+comparison, report **BOTH prompt-strict AND inst-strict IFEval** (don't compare across metric variants).
+
 **Gate-4 re-anchoring (architect 2026-08-06, measurement-defect fix)**: #48's capability panel ran
 lm-eval in **raw-completion mode** on an instruction-tuned model, so its MMLU 0.4424 (and all #48
 capability numbers) are **completion-mode artifacts** — base gemma-4-31b-it is ~85-class MMLU

@@ -88,3 +88,14 @@ probe of the serving path — exp-57 resumes only after my refill confirms stabi
 - Resumed refill `brlcyfbe8` (dedup → only the 702 missing). **Stop-on-disable stays ARMED**: any
   disable → kill + ping, no retry.
 - On clean completion → banding authorized (proceed).
+
+## 2026-08-06 — banding validated + launched; capability anchor-guard recorded (16:15Z)
+
+- Banding probe (taoism 192): 192/192 judged, 0 failed, all full-scope, scores on -1..+1 ladder,
+  schema = build_dpo_pairs inputs. Path validated → launched FULL banding `bjccqvgj3` (6 remaining
+  traditions; driver resumable, skips taoism).
+- Architect anchor-guard for the chat-mode capability panel recorded in notes: taqwabench base (same
+  harness) MMLU 82.8/GSM8K 95.8/IFEval-prompt 91.7; my base must be within ~±3 pts or HALT+ping
+  (config problem). Report both prompt-strict AND inst-strict IFEval for the gate.
+- Next: banding done → build+combine pairs (487 + new) → reconcile EXACT banding usage-actual →
+  PING-before-DPO → DPO mb-dpo-full → lean battery (AFB cold + probes + 4-ckpt chat capability).
