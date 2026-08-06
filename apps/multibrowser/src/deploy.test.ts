@@ -74,7 +74,11 @@ describe("build / deploy invariants", () => {
     // The ~126 MB gz raw tier is baked into `public/data-raw/` ONLY at `railway up` time (see
     // scripts/bake-and-deploy.sh) and gitignored; a normal `pnpm build` (this test's beforeAll)
     // must not carry it into `dist/`, or every CI/dev build would balloon.
-    expect(existsSync("dist/data-raw")).toBe(false);
+    expect(
+      existsSync("dist/data-raw"),
+      "dist/data-raw exists — you have a leftover local bake. Run `rm -rf apps/multibrowser/public/data-raw` " +
+        "and rebuild; the baked tier is deploy-only (bake-and-deploy.sh cleans it via an EXIT trap).",
+    ).toBe(false);
     // And the baked dir is gitignored so it never lands in git.
     expect(readFileSync(".gitignore", "utf8")).toMatch(/public\/data-raw\//);
   });

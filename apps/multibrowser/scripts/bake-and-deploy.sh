@@ -22,6 +22,9 @@ RUN_ID="${1:?usage: bake-and-deploy.sh <run-id> <run-root>...}"; shift
 [ "$#" -ge 1 ] || { echo "error: at least one run-root is required" >&2; exit 2; }
 # Validate RUN_ID as a safe single path segment BEFORE any rm/mkdir (it's interpolated into paths).
 [[ "$RUN_ID" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]] || { echo "error: unsafe run-id '$RUN_ID'" >&2; exit 2; }
+# Must run from the repo root — every path below (OUT, the uv --project, the run-roots) is repo-relative.
+[ -d apps/multibrowser ] && [ -d workflows/analysis ] || {
+  echo "error: run from the repo root (expected apps/multibrowser/ and workflows/analysis/ here)" >&2; exit 2; }
 
 OUT="apps/multibrowser/public/data-raw"
 # The baked dir is deploy-only (gitignored). Always remove it on exit so a later `pnpm build`

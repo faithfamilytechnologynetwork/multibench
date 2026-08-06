@@ -327,6 +327,17 @@ describe("GitHubRawSource / BakedRawSource fetch shapes", () => {
     expect(await src.catalogText("run1")).toBeNull();
   });
 
+  it("BakedRawSource treats a 200 text/html (SPA history fallback) as absent — catalog + shard", async () => {
+    // `serve -s dist` answers a MISSING baked file with 200 + index.html, not a 404. Both reads
+    // must report "absent" (null) so the clean baked→GitHub fallback fires, not a parse/gunzip error.
+    const html = "<!doctype html><html><body id=\"root\"></body></html>";
+    const fetchImpl = (async () =>
+      new Response(html, { status: 200, headers: { "content-type": "text/html; charset=utf-8" } })) as unknown as typeof fetch;
+    const src = new BakedRawSource("data-raw", fetchImpl);
+    expect(await src.catalogText("run1")).toBeNull();
+    expect(await src.shardText("run1", "buddhism/BUD-001.json.gz")).toBeNull();
+  });
+
   it("BakedRawSource resolves root-anchored URLs (not relative to a deep route)", async () => {
     let seen = "";
     const fetchImpl = (async (url: string) => { seen = url; return new Response("{}", { status: 200 }); }) as unknown as typeof fetch;

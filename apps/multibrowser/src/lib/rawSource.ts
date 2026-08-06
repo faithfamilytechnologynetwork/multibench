@@ -55,6 +55,17 @@ export interface RawDataSource {
 const MANIFEST = "manifest.json";
 const rawPath = (runId: string, rel: string) => `results-raw/${runId}/${rel}`;
 
+/**
+ * A same-origin SPA host with history fallback (`serve -s dist`, Railway's start command)
+ * answers a MISSING baked file with `200 + index.html`, NOT a 404. Treat an HTML response as
+ * "baked file absent" so the clean baked→GitHub fallback fires (and the user sees "no baked
+ * bundle — serving the live copy"), rather than feeding index.html into a JSON/gunzip parser
+ * and surfacing a misleading "baked data is unreadable" notice on every load until the first bake.
+ */
+function isHtmlResponse(res: Response): boolean {
+  return (res.headers.get("content-type") ?? "").toLowerCase().includes("text/html");
+}
+
 /** Same-origin baked bundle (`<base>/<run>/…`, default base `data-raw`). Primary when present. */
 export class BakedRawSource implements RawDataSource {
   readonly kind = "baked" as const;
@@ -70,12 +81,14 @@ export class BakedRawSource implements RawDataSource {
     const res = await this.fetchImpl(this.url(runId, MANIFEST));
     if (res.status === 404) return null;
     if (!res.ok) return null; // baked is best-effort; a non-OK baked read → fall back to GitHub
+    if (isHtmlResponse(res)) return null; // SPA history fallback served index.html → baked absent
     return res.text();
   }
   async shardText(runId: string, relPath: string): Promise<string | null> {
     const res = await this.fetchImpl(this.url(runId, relPath));
     if (res.status === 404) return null;
     if (!res.ok) throw new Error(`baked shard ${relPath} HTTP ${res.status}`);
+    if (isHtmlResponse(res)) return null; // SPA history fallback served index.html → baked absent
     return decodeGzText(await res.arrayBuffer());
   }
 }
