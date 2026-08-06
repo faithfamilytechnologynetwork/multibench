@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -18,7 +18,8 @@ import {
   judgeModelForKey,
   rankingJudgeModel,
   sortRows,
-  subjectTraditionValues,
+  subjectDrilldownRows,
+  type StripCell,
 } from "../lib/leaderboard";
 import { scoreColor, scoreTextColor } from "../lib/scoreColor";
 import { notice, type Notice as NoticeT } from "../lib/model";
@@ -197,11 +198,23 @@ export function ResultsPage() {
             </p>
           )}
 
-          <Leaderboard manifest={manifest} shards={runQ.data!.shards} sel={sel} onSort={(key) => {
-            const cur = sel.sort;
-            const dir: SortDir = cur && cur.key === key && cur.dir === "desc" ? "asc" : "desc";
-            update({ sort: { key, dir } });
-          }} />
+          <Leaderboard
+            manifest={manifest}
+            shards={runQ.data!.shards}
+            sel={sel}
+            onSort={(key) => {
+              const cur = sel.sort;
+              const dir: SortDir = cur && cur.key === key && cur.dir === "desc" ? "asc" : "desc";
+              update({ sort: { key, dir } });
+            }}
+            onToggleExpand={(subject) =>
+              update({
+                expanded: sel.expanded.includes(subject)
+                  ? sel.expanded.filter((s) => s !== subject)
+                  : [...sel.expanded, subject],
+              })
+            }
+          />
         </>
       )}
     </div>
@@ -245,15 +258,46 @@ function ScoreCell({ value, testid }: { value: number | null; testid: string }) 
   );
 }
 
+/**
+ * The per-tradition heat strip (the multi-faith upgrade): one `scoreColor` square per tradition, in
+ * manifest order, whose non-null mean IS the Post column. Color is never the sole encoding — every
+ * square carries a `title`/`aria-label` with the tradition and its exact value, and an uncovered
+ * (null) tradition renders a visually distinct dashed square labelled "no data".
+ */
+function HeatStrip({ strip }: { strip: StripCell[] }) {
+  return (
+    <div className="flex items-center gap-0.5" role="group" aria-label="Per-tradition scores" data-testid="strip">
+      {strip.map((c) => {
+        const label = c.value === null ? `${c.tradition}: no data` : `${c.tradition}: ${fmt(c.value)}`;
+        return (
+          <span
+            key={c.tradition}
+            data-testid="strip-cell"
+            data-tradition={c.tradition}
+            data-empty={c.value === null ? "true" : undefined}
+            title={label}
+            aria-label={label}
+            className={
+              "inline-block h-4 w-4 rounded-sm border " +
+              (c.value === null ? "border-dashed border-default-400" : "border-default-200/60")
+            }
+            style={{ backgroundColor: scoreColor(c.value) }}
+          />
+        );
+      })}
+    </div>
+  );
+}
+
 function Leaderboard({
-  manifest, shards, sel, onSort,
+  manifest, shards, sel, onSort, onToggleExpand,
 }: {
   manifest: ResultsManifest;
   shards: Record<string, ResultsShard>;
   sel: ResultsSelection;
   onSort: (key: string) => void;
+  onToggleExpand: (subject: string) => void;
 }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const total = manifest.traditions.length;
   const firstFraming = manifest.framings[0] ?? "unstated";
   const rows = computeLeaderboardRows(shards, manifest, { pressure: sel.pressure });
@@ -262,16 +306,11 @@ function Leaderboard({
     : rows;
   const drillJudge = judgeModelForKey(manifest, sel.judge) ?? rankingJudgeModel(manifest);
   const isSample = !manifest.judges.find((j) => j.key === sel.judge)?.fullGrid;
+  const expanded = new Set(sel.expanded);
 
   const framingCols = manifest.framings.map((f) => ({ key: f, label: FRAMING_LABEL[f] ?? f }));
-
-  const toggle = (subject: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(subject)) next.delete(subject);
-      else next.add(subject);
-      return next;
-    });
+  // # + Subject + 3 headline + F framing + Traditions — the drill-down spans the whole row.
+  const totalCols = 6 + framingCols.length;
 
   return (
     <div className="overflow-x-auto" data-testid="leaderboard-scroll">
@@ -293,9 +332,8 @@ function Leaderboard({
           {display.map((r) => {
             const open = expanded.has(r.subject);
             const nContributing = r.strip.filter((c) => c.value !== null).length;
-            const perTradition = open
-              ? subjectTraditionValues(shards, manifest, r.subject,
-                  { framing: firstFraming, metric: "full", pressure: sel.pressure }, drillJudge)
+            const drill = open
+              ? subjectDrilldownRows(shards, manifest, r.subject, { pressure: sel.pressure, judgeModel: drillJudge })
               : [];
             return (
               <Fragment key={r.subject}>
@@ -305,7 +343,7 @@ function Leaderboard({
                     <button
                       type="button"
                       aria-expanded={open}
-                      onClick={() => toggle(r.subject)}
+                      onClick={() => onToggleExpand(r.subject)}
                       className="font-medium hover:text-primary"
                       data-testid="standings-expand"
                     >
@@ -320,34 +358,60 @@ function Leaderboard({
                       <ScoreCell value={r.byFraming[c.key] ?? null} testid={`cell-${c.key}`} />
                     </td>
                   ))}
-                  <td className="py-2 pr-2 tabular-nums text-default-500">{nContributing}/{total}</td>
+                  <td className="py-2 pr-2">
+                    <div className="flex items-center gap-2">
+                      <HeatStrip strip={r.strip} />
+                      <span className="tabular-nums text-default-400" data-testid="standings-kn">{nContributing}/{total}</span>
+                    </div>
+                  </td>
                 </tr>
                 {open && (
                   <tr data-testid="drilldown" data-subject={r.subject}>
-                    <td />
-                    <td colSpan={3 + framingCols.length + 1} className="pb-3">
+                    <td colSpan={totalCols} className="pb-3">
                       <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
                         <div className="mb-1 text-xs text-default-500">
                           Per-tradition ({isSample ? `${sel.judge} — validation sample` : `${sel.judge}`})
-                          {perTradition.length === 0 && " — no data for this judge/selection"}
+                          {drill.length === 0 && " — no data for this judge/selection"}
                         </div>
-                        <ul className="flex flex-col gap-1">
-                          {perTradition.map((tv) => (
-                            <li key={tv.tradition} className="flex items-center gap-2 text-xs"
-                                data-testid="drill-row" data-tradition={tv.tradition}>
-                              <span className="w-40 truncate text-default-600">{tv.tradition}</span>
-                              <ScoreCell value={tv.value} testid="drill-score" />
-                              <span className="tabular-nums text-default-400">
-                                {tv.nJudged}/{tv.nExpected}
-                              </span>
-                              {isSample && tv.nJudged < tv.nExpected && (
-                                <span className="rounded bg-warning-100 px-1 text-warning-800" data-testid="sample-badge">
-                                  sample
-                                </span>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
+                        {drill.length > 0 && (
+                          <div className="overflow-x-auto">
+                            <table className="text-xs" data-testid="drill-table">
+                              <thead>
+                                <tr className="text-left text-default-500">
+                                  <th className="pr-3 font-medium">Tradition</th>
+                                  <th className="pr-2 font-medium">Init</th>
+                                  <th className="pr-2 font-medium">Post</th>
+                                  <th className="pr-2 font-medium">Δ</th>
+                                  {framingCols.map((c) => <th key={c.key} className="pr-2 font-medium">{c.label}</th>)}
+                                  <th className="pr-2 font-medium">Coverage</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {drill.map((d) => (
+                                  <tr key={d.tradition} data-testid="drill-row" data-tradition={d.tradition}>
+                                    <td className="pr-3 text-default-600">{d.tradition}</td>
+                                    <td className="pr-2"><ScoreCell value={d.initial} testid="drill-initial" /></td>
+                                    <td className="pr-2"><ScoreCell value={d.post} testid="drill-post" /></td>
+                                    <td className="pr-2"><ScoreCell value={d.delta} testid="drill-delta" /></td>
+                                    {framingCols.map((c) => (
+                                      <td key={c.key} className="pr-2">
+                                        <ScoreCell value={d.byFraming[c.key] ?? null} testid={`drill-${c.key}`} />
+                                      </td>
+                                    ))}
+                                    <td className="pr-2 tabular-nums text-default-400" data-testid="drill-coverage">
+                                      {d.nJudged ?? "—"}/{d.nExpected}
+                                      {isSample && d.nJudged !== null && d.nJudged < d.nExpected && (
+                                        <span className="ml-1 rounded bg-warning-100 px-1 text-warning-800" data-testid="sample-badge">
+                                          sample
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
                       </div>
                     </td>
                   </tr>

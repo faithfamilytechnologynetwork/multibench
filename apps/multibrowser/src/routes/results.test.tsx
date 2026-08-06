@@ -209,17 +209,91 @@ describe("/results leaderboard", () => {
     expect(screen.queryByTestId("leaderboard")).not.toBeInTheDocument();
   });
 
-  it("expanding a subject shows the per-tradition drill-down (Gemini)", async () => {
+  it("renders the per-tradition heat strip (labels + values), and it reframes with pressure", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    let rows = await screen.findAllByTestId("standings-row");
+    const sonnet = () => screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    // sonnet strip: buddhism 0.600, taoism 0.800 — color is never the only encoding (aria-label carries the value).
+    let cells = within(sonnet()).getAllByTestId("strip-cell");
+    expect(cells).toHaveLength(2);
+    const bud = cells.find((c) => c.getAttribute("data-tradition") === "buddhism")!;
+    expect(bud).toHaveAttribute("aria-label", "buddhism: 0.600");
+    // an all-null subject (no data) renders distinct empty cells labelled "no data".
+    const qwen = screen.getAllByTestId("standings-row").find((r) => r.getAttribute("data-subject")?.includes("Qwen"))!;
+    const qCell = within(qwen).getAllByTestId("strip-cell")[0]!;
+    expect(qCell).toHaveAttribute("data-empty", "true");
+    expect(qCell).toHaveAttribute("aria-label", expect.stringContaining("no data"));
+    // reframe by pressure: at false_authority sonnet buddhism = 0.100 → the strip cell updates.
+    await userEvent.click(within(screen.getByTestId("sel-pressure")).getByText("false_authority"));
+    await waitFor(() => {
+      cells = within(sonnet()).getAllByTestId("strip-cell");
+      const b = cells.find((c) => c.getAttribute("data-tradition") === "buddhism")!;
+      expect(b).toHaveAttribute("aria-label", "buddhism: 0.100");
+    });
+    void rows;
+  });
+
+  it("expanding a subject shows the DENSE per-tradition drill-down (Init/Post/Δ/framings + coverage)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     renderApp("/results");
     const rows = await screen.findAllByTestId("standings-row");
     await userEvent.click(within(rows[0]!).getByTestId("standings-expand")); // claude-sonnet-5
     const drill = await screen.findByTestId("drilldown");
     const drillRows = within(drill).getAllByTestId("drill-row");
-    // both traditions have Gemini data (0.6 buddhism, 0.8 taoism)
-    expect(drillRows).toHaveLength(2);
+    expect(drillRows).toHaveLength(2); // both traditions have Gemini data
     const bud = drillRows.find((r) => r.getAttribute("data-tradition") === "buddhism")!;
-    expect(within(bud).getByTestId("drill-score")).toHaveTextContent("0.600");
+    expect(within(bud).getByTestId("drill-initial")).toHaveTextContent("0.200");
+    expect(within(bud).getByTestId("drill-post")).toHaveTextContent("0.600");
+    expect(within(bud).getByTestId("drill-delta")).toHaveTextContent("0.400");
+    expect(within(bud).getByTestId("drill-stated")).toHaveTextContent("0.900");
+    expect(within(bud).getByTestId("drill-guided")).toHaveTextContent("—"); // no guided data
+    expect(within(bud).getByTestId("drill-coverage")).toHaveTextContent("2/12"); // Post-slice numerator
+  });
+
+  it("expansion is keyboard-operable and round-trips through the URL (?expanded=)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    const { router } = renderApp("/results");
+    const rows = await screen.findAllByTestId("standings-row");
+    const btn = within(rows[0]!).getByTestId("standings-expand"); // claude-sonnet-5
+    btn.focus();
+    await userEvent.keyboard("{Enter}"); // keyboard activation, not a mouse click
+    await screen.findByTestId("drilldown");
+    expect(router.state.location.searchStr).toContain("expanded=claude-sonnet-5");
+  });
+
+  it("honors a deep-linked ?expanded= on first load", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results?expanded=claude-sonnet-5");
+    expect(await screen.findByTestId("drilldown")).toBeInTheDocument();
+  });
+
+  it("shows —/N coverage when a tradition is present only via a non-Post slice", async () => {
+    // buddhism: sonnet has ONLY stated (no unstated full) → drill row included via a framing slice,
+    // Post absent → numerator "—". taoism keeps its normal shard.
+    const noPost = resultsFiles("20260803", {
+      traditions: ["buddhism", "taoism"],
+      shard: (t) => t === "buddhism"
+        ? {
+            tradition: t, n_scenarios: 2, judges: ["gemini-3.6-flash"],
+            means: { "gemini-3.6-flash": { "claude-sonnet-5": { stated: { full: { all: [0.5, 2, 2] } } } } },
+            steadfastness: {},
+          }
+        : shardFor(t),
+    });
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, noPost));
+    renderApp("/results?expanded=claude-sonnet-5");
+    const drill = await screen.findByTestId("drilldown");
+    const bud = within(drill).getAllByTestId("drill-row").find((r) => r.getAttribute("data-tradition") === "buddhism")!;
+    expect(within(bud).getByTestId("drill-post")).toHaveTextContent("—"); // no Post slice
+    expect(within(bud).getByTestId("drill-stated")).toHaveTextContent("0.500"); // included via stated
+    expect(within(bud).getByTestId("drill-coverage")).toHaveTextContent("—/12"); // numerator absent, denominator defined
+  });
+
+  it("wraps the dense table in a horizontal-scroll container (narrow-viewport)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
+    renderApp("/results");
+    expect(await screen.findByTestId("leaderboard-scroll")).toBeInTheDocument();
   });
 
   it("the judge selector switches the drill-down to Opus WITHOUT re-ranking the leaderboard", async () => {

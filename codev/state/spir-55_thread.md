@@ -161,3 +161,17 @@ Only non-blocking note: drill-down colSpan is one short — should be `5 + frami
 (which rewrites the drill-down into the dense per-tradition sub-table — colSpan set correctly there).
 Also Phase-3 TODO: wire sel.expanded to URL (currently useState, ?expanded inert). Phase-4 TODO: rebase
 onto origin/main (docs/paper leak). Advancing to phase_3.
+
+## 2026-08-06 — Phase 3 DONE: multi-faith layer (heat strip, dense drill-down, a11y).
+
+ResultsPage.tsx: HeatStrip component (module scope) — one scoreColor square per row.strip cell, manifest
+order; title+aria-label "<tradition>: <value>"/"no data" (color never sole encoding); null cell = dashed
+border + data-empty. Strip lives in the Traditions column beside k/N; recomputes with pressure (part of
+row). Drill-down UPGRADED: subjectDrilldownRows → dense sub-table (Init/Post/Δ + framings + Coverage),
+—/N when Post numerator null, sample-badge for Opus. Expansion moved to sel.expanded (URL) via
+onToggleExpand → update() — keyboard-operable (aria-expanded), deep-linkable. colSpan bug fixed: drill row
+now single full-width <td colSpan={6+F}> (no off-by-one). Judge selector retained (headline/strip stay
+Gemini). Table wrapped in overflow-x-auto (leaderboard-scroll).
+Tests +5: heat strip labels+empty+pressure-reframe; dense drill columns; keyboard-expand+URL round-trip;
+deep-linked ?expanded; —/N via non-Post slice; scroll-container. check-types green, 177 tests. Only
+ResultsPage.tsx + results.test.tsx touched. Phase-2 colSpan note RESOLVED here.
