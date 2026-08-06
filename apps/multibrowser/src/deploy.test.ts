@@ -5,26 +5,21 @@ import { execSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
 
 /**
- * Fail fast (with a diagnostic) if `port` is already bound. A leaked `serve` grandchild from a
- * defunct worktree once squatted on this port for days — its dist was gone so it 404'd
- * everything, and new serves silently fell back to an ephemeral port, making the smoke below
- * time out with a misleading cause (#49 review). This turns that into an obvious message.
+ * Acquire a free ephemeral port (OS-assigned via bind 0) to run the smoke server on. A FIXED
+ * port would deterministically collide when two builders touch multibrowser concurrently (and a
+ * leaked `serve` once squatted on a hardcoded port for days, #49 review) — an ephemeral port
+ * sidesteps both. There is a tiny window between close and the server's re-bind, but ephemeral
+ * ports effectively never collide there.
  */
-async function assertPortFree(port: number): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
+async function getFreePort(): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
     const probe = createServer();
-    probe.once("error", (err: NodeJS.ErrnoException) => {
-      reject(
-        err.code === "EADDRINUSE"
-          ? new Error(
-              `port ${port} is already in use — likely a leaked 'serve' from a defunct worktree. ` +
-                `Free it: \`lsof -iTCP:${port} -sTCP:LISTEN\` then kill the PID.`,
-            )
-          : err,
-      );
+    probe.once("error", reject);
+    probe.listen(0, "127.0.0.1", () => {
+      const addr = probe.address();
+      const port = typeof addr === "object" && addr ? addr.port : 0;
+      probe.close(() => (port ? resolve(port) : reject(new Error("could not acquire a free port"))));
     });
-    probe.once("listening", () => probe.close(() => resolve()));
-    probe.listen(port, "127.0.0.1");
   });
 }
 
@@ -85,9 +80,7 @@ describe("build / deploy invariants", () => {
   });
 
   it("REAL smoke: the static server returns index.html for a nested deep link (SPA fallback)", async () => {
-    const port = 4199;
-    // Pre-flight: a busy port means a leaked serve, not a real failure — say so up front.
-    await assertPortFree(port);
+    const port = await getFreePort(); // ephemeral — safe under concurrent builders
     // Run the actual `start` command (serve -s dist) on a test port. `detached` makes the child
     // a process-group leader so we can reap the whole tree (serve is a grandchild of pnpm).
     const server = spawn("pnpm", ["start"], {

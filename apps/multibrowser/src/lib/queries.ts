@@ -26,6 +26,7 @@ import {
 } from "./model";
 import { loadResults } from "./results";
 import {
+  isSafePathSegment,
   parseResultsManifest,
   parseResultsShard,
   shardConsistencyNotices,
@@ -255,6 +256,14 @@ export async function loadResultsShard(
     return {
       shard: null,
       notices: [notice("error", "results", rPath(runId, "manifest.json"), `tradition ${tradition} not in manifest`)],
+    };
+  }
+  // The shard filename is untrusted manifest data spliced into a raw URL — reject a hostile
+  // (`../`, absolute) value before fetching (mirrors the exporter's path-segment guard).
+  if (!isSafePathSegment(entry.shard)) {
+    return {
+      shard: null,
+      notices: [notice("error", "results", rPath(runId, "manifest.json"), `unsafe shard filename "${entry.shard}"`)],
     };
   }
   const where = rPath(runId, entry.shard);

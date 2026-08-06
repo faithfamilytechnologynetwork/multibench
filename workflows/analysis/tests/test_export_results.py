@@ -15,11 +15,14 @@ Two tiers:
 from __future__ import annotations
 
 import json
+import tempfile
 from pathlib import Path
 
 import pytest
 
+from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.export_results import (
+    SCOPES,
     CANONICAL_SUBJECTS,
     MAX_SHARD_BYTES,
     SCHEMA_VERSION,
@@ -302,8 +305,35 @@ def test_same_file_duplicate_base_identity_rejected(tmp_path):
 # ── Serialization: manifest + shards + round-trip + size (Phase 2) ────────────────
 
 
+def _write_full_grid_fixture(root: Path):
+    """A COMPLETE Gemini run (earns full_grid:true) + a partial Opus validation layer, for the
+    manifest/writer tests (the committed minimal fixture is intentionally not full-grid)."""
+    scenarios = ["T-1", "T-2"]
+    gem = root / "gemini-run" / _TRAD
+    gem.mkdir(parents=True)
+    rows, i = [], 0
+    for subj in CANONICAL_SUBJECTS:
+        for fr in FRAMINGS:
+            for scope in SCOPES:
+                for pr in PRESSURES:
+                    for sc in scenarios:
+                        rows.append(_row(subj, sc, pr, fr, scope, "gemini-3.6-flash", 0.5, f"t{i}"))
+                        i += 1
+    (gem / "judgments.jsonl").write_text("".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    (gem / "report.json").write_text(
+        json.dumps(_report(scenarios, list(CANONICAL_SUBJECTS), ["gemini-3.6-flash"])), encoding="utf-8")
+    # Partial Opus layer (validation sample): one subject/framing/pressure, both scopes, one scenario.
+    op = root / "opus-run" / _TRAD
+    op.mkdir(parents=True)
+    orows = [_row("claude-sonnet-5", "T-1", "secularize", "unstated", scope, "claude-opus-4-8", 0.5, f"o{k}")
+             for k, scope in enumerate(SCOPES)]
+    (op / "judgments.jsonl").write_text("".join(json.dumps(r) + "\n" for r in orows), encoding="utf-8")
+
+
 def _build_fixture_exports():
-    return build_corpus_export([_FIXTURE / "gemini-run", _FIXTURE / "opus-run"])
+    root = Path(tempfile.mkdtemp())
+    _write_full_grid_fixture(root)
+    return build_corpus_export([root / "gemini-run", root / "opus-run"])
 
 
 def test_manifest_has_required_fields_and_judge_consistency():
@@ -329,11 +359,13 @@ def test_manifest_has_required_fields_and_judge_consistency():
         assert set(exp.judges) <= manifest_models
     # per-tradition entries carry n_scenarios + shard filename
     assert m["traditions"] == [{"id": "buddhism", "n_scenarios": 2, "shard": "buddhism.json"}]
-    # coverage summary present (scope=full, pressure=all → n_expected = n_scenarios*6 = 12).
-    # The fixture only carries the 'secularize' pressure, so Gemini judged 2 of 12 and Opus
-    # 1 of 12 — the roll-up honestly reflects the (degenerate) fixture grid.
+    # coverage summary (scope=full, pressure=all, pooled over 5 subjects; n_expected/subject =
+    # n_scenarios(2)×6 = 12 → 60 over 5 subjects). Gemini is full-grid (60/60); Opus covers only
+    # one subject's single cell → 1/60.
     cov = m["counts"]["coverage"]
-    assert cov["gemini-3.6-flash"]["unstated"] == {"n_judged": 2, "n_expected": 12}
+    assert cov["gemini-3.6-flash"]["unstated"] == {"n_judged": 60, "n_expected": 60}
+    # Opus touched only one subject here, so the roll-up sums over that present subject (1/12);
+    # on the real run Opus covers all subjects at unstated, giving ~full coverage.
     assert cov["claude-opus-4-8"]["unstated"] == {"n_judged": 1, "n_expected": 12}
 
 
@@ -342,10 +374,13 @@ def test_shard_written_to_disk_matches_serialize(tmp_path):
     write_dataset(exports, tmp_path, "r1", "2026-08-06T00:00:00+00:00")
     on_disk = json.loads((tmp_path / "r1" / "buddhism.json").read_text())
     assert on_disk == serialize_tradition(exports["buddhism"])  # real disk round-trip
+    # full grid, all scores 0.5: mean 0.5 over 2 scenarios; steadfastness = 0.5 − 0.5 = 0.0
     g = on_disk["means"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["full"]["secularize"]
-    assert g == [pytest.approx(0.75), 2, 2]
+    assert g == [pytest.approx(0.5), 2, 2]
+    gall = on_disk["means"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["full"]["all"]
+    assert gall == [pytest.approx(0.5), 12, 12]
     st = on_disk["steadfastness"]["gemini-3.6-flash"]["claude-sonnet-5"]["unstated"]["secularize"]
-    assert st == [pytest.approx(1.25), 2]
+    assert st == [pytest.approx(0.0), 2]
 
 
 def test_write_dataset_layout_and_deterministic(tmp_path):
@@ -393,12 +428,34 @@ def test_write_dataset_total_ceiling_enforced(tmp_path, monkeypatch):
 
 
 def test_export_dataset_end_to_end(tmp_path):
-    written = export_dataset([_FIXTURE / "gemini-run", _FIXTURE / "opus-run"],
-                             tmp_path, "r1", "2026-08-06T00:00:00+00:00")
-    manifest = json.loads((tmp_path / "r1" / "manifest.json").read_text())
-    assert manifest["counts"]["judgments"]["gemini-3.6-flash"] == 4
-    assert manifest["counts"]["judgments"]["claude-opus-4-8"] == 1  # 2 rows → 1 after collision+v2
+    src = tmp_path / "src"
+    _write_full_grid_fixture(src)
+    written = export_dataset([src / "gemini-run", src / "opus-run"],
+                             tmp_path / "out", "r1", "2026-08-06T00:00:00+00:00")
+    manifest = json.loads((tmp_path / "out" / "r1" / "manifest.json").read_text())
+    # full grid: 5 subjects × 3 framings × 2 scopes × 6 pressures × 2 scenarios = 360
+    assert manifest["counts"]["judgments"]["gemini-3.6-flash"] == 360
+    assert manifest["counts"]["judgments"]["claude-opus-4-8"] == 2
     assert all(p.stat().st_size <= MAX_SHARD_BYTES for p in written)
+
+
+def test_build_manifest_rejects_incomplete_full_grid(tmp_path):
+    # A Gemini run missing part of the grid must NOT be written as full_grid:true — fail fast.
+    src = tmp_path / "src"
+    _write_full_grid_fixture(src)
+    # Drop one pressure's rows for one subject/framing/scope from the Gemini run.
+    gpath = src / "gemini-run" / _TRAD / "judgments.jsonl"
+    kept = [
+        line for line in gpath.read_text().splitlines()
+        if not (json.loads(line)["subject"] == "claude-sonnet-5"
+                and json.loads(line)["framing"] == "unstated"
+                and json.loads(line)["scope"] == "full"
+                and json.loads(line)["pressure"] == "secularize")
+    ]
+    gpath.write_text("\n".join(kept) + "\n", encoding="utf-8")
+    exports = build_corpus_export([src / "gemini-run", src / "opus-run"])
+    with pytest.raises(AnalysisInputError, match="incomplete coverage"):
+        build_manifest(exports, "r1", "2026-08-06T00:00:00+00:00")
 
 
 # ── Real-data parity (sealed launch runs) ─────────────────────────────────────────
@@ -491,17 +548,19 @@ def test_export_cli_command(tmp_path):
 
     from analysis.cli import app
 
+    src = tmp_path / "src"
+    _write_full_grid_fixture(src)  # full-grid so build_manifest earns full_grid:true
     result = CliRunner().invoke(app, [
-        "export", str(_FIXTURE / "gemini-run"), str(_FIXTURE / "opus-run"),
-        "--run-id", "cli1", "--out", str(tmp_path),
+        "export", str(src / "gemini-run"), str(src / "opus-run"),
+        "--run-id", "cli1", "--out", str(tmp_path / "out"),
     ])
     assert result.exit_code == 0, result.output
     out = json.loads(result.output)
     assert out["run_id"] == "cli1"
     assert out["traditions"] == ["buddhism"]
-    assert out["counts"]["judgments"]["gemini-3.6-flash"] == 4  # CLI reports counts
+    assert out["counts"]["judgments"]["gemini-3.6-flash"] == 360  # CLI reports counts
     assert "coverage" in out["counts"]
-    assert (tmp_path / "cli1" / "manifest.json").is_file()
+    assert (tmp_path / "out" / "cli1" / "manifest.json").is_file()
 
 
 def test_export_cli_input_error_exits_cleanly(tmp_path):

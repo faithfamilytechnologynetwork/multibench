@@ -65,7 +65,7 @@ def _sumcount(
 ) -> SumCount:
     """Per-scenario (sum-of-cell-values, count-of-cells) arrays for one filtered slice.
 
-    ``sum(sum_arr)/sum(count_arr)`` is exactly the cell-mean aggregate (``_mean_over``);
+    ``sum(sum_arr)/sum(count_arr)`` is exactly the cell-mean aggregate (``breakdown_mean``);
     resampling scenario indices over these arrays is the cluster bootstrap of it.
     """
     n = len(scenario_index)

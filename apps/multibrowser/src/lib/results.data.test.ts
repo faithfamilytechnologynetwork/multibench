@@ -195,6 +195,17 @@ describe("loadResultsShard / loadResultsManifest", () => {
     expect(notices.map((n) => n.message).join(" | ")).toMatch(/unknown judge\(s\).*unknown-judge/);
   });
 
+  it("rejects an unsafe (path-traversal) shard filename from the manifest", async () => {
+    const files = resultsFiles("r1", { traditions: ["buddhism"] });
+    const m = JSON.parse(files["results/r1/manifest.json"]!);
+    m.traditions[0].shard = "../../etc/evil.json"; // hostile manifest
+    files["results/r1/manifest.json"] = JSON.stringify(m);
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard).toBeNull();
+    expect(notices[0]?.message).toMatch(/unsafe shard filename/);
+  });
+
   it("a missing manifest yields a notice", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {}));
     const { manifest, notices } = await loadResultsManifest(newQc(), SHA, "ghost");

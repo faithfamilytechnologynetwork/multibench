@@ -14,6 +14,15 @@ import { FRAMINGS, PRESSURES } from "./constants";
 /** The schema version this build understands. A dataset stamped otherwise is not trusted. */
 export const SUPPORTED_SCHEMA_VERSION = 1;
 
+/**
+ * A safe single path segment — mirrors the exporter's `_require_safe_segment`. The manifest is
+ * untrusted remote JSON; validate a manifest-declared `shard` filename before it's spliced into a
+ * `raw.githubusercontent.com` URL, so a hostile `../` / absolute value can't redirect the fetch.
+ */
+export function isSafePathSegment(name: string): boolean {
+  return /^[A-Za-z0-9][A-Za-z0-9._-]*$/.test(name) && !name.includes("..");
+}
+
 // The universal-core vocabularies the SPA itself knows (framings/pressures are universal core;
 // scopes/metrics are what this UI supports). A manifest declaring anything outside these is
 // flagged. Subjects and judges are deliberately NOT restricted here — new models must be able

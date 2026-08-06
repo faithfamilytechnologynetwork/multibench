@@ -155,9 +155,17 @@ was verified against the real data/code before being incorporated.
 #### Claude — **Addressed**: document run selection, replace stale "no results UI" bullet, byte-stable caveat, means-vs-steadfastness ranges, sorted judges example.
 #### Codex — APPROVE.
 
-### Review / PR (Round 1)
+### Review / PR (Rounds 1–3, porch 2-way)
 #### Claude — APPROVE (reconciliation/reproducibility/size/coverage independently verified).
-#### Codex — **Addressed**: contract-breaking (tradition-mismatch) shards now **excluded** from standings, not just flagged; coverage sanity (`n_judged>n_expected` / wrong denominator) flagged; committed-artifact reconciliation extended to **all 5 subjects × 3 framings**; plan `Status`, commit count, and the "CI" wording corrected; `.claude/hooks/` gitignored. **Rebutted/Deferred**: adding a GitHub Actions job for the JS/Python suites is a repo-wide gap recorded as Technical Debt (out of this feature's scope).
+#### Codex — **Addressed** (r1): contract-breaking (tradition-mismatch) shards now **excluded** from standings, not just flagged; coverage sanity (`n_judged>n_expected` / wrong denominator) flagged; committed-artifact reconciliation extended to **all 5 subjects × 3 framings**; plan `Status`, commit count, and the "CI" wording corrected; `.claude/hooks/` gitignored. (r2, Claude) export **path-traversal guard** on run-id/tradition; notice dedup; manifest-sourced denominator. (r3) fail-fast on **unknown framing/pressure/scope** at ingest. **Deferred**: GitHub Actions job for the suites → Technical Debt.
+
+### Architect Integration Review (3-way CMAP: Gemini APPROVE · Claude APPROVE · Codex REQUEST_CHANGES)
+Three required items — all **Addressed**:
+- **Full-grid invariant earned, not asserted**: `build_manifest` now validates complete Gemini coverage (every tradition × subject × framing × scope × pressure) before writing `full_grid: true`, failing fast otherwise (+ regression test with incomplete Gemini input). The UI ranking trusts that flag.
+- **Ephemeral deploy-smoke port**: `deploy.test.ts` now acquires an OS-assigned free port (bind 0) instead of a hardcoded 4199 (which would collide under concurrent builders); keeps the detached spawn + process-group reap; the fixed-port pre-flight is gone.
+- **Cleanups**: finished the `aggregate._mean_over` → `breakdown_mean` promotion (six call sites renamed, alias dropped); mirrored the exporter's path-segment guard on the SPA (`isSafePathSegment` rejects a hostile manifest-declared `entry.shard` before it reaches the raw URL) + test.
+
+The committed dataset is byte-identical after these changes (verified via re-export diff). Non-blocking follow-ups noted by the CMAP (palette-parity check, steadfastness ±2 vs the ±1 color clamp, CI jobs) are recorded as Technical Debt / Verify-phase items.
 
 ## Lessons Learned
 

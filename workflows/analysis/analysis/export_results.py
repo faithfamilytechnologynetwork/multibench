@@ -519,6 +519,27 @@ def _coverage_summary(exports: dict[str, TraditionExport]) -> dict:
     return cov
 
 
+def _assert_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> None:
+    """Fail-fast unless *judge_model* covered the COMPLETE grid — every tradition × subject ×
+    framing × scope × pressure. The UI trusts ``full_grid: true`` to rank on this judge, so the
+    flag must be earned at export time, not asserted statically. Coverage is checked per specific
+    pressure (n_judged == n_scenarios) across every subject/framing/scope, for every tradition.
+    """
+    for tradition, exp in exports.items():
+        for subject in CANONICAL_SUBJECTS:
+            for framing in FRAMINGS:
+                for scope in SCOPES:
+                    for pressure in PRESSURES:
+                        sl = exp.means.get((judge_model, subject, framing, scope, pressure))
+                        if sl is None or sl.n_judged != sl.n_expected:
+                            got = "missing" if sl is None else f"{sl.n_judged}/{sl.n_expected}"
+                            raise AnalysisInputError(
+                                f"full_grid judge {judge_model!r} has incomplete coverage at "
+                                f"{tradition}/{subject}/{framing}/{scope}/{pressure} ({got}) — "
+                                f"cannot write full_grid:true"
+                            )
+
+
 def build_manifest(exports: dict[str, TraditionExport], run_id: str,
                    generated_at: str) -> dict:
     """The run-level manifest (subjects, judges, framings, pressures, scopes, counts)."""
@@ -528,6 +549,8 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
         if model not in JUDGE_UI:  # fail-fast — a normalized judge is always known here
             raise AnalysisInputError(f"no UI metadata for judge {model!r}")
         ui = JUDGE_UI[model]
+        if ui["full_grid"]:
+            _assert_full_grid(exports, model)  # earn the flag, don't assert it statically
         aliases = sorted({model, *_JUDGE_VARIANTS.get(model, ())})
         judges_meta.append({
             "key": ui["key"], "model": model, "aliases": aliases,

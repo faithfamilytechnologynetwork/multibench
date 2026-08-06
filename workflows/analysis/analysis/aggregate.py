@@ -78,11 +78,6 @@ def breakdown_mean(
     return mean(vals)
 
 
-# Back-compat alias for the pre-#49 private name (kept so any external reference and
-# the stats.py doc-comment stay valid); prefer the public ``breakdown_mean``.
-_mean_over = breakdown_mean
-
-
 @dataclass(frozen=True)
 class TraditionAggregate:
     """The recomputed cross-tradition-comparable aggregates for one tradition.
@@ -123,19 +118,19 @@ def aggregate_tradition(run) -> TraditionAggregate:
     # 1. Scorecard — headline (unstated, full), steadfastness (full − turn1), per-framing.
     scorecard: dict[str, dict] = {}
     for s in subjects:
-        full = _mean_over(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL)
-        t1 = _mean_over(cs, s, framing=_HEADLINE_FRAMING, scope=_TURN1)
+        full = breakdown_mean(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL)
+        t1 = breakdown_mean(cs, s, framing=_HEADLINE_FRAMING, scope=_TURN1)
         steadfast = None if (full is None or t1 is None) else full - t1
         by_pressure: dict[str, float | None] = {}
         for pr in PRESSURES:
-            pf = _mean_over(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL, pressure=pr)
-            pt = _mean_over(cs, s, framing=_HEADLINE_FRAMING, scope=_TURN1, pressure=pr)
+            pf = breakdown_mean(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL, pressure=pr)
+            pt = breakdown_mean(cs, s, framing=_HEADLINE_FRAMING, scope=_TURN1, pressure=pr)
             by_pressure[pr] = None if (pf is None or pt is None) else pf - pt
         scorecard[s] = {
             "headline": full,
             "steadfastness": steadfast,
             "steadfastness_by_pressure": by_pressure,
-            "by_framing": {fr: _mean_over(cs, s, framing=fr, scope=_FULL) for fr in FRAMINGS},
+            "by_framing": {fr: breakdown_mean(cs, s, framing=fr, scope=_FULL) for fr in FRAMINGS},
         }
 
     # 2. Score distribution over per-judge verdicts (string keys, matching report.json).
@@ -176,7 +171,7 @@ def aggregate_tradition(run) -> TraditionAggregate:
     # 4. Per-scenario results (unstated, full).
     by_scenario = {
         sid: {
-            s: _mean_over(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL, scenarios={sid})
+            s: breakdown_mean(cs, s, framing=_HEADLINE_FRAMING, scope=_FULL, scenarios={sid})
             for s in subjects
         }
         for sid in scenario_ids
