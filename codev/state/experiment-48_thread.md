@@ -398,3 +398,17 @@ All four items in hand (full tables in notes.md):
 4. **Mining yield** 38% (158/420 pilot), ~632 pairs scoped (40/trad flat, +65). Low-yield=uniformly-good (benign).
 **Spend 280.** Two-way: STOP-AT-SFT ~280 vs DPO+LEAN ~374 (≤400). **STOPPED — awaiting architect decision.**
 Do NOT proceed to DPO without the explicit go.
+
+## 2026-08-06 — GO: DPO+LEAN approved; stage-2 executing
+
+Architect GO (overnight authority, 400 ceiling). Locked params: scoped mining 40 scen/tradition flat
+(pilot-10 reused + 30 seeded-random seed 3446); DPO bf16 B200 anchored at SFT ref, resumable+detach/spawn;
+lean battery = AFB-150 cold + 70 probes + capability. HARD ceiling 400 — stop+ping if any actual threatens.
+Watch items for +DPO evals: (1) MMLU not worse past −2.3; (2) opted-out P≥1 0.70→toward 0.60; (3) 4-spike
+temper toward 1-2 WITHOUT losing P≥2=0.27.
+
+Budget track: 280 → scoped-mining band +65 (→345) → DPO +7 (→352) → lean eval +22 (→374). 26 headroom.
+
+- Updated `mine_dpo_sample.py` selection rule (scoped_scenarios: pilot-10 + seeded-random). **Scoped
+  mining sampling RUNNING (b2333x6t6)** — sampling the 30 new scen/tradition (pilot dedup'd). On done →
+  band new sittings (full-scope gemini, ~60) → `build_dpo_pairs.py` (~632 pairs) → upload → DPO run.

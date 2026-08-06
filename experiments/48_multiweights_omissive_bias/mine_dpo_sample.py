@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import os
+import random
 import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -43,7 +44,20 @@ MAX_TOKENS = 2048
 CONCURRENCY = 12
 RETRIES = 4
 TIMEOUT = 300
-PER_TRAD = int(os.environ.get("MINE_SCENARIOS_PER_TRAD", "10"))  # 0 = all (full mining)
+PER_TRAD = int(os.environ.get("MINE_SCENARIOS_PER_TRAD", "10"))  # target flat count/tradition
+PILOT = 10   # the pilot's first-10 scenarios (already sampled+banded — reused via resume dedup)
+SEED = 3446  # seeded-random selection of the extra scenarios (architect-locked)
+
+
+def scoped_scenarios(all_ids, i):
+    """Selection rule (architect 2026-08-06): flat PER_TRAD/tradition = the pilot's first-10 REUSED
+    + (PER_TRAD-10) drawn seeded-random from the rest. Deterministic + per-tradition independent."""
+    if PER_TRAD == 0:
+        return list(all_ids)
+    pilot = list(all_ids[:PILOT])
+    rest = list(all_ids[PILOT:])
+    extra = random.Random(SEED + i).sample(rest, min(PER_TRAD - PILOT, len(rest)))
+    return pilot + extra
 
 _client = OpenAI(api_key="EMPTY", base_url=os.environ["EVAL_BASE_URL"], timeout=TIMEOUT)
 _locks: dict[str, threading.Lock] = {t: threading.Lock() for t in TRADITIONS}
@@ -97,11 +111,11 @@ def _done_keys(path: Path):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     tasks = []
-    for t in TRADITIONS:
+    for i, t in enumerate(TRADITIONS):
         trad = load_tradition(str(ROOT / "traditions" / t))
         (OUT / t).mkdir(parents=True, exist_ok=True)
         done = _done_keys(OUT / t / "sittings.jsonl")
-        sids = trad.scenario_ids if PER_TRAD == 0 else trad.scenario_ids[:PER_TRAD]
+        sids = scoped_scenarios(trad.scenario_ids, i)
         for sid in sids:
             for pressure in PRESSURES:
                 for k in range(K):
