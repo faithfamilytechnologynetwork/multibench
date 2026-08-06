@@ -21,6 +21,14 @@ results-raw/<run-id>/
   max ≈ 533 KB). Shard paths are **manifest-declared** — the viewer never lists them via the
   GitHub API.
 
+### Size ceilings (enforced at export)
+
+The exporter serializes and gzips everything, **validates all sizes before writing anything**
+(so a violation never leaves a partial tier), and aborts loudly on breach:
+
+- **per-shard ≤ 1 MB** (gz) — calibrated above the real p99 (measured max 545,560 bytes ≈ 533 KB),
+- **per-run ≤ 200 MB** (gz) — above the ~126 MB launch total.
+
 ## Two public sources, identical content (dual-source, Spec 51 Decision 14)
 
 The exact same slimmed content is served from two places:
@@ -72,11 +80,20 @@ so re-exports are byte-identical.
   "cells": [
     {
       "subject": "claude-sonnet-5",
-      "conditions": {"framing": "unstated", "pressure": "secularize"},
+      "conditions": {"framing": "stated", "pressure": "secularize"},
       "transcript": [{"role": "user", "content": "…"}, {"role": "assistant", "content": "…"}],
-      "contextKey": "stated",        // present only for stated/guided → contexts["stated"]
+      "contextKey": "stated",        // stated/guided cells reference contexts[<contextKey>]
       "verdicts": [
         {"judge": "gemini", "scope": "turn1", "score": 1.0, "summary": "…", "rationale": "…"}
+      ]
+    },
+    {
+      "subject": "claude-sonnet-5",
+      "conditions": {"framing": "unstated", "pressure": "secularize"},
+      "transcript": [{"role": "user", "content": "…"}, {"role": "assistant", "content": "…"}],
+      // no contextKey — unstated cells are context-free (not in the contexts pool)
+      "verdicts": [
+        {"judge": "opus", "scope": "full", "score": -0.5, "summary": "…"}
       ]
     }
   ]
@@ -100,12 +117,16 @@ excluded** — judgment `usage`/`raw`/`ts`/`sitting_key`; sitting `attempts`/`us
 `manifest.presets` is a list of curated deep-link views (a preset with no qualifying entries is
 omitted): **Models split** (widest turn-1 cross-model spread), **Judges differed** (the two
 judges ≥ 1.0 apart at full scope), **Steadfastness cliff** (biggest post-pressure Gemini drop).
-Each is deterministic, capped at 12, one entry per scenario, and — because hundreds of scenarios
-tie at the max magnitude — **round-robined across traditions** so a preset is a genuinely
-cross-tradition curated view (a CMAP-required refinement of the spec's literal tie-break;
-verified to span all 7 traditions). Each entry's `params` carry
-`{group, item, scope, a, b?, conditions:{…}}` — condition-axis values are **nested** under
-`conditions` (matching the cell shape) so the viewer applies them generically.
+Each is deterministic (magnitude-sorted with a `group → scenario → canonical pressure →
+canonical framing` tie-break), capped at 12, and one entry per `(group, item)`. Because
+hundreds of scenarios tie at the max magnitude (a plain magnitude cut fills all 12 slots from
+one alphabetically-first tradition), the final selection is **round-robined across traditions**
+so a preset is a genuinely cross-tradition curated view — verified to span all 7 traditions.
+This round-robin is an **architect-approved, CMAP-required refinement** of the spec's literal
+`(scenario, pressure, framing)` tie-break (recorded in the spec's *Presets* section and the
+review doc). Each entry's `params` carry `{group, item, scope, a, b?, conditions:{…}}` —
+condition-axis values are **nested** under `conditions` (matching the cell shape) so the viewer
+applies them generically; `b` (the compare subject) is optional.
 
 ## Source fingerprint (cross-tier agreement)
 

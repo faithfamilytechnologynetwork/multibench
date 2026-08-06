@@ -207,9 +207,13 @@ Revert; the additive `results/` fingerprint is backward-compatible (zod tolerant
 #### Deliverables
 - [ ] Preset computation (Spec *Presets*): **Models split** (turn1 Gemini widest cross-subject
   spread), **Judges differed** (full-scope two-judge |Δ| ≥ 1.0), **Steadfastness cliff**
-  (largest negative full−turn1, Gemini). Each: deterministic, cap 12, one-per-scenario dedup,
-  `(scenario,pressure,framing)` tie-break, **stable keys**, sparse-Opus-safe (skip, never
-  zero-fill). Emitted as deep-link param maps into the catalog.
+  (largest negative full−turn1, Gemini). Each: deterministic, cap 12, one entry per
+  `(group,item)`, `group → scenario → pressure → framing` tie-break (canonical order),
+  **stable keys**, sparse-Opus-safe (skip, never zero-fill). Emitted as deep-link param maps
+  (`{group,item,scope,a,b?,conditions}`) into the catalog.
+- [ ] **Round-robin across traditions** (architect-approved, CMAP-required refinement): the
+  final cap selection interleaves groups so a preset spans traditions rather than filling from
+  one (real data ties at max magnitude). See the Spec *Presets* refinement note.
 - [ ] Tests for each algorithm.
 
 #### Acceptance Criteria

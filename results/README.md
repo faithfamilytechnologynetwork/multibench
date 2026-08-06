@@ -5,6 +5,10 @@ the **multibrowser** SPA reads at runtime (the same way it reads `traditions/`):
 git-trees + `raw` fetches, no backend, no baked data. Drop a new `results/<run-id>/` in and it
 appears in the browser's **Results** explorer with **no code change** (Spec 49).
 
+The per-scenario **transcripts + judge verdicts** live in the sibling [`results-raw/`](../results-raw/README.md)
+tier (Spec 51); both tiers stamp the **same `fingerprint`** for a given `<run-id>` so they can
+never disagree.
+
 There are **no transcripts here** — raw run data is hundreds of MB; this export is single-digit MB
 (the launch run is ~180 KB). It carries pre-aggregated per-tradition slice tables plus a manifest.
 

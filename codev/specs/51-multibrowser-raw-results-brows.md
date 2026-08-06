@@ -341,9 +341,23 @@ baked primary's speed and rate-limit immunity.
 
 ### Presets (export-computed; user-visible, hence specified here)
 Each preset is a capped, deterministic list of deep-link entries with stable keys, deduped
-to **one entry per scenario**, sorted by magnitude with `(scenario, pressure, framing)`
-tie-breaks, **cap = 12**, computed only from cells that have the required judge/scope
-(sparse-Opus cells are simply skipped, never zero-filled):
+to **one entry per `(group, item)`**, sorted by magnitude with a `group → scenario →
+pressure → framing` tie-break (canonical pressure/framing order), **cap = 12**, computed
+only from cells that have the required judge/scope (sparse-Opus cells are simply skipped,
+never zero-filled):
+
+> **Refinement (architect-approved, CMAP-required — 2026-08-06):** on real data hundreds of
+> scenarios tie at the maximum magnitude, so a straight magnitude + lexicographic cut fills
+> all 12 slots from the single alphabetically-first tradition (verified: all 36 launch-run
+> entries landed in `buddhism`), defeating this section's own "curated navigation" goal. The
+> final selection is therefore **round-robined across the grouping axis (traditions)** — one
+> entry per tradition per round, in sorted group order — so each preset spans all traditions.
+> This refines the literal tie-break above while serving its stated intent; with a single
+> group it degenerates to plain magnitude order.
+
+Entry `params` carry `{group, item, scope, a, b?, conditions:{…}}` — condition-axis values
+are **nested** under `conditions` (matching the cell shape, so the viewer stays generic over
+axes); `b` (the compare subject) is optional. Definitions:
 - **Models split** — for each `(scenario, pressure, framing)` at **scope = turn1**, the
   widest cross-subject spread of the **Gemini** cell score; entry links the max-score vs
   min-score subjects (A/B). Skip zero-spread and <2-subject cells.
