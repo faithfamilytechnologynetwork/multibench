@@ -9,3 +9,6 @@ dist-ssr
 .vite
 coverage
 *.local
+# Root .gitignore patterns --no-gitignore also disables — belt-and-braces (OS/editor cruft):
+.DS_Store
+*.sw?
