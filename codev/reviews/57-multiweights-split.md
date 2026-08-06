@@ -50,13 +50,24 @@ not 4× memorization. #53's +0.22 was the biased-sample **lower bound its own ca
 hard-tier under-representation caveat again; 846 cells have zero within-cell gap — SFT already
 uniformly good (#48's "no-pair cells are good, not bad" reproduces at clean-split scale).
 
-## 5. Spend — reconciled, UNDER ceiling (contrast #48's overshoot)
+## 5. Spend — reconciled at each gate, UNDER ceiling (contrast #48's overshoot)
 
 **$216 / $250.** Gemini **usage-exact $181.86** (SFT descriptive 45.75 + mining band 92.25 + DPO
-descriptive 43.86); GPU ~$34 (SFT 6 + DPO 3 + endpoint H200 ~25). Held by: (a) three usage-reconciled
-gates (G1/G2/G3) — never rolling estimates; (b) stating up front that **gemini is not batchable**
-(only the Anthropic judge batches — verified in `batching.py`), so the ceiling was planned honestly
-rather than discovered late. Dominant line: the mining band ($92).
+descriptive 43.86); GPU ~$34 (SFT 6 + DPO 3 + endpoint H200 ~25).
+
+**Three gate reconciles (usage-exact for gemini; wall-clock for GPU — never rolling estimates):**
+
+| gate | what | reconciled | running total | decision |
+|---|---|---|---|---|
+| **G1** post-SFT | SFT train (54m B200) | ~$6 | ~$58 (incl. SFT descriptive $45.75 + endpoint ~$6) | proceed |
+| **G2** post-mining-band | mining band **$92.25 exact** + sampling GPU ~$13 | S_G2 ≈ **$163** → headroom ~$87 | **RUN** split-DPO descriptive (≥$59 rule) |
+| **G3** post-DPO | DPO train (29m B200) | ~$3 | ~$166 | proceed to DPO descriptive |
+| final | DPO descriptive **$43.86 exact** + endpoint ~$6 | — | **≈ $216** | — |
+
+Held by: (a) the three usage-reconciled gates — never rolling estimates (the #48 breach was a
+rolling-estimate miss); (b) stating up front that **gemini is not batchable** (only the Anthropic
+judge batches — verified in `batching.py`), so the ceiling was planned honestly rather than discovered
+late. Dominant line: the mining band ($92).
 
 ## 6. Lessons
 
@@ -83,3 +94,24 @@ rather than discovered late. Dominant line: the mining band ($92).
 - Report the shipped-vs-companion bound and the DPO-increment judge-alignment caveat plainly.
 - **Not done (out of scope):** re-measuring the shipped full-data model on a holdout (would need a
   second full retrain); DPO's OOD value (Experiment B / AFB, already in hand).
+
+## 8. Data inventory & persistence (recorded BEFORE any cleanup — #48 scar rule)
+
+Nothing is destroyed until this is on record. All expensive-to-regenerate artifacts are on the
+persistent Modal `gemma-dpo` volume; the ~$180 raw gemini audit trail is archived there too.
+
+**Persisted on the `gemma-dpo` volume (confirmed present):**
+- `/runs/mb-sft-split50/adapter` (+`config.json`) — the SFT LoRA.
+- `/runs/mb-dpo-split50/adapter` (+`config.json`) — the DPO LoRA.
+- `/pairs/pairs_sft2_mb_split50.jsonl` (480 DPO pairs, 6.04MB) · `/pairs/sft_guided_mb_split50train.jsonl` (1,362-ex train-half SFT set).
+- **`/exp57-archive/data_output.tar.gz`** — the full raw audit trail (sittings + judgments), 26MB,
+  **verified sha256 `d1f18169…`** (round-trip, exp-58 guard). This is the durable copy of the local
+  gitignored data below, so a worktree cleanup cannot destroy the audit trail.
+
+**Committed in git (small, load-bearing numbers):** `summary_57_{sft,dpo}.json`,
+`per_scenario_57_{sft,dpo}.csv`, `fig_transfer_{sft,dpo}.pdf/.png`, split lists, all scripts, notes.md.
+
+**Local, gitignored (`data/output/`, 107MB — regenerable; now also archived on the volume):**
+mining sittings+judgments (55M), `descriptive_sft/` (24M), `descriptive_dpo/` (26M), smokes (~0.1M).
+Regenerable from the recipe at gemini re-spend; the committed CSVs carry the per-scenario numbers and
+the volume archive carries the per-cell audit trail. **Safe to `afx cleanup` on the architect's word.**
