@@ -161,3 +161,14 @@ direct volume-side sha. exp-58 corruption guard satisfied.)
 β0.1 lr1e-5). Polling config.json (bg bxdy0zvqs). Final step==60 double-checks loaded-pair count.
 Stop-on-disable armed. NEXT: G3 reconcile → redeploy endpoint (serves dpo) → split-DPO descriptive
 both halves → `analyze.py --model dpo` → DPO increment vs SFT.
+
+**G3 — DPO COMPLETE + reconciled.** 60 steps (=480/8 exact → loaded-pair count verified = 480, 2nd
+upload guard passes). Loss init 0.693 (ln2, policy==ref ✓); pref_acc near chance (0.0→0.625→0.5,
+noisy) — **same weak/flat DPO signal as #48** (SFT already good, little contrast; expected null-ish).
+bf16 B200 peak 66GB, clean. **Wall-clock 15:25→15:54 = 29 min B200 ≈ $3.** **Running total ≈ $166/250,
+headroom ~$84.**
+
+**Split-DPO descriptive STARTED.** Redeployed endpoint (now serves sft+dpo). Made
+`multibench_descriptive_split_dpo.yaml` (subject model=dpo). Running a 1-scenario **dpo smoke** (bg
+brkdjqrl7) to confirm the dpo LoRA serves before the full ~$46 run. Then full descriptive_dpo (519
+unstated/full, gemini) → `analyze.py --model dpo` → held-out DPO lift + SFT-vs-DPO increment.
