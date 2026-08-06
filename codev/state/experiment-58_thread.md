@@ -64,3 +64,16 @@ DPO ~$10–15 + lean battery ~$15–22 = **~$116–152** (pt ~$134). Well under 
 2. **PING architect BEFORE launching the ~2–3h DPO B200 run** (stability check). If billing state
    unconfirmed by then, launch anyway (checkpoint+resume+detach = recoverable) but eyes-open.
 3. **A SECOND workspace-disable → STOP EVERYTHING and ping.** Twice is a pattern, not a blip.
+
+## 2026-08-06 — SECOND disable → STOPPED, HOLDING (14:50Z)
+
+Architect: the disable **recurred** (hit exp-57 mining too) — confirmed pattern. Per rule 3, I stopped.
+- **Killed** the refill `bc3t5rcyl` (exit 144). No mining/DPO/eval procs of mine remain. **No auto-retry.**
+- **Safe-state**: 5,034/5,736 sittings on local disk (unchanged, safe); 702 still missing (sunni-islam
+  tail 510 + taoism 192). No DPO, no banding launched. Serve endpoint is scale-to-zero → idles to $0.
+  Nothing spending.
+- The 8 `taqwabench…capability` procs running are **exp-57's**, NOT mine — left untouched.
+- **HOLDING all Modal work** until Waleed clears the billing/spend-cap. Banding (OpenRouter) is
+  Modal-immune but I'm holding it too until the hold lifts, since it needs complete mining first.
+- Resume path when cleared: redeploy serve → re-run mine (dedup fills only the 702) → band → pairs →
+  ping-before-DPO → DPO → lean battery.
