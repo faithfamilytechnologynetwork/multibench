@@ -295,7 +295,18 @@ tier (Buddhism, Taoism, secular sage) $+0.149 \to +0.750$ ($\Delta$
 +0.60), and the overall mean $-0.138 \to +0.652$ ($\Delta$ +0.79). The
 tier ordering compresses sharply in aggregate.
 
-How much of this is generalization rather than memorization? Because the
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.8\linewidth]{figures/fig_dose_response.pdf}
+\caption{Descriptive lift (base $\to$ SFT, unstated) by training
+exposure (cells of the scenario that entered the SFT set). Lift rises
+monotonically with exposure; the zero-exposure stratum is the strict
+prompt-level holdout.}
+\label{fig:dose}
+\end{figure}
+
+How much of this is generalization rather than memorization
+(\cref{fig:dose})? Because the
 judge filter operates per cell, scenarios entered training with anywhere
 from all six to \emph{none} of their cells, and training examples are
 rendered bare --- so the 13 zero-exposure scenarios constitute a true
