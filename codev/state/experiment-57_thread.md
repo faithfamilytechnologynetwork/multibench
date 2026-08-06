@@ -142,3 +142,22 @@ at G2; GPU is always an estimate, the band is usage-exact).
 **G2 mining BAND launched** (bg bof6x8c1j, `run_mining_judge.sh`): gemini full-scope over all 6,216
 mining sittings — the authorized ~$90 spend. On completion → reconcile band from usage (exact) → S_G2
 → apply swing decision (run split-DPO descriptive iff headroom ≥ ~$59) → build pairs → mb-dpo-split50.
+
+## 2026-08-06 — G2 PASSED: band $92.25 exact, swing decision = RUN; DPO training
+
+**Band complete** 6,216/6,216 full-scope, 0 missing/failed. **Mining band = $92.25 EXACT** (29.32M in
+/ 6.42M out). **Running total reconcile: SFT-stage 57.8 + sampling-GPU ~13 + band 92.25 = S_G2 ≈ $163
+→ headroom ~$87.** **SWING DECISION: 87 ≥ ~59 → RUN split-DPO descriptive** (full path ~$222 ≤ 250).
+
+**Pairs: 480** max-gap (gap≥1.0) from 1,554 train-half cells (31%). sunni-islam 168 (most — softens
+hard-tier caveat), taoism 59, EC 82, jud 48, RC 53, bud 43, sage 27. 846 cells gap=0 (SFT uniformly
+good — #48 pattern reproduces). gap hist {0:846, .5:228, 1:70, 1.5:145, 2:265}.
+
+**Verified upload**: volume sha256 == local EXACTLY (c19d6a24…, 480 lines, 6.04MB). (Wrapper had a
+tail-1 parse bug → false mismatch; upload itself was perfect attempt-1; fixed parser, confirmed via
+direct volume-side sha. exp-58 corruption guard satisfied.)
+
+**DPO LAUNCHED** `mb-dpo-split50` (detached ap-pWlj33d0…, ref=mb-sft-split50, 480 pairs → 60 steps,
+β0.1 lr1e-5). Polling config.json (bg bxdy0zvqs). Final step==60 double-checks loaded-pair count.
+Stop-on-disable armed. NEXT: G3 reconcile → redeploy endpoint (serves dpo) → split-DPO descriptive
+both halves → `analyze.py --model dpo` → DPO increment vs SFT.
