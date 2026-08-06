@@ -43,7 +43,7 @@ MODEL = "sft"  # = mb-sft-split50, served by serve_split_eval.py
 K = 4
 TEMPERATURE = 1.3
 MAX_TOKENS = 2048
-CONCURRENCY = 12
+CONCURRENCY = 32  # raised 12→32 on resume (endpoint max_inputs=64 was underutilized; ~2.5× throughput)
 RETRIES = 4
 TIMEOUT = 300
 

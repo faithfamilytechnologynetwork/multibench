@@ -125,3 +125,20 @@ billing check (2 disables in ~2h = spend-cap pattern). Directed local work — D
 - DPO input format verified compatible (build_dpo_pairs_split → chosen_turns/rejected_turns).
 
 **All local work complete. Genuinely blocked on Modal; awaiting architect's re-enable ping.**
+
+## 2026-08-06 — GO: Modal stable (exp-58 probe 702/0-fail), mining RESUMED
+
+Architect go (16:14). Ran `resume_mining.sh` (bg bz2pide3k): endpoint redeployed clean (no disable),
+warmup cold-starting, then resumes sampling from 360 (keyed dedup). Stop-on-disable armed in the
+warmup. Launched a throughput probe (bg bjnaf0rif) to measure true rate once sampling is underway
+(catches a slow endpoint early — the pre-disable "0/min" reading was the disable, not slowness).
+NEXT: mining complete → G2 (reconcile sampling GPU + band via usage) → swing decision per memo.
+
+**Mining sampling COMPLETE: 6,216/6,216, 0 failed**, every tradition = train_cells×4 exactly. Concurrency
+12→32 gave 25→43 sittings/min (single H200 near its generation ceiling; higher won't help). Endpoint
+H200 wall-clock ≈ warmup(s) ~20m + sampling ~150m ≈ **~2.8h → sampling GPU ~$12–14 est** (reconcile
+at G2; GPU is always an estimate, the band is usage-exact).
+
+**G2 mining BAND launched** (bg bof6x8c1j, `run_mining_judge.sh`): gemini full-scope over all 6,216
+mining sittings — the authorized ~$90 spend. On completion → reconcile band from usage (exact) → S_G2
+→ apply swing decision (run split-DPO descriptive iff headroom ≥ ~$59) → build pairs → mb-dpo-split50.
