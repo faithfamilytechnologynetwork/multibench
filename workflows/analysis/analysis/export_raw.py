@@ -75,9 +75,13 @@ def _humanize(value: str) -> str:
 
 
 def _fingerprint_tuple(row: dict) -> list:
-    """One resolved judgment reduced to its fingerprinted fields (canonical order)."""
+    """One resolved judgment reduced to its fingerprinted fields (canonical order).
+
+    ``tradition`` is included so the identity is globally unique even if two traditions ever
+    shared a ``scenario_id``. export_results must build the same tuple from the same rows.
+    """
     return [
-        row["subject"], row["scenario_id"], row["pressure"], row["framing"],
+        row["tradition"], row["subject"], row["scenario_id"], row["pressure"], row["framing"],
         row["judge"], row["scope"],
         # score as a JSON number; direction/rationale as "" when absent (stable).
         row["score"],
@@ -203,15 +207,20 @@ def _clean_prefix(prefix, where: str) -> str | None:
 
 
 def _iter_jsonl(path: Path):
-    """Yield (lineno, obj) for non-blank JSONL lines; fail loud on malformed JSON."""
+    """Yield (lineno, obj) for non-blank JSONL lines; fail loud on malformed JSON.
+
+    Streams the file line by line (``sittings.jsonl`` is ~100 MB/tradition) rather than
+    reading it whole.
+    """
     if not path.is_file():
         raise AnalysisInputError(f"expected sittings file not found: {path}")
-    for lineno, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
-        if line.strip():
-            try:
-                yield lineno, json.loads(line)
-            except json.JSONDecodeError as e:
-                raise AnalysisInputError(f"{path}:{lineno}: malformed JSON ({e})") from e
+    with path.open(encoding="utf-8") as fh:
+        for lineno, line in enumerate(fh, start=1):
+            if line.strip():
+                try:
+                    yield lineno, json.loads(line)
+                except json.JSONDecodeError as e:
+                    raise AnalysisInputError(f"{path}:{lineno}: malformed JSON ({e})") from e
 
 
 # ── Building the raw corpus (per tradition) ────────────────────────────────────────
@@ -300,16 +309,18 @@ _SUBJECT_ORDER = {s: i for i, s in enumerate(CANONICAL_SUBJECTS)}
 
 
 def _build_scenario(scenario_id: str, tradition: str,
-                    sittings: dict[SittingKey, Sitting],
+                    scenario_sittings: dict[SittingKey, Sitting],
                     verdicts_by_cell: dict[tuple, list[dict]]) -> RawScenario:
-    """Assemble one scenario's shard-ready cells + contexts pool."""
+    """Assemble one scenario's shard-ready cells + contexts pool.
+
+    ``scenario_sittings`` is already filtered to this scenario (the caller pre-groups, so this
+    is linear in the scenario's cells rather than rescanning the whole tradition per scenario).
+    """
     contexts: dict[str, str] = {}
     cells: list[dict] = []
-    # Iterate the sittings for this scenario (transcript is the anchor; a cell exists iff a
-    # transcript exists — verdicts without a transcript are caught by the orphan guard).
-    for (subj, sc, pr, fr), sitting in sittings.items():
-        if sc != scenario_id:
-            continue
+    # The transcript is the anchor; a cell exists iff a transcript exists — verdicts without a
+    # transcript are caught by the orphan guard.
+    for (subj, sc, pr, fr), sitting in scenario_sittings.items():
         cell = {
             "subject": subj,
             "conditions": {"framing": fr, "pressure": pr},
@@ -395,8 +406,14 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
             )
         verdicts_by_cell.setdefault(key, []).append(_verdict(row, tradition))
 
+    # Pre-group sittings by scenario once (linear), so each _build_scenario is linear in its
+    # own cells rather than rescanning the whole tradition.
+    sittings_by_scenario: dict[str, dict[SittingKey, Sitting]] = defaultdict(dict)
+    for skey, sitting in full_grid_sittings.items():
+        sittings_by_scenario[skey[1]][skey] = sitting
+
     scenarios = [
-        _build_scenario(sc, tradition, full_grid_sittings, verdicts_by_cell)
+        _build_scenario(sc, tradition, sittings_by_scenario[sc], verdicts_by_cell)
         for sc in sorted(sitting_scenarios)
     ]
     return RawTraditionExport(tradition=tradition, scenarios=scenarios)
@@ -488,8 +505,8 @@ def build_catalog(corpus: RawCorpus) -> dict:
             items.append({
                 "id": scenario.scenario_id,
                 "label": scenario.scenario_id,
-                "group": tradition,
-                "shard": _shard_path(tradition, scenario.scenario_id),
+                "group": scenario.group,
+                "shard": _shard_path(scenario.group, scenario.scenario_id),
             })
 
     judges = []

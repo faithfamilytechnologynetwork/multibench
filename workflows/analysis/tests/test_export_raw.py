@@ -374,17 +374,40 @@ def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
 # ── Agreement with the score tier + field allowlist ─────────────────────────────────
 
 
-def test_raw_verdicts_reconcile_with_score_tier_aggregate(tmp_path):
-    """Spec Test 2: a score-tier slice recomputed from the raw verdict stream equals the
-    #49 export's slice — the raw and score tiers cannot disagree (same resolved stream)."""
-    root = _grid_root(tmp_path)
+def _gemini_rows_from_shards(scenarios):
+    """Reconstruct cell_scores-ready rows from the SHIPPED shard verdicts (not the input)."""
+    rows = []
+    for scenario in scenarios:
+        shard = build_shard(scenario)
+        for c in shard["cells"]:
+            for v in c["verdicts"]:
+                if v["judge"] == "gemini":
+                    rows.append({
+                        "subject": c["subject"], "scenario_id": scenario.scenario_id,
+                        "pressure": c["conditions"]["pressure"],
+                        "framing": c["conditions"]["framing"],
+                        "scope": v["scope"], "score": v["score"],
+                    })
+    return rows
+
+
+def test_raw_shard_verdicts_reconcile_with_score_tier_aggregate(tmp_path):
+    """Spec Test 2: score-tier slices recomputed from the SHIPPED SHARD verdicts equal the #49
+    export's slices — so a `_build_scenario` regression (dropped/altered verdict) is caught,
+    not just the input stream. (Score varies by scope so the means are non-trivial.)"""
+    root = _grid_root(tmp_path, score_fn=lambda su, fr, pr, scope: 1.0 if scope == "turn1" else 0.0)
     corpus = build_raw_corpus([root])
     te = build_tradition_export(_TRAD, [read_run_root(root)[_TRAD]])
-    cs = cell_scores([r for r in corpus.resolved if r["judge"] == "gemini-3.6-flash"])
-    recomputed = breakdown_mean(cs, "gpt-5.6-terra", framing="unstated", scope="full",
-                                pressure="secularize")
-    slice_key = ("gemini-3.6-flash", "gpt-5.6-terra", "unstated", "full", "secularize")
-    assert recomputed == te.means[slice_key].mean == 0.5
+    cs = cell_scores(_gemini_rows_from_shards(corpus.per_tradition[_TRAD].scenarios))
+
+    for scope, expected in (("turn1", 1.0), ("full", 0.0)):
+        per_pressure = breakdown_mean(cs, "gpt-5.6-terra", framing="unstated", scope=scope,
+                                      pressure="secularize")
+        pooled = breakdown_mean(cs, "gpt-5.6-terra", framing="unstated", scope=scope, pressure=None)
+        assert per_pressure == te.means[
+            ("gemini-3.6-flash", "gpt-5.6-terra", "unstated", scope, "secularize")].mean == expected
+        assert pooled == te.means[
+            ("gemini-3.6-flash", "gpt-5.6-terra", "unstated", scope, "all")].mean == expected
 
 
 def _all_keys(obj, acc):
@@ -414,6 +437,48 @@ def test_field_allowlist_no_disallowed_keys_in_shards_or_catalog(tmp_path):
             assert set(turn) == {"role", "content"}
         for v in cell["verdicts"]:
             assert set(v) <= {"judge", "scope", "score", "summary", "rationale"}
+
+
+# ── Additional guards + determinism ─────────────────────────────────────────────────
+
+
+def test_no_report_bearing_root_aborts(tmp_path):
+    base, sittings = _grid(["gpt-5.6-terra"])
+    root = _write_run(tmp_path / "noreport", base=base, sittings=sittings)  # no report.json
+    with pytest.raises(AnalysisInputError, match="no run root provides report.json"):
+        build_raw_corpus([root])
+
+
+def test_missing_sittings_file_aborts(tmp_path):
+    base, _sit = _grid(["gpt-5.6-terra"])
+    root = _write_run(tmp_path / "nosit", base=base,
+                      report=_report(["BUD-001"], ["gpt-5.6-terra"], ["gemini-3.6-flash"]))
+    with pytest.raises(AnalysisInputError, match="expected sittings file not found"):
+        build_raw_corpus([root])
+
+
+def test_unmapped_sitting_subject_aborts(tmp_path):
+    base, sittings = _grid(["gpt-5.6-terra"])
+    sittings.append(_srow("acme/unknown-model", "BUD-001", "secularize", "unstated"))
+    root = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                      subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"])
+    with pytest.raises(AnalysisInputError, match="unmapped subject id"):
+        build_raw_corpus([root])
+
+
+def test_export_deterministic_over_shuffled_input(tmp_path):
+    base, sittings = _grid(["gpt-5.6-terra", "claude-sonnet-5"])
+    subjects, judges = ["gpt-5.6-terra", "claude-sonnet-5"], ["gemini-3.6-flash"]
+    a = _full_grid(tmp_path / "a", base=base, sittings=sittings, subjects=subjects, judges=judges)
+    # same rows, reversed order → the canonical sort must make the output byte-identical
+    b = _full_grid(tmp_path / "b", base=list(reversed(base)), sittings=list(reversed(sittings)),
+                   subjects=subjects, judges=judges)
+    ca, cb = build_raw_corpus([a]), build_raw_corpus([b])
+    sa = [build_shard(s) for s in ca.per_tradition[_TRAD].scenarios]
+    sb = [build_shard(s) for s in cb.per_tradition[_TRAD].scenarios]
+    assert sa == sb
+    assert build_catalog(ca) == build_catalog(cb)
+    assert source_fingerprint(ca.resolved) == source_fingerprint(cb.resolved)
 
 
 # ── Fingerprint ─────────────────────────────────────────────────────────────────────
