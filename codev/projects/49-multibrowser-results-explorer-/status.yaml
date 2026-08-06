@@ -1,0 +1,56 @@
+id: '49'
+title: multibrowser-results-explorer-
+protocol: spir
+phase: verify
+plan_phases:
+  - id: phase_1
+    title: 'Export core: normalization, aggregation & parity'
+    status: complete
+  - id: phase_2
+    title: Export writer, manifest, CLI & committed launch dataset
+    status: complete
+  - id: phase_3
+    title: 'SPA results data layer: discovery, loader, validation & truncation fallback'
+    status: complete
+  - id: phase_4
+    title: Leaderboard route + framing / scope+steadfastness / pressure selectors (Gemini-ranked)
+    status: complete
+  - id: phase_5
+    title: Per-tradition drill-down (incl. steadfastness) + judge selector + Opus validation layer
+    status: complete
+  - id: phase_6
+    title: 'Documentation: results data-contract README + multibrowser README'
+    status: complete
+current_plan_phase: null
+gates:
+  spec-approval:
+    status: approved
+    requested_at: '2026-08-05T23:59:50.138Z'
+    approved_at: '2026-08-06T00:32:52.227Z'
+  plan-approval:
+    status: approved
+    requested_at: '2026-08-06T00:48:31.015Z'
+    approved_at: '2026-08-06T00:56:52.955Z'
+  pr:
+    status: approved
+    requested_at: '2026-08-06T03:26:20.964Z'
+    approved_at: '2026-08-06T03:42:59.922Z'
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-05T23:42:45.960Z'
+updated_at: '2026-08-06T03:43:24.994Z'
+force_advanced:
+  phase: review
+  iteration: 3
+  max_iterations: 3
+  rebuttal_file: 49-review-iter3-rebuttals.md
+  at: '2026-08-06T03:26:19.709Z'
+pr_history:
+  - phase: review
+    pr_number: 50
+    branch: builder/spir-49
+    created_at: '2026-08-06T03:03:23.665Z'
+pr_ready_for_human: false

@@ -12,9 +12,17 @@ export function RootLayout() {
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b border-default-200">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link to="/" className="text-lg font-semibold">
-            Multi<span className="text-primary">Browser</span>
-          </Link>
+          <div className="flex items-baseline gap-4">
+            <Link to="/" className="text-lg font-semibold">
+              Multi<span className="text-primary">Browser</span>
+            </Link>
+            <Link
+              to="/results"
+              className="text-sm text-default-500 hover:text-default-700 [&.active]:text-primary"
+            >
+              Results
+            </Link>
+          </div>
           <a
             href={`https://github.com/${REPO}/tree/${ref}/traditions`}
             target="_blank"

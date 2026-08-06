@@ -25,6 +25,14 @@ import {
   type Tradition,
 } from "./model";
 import { loadResults } from "./results";
+import {
+  isSafePathSegment,
+  parseResultsManifest,
+  parseResultsShard,
+  shardConsistencyNotices,
+  type ResultsManifest,
+  type ResultsShard,
+} from "./resultsModel";
 
 const GC_TIME = 1000 * 60 * 60; // keep SHA-pinned (immutable) data ~1h for instant back-nav
 
@@ -73,6 +81,16 @@ export function scenarioFolderIds(entries: TreeEntry[], traditionId: string): st
 
 export function hasFile(entries: TreeEntry[], path: string): boolean {
   return entries.some((e) => e.type === "blob" && e.path === path);
+}
+
+/** Results run ids = `results/<id>/manifest.json` blobs (the #49 results datasets). */
+export function resultsRunIds(entries: TreeEntry[]): string[] {
+  const ids: string[] = [];
+  for (const e of entries) {
+    const m = /^results\/([^/]+)\/manifest\.json$/.exec(e.path);
+    if (m && m[1]) ids.push(m[1]);
+  }
+  return ids.sort();
 }
 
 // ---- shared cached fetchers (dedupe across derived queries) ----------------------------------
@@ -149,6 +167,121 @@ export async function loadTraditions(qc: QueryClient, sha: string): Promise<Trad
   const entries = await ensureTree(qc, sha);
   const ids = traditionIds(entries);
   return Promise.all(ids.map((id) => loadTraditionCore(qc, sha, entries, id)));
+}
+
+// ---- results datasets (#49): discovery + manifest/shard loaders --------------------
+
+export interface ResultsRun {
+  id: string;
+  manifest: ResultsManifest | null;
+  notices: Notice[];
+}
+
+export interface ResultsRunsResult {
+  runs: ResultsRun[];
+  /** The run to show by default: the most recent by manifest `generatedAt`, or null if none. */
+  defaultRunId: string | null;
+}
+
+const rPath = (runId: string, file: string) => ["results", runId, file].join("/");
+
+export async function loadResultsManifest(
+  qc: QueryClient,
+  sha: string,
+  runId: string,
+): Promise<{ manifest: ResultsManifest | null; notices: Notice[] }> {
+  const where = rPath(runId, "manifest.json");
+  const text = await ensureRaw(qc, sha, where);
+  if (text === null) {
+    return { manifest: null, notices: [notice("error", "results", where, "manifest not found")] };
+  }
+  return parseResultsManifest(text, where);
+}
+
+/** Discover every `results/<id>/` run and load its manifest; newest (by date) is the default. */
+export async function loadResultsRuns(qc: QueryClient, sha: string): Promise<ResultsRunsResult> {
+  const entries = await ensureTree(qc, sha);
+  const ids = resultsRunIds(entries);
+  const runs: ResultsRun[] = await Promise.all(
+    ids.map(async (id) => ({ id, ...(await loadResultsManifest(qc, sha, id)) })),
+  );
+  // Order by parsed instant (not lexical): a non-UTC offset or unparseable date must not
+  // misorder the runs. Invalid/absent dates parse to NaN and sort last.
+  const ts = (r: ResultsRun) => (r.manifest ? Date.parse(r.manifest.generatedAt) : NaN);
+  const valid = runs.filter((r) => r.manifest !== null);
+  valid.sort((a, b) => {
+    const [ta, tb] = [ts(a), ts(b)];
+    if (Number.isNaN(ta) && Number.isNaN(tb)) return a.id.localeCompare(b.id);
+    if (Number.isNaN(ta)) return 1;
+    if (Number.isNaN(tb)) return -1;
+    return tb - ta; // most recent first
+  });
+  return { runs, defaultRunId: valid[0]?.id ?? null };
+}
+
+export interface LoadedResultsRun {
+  manifest: ResultsManifest | null;
+  shards: Record<string, ResultsShard>;
+  notices: Notice[];
+}
+
+/** Load a run's manifest + all its tradition shards (for the leaderboard's mean-of-means). */
+export async function loadResultsRun(qc: QueryClient, sha: string, runId: string): Promise<LoadedResultsRun> {
+  const { manifest, notices } = await loadResultsManifest(qc, sha, runId);
+  if (manifest === null) return { manifest: null, shards: {}, notices };
+  const all: Notice[] = [...notices];
+  const shards: Record<string, ResultsShard> = {};
+  await Promise.all(
+    manifest.traditions.map(async (t) => {
+      const { shard, notices: sn } = await loadResultsShard(qc, sha, runId, t.id);
+      if (shard) shards[t.id] = shard;
+      all.push(...sn);
+    }),
+  );
+  return { manifest, shards, notices: all };
+}
+
+export async function loadResultsShard(
+  qc: QueryClient,
+  sha: string,
+  runId: string,
+  tradition: string,
+): Promise<{ shard: ResultsShard | null; notices: Notice[] }> {
+  // Load the manifest first: it is the single source of truth for the shard filename and the
+  // vocabulary the shard is cross-validated against (unknown keys → Notice).
+  const { manifest, notices: mNotices } = await loadResultsManifest(qc, sha, runId);
+  if (manifest === null) return { shard: null, notices: mNotices };
+  const entry = manifest.traditions.find((t) => t.id === tradition);
+  if (!entry) {
+    return {
+      shard: null,
+      notices: [notice("error", "results", rPath(runId, "manifest.json"), `tradition ${tradition} not in manifest`)],
+    };
+  }
+  // The shard filename is untrusted manifest data spliced into a raw URL — reject a hostile
+  // (`../`, absolute) value before fetching (mirrors the exporter's path-segment guard).
+  if (!isSafePathSegment(entry.shard)) {
+    return {
+      shard: null,
+      notices: [notice("error", "results", rPath(runId, "manifest.json"), `unsafe shard filename "${entry.shard}"`)],
+    };
+  }
+  const where = rPath(runId, entry.shard);
+  const text = await ensureRaw(qc, sha, where);
+  if (text === null) {
+    return { shard: null, notices: [notice("error", "results", where, `no results shard for ${tradition}`)] };
+  }
+  const { shard, notices } = parseResultsShard(text, where);
+  if (shard === null) return { shard: null, notices };
+  const consistency = shardConsistencyNotices(shard, manifest, tradition, where);
+  const all = [...notices, ...consistency];
+  // A contract-breaking shard (error-severity notice — e.g. a tradition mismatch) is EXCLUDED
+  // from the data so it can't be counted under the wrong tradition; unknown-vocab/coverage
+  // warnings are display-only and keep the shard.
+  if (consistency.some((n) => n.severity === "error")) {
+    return { shard: null, notices: all };
+  }
+  return { shard, notices: all };
 }
 
 export async function loadTradition(qc: QueryClient, sha: string, id: string): Promise<Tradition | null> {
@@ -287,6 +420,42 @@ export function useTradition(sha: string | undefined, id: string) {
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadTradition(qc, sha as string, id),
+  });
+}
+
+/** All results runs + the default (most recent). SHA-keyed, immutable per snapshot. */
+export function useResultsRuns(sha: string | undefined) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["results", "runs", REPO, sha],
+    enabled: !!sha,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadResultsRuns(qc, sha as string),
+  });
+}
+
+/** One tradition's results shard for a run (off the API budget; parsed fail-soft). */
+export function useResultsShard(sha: string | undefined, runId: string | undefined, tradition: string) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["results", "shard", REPO, sha, runId, tradition],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadResultsShard(qc, sha as string, runId as string, tradition),
+  });
+}
+
+/** A whole run: manifest + all shards (drives the leaderboard). */
+export function useResultsRun(sha: string | undefined, runId: string | undefined) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["results", "run", REPO, sha, runId],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadResultsRun(qc, sha as string, runId as string),
   });
 }
 

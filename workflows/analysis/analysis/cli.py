@@ -105,6 +105,56 @@ def report(
     )
 
 
+@app.command()
+def export(
+    run_roots: list[str] = typer.Argument(
+        ...,
+        metavar="RUN_ROOT...",
+        help="Judging run ROOTS (each a dir of per-tradition subdirs). The full-grid "
+             "Gemini run must carry report.json; report-less Opus layers merge in.",
+    ),
+    run_id: str = typer.Option(
+        ..., "--run-id", help="Dataset id — the results/<run-id>/ directory name."
+    ),
+    out: str = typer.Option(
+        "results", "--out",
+        help="Root output dir; writes <out>/<run-id>/manifest.json + <tradition>.json.",
+    ),
+) -> None:
+    """Export judging runs into a compact, browsable results/<run-id>/ dataset (#49).
+
+    Normalizes subject/judge ids across runs, resolves the Opus alias collision + v2
+    overlay, aggregates via the canonical semantics, and writes per-tradition shards +
+    a manifest (scores + metadata only — no transcripts).
+    """
+    import json as _json
+    from datetime import datetime, timezone
+    from pathlib import Path
+
+    from analysis.export_results import export_dataset
+    from analysis.loaders import AnalysisInputError
+
+    generated_at = datetime.now(timezone.utc).isoformat()
+    try:
+        written = export_dataset(list(run_roots), out, run_id, generated_at)
+    except AnalysisInputError as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    total = sum(p.stat().st_size for p in written)
+    manifest = _json.loads((Path(out) / run_id / "manifest.json").read_text())
+    typer.echo(
+        _json.dumps({
+            "run_id": run_id,
+            "out": str(Path(out) / run_id),
+            "files": len(written),
+            "total_bytes": total,
+            "traditions": [t["id"] for t in manifest["traditions"]],
+            "counts": manifest["counts"],
+        })
+    )
+
+
 def _emit_figures(aggregates, all_stats, out_dir, fig_format) -> None:
     """Render matplotlib PNG/PDF figures under ``<out>/figures``.
 

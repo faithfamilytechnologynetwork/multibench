@@ -90,15 +90,23 @@ const TreeSchema = z.object({
 });
 
 /**
+ * Top-level directories the truncation fallback walks. Both the corpus (`traditions/`) and
+ * the committed results datasets (`results/`, #49) must survive a truncated recursive tree —
+ * omitting `results/` here would make every results run silently vanish on a large repo.
+ */
+const WALK_DIRS = ["traditions", "results"] as const;
+
+/**
  * Full repo tree (recursive, one call). If GitHub reports `truncated`, fall back to a
- * per-directory walk under `traditions/` (§6 N-trunc) so the scenario set is still complete.
+ * per-directory walk under `WALK_DIRS` (§6 N-trunc) so both the scenario set and the
+ * results datasets stay complete.
  */
 export async function tree(repo: string, sha: string, fetchImpl: FetchImpl = fetch): Promise<TreeEntry[]> {
   const data = await apiJson(`${API}/repos/${repo}/git/trees/${sha}?recursive=1`, fetchImpl);
   const parsed = TreeSchema.safeParse(data);
   if (!parsed.success) throw new GitHubError(200, "Unexpected git-trees response shape.");
   if (parsed.data.truncated) {
-    return walkTraditions(repo, sha, fetchImpl);
+    return walkTopDirs(repo, sha, fetchImpl);
   }
   return parsed.data.tree
     .filter((e): e is TreeEntry => e.type === "blob" || e.type === "tree")
@@ -109,13 +117,16 @@ const NodeSchema = z.object({
   tree: z.array(z.object({ path: z.string(), type: z.string(), sha: z.string() })),
 });
 
-/** Per-directory fallback: walk only the `traditions/` subtree, accumulating full paths. */
-async function walkTraditions(repo: string, sha: string, fetchImpl: FetchImpl): Promise<TreeEntry[]> {
+/** Per-directory fallback: walk each present `WALK_DIRS` subtree, accumulating full paths. */
+async function walkTopDirs(repo: string, sha: string, fetchImpl: FetchImpl): Promise<TreeEntry[]> {
   const root = NodeSchema.parse(await apiJson(`${API}/repos/${repo}/git/trees/${sha}`, fetchImpl));
-  const traditions = root.tree.find((e) => e.path === "traditions" && e.type === "tree");
-  if (!traditions) return [];
-  const out: TreeEntry[] = [{ path: "traditions", type: "tree" }];
-  await walkInto(repo, traditions.sha, "traditions", out, fetchImpl);
+  const out: TreeEntry[] = [];
+  for (const dir of WALK_DIRS) {
+    const node = root.tree.find((e) => e.path === dir && e.type === "tree");
+    if (!node) continue; // a repo may have traditions/ but not yet results/ (or vice-versa)
+    out.push({ path: dir, type: "tree" });
+    await walkInto(repo, node.sha, dir, out, fetchImpl);
+  }
   return out;
 }
 

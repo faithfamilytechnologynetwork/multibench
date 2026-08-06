@@ -15,6 +15,7 @@ MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sec
 - **A client-side GitHub data layer** is unauthenticated (60/hr per IP, may be NAT-shared, no safe token): SHA-pin the tree (≈1 call/snapshot), fetch content via `raw` (off the API budget), poll the commit SHA gently (`refetchInterval`; `staleTime` alone does NOT poll), serve stale + a banner on 403.
 - **Gemini's per-phase impl/code consult can't see the worktree here** (no verdict → blocks unanimity); per-phase consult is `["codex","claude"]` — do full 3-way only where the diff is fed inline (the PR integration CMAP).
 - Porch only re-extracts plan phases at the plan→implement transition; adding a phase mid-implement needs `porch rollback <id> plan` + plan re-approval.
+- **To surface derived numbers that must reconcile with an authoritative source, pre-aggregate in the canonical code** (here the Python aggregator) and let the client do only the *last trivial step* (an equal-weight mean-of-means) — reconciliation holds by construction, and there's no second implementation of the convention to drift. Guard it with a test that reconciles the committed artifact against the paper.
 
 ## Map of lessons-learned.md (consult when…)
 - Toolchain & protocol environment (Python + porch) — consult when porch checks/consults misbehave in this Python repo.

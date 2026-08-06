@@ -2,6 +2,26 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execSync, spawn } from "node:child_process";
+import { createServer } from "node:net";
+
+/**
+ * Acquire a free ephemeral port (OS-assigned via bind 0) to run the smoke server on. A FIXED
+ * port would deterministically collide when two builders touch multibrowser concurrently (and a
+ * leaked `serve` once squatted on a hardcoded port for days, #49 review) — an ephemeral port
+ * sidesteps both. There is a tiny window between close and the server's re-bind, but ephemeral
+ * ports effectively never collide there.
+ */
+async function getFreePort(): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    const probe = createServer();
+    probe.once("error", reject);
+    probe.listen(0, "127.0.0.1", () => {
+      const addr = probe.address();
+      const port = typeof addr === "object" && addr ? addr.port : 0;
+      probe.close(() => (port ? resolve(port) : reject(new Error("could not acquire a free port"))));
+    });
+  });
+}
 
 // Build / deploy invariants (the Phase-6 acceptance items). Some run against the repo files;
 // two run a REAL production build and a REAL static server. Run by vitest from apps/multibrowser.
@@ -60,11 +80,13 @@ describe("build / deploy invariants", () => {
   });
 
   it("REAL smoke: the static server returns index.html for a nested deep link (SPA fallback)", async () => {
-    const port = 4199;
-    // Run the actual `start` command (serve -s dist) on a test port.
+    const port = await getFreePort(); // ephemeral — safe under concurrent builders
+    // Run the actual `start` command (serve -s dist) on a test port. `detached` makes the child
+    // a process-group leader so we can reap the whole tree (serve is a grandchild of pnpm).
     const server = spawn("pnpm", ["start"], {
       env: { ...process.env, PORT: String(port) },
       stdio: "ignore",
+      detached: true,
     });
     try {
       let ready = false;
@@ -84,6 +106,13 @@ describe("build / deploy invariants", () => {
       expect(deep.status).toBe(200);
       expect(await deep.text()).toContain('id="root"');
     } finally {
+      // Kill the whole process GROUP so the `serve` grandchild dies with the pnpm wrapper
+      // (killing only the wrapper is exactly what leaked the zombie serve before).
+      try {
+        if (server.pid) process.kill(-server.pid, "SIGTERM");
+      } catch {
+        /* group may already be gone */
+      }
       server.kill();
     }
   }, 60_000);

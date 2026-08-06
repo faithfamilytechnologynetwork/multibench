@@ -25,6 +25,25 @@ function json(o: unknown, init?: ResponseInit): Response {
   });
 }
 
+/**
+ * Immediate children of a directory (`""` = repo root), for the NON-recursive git-trees walk
+ * the truncation fallback uses. Each child's `sha` is its full path, so `walkInto` can address
+ * the next level. Models the GitHub `git/trees/<sha>` (no `recursive=1`) response shape.
+ */
+function childrenOf(files: Record<string, string>, dir: string): { path: string; type: string; sha: string }[] {
+  const prefix = dir ? `${dir}/` : "";
+  const seen = new Map<string, "tree" | "blob">();
+  for (const p of Object.keys(files)) {
+    if (!p.startsWith(prefix)) continue;
+    const rest = p.slice(prefix.length);
+    if (!rest) continue;
+    const slash = rest.indexOf("/");
+    if (slash === -1) seen.set(rest, "blob");
+    else seen.set(rest.slice(0, slash), "tree");
+  }
+  return [...seen].map(([name, type]) => ({ path: name, type, sha: prefix + name }));
+}
+
 export interface FakeOpts {
   truncated?: boolean;
   rateLimited?: boolean;
@@ -50,6 +69,13 @@ export function fakeFetch(
     if (url.includes(`/repos/${repo}/commits/`)) return json({ sha });
     if (url.includes(`/repos/${repo}/git/trees/`) && url.includes("recursive=1")) {
       return json({ truncated: !!opts.truncated, tree: opts.truncated ? [] : buildTree(files) });
+    }
+    // Non-recursive git-trees (the truncation fallback's per-directory walk).
+    const nrec = url.match(/\/repos\/[^/]+\/[^/]+\/git\/trees\/(.+)$/);
+    if (nrec?.[1]) {
+      const key = decodeURIComponent(nrec[1].split("?")[0] ?? "");
+      const dir = key === sha ? "" : key; // the commit sha addresses the repo root
+      return json({ tree: childrenOf(files, dir) });
     }
     if (url.startsWith(rawPrefix)) {
       const path = decodeURIComponent(url.slice(rawPrefix.length));
@@ -112,6 +138,73 @@ export function traditionFiles(id: string, scenarioIds: string[]): Record<string
       "pa",
       "",
     ].join("\n");
+  }
+  return files;
+}
+
+/**
+ * A minimal committed results dataset (#49): `results/<runId>/manifest.json` + one shard per
+ * tradition. Deterministic, self-consistent — used by the results data-layer / explorer tests.
+ */
+export function resultsFiles(
+  runId: string,
+  opts: {
+    generatedAt?: string;
+    traditions?: string[];
+    schemaVersion?: number;
+    // per (tradition, judge, subject, framing, scope, pressure) mean override; default fills unstated/full/all
+    shard?: (tradition: string) => Record<string, unknown>;
+  } = {},
+): Record<string, string> {
+  const traditions = opts.traditions ?? ["buddhism"];
+  const gen = opts.generatedAt ?? "2026-08-06T00:00:00+00:00";
+  const manifest = {
+    schema_version: opts.schemaVersion ?? 1,
+    run_id: runId,
+    generated_at: gen,
+    subjects: [
+      "Qwen/Qwen3-235B-A22B-Instruct-2507", "claude-sonnet-5", "gemini-3.6-flash",
+      "gpt-5.6-terra", "thinkingmachines/Inkling",
+    ],
+    judges: [
+      { key: "gemini", model: "gemini-3.6-flash", aliases: ["gemini-3.6-flash"], full_grid: true },
+      {
+        key: "opus", model: "claude-opus-4-8",
+        aliases: ["claude-opus-4-8", "anthropic/claude-opus-4.8"], full_grid: false,
+      },
+    ],
+    framings: ["unstated", "stated", "guided"],
+    pressures: [
+      "secularize", "insistence", "false_authority", "good_cause", "flattery", "personal_appeal",
+    ],
+    pressure_all: "all",
+    scopes: ["turn1", "full"],
+    metrics: ["turn1", "full", "steadfastness"],
+    traditions: traditions.map((t) => ({ id: t, n_scenarios: 2, shard: `${t}.json` })),
+    counts: {
+      judgments: { "gemini-3.6-flash": 10, "claude-opus-4-8": 5 },
+      coverage: { "gemini-3.6-flash": { unstated: { n_judged: 10, n_expected: 10 } } },
+    },
+  };
+  const files: Record<string, string> = {
+    [`results/${runId}/manifest.json`]: JSON.stringify(manifest),
+  };
+  for (const t of traditions) {
+    const shard = opts.shard
+      ? opts.shard(t)
+      : {
+          tradition: t,
+          n_scenarios: 2,
+          judges: ["gemini-3.6-flash"],
+          means: {
+            "gemini-3.6-flash": {
+              // n_expected for the pooled "all" slice = n_scenarios(2) × 6 pressures = 12
+              "claude-sonnet-5": { unstated: { full: { all: [0.5, 2, 12] } } },
+            },
+          },
+          steadfastness: {},
+        };
+    files[`results/${runId}/${t}.json`] = JSON.stringify(shard);
   }
   return files;
 }
