@@ -17,7 +17,7 @@ echo "local: sha=$LSHA lines=$LLINES file=$LOCAL"
 for attempt in 1 2 3; do
   echo "=== put attempt $attempt -> $DEST ==="
   modal volume put --force gemma-dpo "$LOCAL" "$DEST"
-  R=$(modal run experiments/57_multiweights_split/modal/modal_volume_verify.py --path "$DEST" 2>/dev/null | tail -1)
+  R=$(modal run experiments/57_multiweights_split/modal/modal_volume_verify.py --path "$DEST" 2>/dev/null | grep '"sha256"' | tail -1)
   VSHA=$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['sha256'])" "$R" 2>/dev/null || echo "ERR")
   VLINES=$(python3 -c "import json,sys; print(json.loads(sys.argv[1])['lines'])" "$R" 2>/dev/null || echo "ERR")
   echo "volume: sha=$VSHA lines=$VLINES"
