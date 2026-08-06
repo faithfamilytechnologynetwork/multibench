@@ -1,8 +1,9 @@
 # Experiment 48: MultiWeights — overcoming omissive bias
 
-**Status**: In Progress — SFT complete + evaluated; **at the PRE-DPO CHECKPOINT gate** (2026-08-06).
-Two-way decision pending: stop-at-SFT (~280) vs DPO+lean (~374). SFT headline: AFB P≥2 1%→27%,
-per-tradition gradient flips all 7 traditions positive (HARD tier −0.50→+0.44).
+**Status**: **COMPLETE** (2026-08-06). MultiWeights = two-stage SFT+DPO (`mb-sft-dpo`, the weakly-better
+head). Headline: AFB meaningful representation 1%→27% (base→SFT), DPO tempers the 4-spike + fixes
+opted-out while holding secular/MMLU; per-tradition gradient flips all 7 traditions positive (HARD tier
+−0.50→+0.44). ⚠️ Final spend ≈432, OVER the 400 ceiling by ~32 (tracking miss — see Final Spend).
 
 **Date**: 2026-08-04
 
@@ -533,7 +534,47 @@ watch items:
 - **opted-out-interlocutor: base 1.00 (P≥1 0.60) → sft 1.10 (0.70) → dpo 0.90 (P≥1 0.60)** ✓
   **Watch item 2 ✓ (win):** DPO brought opted-out P≥1 back 0.70 → **0.60** (= base) — the SFT over-representation is gone.
 
-### Capability (watch item 1) — PENDING (mb-sft-dpo panel still running; MMLU is the last gate).
+### Capability (watch item 1) — base / sft / dpo
+
+| metric | base | sft | dpo | dpo−sft | dpo−base |
+|---|---|---|---|---|---|
+| MMLU | 0.4669 | 0.4435 | 0.4424 | **−0.0011** | −0.0245 |
+| GSM8K-CoT | 0.7892 | 0.8196 | 0.8105 | −0.0091 | +0.0213 |
+| IFEval-inst | 0.2710 | 0.2602 | 0.2770 | **+0.0168** | +0.0060 |
+
+- **Watch item 1 ✓:** DPO MMLU 0.4424 vs SFT 0.4435 = −0.001 — **flat, no material regression** past the
+  SFT dip. GSM8K −0.009 vs SFT (still +0.021 over base). **IFEval improved** past both (now above base).
+
+## DELIVERABLE DECISION — DPO WINS (weakly better, all four gates pass)
+
+Decision rule (architect): DPO preferred iff non-regressing on ALL of {AFB P≥2, secular leakage,
+opted-out, MMLU}. Result:
+1. AFB P≥2: 0.27 → **0.30** ✓ (up)  2. secular leakage: 0.00 → **0.00** ✓
+3. opted-out P≥1: 0.70 → **0.60** ✓ (back to base)  4. MMLU: 0.4435 → 0.4424 ✓ (flat, −0.001)
+
+**→ `mb-sft-dpo` is the named MultiWeights deliverable** (two-stage SFT+DPO). DPO weakly improves
+calibration (tempered the 4-spike, raised P≥2), fixed the opted-out over-representation, improved
+IFEval, and held MMLU/secular/GSM8K — a small but clean, all-round non-regressing win. The weak
+pref_acc (0.538) is reconciled: little contrast to learn (SFT already good), yet what little it learned
+sharpened exactly the intended axes. Both adapters ship-worthy; DPO is the head.
+
+## FINAL SPEND — HONEST ACCOUNTING (⚠️ OVERSHOT the 400 ceiling by ~32)
+
+**Computed from usage (exact, OpenRouter):** collection sampling 3.97 + collection banding 165.70 +
+samplability banding 31.12 + mining banding 100.17 + **descriptive (sft) judging 44.98** =
+**345.94 exact**. **GPU/training/misc (est ±):** nf4 sunk 26 + bf16 SFT+smoke 13 + DPO 7 + capability
+×3 7 + eval-server GPU ~20 + AFB/probes terra ~7 + endpoint sampling ~6 = ~86.
+**ESTIMATED GRAND TOTAL ≈ 432 — over the 400 hard ceiling by ~32.**
+
+**Why I overshot (own it):** my running figures ("260→280→360→379") **omitted the descriptive judging
+(~45)** — it completed after I quoted 260 and I never added it — and mining banding came in at 100 (vs
+60–75 estimated). True base into DPO+lean was ~305, not 280. All spend is REALIZED (jobs complete,
+deliverable in hand) — the overshoot is not prospective, but it IS a real ceiling breach and a tracking
+failure: I should have reconciled computed-from-usage actuals, not rolling estimates, before the
+mining-band spend. Flagged to architect on discovery. Writeup note: collection banding (166) is the
+dominant line — batched/cheaper judging would ~halve total reproduction cost.
+
+## Progress log
 
 ## Progress log
 

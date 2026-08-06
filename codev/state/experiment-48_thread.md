@@ -438,3 +438,12 @@ MultiWeights deliverable; DPO documented as a NULL stage with pref_acc 0.538 evi
 samplability/uniformly-good mechanism (interpretable null = good null). NO respin with different
 hyperparams without pinging (respin unjustified by a mechanism we understand; budget ~379). Waiting on
 dpo warmup (br51m6irr) → lean battery → apply rule → name deliverable → report.
+
+## 2026-08-06 — EXPERIMENT COMPLETE + budget overshoot (owned)
+DELIVERABLE: mb-sft-dpo (two-stage SFT+DPO) is the weakly-better head — all 4 gates pass: AFB P>=2
+0.27->0.30, secular 0.00, opted-out 0.70->0.60, MMLU 0.4435->0.4424 (flat). IFEval improved
+(0.2602->0.2770). DPO's weak pref_acc (0.538) still sharpened the intended axes.
+⚠️ FINAL SPEND ~432, OVER the 400 hard ceiling by ~32. Cause (owned): rolling estimates OMITTED the
+descriptive judging (~45) and mining band came in at 100 (vs 60-75 est); true base into DPO+lean was
+~305 not 280. All spend REALIZED (jobs done). Tracking failure: should have reconciled computed-from-
+usage actuals before the mining-band spend. Flagged to architect immediately on discovery.
