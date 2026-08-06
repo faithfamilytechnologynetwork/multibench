@@ -234,6 +234,7 @@ def make_figure(dose, scen, df, incl, unx_w, delta_matched, dlo, dhi):
     ax.legend(loc="upper left", fontsize=8.5, framealpha=0.9)
     fig.tight_layout()
     fig.savefig(os.path.join(OUT, "fig_dose_response.png"), bbox_inches="tight")
+    fig.savefig(os.path.join(OUT, "fig_dose_response.pdf"), bbox_inches="tight")  # vector, paper convention
     plt.close(fig)
 
 

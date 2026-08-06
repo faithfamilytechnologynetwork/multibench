@@ -140,6 +140,16 @@ transferable effect ≈4×. Crucially, zero-exposure scenarios **improve but do 
 positive** (base −0.872 → SFT −0.654; 92% remain < 0) — the "all 7 traditions positive"
 aggregate reading is memorization-driven, not a property of held-out prompts.
 
+> **⚠️ Prominent limitation — the strict holdout is small and tradition-skewed.** The
+> zero-exposure arm is only **13 scenarios across 3 traditions — sunni-islam 9,
+> secular-sage 3, judaism 1** — i.e. the strict prompt-level holdout is *mostly
+> sunni-islam*, and 4 of the 7 traditions (eastern-christianity, roman-catholicism,
+> taoism, buddhism) have **no** zero-exposure scenario at all. The +0.218 transferable
+> estimate therefore rests largely on one tradition and **cannot be read as an even,
+> cross-tradition generalization result**. The cell-level matched contrast (n=382 unexposed
+> cells, all traditions) is the statistically stronger and better-balanced arm; a clean
+> per-tradition holdout would need the single-fold retrain deferred to future work.
+
 ### Key Findings
 
 1. **Monotone dose-response (raw).** Scenario mean lift by exposure 0..6:
@@ -195,7 +205,10 @@ statistically stronger arm and covers all traditions.
 > scenarios (95% CI [+0.11, +0.35])** — and a dominant exposure-concentrated component
 > (base-difficulty-matched exposed-vs-held-out contrast Δ ≈ **+1.01**, CI [+0.92, +1.10]);
 > the aggregate therefore **overstates the transferable effect roughly four-fold**, and
-> matching on base difficulty does not remove the gap. Stated plainly: zero-exposure
+> matching on base difficulty does not remove the gap. (The strict zero-exposure arm is
+> small and tradition-skewed — 13 scenarios, mostly sunni-islam — so +0.22 bounds rather
+> than evenly estimates cross-tradition transfer; the 382-cell matched contrast is the
+> better-balanced arm.) Stated plainly: zero-exposure
 > scenarios *improve but do not flip positive* (mean base −0.87 → −0.65; 92% remain
 > negative), so the "all seven traditions positive" aggregate is memorization-driven
 > rather than a property of held-out prompts. This confound is intrinsic to the design:
