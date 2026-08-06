@@ -184,6 +184,36 @@ framings/pressures) or the −1…+1 ramp as a constant — all such values arri
 (The #49 *score* tier / leaderboard stays MultiBench-specific; genericity binds the **new**
 #51 raw contract + viewer that #54 will reuse.)
 
+**Dual-source data architecture ruling (Waleed, 2026-08-06 — resolves the repo-weight
+open question):** the raw tier is served from **two public sources with identical slimmed
+content** (the export field allowlist applies to **both** — both are public):
+- **Committed GitHub compressed tier** — the per-scenario `.gz` shards under
+  `results-raw/<run-id>/`, exactly as specced. This is the **authoritative** copy and the
+  **fallback**; Waleed has explicitly accepted this committed weight.
+- **Baked deploy bundle** — the Railway `railway up` step (which deploys **from the local
+  machine**, so the bundle is **not** constrained by what is committed) additionally bakes
+  the **full, uncompressed** export into the static bundle (a same-origin `/data`-style
+  path). This is the **primary** source when present.
+
+**Source-resolution rule:** the viewer prefers the **same-origin baked** source (fast — no
+GitHub rate limits, no API budget) and falls back to the **SHA-pinned GitHub** compressed
+tier when the baked bundle is **absent** or **stale-mismatched**. Coherence is decided by
+the **source fingerprint** (the same hash stamped in every manifest): the baked bundle is
+served only when its fingerprint matches the authoritative run being viewed; otherwise the
+viewer falls back to GitHub and shows a **`Notice`** that it is serving the fallback copy.
+"Full" means the complete **uncompressed** export in the bundle vs. the **gz** shards on
+GitHub — identical content, same fingerprint, differing only in representation. (The
+magic-byte gunzip sniff already carried verbatim makes this nearly free on the client: an
+uncompressed baked file simply lacks the `0x1f 0x8b` header and takes the `TextDecoder`
+path, while a `.gz` shard takes the `DecompressionStream` path — one code path, both
+sources.)
+
+**Deploy-flow implication (disclosed trade-off):** refreshing site data now means
+**re-export + `railway up`** — the **baked** copy does **not** update without a deploy
+(unlike the pure #1/#49 "new data appears with no redeploy" property, which still holds for
+the **GitHub fallback** copy that updates live on commit). This is the accepted cost of the
+baked primary's speed and rate-limit immunity.
+
 ## Stakeholders
 - **Primary Users**: readers/reviewers of the MultiBench results (researchers, the paper's
   audience) who want to audit the raw evidence behind the scores.
@@ -249,6 +279,11 @@ framings/pressures) or the −1…+1 ramp as a constant — all such values arri
       non-tradition items, a non-leaderboard subjects list) with no component change.
 - [ ] Fail-soft throughout: malformed/absent remote JSON, 404s, and rate-limits produce
       the existing `Notice`/banner UX, never a blank crash.
+- [ ] **Dual-source (Baked Decision 14):** the exporter can emit both the committed **gz**
+      tier and a **full uncompressed** baked bundle of **identical content + fingerprint**;
+      the Railway deploy bakes the full bundle; the viewer resolves **baked-first,
+      GitHub-fallback** with the **source fingerprint** deciding coherence and a `Notice`
+      when serving the fallback.
 - [ ] A **baked dev fixture** (a `--limit`-style small export) lets the SPA's tests run
       without network access.
 - [ ] A `results-raw/README.md` documents the contract, layout, allowlist, size ceilings,
@@ -296,6 +331,13 @@ framings/pressures) or the −1…+1 ramp as a constant — all such values arri
     same viewer with zero component changes. No MultiBench vocab (`tradition`, `scenario`,
     framings/pressures) and no −1…+1 ramp constant may be baked into the raw schemas or
     components. (See the *Catalog-genericity ruling* in Desired State.)
+14. **Dual-source data (Waleed).** Two public sources of identical slimmed content: the
+    committed GitHub **compressed** tier (authoritative + fallback) and the Railway
+    **baked full uncompressed** bundle (primary when present). The viewer resolves
+    baked-first, GitHub-fallback, with the **source fingerprint** deciding coherence and a
+    `Notice` when serving the fallback. Refreshing the baked copy requires
+    re-export + `railway up`; the GitHub copy still updates live on commit. (See the
+    *Dual-source data architecture ruling* in Desired State.)
 
 ### Presets (export-computed; user-visible, hence specified here)
 Each preset is a capped, deterministic list of deep-link entries with stable keys, deduped
@@ -313,11 +355,13 @@ tie-breaks, **cap = 12**, computed only from cells that have the required judge/
   mean(turn1)` (Gemini), i.e. the biggest post-pressure drop; entry links that cell.
 
 ### Technical Constraints
-- **Runtime-fetch, committed tier** (like `results/`): SHA-pinned GitHub `raw`, no backend,
-  no baked data in the SPA build, new data with no redeploy. `github.ts` is the only fetch
-  boundary; its truncated-tree fallback (`WALK_DIRS`) must also reach `results-raw/` for
-  **catalog** discovery (per-scenario shards are manifest-declared, never enumerated via
-  the API).
+- **Dual-source data** (Baked Decision 14): the SPA reads a same-origin **baked**
+  uncompressed bundle when present/coherent, else the SHA-pinned GitHub **compressed**
+  tier. `github.ts` remains the GitHub fetch boundary; a source-resolution layer sits above
+  the data layer to choose baked-vs-GitHub. The GitHub truncated-tree fallback (`WALK_DIRS`)
+  must reach `results-raw/` for **catalog** discovery (per-scenario shards are
+  manifest-declared, never enumerated via the API); the baked source enumerates via its
+  manifest identically. No backend either way.
 - **Client environment:** `DecompressionStream('gzip')` (evergreen; Safari ≥16.4).
   Unauthenticated GitHub budget (60/hr per IP, possibly NAT-shared): the catalog costs a
   tree walk; per-scenario `.gz` shards fetch via `raw` (off the API budget) and load only
@@ -378,11 +422,11 @@ baked dev-fixture).
 ## Open Questions
 
 ### Critical (Blocks Progress)
-- [ ] **Repo-weight acceptance (Waleed, at the gate):** the raw tier is **~110–150 MB gz
-      per run** (measured extrapolation, not the issue's 30–80 MB) and grows history per
-      refresh. Confirm committing at this magnitude is acceptable, or choose a lever
-      (git-LFS; a subject/tradition subset; a retention policy of one run at a time). The
-      rest of the spec assumes plain commit with per-scenario determinism as the mitigation.
+- [x] **Repo-weight acceptance — RESOLVED by Waleed (2026-08-06).** The committed
+      compressed tier (~110–150 MB gz/run) is accepted as-is, **and** the
+      **dual-source architecture** (Baked Decision 14) makes the fast path a same-origin
+      baked bundle so the committed tier's weight does not gate day-to-day performance. No
+      git-LFS / subset needed at this time.
 
 ### Important (Affects Design)
 - [ ] **License identifier:** the concrete SPDX id / text and its approval source for
@@ -407,10 +451,13 @@ baked dev-fixture).
   per-run total **≤ 200 MB gz**. The export validates **all** sizes before writing
   anything (no partial tier) and fails loudly on breach. Final values may be tuned in Plan
   from the measured p99, but must sit above real data, not on it.
-- **Per-view payload**: a drill-in fetches **one** `.gz` shard (~a few hundred KB);
-  above-the-fold `/results` uses only the #49 score tier.
-- **API budget**: no per-scenario API calls — shards fetch via `raw` (off-budget); the
-  catalog is discovered via the existing SHA-pinned tree walk.
+- **Per-view payload**: a drill-in fetches **one** shard (~a few hundred KB gz on GitHub,
+  or its uncompressed baked equivalent same-origin); above-the-fold `/results` uses only the
+  #49 score tier.
+- **API budget**: with the **baked** primary source, per-scenario shard reads are
+  **same-origin** (no GitHub rate limits, no API budget) — the point of the dual-source
+  architecture. On the **GitHub fallback**, shards fetch via `raw` (off the API budget) and
+  the catalog is discovered via the SHA-pinned tree walk; no per-scenario API calls.
 - **Determinism**: byte-identical re-exports (stable caching / no-op commits).
 
 ## Security Considerations
@@ -470,6 +517,14 @@ baked dev-fixture).
     change**; the ramp, scale domain, item grouping, and subjects all come from the catalog.
     A static check asserts the raw schemas/components contain no `tradition`/`scenario`
     literals or a hardcoded −1…+1 ramp.
+16. **Source resolution (Baked Decision 14):** with a coherent baked bundle present, the
+    viewer serves shards **same-origin** (no GitHub fetch); with the baked bundle absent, it
+    falls back to the GitHub gz tier **and shows a `Notice`**; with a baked bundle whose
+    **fingerprint mismatches** the authoritative run, it also falls back + notices (stale
+    bundle). Identical parsed content from both sources for the same cell.
+17. **Dual-representation identity:** the same export emitted as gz (committed) and as full
+    uncompressed (baked) carries **identical content and the same fingerprint** — differing
+    only in byte representation.
 
 ### Non-Functional Tests
 1. **Size ceilings:** an over-ceiling shard or total fails the export before any write.
@@ -503,7 +558,8 @@ baked dev-fixture).
 ## Risks and Mitigation
 | Risk | Probability | Impact | Mitigation Strategy |
 |------|------------|--------|-------------------|
-| Committed raw tier is ~110–150 MB gz/run and grows history per refresh (gz doesn't delta) | High | High | Surfaced to Waleed as a gate decision (Critical open question); per-scenario granularity + determinism → only changed shards rewrite; git-LFS / subset / one-run-retention as levers; documented in `results-raw/README.md`. |
+| Committed raw tier is ~110–150 MB gz/run and grows history per refresh (gz doesn't delta) | High | Medium | **Resolved by Waleed**: committed weight accepted; the dual-source baked bundle carries the fast path so the committed tier's weight doesn't gate performance; per-scenario determinism → only changed shards rewrite; documented in `results-raw/README.md`. |
+| Baked deploy bundle goes stale vs. the authoritative GitHub tier (data refreshed on GitHub but no `railway up`) | Medium | Low | Source fingerprint decides coherence; a fingerprint mismatch falls back to the live GitHub copy + a `Notice`; the deploy-flow trade is documented (refresh = re-export + `railway up`). |
 | Raw and score tiers drift (separate commands, separate times) | Low | High | Shared **fingerprint** stamped in both manifests + viewer/CI equality check; field-parity + aggregate-reconciliation tests. |
 | Transcript↔verdict join silently drops cells (divergent subject spellings; no #49 sitting loader) | Medium | High | New sitting reader keys by **normalized** subject; orphan verdict = loud export abort; explicit tests (6, 5). |
 | Wrong-root sittings shadow the authoritative transcript | Medium | Medium | Transcripts read **only** from the full-grid run; all other roots' sittings ignored (test 4). |
@@ -540,16 +596,24 @@ architect); Codex and Claude (SPIR spec CMAP, per this repo's per-phase consult 
 - *Minor*: #49 tier = 184 KB; Opus judgments = 42,711; score numeric via `is_valid_score`;
   edit the "bands" placeholder string (Claude).
 
-**Pre-gate amendment (2026-08-06, Waleed via issue #54):** added the **catalog-genericity**
+**Pre-gate amendment 1 (2026-08-06, Waleed via issue #54):** added the **catalog-genericity**
 requirement (Baked Decision 13 + the Desired-State ruling + criteria/tests) — the raw
 contract + viewer must be catalog-generic (score scale/ramp, items/grouping, subjects all
 catalog-declared) so #54's AFB 0–4 explorer rides the same viewer with zero component
 changes. This is a genericity requirement on #51, not new #51 scope; the AFB explorer
 itself is #54, built after #51 lands.
 
+**Pre-gate amendment 2 (2026-08-06, Waleed):** resolved the repo-weight Critical open
+question with a **dual-source data architecture** (Baked Decision 14 + the Desired-State
+ruling + criteria/tests): the committed GitHub compressed tier stays authoritative + the
+fallback, and the Railway deploy additionally bakes the full uncompressed export into the
+static bundle as the same-origin **primary** source; the viewer resolves baked-first with
+the source fingerprint deciding coherence and a `Notice` on fallback. Disclosed trade: the
+baked copy refreshes only on `railway up`; the GitHub copy still updates live.
+
 ## Approval
-- [ ] Repo-weight decision (Waleed) — Critical open question
-- [ ] License identifier (Waleed)
+- [x] Repo-weight decision (Waleed) — RESOLVED via dual-source architecture (Decision 14)
+- [ ] License identifier (Waleed) — still open
 - [ ] Technical Lead / Architect Review
 - [ ] Product Owner Review (Waleed)
 - [x] Cross-workspace review (taqwabench architect) — approve-with-defect, folded in
@@ -561,5 +625,10 @@ itself is #54, built after #51 lands.
   `contexts`-pool wire shape, the fingerprint's exact hash construction, size-ceiling
   final values, and the `results/` `generated_at` change are Plan-phase decisions, seeded
   by the *Open Questions* and *Constraints* above.
-- Two decisions await Waleed at the gate: the **repo-weight** acceptance (the corrected
-  ~110–150 MB/run) and the **license** identifier. Both are flagged rather than assumed.
+- The **repo-weight** decision is resolved (dual-source, Decision 14). **One** decision
+  still awaits Waleed at the gate: the **license** identifier for `dataset.license`.
+- Plan-level items introduced by the dual-source ruling: the exporter emitting both a gz and
+  an uncompressed representation of identical content/fingerprint; the Railway deploy step
+  baking the full bundle into the static site; the SPA's source-resolution layer above the
+  data layer; and `results-raw/README.md` documenting the two sources + the deploy-flow
+  refresh trade.

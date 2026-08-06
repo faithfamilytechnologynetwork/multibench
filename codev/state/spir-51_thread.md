@@ -103,3 +103,21 @@ already ported from jaleesbrowser's generic contract, so this is cheap to absorb
 watch-item is not importing scoreColor's hardcoded constant in the raw view (read the ramp
 from the catalog). Folded into Baked Decision 13 + Desired-State ruling + criteria + tests
 + risk. Re-committing; gate re-queues for Waleed.
+
+### 2026-08-06 — pre-gate amendment 2: dual-source data (Waleed resolves repo-weight)
+Waleed resolved the repo-weight Critical open question with a DUAL-SOURCE architecture:
+- **Committed GitHub compressed tier** (per-scenario gz shards, as specced) = AUTHORITATIVE
+  + FALLBACK. Waleed explicitly OK'd this committed weight (~110–150 MB gz/run).
+- **Railway baked bundle** = the deploy (`railway up`, from the local machine so NOT
+  constrained by what's committed) additionally bakes the FULL UNCOMPRESSED export into the
+  static bundle (same-origin /data-style) = PRIMARY when present.
+Resolution rule: baked-first (fast, no rate limits / API budget), GitHub-fallback; the
+SOURCE FINGERPRINT decides coherence; a Notice when serving fallback. Identical slimmed
+CONTENT both sources (allowlist applies to BOTH — both public); "full" = uncompressed in
+bundle vs gz on GH, same fingerprint. Elegant: the magic-byte gunzip sniff we already carry
+means uncompressed baked (.json, no 0x1f8b) and GH .gz go through ONE client code path.
+Deploy-flow trade (disclosed): refreshing the BAKED copy = re-export + railway up (no longer
+appears without a deploy); GH fallback still updates live on commit.
+Folded into Baked Decision 14 + Desired-State ruling + criteria + tests 16/17 + risks +
+closed the repo-weight open question. LICENSE SPDX still OPEN (flagged). Re-committing; gate
+re-queues for Waleed — now ONE decision left at the gate (license id).
