@@ -47,7 +47,7 @@ def cell_scores(judgments: list[dict]) -> dict[Cell, float]:
     return {c: mean(v) for c, v in by.items()}  # a cell exists iff it has ≥1 score
 
 
-def _mean_over(
+def breakdown_mean(
     cs: dict[Cell, float],
     subject: str,
     *,
@@ -56,7 +56,12 @@ def _mean_over(
     pressure: str | None = None,
     scenarios: set[str] | None = None,
 ) -> float | None:
-    """Unweighted mean of in-scope cell scores; ``None`` if none match (never 0.0)."""
+    """Unweighted mean of in-scope cell scores; ``None`` if none match (never 0.0).
+
+    The canonical breakdown reducer (spec §4.2). Public so consumers — the results
+    export (#49) as well as ``aggregate_tradition`` below — share one implementation
+    of the "unweighted mean of in-scope cells" semantics rather than re-deriving it.
+    """
     vals: list[float] = []
     for (su, sc, pr, fr, scp), val in cs.items():
         if su != subject:
@@ -71,6 +76,11 @@ def _mean_over(
             continue
         vals.append(val)
     return mean(vals)
+
+
+# Back-compat alias for the pre-#49 private name (kept so any external reference and
+# the stats.py doc-comment stay valid); prefer the public ``breakdown_mean``.
+_mean_over = breakdown_mean
 
 
 @dataclass(frozen=True)

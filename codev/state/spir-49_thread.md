@@ -163,3 +163,20 @@ steadfastness), pressure-filterable, per-tradition drill-down, Gemini-ranked, Op
   now MATCHES spec (my iter1 scope-out had diverged).
 Architect said NO re-consult needed (not structural). Committing amended plan → message architect → they
 approve gate.
+
+### Plan APPROVED (2026-08-06, gate 3c9d995). IMPLEMENT phase.
+
+**Phase 1 (export core) — DONE, committing.**
+- `aggregate.py`: promoted private `_mean_over` → public `breakdown_mean` (+ back-comat alias). 81 existing
+  analysis tests still green (non-breaking).
+- New `analysis/export_results.py`: explicit subject+judge alias maps (fail-fast on unmapped), purpose-built
+  row reader (NOT load_run_dir — Opus runs have no report.json), v2-then-dedupe with later-ts (resolves the
+  live ~1801 sunni-islam alias collisions), coverage pinned to Gemini full-grid universe (report.json
+  by_scenario), matched-cell steadfastness, per-(judge,subject,framing,scope,pressure-incl-all) slice means.
+- New `tests/test_export_results.py`: 7 deterministic unit tests (synthetic run roots in tmp_path — no
+  tmp/judging-runs dep) + 3 skipif real-data parity tests. 11 pass. Ruff clean. Full suite 92 pass.
+- VERIFIED real-data: all 15 Gemini mean-of-means == subj_overall (<1e-9); steadfastness == report.json
+  (headline + by_pressure) all traditions; secular-sage Opus stated coverage honestly 18/294 (~6%, sealed
+  data); Gemini full-grid 312/312.
+Commit: [Spec 49][Phase: export-core]. Then porch done (dispatcher runs workflows/analysis pytest + per-phase
+consult codex+claude).
