@@ -58,6 +58,31 @@ describe("loadResultsRuns (real QueryClient + stubbed fetch)", () => {
     expect(bad.manifest).toBeNull();
     expect(bad.notices.length).toBeGreaterThan(0);
   });
+
+  it("orders by parsed instant; an unparseable date warns and sorts last", async () => {
+    const files = {
+      ...resultsFiles("good", { generatedAt: "2026-08-03T00:00:00+00:00" }),
+      ...resultsFiles("nodate", { generatedAt: "not-a-date" }),
+    };
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { runs, defaultRunId } = await loadResultsRuns(newQc(), SHA);
+    expect(defaultRunId).toBe("good"); // valid date wins; unparseable sorts last
+    const nodate = runs.find((r) => r.id === "nodate")!;
+    expect(nodate.manifest).not.toBeNull(); // still accepted (date is metadata)
+    expect(nodate.notices.some((n) => /unparseable generated_at/.test(n.message))).toBe(true);
+  });
+
+  it("compares non-UTC offsets by instant, not lexically", async () => {
+    // "2026-08-03T00:00:00+05:00" is EARLIER than "2026-08-02T21:00:00+00:00"? No — equal instant.
+    // Use a case where lexical order would be wrong: +05:00 midnight vs +00:00 01:00 same day.
+    const files = {
+      ...resultsFiles("offset", { generatedAt: "2026-08-03T00:00:00+05:00" }), // = 2026-08-02T19:00Z
+      ...resultsFiles("utc", { generatedAt: "2026-08-02T20:00:00+00:00" }), // later instant
+    };
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { defaultRunId } = await loadResultsRuns(newQc(), SHA);
+    expect(defaultRunId).toBe("utc"); // later instant wins (lexical would pick "offset")
+  });
 });
 
 describe("loadResultsShard / loadResultsManifest", () => {
@@ -69,11 +94,60 @@ describe("loadResultsShard / loadResultsManifest", () => {
     expect(shard?.means?.["gemini-3.6-flash"]?.["claude-sonnet-5"]?.unstated?.full?.all).toEqual([0.5, 2, 2]);
   });
 
-  it("a missing shard yields a notice, not a throw", async () => {
+  it("a tradition absent from the manifest yields a notice", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, resultsFiles("r1", { traditions: ["buddhism"] })));
     const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "atlantis");
     expect(shard).toBeNull();
+    expect(notices[0]?.message).toMatch(/not in manifest/);
+  });
+
+  it("a manifest-listed shard whose file is missing yields a notice", async () => {
+    const files = resultsFiles("r1", { traditions: ["buddhism"] });
+    delete files["results/r1/buddhism.json"]; // manifest lists it; file absent
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard).toBeNull();
     expect(notices[0]?.message).toMatch(/no results shard/);
+  });
+
+  it("uses the shard filename declared in the manifest (single source of truth)", async () => {
+    const files = resultsFiles("r1", {
+      traditions: ["buddhism"],
+      shard: (t) => ({ tradition: t, n_scenarios: 2, judges: ["gemini-3.6-flash"], means: {}, steadfastness: {} }),
+    });
+    // Rename the shard file + point the manifest at the new name.
+    const manifest = JSON.parse(files["results/r1/manifest.json"]!);
+    manifest.traditions[0].shard = "buddhism.v2.json";
+    files["results/r1/manifest.json"] = JSON.stringify(manifest);
+    files["results/r1/buddhism.v2.json"] = files["results/r1/buddhism.json"]!;
+    delete files["results/r1/buddhism.json"];
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard?.tradition).toBe("buddhism");
+    expect(notices).toEqual([]);
+  });
+
+  it("unknown selector keys + tradition/n_scenarios mismatch surface as notices (shard still returned)", async () => {
+    const files = resultsFiles("r1", {
+      traditions: ["buddhism"],
+      shard: () => ({
+        tradition: "WRONG", // mismatch
+        n_scenarios: 99, // mismatch (manifest says 2)
+        judges: ["gemini-3.6-flash"],
+        means: {
+          "mystery-judge": { "claude-sonnet-5": { unstated: { full: { bogus_pressure: [0.5, 1, 1] } } } },
+        },
+        steadfastness: {},
+      }),
+    });
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
+    const { shard, notices } = await loadResultsShard(newQc(), SHA, "r1", "buddhism");
+    expect(shard).not.toBeNull(); // display-first: still returned
+    const msgs = notices.map((n) => n.message).join(" | ");
+    expect(msgs).toMatch(/does not match requested/);
+    expect(msgs).toMatch(/n_scenarios 99/);
+    expect(msgs).toMatch(/unknown judge\(s\).*mystery-judge/);
+    expect(msgs).toMatch(/unknown pressure\(s\).*bogus_pressure/);
   });
 
   it("a missing manifest yields a notice", async () => {

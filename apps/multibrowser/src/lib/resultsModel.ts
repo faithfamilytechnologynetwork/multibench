@@ -143,6 +143,11 @@ export function parseResultsManifest(
       ],
     };
   }
+  const notices: Notice[] = [];
+  if (Number.isNaN(Date.parse(m.generated_at))) {
+    // Metadata, not load-bearing — keep the manifest but flag it (run-ordering falls back safely).
+    notices.push(notice("warning", "results", where, `unparseable generated_at "${m.generated_at}"`));
+  }
   const coverage: ResultsManifest["coverage"] = {};
   for (const [judge, byFraming] of Object.entries(m.counts?.coverage ?? {})) {
     const dst: Record<string, { nJudged: number; nExpected: number }> = {};
@@ -166,8 +171,75 @@ export function parseResultsManifest(
       traditions: m.traditions.map((t) => ({ id: t.id, nScenarios: t.n_scenarios, shard: t.shard })),
       coverage,
     },
-    notices: [],
+    notices,
   };
+}
+
+/**
+ * Cross-validate a shard against its manifest: the requested tradition, `n_scenarios`, and every
+ * judge/subject/framing/scope/pressure key must be in the manifest's declared vocabulary. Unknown
+ * keys become `Notice`s (display-first — the shard still renders; the UI only selects known keys).
+ * One notice per category (deduped) rather than per stray key.
+ */
+export function shardConsistencyNotices(
+  shard: ResultsShard,
+  manifest: ResultsManifest,
+  requestedTradition: string,
+  where: string,
+): Notice[] {
+  const notices: Notice[] = [];
+  if (shard.tradition !== requestedTradition) {
+    notices.push(notice("error", "results", where,
+      `shard tradition "${shard.tradition}" does not match requested "${requestedTradition}"`));
+  }
+  const trad = manifest.traditions.find((t) => t.id === requestedTradition);
+  if (trad && shard.nScenarios !== trad.nScenarios) {
+    notices.push(notice("warning", "results", where,
+      `n_scenarios ${shard.nScenarios} disagrees with manifest ${trad.nScenarios}`));
+  }
+  const judges = new Set(manifest.judges.map((j) => j.model));
+  const subjects = new Set(manifest.subjects);
+  const framings = new Set(manifest.framings);
+  const scopes = new Set(manifest.scopes);
+  const pressures = new Set([...manifest.pressures, manifest.pressureAll]);
+  const unknown: Record<string, Set<string>> = {
+    judge: new Set(), subject: new Set(), framing: new Set(), scope: new Set(), pressure: new Set(),
+  };
+
+  for (const [judge, bySubj] of Object.entries(shard.means)) {
+    if (!judges.has(judge)) unknown.judge!.add(judge);
+    for (const [subject, byFr] of Object.entries(bySubj)) {
+      if (!subjects.has(subject)) unknown.subject!.add(subject);
+      for (const [framing, byScope] of Object.entries(byFr)) {
+        if (!framings.has(framing)) unknown.framing!.add(framing);
+        for (const [scope, byPr] of Object.entries(byScope)) {
+          if (!scopes.has(scope)) unknown.scope!.add(scope);
+          for (const pressure of Object.keys(byPr)) {
+            if (!pressures.has(pressure)) unknown.pressure!.add(pressure);
+          }
+        }
+      }
+    }
+  }
+  for (const [judge, bySubj] of Object.entries(shard.steadfastness)) {
+    if (!judges.has(judge)) unknown.judge!.add(judge);
+    for (const [subject, byFr] of Object.entries(bySubj)) {
+      if (!subjects.has(subject)) unknown.subject!.add(subject);
+      for (const [framing, byPr] of Object.entries(byFr)) {
+        if (!framings.has(framing)) unknown.framing!.add(framing);
+        for (const pressure of Object.keys(byPr)) {
+          if (!pressures.has(pressure)) unknown.pressure!.add(pressure);
+        }
+      }
+    }
+  }
+  for (const [category, vals] of Object.entries(unknown)) {
+    if (vals.size > 0) {
+      notices.push(notice("warning", "results", where,
+        `unknown ${category}(s) not in manifest: ${[...vals].sort().join(", ")}`));
+    }
+  }
+  return notices;
 }
 
 /** Parse one tradition shard. Returns `{ shard: null, notices }` on any problem. */

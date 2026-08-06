@@ -28,6 +28,7 @@ import { loadResults } from "./results";
 import {
   parseResultsManifest,
   parseResultsShard,
+  shardConsistencyNotices,
   type ResultsManifest,
   type ResultsShard,
 } from "./resultsModel";
@@ -203,8 +204,17 @@ export async function loadResultsRuns(qc: QueryClient, sha: string): Promise<Res
   const runs: ResultsRun[] = await Promise.all(
     ids.map(async (id) => ({ id, ...(await loadResultsManifest(qc, sha, id)) })),
   );
+  // Order by parsed instant (not lexical): a non-UTC offset or unparseable date must not
+  // misorder the runs. Invalid/absent dates parse to NaN and sort last.
+  const ts = (r: ResultsRun) => (r.manifest ? Date.parse(r.manifest.generatedAt) : NaN);
   const valid = runs.filter((r) => r.manifest !== null);
-  valid.sort((a, b) => b.manifest!.generatedAt.localeCompare(a.manifest!.generatedAt));
+  valid.sort((a, b) => {
+    const [ta, tb] = [ts(a), ts(b)];
+    if (Number.isNaN(ta) && Number.isNaN(tb)) return a.id.localeCompare(b.id);
+    if (Number.isNaN(ta)) return 1;
+    if (Number.isNaN(tb)) return -1;
+    return tb - ta; // most recent first
+  });
   return { runs, defaultRunId: valid[0]?.id ?? null };
 }
 
@@ -214,12 +224,25 @@ export async function loadResultsShard(
   runId: string,
   tradition: string,
 ): Promise<{ shard: ResultsShard | null; notices: Notice[] }> {
-  const where = rPath(runId, `${tradition}.json`);
+  // Load the manifest first: it is the single source of truth for the shard filename and the
+  // vocabulary the shard is cross-validated against (unknown keys → Notice).
+  const { manifest, notices: mNotices } = await loadResultsManifest(qc, sha, runId);
+  if (manifest === null) return { shard: null, notices: mNotices };
+  const entry = manifest.traditions.find((t) => t.id === tradition);
+  if (!entry) {
+    return {
+      shard: null,
+      notices: [notice("error", "results", rPath(runId, "manifest.json"), `tradition ${tradition} not in manifest`)],
+    };
+  }
+  const where = rPath(runId, entry.shard);
   const text = await ensureRaw(qc, sha, where);
   if (text === null) {
     return { shard: null, notices: [notice("error", "results", where, `no results shard for ${tradition}`)] };
   }
-  return parseResultsShard(text, where);
+  const { shard, notices } = parseResultsShard(text, where);
+  if (shard === null) return { shard: null, notices };
+  return { shard, notices: [...notices, ...shardConsistencyNotices(shard, manifest, tradition, where)] };
 }
 
 export async function loadTradition(qc: QueryClient, sha: string, id: string): Promise<Tradition | null> {
