@@ -207,3 +207,14 @@ deep-link params) + fixed stale ?framing/?metric URL example; results/README "Re
 Smoke: `pnpm build` OK (bundle builds); `pnpm preview` serves /results SPA shell (200 + root div + JS) via
 fallback; deploy.test REAL smoke green in suite. check-types green, 179 tests. PR prep TODO: rebase onto
 origin/main (drops docs/paper base leak); #49 supersession note in PR/review.
+
+## 2026-08-06 — Phase 4 iter-1 (codex RC, claude COMMENT): PR-prep items. Addressed.
+
+Blockers were all PR-prep: (1) REBASED onto origin/main via `git rebase --onto origin/main d0fa576`
+(backup ref backup-spir-55-prerebase; 40 commits clean, 0 conflicts — verified my commits touch 0
+docs/paper|experiments files, 0 overlap with origin/main). Branch diff now = only my 9 files
+(apps/multibrowser/* + results/README). docs/paper+experiments dropped. 179 tests still green, deps
+unchanged, porch state intact. (2) #49 supersession note → written in codev/reviews/55-*.md. (3)
+interactive smoke: honestly documented — 20 integration tests over byte-faithful GitHub stand-in +
+build + shell-serve; live click-through is post-merge Railway (per plan). Minors: aria-controls gated
+on open; README run-selector mention. Re-signaling for iter-2 consult.
