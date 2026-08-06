@@ -2,6 +2,31 @@ import { describe, it, expect, beforeAll } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execSync, spawn } from "node:child_process";
+import { createServer } from "node:net";
+
+/**
+ * Fail fast (with a diagnostic) if `port` is already bound. A leaked `serve` grandchild from a
+ * defunct worktree once squatted on this port for days — its dist was gone so it 404'd
+ * everything, and new serves silently fell back to an ephemeral port, making the smoke below
+ * time out with a misleading cause (#49 review). This turns that into an obvious message.
+ */
+async function assertPortFree(port: number): Promise<void> {
+  await new Promise<void>((resolve, reject) => {
+    const probe = createServer();
+    probe.once("error", (err: NodeJS.ErrnoException) => {
+      reject(
+        err.code === "EADDRINUSE"
+          ? new Error(
+              `port ${port} is already in use — likely a leaked 'serve' from a defunct worktree. ` +
+                `Free it: \`lsof -iTCP:${port} -sTCP:LISTEN\` then kill the PID.`,
+            )
+          : err,
+      );
+    });
+    probe.once("listening", () => probe.close(() => resolve()));
+    probe.listen(port, "127.0.0.1");
+  });
+}
 
 // Build / deploy invariants (the Phase-6 acceptance items). Some run against the repo files;
 // two run a REAL production build and a REAL static server. Run by vitest from apps/multibrowser.
@@ -61,10 +86,14 @@ describe("build / deploy invariants", () => {
 
   it("REAL smoke: the static server returns index.html for a nested deep link (SPA fallback)", async () => {
     const port = 4199;
-    // Run the actual `start` command (serve -s dist) on a test port.
+    // Pre-flight: a busy port means a leaked serve, not a real failure — say so up front.
+    await assertPortFree(port);
+    // Run the actual `start` command (serve -s dist) on a test port. `detached` makes the child
+    // a process-group leader so we can reap the whole tree (serve is a grandchild of pnpm).
     const server = spawn("pnpm", ["start"], {
       env: { ...process.env, PORT: String(port) },
       stdio: "ignore",
+      detached: true,
     });
     try {
       let ready = false;
@@ -84,6 +113,13 @@ describe("build / deploy invariants", () => {
       expect(deep.status).toBe(200);
       expect(await deep.text()).toContain('id="root"');
     } finally {
+      // Kill the whole process GROUP so the `serve` grandchild dies with the pnpm wrapper
+      // (killing only the wrapper is exactly what leaked the zombie serve before).
+      try {
+        if (server.pid) process.kill(-server.pid, "SIGTERM");
+      } catch {
+        /* group may already be gone */
+      }
       server.kill();
     }
   }, 60_000);

@@ -234,3 +234,11 @@ PORT=4199 not propagating to `serve -s dist -l ${PORT:-4173}` → server binds 4
 Full suite: 109 pass / 1 fail (only this smoke). Since Phase 3 touches apps/multibrowser, porch dispatcher
 runs `pnpm test` → this fails → blocks porch-done. It's the architect's deploy guard → NOTIFYING before any
 skip. Proposed: conditional skip on node major != 20 (preserves CI coverage). Awaiting architect guidance.
+
+**RESOLVED by architect**: my node/PORT diagnosis was WRONG. Real cause: a leaked `serve` grandchild from the
+defunct air-46 worktree squatting on port 4199 since Monday (test killed the pnpm wrapper, not the serve
+grandchild; dead worktree's dist deleted → 404s; new serves fell back to ephemeral ports). Architect killed it.
+Deploy smoke now passes (554ms), full multibrowser suite 110/110 green, port 4199 clean after run.
+Applied architect-requested HARDENING to deploy.test.ts (authorized): (1) spawn detached:true + finally kills
+the process GROUP (process.kill(-pid,SIGTERM) try/catch → server.kill()); (2) assertPortFree(4199) pre-flight
+with fail-fast diagnostic naming the leaked-serve cause. To note in review doc. → porch done Phase 3.
