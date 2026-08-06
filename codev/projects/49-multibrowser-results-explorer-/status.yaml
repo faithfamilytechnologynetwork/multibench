@@ -41,7 +41,7 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-05T23:42:45.960Z'
-updated_at: '2026-08-06T03:43:24.994Z'
+updated_at: '2026-08-06T03:44:33.965Z'
 force_advanced:
   phase: review
   iteration: 3
@@ -53,4 +53,6 @@ pr_history:
     pr_number: 50
     branch: builder/spir-49
     created_at: '2026-08-06T03:03:23.665Z'
+    merged: true
+    merged_at: '2026-08-06T03:44:33.965Z'
 pr_ready_for_human: false
