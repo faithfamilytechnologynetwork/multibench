@@ -10,46 +10,62 @@
 
 Implements Spec 51's **Approach 1**: a new committed, per-scenario `results-raw/<run-id>/`
 gzip tier (transcripts + judge verdicts) produced by a **sibling `analysis export-raw`**
-command that reuses the #49 judgment loaders, plus a **catalog-generic** raw-results view in
-the multibrowser SPA that lights up the inert `ResultsRegion` seam and adds a run+scenario
--scoped view with A/B compare, presets, and deep links. Data is served from **two public
-sources of identical content** (Spec Decision 14): a Railway-baked full-uncompressed bundle
-(same-origin, primary) with the SHA-pinned committed gz tier as authoritative + fallback,
-resolved by a shared **source fingerprint**.
+command reusing the #49 judgment loaders, plus a **catalog-generic** raw-results view in the
+multibrowser SPA that lights up the inert `ResultsRegion` seam and adds a run+scenario-scoped
+view (A/B compare, presets, deep links). Data is served from **two public sources of
+identical content** (Spec Decision 14): a Railway-baked **gz** bundle (same-origin, primary —
+see amendment below) with the SHA-pinned committed gz tier as authoritative + fallback,
+reconciled by a shared **source fingerprint**.
 
-The plan is ordered producer → consumer so each phase is independently testable: the export
-core (pure transform) → the writer/CLI/committed dataset → the SPA data layer → the view →
-A/B + deep-links + presets → deploy bake + docs.
+Ordered producer → consumer so each phase is an independently testable, committable unit.
 
-### Two spec-flagged plan decisions — resolved here
-- **`context_prefix` pool mechanics (measured):** a **per-shard `contexts` object keyed by
-  framing** (`{stated: "…", guided: "…"}`; `unstated` absent); each cell references its
-  framing. Measured cost: guided prefix ~6.5 KB raw → ~2–3 KB gz *inside* an already
-  -compressed shard, once per framing per shard — negligible against the 161–300 KB shard
-  and the 512 KB ceiling. **Per-shard chosen** (self-contained shard; one fetch renders).
-- **`export-raw` wiring:** a **sibling Typer command** in `analysis/cli.py` calling a new
-  `analysis/export_raw.py`. It reuses `export_results.read_run_root` / `resolve_judgments` /
-  the alias maps for **verdicts**, adds a **new normalized sitting reader** for transcripts,
-  and shares a **fingerprint helper** with `export_results` (which is additively extended to
-  stamp the same fingerprint in the `results/` manifest). Emits the committed **gz** tier by
-  default and a **full uncompressed** bundle under `--uncompressed` (identical content +
-  fingerprint) for the Railway bake.
-- **`results/` `generated_at` (spec Important open Q):** **kept** — #49's default-run
-  selection depends on it, and the raw tier's determinism does not require dropping it (the
-  raw tier is timestamp-free and always addressed by run-id from score-tier context). We
-  only **add** the `fingerprint` field additively (zod tolerant of both).
+### Amendments folded in from plan iter-1 review (Codex + Claude, both REQUEST_CHANGES)
+- **Baked representation = gz, not uncompressed (architect-approved 2026-08-06).** Measured
+  gzip ratio ~3.7× → an *uncompressed* bake is ~400–550 MB (~1 GB in the Nixpacks image after
+  Vite copies `public/`→`dist/`); the *gz* bake is ~115 MB. Waleed's directive's substance was
+  *full-data-same-origin*; encoding is implementation. The client already gunzips via the
+  magic-byte sniff, so baked-`.gz` and GitHub-`.gz` share one code path — identical UX, ~4×
+  smaller image. **Baked source = the same gz shards, served same-origin.**
+- **Railway honors `.gitignore` by default** → a gitignored bake dir silently never uploads.
+  Deploy uses **`railway up --no-gitignore`** + a **`.railwayignore`** (re-excluding
+  `node_modules`/`dist`); the bake is a **separate predeploy script**, *not* part of
+  `pnpm build` (so `deploy.test.ts`'s real build never copies the bundle).
+- **Generic contract** uses catalog-declared **`conditionAxes`** + cells carrying
+  `conditions: Record<string,string>` (jaleesbench shape) — no `framing`/`pressure` literals
+  in schemas/components (resolves the Decision-5-vs-13 tension).
+- **Fingerprint is *threaded*, not a trivial add**: `build_manifest` never sees
+  `resolve_judgments` output (discarded at `export_results.py:370`). Both tiers call **one**
+  shared `source_fingerprint(global_resolved_stream)` on the **same global sorted stream**.
+- **Shard carries no title/taxonomy** (removes a `--corpus-root` dependency); item labels
+  live in the **catalog** (scenario-id-based for MultiBench); the SPA enriches MultiBench
+  context via a `(group,item)→(tradition,scenario)` adapter.
+- **Per-tradition streaming** writer (buffer only compressed bytes) — the corpus is ~430 MB
+  of source sittings; don't hold it all live.
+- **URL ownership**: `run/group/item` = **route path params**; `A/B/framing/pressure/scope`
+  = **validated search** (route `validateSearch` zod, not `searchParams.ts` alone).
+- Multi-segment **safe relative-path** validator (Py + TS) for `<group>/<item>.json.gz`.
+- **Presets split** into their own phase; **committed launch dataset** its own phase.
+- Test fixture lives in **`src/test/`** (not `public/data-raw/`); the baked-coherent test
+  uses an **injectable expected fingerprint** (a `--limit` fixture can't match the real
+  full-stream fingerprint).
+
+### Two spec-flagged plan decisions — resolved
+- **`context_prefix`**: per-shard `contexts` object keyed by framing (`{stated,guided}`;
+  unstated absent) — measured ~2–3 KB gz/shard, negligible vs the 512 KB ceiling.
+- **`export-raw` wiring**: sibling Typer command reusing #49 loaders + a new normalized
+  sitting reader + the shared fingerprint helper.
+- **`results/` `generated_at`** (spec Important open Q): **kept** (default-run selection needs
+  it); we only **add** the `fingerprint` field additively.
 
 ## Success Metrics
-- [ ] All Spec 51 success criteria met (incl. Baked Decisions 1–14).
-- [ ] Raw and score tiers carry an **equal source fingerprint** per run-id; field-parity +
+- [ ] All Spec 51 success criteria (incl. Baked Decisions 1–14).
+- [ ] Raw and score tiers stamp an **equal** source fingerprint per run-id; field-parity +
       aggregate-reconciliation tests pass.
-- [ ] Export is **byte-identical** on re-run (no wall-clock); size ceilings enforced
-      pre-write.
-- [ ] Catalog-genericity: the raw view renders from a **synthetic non-MultiBench 0–4
-      catalog** with no component change; static no-MB-literals check passes.
-- [ ] Dual-source resolution: baked-first, GitHub-fallback + `Notice`, fingerprint coherence.
-- [ ] Both suites pass via `.codev/checks/test.sh` (`workflows/analysis` pytest +
-      `apps/multibrowser` vitest); no coverage regression.
+- [ ] Byte-identical re-export (no wall-clock); size ceilings enforced pre-write.
+- [ ] Genericity: the raw view renders from a synthetic non-MultiBench 0–4 catalog with no
+      component change; static no-MB-literals check passes.
+- [ ] Dual-source: baked-first, GitHub-fallback + `Notice`, fingerprint coherence.
+- [ ] Both suites pass via `.codev/checks/test.sh`; no coverage regression.
 
 ## Phases (Machine Readable)
 
@@ -58,315 +74,352 @@ A/B + deep-links + presets → deploy bake + docs.
 ```json
 {
   "phases": [
-    {"id": "phase_1", "title": "Raw export core: normalized sitting reader, verdict join, shard/catalog build, fingerprint (pure transform)"},
-    {"id": "phase_2", "title": "Export writer + export-raw CLI + presets + fingerprint into results/ manifest + committed launch dataset + README"},
-    {"id": "phase_3", "title": "SPA raw data layer: generic zod contract, dual-source resolution, gunzip sniff, version+fingerprint checks, dev fixture"},
-    {"id": "phase_4", "title": "Raw view route: transcripts + verdicts (catalog-generic ramp) + live ResultsRegion entry + drill-down"},
-    {"id": "phase_5", "title": "A/B side-by-side compare + deep-link URL state (incl. run-id) + preset navigation"},
-    {"id": "phase_6", "title": "Railway baked-bundle deploy wiring + documentation + arch-doc updates"}
+    {"id": "phase_1", "title": "Raw export core: normalized sitting reader + validation, verdict join, generic shard/catalog build, shared fingerprint (pure transform)"},
+    {"id": "phase_2", "title": "Fingerprint cross-tier plumbing + streaming writer + export-raw CLI + size measurement"},
+    {"id": "phase_3", "title": "Presets (export-computed): Models split, Judges differed, Steadfastness cliff"},
+    {"id": "phase_4", "title": "Committed launch dataset + results-raw/README (data contract)"},
+    {"id": "phase_5", "title": "SPA raw data layer: generic zod contract, dual-source resolver, gunzip sniff, version+fingerprint checks, safe paths, dev fixture"},
+    {"id": "phase_6", "title": "Raw view route: transcripts + verdicts (catalog-generic ramp) + live ResultsRegion entry + drill-down"},
+    {"id": "phase_7", "title": "A/B compare + deep-link URL state (path params + validated search, incl. run-id) + preset navigation"},
+    {"id": "phase_8", "title": "Railway gz-baked deploy wiring (--no-gitignore) + deploy-test safety + documentation + arch-docs"}
   ]
 }
 ```
 
 ## Phase Breakdown
 
-### Phase 1: Raw export core — normalized sitting reader, verdict join, shard/catalog build, fingerprint (pure transform)
+### Phase 1: Raw export core — normalized sitting reader + validation, verdict join, generic shard/catalog build, shared fingerprint (pure transform)
 **Dependencies**: None
 
 #### Objectives
-- Produce the in-memory raw-tier documents (per-scenario shards + catalog) from the run
-  roots, reusing the #49 judgment resolution and adding transcript reading, with agreement
-  guaranteed by construction and a shared fingerprint.
+- Produce in-memory raw-tier documents (generic per-scenario shards + catalog) from the run
+  roots, reusing #49 verdict resolution, with agreement guaranteed and a shared fingerprint.
 
 #### Deliverables
-- [ ] New `workflows/analysis/analysis/export_raw.py`:
-  - `read_full_grid_sittings(root)` — a **new** sitting reader over the **report.json-bearing
-    (full-grid) run only**; parses `sittings.jsonl`, keys each sitting by **normalized**
-    subject (`export_results.normalize_subject`) + `(scenario_id, pressure, framing)`;
-    validates vocab (FRAMINGS/PRESSURES); extracts the allowlisted turns `{role, content}`
-    and the `context_prefix`. Ignores every non-full-grid root's sittings.
-  - `build_raw_corpus(roots)` — resolve verdicts via `export_results.build_corpus_export`'s
-    path (`read_run_root` + `resolve_judgments`, per tradition) and join to the full-grid
-    transcripts; **abort loudly** on a resolved verdict with no matching normalized
-    transcript (orphan guard); **abort loudly** on a full-grid sitting subject that
-    normalizes outside `CANONICAL_SUBJECTS`.
-  - `build_scenario_shard(...)` — a self-contained shard doc: `schema_version`, `item`
-    (id/title/taxonomy tags from the tradition corpus), a `contexts` pool keyed by framing,
-    and `cells[]` (each: normalized `subject`, `framing`, `pressure`, `transcript`, framing
-    key into `contexts`, `verdicts[]`). Verdict = `{judge (UI key), scope, score (number),
-    summary(=direction), rationale?}`. Canonical sort order fixed here.
-  - `build_catalog(...)` — generic catalog: `schema_version`, `dataset` (title, description,
-    `language`, `license: "CC-BY-4.0"`), **scale** (`{min:-1, center:0, max:1}`) + **ramp**
-    (the #49 `scoreColor` stops, **no rung labels**), `subjects` (catalog-declared),
-    `judges` (reuse `JUDGE_UI` key/full_grid; Opus badged), a generic **grouping axis**
-    (group=tradition) + **items** with **manifest-declared shard paths**, `fingerprint`.
-- [ ] Shared **fingerprint** helper (over the resolved-judgments stream: sorted
-  `(subj, scenario, pressure, framing, judge, scope, score, direction, rationale)`),
-  importable by both `export_raw` and `export_results`.
-- [ ] The export field **allowlist** applied here (positive list; nothing else emitted).
-- [ ] Tests in `workflows/analysis/tests/test_export_raw.py`.
+- [ ] `workflows/analysis/analysis/export_raw.py`:
+  - `read_full_grid_sittings(root)` — **new** reader over the **report.json-bearing run
+    only**; keys sittings by **normalized** subject + `(scenario_id, pressure, framing)`;
+    validates vocab; **rejects duplicate sitting identities** and **conflicting
+    `context_prefix`** for one `(scenario, framing)`; extracts allowlisted turns +
+    `context_prefix`. Non-full-grid roots' sittings ignored.
+  - `build_raw_corpus(roots)` — resolve verdicts via `read_run_root` + `resolve_judgments`
+    (per tradition) and join to full-grid transcripts. **Abort loudly** on: a resolved
+    verdict with no matching transcript (orphan); a sitting subject normalizing outside
+    `CANONICAL_SUBJECTS`; a per-scenario grid that disagrees with the report universe.
+    Returns the per-tradition exports **and** the global resolved-judgments stream.
+  - `build_scenario_shard(...)` — self-contained shard: `schema_version`, a `contexts` pool
+    keyed by framing, and `cells[]` (each: normalized `subject`, generic
+    `conditions:{framing,pressure}`, `transcript`, `contextKey`, `verdicts[]`). Verdict =
+    `{judge(UI key), scope, score(number −1…+1), summary(=direction), rationale?}`. **No**
+    title/taxonomy. Canonical sort fixed here.
+  - `build_catalog(...)` — generic: `schema_version`, `dataset`{title,description,language,
+    `license:"CC-BY-4.0"`}, `scale`{min,center,max}, `ramp`(scoreColor stops, **no labels**),
+    `subjects`, `judges`(JUDGE_UI key/full_grid; Opus badged), `conditionAxes`
+    (framing+pressure values), a `groupBy` axis + `items`(id, label, **manifest-declared**
+    shard path), `fingerprint`.
+- [ ] `source_fingerprint(global_resolved_stream)` shared helper (hash of the sorted
+  `(subj,scenario,pressure,framing,judge,scope,score,direction,rationale)` tuples) —
+  importable by `export_raw` **and** `export_results` (Phase 2).
+- [ ] Field **allowlist** applied (positive list only).
+- [ ] `workflows/analysis/tests/test_export_raw.py`.
 
 #### Implementation Details
-- Reuse, do not fork: `normalize_subject`/`normalize_judge`, `resolve_judgments`,
-  `_scenario_universe`, `JUDGE_UI`, `CANONICAL_SUBJECTS` from `export_results.py`.
-- Score is validated by the #49 `is_valid_score` contract and emitted as a **number** on
-  −1…+1 (no rescale).
-- Pure transform only — **no disk writes** in this phase (writer is Phase 2), mirroring
-  #49's Phase-1/Phase-2 split.
+- Reuse (don't fork) `normalize_subject/_judge`, `resolve_judgments`, `_scenario_universe`,
+  `JUDGE_UI`, `CANONICAL_SUBJECTS`. Score emitted as a number (no rescale). **No disk writes**
+  here (Phase 2), mirroring #49's transform/writer split.
 
 #### Acceptance Criteria
-- [ ] Field-parity: a sampled shipped verdict's preserved fields equal the #49-resolved
-      judgment for that identity.
-- [ ] Aggregate reconciliation: a `results/` slice mean recomputed from **all** raw-tier
-      verdicts equals the score-tier slice.
-- [ ] Orphan-verdict and out-of-universe sitting both abort loudly.
-- [ ] Transcript sourced only from the full-grid run (a differing non-full-grid sitting does
-      not change output); normalized join across divergent spellings drops nothing.
-- [ ] Fingerprint is deterministic and changes when any resolved judgment changes.
+- [ ] Field-parity: a shipped verdict's preserved fields == the #49-resolved judgment.
+- [ ] Aggregate reconciliation: a `results/` slice recomputed from **all** raw-tier verdicts
+      == the score-tier slice.
+- [ ] Orphan verdict, out-of-universe sitting, duplicate sitting, conflicting prefix each
+      abort loudly.
+- [ ] Transcript sourced only from the full-grid run; normalized join drops nothing.
+- [ ] Fingerprint deterministic + changes on any judgment change.
 
 #### Test Plan
-- **Unit**: sitting reader normalization; contexts-pool build; allowlist (no disallowed key);
-  fingerprint determinism/sensitivity.
-- **Integration**: `build_raw_corpus` over a small multi-root fixture (full-grid + an Opus
-  layer) → field-parity + aggregate-reconciliation vs `export_results`.
-- **Manual**: run against one real tradition (taoism) in `tmp/judging-runs/…`.
+- **Unit**: sitting normalization/dedup/conflict; contexts pool; allowlist; fingerprint.
+- **Integration**: `build_raw_corpus` over a multi-root fixture → parity + reconciliation.
+- **Manual**: run against real `taoism` roots.
 
 #### Rollback Strategy
-New module + new tests only; revert the commit — no existing behavior touched.
+New module + tests only; revert the commit.
 
 #### Risks
-- **Risk**: transcript↔verdict join drops cells silently. **Mitigation**: normalized-subject
-  key + orphan abort + explicit tests (spec tests 5, 6).
+- **Risk**: silent cell drop on join. **Mitigation**: normalized key + orphan abort + tests.
 
 ---
 
-### Phase 2: Export writer + `export-raw` CLI + presets + fingerprint into `results/` manifest + committed launch dataset + README
+### Phase 2: Fingerprint cross-tier plumbing + streaming writer + `export-raw` CLI + size measurement
 **Dependencies**: Phase 1
 
 #### Objectives
-- Serialize the raw tier deterministically to disk (gz + uncompressed), wire the CLI,
-  compute presets, make the fingerprint checkable across both tiers, and land the committed
-  launch dataset + contract README.
+- Make the fingerprint a checkable cross-tier invariant, serialize deterministically at
+  scale, wire the CLI, and measure real sizes early.
 
 #### Deliverables
-- [ ] `export_raw.write_dataset(...)`: writes `results-raw/<run-id>/manifest.json` +
-  `<tradition>/<scenario>.json.gz`; deterministic (`sort_keys`, compact separators,
-  `gzip(level 9, mtime=0)`); **no wall-clock**; `schema_version` in catalog **and** every
-  shard; **manifest-declared** shard paths; `_require_safe_segment` on run-id/tradition/
-  scenario; **validate all sizes before any write** (per-shard ≤ 512 KB, per-run ≤ 200 MB);
-  prune stale shards.
-- [ ] `--uncompressed` mode: emit the identical corpus as plain `.json` (full bundle for the
-  bake) — same content + **same fingerprint**.
-- [ ] `--limit N` mode: small dev fixture (baked into the SPA repo for network-free tests).
-- [ ] Presets computed at export into the catalog (Spec *Presets*): **Models split**
-  (turn1 Gemini widest cross-subject spread), **Judges differed** (full-scope two-judge
-  |Δ| ≥ 1.0), **Steadfastness cliff** (largest negative full−turn1, Gemini); deterministic,
-  cap 12, one-per-scenario dedup, `(scenario,pressure,framing)` tie-break, stable keys,
-  sparse-Opus-safe (skip, never zero-fill).
-- [ ] `analysis export-raw` Typer command in `analysis/cli.py` (args: run roots; options:
-  `--run-id`, `--out results-raw`, `--uncompressed`, `--limit`).
-- [ ] **Additive #49 change**: `export_results.build_manifest` stamps the shared
-  `fingerprint`; update `test_export_results.py` accordingly.
-- [ ] Produce + **commit** the launch `results-raw/<run-id>/` gz dataset (the real run).
-- [ ] `results-raw/README.md`: contract, layout, allowlist, size ceilings, fingerprint,
-  dual-source, deploy-flow refresh trade, `CC-BY-4.0`, produce/refresh command.
-
-#### Implementation Details
-- Mirror `export_results.write_dataset`'s validate-before-write + prune discipline.
-- The committed launch dataset is large (~110–150 MB gz) — Waleed-accepted (Spec Decision
-  14); commit it as its own commit within the phase.
+- [ ] **Fingerprint threading (#49, additive but real):** `build_corpus_export` retains the
+  global resolved stream; `export_results.build_manifest` stamps
+  `source_fingerprint(global_stream)` — the **same** function/input shape as `export_raw`.
+  Update `test_export_results.py`. (Signature changes through `build_corpus_export`/
+  `export_dataset` as needed.)
+- [ ] `export_raw.write_dataset(...)` — **per-tradition streaming**: build → serialize →
+  `gzip(level 9, mtime=0)` → **hold only compressed bytes** → validate all sizes → write;
+  prunes stale shards; **no wall-clock**; `schema_version` in catalog + every shard;
+  **manifest-declared** shard paths; safe **multi-segment** path guard
+  (`_require_safe_relpath`: per-component `_SAFE_SEGMENT` + extension + no `..`); ceilings
+  (per-shard ≤ 512 KB, per-run ≤ 200 MB).
+- [ ] `--limit N` mode (small dev fixture for the SPA).
+- [ ] `analysis export-raw` Typer command in `analysis/cli.py` (run roots; `--run-id`,
+  `--out results-raw`, `--limit`).
+- [ ] **Size measurement** logged (gz total, uncompressed total, ratio) so the deploy
+  representation decision is grounded (informs Phase 8; gz-baked already chosen).
 
 #### Acceptance Criteria
-- [ ] Re-running `export-raw` over identical inputs yields **byte-identical** shards + catalog.
-- [ ] Dual-representation identity: gz and `--uncompressed` carry identical content +
-      fingerprint.
-- [ ] Raw manifest `fingerprint` == `results/` manifest `fingerprint` for the run-id.
-- [ ] Over-ceiling shard/total aborts before any write (no partial tier).
+- [ ] Byte-identical re-export over identical inputs.
+- [ ] Raw manifest `fingerprint` == `results/` manifest `fingerprint` (same fixture).
+- [ ] Over-ceiling shard/total aborts before any write.
+- [ ] Peak memory bounded (streaming; not the whole corpus live).
 - [ ] `cli_smoke` covers `export-raw --limit`.
 
 #### Test Plan
-- **Unit**: determinism (byte-identity), size-ceiling abort, safe-segment guard, preset
-  determinism/cap/dedup, dual-representation identity.
-- **Integration**: end-to-end `export-raw` on a fixture → manifest+shards validate; fingerprint
-  equality vs an `export` run on the same fixture.
-- **Manual**: full `export-raw` on the real roots; inspect one shard + sizes.
+- **Unit**: determinism; size-ceiling abort; multi-seg path guard; fingerprint equality vs
+  `export`.
+- **Integration**: end-to-end `export-raw` on a fixture.
+- **Manual**: full `export-raw` on real roots; record sizes.
 
 #### Rollback Strategy
-Revert the phase commit(s); the additive `results/` fingerprint is backward-compatible
-(zod tolerant, Phase 3), so no coordinated rollback needed.
+Revert; the additive `results/` fingerprint is backward-compatible (zod tolerant, Phase 5).
 
 #### Risks
-- **Risk**: committing ~110–150 MB bloats the PR/history. **Mitigation**: Waleed-accepted;
-  determinism → only changed shards rewrite on refresh; documented in README.
+- **Risk**: the two exporters hash differently. **Mitigation**: one shared fn, one global
+  input shape, equality test.
 
 ---
 
-### Phase 3: SPA raw data layer — generic zod contract, dual-source resolution, gunzip sniff, version+fingerprint checks, dev fixture
-**Dependencies**: Phase 2 (fixture + dataset shape)
+### Phase 3: Presets (export-computed) — Models split, Judges differed, Steadfastness cliff
+**Dependencies**: Phase 2
 
 #### Objectives
-- A catalog-generic, fail-soft data layer that resolves baked-first / GitHub-fallback and
-  never bakes MultiBench vocab or the ramp.
+- Compute the three curated preset lists at export into the catalog, deterministically.
 
 #### Deliverables
-- [ ] `apps/multibrowser/src/lib/rawContract.ts` — **generic** zod schemas (catalog + shard):
-  scale/ramp, subjects, judges, grouping axis, items (+manifest-declared shard paths),
-  `contexts` pool, cells, verdicts, presets, `schema_version`, `fingerprint`. **No**
-  `tradition`/`scenario`/framing/pressure literals or −1…+1 constant.
-- [ ] `apps/multibrowser/src/lib/rawSource.ts` — `DataSource` seam with two implementations
-  (same-origin baked; GitHub via `github.ts`) + a resolver: **baked-first**, fall back to
-  GitHub when baked absent or **fingerprint-mismatched**, surfacing a `Notice`. Carries the
-  **magic-byte gunzip sniff verbatim** (`0x1f 0x8b`; else `TextDecoder`) and
-  **feature-detects** `DecompressionStream` (message, no polyfill).
-- [ ] `apps/multibrowser/src/lib/rawModel.ts` — tolerant parsers (mirror `resultsModel.ts`):
-  unsupported `schema_version` → `Notice`; `isSafePathSegment` on manifest paths;
-  malformed → `Notice`, never throw.
-- [ ] Raw query hooks (TanStack) in `lib/queries.ts` (or a sibling); add `"results-raw"` to
-  `github.ts` `WALK_DIRS`.
-- [ ] Baked dev fixture under `apps/multibrowser/` (from Phase 2 `--limit`) wired into tests.
-
-#### Implementation Details
-- Reuse `github.ts` (raw + SHA-pin + truncation fallback) unchanged except `WALK_DIRS`.
-- The gunzip sniff makes baked `.json` and GitHub `.json.gz` share one parse path.
+- [ ] Preset computation (Spec *Presets*): **Models split** (turn1 Gemini widest cross-subject
+  spread), **Judges differed** (full-scope two-judge |Δ| ≥ 1.0), **Steadfastness cliff**
+  (largest negative full−turn1, Gemini). Each: deterministic, cap 12, one-per-scenario dedup,
+  `(scenario,pressure,framing)` tie-break, **stable keys**, sparse-Opus-safe (skip, never
+  zero-fill). Emitted as deep-link param maps into the catalog.
+- [ ] Tests for each algorithm.
 
 #### Acceptance Criteria
-- [ ] Gunzip sniff parses both already-decompressed and raw-gz bytes.
-- [ ] Version mismatch, malformed shard, 404, and rate-limit each yield a `Notice` (no crash).
-- [ ] Source resolution: baked coherent → same-origin, no GitHub call; baked absent/stale →
-      GitHub + `Notice`.
-- [ ] A **synthetic non-MultiBench catalog** parses (genericity at the contract layer).
+- [ ] Deterministic, capped, deduped-per-scenario, stable-keyed; sparse-Opus cells skipped.
+- [ ] Each entry is a valid deep-link param map for the Phase-7 navigator.
 
 #### Test Plan
-- **Unit**: zod parsers (valid/invalid/version); sniff; source resolver (three paths);
-  `isSafePathSegment`.
-- **Integration**: hooks against `fakeRepo`/fixture (no network).
+- **Unit**: thresholds, caps, dedup, tie-breaks, sparse-Opus behavior, determinism.
 
 #### Rollback Strategy
-New lib modules + a one-line `WALK_DIRS` change; revert the commit.
+Revert; the catalog simply carries no `presets` (viewer tolerates absence).
 
 #### Risks
-- **Risk**: importing `scoreColor`'s constant defeats genericity. **Mitigation**: the ramp is
-  read from the catalog; Phase 4 supplies a generic interpolator; static check in Phase 4.
+- **Risk**: one dramatic scenario floods a preset. **Mitigation**: one-per-scenario dedup.
 
 ---
 
-### Phase 4: Raw view route — transcripts + verdicts (catalog-generic ramp) + live `ResultsRegion` entry + drill-down
+### Phase 4: Committed launch dataset + `results-raw/README.md`
 **Dependencies**: Phase 3
 
 #### Objectives
-- Render a scenario's cells (transcripts, context prefix, per-(judge,scope) verdicts) from
-  the catalog-generic data, and turn the inert seam into a live entry.
+- Produce and commit the real launch `results-raw/<run-id>/` gz tier and document the contract.
 
 #### Deliverables
-- [ ] New run+scenario-scoped route (e.g. `/results/$runId/$groupId/$itemId`) + component in
-  `apps/multibrowser/src/routes/` (wired in `router.tsx`).
-- [ ] Components: transcript renderer (reuse `Markdown`), context-prefix panel, verdict card
-  (score colored by the **catalog-declared ramp**, `summary`, `rationale`, Opus **badge**),
-  cell grid.
-- [ ] A **generic ramp interpolator** seeded by the catalog's scale+stops (not importing the
-  `scoreColor` constant); `null` → neutral.
-- [ ] Upgrade `components/ResultsRegion.tsx` to a **live in-page entry** (compact per-scenario
-  summary linking into the route); **edit the placeholder string to drop "bands."**
-- [ ] Drill-down from `/results` into the route.
+- [ ] Run `export-raw` on the real roots; **commit** the `results-raw/<run-id>/` gz tier
+  (its own commit; ~110–150 MB, Waleed-accepted).
+- [ ] `results-raw/README.md`: contract, layout, allowlist, size ceilings, fingerprint,
+  dual-source, deploy-flow refresh trade, `CC-BY-4.0`, produce/refresh command.
 
 #### Acceptance Criteria
-- [ ] Renders MultiBench cells (transcripts + both judges' verdicts, Opus badged).
-- [ ] **Renders a synthetic non-MultiBench 0–4 catalog with no component change**; static
-      check: no `tradition`/`scenario` literal or −1…+1 ramp constant in raw components.
-- [ ] No band names anywhere; the edited placeholder no longer says "bands".
-- [ ] `ResultsRegion` links into the route; lazy-loads only the one scenario's shard.
+- [ ] The committed dataset validates against the Phase-5 zod contract.
+- [ ] Raw/score fingerprints match for the committed run.
+- [ ] README documents every contract element above.
 
 #### Test Plan
-- **Unit**: verdict card colors from a catalog ramp; badge; neutral-null.
-- **Integration** (vitest + fixture): render the route for a MB scenario and for a synthetic
-  0–4 catalog; assert genericity + no-band-names.
+- **Manual**: inspect a committed shard + the manifest; confirm fingerprint parity with the
+  committed `results/<run-id>/`.
 
 #### Rollback Strategy
-Revert the phase; `ResultsRegion` returns to inert (its `loadResults` seam stays).
+Revert the data commit (large but clean).
 
 #### Risks
-- **Risk**: A/B and deep-links creep into this phase. **Mitigation**: scoped to single-view
-  render here; A/B + URL state is Phase 5.
+- **Risk**: committed weight. **Mitigation**: Waleed-accepted; determinism → changed-only
+  rewrites; documented.
 
 ---
 
-### Phase 5: A/B side-by-side compare + deep-link URL state (incl. run-id) + preset navigation
-**Dependencies**: Phase 4
+### Phase 5: SPA raw data layer — generic zod contract, dual-source resolver, gunzip sniff, version+fingerprint checks, safe paths, dev fixture
+**Dependencies**: Phase 4 (dataset shape + fixture)
 
 #### Objectives
-- The jaleesbrowser parity features: side-by-side A/B on a cell, full shareable URL state,
-  and preset-driven navigation.
+- A catalog-generic, fail-soft data layer resolving baked-first / GitHub-fallback with no
+  MultiBench vocab or ramp baked in.
 
 #### Deliverables
-- [ ] A/B subject compare on a cell (two subjects side-by-side: transcript + verdicts).
-- [ ] Full view state in the URL via `searchParams.ts` (validated search): **run-id**,
-  group, item, A subject, B subject, framing, pressure, scope; opening a URL restores the
-  view; a missing `results-raw/<run-id>/` degrades to a `Notice`.
-- [ ] Preset bar reading the catalog presets → deep links (Models split / Judges differed /
-  Steadfastness cliff).
+- [ ] `apps/multibrowser/src/lib/rawContract.ts` — **generic** zod schemas: scale, ramp,
+  subjects, judges, `conditionAxes`, `groupBy`, items(+manifest-declared shard paths),
+  `contexts`, cells(`conditions:Record<string,string>`), verdicts, presets, `schema_version`,
+  `fingerprint`. **No** `tradition`/`scenario`/framing/pressure literals or −1…+1 constant.
+- [ ] `apps/multibrowser/src/lib/rawSource.ts` — `DataSource` seam: same-origin **baked** +
+  **GitHub** (`github.ts`) impls + resolver (**baked-first**; fall back on baked-absent or
+  **fingerprint mismatch**, surfacing a `Notice`). Carries the **magic-byte sniff verbatim**
+  (`0x1f 0x8b` else `TextDecoder`); **feature-detects** `DecompressionStream` (message).
+- [ ] `apps/multibrowser/src/lib/rawModel.ts` — tolerant parsers (mirror `resultsModel.ts`):
+  unsupported `schema_version` → `Notice`; **multi-segment safe-path** guard (`isSafeRelPath`);
+  malformed → `Notice`.
+- [ ] Extend `resultsModel.ts` with a **tolerant `fingerprint` field** (present/absent both OK).
+- [ ] Raw query hooks; add `"results-raw"` to `github.ts` `WALK_DIRS`.
+- [ ] Dev fixture under **`apps/multibrowser/src/test/`** (from Phase 2 `--limit`), served
+  via the test harness; the baked-coherent path is tested with an **injectable expected
+  fingerprint**.
 
 #### Acceptance Criteria
-- [ ] A/B renders both subjects; switching updates the URL.
-- [ ] Deep-link round-trip incl. run-id restores the exact view; missing run → `Notice`.
-- [ ] Each preset entry opens the intended cell/compare; presets ≤12, deduped-per-scenario.
+- [ ] Sniff parses both already-decompressed and raw-gz.
+- [ ] Version mismatch, malformed shard, 404, rate-limit each → `Notice` (no crash).
+- [ ] Resolver: baked coherent → same-origin (no GitHub call); baked absent/stale → GitHub +
+      `Notice`.
+- [ ] A synthetic non-MultiBench catalog parses (contract genericity).
 
 #### Test Plan
-- **Unit**: URL encode/decode incl. run-id (round-trip); preset→params.
-- **Integration**: A/B render; preset navigation; missing-run fail-soft.
+- **Unit**: zod (valid/invalid/version); sniff; resolver (three paths); `isSafeRelPath`.
+- **Integration**: hooks vs `fakeRepo`/fixture (no network).
 
 #### Rollback Strategy
-Revert the phase; the single-view route (Phase 4) remains usable.
+New lib modules + a one-line `WALK_DIRS` change + an additive `resultsModel` field; revert.
 
 #### Risks
-- **Risk**: run-id absent from state (spec defect). **Mitigation**: run-id is a required
-  search param; test asserts round-trip.
+- **Risk**: importing `scoreColor`'s constant defeats genericity. **Mitigation**: ramp read
+  from catalog; generic interpolator in Phase 6 + static check.
 
 ---
 
-### Phase 6: Railway baked-bundle deploy wiring + documentation + arch-doc updates
+### Phase 6: Raw view route — transcripts + verdicts (catalog-generic ramp) + live `ResultsRegion` entry + drill-down
 **Dependencies**: Phase 5
 
 #### Objectives
-- Bake the full uncompressed bundle into the Railway static deploy; document the tier and
-  the deploy flow; update governance docs.
+- Render a scenario's cells (transcripts, context prefix, per-(judge,scope) verdicts) from
+  catalog-generic data; make the seam live.
 
 #### Deliverables
-- [ ] Deploy wiring: a documented pre-deploy step that runs `analysis export-raw
-  --uncompressed --out apps/multibrowser/public/data-raw` before `railway up`, so `pnpm
-  build` includes it same-origin; **gitignore** `apps/multibrowser/public/data-raw/`
-  (baked, not committed); the SPA falls back to GitHub when the baked dir is absent (so CI
-  builds without the ~150 MB data still work).
-- [ ] `apps/multibrowser/README.md`: the raw tier, dual-source, deploy-flow refresh trade
-  (baked = re-export + `railway up`; GitHub updates live).
-- [ ] Arch-doc updates via the **`update-arch-docs` skill** (hot/cold tiers): a raw-tier +
-  dual-source fact in `arch-critical.md`; the genericity/gunzip-sniff/fingerprint lessons in
-  `lessons-critical.md` (displace weaker entries if capped).
+- [ ] New route `/results/$runId/$groupId/$itemId` + component (wired in `router.tsx`).
+- [ ] Components: transcript renderer (reuse `Markdown`), context-prefix panel, verdict card
+  (score colored by the **catalog-declared ramp**, `summary`, `rationale`, Opus **badge**),
+  cell grid iterating `conditionAxes` (no hardcoded axis names).
+- [ ] A **generic ramp interpolator** seeded by the catalog scale+stops (not importing the
+  `scoreColor` constant); `null` → neutral.
+- [ ] Upgrade `components/ResultsRegion.tsx` to a **live in-page entry** (per-scenario summary
+  linking into the route) via a `(group,item)→(tradition,scenario)` **adapter**; **edit the
+  placeholder string to drop "bands."**
+- [ ] Drill-down from `/results`.
 
 #### Acceptance Criteria
-- [ ] `pnpm build` succeeds **with** the baked dir (bundle includes `/data-raw`) **and
-      without** it (falls back to GitHub); documented flow verified locally.
-- [ ] READMEs + arch-docs updated and accurate.
+- [ ] Renders MultiBench cells (both judges, Opus badged).
+- [ ] Renders a synthetic non-MultiBench 0–4 catalog with **no component change**; static
+      check: no `tradition`/`scenario` literal or −1…+1 constant in raw components.
+- [ ] No band names; placeholder no longer says "bands".
+- [ ] `ResultsRegion` links into the route; lazy-loads only that scenario's shard.
 
 #### Test Plan
-- **Manual**: local `export-raw --uncompressed` → `pnpm build` → `pnpm preview`; confirm the
-  raw view serves same-origin; remove the dir and confirm GitHub fallback + `Notice`.
-- **Unit**: existing `deploy.test.ts` still passes.
+- **Unit**: verdict-card colors from a catalog ramp; badge; neutral-null; adapter.
+- **Integration** (vitest + fixture): render for a MB scenario and a synthetic 0–4 catalog.
 
 #### Rollback Strategy
-Revert the phase; the SPA already works via the committed GitHub tier (fallback) without the
-bake, so deploy is unaffected.
+Revert; `ResultsRegion` returns to inert (its `loadResults` seam remains).
 
 #### Risks
-- **Risk**: a build without local data ships an empty baked dir. **Mitigation**: absent dir →
-  GitHub fallback (not an empty-but-present dir); document + guard the copy step.
+- **Risk**: A/B/deep-links creep in. **Mitigation**: single-view render only here.
+
+---
+
+### Phase 7: A/B compare + deep-link URL state (path params + validated search, incl. run-id) + preset navigation
+**Dependencies**: Phase 6
+
+#### Objectives
+- jaleesbrowser parity: side-by-side A/B, full shareable URL state, preset navigation.
+
+#### Deliverables
+- [ ] A/B subject compare on a cell (two subjects: transcript + verdicts side-by-side).
+- [ ] View state: `run/group/item` as **route path params**; `a`, `b`, `framing`, `pressure`,
+  `scope` as **validated search** via the route's `validateSearch` zod schema in `router.tsx`
+  (using `searchParams.ts` only for flat (de)serialization). Opening a URL restores the view;
+  a missing `results-raw/<run-id>/` degrades to a `Notice`.
+- [ ] Preset bar reading catalog presets → deep links.
+
+#### Acceptance Criteria
+- [ ] A/B renders both; switching updates the URL.
+- [ ] Deep-link round-trip incl. run-id restores the exact view; missing run → `Notice`.
+- [ ] Each preset opens the intended cell/compare; presets ≤ 12, deduped-per-scenario.
+
+#### Test Plan
+- **Unit**: search encode/decode round-trip; preset→params.
+- **Integration**: A/B render; preset navigation; missing-run fail-soft.
+
+#### Rollback Strategy
+Revert; the single-view route (Phase 6) remains usable.
+
+#### Risks
+- **Risk**: run-id dropped from state. **Mitigation**: run-id is a required path param;
+  round-trip test.
+
+---
+
+### Phase 8: Railway gz-baked deploy wiring (`--no-gitignore`) + deploy-test safety + documentation + arch-docs
+**Dependencies**: Phase 7
+
+#### Objectives
+- Bake the gz tier into the Railway static deploy correctly; keep the test build clean;
+  document and update governance docs.
+
+#### Deliverables
+- [ ] **Predeploy script** (e.g. `apps/multibrowser/scripts/bake-and-deploy.sh`): run
+  `analysis export-raw --run-id … --out apps/multibrowser/public/data-raw` (**gz** shards) →
+  `railway up --no-gitignore`. **Not** part of `pnpm build` (so `deploy.test.ts`'s real build
+  never touches it).
+- [ ] `.railwayignore` re-excluding `node_modules`/`dist`; `.gitignore` for
+  `apps/multibrowser/public/data-raw/` (baked, not committed).
+- [ ] `deploy.test.ts` safety: the fixture is **not** in `public/data-raw/`; add a guard/note
+  that `public/data-raw/` is deploy-only so a stray local copy doesn't bloat the test build.
+- [ ] `apps/multibrowser/README.md`: raw tier, dual-source (gz-baked), deploy-flow refresh
+  trade (baked = re-export + `railway up --no-gitignore`; GitHub updates live).
+- [ ] Arch-docs via the **`update-arch-docs` skill**: a raw-tier + dual-source fact in
+  `arch-critical.md`; the genericity / gunzip-sniff / fingerprint / Railway-`.gitignore`
+  lessons in `lessons-critical.md` (displace weaker entries if capped).
+
+#### Acceptance Criteria
+- [ ] `pnpm build` succeeds **with** a baked `public/data-raw/` (bundle serves same-origin
+      gz) **and without** it (GitHub fallback); verified locally.
+- [ ] `deploy.test.ts` unaffected by the bake (fixture elsewhere).
+- [ ] READMEs + arch-docs accurate.
+
+#### Test Plan
+- **Manual**: `export-raw --out public/data-raw` → `pnpm build` → `pnpm preview`; confirm
+  same-origin gz serving; remove the dir → GitHub fallback + `Notice`.
+- **Unit**: `deploy.test.ts` passes unchanged.
+
+#### Rollback Strategy
+Revert; the SPA already works via the committed GitHub tier (fallback) without the bake.
+
+#### Risks
+- **Risk**: `railway up` drops the bake (`.gitignore`). **Mitigation**: `--no-gitignore` +
+  `.railwayignore`; documented + a deploy checklist.
 
 ---
 
 ## Cross-Phase Notes
-- **Per-phase consult** in this repo is `["codex","claude"]` (Gemini can't see the worktree);
-  full 3-way only where the diff is fed inline (the PR integration CMAP). (lessons-critical.)
-- **Test dispatcher** (`.codev/checks/test.sh`) already registers `workflows/analysis` and
-  `apps/multibrowser`; both suites run for this builder.
-- **Single PR** per the issue's PR strategy: phases are git commits on one branch; the PR
-  opens at/after the final implement phase unless the architect requests earlier.
-- **plan-approval gate** goes to Waleed (architect note).
+- **Per-phase consult** is `["codex","claude"]` (Gemini can't see the worktree); full 3-way
+  only where the diff is fed inline (the PR integration CMAP). (lessons-critical.)
+- **Test dispatcher** (`.codev/checks/test.sh`) registers `workflows/analysis` +
+  `apps/multibrowser`; both run for this builder.
+- **Single PR** (issue PR strategy): phases are commits on one branch; PR opens at/after the
+  final implement phase unless the architect requests earlier.
+- **External-account actions** (Railway, etc.) go through the **architect first** (2026-08-06
+  ruling). The gz-baked representation is architect-approved.
+- **plan-approval gate** goes to Waleed.
