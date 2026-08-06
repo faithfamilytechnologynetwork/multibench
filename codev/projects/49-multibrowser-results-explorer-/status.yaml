@@ -1,7 +1,7 @@
 id: '49'
 title: multibrowser-results-explorer-
 protocol: spir
-phase: specify
+phase: plan
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -16,7 +16,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-08-05T23:42:45.960Z'
-updated_at: '2026-08-06T00:32:52.228Z'
+updated_at: '2026-08-06T00:35:14.307Z'
