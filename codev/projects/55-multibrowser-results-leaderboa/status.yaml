@@ -1,7 +1,7 @@
 id: '55'
 title: multibrowser-results-leaderboa
 protocol: spir
-phase: verify
+phase: verified
 plan_phases:
   - id: phase_1
     title: Client aggregation for the dense rows (pure lib + tests)
@@ -36,7 +36,7 @@ iteration: 1
 build_complete: true
 history: []
 started_at: '2026-08-06T09:50:22.324Z'
-updated_at: '2026-08-06T20:34:34.612Z'
+updated_at: '2026-08-06T20:34:35.985Z'
 pr_history:
   - phase: review
     pr_number: 59
