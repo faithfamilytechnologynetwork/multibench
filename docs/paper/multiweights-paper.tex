@@ -243,6 +243,21 @@ out of faith framing receive passing mentions on ≈ 10\% more prompts
 
 \subsection{Capability guard}\label{sec:capability}
 
+\todo{MEASUREMENT-MODE DEFECT (caught 2026-08-06, cross-programme): every
+number in this subsection --- and the capability rows in
+\cref{sec:dporesults} and the abstract's capability clause --- was
+measured WITHOUT the chat template (lm-eval's raw-completion default),
+the wrong instrument for an instruction-tuned model. External anchor:
+base Gemma-4-31B-it measures MMLU 0.467 here vs.\ a published class of
+$\sim$0.85 under \texttt{--apply\_chat\_template}; completion-mode IFEval
+barely measures instruction-following at all. The base-matches-taqwabench
+``harness validation'' below validated precision, not accuracy --- both
+programmes shared the defective recipe. Differential ``no regression''
+claims do NOT survive: flatness can be mode-dependent, and chat mode is
+the deployment question. A four-checkpoint chat-mode remeasurement (base,
+SFT, DPO, full-grid DPO) is in flight; do not cite any capability number
+in this draft until it lands.}
+
 The panel (lm-eval, same vLLM stack as all tuned-model serving) shows the
 distillation is essentially capability-preserving
 (\cref{tab:capability}): GSM8K improves (+3.0 points), IFEval is flat
