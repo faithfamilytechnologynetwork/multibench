@@ -149,6 +149,10 @@ describe("raw contract + view are catalog-generic (static check)", () => {
       for (const lit of ['"tradition"', "'tradition'", '"scenario"', "'scenario'", '"framing"', "'framing'", '"pressure"', "'pressure'"]) {
         expect(code, `${f} must not hardcode ${lit}`).not.toContain(lit);
       }
+      // no MultiBench identifiers or route (would dead-link a non-MultiBench catalog, #54)
+      for (const id of ["traditionId", "scenarioId", "/t/"]) {
+        expect(code, `${f} must not reference the MultiBench-specific ${id}`).not.toContain(id);
+      }
       // no hardcoded scoreColor ramp constant (colors come from catalog.ramp)
       expect(code, `${f} must not import the hardcoded scoreColor`).not.toMatch(/from ["']\.\/scoreColor["']/);
     }

@@ -7,7 +7,11 @@ import { useLatestSha, useResultsRuns } from "../lib/queries";
 // in-page seam that links into it, keyed to the default (most recent) results run.
 export function ResultsRegion({ traditionId, scenarioId }: { traditionId: string; scenarioId: string }) {
   const sha = useLatestSha().data;
-  const runs = useResultsRuns(sha).data;
+  const runsQ = useResultsRuns(sha);
+  // While runs are still loading, render nothing — don't flash the "no results yet" placeholder
+  // (a false claim) before flipping to the live link.
+  if (!sha || runsQ.isLoading) return <span data-testid="results-region" />;
+  const runs = runsQ.data;
   const runId = runs?.defaultRunId ?? null;
   if (!runId) {
     return (

@@ -83,8 +83,13 @@ describe("raw-results view", () => {
     expect(await screen.findByRole("heading", { name: "The firearms job" })).toBeInTheDocument();
   });
 
-  it("renders a NON-MultiBench 0–4 catalog with no component change (genericity, #54)", async () => {
-    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(AFB_CATALOG, "afb-150/AFB-001.json.gz", AFB_SHARD)));
+  it("renders a NON-MultiBench 0–4 catalog with NO #49 score tier (genericity + independence, #54)", async () => {
+    // Raw tier ONLY — no results/ score manifest. The raw view must still work (fingerprint null
+    // → GitHub, no coherence check), proving it's decoupled from the MultiBench score tier.
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {
+      [`results-raw/${RUN}/manifest.json`]: JSON.stringify(AFB_CATALOG),
+      [`results-raw/${RUN}/afb-150/AFB-001.json.gz`]: JSON.stringify(AFB_SHARD),
+    }));
     renderApp(`/results/${RUN}/afb-150/AFB-001`);
     expect(await screen.findByRole("heading", { name: "AFB-001" })).toBeInTheDocument();
     // grouping axis label + item come from the catalog, not hardcoded "Tradition"/"scenario"

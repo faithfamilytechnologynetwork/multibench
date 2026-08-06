@@ -27,10 +27,10 @@ describe("scenario detail", () => {
     // Guided framing renders the tradition's actual guide.md content.
     expect(screen.getByText(/guide of sunni-islam/)).toBeInTheDocument();
 
-    // Results entry: with no results run committed, the placeholder shows (no drill-in link,
-    // no "bands" wording — #51 numeric-only policy).
+    // Results entry: with no results run committed, the placeholder shows once the runs query
+    // settles (no drill-in link, no "bands" wording — #51 numeric-only policy).
+    expect(await screen.findByText(/No judging results yet/)).toBeInTheDocument();
     const region = screen.getByTestId("results-region");
-    expect(region).toHaveTextContent(/No judging results yet/);
     expect(region.textContent ?? "").not.toMatch(/bands/i);
     expect(region).not.toHaveAttribute("data-has-results");
   });

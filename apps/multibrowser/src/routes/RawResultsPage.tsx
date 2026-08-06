@@ -9,7 +9,6 @@ import { Collapsible } from "../components/Collapsible";
 import { Notices, Notice } from "../components/Notice";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
-import { NotFound } from "./NotFound";
 
 const route = getRouteApi("/results/$runId/$groupId/$itemId");
 
@@ -52,13 +51,15 @@ export function RawResultsPage() {
   const { runId, groupId, itemId } = route.useParams();
   const shaQ = useLatestSha();
   const sha = shaQ.data;
+  // The score tier (#49) is consulted ONLY for an OPTIONAL coherence fingerprint — the raw view
+  // does not require it. A standalone (non-MultiBench) catalog with no results/ tier still loads
+  // (fingerprint null → GitHub, no coherence check). Run existence comes from the RAW catalog.
   const runsQ = useResultsRuns(sha);
   const runsSettled = !!sha && !runsQ.isLoading;
-  const run = runsQ.data?.runs.find((r) => r.id === runId);
-  const fingerprint = run?.manifest?.fingerprint ?? null;
+  const fingerprint = runsQ.data?.runs.find((r) => r.id === runId)?.manifest?.fingerprint ?? null;
 
-  // Only fetch the raw shard once the run manifests have settled, so `fingerprint` is known
-  // (null or a value) and the baked-first coherence check isn't defeated by a first null pass.
+  // Fetch the raw shard once the (optional) score manifests have settled, so `fingerprint` is
+  // known (null or a value) and the baked-first coherence check isn't defeated by a first null pass.
   const rawQ = useRawScenario(runsSettled ? sha : undefined, runsSettled ? runId : undefined, groupId, itemId, fingerprint);
 
   const catalog = rawQ.data?.catalog ?? null;
@@ -80,7 +81,7 @@ export function RawResultsPage() {
   const otherError = !rl && (shaQ.error || runsQ.error || rawQ.error);
 
   if ((shaQ.isLoading || runsQ.isLoading || rawQ.isLoading) && !catalog) return <CenteredSpinner label="Loading raw results…" />;
-  // Rate-limit / fetch error before NotFound — never show a bare 404 for a transient failure.
+  // Rate-limit / fetch error → banner + notice (never a bare 404 for a transient failure).
   if (!catalog && (rl || otherError)) {
     return (
       <div className="flex flex-col gap-4">
@@ -92,8 +93,7 @@ export function RawResultsPage() {
       </div>
     );
   }
-  // Only a genuine "run not found" (runs loaded OK, run absent) is a NotFound.
-  if (runsQ.data && !run) return <NotFound what={`Results run “${runId}”`} />;
+  // No raw catalog for this run — the loader added the reason to `notices`; show it + a way back.
   if (!catalog) {
     return (
       <div className="flex flex-col gap-4">
@@ -111,9 +111,8 @@ export function RawResultsPage() {
     <div className="flex flex-col gap-6">
       {rl && <RateLimitBanner error={rl} />}
       <nav className="flex items-center gap-3 text-sm">
+        {/* Generic navigation only — no per-catalog (tradition/scenario) route is hardcoded here. */}
         <Link to="/results" className="text-primary hover:underline">← Results</Link>
-        <Link to="/t/$traditionId/$scenarioId" params={{ traditionId: groupId, scenarioId: itemId }}
-              className="text-primary hover:underline">Scenario &amp; judge guidance →</Link>
         <span className="text-default-400">run {runId}</span>
       </nav>
 
