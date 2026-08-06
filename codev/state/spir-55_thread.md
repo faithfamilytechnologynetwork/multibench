@@ -242,3 +242,13 @@ Architect accepted the automated evidence (20-test suite + build/preview + verif
 after post-merge railway up; #55 AND parked #49 verify gate stay open until he confirms; his changes =
 follow-up iterations, not scope creep. Flow: PR → architect integration review (expect high-risk CMAP,
 it rewrites /results UX) → pr gate to Waleed. Committing exception, then opening PR.
+
+## 2026-08-06 — Review-phase consult (codex RC, claude APPROVE). Fixed + PR pushed.
+
+Codex real bug: malformed runs were selectable → picking one blanks the page (manifest null hides the
+selector too) w/ no recovery. FIXED: knownRunIds + selector options now from selectableRuns (manifest
+!= null); malformed ?run falls back to newest valid, notice still surfaces. +regression test (3-run
+fixture: 2 valid + 1 malformed-newest). Codex #2: spec/plan Status draft→approved + approval boxes
+checked (Success Criteria boxes stay unchecked — acceptance = Waleed's post-merge live approval per
+exception). Claude latent nits documented (DEFAULTS.pressure hardcode / sort-key namespace / stale
+run-switch params) — non-blocking, rationale in rebuttal. 180 tests green. Pushing to update PR #59.

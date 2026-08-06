@@ -79,7 +79,11 @@ export function ResultsPage() {
 
   const preSel = parseResultsSelection(search);
   const runs = runsQ.data?.runs ?? [];
-  const knownRunIds = new Set(runs.map((r) => r.id));
+  // Only runs whose manifest parsed are selectable — a malformed run must never be reachable via the
+  // selector or a `?run=` deep link, or picking it would blank the whole page (manifest → null) with
+  // no selector left to recover. Its parse notices still surface via `dataNotices` below.
+  const selectableRuns = runs.filter((r) => r.manifest !== null);
+  const knownRunIds = new Set(selectableRuns.map((r) => r.id));
   const runInvalid = preSel.runId != null && runsQ.data != null && !knownRunIds.has(preSel.runId);
   const runId =
     preSel.runId && knownRunIds.has(preSel.runId) ? preSel.runId : runsQ.data?.defaultRunId ?? undefined;
@@ -159,13 +163,13 @@ export function ResultsPage() {
               Run <span className="font-mono text-default-700">{manifest.runId}</span> · exported{" "}
               {manifest.generatedAt.slice(0, 10)} · {manifest.traditions.length} traditions
             </div>
-            {runs.length > 1 && (
+            {selectableRuns.length > 1 && (
               <Segmented
                 label="Run"
                 testid="sel-run"
                 value={manifest.runId}
                 onChange={(id) => update({ runId: id === runsQ.data?.defaultRunId ? null : id })}
-                options={runs.map((r) => ({ value: r.id, label: r.id }))}
+                options={selectableRuns.map((r) => ({ value: r.id, label: r.id }))}
               />
             )}
             <Segmented

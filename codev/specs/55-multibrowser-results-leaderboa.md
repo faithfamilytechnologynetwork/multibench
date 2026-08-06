@@ -8,7 +8,7 @@ Implementation phases, file paths, and code belong in codev/plans/55-*.md.
 
 ## Metadata
 - **ID**: spec-2026-08-06-multibrowser-results-leaderboard-v2
-- **Status**: draft
+- **Status**: approved (spec-approval gate, Waleed via architect, 2026-08-06)
 - **Created**: 2026-08-06
 
 ## Clarifying Questions Asked
@@ -519,10 +519,10 @@ or code before incorporation.
 Note: All consultation feedback has been incorporated directly into the relevant sections above.
 
 ## Approval
-- [ ] Technical Lead Review
-- [ ] Product Owner Review
-- [ ] Stakeholder Sign-off
-- [ ] Expert AI Consultation Complete
+- [x] Technical Lead Review — architect, 2026-08-06 (spec-approval gate)
+- [x] Product Owner Review — Waleed, 2026-08-06
+- [x] Stakeholder Sign-off — 2026-08-06 (spec-approval gate approved)
+- [x] Expert AI Consultation Complete — Codex + Claude, iteration 1
 
 ## Notes
 - **Scope boundary**: this is a **presentation + selection-model** rewrite of the `/results`

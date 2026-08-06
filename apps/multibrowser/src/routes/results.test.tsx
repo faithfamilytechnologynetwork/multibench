@@ -186,6 +186,27 @@ describe("/results leaderboard", () => {
     expect(router.state.location.searchStr).toContain("run=20260803");
   });
 
+  it("a malformed run is not selectable and never strands the user", async () => {
+    const mixed = {
+      ...resultsFiles("20260803", { generatedAt: "2026-08-03T00:00:00+00:00", traditions: ["buddhism", "taoism"], shard: shardFor }),
+      ...resultsFiles("20260901", { generatedAt: "2026-09-01T00:00:00+00:00", traditions: ["buddhism"], shard: shardFor }),
+      ...resultsFiles("20261001", { generatedAt: "2026-10-01T00:00:00+00:00", traditions: ["buddhism"], shard: shardFor }),
+    };
+    mixed["results/20261001/manifest.json"] = "{ not valid json"; // newest run, but broken
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, mixed));
+    renderApp("/results?run=20261001"); // deep-link straight into the malformed run
+    // Does NOT blank: falls back to the newest VALID run (20260901) and still renders the board.
+    expect(await screen.findByTestId("results-run-label")).toHaveTextContent("20260901");
+    expect(screen.getByTestId("leaderboard")).toBeInTheDocument();
+    // The run selector offers only the two valid runs — never the malformed one (no dead-end).
+    const runSel = screen.getByTestId("sel-run");
+    expect(within(runSel).getByText("20260803")).toBeInTheDocument();
+    expect(within(runSel).getByText("20260901")).toBeInTheDocument();
+    expect(within(runSel).queryByText("20261001")).not.toBeInTheDocument();
+    // …and the malformed run's parse failure still surfaces as a notice (display-first).
+    expect(screen.getByTestId("results-notices")).toBeInTheDocument();
+  });
+
   it("adds no on-budget GitHub API call for results data (all shards via raw)", async () => {
     const { wrapped, calls } = countingFetch(fakeFetch(REPO, SHA, files()));
     vi.stubGlobal("fetch", wrapped);

@@ -3,7 +3,7 @@
 ## Metadata
 - **ID**: plan-2026-08-06-multibrowser-results-leaderboard-v2
 - **Specification**: [codev/specs/55-multibrowser-results-leaderboa.md](../specs/55-multibrowser-results-leaderboa.md)
-- **Status**: draft
+- **Status**: approved (plan-approval gate, Waleed via architect, 2026-08-06)
 - **Created**: 2026-08-06
 
 ## Executive Summary
@@ -544,10 +544,10 @@ before any UI consumes it; the multi-faith + accessibility layer is isolated in 
 reviewed as the distinct "new design work."
 
 ## Approval
-- [ ] Technical Lead Review
-- [ ] Engineering Manager Approval
-- [ ] Resource Allocation Confirmed
-- [ ] Expert AI Consultation Complete
+- [x] Technical Lead Review — architect, 2026-08-06 (plan-approval gate)
+- [x] Engineering Manager Approval — architect, 2026-08-06
+- [x] Resource Allocation Confirmed — N/A (single-builder client-side feature)
+- [x] Expert AI Consultation Complete — Codex + Claude, 2 iterations
 
 ## Change Log
 | Date | Change | Reason | Author |
