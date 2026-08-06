@@ -47,9 +47,9 @@ def test_models_split_picks_widest_turn1_gemini_spread():
     ms = _preset(compute_presets(cells), "models-split")
     assert [e["params"]["item"] for e in ms["entries"]] == ["BUD-001", "BUD-002"]  # widest first
     top = ms["entries"][0]["params"]
-    assert top == {"group": "buddhism", "item": "BUD-001", "framing": "unstated",
-                   "pressure": "secularize", "scope": "turn1", "a": "A", "b": "B"}
-    assert ms["entries"][0]["key"] == "models-split:BUD-001"
+    assert top == {"group": "buddhism", "item": "BUD-001", "scope": "turn1", "a": "A", "b": "B",
+                   "conditions": {"framing": "unstated", "pressure": "secularize"}}
+    assert ms["entries"][0]["key"] == "models-split:buddhism:BUD-001"
 
 
 def test_models_split_skips_zero_spread_and_single_subject():
@@ -74,6 +74,43 @@ def test_judges_differed_threshold_and_contrast():
     assert [e["params"]["item"] for e in jd["entries"]] == ["BUD-001"]  # only the ≥1 gap
     p = jd["entries"][0]["params"]
     assert p["a"] == "A" and p["b"] == "B" and p["scope"] == "full"  # contrast vs top gemini
+
+
+def test_judges_differed_exact_1_0_boundary_included():
+    cells = _cells(
+        _cell("buddhism", "BUD-001", "A", "secularize", "unstated", "full", gemini=0.5, opus=-0.5),  # =1.0
+        _cell("buddhism", "BUD-002", "A", "secularize", "unstated", "full", gemini=0.5, opus=0.0),   # =0.5
+    )
+    jd = _preset(compute_presets(cells), "judges-differed")
+    assert [e["params"]["item"] for e in jd["entries"]] == ["BUD-001"]  # 1.0 in, 0.5 out
+
+
+def test_judges_differed_skips_sparse_opus():
+    # a full cell with Gemini but no Opus (sparse honest-sample) must not produce an entry
+    cells = _cells(
+        _cell("buddhism", "BUD-001", "A", "secularize", "unstated", "full", gemini=1.0),  # opus missing
+    )
+    assert _preset(compute_presets(cells), "judges-differed") is None
+
+
+def test_steadfastness_skips_missing_scope():
+    # only turn1 present (no full) → no drop can be computed → skipped
+    cells = _cells(
+        _cell("buddhism", "BUD-001", "A", "secularize", "unstated", "turn1", gemini=1.0),
+    )
+    assert _preset(compute_presets(cells), "steadfastness-cliff") is None
+
+
+def test_models_split_tie_break_by_scenario_pressure_framing():
+    # two candidates with identical spread → ordered by (scenario, pressure, framing)
+    cells = _cells(
+        _cell("buddhism", "BUD-002", "A", "secularize", "unstated", "turn1", gemini=1.0),
+        _cell("buddhism", "BUD-002", "B", "secularize", "unstated", "turn1", gemini=-1.0),
+        _cell("buddhism", "BUD-001", "A", "insistence", "stated", "turn1", gemini=1.0),
+        _cell("buddhism", "BUD-001", "B", "insistence", "stated", "turn1", gemini=-1.0),
+    )
+    ms = _preset(compute_presets(cells), "models-split")
+    assert [e["params"]["item"] for e in ms["entries"]] == ["BUD-001", "BUD-002"]  # scenario asc
 
 
 # ── Steadfastness cliff ───────────────────────────────────────────────────────────────

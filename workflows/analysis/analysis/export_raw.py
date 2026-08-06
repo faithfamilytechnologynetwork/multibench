@@ -553,21 +553,26 @@ def accumulate_cell_scores(resolved: list[dict], into: dict[PresetCell, dict[str
 
 def _entry(preset_key: str, group: str, item: str, *, framing: str, pressure: str, scope: str,
            a: str, b: str | None, label: str) -> dict:
-    params = {"group": group, "item": item, "framing": framing, "pressure": pressure,
-              "scope": scope, "a": a}
+    # Condition-axis values are nested under `conditions` (matching the cell shape and keeping
+    # the viewer generic over axes), not flattened into the reserved param namespace.
+    params = {"group": group, "item": item, "scope": scope, "a": a,
+              "conditions": {"framing": framing, "pressure": pressure}}
     if b is not None:
         params["b"] = b
-    return {"key": f"{preset_key}:{item}", "label": label, "params": params}
+    # Stable key includes group+item (the item identity is (group, id); item ids need not be
+    # globally unique across future catalogs).
+    return {"key": f"{preset_key}:{group}:{item}", "label": label, "params": params}
 
 
 def _dedup_per_item(sorted_entries) -> list[dict]:
-    """Keep the first (highest-magnitude) entry per item; cap at PRESET_CAP."""
-    seen: set[str] = set()
+    """Keep the first (highest-magnitude) entry per (group, item); cap at PRESET_CAP."""
+    seen: set[tuple] = set()
     out: list[dict] = []
     for e in sorted_entries:
-        if e["params"]["item"] in seen:
+        ident = (e["params"]["group"], e["params"]["item"])
+        if ident in seen:
             continue
-        seen.add(e["params"]["item"])
+        seen.add(ident)
         out.append(e)
         if len(out) >= PRESET_CAP:
             break
