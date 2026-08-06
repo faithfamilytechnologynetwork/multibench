@@ -127,3 +127,24 @@ Waleed: dataset.license = CC-BY-4.0 (SPDX). Closes the last open decision. (#54'
 are MIT — that's #54's concern; #51's MultiBench corpus/responses/judgments = CC-BY-4.0.)
 Folded into Baked Decision 7 + criteria + security + open questions + approval. NO open
 decisions remain for the spec-approval gate — ready for Waleed's word.
+
+### 2026-08-06 — spec-approval gate APPROVED by Waleed → Plan phase
+Spec approved (all decisions resolved: genericity #54, dual-source, CC-BY-4.0). Drafted the
+plan (codev/plans/51-...) — 6 phases, producer→consumer ordered:
+1. Raw export core (pure transform): new normalized sitting reader (full-grid only) + reuse
+   #49 verdict loaders + join w/ orphan-abort + shard/catalog build + shared fingerprint.
+2. Writer + `export-raw` CLI + presets + fingerprint into results/ manifest (additive #49) +
+   committed launch dataset + results-raw/README.
+3. SPA generic zod contract + dual-source resolver (baked-first/GH-fallback, fingerprint
+   coherence) + gunzip sniff verbatim + version checks + dev fixture.
+4. Raw view route: transcripts + verdicts w/ catalog-declared ramp (generic interpolator,
+   NOT scoreColor constant) + live ResultsRegion entry + drill-down; edit "bands" string.
+5. A/B compare + deep-link URL state (incl run-id) + preset navigation.
+6. Railway baked-bundle deploy wiring + docs + arch-doc updates.
+
+Resolved the 2 flagged plan decisions: (a) context_prefix = per-shard `contexts` keyed by
+framing (measured ~2-3KB gz/shard, negligible); (b) sibling `export-raw` Typer command
+reusing #49 loaders + new sitting reader + shared fingerprint helper. Also decided NOT to
+drop results/ generated_at (default-run selection needs it; only ADD fingerprint). plan
+checks pass (6 phase ids). Committing; plan-phase consult next, then plan-approval gate →
+Waleed.
