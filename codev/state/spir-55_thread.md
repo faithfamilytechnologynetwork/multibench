@@ -183,3 +183,15 @@ Codex blocking: ?expanded=bogus retained → parseExpanded now filters to manife
 ignored → added role="img" to strip cells. Claude minor: Traditions header title added. Deferred to
 Phase 4: remove now-app-dead subjectTraditionValues export+test (replaced by subjectDrilldownRows).
 check-types green, 178 tests. Touched resultsSelection(.test) + ResultsPage.
+
+## 2026-08-06 — Phase 3 APPROVED (codex + claude, both APPROVE). Advancing to phase_4.
+
+Phase-4 checklist (docs + cleanup + polish + verify):
+- Remove app-dead subjectTraditionValues export + its test (replaced by subjectDrilldownRows).
+- Claude minor polish: add test asserting heat strip unchanged on judge→Opus (structural, but pin it);
+  test the collapse path of onToggleExpand; add aria-controls to expand button + unique strip-group
+  aria-label per row.
+- Docs: apps/multibrowser/README leaderboard section; results/README "Results explorer" bullets → v2.
+- #49 supersession note (close #49 + retire its verify gate — architect action, flag it).
+- Rebase spir-55 commits onto origin/main (drops docs/paper leak) at PR prep.
+- Local `pnpm build && pnpm preview` smoke.
