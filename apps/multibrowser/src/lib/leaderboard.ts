@@ -2,8 +2,19 @@
 // is the equal-weight mean of the per-tradition means — which reconciles with the paper's
 // tab_standings by construction (the per-tradition means come from the canonical Python export).
 
-import type { ResultsManifest, ResultsShard } from "./resultsModel";
-import type { Metric, ResultsSelection } from "./resultsSelection";
+import type { Metric, ResultsManifest, ResultsShard } from "./resultsModel";
+
+/**
+ * The aggregation slice the cross-tradition statistics are computed over. Deliberately standalone
+ * (not a `Pick<ResultsSelection, …>`): the leaderboard's URL/selection model drops `framing`/`metric`
+ * as *selectors* (they become table columns), but the aggregation still needs all three axes — so
+ * the pure lib depends on this local shape, never on the page's selection type.
+ */
+export interface Slice {
+  framing: string;
+  metric: Metric;
+  pressure: string;
+}
 
 export interface TraditionValue {
   tradition: string;
@@ -54,43 +65,19 @@ export function traditionValue(
 }
 
 /**
- * One subject's per-tradition values for the selection under a SPECIFIC judge — the drill-down /
- * inspection data. Iterates traditions in manifest order (stable display). A tradition with no
- * value for this judge/slice is omitted (honest: zero coverage shows nothing, never a 0). This is
- * what the judge selector re-points to Opus without ever changing the Gemini-ranked leaderboard.
- */
-export function subjectTraditionValues(
-  shards: Record<string, ResultsShard>,
-  manifest: ResultsManifest,
-  subject: string,
-  sel: Pick<ResultsSelection, "framing" | "metric" | "pressure">,
-  judgeModel: string,
-): TraditionValue[] {
-  const perScenario = sel.pressure === manifest.pressureAll ? manifest.pressures.length : 1;
-  const out: TraditionValue[] = [];
-  for (const t of manifest.traditions) {
-    const shard = shards[t.id];
-    if (!shard) continue;
-    const tv = traditionValue(shard, judgeModel, subject, sel.framing, sel.metric, sel.pressure, t.nScenarios * perScenario);
-    if (tv !== null) out.push(tv);
-  }
-  return out;
-}
-
-/**
  * Standings for the given selection, ranked by the equal-weight mean of per-tradition means,
  * descending. `judgeModel` defaults to the ranking (full-grid) judge — the leaderboard always
- * ranks on Gemini; the judge selector (Phase 5) only re-points the drill-down/inspection layer.
+ * ranks on Gemini; the judge selector only re-points the drill-down/inspection layer.
  */
 export function computeStandings(
   shards: Record<string, ResultsShard>,
   manifest: ResultsManifest,
-  sel: Pick<ResultsSelection, "framing" | "metric" | "pressure">,
+  sel: Slice,
   judgeModel: string = rankingJudgeModel(manifest),
 ): Standing[] {
   const perScenario = sel.pressure === manifest.pressureAll ? manifest.pressures.length : 1;
-  // n_scenarios comes from the MANIFEST (the authoritative full grid) — same source as
-  // subjectTraditionValues, so the steadfastness coverage denominator is identical in both paths.
+  // n_scenarios comes from the MANIFEST (the authoritative full grid), so the steadfastness coverage
+  // denominator matches the drill-down path (`subjectDrilldownRows`) exactly.
   const nScenariosOf = new Map(manifest.traditions.map((t) => [t.id, t.nScenarios]));
   const standings = manifest.subjects.map((subject) => {
     const contributions: TraditionValue[] = [];
@@ -112,4 +99,234 @@ export function computeStandings(
     return b.value - a.value;
   });
   return standings;
+}
+
+// ============================================================================================
+// Dense-table rows (leaderboard v2) — the jaleesbrowser-style whole-picture-at-a-glance model.
+//
+// A row carries, for one subject at a fixed pressure and the RANKING (Gemini) judge:
+//   - Initial / Post / Δ headline columns, on the FIRST framing only (the paper's published slice);
+//   - one Post (`full`) column per framing (the framing staircase);
+//   - a per-tradition heat strip (1:1 with manifest.traditions);
+//   - a canonical rank (by first-framing `full`, descending) that persists under any display sort.
+// Every numeric column is a reuse of `computeStandings` — the SPA never re-implements the
+// aggregation convention, so the board reconciles with the paper by construction.
+// ============================================================================================
+
+/** One per-tradition heat-strip cell — aligned 1:1 with `manifest.traditions` (manifest order). */
+export interface StripCell {
+  tradition: string;
+  /** the subject's Post value for this tradition, or null when that tradition had no coverage. */
+  value: number | null;
+  nJudged: number;
+  nExpected: number;
+}
+
+/** One dense leaderboard row (one subject), all columns at a fixed pressure, ranking judge. */
+export interface LeaderboardRow {
+  subject: string;
+  /** first-framing `turn1` mean-of-per-tradition-means. */
+  initial: number | null;
+  /** first-framing `full` mean-of-per-tradition-means — the headline score (reconciles with paper). */
+  post: number | null;
+  /** first-framing matched-cell `steadfastness` (NOT post − initial; read from the shard). */
+  delta: number | null;
+  /** `full` mean at each framing — EVERY manifest framing id present (value null if absent). */
+  byFraming: Record<string, number | null>;
+  /** the per-tradition Post contributions, 1:1 with manifest.traditions (null where uncovered). */
+  strip: StripCell[];
+  /** canonical position (1-based) by first-framing `full` desc; stable under display sort. */
+  rank: number;
+}
+
+const perScenarioFactor = (manifest: ResultsManifest, pressure: string): number =>
+  pressure === manifest.pressureAll ? manifest.pressures.length : 1;
+
+/** subject → that column's value, from a `computeStandings` result (indexed for a by-id join). */
+function valueBySubject(standings: Standing[]): Map<string, number | null> {
+  return new Map(standings.map((s) => [s.subject, s.value]));
+}
+
+/**
+ * One dense row per subject for the given pressure, ranked by the canonical (first-framing `full`)
+ * ordering. The board is ALWAYS the ranking (full-grid) judge — this function takes no judge, so
+ * "Opus never re-ranks/recolors the board" is true by construction, not by test. Rows are returned
+ * in canonical rank order; the display layer re-sorts with `sortRows` while the `rank` field
+ * persists.
+ *
+ * Cross-column assembly joins by subject id, never by array index: each `computeStandings` call
+ * returns a `Standing[]` sorted by ITS OWN column's value, so a positional zip would silently
+ * misattribute Initial/Δ/framing columns to the wrong subjects (and still pass a Post-only test).
+ */
+export function computeLeaderboardRows(
+  shards: Record<string, ResultsShard>,
+  manifest: ResultsManifest,
+  opts: { pressure: string },
+): LeaderboardRow[] {
+  const { pressure } = opts;
+  const judge = rankingJudgeModel(manifest);
+  const framings = manifest.framings;
+  const firstFraming = framings[0];
+  if (firstFraming === undefined) return [];
+
+  // Each per-column result, indexed by subject (the by-id join source).
+  const initialBy = valueBySubject(
+    computeStandings(shards, manifest, { framing: firstFraming, metric: "turn1", pressure }, judge),
+  );
+  const deltaBy = valueBySubject(
+    computeStandings(shards, manifest, { framing: firstFraming, metric: "steadfastness", pressure }, judge),
+  );
+  // Post standings carry the per-tradition contributions we need for the heat strip.
+  const postStandings = computeStandings(
+    shards, manifest, { framing: firstFraming, metric: "full", pressure }, judge,
+  );
+  const postBy = valueBySubject(postStandings);
+  const contributionsBy = new Map(postStandings.map((s) => [s.subject, s.contributions]));
+  const byFramingMaps: Record<string, Map<string, number | null>> = {};
+  for (const f of framings) {
+    byFramingMaps[f] = valueBySubject(
+      computeStandings(shards, manifest, { framing: f, metric: "full", pressure }, judge),
+    );
+  }
+
+  // Canonical rank: first-framing `full` (== Post) desc, nulls last, ties by subject id.
+  const rankOrder = [...manifest.subjects].sort((x, y) => {
+    const px = postBy.get(x) ?? null;
+    const py = postBy.get(y) ?? null;
+    if (px === null && py === null) return x.localeCompare(y);
+    if (px === null) return 1;
+    if (py === null) return -1;
+    if (px !== py) return py - px;
+    return x.localeCompare(y);
+  });
+  const rankOf = new Map(rankOrder.map((s, i) => [s, i + 1]));
+
+  const rows = manifest.subjects.map((subject): LeaderboardRow => {
+    const byFraming: Record<string, number | null> = {};
+    for (const f of framings) byFraming[f] = byFramingMaps[f]!.get(subject) ?? null;
+
+    // Heat strip: left-join the sparse Post contributions against the manifest tradition order, so
+    // uncovered traditions become a distinct null cell (with a manifest-derived denominator).
+    // The join key is the tradition id: `computeStandings` keys each contribution by `shard.tradition`
+    // and the shard loader keys shards by `manifest.traditions[].id`; the exporter writes them equal
+    // (and `shardConsistencyNotices` flags any divergence at load), so every covered contribution
+    // lands in a manifest cell and `mean(non-null strip) == post` holds.
+    const contribBy = new Map((contributionsBy.get(subject) ?? []).map((c) => [c.tradition, c]));
+    const strip: StripCell[] = manifest.traditions.map((t) => {
+      const c = contribBy.get(t.id);
+      if (c) return { tradition: t.id, value: c.value, nJudged: c.nJudged, nExpected: c.nExpected };
+      return { tradition: t.id, value: null, nJudged: 0, nExpected: t.nScenarios * perScenarioFactor(manifest, pressure) };
+    });
+
+    return {
+      subject,
+      initial: initialBy.get(subject) ?? null,
+      post: postBy.get(subject) ?? null,
+      delta: deltaBy.get(subject) ?? null,
+      byFraming,
+      strip,
+      rank: rankOf.get(subject) ?? manifest.subjects.length,
+    };
+  });
+
+  rows.sort((a, b) => a.rank - b.rank);
+  return rows;
+}
+
+export type SortDir = "asc" | "desc";
+/** The fixed numeric headline columns; any other sort key is treated as a framing id. */
+const HEADLINE_KEYS = new Set(["initial", "post", "delta"]);
+
+/** Is `key` a sortable column for `manifest` (a headline key or a declared framing id)? */
+export function isSortableColumn(manifest: ResultsManifest, key: string): boolean {
+  return HEADLINE_KEYS.has(key) || manifest.framings.includes(key);
+}
+
+function rowSortValue(row: LeaderboardRow, key: string): number | null {
+  if (key === "initial") return row.initial;
+  if (key === "post") return row.post;
+  if (key === "delta") return row.delta;
+  return row.byFraming[key] ?? null;
+}
+
+/**
+ * A display sort over the numeric columns (a headline key or a framing id). Nulls sort last in
+ * BOTH directions; ties break by subject id. Pure — returns a new array and leaves each row's
+ * `rank` field untouched (the canonical rank column never re-numbers on sort).
+ */
+export function sortRows(rows: LeaderboardRow[], key: string, dir: SortDir): LeaderboardRow[] {
+  const sign = dir === "desc" ? 1 : -1;
+  return [...rows].sort((a, b) => {
+    const va = rowSortValue(a, key);
+    const vb = rowSortValue(b, key);
+    if (va === null && vb === null) return a.subject.localeCompare(b.subject);
+    if (va === null) return 1; // nulls last regardless of direction
+    if (vb === null) return -1;
+    if (va !== vb) return (vb - va) * sign;
+    return a.subject.localeCompare(b.subject);
+  });
+}
+
+/** One tradition's dense values for the subject drill-down under a SPECIFIC judge. */
+export interface DrilldownRow {
+  tradition: string;
+  initial: number | null;
+  post: number | null;
+  delta: number | null;
+  byFraming: Record<string, number | null>;
+  /** Post-slice numerator, or null when this tradition is included via a non-Post slice. */
+  nJudged: number | null;
+  /** manifest-derived full-grid denominator (always defined). */
+  nExpected: number;
+}
+
+/**
+ * The per-tradition drill-down for one subject under `judgeModel` (the validation layer when Opus).
+ * Mirrors the headline columns per tradition (Initial/Post/Δ + each framing's `full`). A tradition
+ * is included iff ANY displayed slice is non-null — so the sampled Opus case (e.g. `full` present
+ * but `steadfastness` absent, or one framing not another) still shows what data exists. The coverage
+ * denominator `nExpected` is ALWAYS manifest-derived; the numerator `nJudged` comes from the Post
+ * slice, or null when the tradition is present only via a non-Post slice.
+ */
+export function subjectDrilldownRows(
+  shards: Record<string, ResultsShard>,
+  manifest: ResultsManifest,
+  subject: string,
+  opts: { pressure: string; judgeModel: string },
+): DrilldownRow[] {
+  const { pressure, judgeModel } = opts;
+  const framings = manifest.framings;
+  const firstFraming = framings[0];
+  if (firstFraming === undefined) return [];
+  const perScenario = perScenarioFactor(manifest, pressure);
+
+  const out: DrilldownRow[] = [];
+  for (const t of manifest.traditions) {
+    const shard = shards[t.id];
+    if (!shard) continue;
+    const nExpected = t.nScenarios * perScenario;
+    const read = (framing: string, metric: Metric) =>
+      traditionValue(shard, judgeModel, subject, framing, metric, pressure, nExpected);
+    const postTv = read(firstFraming, "full");
+    const initial = read(firstFraming, "turn1")?.value ?? null;
+    const post = postTv?.value ?? null;
+    const delta = read(firstFraming, "steadfastness")?.value ?? null;
+    const byFraming: Record<string, number | null> = {};
+    for (const f of framings) byFraming[f] = read(f, "full")?.value ?? null;
+
+    const anyValue =
+      initial !== null || post !== null || delta !== null || framings.some((f) => byFraming[f] !== null);
+    if (!anyValue) continue;
+
+    out.push({
+      tradition: t.id,
+      initial,
+      post,
+      delta,
+      byFraming,
+      nJudged: postTv?.nJudged ?? null,
+      nExpected,
+    });
+  }
+  return out;
 }
