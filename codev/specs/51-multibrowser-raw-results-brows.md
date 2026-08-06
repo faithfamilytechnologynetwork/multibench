@@ -155,6 +155,35 @@ framing key. `unstated` cells have no prefix. The shard renders completely from 
 fetch** (self-containment preserved; no catalog coupling). Tradition-level constancy of
 guided text, if it holds, is a compression fact, **not** part of the schema.
 
+**Catalog-genericity ruling (new requirement from Waleed, issue #54 — a requirement on
+#51, not new #51 scope):** the raw contract (zod schemas) and the raw-view components must
+be **catalog-generic** — a non-MultiBench catalog (concretely #54's AFB **0–4** explorer:
+vanilla Gemma vs fine-tuned, GPT-5.6-Terra judge) must ride the **same** viewer with **zero
+component changes**. This is the jaleesbench generic-contract discipline (subjects / items /
+condition-axes / score scale all shipped in data), applied here. Specifically:
+1. **Score scale + color ramp are catalog-declared data**, not a hardcoded −1…+1 + the
+   `scoreColor` constant. The catalog declares the numeric scale **domain** (min / center /
+   max) and the **ramp stops**; the raw view interpolates generically. MultiBench's catalog
+   ships exactly the #49 `scoreColor` 7-stop ramp on (−1, 0, +1) with **no rung labels**
+   (no band names — MultiBench policy stands, now expressed as catalog data); #54's catalog
+   ships a 0–4 scale + its own ramp (and may include rung labels). Optional labels are a
+   schema affordance MultiBench declines.
+2. **Items and their grouping axis are catalog-declared** — the contract must **not** bake a
+   `tradition → scenario` shape. The catalog declares the item set and a grouping axis; the
+   on-disk `results-raw/<run-id>/<tradition>/<scenario>.json.gz` nesting is MultiBench's
+   *realization* of a generic `<group>/<item>` shard convention (group = tradition, item =
+   scenario), with each item's shard path **manifest-declared**. #54's items are AFB-150
+   with a `condition` axis, no tradition grouping.
+3. **The subjects list is catalog-declared** — whatever subjects a catalog ships, not the
+   MultiBench leaderboard set. #54's subjects are `gemma-4-31b-it`, `mb-sft-guided`,
+   `mb-sft-dpo`.
+
+The **genericity check** is concrete: nothing in the raw shard/catalog zod schemas or the
+raw-view components may reference MultiBench-specific vocabulary (`tradition`, `scenario`,
+framings/pressures) or the −1…+1 ramp as a constant — all such values arrive in the data.
+(The #49 *score* tier / leaderboard stays MultiBench-specific; genericity binds the **new**
+#51 raw contract + viewer that #54 will reuse.)
+
 ## Stakeholders
 - **Primary Users**: readers/reviewers of the MultiBench results (researchers, the paper's
   audience) who want to audit the raw evidence behind the scores.
@@ -208,9 +237,16 @@ guided text, if it holds, is a compression fact, **not** part of the schema.
 - [ ] Client gunzip carries the **magic-byte sniff** (0x1f 0x8b) **verbatim** from
       `datasource.ts:70-84`; missing `DecompressionStream` is **feature-detected** and
       shown as a message (no polyfill).
-- [ ] **No band names** anywhere; verdict scores use the #49 `scoreColor` ramp; a
-      `null`/no-coverage cell reads as neutral, not zero; the `ResultsRegion` placeholder
-      string is edited to drop "bands".
+- [ ] **No band names** anywhere; a `null`/no-coverage cell reads as neutral, not zero;
+      the `ResultsRegion` placeholder string is edited to drop "bands". Verdict colors come
+      from the **catalog-declared** ramp (MultiBench's catalog ships the `scoreColor` stops
+      on −1…+1), not a hardcoded viewer constant.
+- [ ] **Catalog-genericity (issue #54):** the raw shard/catalog **zod schemas** and
+      **raw-view components** reference no MultiBench-specific vocabulary (`tradition`,
+      `scenario`, framings/pressures) and no −1…+1 ramp constant — score scale + ramp, item
+      set + grouping axis, and subjects are all catalog-declared. Demonstrated by a test
+      that renders the raw view from a **synthetic non-MultiBench catalog** (a 0–4 scale,
+      non-tradition items, a non-leaderboard subjects list) with no component change.
 - [ ] Fail-soft throughout: malformed/absent remote JSON, 404s, and rate-limits produce
       the existing `Notice`/banner UX, never a blank crash.
 - [ ] A **baked dev fixture** (a `--limit`-style small export) lets the SPA's tests run
@@ -244,7 +280,9 @@ guided text, if it holds, is a compression fact, **not** part of the schema.
 6. **`context_prefix`** → per-shard `contexts` pool keyed by framing (ruling b).
 7. **License field** in the `dataset` block (concrete SPDX id, confirmed by Waleed).
 8. **No band names anywhere** — numeric −1…+1 + the #49 `scoreColor` ramp (MultiBench
-   policy).
+   policy). Expressed as **catalog data** (see decision 13): MultiBench's catalog declares
+   the −1…+1 scale + the `scoreColor` stops with **no rung labels**; the ramp is not a
+   hardcoded viewer constant.
 9. **Build ON the #49 seams** — `results/` scores tier, the inert per-scenario
    `ResultsRegion`, and the `export_results.py` judgment loaders. Agreement is enforced by
    the shared fingerprint (item 2), not by hope.
@@ -252,6 +290,12 @@ guided text, if it holds, is a compression fact, **not** part of the schema.
 11. **Transcript source = the full-grid (report.json) run only**; other roots' sittings
     ignored (ruling on the iter-1 factual correction).
 12. **Sibling `export-raw`** command (ruling a).
+13. **Catalog-genericity (issue #54).** The raw contract (zod schemas) and raw-view
+    components are catalog-generic: score scale + color ramp, item set + grouping axis, and
+    subjects are **all catalog-declared** — a non-MultiBench catalog (AFB 0–4) rides the
+    same viewer with zero component changes. No MultiBench vocab (`tradition`, `scenario`,
+    framings/pressures) and no −1…+1 ramp constant may be baked into the raw schemas or
+    components. (See the *Catalog-genericity ruling* in Desired State.)
 
 ### Presets (export-computed; user-visible, hence specified here)
 Each preset is a capped, deterministic list of deep-link entries with stable keys, deduped
@@ -420,6 +464,12 @@ baked dev-fixture).
     deterministic.
 14. **Fail-soft:** a 404 shard, a malformed shard, and a rate-limit each degrade to the
     existing `Notice`/banner UX.
+15. **Catalog-genericity (issue #54):** the raw view renders correctly from a **synthetic
+    non-MultiBench catalog** — a 0–4 score scale + a distinct ramp, non-tradition items with
+    a `condition` grouping axis, and a non-leaderboard subjects list — with **no component
+    change**; the ramp, scale domain, item grouping, and subjects all come from the catalog.
+    A static check asserts the raw schemas/components contain no `tradition`/`scenario`
+    literals or a hardcoded −1…+1 ramp.
 
 ### Non-Functional Tests
 1. **Size ceilings:** an over-ceiling shard or total fails the export before any write.
@@ -438,6 +488,8 @@ baked dev-fixture).
 
 ## References
 - Issue #51 + the two architect comments (deep-read of jaleesbench + binding spec inputs).
+- Issue #54 (AFB before/after explorer) — the second catalog type that rides #51's generic
+  contract; source of the catalog-genericity requirement (Baked Decision 13).
 - taqwabench retro: `…/taqwabench/tmp/jaleesbrowser-retro-multibench.md`.
 - taqwabench cross-workspace spec review: `…/taqwabench/tmp/multibench-51-spec-review.md`.
 - Reference export: `…/taqwabench/jaleesbench/jaleesbench/export_web.py`.
@@ -459,6 +511,7 @@ baked dev-fixture).
 | `DecompressionStream` unsupported on an old browser | Low | Medium | Feature-detect + message (no polyfill). |
 | Guided `context_prefix` (~6.5 KB) bloats shards | Low | Medium | Per-shard framing-keyed pool (once per framing) + per-shard ceiling. |
 | SPA tests coupled to the network | Medium | Medium | Baked `--limit` dev fixture. |
+| Genericity silently violated — the raw view imports the hardcoded `scoreColor` constant or bakes `tradition`/`scenario`, so #54's AFB 0–4 catalog can't ride it | Medium | Medium | Ramp/scale/items/subjects catalog-declared; the raw view reads the ramp from the catalog (a generic interpolator seeded by MultiBench's stops), not by importing the constant; genericity test renders a synthetic non-MultiBench catalog + a static no-MultiBench-literals check (Baked Decision 13; issue #54). |
 
 ## Expert Consultation
 **Date**: 2026-08-06
@@ -486,6 +539,13 @@ architect); Codex and Claude (SPIR spec CMAP, per this repo's per-phase consult 
   sanitization (Codex; Claude).
 - *Minor*: #49 tier = 184 KB; Opus judgments = 42,711; score numeric via `is_valid_score`;
   edit the "bands" placeholder string (Claude).
+
+**Pre-gate amendment (2026-08-06, Waleed via issue #54):** added the **catalog-genericity**
+requirement (Baked Decision 13 + the Desired-State ruling + criteria/tests) — the raw
+contract + viewer must be catalog-generic (score scale/ramp, items/grouping, subjects all
+catalog-declared) so #54's AFB 0–4 explorer rides the same viewer with zero component
+changes. This is a genericity requirement on #51, not new #51 scope; the AFB explorer
+itself is #54, built after #51 lands.
 
 ## Approval
 - [ ] Repo-weight decision (Waleed) — Critical open question

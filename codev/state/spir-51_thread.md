@@ -82,3 +82,24 @@ route for the full raw view; ResultsRegion becomes a live in-page entry. Correct
 issue estimate). Field allowlist replaces vestigial sanitization (scenario corpus already
 public in traditions/). Presets fully specified. Agreement test = field-level equality +
 independent aggregate recompute + fingerprint equality.
+
+### 2026-08-06 — pre-gate amendment: catalog-genericity (issue #54, Waleed)
+Architect relayed a new requirement (issue #54, the AFB before/after explorer): the #51 raw
+contract + viewer must be GENERIC enough that a non-MultiBench catalog rides the same viewer
+with zero component changes. #54 ships an AFB 0–4 catalog (vanilla Gemma vs fine-tuned,
+GPT-5.6-Terra judge) as a SECOND catalog type — not a viewer change. Requirement (not new
+#51 scope):
+1. score scale + color ramp = catalog-declared data (not hardcoded −1..+1 / scoreColor
+   constant). MultiBench catalog ships the scoreColor stops on (−1,0,+1), no rung labels;
+   AFB ships 0–4 + its own ramp. Optional labels = schema affordance MB declines.
+2. items + grouping axis = catalog-declared (NOT tradition→scenario shaped). On-disk
+   <tradition>/<scenario> nesting is MB's realization of a generic <group>/<item>
+   convention; shard paths manifest-declared.
+3. subjects = catalog-declared (not the leaderboard set).
+Genericity check: raw zod schemas + raw-view components contain NO tradition/scenario
+literals and NO −1..+1 ramp constant — all in data. (#49 score/leaderboard tier stays
+MB-specific; genericity binds the NEW #51 raw contract that #54 reuses.) My design is
+already ported from jaleesbrowser's generic contract, so this is cheap to absorb; main
+watch-item is not importing scoreColor's hardcoded constant in the raw view (read the ramp
+from the catalog). Folded into Baked Decision 13 + Desired-State ruling + criteria + tests
++ risk. Re-committing; gate re-queues for Waleed.
