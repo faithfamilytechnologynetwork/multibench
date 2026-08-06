@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { screen, fireEvent, within } from "@testing-library/react";
+import { screen, fireEvent, within, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, resultsFiles, traditionFiles } from "../test/fakeRepo";
@@ -56,24 +56,63 @@ describe("raw-results view", () => {
     expect(await screen.findByRole("heading", { name: "BUD-001" })).toBeInTheDocument();
     expect(await screen.findByText(/thinking about leaving/)).toBeInTheDocument(); // transcript (default cell)
     const verdicts = await screen.findAllByTestId("verdict");
-    expect(verdicts.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("gemini")).toBeInTheDocument(); // judge label
-    expect(screen.getByText("opus")).toBeInTheDocument();
-    expect(screen.getByText("sample")).toBeInTheDocument(); // Opus (non-full-grid) badge on the default cell
+    expect(verdicts.length).toBeGreaterThanOrEqual(2); // gemini + opus on the default cell
+    expect(screen.getAllByText("gemini").length).toBeGreaterThan(0); // judge label (pill + verdict)
+    expect(screen.getByText("sample")).toBeInTheDocument(); // Opus (non-full-grid) badge on the default cell's verdict
+    expect(screen.getByTestId("score-grid")).toBeInTheDocument(); // the cell-score grid overview
   });
 
-  it("shows the context-prefix panel + switches cells via the condition-axis selectors", async () => {
+  it("the grid navigates: clicking a chip opens that cell's context panel + transcript", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001`);
     await screen.findByRole("heading", { name: "BUD-001" });
     // default cell (claude-sonnet-5 / unstated) has no context prefix
     expect(screen.queryByText(/what the model was told/i)).not.toBeInTheDocument();
-    // switch to the stated gpt-5.6-terra cell → its context panel + transcript appear
-    fireEvent.change(screen.getByLabelText(/Subject/), { target: { value: "gpt-5.6-terra" } });
-    fireEvent.change(screen.getByLabelText(/Framing/), { target: { value: "stated" } });
+    // click the grid chip for the stated gpt-5.6-terra cell → its context panel + transcript appear
+    fireEvent.click(screen.getByTitle(/gpt-5\.6-terra · stated \/ secularize/));
     expect(await screen.findByText(/what the model was told/i)).toBeInTheDocument();
     expect(screen.getByText(/practising Buddhist/)).toBeInTheDocument(); // the context text
     expect(screen.getByText(/weigh it against your values/)).toBeInTheDocument(); // the new transcript
+  });
+
+  it("A/B compare: pinning a second subject shows two cell detail columns", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    expect(screen.getAllByTestId("cell-detail")).toHaveLength(1);
+    fireEvent.change(screen.getByLabelText(/Compare/), { target: { value: "gpt-5.6-terra" } });
+    await waitFor(() => expect(screen.getAllByTestId("cell-detail")).toHaveLength(2));
+    const details = screen.getAllByTestId("cell-detail");
+    expect(details.map((d) => d.getAttribute("data-subject"))).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
+  });
+
+  it("selection is a deep link: the search carries a/scope/judge + condition axes", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    const { router } = renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    fireEvent.click(screen.getByTitle(/gpt-5\.6-terra · stated \/ secularize/));
+    await screen.findByText(/weigh it against your values/);
+    const s = router.state.location.search as Record<string, string>;
+    expect(s.a).toBe("gpt-5.6-terra");
+    expect(s.framing).toBe("stated");
+    expect(s.pressure).toBe("secularize");
+    expect(s.scope).toBeTruthy();
+    expect(s.judge).toBe("gemini");
+  });
+
+  it("opening a deep link restores the exact cell", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001?a=gpt-5.6-terra&framing=stated&pressure=secularize&scope=full&judge=gemini`);
+    expect(await screen.findByText(/weigh it against your values/)).toBeInTheDocument(); // gpt/stated transcript
+    expect(screen.getByText(/what the model was told/i)).toBeInTheDocument(); // its context panel
+  });
+
+  it("a preset renders a deep-link into a cell", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    const preset = within(screen.getByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ });
+    expect(preset.getAttribute("href")).toMatch(/\/results\/.*\/buddhism\/BUD-001\?.*a=gpt-5\.6-terra/);
   });
 
   it("shows the catalog-declared item LABEL, not the route id", async () => {
@@ -96,7 +135,7 @@ describe("raw-results view", () => {
     expect(screen.getByText(/Instrument: afb-150/)).toBeInTheDocument();
     expect(await screen.findByText(/vanilla omission/)).toBeInTheDocument();
     expect((await screen.findAllByTestId("verdict")).length).toBe(1);
-    expect(screen.getByText("gpt-5.6-terra")).toBeInTheDocument();
+    expect(screen.getAllByText("gpt-5.6-terra").length).toBeGreaterThan(0); // judge label (pill + verdict)
   });
 
   it("ResultsRegion becomes a live drill-in link when a results run exists", async () => {
