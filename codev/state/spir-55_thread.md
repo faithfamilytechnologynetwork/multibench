@@ -175,3 +175,11 @@ Gemini). Table wrapped in overflow-x-auto (leaderboard-scroll).
 Tests +5: heat strip labels+empty+pressure-reframe; dense drill columns; keyboard-expand+URL round-trip;
 deep-linked ?expanded; —/N via non-Post slice; scroll-container. check-types green, 177 tests. Only
 ResultsPage.tsx + results.test.tsx touched. Phase-2 colSpan note RESOLVED here.
+
+## 2026-08-06 — Phase 3 impl consult (codex RC blocking, claude APPROVE). Fixed.
+
+Codex blocking: ?expanded=bogus retained → parseExpanded now filters to manifest.subjects when present
+(+ test: bogus dropped, no round-trip survival). Claude a11y (good): aria-label on role-less span is
+ignored → added role="img" to strip cells. Claude minor: Traditions header title added. Deferred to
+Phase 4: remove now-app-dead subjectTraditionValues export+test (replaced by subjectDrilldownRows).
+check-types green, 178 tests. Touched resultsSelection(.test) + ResultsPage.

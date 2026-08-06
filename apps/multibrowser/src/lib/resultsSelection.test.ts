@@ -8,6 +8,7 @@ import {
 import type { ResultsManifest } from "./resultsModel";
 
 const manifest = {
+  subjects: ["claude-sonnet-5", "gemini-3.6-flash"],
   framings: ["unstated", "stated", "guided"],
   pressures: ["secularize", "insistence"],
   pressureAll: "all",
@@ -23,10 +24,10 @@ describe("parseResultsSelection", () => {
 
   it("reads valid run / judge / pressure / sort / expanded", () => {
     const sel = parseResultsSelection(
-      { run: "20260803", judge: "opus", pressure: "secularize", sort: "post.asc", expanded: "a,b" }, manifest);
+      { run: "20260803", judge: "opus", pressure: "secularize", sort: "post.asc", expanded: "claude-sonnet-5,gemini-3.6-flash" }, manifest);
     expect(sel).toEqual({
       runId: "20260803", judge: "opus", pressure: "secularize",
-      sort: { key: "post", dir: "asc" }, expanded: ["a", "b"],
+      sort: { key: "post", dir: "asc" }, expanded: ["claude-sonnet-5", "gemini-3.6-flash"],
     });
   });
 
@@ -50,6 +51,13 @@ describe("parseResultsSelection", () => {
 
   it("dedupes and trims the expanded list", () => {
     expect(parseResultsSelection({ expanded: "a, b ,a, ,c" }).expanded).toEqual(["a", "b", "c"]);
+  });
+
+  it("drops unknown expanded subject ids when a manifest is supplied (ignored, not carried)", () => {
+    const sel = parseResultsSelection({ expanded: "claude-sonnet-5,bogus,gemini-3.6-flash" }, manifest);
+    expect(sel.expanded).toEqual(["claude-sonnet-5", "gemini-3.6-flash"]); // 'bogus' filtered out
+    // and it does not survive a re-serialization round-trip.
+    expect(selectionToResultsSearch(sel).expanded).toBe("claude-sonnet-5,gemini-3.6-flash");
   });
 });
 

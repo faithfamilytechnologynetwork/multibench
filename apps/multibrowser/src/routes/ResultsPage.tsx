@@ -272,6 +272,7 @@ function HeatStrip({ strip }: { strip: StripCell[] }) {
         return (
           <span
             key={c.tradition}
+            role="img"
             data-testid="strip-cell"
             data-tradition={c.tradition}
             data-empty={c.value === null ? "true" : undefined}
@@ -325,7 +326,9 @@ function Leaderboard({
             {framingCols.map((c) => (
               <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
             ))}
-            <th className="py-2 pr-2 font-medium">Traditions</th>
+            <th className="py-2 pr-2 font-medium" title="Per-tradition Post scores, in manifest order; hover a square for its value">
+              Traditions
+            </th>
           </tr>
         </thead>
         <tbody>

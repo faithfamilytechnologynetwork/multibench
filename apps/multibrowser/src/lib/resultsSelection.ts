@@ -73,12 +73,15 @@ function parseSort(raw: string | undefined, manifest?: ResultsManifest | null): 
   return { key, dir };
 }
 
-function parseExpanded(raw: string | undefined): string[] {
+function parseExpanded(raw: string | undefined, manifest?: ResultsManifest | null): string[] {
   if (!raw) return [];
+  // When a manifest is available, drop ids that aren't real subjects — an unknown `?expanded=bogus`
+  // is ignored (and thus removed from later URL updates), not carried around forever.
+  const known = manifest?.subjects ? new Set(manifest.subjects) : null;
   const seen = new Set<string>();
   for (const id of raw.split(",")) {
     const t = id.trim();
-    if (t) seen.add(t);
+    if (t && (!known || known.has(t))) seen.add(t);
   }
   return [...seen];
 }
@@ -104,7 +107,7 @@ export function parseResultsSelection(search: SearchRecord, manifest?: ResultsMa
     judge,
     pressure,
     sort: parseSort(one(search.sort), manifest),
-    expanded: parseExpanded(one(search.expanded)),
+    expanded: parseExpanded(one(search.expanded), manifest),
   };
 }
 
