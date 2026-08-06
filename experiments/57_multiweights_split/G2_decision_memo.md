@@ -65,9 +65,10 @@ is genuinely slow) — which the throughput re-measure on resume will catch earl
 
 ## G2 execution checklist (the moment Modal is confirmed stable)
 
-1. `modal deploy .../serve_split_eval.py` (redeploy endpoint; scale-to-zero, needs live workspace).
-2. Resume sampling: `bash .../run_mining_sample.sh` (keyed dedup → continues from 360). **Re-measure
-   throughput after ~2 min; if pathologically slow, raise sampler CONCURRENCY (12→~32) and restart.**
+1–2. **One command:** `bash experiments/57_multiweights_split/resume_mining.sh` — redeploys the
+   endpoint, disable-aware warmup (exit 3 = disabled → STOP+ping; exit 2 = warmup timeout), then
+   resumes sampling (keyed dedup from 360). **Re-measure throughput after ~2 min; if pathologically
+   slow, raise sampler CONCURRENCY (12→~32) in `mine_dpo_split.py` and restart (still resumable).**
 3. On sampling complete → **G2 band**: `bash .../run_mining_judge.sh` (the ~$90 gemini spend).
 4. **Reconcile**: sum `mining/*/judgments.jsonl` usage → exact band $; add resumed-sampling GPU →
    `S_G2`. Apply the rule above → **RUN or DEFER** the split-DPO descriptive.
