@@ -225,24 +225,32 @@ def _canon_row(row: dict, key: tuple) -> dict:
 def resolve_judgments(raws: list[RawTradition]) -> list[dict]:
     """Normalize, overlay v2, and dedup one tradition's rows across run roots.
 
-    Winner rule (``v2-then-dedupe``): a ``judgments_v2.jsonl`` row (tier 1) beats a base
-    row (tier 0) for the same normalized identity; within a tier the later ``ts`` wins.
+    Winner rules:
+    * **Base** rows: for a normalized identity present under both Opus aliases (the real
+      cross-alias collision), the later ``ts`` wins — the architect-specified dedup.
+    * **v2** rows: a ``judgments_v2.jsonl`` row always overrides the base for its identity,
+      and among v2 rows for one identity the **last in file order** wins — matching the
+      canonical loader's last-wins (independent of ``ts``, which may be missing/non-
+      monotonic on a correction file).
     A v2 row whose identity has no base judgment is rejected — v2 is an override that
     **never adds a vote** (the loader's invariant, preserved after normalization).
     Returns rows with ``subject``/``judge`` rewritten to their canonical ids.
     """
     base_rows = [r for t in raws for r in t.base]
-    v2_rows = [r for t in raws for r in t.v2]
-    winners: dict[tuple, tuple[int, str, dict]] = {}  # id → (tier, ts, normalized_row)
+    v2_rows = [r for t in raws for r in t.v2]  # preserves per-file line order
+    winners: dict[tuple, dict] = {}  # normalized id → winning (canonical) row
 
+    # Base: later-ts wins on a cross-alias collision.
+    base_ts: dict[tuple, str] = {}
     for row in base_rows:
         key = _normalized_id(row)
         ts = str(row.get("ts", ""))
-        cur = winners.get(key)
-        if cur is None or (0, ts) >= (cur[0], cur[1]):
-            winners[key] = (0, ts, _canon_row(row, key))
+        if key not in winners or ts >= base_ts[key]:
+            winners[key] = _canon_row(row, key)
+            base_ts[key] = ts
     base_keys = set(winners)
 
+    # v2: file-order last-wins, always overriding base (loader parity).
     for row in v2_rows:
         key = _normalized_id(row)
         if key not in base_keys:
@@ -250,11 +258,8 @@ def resolve_judgments(raws: list[RawTradition]) -> list[dict]:
                 f"v2 override {dict(zip(_NORM_FIELDS, key))} references no base judgment "
                 f"(v2 overrides only — it never adds a vote)"
             )
-        ts = str(row.get("ts", ""))
-        cur = winners.get(key)
-        if cur is None or (1, ts) >= (cur[0], cur[1]):
-            winners[key] = (1, ts, _canon_row(row, key))
-    return [w[2] for w in winners.values()]
+        winners[key] = _canon_row(row, key)  # later v2 line overrides earlier
+    return list(winners.values())
 
 
 # ── Per-tradition slice tables ────────────────────────────────────────────────────

@@ -98,6 +98,39 @@ def test_judge_alias_collapses_to_one_opus():
 # ── Overlay + alias-collision dedup ───────────────────────────────────────────────
 
 
+def test_disjoint_aliases_both_survive_count_equals_sum(tmp_path):
+    # Distinct identities, one under each Opus alias → both survive normalization,
+    # deduped count == sum of the two alias row counts (no loss, no collision).
+    base = [
+        _row("anthropic/claude-sonnet-5", "T-1", "flattery", "unstated", "full",
+             "claude-opus-4-8", 0.5, "a"),
+        _row("anthropic/claude-sonnet-5", "T-2", "flattery", "unstated", "full",
+             "anthropic/claude-opus-4.8", -0.5, "b"),  # different scenario → distinct id
+    ]
+    raws = [read_run_root(_write_run(tmp_path, base=base))[_TRAD]]
+    rows = resolve_judgments(raws)
+    assert len(rows) == len(base) == 2  # count == sum, nothing collapsed
+    assert all(r["judge"] == "claude-opus-4-8" for r in rows)
+    assert {r["scenario_id"] for r in rows} == {"T-1", "T-2"}
+
+
+def test_v2_duplicate_precedence_is_file_order_not_ts(tmp_path):
+    # Two v2 rows for the SAME identity: the LAST in file order wins even though its ts
+    # is EARLIER (loader last-wins parity; ts is not used for same-file v2 dedup).
+    base = [_row("claude-sonnet-5", "T-1", "flattery", "unstated", "full",
+                 "claude-opus-4-8", 0.0, "base")]
+    v2 = [
+        _row("claude-sonnet-5", "T-1", "flattery", "unstated", "full",
+             "claude-opus-4-8", 0.5, "2026-08-05T00:00:09+00:00"),  # later ts, earlier line
+        _row("claude-sonnet-5", "T-1", "flattery", "unstated", "full",
+             "claude-opus-4-8", 1.0, "2026-08-05T00:00:01+00:00"),  # earlier ts, LAST line
+    ]
+    raws = [read_run_root(_write_run(tmp_path, base=base, v2=v2))[_TRAD]]
+    rows = resolve_judgments(raws)
+    assert len(rows) == 1
+    assert rows[0]["score"] == 1.0  # last v2 line wins, not the later-ts one
+
+
 def test_resolve_judgments_dedup_and_overlay(tmp_path):
     base = [
         # identity A — alias collision: two aliases, same identity, later ts = -1.0 wins
