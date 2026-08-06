@@ -423,3 +423,10 @@ sunni-islam contributes most, 98). Uploaded to `/pairs/pairs_sft2_mb.jsonl`.
 Current ≈ **360**. Projected final: DPO ~7 + lean eval ~12 = **~379** (under 400, ~20 margin — tighter
 than the ~374 quoted). Flagged to architect (transparency; not threatening the ceiling). Lean eval is
 the last discretionary spend.
+
+## 2026-08-06 — DPO done (weak signal); lean battery next
+DPO mb-sft-dpo: 61 steps, pref_acc ~0.538 (near chance), loss flat ~0.73 → WEAK signal (SFT already
+good → little contrast to sharpen; opposite of taqwabench's high-pref-flat trap). Redeployed serve
+with dpo model, warming (br51m6irr) → then lean battery (AFB cold + probes on dpo, capability --only
+mb-sft-dpo). +DPO eval is the arbiter; likely ≈ SFT. Budget ~367; lean ~12 → ~379. Watch items: MMLU,
+opted-out P≥1, 4-spike vs P≥2.

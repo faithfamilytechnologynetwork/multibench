@@ -502,6 +502,16 @@ on all scenarios → memorization-confounded); the +0.79 movement dwarfs the ~�
   + capability] ~22). Comfortably ≤ 400; buys the calibration sharpening (tempering the AFB 4-spike)
   + pressure-robustness, with post-DPO capability as the number of record.
 
+## 2026-08-06 — DPO trained (bf16 B200); WEAK training signal
+
+`mb-sft-dpo`: 61 steps (487 pairs / batch 8), 1 epoch, β0.1, lr1e-5, ref=SFT, adapter saved, peak 66GB.
+**Training signal WEAK/FLAT:** loss ~0.73 throughout (init 0.693=ln2, policy==ref), pref_acc near
+chance (thirds 0.512/0.569/0.533, overall **0.538**, no upward trend). DPO learned little to prefer
+chosen>rejected. Interpretation: consistent with "no-pair cells uniformly GOOD" — SFT already produces
+good counsel, so within-cell contrast is textually modest → little for DPO to sharpen. This is the
+OPPOSITE of taqwabench's high-pref-acc-but-flat trap; here low pref-acc = genuinely little signal.
+**The +DPO eval is the arbiter** — likely +DPO ≈ +SFT (valid honest finding: SFT captured the signal).
+
 ## Progress log
 
 ### 2026-08-04 — setup (this session)
