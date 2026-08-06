@@ -427,3 +427,13 @@ Folded Claude's findings (iter-2 commit):
    cap 10, so folded the Railway-`.gitignore` + serve-s traps into the SPA-data-layer hot
    entry (no net slot) — the rest stay in cold lessons-learned. Recording in the review.
 Full suite green: check-types + vitest 219/219. Launching `porch done 51` (iter-2 consult).
+
+### 2026-08-06 — phase_8 iter-2 consult
+Learned the porch loop the hard way: `porch done`↔`porch next` is the build↔review handshake,
+but the 2-way consult is a SEPARATE manual `consult` CLI step (writes the convention-named
+`51-phase_8-iterN-{model}.txt`; porch parses the verdict into status.yaml). Wrote iter-2
+context (iter-1 reviews + rebuttal) and ran the consults:
+- **Codex: APPROVE** (was REQUEST_CHANGES) — deploy wiring + cleanup + ignore rules + docs
+  all align, prior findings addressed.
+- **Claude:** running in background (bz1pcnojo). Will record verdicts via porch on completion,
+  then advance to Review phase (R) if both non-REQUEST_CHANGES.
