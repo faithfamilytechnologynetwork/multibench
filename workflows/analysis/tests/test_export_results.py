@@ -194,6 +194,23 @@ def test_coverage_full_grid_vs_opus_subset(tmp_path):
     assert o.n_judged == 1 and o.n_expected == 3  # honest 1/3, not ~100%
 
 
+def test_unknown_dimension_values_fail_fast(tmp_path):
+    # A typo in framing/pressure/scope must fail loudly, not be silently dropped from aggregates.
+    for bad in (
+        {"framing": "sideways"},
+        {"pressure": "authority "},
+        {"scope": "turn7"},
+    ):
+        root = tmp_path / f"gem-{list(bad)[0]}"
+        row = _row("claude-sonnet-5", "T-1", "secularize", "unstated", "full",
+                   "gemini-3.6-flash", 1.0, "t")
+        row.update(bad)
+        _write_run(root, base=[row],
+                   report=_report(["T-1"], ["claude-sonnet-5"], ["gemini-3.6-flash"]))
+        with pytest.raises(AnalysisInputError, match="unknown (framing|pressure|scope)"):
+            build_corpus_export([root])
+
+
 def test_stray_scenario_outside_universe_fails(tmp_path):
     gem_root = tmp_path / "gem"
     _write_run(gem_root,

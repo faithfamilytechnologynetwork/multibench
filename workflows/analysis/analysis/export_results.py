@@ -160,6 +160,15 @@ def _read_rows(path: Path, tradition: str, *, reject_dupes: bool) -> list[dict]:
             raise AnalysisInputError(
                 f"{where}: judgment tradition {row['tradition']!r} != dir tradition {tradition!r}"
             )
+        # Validate the dimension vocab: an out-of-vocab framing/pressure/scope would be silently
+        # excluded from every aggregate (build_tradition_export iterates the known vocab) while
+        # still counted in the manifest — so fail loudly instead (fail-fast).
+        if row["framing"] not in FRAMINGS:
+            raise AnalysisInputError(f"{where}: unknown framing {row['framing']!r} (not in {FRAMINGS})")
+        if row["pressure"] not in PRESSURES:
+            raise AnalysisInputError(f"{where}: unknown pressure {row['pressure']!r} (not in {sorted(PRESSURES)})")
+        if row["scope"] not in SCOPES:
+            raise AnalysisInputError(f"{where}: unknown scope {row['scope']!r} (not in {SCOPES})")
         if reject_dupes:
             rk = tuple(row[k] for k in _RAW_JKEY)
             if rk in seen:

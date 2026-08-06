@@ -47,7 +47,7 @@ paper's standings to displayed precision, verified against the real committed sh
 
 - **Commits**: ~70 on the branch (17 `[Phase]` feature/data commits + spec/plan/thread/porch/review;
   count keeps growing through the review consult rounds).
-- **Tests**: 260 passing (Python 110 = 81 existing + ~29 new; JS 150 = ~97 existing + ~53 new).
+- **Tests**: 264 passing (Python 112 = 81 existing + ~31 new; JS 152 = ~97 existing + ~55 new).
 - **Files created**: `workflows/analysis/analysis/export_results.py` (+ test + `tests/fixtures/export/`);
   `results/20260803/**` (dataset) + `results/README.md`;
   `apps/multibrowser/src/lib/{resultsModel,resultsSelection,leaderboard,scoreColor}.ts` (+ tests);
