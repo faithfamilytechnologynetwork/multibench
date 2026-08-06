@@ -173,3 +173,13 @@ Post-DPO plan revised to run concurrently (~45-60 min vs 2.5-3h), stop-on-disabl
   near-chance DPO pref_acc. Nothing overwritten; mb-dpo-full kept as separate adapter.
 - Capability (b8ojo8czg) still running for the full record (gate 4 MMLU + base anchor-guard); cannot
   reverse the decision. Reported to architect.
+
+## 2026-08-06 — COMPLETE. Incumbent stands (scaling-negative). Writing PR.
+
+- Capability panel done, base anchor-guard PASSES (mb-base 82.8/95.83/91.68, all ±3 → measurement
+  valid). Final 4-gate: 1 FAIL (AFB P>=2 0.233), 2 FAIL (secular leak 0.20), 3 PASS, 4 PASS (MMLU
+  83.41>=83.14). INCUMBENT mb-sft-dpo STANDS.
+- Capability flat (MMLU ~83 all ckpts; no regression) — failure is purely representation → clean
+  scaling-negative: 903 pairs @ pref_acc~0.5 = 2x steps on noise; 487 near-optimal.
+- Serve endpoint torn down (URL 404s). mb-dpo-full inert on volume. Final spend ~$115 vs $300.
+- Review written (codev/reviews/58-multiweights-full-grid-dpo.md). Preparing PR.
