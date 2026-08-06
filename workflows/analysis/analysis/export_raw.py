@@ -16,8 +16,9 @@ ramp, subjects, judges, condition axes, grouping axis, and items — nothing Mul
 (``tradition``/``scenario``/framing/pressure) is hardcoded in the *shape*. A non-MultiBench
 catalog (AFB 0–4) rides the same viewer unchanged.
 
-Phase 1 (this module) is the **pure transform** — it reads run roots and returns in-memory
-documents. The deterministic writer, the ``export-raw`` CLI, and presets are Phase 2/3.
+This module spans the export core: the pure transform (sitting reader + verdict join +
+generic shard/catalog builders), the deterministic streaming writer + size guards, and the
+export-computed presets. The ``export-raw`` CLI wraps :func:`write_dataset`.
 """
 
 from __future__ import annotations

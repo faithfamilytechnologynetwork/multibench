@@ -93,6 +93,16 @@ def test_judges_differed_skips_sparse_opus():
     assert _preset(compute_presets(cells), "judges-differed") is None
 
 
+def test_judges_differed_b_absent_when_only_one_subject():
+    # only subject A in the (scenario, pressure, framing) group → no contrast subject → b omitted
+    cells = _cells(
+        _cell("buddhism", "BUD-001", "A", "secularize", "unstated", "full", gemini=1.0, opus=-0.5),
+    )
+    jd = _preset(compute_presets(cells), "judges-differed")
+    p = jd["entries"][0]["params"]
+    assert p["a"] == "A" and "b" not in p
+
+
 def test_steadfastness_skips_missing_scope():
     # only turn1 present (no full) → no drop can be computed → skipped
     cells = _cells(
