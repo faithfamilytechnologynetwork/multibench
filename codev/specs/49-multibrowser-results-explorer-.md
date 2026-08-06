@@ -7,8 +7,30 @@ This spec defines WHAT and WHY. The plan defines HOW and WHEN.
 
 ## Metadata
 - **ID**: spec-2026-08-05-multibrowser-results-explorer
-- **Status**: draft
+- **Status**: approved
 - **Created**: 2026-08-05
+- **Approved**: 2026-08-06 (architect, with the simplifying decisions in "Approved Decisions" below)
+
+## Approved Decisions (architect, 2026-08-06 — supersede any conflicting text below)
+
+These are baked, post-approval decisions from Waleed via the architect. Where they conflict with earlier
+draft text, **these win**; the affected sections have been reconciled to match.
+
+1. **The leaderboard ranks on Gemini ONLY.** Gemini is the complete judge (full grid, all framings); **Opus
+   is never a ranking judge.** There is no Opus-ranked leaderboard in any framing. The **judge selector**
+   therefore does not switch *which judge ranks*; it switches **inspection / drill-down** views (per-tradition
+   means, coverage badges, judge-agreement context) to Opus **where Opus data exists**, clearly badged as the
+   **validation layer**. This **moots** the earlier Critical question about Opus stated/guided ranking.
+2. **`min_coverage` is no longer a ranking gate** (the leaderboard is Gemini-only and full-grid, so nothing
+   is gated out). Coverage is still **displayed/badged** (`n/N`) for honest Opus inspection views; an internal
+   "worth displaying" threshold is allowed at the builder's discretion in the plan.
+3. **pressure="all" = cell-pooled mean** (paper convention) — confirmed.
+4. **Run discovery** defaults to the **most recent run by manifest date**; a run selector is optional (SHOULD).
+5. **Rationale/verdict text**: aggregates-only for v1 stands (no per-judgment rationale published).
+6. **Bootstrap CIs**: optional SHOULD, and only for the **pooled Gemini** standings.
+7. **`ResultsRegion` seam**: leave **inert** (do not wire the per-scenario results region in this work).
+8. **Data / re-export**: the Opus framings-sample tail-fill is essentially complete (~8 straggler sittings
+   being swept); plan for **one re-export at seal** once the architect confirms it.
 
 ## Clarifying Questions Asked
 
@@ -98,16 +120,16 @@ A **Results Explorer** in `multibrowser`, added as new routes/facets without dis
   the **mean of per-tradition means, post-pressure** (the paper's `tab_standings` convention), with a
   **per-tradition drill-down**, a **framing toggle** (unstated / stated / guided), and a **scope toggle**
   (first-response = `turn1` / post-pressure = `full`).
-- A **judge selector** that switches whose verdicts drive every view — **judge=Gemini** (full grid) or
-  **judge=Opus** (one normalized judge). "Judge" and "subject" are kept distinct everywhere: the judge is
-  who scores; `gemini-3.6-flash` may also appear as one of the five ranked **subjects**, and the UI must
-  never conflate the two. Opus stated/guided views degrade honestly (badged sample, coverage shown).
-- **Honest degradation for uneven samples**: each tradition-mean carries its coverage (`n_judged /
-  n_expected`). A tradition-mean whose coverage is below a **`min_coverage`** threshold (recorded in the
-  manifest, default 0.5) is **excluded from the leaderboard's mean-of-means** and shown in the drill-down
-  badged `sample (n/N)`; the leaderboard annotates how many of the seven traditions actually contributed
-  (`k/7`). Zero-coverage traditions are likewise excluded (never counted as 0). This covers the tiny-non-zero
-  case (e.g. a 2-cell tradition-mean), not just the zero case.
+- **The leaderboard ranks on Gemini only** (Approved Decision 1). Gemini is the complete judge, so standings
+  exist for every framing/scope/pressure without coverage gaps. A **judge selector** does **not** re-rank the
+  board; instead it switches the **inspection / drill-down** context to **Opus where Opus data exists** —
+  per-tradition means, coverage badges, and judge-agreement context — clearly badged as the **validation
+  layer**. "Judge" and "subject" are kept distinct everywhere: `gemini-3.6-flash` is both the ranking judge
+  and one of the five ranked **subjects**, and the UI must never conflate the two.
+- **Honest degradation for Opus inspection views**: each Opus tradition-mean carries its coverage (`n_judged
+  / n_expected`) and is badged `sample (n/N)`; zero-coverage traditions show nothing rather than a 0. Because
+  the leaderboard is Gemini-only, coverage is **not** a ranking gate (Approved Decision 2) — it governs only
+  what the Opus validation views display; the builder may keep an internal "worth displaying" threshold.
 - A **pressure selector** that filters every results view by one of the six pressures or "all".
 - The whole explorer is fed by a **committed, additive results dataset** the SPA reads at runtime:
   `results/<run-id>/` with a **manifest** (subjects, judges, framings, pressures, scopes, counts, dates,
@@ -137,16 +159,17 @@ full; pressure = all):
 - [ ] **Leaderboard reconciles with the paper**: overall standings (mean of per-tradition means) for every
       subject × framing at `scope=full`, judge=Gemini, pressure=all, match the paper's standings table to
       the displayed precision.
-- [ ] **Judge selector** switches all views between Gemini and a single normalized Opus judge; the SPA never
+- [ ] **Leaderboard ranks on Gemini only** in every framing/scope/pressure; no Opus-ranked board exists.
+- [ ] **Judge selector** switches the **inspection/drill-down** views to a single normalized Opus judge
+      (validation layer, badged) where Opus data exists; it does not re-rank the leaderboard; the SPA never
       exposes two Opus judges.
 - [ ] **Pressure selector** filters every results view by each of the six pressures and by "all".
 - [ ] **Framing toggle** (unstated/stated/guided) and **scope toggle** (first-response/post-pressure) drive
       the leaderboard and drill-down.
 - [ ] **Per-tradition drill-down** shows each tradition's contributing mean for the current selection.
-- [ ] **Honest degradation**: where Opus coverage is sample-only (stated/guided), the view is badged as a
-      sample and shows coverage (`n_judged / n_expected`); a tradition-mean below `min_coverage` (default
-      0.5) — including the tiny-non-zero and zero cases — is excluded from the leaderboard mean-of-means and
-      the leaderboard annotates the contributing-tradition count (`k/7`).
+- [ ] **Honest degradation (Opus inspection views)**: where Opus coverage is sample-only (stated/guided),
+      the view is badged as a sample and shows coverage (`n_judged / n_expected`); zero-coverage traditions
+      show nothing, never a 0. (Coverage is display-only, not a ranking gate — the board is Gemini-only.)
 - [ ] **Subject normalization**: the export maps all source subject-id variants to exactly **five** canonical
       subjects via an explicit alias map (covering the Qwen `-Instruct` case); a test asserts exactly five.
 - [ ] **Judge alias normalization**: the export collapses `claude-opus-4-8` and `anthropic/claude-opus-4.8`
@@ -310,33 +333,17 @@ here for traceability: subject-id alias map (Constraints); Opus judge-alias dedu
 `pressure="all"` = cell-pooled mean emitted directly by the export (below); judge-vs-subject disambiguation
 (Desired State). The remaining genuine questions:
 
-### Critical (Blocks Progress)
-- [ ] **`min_coverage` threshold value**: the default is 0.5 (a tradition-mean below it is excluded from the
-      leaderboard mean-of-means and badged in the drill-down). Is 0.5 the right cut, and should it differ by
-      framing (unstated is full-grid for both judges; only Opus stated/guided is a sample)? This directly
-      shapes which numbers rank, so it must be confirmed before implementation — but a concrete testable
-      default (0.5) unblocks progress.
-- [ ] **Opus stated/guided ranking presentation**: with judge=Opus + stated/guided, most tradition-means
-      fall below `min_coverage`, so the leaderboard would rank on very few (or zero) traditions. Confirm the
-      desired presentation: rank on the qualifying `k/7` with a prominent sample caveat, or show
-      "sample — not ranked" for those selections entirely.
+**All previously-open questions were resolved by the architect's Approved Decisions (see top of spec):**
+- ~~`min_coverage` threshold as a ranking gate~~ → **resolved**: leaderboard is Gemini-only, so coverage is
+  not a ranking gate; it is display-only for Opus inspection views (Decision 2).
+- ~~Opus stated/guided ranking presentation~~ → **mooted**: Opus never ranks (Decision 1).
+- ~~Rationale/verdict text~~ → **resolved**: aggregates-only for v1 (Decision 5).
+- ~~Run discovery UX~~ → **resolved**: default most-recent-by-manifest-date; selector optional SHOULD (Decision 4).
+- ~~Pooled `pressure="all"`~~ → **resolved**: cell-pooled mean, paper convention (Decision 3).
+- ~~Bootstrap CIs~~ → **resolved**: optional SHOULD, pooled Gemini standings only (Decision 6).
+- ~~Wire the `ResultsRegion` seam~~ → **resolved**: leave inert (Decision 7).
 
-### Important (Affects Design)
-- [ ] **Rationale/verdict text**: v1 excludes per-judgment `direction`/`rationale` to hold the size budget.
-      Is a scenario-level verdict view (with rationale, lazily fetched from a separate layout) wanted later,
-      or is aggregates-only acceptable indefinitely?
-- [ ] **Run discovery UX**: default to the most recent run by manifest date, or expose a run selector across
-      all `results/*/`? (Acceptance only requires that a new run *appears*; a selector is a SHOULD.)
-- [ ] **Pooled `pressure="all"` confirmation**: the export emits the "all" slice as the cell-pooled mean (all
-      pressures pooled within a tradition before the mean, matching the paper) — not a mean of the six
-      per-pressure means. Confirm this is the intended semantics for the pressure="all" leaderboard.
-
-### Nice-to-Know (Optimization)
-- [ ] Whether to also surface bootstrap CIs (from `stats_bundle.json`) in the UI, or only point estimates.
-      CIs cannot be recomputed client-side cheaply; if wanted, the export would carry them for the pooled
-      standings only.
-- [ ] Whether to wire the per-scenario `ResultsRegion` seam on the scenario page as part of this work or
-      leave it inert.
+No open questions remain that block planning.
 
 ## Performance Requirements
 - **API budget**: no material increase to the unauthenticated 60/hr GitHub budget — results reuse the one
@@ -373,10 +380,10 @@ here for traceability: subject-id alias map (Constraints); Opus judge-alias dedu
    Steadfastness (full − turn1) is computed **only over cells present in both scopes** (the unstated-opus
    panel has slightly more turn1 than full cells), so the test uses a matched-cell definition, not raw
    scope totals.
-6. **Honest degradation (uneven Opus sample)**: judge=Opus, framing=stated shows the sample badge and
-   coverage; a tradition-mean below `min_coverage` (e.g. secular-sage's ~2-cell mean) is excluded from the
-   mean-of-means and the leaderboard shows `k/7` contributing traditions; a zero-coverage tradition is
-   likewise excluded (never 0).
+6. **Honest degradation (Opus inspection view)**: switching the judge selector to Opus for framing=stated
+   shows per-tradition means badged `sample (n/N)` (e.g. secular-sage's ~2-cell mean is badged, not silently
+   averaged in); a zero-coverage tradition shows nothing, never a 0. The **leaderboard itself stays Gemini-
+   ranked** and unchanged by the judge selector.
 7. **Additive no-redeploy publish**: with a second `results/<run-id>/` present in the fake repo tree, the
    explorer lists/loads it without any code change; the corpus routes are unaffected.
 8. **Truncated-tree discovery**: when the fake repo reports the recursive tree `truncated`, the extended
@@ -465,10 +472,10 @@ real run data before incorporation.
 Note: All consultation feedback has been incorporated directly into the relevant sections above.
 
 ## Approval
-- [ ] Technical Lead Review
-- [ ] Product Owner Review
-- [ ] Stakeholder Sign-off
-- [ ] Expert AI Consultation Complete
+- [x] Technical Lead Review — architect, 2026-08-06 (with Approved Decisions)
+- [x] Product Owner Review — Waleed, 2026-08-06 (the two simplifying decisions)
+- [x] Stakeholder Sign-off — 2026-08-06
+- [x] Expert AI Consultation Complete — Codex + Claude, iteration 1
 
 ## Notes
 - **Scope boundary**: the leaderboard/drill-down is a new top-level `/results` route family (with
