@@ -218,3 +218,18 @@ unchanged, porch state intact. (2) #49 supersession note → written in codev/re
 interactive smoke: honestly documented — 20 integration tests over byte-faithful GitHub stand-in +
 build + shell-serve; live click-through is post-merge Railway (per plan). Minors: aria-controls gated
 on open; README run-selector mention. Re-signaling for iter-2 consult.
+
+## 2026-08-06 — Phase 4 iter-2 (codex RC on interactive smoke, claude APPROVE). Doc minors fixed + real-data-path verified.
+
+Fixed 3 doc minors (review rebase→past tense; multibrowser README explorer heading → "#49 data tier;
+#55 v2 presentation"; results/README run-selector mention). Verified the REAL GitHub runtime data path
+live: main SHA 7f2c34c → recursive git-tree (non-truncated) lists all 8 results/20260803 files →
+raw manifest parses (5 subj/7 trad) + sunni-islam shard parses (2 judges). This is the SPA's actual
+runtime dependency, confirmed end-to-end.
+
+BLOCKER (Codex): the plan's "manual local-preview browser click-through against real GitHub" is the ONE
+thing a headless builder can't do (no real browser). Evidence assembled: 20 integration tests over
+byte-faithful GitHub stand-in + build + shell-serve + real-data-path curl check. Escalating to architect
+for the decision Codex itself offers ("obtain an explicit plan exception"): accept automated evidence +
+defer live click-through to post-merge Railway (plan sequences prod railway up after merge), OR require a
+human click-through pre-merge. NOT looping porch (would just re-block on the same unsatisfiable-headless item).

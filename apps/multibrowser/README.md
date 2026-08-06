@@ -61,7 +61,7 @@ command live in [`results/README.md`](../../results/README.md).
   pressure, index↔folder drift) renders with an inline **notice** rather than crashing; an error
   boundary backstops any render error. Taxonomy axes are read **from each manifest** — nothing is
   hardcoded, so 2-axis and 5-axis traditions both work.
-- **Results explorer (#49).** The `/results` explorer reads committed `results/<run-id>/` datasets
+- **Results explorer (#49 data tier; #55 v2 presentation).** The `/results` explorer reads committed `results/<run-id>/` datasets
   at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
   run shown defaults to the newest by `generated_at`; a **run selector** (shown when more than one run
   is published) switches runs, and a specific run can also be pinned with `?run=<id>`.

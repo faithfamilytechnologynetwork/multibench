@@ -36,10 +36,10 @@ Re-running with the same inputs is deterministic (sorted keys) — the shards ar
 the manifest differs only in its `generated_at` timestamp — so refreshing a run after more
 judgments land is just the same command again, then a new commit.
 
-**Which run the SPA shows.** The Results explorer defaults to the **newest** run by `generated_at`
-and lets you pin a specific one with `?run=<run-id>` in the URL. So committing a new
-`results/<run-id>/` with a later timestamp makes it the default automatically; older runs remain
-reachable by their id.
+**Which run the SPA shows.** The Results explorer defaults to the **newest** run by `generated_at`.
+When more than one run is published it shows a **run selector**; you can also pin a specific run with
+`?run=<run-id>` in the URL. So committing a new `results/<run-id>/` with a later timestamp makes it the
+default automatically; older runs remain reachable via the selector or their id.
 
 ## `manifest.json`
 

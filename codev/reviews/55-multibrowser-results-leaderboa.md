@@ -75,12 +75,15 @@ Both are **architect actions** flagged here (the builder does not close #49 or t
 
 ## PR prep
 
-- **Rebase onto `origin/main`** to drop the `docs/paper/*` files inherited from the branch base
-  (`d0fa576`, whose content already landed on `origin` as `9a4f735`) — the PR should show only the
-  `/results` leaderboard changes.
+- **Rebase onto `origin/main` — DONE** (`git rebase --onto origin/main d0fa576`): dropped the
+  `docs/paper/*` files inherited from the branch base (`d0fa576`, whose content already landed on
+  `origin` as `9a4f735`), so the branch diff shows only the `/results` leaderboard changes. Verified
+  zero conflicts (my commits touch none of those files) and 179 tests still green.
 - **Interactive verification:** the 20-test `results.test.tsx` integration suite exercises every board
   interaction (columns, sort + persistent rank, pressure reframe, run switch, heat strip, dense
   drill-down, keyboard expansion, deep-link restore, judge invariance) against a byte-faithful GitHub
-  fetch stand-in; `pnpm build` + `pnpm preview` confirm the bundle builds and serves. A final live
-  click-through against the real GitHub runtime happens on the post-merge Railway deploy (per plan,
-  production `railway up` is after merge).
+  fetch stand-in; `pnpm build` + `pnpm preview` confirm the bundle builds and serves the `/results`
+  shell; and the real GitHub data path (git-trees + `raw` for `results/20260803/`) is reachable at the
+  current `main` SHA (checked directly). A final human live click-through against the deployed site is
+  the post-merge Railway step (per plan, production `railway up` is after merge) — a headless builder
+  cannot drive a real browser, so that step is the architect's/user's, not automatable here.
