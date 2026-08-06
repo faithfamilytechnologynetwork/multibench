@@ -1,0 +1,27 @@
+# MultiBench-descriptive eval (experiment 48) — per-tradition base-vs-SFT gradient (DESCRIPTIVE ONLY).
+#
+# Runs the SFT checkpoint over the MultiBench grid UNSTATED (bare), judged FULL-scope by the gemini
+# selection/eval judge, to show whether the tune moves the 3-tier tradition gradient. Compared against
+# the EXISTING base unstated full-scope bands (data/output/collection/*/judgments.jsonl) — those were
+# collected via OpenRouter (mixed hosts) while this SFT collection is via the vLLM eval endpoint, so
+# the base-vs-SFT delta carries a small same-stack caveat (~ the −0.058 provider-vs-vLLM shift). This
+# is DESCRIPTIVE (trained on all 519 scenarios → memorization-confounded), reported for the gradient
+# movement, NOT as a claim (see spec §4.3 no-holdout).
+#
+# Subject = the SFT LoRA served by serve_gemma_eval.py (model name "sft"); api_key_env EVAL_KEY (set
+# EVAL_KEY=EMPTY at run time — vLLM ignores it). base_url is the deployed endpoint + /v1.
+
+subjects:
+  # max_tokens MUST be < the endpoint's max_model_len (16384) minus the prompt — the SubjectSpec
+  # default (16384) == the context window and vLLM 400s ("requested 16384 output tokens"). 4096 is
+  # ample for a counsel reply (original collection replies were ~700-840 tok).
+  - {model: sft, provider: openai, base_url: https://waleedkadous--multibench-gemma-eval-serve-serve.modal.run/v1, api_key_env: EVAL_KEY, max_tokens: 4096}
+
+framings: [unstated]
+scopes: [full]
+
+judges:
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, safety_off: false}
+
+concurrency: 16
+retries: 4

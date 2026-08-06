@@ -1,0 +1,5 @@
+# Heavy, regenerable run artifacts stay out of git (protocol: commit summaries in notes.md, not
+# sittings/judgments/logs). The small deterministic manifest (uncovered_scenarios.json) IS tracked.
+data/output/mining/
+data/output/eval/
+data/output/pairs/

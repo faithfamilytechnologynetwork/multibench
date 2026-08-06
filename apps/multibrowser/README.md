@@ -16,13 +16,28 @@ Browses `results/<run-id>/` datasets the same runtime way it reads the corpus (S
 + `raw`), so a newly committed run appears **without a redeploy** — the data contract and export
 command live in [`results/README.md`](../../results/README.md).
 
-- **Leaderboard** — cross-tradition standings = the **mean of per-tradition means**, ranked on the
-  full-grid **Gemini** judge; reconciles with the paper's standings to displayed precision.
-- **Selectors** (all deep-linkable): **framing** (unstated/stated/guided), **metric**
-  (first-response / post-pressure / **steadfastness** = full − turn1), **pressure** (six + "all").
-- **Judge selector** — points the **per-tradition drill-down** at **Opus** (the validation judge)
-  where Opus data exists, badged `sample n/N`. It **never re-ranks** the board; Opus stated/guided
-  is only a sample, so ranking always stays Gemini.
+- **Dense leaderboard** (jaleesbrowser-style, Spec 55) — one row per subject, the whole picture at a
+  glance. Cross-tradition standings = the **mean of per-tradition means**, ranked on the full-grid
+  **Gemini** judge; reconciles with the paper's standings to displayed precision.
+  - **Headline columns** — **First-response / Post-pressure / Δ (steadfastness)** on the paper's
+    published slice (the first framing, i.e. unstated); Δ is the matched-cell steadfastness read from
+    the shard, **not** post − initial.
+  - **Framing columns** — one post-pressure column per framing (unstated/stated/guided); the
+    Post-pressure headline equals the first-framing column by definition.
+  - **Per-tradition heat strip** — a `scoreColor` square per tradition (manifest order) in each row;
+    its non-null mean *is* the Post-pressure column. Color is never the only encoding — each square
+    carries an accessible label with the tradition and its value (or "no data" for an uncovered one).
+  - **Sortable** by any numeric column (ascending/descending); a **canonical rank** column persists
+    while sorted (it never re-numbers). Nulls sort last.
+- **Pressure selector** (deep-linkable) — reframes the **whole table** (headline, framing columns,
+  strip, and rank) to one of the six pressures or the pooled `"all"` (the default).
+- **Drill-down** — click a subject (or deep-link `?expanded=`) for a **dense per-tradition table**
+  (First/Post/Δ + framings + coverage `n/N`, `—/N` where the post numerator is absent). Each
+  tradition links to `/t/<tradition>` → a scenario → its **raw transcripts + verdicts** (#51).
+- **Judge selector** — points the **drill-down** at **Opus** (the validation judge) where Opus data
+  exists, badged `sample n/N`. It **never re-ranks or recolors** the board; ranking/strip stay Gemini.
+- **Deep-linkable state** — run, pressure, judge, **column sort**, and **expanded subjects** all live
+  in the URL; the bare `/results` link carries no default params.
 - Display-first: a malformed/missing manifest or shard, unknown vocab, or a dropped tradition
   renders an inline notice — never a blank page.
 
@@ -67,15 +82,15 @@ Reached by drilling in from `/results` → a tradition → a scenario's live **R
   pressure, index↔folder drift) renders with an inline **notice** rather than crashing; an error
   boundary backstops any render error. Taxonomy axes are read **from each manifest** — nothing is
   hardcoded, so 2-axis and 5-axis traditions both work.
-- **Results explorer (#49).** The `/results` explorer reads committed `results/<run-id>/` datasets
+- **Results explorer (#49 data tier; #55 v2 presentation).** The `/results` explorer reads committed `results/<run-id>/` datasets
   at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
-  run shown defaults to the newest by `generated_at`; a specific run can be pinned with `?run=<id>`.
+  run shown defaults to the newest by `generated_at`; a **run selector** (shown when more than one run
+  is published) switches runs, and a specific run can also be pinned with `?run=<id>`.
   The per-scenario `ResultsRegion` is now the **live** raw-results drill-in (#51, above); the old
-  `loadResults()`/`Scenario.results` seam is deprecated (always `null`, unread) and slated for
-  cleanup.
+  `loadResults()`/`Scenario.results` seam is deprecated (always `null`, unread) and slated for cleanup.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable
-  setup; corpus filters and results selectors live in the URL as flat params
-  (`?pillars=a&pillars=b`, `?framing=stated&metric=steadfastness`).
+  setup; corpus filters and results selection live in the URL as flat params
+  (`?pillars=a&pillars=b`, `?pressure=flattery&sort=post.desc&expanded=claude-sonnet-5`).
 
 ## Develop
 

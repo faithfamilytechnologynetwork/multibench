@@ -1,4 +1,4 @@
-import { Fragment, useState } from "react";
+import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -8,14 +8,18 @@ import { RateLimitBanner } from "../components/RateLimitBanner";
 import {
   parseResultsSelection,
   selectionToResultsSearch,
-  type Metric,
   type ResultsSelection,
+  type SortDir,
+  type SortSpec,
 } from "../lib/resultsSelection";
 import {
-  computeStandings,
-  rankingJudgeModel,
+  computeLeaderboardRows,
+  isSortableColumn,
   judgeModelForKey,
-  subjectTraditionValues,
+  rankingJudgeModel,
+  sortRows,
+  subjectDrilldownRows,
+  type StripCell,
 } from "../lib/leaderboard";
 import { scoreColor, scoreTextColor } from "../lib/scoreColor";
 import { notice, type Notice as NoticeT } from "../lib/model";
@@ -23,12 +27,12 @@ import type { ResultsManifest, ResultsShard } from "../lib/resultsModel";
 
 const routeApi = getRouteApi("/results");
 
-const METRIC_LABEL: Record<Metric, string> = {
-  turn1: "First response",
-  full: "Post-pressure",
-  steadfastness: "Steadfastness (Δ)",
-};
 const FRAMING_LABEL: Record<string, string> = { unstated: "Unstated", stated: "Stated", guided: "Guided" };
+const HEADLINE_COLS: { key: "initial" | "post" | "delta"; label: string }[] = [
+  { key: "initial", label: "First response" },
+  { key: "post", label: "Post-pressure" },
+  { key: "delta", label: "Steadfastness (Δ)" },
+];
 
 /** Single-select segmented control (deep-linkable; mirrors FilterBar's Toggle look). */
 function Segmented<T extends string>({
@@ -67,6 +71,19 @@ function fmt(v: number | null): string {
   return v === null ? "—" : v.toFixed(3);
 }
 
+/** Signed 2-dp for the strip tooltip (e.g. "+0.44", "-0.18", "—"). */
+function fmtSigned(v: number | null): string {
+  return v === null ? "—" : (v > 0 ? "+" : "") + v.toFixed(2);
+}
+
+/** Title-case a tradition id for display: "sunni-islam" → "Sunni Islam". */
+function traditionDisplayName(id: string): string {
+  return id
+    .split("-")
+    .map((w) => (w ? w[0]!.toUpperCase() + w.slice(1) : w))
+    .join(" ");
+}
+
 export function ResultsPage() {
   const search = routeApi.useSearch();
   const navigate = routeApi.useNavigate();
@@ -75,7 +92,11 @@ export function ResultsPage() {
 
   const preSel = parseResultsSelection(search);
   const runs = runsQ.data?.runs ?? [];
-  const knownRunIds = new Set(runs.map((r) => r.id));
+  // Only runs whose manifest parsed are selectable — a malformed run must never be reachable via the
+  // selector or a `?run=` deep link, or picking it would blank the whole page (manifest → null) with
+  // no selector left to recover. Its parse notices still surface via `dataNotices` below.
+  const selectableRuns = runs.filter((r) => r.manifest !== null);
+  const knownRunIds = new Set(selectableRuns.map((r) => r.id));
   const runInvalid = preSel.runId != null && runsQ.data != null && !knownRunIds.has(preSel.runId);
   const runId =
     preSel.runId && knownRunIds.has(preSel.runId) ? preSel.runId : runsQ.data?.defaultRunId ?? undefined;
@@ -121,6 +142,7 @@ export function ResultsPage() {
         <h1 className="text-2xl font-semibold">Results</h1>
         <p className="text-default-500">
           Cross-tradition standings — the mean of per-tradition means, ranked on the full-grid Gemini judge.
+          Every column is one pressure slice; sort any column, the rank stays canonical.
         </p>
       </div>
 
@@ -154,22 +176,15 @@ export function ResultsPage() {
               Run <span className="font-mono text-default-700">{manifest.runId}</span> · exported{" "}
               {manifest.generatedAt.slice(0, 10)} · {manifest.traditions.length} traditions
             </div>
-            <Segmented
-              label="Framing"
-              testid="sel-framing"
-              value={sel.framing}
-              onChange={(framing) => update({ framing })}
-              options={manifest.framings.map((f) => ({ value: f, label: FRAMING_LABEL[f] ?? f }))}
-            />
-            <Segmented
-              label="Metric"
-              testid="sel-metric"
-              value={sel.metric}
-              onChange={(metric) => update({ metric })}
-              options={(["turn1", "full", "steadfastness"] as Metric[]).map((m) => ({
-                value: m, label: METRIC_LABEL[m],
-              }))}
-            />
+            {selectableRuns.length > 1 && (
+              <Segmented
+                label="Run"
+                testid="sel-run"
+                value={manifest.runId}
+                onChange={(id) => update({ runId: id === runsQ.data?.defaultRunId ? null : id })}
+                options={selectableRuns.map((r) => ({ value: r.id, label: r.id }))}
+              />
+            )}
             <Segmented
               label="Pressure"
               testid="sel-pressure"
@@ -200,10 +215,51 @@ export function ResultsPage() {
             </p>
           )}
 
-          <Leaderboard manifest={manifest} shards={runQ.data!.shards} sel={sel} />
+          <Leaderboard
+            manifest={manifest}
+            shards={runQ.data!.shards}
+            sel={sel}
+            onSort={(key) => {
+              const cur = sel.sort;
+              const dir: SortDir = cur && cur.key === key && cur.dir === "desc" ? "asc" : "desc";
+              update({ sort: { key, dir } });
+            }}
+            onToggleExpand={(subject) =>
+              update({
+                expanded: sel.expanded.includes(subject)
+                  ? sel.expanded.filter((s) => s !== subject)
+                  : [...sel.expanded, subject],
+              })
+            }
+          />
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * A sortable column header. Hoisted to module scope (NOT defined in the table's render body): a
+ * component defined inside render gets a new identity each render, so React would remount the
+ * `<th>`/button on every state change and drop keyboard focus after a sort activation.
+ */
+function SortHeader({
+  colKey, label, sort, onSort,
+}: {
+  colKey: string;
+  label: string;
+  sort: SortSpec | null;
+  onSort: (key: string) => void;
+}) {
+  const active = sort?.key === colKey;
+  const ariaSort = active ? (sort!.dir === "desc" ? "descending" : "ascending") : "none";
+  return (
+    <th scope="col" className="py-2 pr-2 font-medium" aria-sort={ariaSort} data-testid={`col-${colKey}`}>
+      <button type="button" className="hover:text-primary" onClick={() => onSort(colKey)}>
+        {label}
+        {active ? (sort!.dir === "desc" ? " ↓" : " ↑") : ""}
+      </button>
+    </th>
   );
 }
 
@@ -219,101 +275,254 @@ function ScoreCell({ value, testid }: { value: number | null; testid: string }) 
   );
 }
 
+/** The rich text for a strip square's hover/focus tooltip (also its accessible name). The trailing
+ *  count is the tradition's scenario count (`nScenarios`) — the reader-facing "n" — NOT the pooled
+ *  judged-cell count (which is nScenarios × pressures at pressure="all"). */
+function stripSummary(c: StripCell): string {
+  const name = traditionDisplayName(c.tradition);
+  const n = `${c.nScenarios} ${c.nScenarios === 1 ? "scenario" : "scenarios"}`;
+  if (c.value === null) return `${name} — no data at this selection (${n})`;
+  return `${name} — Post ${fmtSigned(c.value)} · First ${fmtSigned(c.initial)} · Δ ${fmtSigned(c.delta)} · ${n}`;
+}
+
+/**
+ * The per-tradition heat strip (the multi-faith upgrade): one `scoreColor` square per tradition, in
+ * manifest order, whose non-null mean IS the Post column. Color is never the sole encoding — each
+ * square is a focusable `role="img"` whose `aria-label` carries the full per-tradition summary (so
+ * assistive tech gets everything without opening anything), and hover OR keyboard focus reveals the
+ * same summary as a visual tooltip (`role="tooltip"`). An uncovered tradition is a dashed "no data"
+ * square. All numbers come from the row's `strip` (the same `computeStandings` aggregation as the
+ * drill-down — no second path).
+ */
+function HeatStrip({ strip, subject }: { strip: StripCell[]; subject: string }) {
+  const [active, setActive] = useState<string | null>(null);
+  const tipRef = useRef<HTMLSpanElement | null>(null);
+  const [shift, setShift] = useState(0);
+  const safe = subject.replace(/[^\w-]/g, "-");
+
+  // Edge-aware positioning: when a tooltip opens, measure it at the neutral (centered) position and
+  // clamp it within the viewport so right- or left-edge squares don't clip mid-word. jsdom has no
+  // layout (all rects are 0), so this is inert in tests — positioning is verified by inspection.
+  useLayoutEffect(() => {
+    const el = tipRef.current;
+    if (active === null || !el) {
+      setShift(0);
+      return;
+    }
+    el.style.transform = "translateX(-50%)"; // neutral for measurement
+    const rect = el.getBoundingClientRect();
+    const margin = 8;
+    if (rect.right > window.innerWidth - margin) setShift(window.innerWidth - margin - rect.right);
+    else if (rect.left < margin) setShift(margin - rect.left);
+    else setShift(0);
+  }, [active]);
+
+  return (
+    <div className="flex items-center gap-0.5" role="group" aria-label={`Per-tradition scores for ${subject}`} data-testid="strip">
+      {strip.map((c) => {
+        const summary = stripSummary(c);
+        const open = active === c.tradition;
+        const tipId = `tip-${safe}-${c.tradition}`;
+        const clear = () => setActive((a) => (a === c.tradition ? null : a));
+        return (
+          <span key={c.tradition} className="relative inline-flex">
+            <span
+              tabIndex={0}
+              role="img"
+              aria-label={summary}
+              data-testid="strip-cell"
+              data-tradition={c.tradition}
+              data-empty={c.value === null ? "true" : undefined}
+              onMouseEnter={() => setActive(c.tradition)}
+              onMouseLeave={clear}
+              onFocus={() => setActive(c.tradition)}
+              onBlur={clear}
+              className={
+                "inline-block h-4 w-4 cursor-help rounded-sm border " +
+                (c.value === null ? "border-dashed border-default-400" : "border-default-200/60")
+              }
+              style={{ backgroundColor: scoreColor(c.value) }}
+            />
+            {open && (
+              <span
+                ref={tipRef}
+                role="tooltip"
+                id={tipId}
+                data-testid="strip-tooltip"
+                style={{ transform: `translateX(calc(-50% + ${shift}px))` }}
+                className="pointer-events-none absolute bottom-full left-1/2 z-20 mb-1 w-max max-w-xs rounded bg-default-900 px-2 py-1 text-xs text-default-50 shadow-lg"
+              >
+                {summary}
+              </span>
+            )}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
 function Leaderboard({
-  manifest, shards, sel,
+  manifest, shards, sel, onSort, onToggleExpand,
 }: {
   manifest: ResultsManifest;
   shards: Record<string, ResultsShard>;
   sel: ResultsSelection;
+  onSort: (key: string) => void;
+  onToggleExpand: (subject: string) => void;
 }) {
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const total = manifest.traditions.length;
-  const standings = computeStandings(shards, manifest, sel);
+  const firstFraming = manifest.framings[0] ?? "unstated";
+  const rows = computeLeaderboardRows(shards, manifest, { pressure: sel.pressure });
+  const display = sel.sort && isSortableColumn(manifest, sel.sort.key)
+    ? sortRows(rows, sel.sort.key, sel.sort.dir)
+    : rows;
   const drillJudge = judgeModelForKey(manifest, sel.judge) ?? rankingJudgeModel(manifest);
   const isSample = !manifest.judges.find((j) => j.key === sel.judge)?.fullGrid;
+  const expanded = new Set(sel.expanded);
 
-  const toggle = (subject: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(subject)) next.delete(subject);
-      else next.add(subject);
-      return next;
-    });
+  const framingCols = manifest.framings.map((f) => ({ key: f, label: FRAMING_LABEL[f] ?? f }));
+  // # + Subject + 3 headline + F framing + Traditions — the drill-down spans the whole row.
+  const totalCols = 6 + framingCols.length;
 
   return (
-    <table className="w-full border-collapse text-sm" data-testid="leaderboard">
-      <thead>
-        <tr className="border-b border-default-200 text-left text-xs uppercase text-default-500">
-          <th className="py-2 pr-2 font-medium">#</th>
-          <th className="py-2 pr-2 font-medium">Subject</th>
-          <th className="py-2 pr-2 font-medium">Score</th>
-          <th className="py-2 pr-2 font-medium">Traditions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {standings.map((s, i) => {
-          const open = expanded.has(s.subject);
-          const perTradition = open
-            ? subjectTraditionValues(shards, manifest, s.subject, sel, drillJudge)
-            : [];
-          return (
-            <Fragment key={s.subject}>
-              <tr className="border-b border-default-100" data-testid="standings-row"
-                  data-subject={s.subject}>
-                <td className="py-2 pr-2 tabular-nums text-default-400">{i + 1}</td>
-                <td className="py-2 pr-2">
-                  <button
-                    type="button"
-                    aria-expanded={open}
-                    onClick={() => toggle(s.subject)}
-                    className="font-medium hover:text-primary"
-                    data-testid="standings-expand"
-                  >
-                    {open ? "▾ " : "▸ "}{s.subject}
-                  </button>
-                </td>
-                <td className="py-2 pr-2"><ScoreCell value={s.value} testid="standings-score" /></td>
-                <td className="py-2 pr-2 tabular-nums text-default-500">{s.nContributing}/{total}</td>
-              </tr>
-              {open && (
-                <tr data-testid="drilldown" data-subject={s.subject}>
-                  <td />
-                  <td colSpan={3} className="pb-3">
-                    <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
-                      <div className="mb-1 text-xs text-default-500">
-                        Per-tradition ({isSample ? `${sel.judge} — validation sample` : `${sel.judge}`})
-                        {perTradition.length === 0 && " — no data for this judge/selection"}
-                      </div>
-                      <ul className="flex flex-col gap-1">
-                        {perTradition.map((tv) => (
-                          <li key={tv.tradition} className="flex items-center gap-2 text-xs"
-                              data-testid="drill-row" data-tradition={tv.tradition}>
-                            {/* Drill-down toward the raw browser: tradition → its scenarios →
-                                each scenario's raw responses & verdicts (via ResultsRegion). */}
-                            <Link to="/t/$traditionId" params={{ traditionId: tv.tradition }}
-                                  className="w-40 truncate text-primary hover:underline" data-testid="drill-link">
-                              {tv.tradition}
-                            </Link>
-                            <ScoreCell value={tv.value} testid="drill-score" />
-                            <span className="tabular-nums text-default-400">
-                              {tv.nJudged}/{tv.nExpected}
-                            </span>
-                            {isSample && tv.nJudged < tv.nExpected && (
-                              <span className="rounded bg-warning-100 px-1 text-warning-800" data-testid="sample-badge">
-                                sample
-                              </span>
-                            )}
-                          </li>
-                        ))}
-                      </ul>
+    <div className="overflow-x-auto" data-testid="leaderboard-scroll">
+      <table className="w-full border-collapse text-sm" data-testid="leaderboard">
+        <thead>
+          <tr className="border-b border-default-200 text-left text-xs uppercase text-default-500">
+            <th scope="col" className="py-2 pr-2 font-medium">#</th>
+            <th scope="col" className="py-2 pr-2 font-medium">Subject</th>
+            {HEADLINE_COLS.map((c) => (
+              <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
+            ))}
+            {framingCols.map((c) => (
+              <SortHeader key={c.key} colKey={c.key} label={c.label} sort={sel.sort} onSort={onSort} />
+            ))}
+            <th scope="col" className="py-2 pr-2 font-medium" title="Per-tradition Post scores, in manifest order; hover a square for its value">
+              Traditions
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {display.map((r) => {
+            const open = expanded.has(r.subject);
+            // A single k/N (traditions contributing) is derived from the Post-slice strip and is valid
+            // for the whole row: the #50 "earned full_grid" invariant means a judge either covers a
+            // shard's entire grid or is excluded from it wholesale, so coverage cannot diverge column
+            // by column — the Post strip's non-null count equals every other column's. If that
+            // invariant is ever relaxed (partial per-column coverage), revisit this to a per-column count.
+            const nContributing = r.strip.filter((c) => c.value !== null).length;
+            const drillId = `drill-${r.subject.replace(/[^\w-]/g, "-")}`;
+            const drill = open
+              ? subjectDrilldownRows(shards, manifest, r.subject, { pressure: sel.pressure, judgeModel: drillJudge })
+              : [];
+            return (
+              <Fragment key={r.subject}>
+                <tr
+                  className={"border-b border-default-100" + (nContributing === 0 ? " opacity-50" : "")}
+                  data-testid="standings-row"
+                  data-subject={r.subject}
+                  data-void={nContributing === 0 ? "true" : undefined}
+                >
+                  <td className="py-2 pr-2 tabular-nums text-default-400" data-testid="standings-rank">{r.rank}</td>
+                  <td className="py-2 pr-2">
+                    <button
+                      type="button"
+                      aria-expanded={open}
+                      aria-controls={open ? drillId : undefined}
+                      onClick={() => onToggleExpand(r.subject)}
+                      className="font-medium hover:text-primary"
+                      data-testid="standings-expand"
+                    >
+                      {open ? "▾ " : "▸ "}{r.subject}
+                    </button>
+                  </td>
+                  <td className="py-2 pr-2"><ScoreCell value={r.initial} testid="cell-initial" /></td>
+                  <td className="py-2 pr-2"><ScoreCell value={r.post} testid="standings-score" /></td>
+                  <td className="py-2 pr-2"><ScoreCell value={r.delta} testid="cell-delta" /></td>
+                  {framingCols.map((c) => (
+                    <td key={c.key} className="py-2 pr-2">
+                      <ScoreCell value={r.byFraming[c.key] ?? null} testid={`cell-${c.key}`} />
+                    </td>
+                  ))}
+                  <td className="py-2 pr-2">
+                    <div className="flex items-center gap-2">
+                      <HeatStrip strip={r.strip} subject={r.subject} />
+                      <span className="tabular-nums text-default-400" data-testid="standings-kn">{nContributing}/{total}</span>
                     </div>
                   </td>
                 </tr>
-              )}
-            </Fragment>
-          );
-        })}
-      </tbody>
-    </table>
+                {open && (
+                  <tr id={drillId} data-testid="drilldown" data-subject={r.subject}>
+                    <td colSpan={totalCols} className="pb-3">
+                      <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
+                        <div className="mb-1 text-xs text-default-500">
+                          Per-tradition ({isSample ? `${sel.judge} — validation sample` : `${sel.judge}`})
+                          {drill.length === 0 && " — no data for this judge/selection"}
+                        </div>
+                        {drill.length > 0 && (
+                          <div className="overflow-x-auto">
+                            <table className="text-xs" data-testid="drill-table">
+                              <thead>
+                                <tr className="text-left text-default-500">
+                                  <th scope="col" className="pr-3 font-medium">Tradition</th>
+                                  <th scope="col" className="pr-2 font-medium">Init</th>
+                                  <th scope="col" className="pr-2 font-medium">Post</th>
+                                  <th scope="col" className="pr-2 font-medium">Δ</th>
+                                  {framingCols.map((c) => <th key={c.key} scope="col" className="pr-2 font-medium">{c.label}</th>)}
+                                  <th scope="col" className="pr-2 font-medium">Coverage</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {drill.map((d) => (
+                                  <tr key={d.tradition} data-testid="drill-row" data-tradition={d.tradition}>
+                                    {/* Drill-down toward the raw browser (#51): the leaderboard has
+                                        only per-tradition granularity, so — matching #55's drill-row
+                                        level — the tradition links to /t/<tradition>, from which a
+                                        scenario's ResultsRegion opens its raw transcripts + verdicts. */}
+                                    <td className="pr-3 text-default-600">
+                                      <Link to="/t/$traditionId" params={{ traditionId: d.tradition }}
+                                            className="text-primary hover:underline" data-testid="drill-link">
+                                        {d.tradition}
+                                      </Link>
+                                    </td>
+                                    <td className="pr-2"><ScoreCell value={d.initial} testid="drill-initial" /></td>
+                                    <td className="pr-2"><ScoreCell value={d.post} testid="drill-post" /></td>
+                                    <td className="pr-2"><ScoreCell value={d.delta} testid="drill-delta" /></td>
+                                    {framingCols.map((c) => (
+                                      <td key={c.key} className="pr-2">
+                                        <ScoreCell value={d.byFraming[c.key] ?? null} testid={`drill-${c.key}`} />
+                                      </td>
+                                    ))}
+                                    <td className="pr-2 tabular-nums text-default-400" data-testid="drill-coverage">
+                                      {d.nJudged ?? "—"}/{d.nExpected}
+                                      {isSample && d.nJudged !== null && d.nJudged < d.nExpected && (
+                                        <span className="ml-1 rounded bg-warning-100 px-1 text-warning-800" data-testid="sample-badge">
+                                          sample
+                                        </span>
+                                      )}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                )}
+              </Fragment>
+            );
+          })}
+        </tbody>
+      </table>
+      <p className="mt-2 text-xs text-default-400">
+        Headline columns cover the {FRAMING_LABEL[firstFraming] ?? firstFraming} framing (the paper's
+        published slice); Post-pressure equals the {FRAMING_LABEL[firstFraming] ?? firstFraming} column by
+        definition. The framing columns give each framing's post-pressure score. Δ is the matched-cell
+        steadfastness. Rank is canonical (Post desc); sorting a column never re-numbers it.
+      </p>
+    </div>
   );
 }

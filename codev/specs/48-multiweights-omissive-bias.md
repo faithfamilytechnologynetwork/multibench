@@ -19,11 +19,11 @@ over-applying it and without capability regression.**
 
 **Who's behind it (changes the framing of this whole proposal):** CEFEAI is the
 Consortium for Evaluating Faith and Ethics in AI — BYU (lead), Baylor, Notre Dame,
-Yeshiva — announced May 2026, **led by David Wingate**. The omissive-bias paper is
+Yeshiva — announced May 2026. The omissive-bias paper is
 arXiv:2605.24319 ("Omissive Bias in Religious Representation", CC BY 4.0; 27 models ×
 150 questions); companion conversion-asymmetry paper arXiv:2605.22975; live leaderboard
-at cefe.ai. **This proposal is therefore a direct contribution to David's own research
-agenda** — coordinate with him before running, both for scope blessing and because
+at cefe.ai. **This proposal is therefore a direct contribution to the CEFEAI research
+agenda** — coordinate with the consortium before running, both for scope blessing and because
 CEFE-published baselines make our before/after figure stronger.
 
 **Published baselines (from the paper + cefe.ai leaderboard, May 2026):** mean
@@ -59,7 +59,7 @@ JaleesModel §7 warns about. Target: base gemma's mass at 0 shifts toward **1–
 
 ## 3. The validated recipe (JaleesModel — taqwabench, issue iaser-ai/jaleesbench#21)
 
-Full methodology doc: `/Users/mwk/Development/fftn/taqwabench/tmp/dpo-experiment/methodology-for-multibench.md`.
+Full methodology doc: `<taqwabench>/tmp/dpo-experiment/methodology-for-multibench.md`.
 What transfers:
 
 1. **Stage 1 — judge-filtered context distillation** (this is the result): SFT on the
@@ -154,9 +154,9 @@ checkpoints × 2 conditions ≈ 900 responses + judgments, ≈ $15–25).
 | AFB representation runs + judging; capability panel; probes | ~$40 |
 | **Total** | **≈ $220–300** |
 
-Fits inside the ~$3.3k remaining on David's key if he agrees this is in scope (decision
-ask #1) — otherwise it is small enough to fund directly. Wall-clock ≈ 3–5 days, dominated
-by collection and eval passes; training itself is ~3 hours.
+Fits inside the available funded-key budget if the consortium agrees this is in scope
+(decision ask #1) — otherwise it is small enough to fund directly. Wall-clock ≈ 3–5 days,
+dominated by collection and eval passes; training itself is ~3 hours.
 
 ## 6. What this shows if it works
 
@@ -177,9 +177,9 @@ judge = gemini-3.6-flash with thinking (both roles; no Opus) · train on ALL Mul
 data, no holdout (OOD battery carries the claims).
 
 **Still open:**
-1. **Funding source**: David's key vs out-of-pocket ~$250–300. NOTE: David leads CEFEAI —
-   this experiment sits inside his own research program, which argues for coordinating
-   with him directly (scope, and possibly co-authorship/leaderboard submission).
+1. **Funding source**: the funded key vs out-of-pocket ~$250–300. NOTE: this experiment
+   sits inside the CEFEAI research program, which argues for coordinating with the
+   consortium directly (scope, and possibly co-authorship/leaderboard submission).
 2. **AFB judge of record**: should differ from our pipeline judge (gemini) for
    independence — GPT-5.6-Terra or Sonnet-5 (both MultiBench subjects; disclose), or a
    non-subject model.
@@ -203,8 +203,8 @@ data, no holdout (OOD battery carries the claims).
 ## 9. Sources
 
 - AFB repo (cloned): `github.com/CEFEAI/allfaith-religious-representation` (MIT)
-- JaleesModel methodology: `/Users/mwk/Development/fftn/taqwabench/tmp/dpo-experiment/methodology-for-multibench.md`
-- JaleesModel paper outline: `/Users/mwk/Development/fftn/taqwabench/docs/paper/jaleesmodel-outline.md`
+- JaleesModel methodology: `<taqwabench>/tmp/dpo-experiment/methodology-for-multibench.md`
+- JaleesModel paper outline: `<taqwabench>/docs/paper/jaleesmodel-outline.md`
 - Public experiment trail: `github.com/iaser-ai/jaleesbench` issue 21
 - MultiBench framings data: `tmp/judging-runs/20260803-framings/` (guided cells = future
   training-data source for subjects; gemma needs its own collection pass, §4.0)
