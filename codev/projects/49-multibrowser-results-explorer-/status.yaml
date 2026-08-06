@@ -1,7 +1,7 @@
 id: '49'
 title: multibrowser-results-explorer-
 protocol: spir
-phase: review
+phase: verify
 plan_phases:
   - id: phase_1
     title: 'Export core: normalization, aggregation & parity'
@@ -41,7 +41,7 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-05T23:42:45.960Z'
-updated_at: '2026-08-06T03:42:59.923Z'
+updated_at: '2026-08-06T03:43:24.994Z'
 force_advanced:
   phase: review
   iteration: 3
