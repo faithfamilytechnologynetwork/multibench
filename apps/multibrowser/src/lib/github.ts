@@ -90,9 +90,9 @@ const TreeSchema = z.object({
 });
 
 /**
- * Top-level directories the truncation fallback walks. Both the corpus (`traditions/`) and
- * the committed results datasets (`results/`, #49) must survive a truncated recursive tree —
- * omitting `results/` here would make every results run silently vanish on a large repo.
+ * Top-level directories the truncation fallback walks. The corpus (`traditions/`), the committed
+ * score datasets (`results/`, #49), and the raw datasets (`results-raw/`, #51) must all survive a
+ * truncated recursive tree — omitting one would make its runs silently vanish on a large repo.
  */
 const WALK_DIRS = ["traditions", "results", "results-raw"] as const;
 

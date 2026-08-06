@@ -68,4 +68,36 @@ describe("loadRawScenario (integration)", () => {
     expect(r.notices.some((n) => /stale/.test(n.message))).toBe(true);
     expect(r.shard?.cells).toHaveLength(2); // still renders — from the GitHub gz fallback
   });
+
+  it("survives cache persistence/hydration (no class instance is cached)", async () => {
+    const client = qc();
+    const src = sources();
+    await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
+    // simulate a localStorage round-trip: every cached value becomes a plain object
+    for (const q of client.getQueryCache().getAll()) {
+      if (q.state.data !== undefined) {
+        client.setQueryData(q.queryKey, JSON.parse(JSON.stringify(q.state.data)));
+      }
+    }
+    // a later load in the same run must still work — the source is reconstructed from `kind`,
+    // not read back as a (now method-less) hydrated instance
+    const r = await loadRawScenario(client, "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
+    expect(r.shard?.cells).toHaveLength(2);
+    expect(r.notices).toHaveLength(0);
+  });
+
+  it("does NOT touch the GitHub source when baked is coherent", async () => {
+    let githubCalls = 0;
+    const src: RawSources = {
+      baked: fakeRawSource("baked"),
+      github: {
+        kind: "github",
+        catalogText: async () => { githubCalls++; return null; },
+        shardText: async () => { githubCalls++; return null; },
+      },
+    };
+    const r = await loadRawScenario(qc(), "sha", "fixt-run", "buddhism", "BUD-001", RAW_FIXTURE_FINGERPRINT, src);
+    expect(r.shard?.cells).toHaveLength(2);
+    expect(githubCalls).toBe(0); // coherent baked → no GitHub fetch (rate-limit immunity)
+  });
 });

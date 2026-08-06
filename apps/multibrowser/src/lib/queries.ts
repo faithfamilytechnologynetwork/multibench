@@ -540,13 +540,21 @@ export async function loadRawScenario(
   if (!isSafePathSegment(runId)) {
     return { catalog: null, shard: null, notices: [notice("error", "results-raw", where, `unsafe run id "${runId}"`)] };
   }
-  // Dedupe the source resolution (catalog fetch/parse) per (sha, runId, fingerprint).
-  const { source, catalog, notices } = await qc.ensureQueryData({
+  // Dedupe the source resolution (catalog fetch/parse) per (sha, runId, fingerprint). Cache ONLY
+  // SERIALIZABLE data — the winning source's KIND, the catalog, and notices — never the
+  // RawDataSource instance: the cache is persisted to localStorage, and a hydrated class instance
+  // loses its methods. The instance is reconstructed from `kind` after the (possibly hydrated) read.
+  const resolved = await qc.ensureQueryData({
     queryKey: ["rawSource", REPO, sha, runId, expectedFingerprint],
     staleTime: Infinity,
     gcTime: GC_TIME,
-    queryFn: () => resolveRawSource(sources.baked, sources.github, runId, expectedFingerprint),
+    queryFn: async (): Promise<{ kind: RawDataSource["kind"]; catalog: RawCatalog | null; notices: Notice[] }> => {
+      const r = await resolveRawSource(sources.baked, sources.github, runId, expectedFingerprint);
+      return { kind: r.source.kind, catalog: r.catalog, notices: r.notices };
+    },
   });
+  const { catalog, notices } = resolved;
+  const source = resolved.kind === "baked" ? sources.baked : sources.github;
   if (!catalog) return { catalog: null, shard: null, notices };
   const it = catalog.items.find((i) => i.id === item && i.group === group);
   if (!it) {
