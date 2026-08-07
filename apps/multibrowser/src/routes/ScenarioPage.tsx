@@ -66,12 +66,14 @@ export function ScenarioPage() {
   const adherent = tradition.manifest?.adherentNoun?.trim() || "person of faith";
 
   return (
-    <>
+    // Fills the viewport (via RootLayout's h-dvh); the framing header is fixed and the two panes
+    // below scroll INDEPENDENTLY — the document itself never scrolls (Waleed iter-3 / jaleesbrowser).
+    <div className="flex flex-col gap-4 min-[860px]:h-full" data-testid="scenario-page">
       {rl && <RateLimitBanner error={rl} />}
       {/* First-visit framing: a newcomer with zero context should grasp, in one sentence, what this
           project measures and what this page shows. Wording derives from the tradition's own vocab
-          (adherent noun) + the project's purpose — no new claims. */}
-      <header className="mb-5 max-w-3xl" data-testid="page-framing">
+          (adherent noun) + the project's purpose — no new claims. Stays fixed while the panes scroll. */}
+      <header className="max-w-3xl shrink-0" data-testid="page-framing">
         <p className="text-base text-default-700">
           <span className="font-semibold text-default-900">MultiBench</span> measures the spiritual impact of AI
           assistants: when a {adherent} brings a real dilemma and is then <em>pushed</em> to compromise, does
@@ -82,15 +84,15 @@ export function ScenarioPage() {
           <strong>how each model answered</strong> (with the judges&rsquo; scores) on the right.
         </p>
       </header>
-      {/* App-shell (JaleesBrowser layout): a sticky, own-scrolling context sidebar + a main pane for
-          the responses. On a desktop viewport the reader sees BOTH at once — context stays at hand
-          while a response scrolls. Below 860px it degrades to a single stacked column. */}
-      <div className="flex flex-col gap-6 min-[860px]:flex-row min-[860px]:items-start" data-testid="scenario-shell">
+      {/* App-shell (JaleesBrowser styles.css ~540-578, ported literally): sidebar = fixed 400px with
+          its OWN scrollbar; content = flex-1, min-w-0, its OWN scrollbar. At ≥860px each pane scrolls
+          independently and the shell fits the viewport; below 860px it degrades to a stacked column. */}
+      <div className="flex min-h-0 flex-col gap-6 min-[860px]:flex-1 min-[860px]:flex-row min-[860px]:items-stretch" data-testid="scenario-shell">
         <aside
           data-testid="scenario-sidebar"
           aria-label="Scenario context"
           tabIndex={0}
-          className="flex flex-col gap-4 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary min-[860px]:sticky min-[860px]:top-6 min-[860px]:max-h-[calc(100vh-3rem)] min-[860px]:w-[400px] min-[860px]:shrink-0 min-[860px]:overflow-auto min-[860px]:pr-1"
+          className="flex flex-col gap-4 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary min-[860px]:h-full min-[860px]:w-[400px] min-[860px]:shrink-0 min-[860px]:overflow-y-auto min-[860px]:pr-2"
         >
           <nav className="flex items-center justify-between text-sm">
             <Link to="/t/$traditionId" params={{ traditionId }} className="text-primary hover:underline">
@@ -140,10 +142,10 @@ export function ScenarioPage() {
           </Collapsible>
         </aside>
 
-        <section className="min-w-0 flex-1" data-testid="scenario-main">
+        <section className="min-w-0 min-[860px]:h-full min-[860px]:flex-1 min-[860px]:overflow-y-auto min-[860px]:pr-1" data-testid="scenario-main">
           <ScenarioResponses traditionId={traditionId} scenarioId={scenarioId} />
         </section>
       </div>
-    </>
+    </div>
   );
 }

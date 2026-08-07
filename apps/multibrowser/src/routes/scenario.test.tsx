@@ -41,9 +41,11 @@ describe("scenario detail", () => {
     expect(within(sidebar).getByRole("heading", { name: /The question/ })).toBeInTheDocument();
     // …and the responses pane lives in main.
     expect(within(main).getByTestId("scenario-responses")).toBeInTheDocument();
-    // Sidebar is a keyboard-reachable own-scroll pane (tabbable + own scrollbar at desktop width).
+    // Sidebar is a keyboard-reachable own-scroll pane (tabbable + own scrollbar at desktop width);
+    // the main pane scrolls independently too — so the document itself never scrolls (iter-3).
     expect(sidebar).toHaveAttribute("tabindex", "0");
-    expect(sidebar.className).toMatch(/overflow-auto/);
+    expect(sidebar.className).toMatch(/overflow-y-auto/);
+    expect(main.className).toMatch(/overflow-y-auto/);
     // First-visit framing sentence explains the project up top.
     expect(screen.getByTestId("page-framing")).toHaveTextContent(/MultiBench measures/);
   });
