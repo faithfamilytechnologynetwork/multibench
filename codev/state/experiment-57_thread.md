@@ -216,3 +216,11 @@ the absolute credential path committed in the PUBLIC repo (defeats the finding +
 fail-fast/no-fallback rule). Fixed to **`${TAQWABENCH_ENV:?…}`** (fail-fast, no path in file) in all 4
 scripts. Verified: zero absolute /Users or taqwabench/.env paths anywhere in exp57 scripts+docs; all 9
 scripts pass bash -n. Items 2-4 unchanged. Commented + pinged. Awaiting re-verify → Waleed merge word.
+
+## 2026-08-07 — PR #68 MERGED (Waleed's word)
+
+Merge commit **6d48053b8275bd89b3800a7a9d2502d6bc6852f4** ("Merge pull request #68 …/builder/
+experiment-57"). Issue #57 auto-closed. Reported SHA to architect. **HOLDING — NOT cleaning up**
+(architect: a docs-level transfer-terminology follow-up is coming). Worktree + gemma-dpo volume
+artifacts (mb-sft-split50, mb-dpo-split50, pairs, /exp57-archive/ raw audit trail) all intact.
+Standing by.
