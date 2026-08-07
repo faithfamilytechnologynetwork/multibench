@@ -40,6 +40,9 @@ export const scenarioRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/t/$traditionId/$scenarioId",
   component: ScenarioPage,
+  // The embedded responses' selection (model A/B + condition axes) lives in the URL so it's
+  // shareable and sidebar "guided example" presets deep-link into it (reuses the raw-view schema).
+  validateSearch: rawSearchSchema,
 });
 
 export const resultsRoute = createRoute({

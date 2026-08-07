@@ -11,7 +11,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 const FILES = [
   "../components/RawComparison.tsx",
   "../components/ScenarioResponses.tsx",
-  "../components/PressureSection.tsx",
+  "../components/ScenarioControls.tsx",
   "../routes/ScenarioPage.tsx",
 ];
 const BANNED: { re: RegExp; why: string }[] = [

@@ -2,51 +2,40 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, within } from "@testing-library/react";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
-import { REPO, PRESSURES } from "../lib/constants";
+import { REPO } from "../lib/constants";
 
 const SHA = "deadbeef";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("scenario detail", () => {
-  it("renders turn-1, the six compact pressures in canonical order, judge-guidance, and the results section", async () => {
+  it("main pane shows the scenario header + Context (judge guidance) + a no-run placeholder", async () => {
+    // No results run committed → the conversation can't render, but the scenario header and the
+    // Context (the tradition's judge guidance) still show, plus a plain no-run placeholder.
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"])));
-    const { container } = renderApp("/t/sunni-islam/JLS-001");
-
-    expect(await screen.findByRole("heading", { name: "JLS-001" })).toBeInTheDocument();
-    expect(screen.getByText("turn1 for JLS-001")).toBeInTheDocument();
-
-    const order = [...container.querySelectorAll("[data-pressure]")].map((el) =>
-      el.getAttribute("data-pressure"),
-    );
-    expect(order).toEqual([...PRESSURES]); // canonical order (compact accordion)
-
-    expect(screen.getByText(/judge guidance for JLS-001/)).toBeInTheDocument();
-
-    // Results section: with no results run committed, the placeholder shows once the runs query
-    // settles (no drill-in, no "bands" wording — #51 numeric-only policy).
-    expect(await screen.findByText(/No judging results yet/)).toBeInTheDocument();
-    const region = screen.getByTestId("scenario-responses");
-    expect(region.textContent ?? "").not.toMatch(/bands/i);
+    renderApp("/t/sunni-islam/JLS-001");
+    expect(await screen.findByRole("heading", { name: /JLS-001/ })).toBeInTheDocument();
+    expect(screen.getByText(/judge guidance for JLS-001/)).toBeInTheDocument(); // in the Context collapsible
+    expect(await screen.findByTestId("no-run")).toBeInTheDocument();
+    expect(screen.getByTestId("scenario-responses").textContent ?? "").not.toMatch(/bands/i); // #51 no band names
   });
 
-  it("lays out the app-shell: a context sidebar + a main responses pane (iter-3)", async () => {
+  it("lays out the inverted app-shell: a controls sidebar + a scenario/conversation main pane", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"])));
     renderApp("/t/sunni-islam/JLS-001");
     const shell = await screen.findByTestId("scenario-shell");
     const sidebar = within(shell).getByTestId("scenario-sidebar");
     const main = within(shell).getByTestId("scenario-main");
-    // Context (question + compact pressures + judge guidance) lives in the sidebar…
-    expect(within(sidebar).getByText("turn1 for JLS-001")).toBeInTheDocument();
-    expect(within(sidebar).getByTestId("pressures")).toBeInTheDocument();
-    expect(within(sidebar).getByRole("heading", { name: /The question/ })).toBeInTheDocument();
-    // …and the responses pane lives in main.
+    // Sidebar = navigation + the scenario picker; the Model/axes controls appear once a run loads
+    // (none committed here → the controls placeholder shows instead).
+    expect(within(sidebar).getByRole("combobox", { name: "Scenario" })).toBeInTheDocument();
+    expect(within(sidebar).getByText(/No results run published yet/)).toBeInTheDocument();
+    // Main = the scenario + conversation area.
     expect(within(main).getByTestId("scenario-responses")).toBeInTheDocument();
-    // Sidebar is a keyboard-reachable own-scroll pane (tabbable + own scrollbar at desktop width);
-    // the main pane scrolls independently too — so the document itself never scrolls (iter-3).
+    // Both panes own-scroll (independent) → the document never scrolls.
     expect(sidebar).toHaveAttribute("tabindex", "0");
     expect(sidebar.className).toMatch(/overflow-y-auto/);
     expect(main.className).toMatch(/overflow-y-auto/);
-    // First-visit framing sentence explains the project up top.
+    // First-visit orientation line explains the project up top.
     expect(screen.getByTestId("page-framing")).toHaveTextContent(/MultiBench measures/);
   });
 
@@ -59,17 +48,13 @@ describe("scenario detail", () => {
 
   it("shows inline notices (not a crash) for a malformed scenario", async () => {
     const files = traditionFiles("sunni-islam", ["JLS-001"]);
-    // Drop the 'flattery' pressure and blank 'good_cause'.
-    files["traditions/sunni-islam/scenarios/JLS-001/pressures.md"] = [
-      "## secularize", "s", "## insistence", "i", "## false_authority", "fa",
-      "## good_cause", "", "## personal_appeal", "pa", "",
-    ].join("\n");
+    // Blank the judge guidance — the Context the main pane always renders.
+    delete files["traditions/sunni-islam/scenarios/JLS-001/judge-guidance.md"];
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files));
     renderApp("/t/sunni-islam/JLS-001");
 
-    expect(await screen.findByRole("heading", { name: "JLS-001" })).toBeInTheDocument(); // didn't crash
-    const notes = await screen.findAllByText(/missing or empty/i);
-    expect(notes.length).toBeGreaterThan(0); // flattery missing + good_cause empty
+    expect(await screen.findByRole("heading", { name: /JLS-001/ })).toBeInTheDocument(); // didn't crash
+    expect(await screen.findByText(/missing or empty/i)).toBeInTheDocument(); // judge-guidance notice in Context
   });
 
   it("surfaces an unknown-tag-value notice on the scenario page", async () => {
