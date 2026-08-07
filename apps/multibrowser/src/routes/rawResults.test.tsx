@@ -167,39 +167,33 @@ describe("raw-results view", () => {
     expect(screen.getAllByText("gpt-5.6-terra").length).toBeGreaterThan(0); // judge label (pill + verdict)
   });
 
-  it("the scenario page embeds a lazy results section with a cross-link to the explorer", async () => {
+  it("the scenario page embeds the results section (auto-engaged) with a cross-link to the explorer", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {
       ...traditionFiles("buddhism", ["BUD-001"]),
       ...resultsFiles(RUN, {}),
     }));
     renderApp("/t/buddhism/BUD-001");
-    const section = await screen.findByTestId("scenario-responses");
-    // Contentful expand button from the SCORE manifest (5 subjects × 3×6 = 18), no raw fetch yet.
-    const expand = await within(section).findByTestId("responses-expand");
-    expect(expand).toHaveTextContent(/5 models × 18 conditions/);
-    // Cross-link into the full generic explorer for THIS scenario.
-    const link = within(section).getByRole("link", { name: /full explorer/i });
+    // Once the runs query settles, the cross-link into the full generic explorer appears.
+    const link = await screen.findByRole("link", { name: /full explorer/i });
     expect(link).toHaveAttribute("href", expect.stringContaining(`/results/${RUN}/buddhism/BUD-001`));
-    // Lazy: the heavy body (transcript+verdicts) is not rendered until engaged.
-    expect(within(section).queryByTestId("responses-body")).toBeNull();
+    // Auto-engaged: it IS the main pane now — no click gate (the body loads on mount).
+    expect(screen.queryByTestId("responses-expand")).toBeNull();
   });
 
-  it("expands in place to show the model's response + interleaved verdicts (jalees unification)", async () => {
+  it("shows the model's response + interleaved verdicts in the main pane (auto-engaged, jalees unification)", async () => {
     // The core of the redirect: a reader answers "how did this model respond?" ON the scenario page.
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp("/t/buddhism/BUD-001");
-    await userEvent.click(await screen.findByTestId("responses-expand"));
-    // Lazy-loaded shard → interleaved comparison renders: the default cell's transcript + verdicts.
+    // No click — the interleaved comparison renders on load: the default cell's transcript + verdicts.
     expect(await screen.findByTestId("raw-comparison")).toBeInTheDocument();
     expect(await screen.findByText(/thinking about leaving/)).toBeInTheDocument(); // claude/unstated/secularize transcript
     expect(screen.getAllByTestId("verdict-stage").length).toBeGreaterThanOrEqual(1); // scope-interleaved verdicts
     expect((await screen.findAllByTestId("verdict")).length).toBeGreaterThanOrEqual(2); // gemini + opus (turn-1)
   });
 
-  it("compares two models side-by-side in the embedded section (single→A/B)", async () => {
+  it("compares two models side-by-side in the embedded main pane (single→A/B)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp("/t/buddhism/BUD-001");
-    await userEvent.click(await screen.findByTestId("responses-expand"));
     await screen.findByTestId("raw-comparison");
     // Pick a compare model B → the second column appears (gpt has a cell at unstated/secularize too).
     await userEvent.selectOptions(screen.getByLabelText("Compare with"), "gpt-5.6-terra");

@@ -1,5 +1,5 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
-import { screen } from "@testing-library/react";
+import { screen, within } from "@testing-library/react";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
 import { REPO, PRESSURES } from "../lib/constants";
@@ -8,7 +8,7 @@ const SHA = "deadbeef";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("scenario detail", () => {
-  it("renders turn-1, the six pressures in canonical order, judge-guidance, framings, and the results section", async () => {
+  it("renders turn-1, the six compact pressures in canonical order, judge-guidance, and the results section", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"])));
     const { container } = renderApp("/t/sunni-islam/JLS-001");
 
@@ -18,21 +18,34 @@ describe("scenario detail", () => {
     const order = [...container.querySelectorAll("[data-pressure]")].map((el) =>
       el.getAttribute("data-pressure"),
     );
-    expect(order).toEqual([...PRESSURES]); // canonical order
+    expect(order).toEqual([...PRESSURES]); // canonical order (compact accordion)
 
     expect(screen.getByText(/judge guidance for JLS-001/)).toBeInTheDocument();
-
-    // Framings: Stated template instantiated with the tradition's adherent_noun ("Adherent").
-    expect(screen.getByText(/practising Adherent/)).toBeInTheDocument();
-    // Guided framing renders the tradition's actual guide.md content.
-    expect(screen.getByText(/guide of sunni-islam/)).toBeInTheDocument();
 
     // Results section: with no results run committed, the placeholder shows once the runs query
     // settles (no drill-in, no "bands" wording — #51 numeric-only policy).
     expect(await screen.findByText(/No judging results yet/)).toBeInTheDocument();
     const region = screen.getByTestId("scenario-responses");
     expect(region.textContent ?? "").not.toMatch(/bands/i);
-    expect(region.querySelector('[data-testid="responses-expand"]')).toBeNull(); // no run → no expander
+  });
+
+  it("lays out the app-shell: a context sidebar + a main responses pane (iter-3)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"])));
+    renderApp("/t/sunni-islam/JLS-001");
+    const shell = await screen.findByTestId("scenario-shell");
+    const sidebar = within(shell).getByTestId("scenario-sidebar");
+    const main = within(shell).getByTestId("scenario-main");
+    // Context (question + compact pressures + judge guidance) lives in the sidebar…
+    expect(within(sidebar).getByText("turn1 for JLS-001")).toBeInTheDocument();
+    expect(within(sidebar).getByTestId("pressures")).toBeInTheDocument();
+    expect(within(sidebar).getByRole("heading", { name: /The question/ })).toBeInTheDocument();
+    // …and the responses pane lives in main.
+    expect(within(main).getByTestId("scenario-responses")).toBeInTheDocument();
+    // Sidebar is a keyboard-reachable own-scroll pane (tabbable + own scrollbar at desktop width).
+    expect(sidebar).toHaveAttribute("tabindex", "0");
+    expect(sidebar.className).toMatch(/overflow-auto/);
+    // First-visit framing sentence explains the project up top.
+    expect(screen.getByTestId("page-framing")).toHaveTextContent(/MultiBench measures/);
   });
 
   it("offers prev/next navigation in declared order", async () => {

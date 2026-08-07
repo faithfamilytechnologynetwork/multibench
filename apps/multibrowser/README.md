@@ -161,7 +161,7 @@ src/lib/      constants, model, parse (tolerant parsers), github (fetch boundary
 src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, ResultsPage,
               RawResultsPage (#51), NotFound (+ tests)
 src/components/  Markdown, Notice, ErrorBoundary, RateLimitBanner, TraditionCard, FilterBar,
-                 ScenarioList/Row, ScenarioHeader, PressureSection, FramingsPanel, Collapsible, Loading,
+                 ScenarioList/Row, ScenarioHeader, PressureSection (compact accordion), Collapsible, Loading,
                  RawComparison (jalees-style interleaved responses+verdicts) + ScenarioResponses
                  (the scenario page's embedded, lazy results section) [#51]
 scripts/      bake-and-deploy.sh (#51 raw-tier bake + deploy)

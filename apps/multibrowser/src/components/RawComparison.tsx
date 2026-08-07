@@ -4,23 +4,25 @@ import { findCell, type RawCatalog, type RawCell, type RawShard } from "../lib/r
 import { Collapsible } from "./Collapsible";
 import { Markdown } from "./Markdown";
 
-/** One judge verdict: score chip + judge (sample-badged) + scope + summary + collapsible rationale. */
+/** One judge verdict: score chip + judge (sample-badged) + scope + summary + collapsible rationale.
+ *  Light treatment (a subtle tint, no heavy border box) — verdicts sit WITH the response. The score
+ *  is shown as TEXT next to the color chip (never color alone); the chip carries an aria-label. */
 export function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"][number]; catalog: RawCatalog }) {
   const judge = catalog.judges.find((j) => j.key === verdict.judge);
-  const scope = catalog.scopes.find((s) => s.id === verdict.scope);
   return (
-    <div className="flex flex-col gap-1 rounded-md border border-default-200 p-3" data-testid="verdict" data-judge={verdict.judge}>
+    <div className="flex flex-col gap-1 rounded-md bg-default-50 p-2.5" data-testid="verdict" data-judge={verdict.judge}>
       <div className="flex items-center gap-2 text-sm">
-        <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }} aria-hidden />
-        <span className="font-mono tabular-nums">{verdict.score}</span>
+        <span className="inline-block h-4 w-4 shrink-0 rounded" role="img"
+          aria-label={`score ${verdict.score}`}
+          style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }} />
+        <span className="font-mono tabular-nums font-medium">{verdict.score}</span>
         <span className="font-medium">{judge?.label ?? verdict.judge}</span>
         {judge && !judge.fullGrid && (
-          <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-700" title="honest-sample judge (not a full grid)">sample</span>
+          <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-800" title="honest-sample judge — scored only a subset, not the full grid">sample</span>
         )}
-        <span className="text-default-400">· {scope?.label ?? verdict.scope}</span>
       </div>
       {verdict.summary && <p className="text-sm text-default-700">{verdict.summary}</p>}
-      {verdict.rationale && <Collapsible title="Rationale"><Markdown>{verdict.rationale}</Markdown></Collapsible>}
+      {verdict.rationale && <Collapsible title="Why (the judge's reasoning)"><Markdown>{verdict.rationale}</Markdown></Collapsible>}
     </div>
   );
 }
@@ -71,7 +73,9 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
     if (!scope) return null;
     return (
       <div className="flex flex-col gap-2" data-testid="verdict-stage" data-scope={scope.id} key={key}>
-        <p className="text-xs font-medium uppercase tracking-wide text-default-500">Judges — {scope.label}</p>
+        <p className="text-xs font-medium uppercase tracking-wide text-default-500" title={`scope id: ${scope.id}`}>
+          How the judges scored the {scope.label.toLowerCase()}
+        </p>
         <div className={`grid gap-2 ${colGrid}`}>
           <VerdictColumn cell={cellA} scope={scope.id} catalog={catalog} />
           {!single && <VerdictColumn cell={cellB} scope={scope.id} catalog={catalog} />}
@@ -119,19 +123,21 @@ function ColumnHeader({ label, present }: { label: string; present: boolean }) {
 }
 
 function SharedTurn({ content }: { content: string }) {
+  // The person's turn (question, then the pressure push). Light: a label + the text, no filled box.
   return (
-    <div className="rounded-md bg-default-100 p-3" data-role="user">
-      <div className="mb-1 text-xs uppercase tracking-wide text-default-400">User</div>
-      <Markdown>{content}</Markdown>
+    <div data-role="user">
+      <div className="mb-1 text-xs font-medium uppercase tracking-wide text-default-400">They asked</div>
+      <div className="text-default-600"><Markdown>{content}</Markdown></div>
     </div>
   );
 }
 
 function TurnCell({ content, label }: { content: string | undefined; label: string }) {
-  if (content === undefined) return <div className="rounded-md border border-dashed border-default-200 p-3 text-sm text-default-400" aria-hidden>no response</div>;
+  if (content === undefined) return <div className="text-sm italic text-default-400" aria-hidden>no response</div>;
+  // The model's answer. A left rule marks it as the response (type hierarchy, not a heavy card).
   return (
-    <div className="rounded-md bg-primary-50 p-3" data-role="assistant">
-      <div className="mb-1 text-xs uppercase tracking-wide text-default-400">Assistant · {label}</div>
+    <div className="border-l-2 border-default-200 pl-3" data-role="assistant">
+      <div className="mb-1 text-xs font-medium uppercase tracking-wide text-default-500">{label} answered</div>
       <Markdown>{content}</Markdown>
     </div>
   );

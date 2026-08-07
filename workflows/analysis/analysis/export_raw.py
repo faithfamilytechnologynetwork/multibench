@@ -293,6 +293,8 @@ def _verdict(row: dict, tradition: str) -> dict:
 _FRAMING_ORDER = {f: i for i, f in enumerate(FRAMINGS)}
 _PRESSURE_ORDER = {p: i for i, p in enumerate(PRESSURES)}
 _SCOPE_ORDER = {s: i for i, s in enumerate(SCOPES)}
+# Newcomer-friendly scope labels (id stays the stable key; a generic viewer just shows `label`).
+_SCOPE_LABELS = {"turn1": "First response", "full": "After the pressure"}
 _SUBJECT_ORDER = {s: i for i, s in enumerate(CANONICAL_SUBJECTS)}
 
 
@@ -532,7 +534,9 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
              "values": [{"id": p, "label": _humanize(p)} for p in PRESSURES]},
         ],
         "groupBy": {"key": "tradition", "label": "Tradition"},
-        "scopes": [{"id": s, "label": s} for s in SCOPES],
+        # Newcomer-facing scope labels (the internal id stays the stable key). "turn1" is the
+        # assistant's FIRST answer; "full" is its answer AFTER the pressure push.
+        "scopes": [{"id": s, "label": _SCOPE_LABELS.get(s, s)} for s in SCOPES],
         "items": sorted(items, key=lambda it: (it["group"], it["id"])),
         "presets": presets or [],
         "fingerprint": fingerprint,

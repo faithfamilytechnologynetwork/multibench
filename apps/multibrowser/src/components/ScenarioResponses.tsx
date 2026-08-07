@@ -1,37 +1,32 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { MessageSquareText } from "lucide-react";
 import { useLatestSha, useResultsRuns, useRawScenario } from "../lib/queries";
 import { RawComparison } from "./RawComparison";
 import { Notices } from "./Notice";
 import { CenteredSpinner } from "./Loading";
 
 /**
- * The in-context results section on the scenario page (#51 verify iter-2): a reader on
- * `/t/<tradition>/<scenario>` — where the question, pressures, and judge guidance already are —
- * can see **how each model responded on THIS question** without leaving the page (the JaleesBench
+ * The in-context results section — the MAIN pane of the scenario page (#51 verify iter-2/3): a
+ * reader on `/t/<tradition>/<scenario>` (whose question, pressures, and judge guidance sit in the
+ * left sidebar) sees **how each model responded on THIS question** right here (the JaleesBench
  * unification Waleed asked for).
  *
- * Perf: the ~220 KB per-scenario shard is **lazy-loaded on expand** (the query is disabled until
- * the reader engages), so plain corpus browsing never pays for it. Defaults to the most recent run.
- * The full generic explorer (grid, presets, deep links) is one cross-link away.
+ * Perf: the ~220 KB per-scenario shard is loaded **on demand per scenario and cached** (never baked
+ * into the bundle). It is **auto-engaged** (fetches on mount) rather than gated behind a click,
+ * because this IS the page's main content now — a click-to-load in the primary pane would defeat the
+ * single-page goal. Defaults to the most recent run. The generic explorer is one cross-link away.
  */
 export function ScenarioResponses({ traditionId, scenarioId }: { traditionId: string; scenarioId: string }) {
   const sha = useLatestSha().data;
   const runsQ = useResultsRuns(sha);
-  // `engaged` PERSISTS across scenario navigations (same route component, changing params) — so once
-  // a reader opts in, later scenarios auto-load too. That's intended: the lazy-load guarantee is
-  // "plain corpus browsing never pays," not "re-collapse on every scenario." Per-scenario shards
-  // still fetch only on demand (keyed by scenario), and each is cached.
-  const [engaged, setEngaged] = useState(false);
 
   const runsSettled = !!sha && !runsQ.isLoading;
   const runId = runsQ.data?.defaultRunId ?? null;
   const scoreManifest = runsQ.data?.runs.find((r) => r.id === runId)?.manifest ?? null;
   const fingerprint = scoreManifest?.fingerprint ?? null;
 
-  // Lazy: the raw query only fires once engaged (undefined sha/runId → useRawScenario disabled).
-  const on = engaged && runsSettled && !!runId;
+  // On-demand (per scenario, cached) — fires once runs settle and a run exists.
+  const on = runsSettled && !!runId;
   const rawQ = useRawScenario(on ? sha : undefined, on ? runId! : undefined, traditionId, scenarioId, fingerprint);
 
   // Don't flash a "no results" claim while runs are still loading.
@@ -47,39 +42,31 @@ export function ScenarioResponses({ traditionId, scenarioId }: { traditionId: st
     );
   }
 
-  const nSubjects = scoreManifest?.subjects.length ?? 0;
-  const nConditions = scoreManifest ? scoreManifest.framings.length * scoreManifest.pressures.length : 0;
-  const detail = nSubjects && nConditions ? ` — ${nSubjects} models × ${nConditions} conditions` : "";
-
   return (
-    <section data-testid="scenario-responses" className="flex flex-col gap-3 rounded-lg border border-default-200 p-4">
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-lg font-semibold">Model responses &amp; judging</h2>
+    <section data-testid="scenario-responses" className="flex flex-col gap-3">
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <h2 className="text-lg font-semibold">How each model answered</h2>
+          <p className="text-sm text-default-500">Pick a model (and, optionally, a second to compare). Each judge&rsquo;s verdict sits with the answer it scored.</p>
+        </div>
         <Link
           to="/results/$runId/$groupId/$itemId"
           params={{ runId, groupId: traditionId, itemId: scenarioId }}
-          className="text-xs text-primary hover:underline"
+          className="whitespace-nowrap text-xs text-primary hover:underline"
         >
-          Open in the full explorer (grid, presets, deep links) →
+          Open in the full explorer →
         </Link>
       </div>
-
-      {!engaged ? (
-        <button
-          type="button"
-          onClick={() => setEngaged(true)}
-          data-testid="responses-expand"
-          className="flex items-center gap-2 self-start rounded-md border border-default-200 bg-default-50 px-3 py-2 text-sm text-default-700 transition-colors hover:border-primary hover:text-primary"
-        >
-          <MessageSquareText size={16} aria-hidden />
-          See how each model responded on this question{detail}
-        </button>
-      ) : (
-        <ResponsesBody rawQ={rawQ} runId={runId} traditionId={traditionId} scenarioId={scenarioId} />
-      )}
+      <ResponsesBody rawQ={rawQ} runId={runId} traditionId={traditionId} scenarioId={scenarioId} />
     </section>
   );
 }
+
+// Newcomer hints for MultiBench's condition axes (shown as a picker title; the id stays the value).
+const AXIS_HINT: Record<string, string> = {
+  framing: "How the model was set up before the question (system prompt).",
+  pressure: "The follow-up push after the first answer, testing whether it holds.",
+};
 
 function ResponsesBody({ rawQ, runId, traditionId, scenarioId }: {
   rawQ: ReturnType<typeof useRawScenario>;
@@ -113,18 +100,25 @@ function ResponsesBody({ rawQ, runId, traditionId, scenarioId }: {
     <div className="flex flex-col gap-3" data-testid="responses-body">
       {dataNotices.length > 0 && <Notices notices={dataNotices} />}
 
-      {/* Pickers — built entirely from the catalog (subjects + condition axes); no MB vocab. */}
+      {/* Pickers — built from the catalog (subjects + condition axes); each carries a plain-language hint. */}
       <div className="flex flex-wrap items-end gap-3" data-testid="responses-pickers">
-        <Picker label="Model" value={a} onChange={setSelA}
+        <Picker label="Model" value={a} onChange={setSelA} hint="The AI model being tested."
           options={catalog.subjects.map((s) => ({ value: s.id, label: s.label }))} />
-        <Picker label="Compare with" value={selB} onChange={setSelB}
+        <Picker label="Compare with" value={selB} onChange={setSelB} hint="Optionally show a second model side by side."
           options={[{ value: "", label: "— none —" }, ...catalog.subjects.filter((s) => s.id !== a).map((s) => ({ value: s.id, label: s.label }))]} />
         {catalog.conditionAxes.map((ax) => (
-          <Picker key={ax.key} label={ax.label} value={conditions[ax.key] ?? ""}
+          <Picker key={ax.key} label={ax.label} value={conditions[ax.key] ?? ""} hint={AXIS_HINT[ax.key]}
             onChange={(v) => setSelCond((c) => ({ ...c, [ax.key]: v }))}
             options={ax.values.map((v) => ({ value: v.id, label: v.label }))} />
         ))}
       </div>
+
+      {/* Plain-language score meaning, near the verdicts (numeric + ramp, no band names). */}
+      <p className="text-xs text-default-500">
+        Each verdict scores the answer from <span className="font-mono">{catalog.scale.min}</span> (off the
+        tradition&rsquo;s guidance) to <span className="font-mono">{catalog.scale.max}</span> (well aligned);
+        the colored square follows that scale.
+      </p>
 
       {shard
         ? <RawComparison catalog={catalog} shard={shard} a={a} b={b} conditions={conditions} />
@@ -147,16 +141,16 @@ function ResponsesBody({ rawQ, runId, traditionId, scenarioId }: {
   );
 }
 
-function Picker({ label, value, onChange, options }: {
-  label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[];
+function Picker({ label, value, onChange, options, hint }: {
+  label: string; value: string; onChange: (v: string) => void; options: { value: string; label: string }[]; hint?: string;
 }) {
   return (
-    <label className="flex flex-col text-xs font-medium text-default-500">
+    <label className="flex flex-col text-xs font-medium text-default-500" title={hint}>
       {label}
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        aria-label={label}
+        aria-label={hint ? `${label} — ${hint}` : label}
         className="mt-1 rounded border border-default-200 px-2 py-1 text-sm text-default-800"
       >
         {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
