@@ -45,13 +45,14 @@ gates:
     status: approved
     approved_at: '2026-08-06T20:06:11.000Z'
   verify-approval:
-    status: pending
+    status: approved
     requested_at: '2026-08-06T20:19:23.444Z'
+    approved_at: '2026-08-07T21:51:39.519Z'
 iteration: 1
 build_complete: true
 history: []
 started_at: '2026-08-06T07:30:57.553Z'
-updated_at: '2026-08-07T21:51:38.066Z'
+updated_at: '2026-08-07T21:51:39.519Z'
 force_advanced:
   phase: phase_6
   iteration: 3
