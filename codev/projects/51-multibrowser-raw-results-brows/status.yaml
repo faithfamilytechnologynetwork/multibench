@@ -48,10 +48,10 @@ gates:
     status: pending
     requested_at: '2026-08-06T20:19:23.444Z'
 iteration: 1
-build_complete: false
+build_complete: true
 history: []
 started_at: '2026-08-06T07:30:57.553Z'
-updated_at: '2026-08-06T20:19:23.444Z'
+updated_at: '2026-08-07T21:51:38.066Z'
 force_advanced:
   phase: phase_6
   iteration: 3
