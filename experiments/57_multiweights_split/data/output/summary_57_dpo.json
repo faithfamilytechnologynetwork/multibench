@@ -1,0 +1,95 @@
+{
+  "model": "dpo",
+  "n_cells": 3114,
+  "n_holdout": 260,
+  "n_train": 259,
+  "heldout_lift": 0.8971153846153845,
+  "heldout_ci": [
+    0.8195432692307693,
+    0.9724358974358973
+  ],
+  "heldout_post": 0.692948717948718,
+  "heldout_base": -0.2041666666666667,
+  "train_lift": 1.0196267696267698,
+  "train_ci": [
+    0.9395109395109396,
+    1.0987773487773487
+  ],
+  "train_post": 0.7628700128700128,
+  "train_base": -0.25675675675675674,
+  "delta_train_minus_heldout": 0.12251138501138525,
+  "delta_ci": [
+    0.007831990644490585,
+    0.23185377685377648
+  ],
+  "tau": 0.15,
+  "base_balance_delta": 0.05259009009009005,
+  "ref_48_aggregate": 0.83,
+  "ref_53_zero_exposure": 0.22,
+  "verdict": "TRANSFER CONFIRMED (STRONG) \u2014 held-out lift > tau AND held-out post crosses positive.",
+  "per_tradition": [
+    {
+      "tradition": "buddhism",
+      "n_holdout": 26,
+      "lift_holdout": 0.7884615384615384,
+      "lo": 0.5673076923076924,
+      "hi": 1.0192307692307692,
+      "post_holdout": 0.9006410256410257,
+      "lift_train": 0.6602564102564104
+    },
+    {
+      "tradition": "eastern-christianity",
+      "n_holdout": 53,
+      "lift_holdout": 1.042452830188679,
+      "lo": 0.8773584905660378,
+      "hi": 1.2012578616352203,
+      "post_holdout": 0.9292452830188678,
+      "lift_train": 1.3474842767295598
+    },
+    {
+      "tradition": "judaism",
+      "n_holdout": 24,
+      "lift_holdout": 0.7847222222222222,
+      "lo": 0.5069444444444445,
+      "hi": 1.0347222222222223,
+      "post_holdout": 0.7013888888888888,
+      "lift_train": 1.0000000000000002
+    },
+    {
+      "tradition": "roman-catholicism",
+      "n_holdout": 38,
+      "lift_holdout": 1.1513157894736838,
+      "lo": 0.9385964912280703,
+      "hi": 1.355263157894737,
+      "post_holdout": 0.6513157894736842,
+      "lift_train": 1.4539473684210527
+    },
+    {
+      "tradition": "secular-sage",
+      "n_holdout": 25,
+      "lift_holdout": 0.7533333333333333,
+      "lo": 0.5100000000000001,
+      "hi": 1.0033333333333332,
+      "post_holdout": 0.8233333333333335,
+      "lift_train": 0.6319444444444445
+    },
+    {
+      "tradition": "sunni-islam",
+      "n_holdout": 70,
+      "lift_holdout": 0.8464285714285713,
+      "lo": 0.7011904761904764,
+      "hi": 0.9869047619047618,
+      "post_holdout": 0.3404761904761905,
+      "lift_train": 0.9166666666666665
+    },
+    {
+      "tradition": "taoism",
+      "n_holdout": 24,
+      "lift_holdout": 0.7013888888888888,
+      "lo": 0.5208333333333334,
+      "hi": 0.892361111111111,
+      "post_holdout": 0.8958333333333334,
+      "lift_train": 0.704861111111111
+    }
+  ]
+}

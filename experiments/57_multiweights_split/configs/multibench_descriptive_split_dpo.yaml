@@ -1,0 +1,26 @@
+# MultiBench-descriptive eval — experiment 57 (split-SFT / split-DPO, both halves).
+#
+# Runs the SPLIT checkpoint over the full MultiBench grid UNSTATED (bare), judged FULL-scope by the
+# gemini selection/eval judge — the SAME instrument as #48's multibench_descriptive.yaml, for
+# comparability. Collected over ALL 519 scenarios (both halves in one pass); the analysis partitions
+# by the committed train/holdout split. Base is REUSED (not re-collected) from
+# experiments/53_exposure_stratified_holdout/data/output/per_scenario.csv — the same OpenRouter-base
+# as #48/#53, so the split-SFT-vs-base lift is directly comparable (same inherited same-stack caveat,
+# ~-0.058 provider-vs-vLLM shift, << the lifts).
+#
+# Subject = the split adapter served by serve_split_eval.py. Point `model` at "sft" for the split-SFT
+# pass; switch to "dpo" (after mb-dpo-split50 trains) for the optional split-DPO pass. api_key_env
+# EVAL_KEY (set EVAL_KEY=EMPTY at run time — vLLM ignores it). max_tokens 4096 < max_model_len 16384
+# (the SubjectSpec default 16384 == context window and vLLM 400s — #48 lesson).
+
+subjects:
+  - {model: dpo, provider: openai, base_url: https://waleedkadous--multibench-gemma-eval-serve-split-serve.modal.run/v1, api_key_env: EVAL_KEY, max_tokens: 4096}
+
+framings: [unstated]
+scopes: [full]
+
+judges:
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, safety_off: false}
+
+concurrency: 16
+retries: 4

@@ -1,0 +1,63 @@
+{
+  "seed": 5757,
+  "rule": "per-tradition: sort ids asc, random.Random(SEED).shuffle, holdout=first ceil(n/2), train=rest",
+  "source": "experiments/53_exposure_stratified_holdout/data/output/per_scenario.csv",
+  "n_train": 259,
+  "n_holdout": 260,
+  "train_sft_examples": 1362,
+  "holdout_sft_examples": 1370,
+  "sft_set_total": 2732,
+  "train_sha256": "6220e34658506731bcbcd8849f477d77c5156e96b604a669b1260ed24e776aff",
+  "holdout_sha256": "606cd9f160a3f23e642f39518ecbde18d431ab124365f1eea7a5514eb0e1f026",
+  "per_tradition": {
+    "buddhism": {
+      "n_total": 52,
+      "n_train": 26,
+      "n_holdout": 26,
+      "train_sft_examples": 143,
+      "holdout_sft_examples": 151
+    },
+    "eastern-christianity": {
+      "n_total": 106,
+      "n_train": 53,
+      "n_holdout": 53,
+      "train_sft_examples": 310,
+      "holdout_sft_examples": 312
+    },
+    "judaism": {
+      "n_total": 48,
+      "n_train": 24,
+      "n_holdout": 24,
+      "train_sft_examples": 134,
+      "holdout_sft_examples": 135
+    },
+    "roman-catholicism": {
+      "n_total": 76,
+      "n_train": 38,
+      "n_holdout": 38,
+      "train_sft_examples": 200,
+      "holdout_sft_examples": 189
+    },
+    "secular-sage": {
+      "n_total": 49,
+      "n_train": 24,
+      "n_holdout": 25,
+      "train_sft_examples": 126,
+      "holdout_sft_examples": 127
+    },
+    "sunni-islam": {
+      "n_total": 140,
+      "n_train": 70,
+      "n_holdout": 70,
+      "train_sft_examples": 320,
+      "holdout_sft_examples": 321
+    },
+    "taoism": {
+      "n_total": 48,
+      "n_train": 24,
+      "n_holdout": 24,
+      "train_sft_examples": 129,
+      "holdout_sft_examples": 135
+    }
+  }
+}

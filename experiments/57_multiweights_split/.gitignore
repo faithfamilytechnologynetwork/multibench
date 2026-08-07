@@ -1,0 +1,3 @@
+# Run artifacts are regenerable — keep the heavy output tree out of git (protocol: commit
+# summaries in notes.md + the committed split lists under split/, not sittings/judgments/checkpoints).
+data/output/
