@@ -326,12 +326,26 @@ split, base-difficulty balanced across arms, $\Delta = 0.05$), evaluated
 descriptively on the 260 held out (24--70 per tradition). Held-out
 scenarios lift \textbf{+0.78} (95\% CI $[+0.70, +0.86]$) against a
 train-half memorization reference of $+0.90$ --- roughly \textbf{85\% of
-the on-bench lift is genuine cross-tradition transfer}, with a
+the on-bench SFT lift is genuine transfer to held-out scenarios}, with a
 memorization inflation of only $+0.12$ $[+0.01, +0.24]$
 (\cref{fig:transfer}). Every tradition's held-out CI is above zero; the
 hard tier transfers \emph{strongly} (Roman Catholicism $+1.07$, Sunni
 Islam $+0.67$, both crossing positive post-SFT), and the held-out mean
-crosses positive ($-0.20 \to +0.57$).
+crosses positive ($-0.20 \to +0.57$). The preference stage lifts held-out
+performance further to $+0.90$ $[+0.82, +0.97]$ (train-half $+1.02$); this
+SFT$\to$DPO held-out increment ($+0.12$) is confounded with selection-judge
+alignment --- the preference pairs were filtered by the same Gemini judge
+used for this evaluation --- and is not read as an unambiguous quality gain.
+
+\emph{This measures transfer to held-out \textbf{scenarios}, not across
+traditions.} The split is scenario-level \emph{within} every tradition
+(each tradition contributes scenarios to both halves), so a held-out CI
+above zero in all seven traditions establishes that the recipe generalizes
+to unseen scenarios uniformly across the tradition set --- it does
+\emph{not} license a cross-tradition-transfer claim. The stronger claim,
+that a recipe learned on some traditions transfers to a tradition held out
+entirely, would require a leave-one-tradition-out ablation, which we do not
+run.
 
 Transfer is not uniform. An exposure-stratified analysis of the
 full-data model (\cref{fig:dose}) localizes the exception: the scenarios
@@ -341,23 +355,22 @@ by only $+0.22$ $[+0.11, +0.35]$ and do not cross positive. The
 recognition deficit's deepest pockets resist both training and
 transfer. One scope note: the transfer estimate comes from the companion
 half-data retrain; the shipped full-data model's unseen-scenario
-behavior is accordingly bounded by $[+0.22, \sim+0.78]$. The
+behavior is accordingly bounded by $[+0.22, \sim+0.90]$. The
 out-of-distribution instruments (\cref{sec:afb,sec:overapp}) remain the
 headline evidence.
 
 \begin{figure}[ht]
 \centering
-\includegraphics[width=0.85\linewidth]{figures/fig_transfer_sft.pdf}
-\caption{Companion 50/50-split retrain: per-tradition base $\to$ SFT
+\includegraphics[width=0.85\linewidth]{figures/fig_transfer_sft.pdf}\\[4pt]
+\includegraphics[width=0.85\linewidth]{figures/fig_transfer_dpo.pdf}
+\caption{Companion 50/50-split retrain, per-tradition base $\to$ model
 lift on randomly held-out scenarios vs.\ the train-half memorization
-reference. Held-out CIs are above zero in all seven traditions.}
+reference. Top: SFT stage (held-out $+0.78$). Bottom: SFT+DPO stage
+(held-out $+0.90$). Held-out CIs are above zero in all seven traditions;
+the split is scenario-level within each tradition, so this is
+generalization to unseen scenarios, not cross-tradition transfer.}
 \label{fig:transfer}
-\end{figure} One scope note: the
-transfer estimate comes from the companion half-data retrain, not the
-shipped full-data model, whose unseen-scenario behavior is accordingly
-bounded by $[+0.22, \sim+0.78]$. The out-of-distribution instruments
-(\cref{sec:afb,sec:overapp}) remain the headline evidence and are
-untouched by either analysis.
+\end{figure}
 
 Three further disclosures bound this read. It is \emph{descriptive only}: the
 model was trained on its own counsel for these same scenarios (no

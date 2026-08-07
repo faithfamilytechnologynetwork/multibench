@@ -26,7 +26,7 @@ framing, all 7 traditions positive, aggregate **+0.83** on the signed [−1,+1] 
 on all 519 scenarios, so it is memorization-confounded. #53 estimated the *transferable*
 component at only **+0.22** (95% CI [+0.11, +0.35]) on a strict zero-exposure holdout — but that
 holdout was **13 scenarios, mostly sunni-islam**, and 4 of 7 traditions had **no** held-out
-scenario at all, so it could not resolve cross-tradition transfer. **This experiment retrains on
+scenario at all, so it could not resolve per-tradition held-out transfer. **This experiment retrains on
 a clean 50/50 stratified holdout so every tradition has a real held-out arm, and measures the
 lift that transfers to never-trained scenarios.**
 
@@ -34,7 +34,7 @@ lift that transfers to never-trained scenarios.**
 on-policy DPO) on a **train half only** produces a model whose unstated descriptive lift on the
 **held-out half** is **materially smaller** than the memorization-inclusive train-half lift, and
 lands **near #53's transferable estimate (~+0.22)** — i.e. most of #48's +0.83 was memorization,
-but a **real, cross-tradition-generalizing** dispositional component survives.
+but a **real dispositional component that generalizes to held-out scenarios in every tradition** survives.
 
 **Success criterion (what "the recipe helps on-bench" would look like).** The held-out lift CI
 excludes 0 **and** is materially positive (pre-registered thresholds below). The *strong* form —
@@ -83,13 +83,13 @@ random assignment.** A held-out lift materially below the train-half lift is the
   floor, same as #53.
 - **Transfer CONFIRMED (recipe helps on held-out, weak form):** held-out lift 95% CI excludes 0
   **and** lower CI bound > **+0.15**. → The on-bench improvement is not purely memorization; a
-  real disposition transfers to unseen prompts across traditions.
+  real disposition transfers to unseen prompts, and this holds within every tradition.
 - **Transfer CONFIRMED, STRONG form (recipe fixes on-bench omission on unseen prompts):** the
   weak form holds **and** held-out post-SFT mean > **0** (crosses into positive counsel). This is
   the bar #53's strict arm failed.
 - **Transfer WEAK / mostly-memorization:** held-out lift CI excludes 0 but lower bound ≤ +0.15,
   **and/or** Δ (train − held-out) ≥ τ and large. → A real but small transferable component;
-  #48's +0.83 is dominated by memorization — confirms #53 at clean cross-tradition scale.
+  #48's +0.83 is dominated by memorization — confirms #53 with a clean held-out arm in every tradition.
 - **NO transfer:** held-out lift 95% CI includes 0. → The on-bench lift is memorization; the
   recipe does not improve the actual benchmark on held-out scenarios.
 - **Per-tradition** (held-out arms 24–70 scenarios): reported with CIs, **descriptively, no
@@ -233,7 +233,7 @@ strict arm failed at −0.65).
 transferable). That estimate came from an **adversarially-biased holdout**: its zero-exposure cells
 were exactly the samplability-filter *failures* (hardest, mostly-sunni), and it could not separate
 memorization from latent trainability. The **clean random 50/50 retrain breaks that confound** and
-shows the on-bench lift is **~85% genuine cross-tradition transfer** (+0.778 of the +0.90 train-half),
+shows the on-bench lift is **~85% genuine transfer to held-out scenarios** (+0.778 of the +0.90 train-half; uniform across all 7 traditions),
 not memorization — the inflation is only Δ+0.12, not 4×. #53's +0.22 was a depressed lower bound from
 its biased sample, exactly as #53 itself cautioned ("bounds rather than evenly estimates transfer").
 
@@ -249,7 +249,7 @@ its biased sample, exactly as #53 itself cautioned ("bounds rather than evenly e
 | taoism | 24 | +0.583 | [+0.392, +0.778] | +0.778 | +0.542 |
 | judaism | 24 | +0.542 | [+0.233, +0.837] | +0.458 | +0.830 |
 
-- **Every tradition transfers** (CI excludes 0) — the clean cross-tradition generalization #53's
+- **Every tradition transfers** (CI excludes 0) — the clean per-tradition held-out generalization #53's
   13-scenario holdout could not establish (4 traditions had no held-out scenario there).
 - **The hard tier transfers strongly** — RC held-out +1.07, sunni +0.67. Both cross positive
   post-SFT (RC +0.57, sunni +0.17 — sunni closest to the line, its base being most negative).
@@ -311,7 +311,9 @@ The MultiWeights recipe **genuinely improves counsel on the actual benchmark for
 scenarios, across all 7 traditions** — held-out SFT +0.78 / DPO +0.90, both crossing positive, both
 STRONG under the pre-registered rule. Memorization inflation is small (Δ≈+0.12). This **revises #53's
 memorization-driven reading** (its +0.22 was the biased-holdout lower bound its own caveat predicted;
-the clean random split shows ~85–88% genuine cross-tradition transfer). Caveats stated plainly:
+the clean random split shows ~85–88% genuine transfer to held-out scenarios, uniform across all 7
+traditions — a scenario-level result, NOT cross-tradition transfer; the leave-one-tradition-out
+ablation that would test cross-tradition generalization is untested). Caveats stated plainly:
 (1) this is the **companion half-data retrain**, bounding the shipped full-data model's unseen
 behavior in **[+0.22, ~+0.90]**, not re-measuring it; (2) the **SFT→DPO increment is
 judge-alignment-confounded** (same gemini judge for banding + eval); (3) inherited same-stack

@@ -8,7 +8,7 @@ shipped full-data model (`mb-sft-dpo`, #48) is **untouched**.
 ## 1. Question & outcome — TRANSFER CONFIRMED (STRONG)
 
 Does the MultiWeights recipe improve counsel on the **actual benchmark, measured properly** — i.e. on
-never-trained scenarios, cross-tradition — or was #48's on-bench lift memorization? This is the
+never-trained scenarios, uniformly across the traditions — or was #48's on-bench lift memorization? This is the
 single-fold retrain deferred by #48 §4.3 and #53. Answer, under a **pre-registered** rule written
 before any number: **yes, it transfers, strongly.**
 
@@ -27,8 +27,15 @@ stages (base difficulty balanced across halves by the random split, Δ_base +0.0
 +0.22 came from an **adversarially-biased holdout** — its zero-exposure cells were exactly the
 samplability-filter *failures* (hardest, mostly sunni-islam, 13 scenarios, 4 traditions absent) — and
 #53 explicitly could not separate memorization from latent trainability. The clean random 50/50
-retrain **breaks that confound**: the on-bench lift is **~85–88% genuine cross-tradition transfer**,
-not 4× memorization. #53's +0.22 was the biased-sample **lower bound its own caveat predicted**.
+retrain **breaks that confound**: the on-bench lift is **~85–88% genuine transfer to held-out
+scenarios** (uniform across all 7 traditions), not 4× memorization. #53's +0.22 was the biased-sample
+**lower bound its own caveat predicted**.
+
+**Scope (the split is scenario-level within each tradition):** every tradition contributes scenarios
+to both halves, so a held-out CI > 0 in all 7 traditions establishes generalization to unseen
+**scenarios** uniformly across the tradition set — it is **not** a cross-tradition-transfer claim. The
+stronger claim (a recipe learned on some traditions transferring to a tradition held out entirely)
+would need a **leave-one-tradition-out** ablation, which this experiment does **not** run (untested).
 
 ## 3. Deliverable decisions & honest caveats
 
@@ -75,7 +82,7 @@ late. Dominant line: the mining band ($92).
 1. **A biased holdout gives a biased bound, and a clean retrain is worth it.** #53's exposure
    pseudo-holdout was the best zero-spend proxy available, but its selection (filter-failures) both
    depressed and confounded the estimate. The $216 retrain converted a "~4× memorization, mostly-sunni"
-   caution into a "~85% cross-tradition transfer" result. Pre-registering the rule made the flip honest.
+   caution into a "~85% transfer to held-out scenarios" result. Pre-registering the rule made the flip honest.
 2. **`modal volume put` silently corrupts — verify volume-side.** (exp-58 scar.) The DPO-pairs upload
    was guarded by a SHA-256 + line-count round-trip computed *on the volume* (`verified_put.sh` +
    `modal_volume_verify.py`); the training log's loaded-pair count (60 steps = 480/8) is a second guard.
@@ -89,9 +96,11 @@ late. Dominant line: the mining band ($92).
 
 ## 7. Paper path
 
-- **§3.4 headline:** the recipe's on-bench lift is ~85–88% genuine cross-tradition transfer (held-out
-  SFT +0.78 / DPO +0.90, both cross positive, all 7 traditions), **revising** #53's memorization
-  reading to a heterogeneity one. Figures: `fig_transfer_{sft,dpo}.pdf`.
+- **§3.4 headline:** the recipe's on-bench lift is ~85–88% genuine transfer to held-out scenarios
+  (held-out SFT +0.78 / DPO +0.90, both cross positive, all 7 traditions' held-out CIs > 0),
+  **revising** #53's memorization reading to a heterogeneity one — stated as scenario-level
+  generalization, **not** cross-tradition transfer (leave-one-tradition-out untested). Figures:
+  `fig_transfer_{sft,dpo}.pdf`.
 - Report the shipped-vs-companion bound and the DPO-increment judge-alignment caveat plainly.
 - **Not done (out of scope):** re-measuring the shipped full-data model on a holdout (would need a
   second full retrain); DPO's OOD value (Experiment B / AFB, already in hand).
