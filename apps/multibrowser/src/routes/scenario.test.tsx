@@ -2,7 +2,7 @@ import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, within } from "@testing-library/react";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
-import { REPO } from "../lib/constants";
+import { REPO, PRESSURES } from "../lib/constants";
 
 const SHA = "deadbeef";
 afterEach(() => vi.unstubAllGlobals());
@@ -17,6 +17,17 @@ describe("scenario detail", () => {
     expect(screen.getByText(/judge guidance for JLS-001/)).toBeInTheDocument(); // in the Context collapsible
     expect(await screen.findByTestId("no-run")).toBeInTheDocument();
     expect(screen.getByTestId("scenario-responses").textContent ?? "").not.toMatch(/bands/i); // #51 no band names
+  });
+
+  it("falls back to the corpus (question + six pushes in canonical order) when there's no results run", async () => {
+    // The corpus browser must not depend on the results tier (Spec 7 M6): with no run, the main
+    // pane still shows the scenario's own question and the six pushes, in canonical order.
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"])));
+    const { container } = renderApp("/t/sunni-islam/JLS-001");
+    expect(await screen.findByTestId("corpus-fallback")).toBeInTheDocument();
+    expect(screen.getByText("turn1 for JLS-001")).toBeInTheDocument(); // the question
+    const order = [...container.querySelectorAll("[data-pressure]")].map((el) => el.getAttribute("data-pressure"));
+    expect(order).toEqual([...PRESSURES]); // six pushes, canonical order
   });
 
   it("lays out the inverted app-shell: a controls sidebar + a scenario/conversation main pane", async () => {

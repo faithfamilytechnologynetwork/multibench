@@ -145,6 +145,15 @@ per-cell verdicts, A/B compare, presets — lives on a **new run+scenario-scoped
 > run's score manifest (e.g. "N models × M conditions") with **no** raw-shard fetch; the full
 > grid + transcripts + verdicts are one tap away. This is a perf-driven deviation from the
 > plan's "compact summary grid" wording.
+>
+> **Amendment 2 (architect-approved, 2026-08-07 — SUPERSEDES the above, verify iter-3/4):** Waleed
+> directed the JaleesBench unification — the scenario page IS the responses view, not a link. The
+> shard is therefore **loaded on demand per scenario and auto-engaged** (rendered on load, no click
+> gate), superseding the 2026-08-06 "no eager per-scenario shard fetch" ruling. Accepted cost:
+> ~220 KB/scenario of bandwidth on the raw tier, which is **off the GitHub API rate budget** (fetched
+> via `raw`) and **baked-first** (same-origin when the bundle is deployed). Plain corpus browsing
+> (the tradition index / a scenario with no results run) still pays nothing — the fetch only fires on
+> a scenario that has a results run.
 
 `/results` gains a **drill-down** toward the raw browser: the leaderboard has only
 per-tradition granularity, so its per-tradition rows link to `/t/<tradition>` (→ scenario →

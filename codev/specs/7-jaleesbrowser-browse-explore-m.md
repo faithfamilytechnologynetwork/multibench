@@ -328,6 +328,14 @@ themes); an "about this benchmark" panel; RTL/Arabic.
   search params**; result counts shown.
 - **M6.** Scenario **detail**: turn-1, six pressures in canonical order, judge-guidance, with
   tags/identity/locus; malformed scenario → inline notice, not a crash.
+  > **Amendment (architect-approved, 2026-08-07 — Waleed-directed JaleesBench unification, Spec 51
+  > verify iter-4):** the scenario page is now a two-pane responses view. When a results run exists,
+  > the question and the six pushes are carried by the **conversation flow** (they ARE the USER turns
+  > of the transcript) rather than shown as standalone corpus sections; when there is **no results
+  > run** (or the runs query fails/rate-limits), the main pane **falls back to the corpus content** —
+  > turn-1 + the six pushes in canonical order — so the corpus browser never depends on the results
+  > tier (drop-in tradition contract). M6's guarantee (question + six pushes + judge-guidance + tags,
+  > malformed → inline notice) holds via that fallback; judge-guidance + tags always render.
 - **M7. Freshness:** a tradition added/edited on `main` appears **without redeploy** while the
   app is open — within the **SHA `refetchInterval`** (default ~5 min) or sooner on window
   focus/reconnect, because SHA-keyed queries refetch when the polled SHA changes (§5.2).

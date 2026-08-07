@@ -1,4 +1,5 @@
-import { Link, Outlet } from "@tanstack/react-router";
+import { useEffect, useRef } from "react";
+import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { Github } from "lucide-react";
 import { REF, REPO } from "../lib/constants";
 import { useLatestSha } from "../lib/queries";
@@ -8,6 +9,12 @@ export function RootLayout() {
   // falling back to the configured ref — so the link always matches the source the UI is showing.
   const { data: sha } = useLatestSha();
   const ref = sha ?? REF;
+
+  // `main` is the app's scroll container (h-dvh shell) — its scrollTop would otherwise persist across
+  // route changes. Reset it to the top on every pathname change.
+  const mainRef = useRef<HTMLElement>(null);
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  useEffect(() => { if (mainRef.current) mainRef.current.scrollTop = 0; }, [pathname]);
   return (
     // Viewport-height app shell: the header is fixed; the scroll lives INSIDE (main for normal pages,
     // or a page's own panes). So `document` never overflows — a page fits one screen; scrollbars do
@@ -38,7 +45,7 @@ export function RootLayout() {
       </header>
       {/* Fallback scroll container: normal pages scroll HERE (not the document). A page that fills
           `h-full` (the scenario page) makes main non-scrolling and owns its internal scroll instead. */}
-      <main className="mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-4 py-6">
+      <main ref={mainRef} className="mx-auto min-h-0 w-full max-w-6xl flex-1 overflow-y-auto px-4 py-6">
         <Outlet />
       </main>
     </div>

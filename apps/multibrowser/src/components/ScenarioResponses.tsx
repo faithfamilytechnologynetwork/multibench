@@ -1,12 +1,12 @@
 import { Link } from "@tanstack/react-router";
 import type { RawSelection } from "../lib/rawSelection";
 import type { RawCatalog, RawShard } from "../lib/rawModel";
-import type { Notice as NoticeT, ScenarioMeta } from "../lib/model";
+import type { Notice as NoticeT, PressureMap, ScenarioMeta } from "../lib/model";
+import { PRESSURES, PRESSURE_GLOSSES } from "../lib/constants";
 import { RawComparison } from "./RawComparison";
 import { Collapsible } from "./Collapsible";
 import { Markdown } from "./Markdown";
 import { Notice, Notices } from "./Notice";
-import { CenteredSpinner } from "./Loading";
 
 export type ResponsesStatus = "loading" | "no-run" | "ready" | "error";
 
@@ -17,7 +17,8 @@ export type ResponsesStatus = "loading" | "no-run" | "ready" | "error";
  * `RawComparison`), or a loading/no-run/error state. Controls live in the sidebar (`ScenarioControls`).
  */
 export function ScenarioResponses({
-  status, catalog, shard, sel, scenarioId, meta, judgeGuidance, guidanceWhere, runId, traditionId, dataNotices, sourceNotices,
+  status, catalog, shard, sel, scenarioId, meta, judgeGuidance, guidanceWhere, runId, traditionId,
+  turn1, turn1Where, pressures, pressuresWhere, dataNotices, sourceNotices,
 }: {
   status: ResponsesStatus;
   catalog: RawCatalog | null;
@@ -29,6 +30,10 @@ export function ScenarioResponses({
   guidanceWhere: string;
   runId: string | null;
   traditionId: string;
+  turn1: string | null;
+  turn1Where: string;
+  pressures: PressureMap;
+  pressuresWhere: string;
   dataNotices: NoticeT[];
   sourceNotices: NoticeT[];
 }) {
@@ -68,16 +73,18 @@ export function ScenarioResponses({
           always surfaced, even before/without a results run (display-first). */}
       {dataNotices.length > 0 && <Notices notices={dataNotices} />}
 
-      {status === "loading" && <CenteredSpinner label="Loading responses…" />}
-
-      {status === "no-run" && (
-        <p className="text-sm italic text-default-400" data-testid="no-run">
-          No judging results yet — model transcripts and judge verdicts will appear here once a results run is published.
-        </p>
-      )}
-
-      {status === "error" && dataNotices.length === 0 && (
-        <Notice notice={{ severity: "error", scope: "results-raw", where: scenarioId, message: "Couldn't load the responses for this scenario." }} />
+      {/* No conversation (no results run / still loading / failed) → the corpus browser must NOT go
+          blank: fall back to the scenario's own content — the question + the six pushes (Spec 7 M6,
+          drop-in tradition contract). When a run exists, the conversation below carries these. */}
+      {status !== "ready" && (
+        <>
+          {status === "loading" && <p className="text-sm text-default-400" data-testid="responses-status">Loading model responses…</p>}
+          {status === "no-run" && <p className="text-sm italic text-default-400" data-testid="no-run">No judging results yet — showing the scenario; model transcripts + verdicts appear once a results run is published.</p>}
+          {status === "error" && dataNotices.length === 0 && (
+            <Notice notice={{ severity: "error", scope: "results-raw", where: scenarioId, message: "Couldn't load the responses for this scenario." }} />
+          )}
+          <CorpusFallback turn1={turn1} turn1Where={turn1Where} pressures={pressures} pressuresWhere={pressuresWhere} />
+        </>
       )}
 
       {status === "ready" && catalog && sel && (
@@ -98,6 +105,39 @@ export function ScenarioResponses({
           )}
         </>
       )}
+    </div>
+  );
+}
+
+/** Corpus fallback when there's no conversation to show: the scenario's own question + the six
+ *  pushes (canonical order), straight from the tradition files — so the browser never goes blank. */
+function CorpusFallback({ turn1, turn1Where, pressures, pressuresWhere }: {
+  turn1: string | null; turn1Where: string; pressures: PressureMap; pressuresWhere: string;
+}) {
+  return (
+    <div className="flex flex-col gap-4" data-testid="corpus-fallback">
+      <section className="flex flex-col gap-1">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-default-500">The question</h2>
+        {turn1 != null
+          ? <Markdown>{turn1}</Markdown>
+          : <Notice notice={{ severity: "error", scope: "section", where: turn1Where, message: "Turn-1 opening is missing or empty." }} />}
+      </section>
+      <section className="flex flex-col gap-2" data-testid="pressures">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-default-500">The six pushes</h2>
+        {PRESSURES.map((p) => (
+          <div key={p} className="rounded border border-default-200 p-3" data-pressure={p}>
+            <h3 className="text-sm">
+              <span className="font-mono">{p}</span>
+              <span className="ml-1 text-xs font-normal text-default-400">— {PRESSURE_GLOSSES[p]}</span>
+            </h3>
+            <div className="mt-1 text-sm text-default-600">
+              {pressures[p] != null
+                ? <Markdown>{pressures[p] as string}</Markdown>
+                : <Notice notice={{ severity: "error", scope: "section", where: `${pressuresWhere} → ## ${p}`, message: `Pressure “${p}” is missing or empty.` }} />}
+            </div>
+          </div>
+        ))}
+      </section>
     </div>
   );
 }

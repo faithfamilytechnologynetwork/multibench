@@ -3,7 +3,9 @@ import { catalogScoreColor } from "../lib/rampColor";
 import { findCell, type RawCatalog, type RawCell, type RawShard } from "../lib/rawModel";
 import { Markdown } from "./Markdown";
 
-const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+// Show a leading "+" only when the catalog's scale is SIGNED (min < 0, e.g. MultiBench −1…+1);
+// an all-nonnegative scale (e.g. AFB 0–4) renders "3", never "+3" (catalog-generic promise, #54).
+const fmtScore = (n: number, signedScale: boolean) => (signedScale && n > 0 ? `+${n}` : `${n}`);
 
 /** Mean of a cell's verdict scores at one scope (rounded 2dp), or null if none. */
 function scopeMean(cell: RawCell | undefined, scopeId: string | undefined): number | null {
@@ -23,7 +25,7 @@ export function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"]
         <span className="inline-flex h-5 min-w-9 shrink-0 items-center justify-center rounded px-1 font-mono text-xs font-semibold text-default-900"
           role="img" aria-label={`score ${verdict.score}`}
           style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }}>
-          {signed(verdict.score)}
+          {fmtScore(verdict.score, catalog.scale.min < 0)}
         </span>
         <span className="text-default-500">{judge?.label ?? verdict.judge}</span>
         {judge && !judge.fullGrid && (
@@ -115,7 +117,8 @@ function ColumnHeader({ id, label, cell, catalog }: { id: string; label: string;
   const scopes = catalog.scopes;
   const init = scopeMean(cell, scopes[0]?.id);
   const post = scopeMean(cell, scopes[scopes.length - 1]?.id);
-  const part = (v: number | null, lbl?: string) => (v === null ? "—" : `${signed(v)} ${lbl ?? ""}`.trim());
+  const signedScale = catalog.scale.min < 0;
+  const part = (v: number | null, lbl?: string) => (v === null ? "—" : `${fmtScore(v, signedScale)} ${lbl ?? ""}`.trim());
   return (
     <h3 className="text-base font-semibold text-primary" data-testid="cmp-column" data-subject={id}>
       {label}

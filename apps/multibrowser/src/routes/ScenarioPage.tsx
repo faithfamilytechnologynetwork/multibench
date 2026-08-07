@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLatestSha, useScenario, useTradition, useScenarioRaw } from "../lib/queries";
@@ -28,6 +28,10 @@ export function ScenarioPage() {
   const scenario = scenQ.data;
   const raw = useScenarioRaw(traditionId, scenarioId); // default run + this scenario's shard (on demand)
   const [filter, setFilter] = useState("");
+  // The main pane is its OWN scroll container; reset it to the top when the scenario changes
+  // (same route, changing param → the component stays mounted and scrollTop would persist).
+  const mainRef = useRef<HTMLElement>(null);
+  useEffect(() => { if (mainRef.current) mainRef.current.scrollTop = 0; }, [scenarioId]);
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error) ?? asRateLimit(scenQ.error);
   const otherError = !rl && (shaQ.error || tradQ.error || scenQ.error);
@@ -131,7 +135,8 @@ export function ScenarioPage() {
         </aside>
 
         {/* RIGHT: the scenario + the conversation (its own scrollbar). Header + Context always show. */}
-        <section className="min-w-0 min-[860px]:h-full min-[860px]:flex-1 min-[860px]:overflow-y-auto min-[860px]:pr-1" data-testid="scenario-main">
+        <section ref={mainRef} tabIndex={0} aria-label="Model responses"
+          className="min-w-0 rounded focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary min-[860px]:h-full min-[860px]:flex-1 min-[860px]:overflow-y-auto min-[860px]:pr-1" data-testid="scenario-main">
           <ScenarioResponses
             status={
               !raw.runsSettled || (raw.loading && !raw.catalog) ? "loading"
@@ -142,6 +147,8 @@ export function ScenarioPage() {
             catalog={raw.catalog} shard={raw.shard} sel={sel}
             scenarioId={scenarioId} meta={scenario.meta} judgeGuidance={scenario.judgeGuidance}
             guidanceWhere={`${where}/judge-guidance.md`} runId={raw.runId} traditionId={traditionId}
+            turn1={scenario.turn1} turn1Where={`${where}/turn1.md`}
+            pressures={scenario.pressures} pressuresWhere={`${where}/pressures.md`}
             dataNotices={dataNotices} sourceNotices={sourceNotices}
           />
         </section>
