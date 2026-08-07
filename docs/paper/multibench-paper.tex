@@ -572,15 +572,22 @@ hard-tier cells that stay negative and classify whether the failure is the
 model's counsel or the rubric's strictness --- the direct test of the
 interpretation in \cref{sec:discussion}.
 
-\textbf{MultiWeights.} A distillation experiment now in progress asks
-whether recognition can be \emph{internalized} rather than prompted:
-fine-tuning an open-weights model on guided-framing counsel and measuring
-whether the unstated scores rise toward the guided ceiling. An early
-signal: how readily the guided register can be drawn from the base model
-already mirrors the three-tier taxonomy, tradition by tradition.
-% TODO: confirm the MultiWeights samplability claim against the experiment's
-% artifacts before submission (stated here from the programme's in-progress
-% notes; no published numbers yet).
+\textbf{MultiWeights.} A companion experiment answers whether recognition
+can be \emph{internalized} rather than prompted \citep{multiweights2026}:
+judge-filtered context distillation followed by on-policy DPO on
+Gemma-4-31B-it lifts unstated counsel toward the guided ceiling across all
+seven traditions at once. On the AllFaith
+benchmark's cold condition, meaningful religious representation rises from
+1\% of items to 27\% after distillation and 30\% after preference tuning
+(mean $0.113 \to 1.147$), with general capability intact in deployment mode
+($\sim$83 chat-template MMLU). A companion 50/50 retrain shows the lift is
+genuine generalization to held-out \emph{scenarios} rather than
+memorization: randomly held-out scenarios gain $+0.78$ after distillation
+and $+0.90$ after preference tuning, with every tradition's held-out CI
+above zero. The split is scenario-level \emph{within} each tradition, so
+this establishes uniform scenario-level transfer --- not cross-tradition
+transfer, which would require a leave-one-tradition-out ablation we do
+not run.
 
 \section*{Acknowledgements}
 
