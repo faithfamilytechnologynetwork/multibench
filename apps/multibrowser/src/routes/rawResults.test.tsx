@@ -62,17 +62,13 @@ describe("raw-results view", () => {
     expect(screen.getByTestId("score-grid")).toBeInTheDocument(); // the cell-score grid overview
   });
 
-  it("the grid navigates: clicking a chip opens that cell's context panel + transcript", async () => {
+  it("the grid navigates: clicking a chip opens that cell's transcript", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001`);
     await screen.findByRole("heading", { name: "BUD-001" });
-    // default cell (claude-sonnet-5 / unstated) has no context prefix
-    expect(screen.queryByText(/what the model was told/i)).not.toBeInTheDocument();
-    // click the grid chip for the stated gpt-5.6-terra cell → its context panel + transcript appear
+    // click the grid chip for the stated gpt-5.6-terra cell → its transcript appears
     fireEvent.click(screen.getByTitle(/gpt-5\.6-terra · stated \/ secularize/));
-    expect(await screen.findByText(/what the model was told/i)).toBeInTheDocument();
-    expect(screen.getByText(/practising Buddhist/)).toBeInTheDocument(); // the context text
-    expect(screen.getByText(/weigh it against your values/)).toBeInTheDocument(); // the new transcript
+    expect(await screen.findByText(/weigh it against your values/)).toBeInTheDocument(); // that cell's transcript
   });
 
   it("A/B compare: pinning a second subject shows two response columns", async () => {
@@ -82,7 +78,7 @@ describe("raw-results view", () => {
     expect(screen.getAllByTestId("cmp-column")).toHaveLength(1); // single-model view
     fireEvent.change(screen.getByLabelText(/Compare/), { target: { value: "gpt-5.6-terra" } });
     await waitFor(() => expect(screen.getAllByTestId("cmp-column")).toHaveLength(2));
-    expect(screen.getAllByTestId("cmp-column").map((d) => d.textContent)).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
+    expect(screen.getAllByTestId("cmp-column").map((d) => d.getAttribute("data-subject"))).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
   });
 
   it("selection is a deep link: the search carries a/scope/judge + condition axes", async () => {
@@ -103,7 +99,6 @@ describe("raw-results view", () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001?a=gpt-5.6-terra&framing=stated&pressure=secularize&scope=full&judge=gemini`);
     expect(await screen.findByText(/weigh it against your values/)).toBeInTheDocument(); // gpt/stated transcript
-    expect(screen.getByText(/what the model was told/i)).toBeInTheDocument(); // its context panel
   });
 
   it("a preset renders a deep-link into a cell", async () => {
@@ -120,7 +115,7 @@ describe("raw-results view", () => {
     await screen.findByRole("heading", { name: "BUD-001" });
     await userEvent.click(within(screen.getByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ }));
     await waitFor(() => expect(screen.getAllByTestId("cmp-column")).toHaveLength(2)); // A vs B restored
-    expect(screen.getAllByTestId("cmp-column").map((d) => d.textContent)).toEqual(["gpt-5.6-terra", "claude-sonnet-5"]);
+    expect(screen.getAllByTestId("cmp-column").map((d) => d.getAttribute("data-subject"))).toEqual(["gpt-5.6-terra", "claude-sonnet-5"]);
     expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // gpt/unstated transcript
     const s = router.state.location.search as Record<string, string>;
     expect(s).toMatchObject({ a: "gpt-5.6-terra", b: "claude-sonnet-5", framing: "unstated", scope: "turn1" });
@@ -131,7 +126,7 @@ describe("raw-results view", () => {
     renderApp(`/results/${RUN}/buddhism/BUD-001?a=claude-sonnet-5&b=gpt-5.6-terra&framing=unstated&pressure=secularize&scope=turn1`);
     await screen.findByRole("heading", { name: "BUD-001" });
     await screen.findByTestId("raw-comparison");
-    expect(screen.getAllByTestId("cmp-column").map((d) => d.textContent)).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
+    expect(screen.getAllByTestId("cmp-column").map((d) => d.getAttribute("data-subject"))).toEqual(["claude-sonnet-5", "gpt-5.6-terra"]);
     expect(screen.getByText(/thinking about leaving/)).toBeInTheDocument();       // A (claude)
     expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // B (gpt)
   });
@@ -167,42 +162,36 @@ describe("raw-results view", () => {
     expect(screen.getAllByText("gpt-5.6-terra").length).toBeGreaterThan(0); // judge label (pill + verdict)
   });
 
-  it("the scenario page embeds a lazy results section with a cross-link to the explorer", async () => {
+  it("the scenario page embeds the results section (auto-engaged) with a cross-link to the explorer", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {
       ...traditionFiles("buddhism", ["BUD-001"]),
       ...resultsFiles(RUN, {}),
     }));
     renderApp("/t/buddhism/BUD-001");
-    const section = await screen.findByTestId("scenario-responses");
-    // Contentful expand button from the SCORE manifest (5 subjects × 3×6 = 18), no raw fetch yet.
-    const expand = await within(section).findByTestId("responses-expand");
-    expect(expand).toHaveTextContent(/5 models × 18 conditions/);
-    // Cross-link into the full generic explorer for THIS scenario.
-    const link = within(section).getByRole("link", { name: /full explorer/i });
+    // Once the runs query settles, the cross-link into the full generic explorer appears.
+    const link = await screen.findByRole("link", { name: /full explorer/i });
     expect(link).toHaveAttribute("href", expect.stringContaining(`/results/${RUN}/buddhism/BUD-001`));
-    // Lazy: the heavy body (transcript+verdicts) is not rendered until engaged.
-    expect(within(section).queryByTestId("responses-body")).toBeNull();
+    // Auto-engaged: it IS the main pane now — no click gate (the body loads on mount).
+    expect(screen.queryByTestId("responses-expand")).toBeNull();
   });
 
-  it("expands in place to show the model's response + interleaved verdicts (jalees unification)", async () => {
+  it("shows the model's response + interleaved verdicts in the main pane (auto-engaged, jalees unification)", async () => {
     // The core of the redirect: a reader answers "how did this model respond?" ON the scenario page.
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp("/t/buddhism/BUD-001");
-    await userEvent.click(await screen.findByTestId("responses-expand"));
-    // Lazy-loaded shard → interleaved comparison renders: the default cell's transcript + verdicts.
+    // No click — the interleaved comparison renders on load: the default cell's transcript + verdicts.
     expect(await screen.findByTestId("raw-comparison")).toBeInTheDocument();
     expect(await screen.findByText(/thinking about leaving/)).toBeInTheDocument(); // claude/unstated/secularize transcript
     expect(screen.getAllByTestId("verdict-stage").length).toBeGreaterThanOrEqual(1); // scope-interleaved verdicts
     expect((await screen.findAllByTestId("verdict")).length).toBeGreaterThanOrEqual(2); // gemini + opus (turn-1)
   });
 
-  it("compares two models side-by-side in the embedded section (single→A/B)", async () => {
+  it("compares two models side-by-side from the sidebar Model B control (single→A/B)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp("/t/buddhism/BUD-001");
-    await userEvent.click(await screen.findByTestId("responses-expand"));
     await screen.findByTestId("raw-comparison");
-    // Pick a compare model B → the second column appears (gpt has a cell at unstated/secularize too).
-    await userEvent.selectOptions(screen.getByLabelText("Compare with"), "gpt-5.6-terra");
+    // The compare control lives in the LEFT sidebar now; picking Model B adds the second column.
+    await userEvent.selectOptions(screen.getByRole("combobox", { name: /Model B/ }), "gpt-5.6-terra");
     await waitFor(() => expect(screen.getAllByTestId("cmp-column").length).toBe(2));
     expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // gpt's response
   });

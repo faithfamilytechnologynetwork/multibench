@@ -1,41 +1,51 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { catalogScoreColor } from "../lib/rampColor";
 import { findCell, type RawCatalog, type RawCell, type RawShard } from "../lib/rawModel";
-import { Collapsible } from "./Collapsible";
 import { Markdown } from "./Markdown";
 
-/** One judge verdict: score chip + judge (sample-badged) + scope + summary + collapsible rationale. */
+// Show a leading "+" only when the catalog's scale is SIGNED (min < 0, e.g. MultiBench −1…+1);
+// an all-nonnegative scale (e.g. AFB 0–4) renders "3", never "+3" (catalog-generic promise, #54).
+const fmtScore = (n: number, signedScale: boolean) => (signedScale && n > 0 ? `+${n}` : `${n}`);
+
+/** Mean of a cell's verdict scores at one scope (rounded 2dp), or null if none. */
+function scopeMean(cell: RawCell | undefined, scopeId: string | undefined): number | null {
+  if (!cell || !scopeId) return null;
+  const vs = cell.verdicts.filter((v) => v.scope === scopeId);
+  if (!vs.length) return null;
+  return Math.round((vs.reduce((s, v) => s + v.score, 0) / vs.length) * 100) / 100;
+}
+
+/** One judge verdict: score chip + signed number + judge, then the summary and rationale inline.
+ *  Numeric score only (no band names — MultiBench policy); the chip carries an aria-label. */
 export function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"][number]; catalog: RawCatalog }) {
   const judge = catalog.judges.find((j) => j.key === verdict.judge);
-  const scope = catalog.scopes.find((s) => s.id === verdict.scope);
   return (
-    <div className="flex flex-col gap-1 rounded-md border border-default-200 p-3" data-testid="verdict" data-judge={verdict.judge}>
+    <div className="flex flex-col gap-1" data-testid="verdict" data-judge={verdict.judge}>
       <div className="flex items-center gap-2 text-sm">
-        <span className="inline-block h-4 w-4 rounded" style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }} aria-hidden />
-        <span className="font-mono tabular-nums">{verdict.score}</span>
-        <span className="font-medium">{judge?.label ?? verdict.judge}</span>
+        <span className="inline-flex h-5 min-w-9 shrink-0 items-center justify-center rounded px-1 font-mono text-xs font-semibold text-default-900"
+          role="img" aria-label={`score ${verdict.score}`}
+          style={{ backgroundColor: catalogScoreColor(catalog.scale, catalog.ramp, verdict.score) }}>
+          {fmtScore(verdict.score, catalog.scale.min < 0)}
+        </span>
+        <span className="text-default-500">{judge?.label ?? verdict.judge}</span>
         {judge && !judge.fullGrid && (
-          <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-700" title="honest-sample judge (not a full grid)">sample</span>
+          <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-800" title="honest-sample judge — scored only a subset, not the full grid">sample</span>
         )}
-        <span className="text-default-400">· {scope?.label ?? verdict.scope}</span>
       </div>
-      {verdict.summary && <p className="text-sm text-default-700">{verdict.summary}</p>}
-      {verdict.rationale && <Collapsible title="Rationale"><Markdown>{verdict.rationale}</Markdown></Collapsible>}
+      {verdict.summary && <p className="text-sm font-medium text-default-700">{verdict.summary}</p>}
+      {verdict.rationale && <div className="text-sm text-default-600"><Markdown>{verdict.rationale}</Markdown></div>}
     </div>
   );
 }
 
-// ── jalees-style interleaved comparison ──────────────────────────────────────────────────────
+// ── jalees-style conversation (the reference's main pane) ─────────────────────────────────────
 
 /**
- * Two models' responses to ONE scenario cell, laid out in conversation order (a faithful port of
- * jaleesbrowser's `Comparison`): the shared USER prompts (question, then the pressure push) render
- * ONCE full-width (both models got the identical prompt); the two ASSISTANT responses sit
- * side-by-side; and the judges' verdicts are **interleaved** — the initial-scope (turn-1) verdict
- * right after the first response, the post-pressure verdict after the last. `b === null` collapses
- * to a single-model view. A missing cell/turn/verdict fails soft ("no data"), never a crash.
- *
- * Catalog-generic: subjects/scopes/scale/ramp all come from `catalog` — no MultiBench vocab.
+ * The conversation for one scenario cell, in order (a faithful port of jaleesbrowser): shared USER
+ * turns (the question, then the selected pressure push) render ONCE full-width; ASSISTANT responses
+ * sit side-by-side when comparing; and the judges' verdicts are **interleaved** — the first scope's
+ * verdicts right after the first response, the remaining scopes' after the last. `b === null` is the
+ * single-model view. Catalog-generic (subjects/scopes/scale/ramp from `catalog`, no MB vocab).
  */
 export function RawComparison({ catalog, shard, a, b, conditions }: {
   catalog: RawCatalog; shard: RawShard; a: string; b: string | null; conditions: Record<string, string>;
@@ -47,10 +57,8 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
   const labelB = b ? (catalog.subjects.find((s) => s.id === b)?.label ?? b) : "";
   const maxTurns = Math.max(cellA?.transcript.length ?? 0, cellB?.transcript.length ?? 0);
 
-  // Scope interleave (generic over any count): the FIRST scope (turn-1) sits after the first
-  // assistant response; ALL remaining scopes sit after the last. With 2 scopes that's turn-1 then
-  // full (the MB case); with ≥3 scopes no middle scope is ever dropped (catalog-generic invariant,
-  // AFB #54); with 1 scope only the first stage renders.
+  // Scope interleave, generic over count: first scope after the first response; all remaining after
+  // the last (2 scopes → first-response then after-pressure; ≥3 → no middle scope dropped, AFB #54).
   const scopes = catalog.scopes;
   const initialScope = scopes[0];
   const restScopes = scopes.slice(1);
@@ -61,18 +69,17 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
   const firstAssistant = assistantIdx[0];
   const lastAssistant = assistantIdx[assistantIdx.length - 1];
 
-  // Same conditions (incl. framing) for both columns → the "what the model was told" context is shared.
-  const ctxKey = cellA?.contextKey ?? cellB?.contextKey;
-  const context = ctxKey ? shard.contexts[ctxKey] : undefined;
-
   const colGrid = single ? "" : "sm:grid-cols-2";
 
   const verdictStage = (scope: { id: string; label: string } | undefined, key: string): ReactNode => {
     if (!scope) return null;
     return (
-      <div className="flex flex-col gap-2" data-testid="verdict-stage" data-scope={scope.id} key={key}>
-        <p className="text-xs font-medium uppercase tracking-wide text-default-500">Judges — {scope.label}</p>
-        <div className={`grid gap-2 ${colGrid}`}>
+      <div className="flex flex-col gap-3" data-testid="verdict-stage" data-scope={scope.id} key={key}>
+        <p className="border-b border-default-200 pb-1 text-xs font-semibold uppercase tracking-wide text-default-500"
+          title={`scope id: ${scope.id}`}>
+          Judges — {scope.label}
+        </p>
+        <div className={`grid gap-6 ${colGrid}`}>
           <VerdictColumn cell={cellA} scope={scope.id} catalog={catalog} />
           {!single && <VerdictColumn cell={cellB} scope={scope.id} catalog={catalog} />}
         </div>
@@ -81,25 +88,20 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
   };
 
   const rows: ReactNode[] = [
-    <div className={`grid gap-2 ${colGrid}`} key="headers" data-testid="cmp-headers">
-      <ColumnHeader label={labelA} present={!!cellA} />
-      {!single && <ColumnHeader label={labelB} present={!!cellB} />}
+    <div className={`grid gap-6 ${colGrid}`} key="headers" data-testid="cmp-headers">
+      <ColumnHeader id={a} label={labelA} cell={cellA} catalog={catalog} />
+      {!single && <ColumnHeader id={b!} label={labelB} cell={cellB} catalog={catalog} />}
     </div>,
   ];
-  if (context) {
-    rows.push(
-      <Collapsible key="ctx" title="Context — what the model was told"><Markdown>{context}</Markdown></Collapsible>,
-    );
-  }
   for (let i = 0; i < maxTurns; i++) {
     if (roleAt(i) === "user") {
       const turn = cellA?.transcript[i] ?? cellB?.transcript[i];
-      if (turn) rows.push(<SharedTurn key={`t${i}`} content={turn.content} />);
+      if (turn) rows.push(<TurnBlock key={`t${i}`} role="user" content={turn.content} />);
     } else {
       rows.push(
-        <div className={`grid gap-2 ${colGrid}`} key={`t${i}`}>
-          <TurnCell content={cellA?.transcript[i]?.content} label={labelA} />
-          {!single && <TurnCell content={cellB?.transcript[i]?.content} label={labelB} />}
+        <div className={`grid gap-6 ${colGrid}`} key={`t${i}`}>
+          <TurnBlock role="assistant" content={cellA?.transcript[i]?.content} />
+          {!single && <TurnBlock role="assistant" content={cellB?.transcript[i]?.content} />}
         </div>,
       );
       if (i === firstAssistant) rows.push(verdictStage(initialScope, `v-init-${i}`));
@@ -107,32 +109,52 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
     }
   }
 
-  return <div className="flex flex-col gap-3" data-testid="raw-comparison">{rows}</div>;
+  return <div className="flex flex-col gap-4" data-testid="raw-comparison">{rows}</div>;
 }
 
-function ColumnHeader({ label, present }: { label: string; present: boolean }) {
+/** Model name (highlighted) + an inline score summary: "ansari (+1 first response → +0.5 after…)". */
+function ColumnHeader({ id, label, cell, catalog }: { id: string; label: string; cell: RawCell | undefined; catalog: RawCatalog }) {
+  const scopes = catalog.scopes;
+  const init = scopeMean(cell, scopes[0]?.id);
+  const post = scopeMean(cell, scopes[scopes.length - 1]?.id);
+  const signedScale = catalog.scale.min < 0;
+  const part = (v: number | null, lbl?: string) => (v === null ? "—" : `${fmtScore(v, signedScale)} ${lbl ?? ""}`.trim());
   return (
-    <h3 className="text-sm font-semibold text-default-700" data-testid="cmp-column">
-      {label}{!present && <span className="ml-1 font-normal text-default-400">· no data</span>}
+    <h3 className="text-base font-semibold text-primary" data-testid="cmp-column" data-subject={id}>
+      {label}
+      {cell ? (
+        <span className="ml-1.5 text-sm font-normal text-default-500">
+          ({part(init, scopes[0]?.label.toLowerCase())} → {part(post, scopes[scopes.length - 1]?.label.toLowerCase())})
+        </span>
+      ) : (
+        <span className="ml-1.5 text-sm font-normal text-default-400">· no data</span>
+      )}
     </h3>
   );
 }
 
-function SharedTurn({ content }: { content: string }) {
-  return (
-    <div className="rounded-md bg-default-100 p-3" data-role="user">
-      <div className="mb-1 text-xs uppercase tracking-wide text-default-400">User</div>
-      <Markdown>{content}</Markdown>
-    </div>
-  );
-}
+const TRUNCATE_CHARS = 700;
 
-function TurnCell({ content, label }: { content: string | undefined; label: string }) {
-  if (content === undefined) return <div className="rounded-md border border-dashed border-default-200 p-3 text-sm text-default-400" aria-hidden>no response</div>;
+/** A conversation turn: a bordered block with a role label; long assistant answers get "Show more". */
+function TurnBlock({ role, content }: { role: "user" | "assistant"; content: string | undefined }) {
+  const [open, setOpen] = useState(false);
+  if (content === undefined) {
+    return <div className="rounded-md border border-dashed border-default-200 p-4 text-sm italic text-default-400" aria-hidden>no response</div>;
+  }
+  const longAnswer = role === "assistant" && content.length > TRUNCATE_CHARS;
+  const shown = longAnswer && !open ? content.slice(0, TRUNCATE_CHARS) : content;
   return (
-    <div className="rounded-md bg-primary-50 p-3" data-role="assistant">
-      <div className="mb-1 text-xs uppercase tracking-wide text-default-400">Assistant · {label}</div>
-      <Markdown>{content}</Markdown>
+    <div className="rounded-md border border-default-200 p-4" data-role={role}>
+      <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-default-400">
+        {role === "user" ? "User" : "Assistant"}
+      </div>
+      <Markdown>{shown}</Markdown>
+      {longAnswer && (
+        <button type="button" onClick={() => setOpen((v) => !v)} data-testid="show-more"
+          className="mt-2 text-sm font-medium text-primary hover:underline">
+          {open ? "Show less" : "Show more"}
+        </button>
+      )}
     </div>
   );
 }
@@ -140,5 +162,5 @@ function TurnCell({ content, label }: { content: string | undefined; label: stri
 function VerdictColumn({ cell, scope, catalog }: { cell: RawCell | undefined; scope: string; catalog: RawCatalog }) {
   const verdicts = cell?.verdicts.filter((v) => v.scope === scope) ?? [];
   if (verdicts.length === 0) return <p className="text-sm text-default-400">No verdicts for this stage.</p>;
-  return <div className="flex flex-col gap-2">{verdicts.map((v, i) => <VerdictCard key={i} verdict={v} catalog={catalog} />)}</div>;
+  return <div className="flex flex-col gap-3">{verdicts.map((v, i) => <VerdictCard key={i} verdict={v} catalog={catalog} />)}</div>;
 }

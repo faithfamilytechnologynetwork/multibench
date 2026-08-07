@@ -89,9 +89,12 @@ interleaved comparison (`RawComparison`) and cross-link to each other.
   at runtime (see the section above and [`../../results/README.md`](../../results/README.md)). The
   run shown defaults to the newest by `generated_at`; a **run selector** (shown when more than one run
   is published) switches runs, and a specific run can also be pinned with `?run=<id>`.
-  Each scenario page (`/t/<tradition>/<scenario>`) embeds a **`ScenarioResponses`** section (#51,
-  above) — the models' transcripts + judge verdicts, in context, lazy-loaded on expand. The old
-  `loadResults()`/`Scenario.results` seam is deprecated (always `null`, unread) and slated for cleanup.
+  Each scenario page (`/t/<tradition>/<scenario>`) IS the primary responses view (#51, above): a
+  jaleesbrowser-style two-pane app-shell — controls + guided-example presets on the left, the
+  scenario + the models' conversation (transcripts + judges' verdicts) on the right, the shard
+  loaded on demand per scenario (auto-engaged). Without a results run it falls back to the corpus
+  (question + pushes). The old `loadResults()`/`Scenario.results` seam is deprecated (always `null`,
+  unread) and slated for cleanup.
 - **Routing** is code-based TanStack Router (`src/router.tsx`) for a no-codegen, fully testable
   setup; corpus filters and results selection live in the URL as flat params
   (`?pillars=a&pillars=b`, `?pressure=flattery&sort=post.desc&expanded=claude-sonnet-5`).
@@ -161,8 +164,9 @@ src/lib/      constants, model, parse (tolerant parsers), github (fetch boundary
 src/routes/   RootLayout, IndexPage, TraditionPage, ScenarioPage, ResultsPage,
               RawResultsPage (#51), NotFound (+ tests)
 src/components/  Markdown, Notice, ErrorBoundary, RateLimitBanner, TraditionCard, FilterBar,
-                 ScenarioList/Row, ScenarioHeader, PressureSection, FramingsPanel, Collapsible, Loading,
-                 RawComparison (jalees-style interleaved responses+verdicts) + ScenarioResponses
-                 (the scenario page's embedded, lazy results section) [#51]
+                 ScenarioList/Row, Collapsible, Loading,
+                 RawComparison (jalees-style interleaved responses+verdicts),
+                 ScenarioControls (scenario-page sidebar: pickers + guided-example presets),
+                 ScenarioResponses (scenario-page main pane: scenario + Context + conversation) [#51]
 scripts/      bake-and-deploy.sh (#51 raw-tier bake + deploy)
 ```

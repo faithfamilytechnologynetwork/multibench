@@ -621,3 +621,27 @@ export function useRawScenario(
     queryFn: () => loadRawScenario(qc, sha as string, runId as string, group, item, expectedFingerprint),
   });
 }
+
+/**
+ * The scenario page's raw-data seam: resolves the default (most recent) results run and loads that
+ * scenario's shard on demand (cached per scenario). Returns everything the page needs to render the
+ * embedded responses; the SELECTION (model A/B + axes) is URL state owned by the page, not here.
+ */
+export function useScenarioRaw(traditionId: string, scenarioId: string) {
+  const sha = useLatestSha().data;
+  const runsQ = useResultsRuns(sha);
+  const runsSettled = !!sha && !runsQ.isLoading;
+  const runId = runsQ.data?.defaultRunId ?? null;
+  const scoreManifest = runsQ.data?.runs.find((r) => r.id === runId)?.manifest ?? null;
+  const fingerprint = scoreManifest?.fingerprint ?? null;
+  const on = runsSettled && !!runId;
+  const rawQ = useRawScenario(on ? sha : undefined, on ? runId! : undefined, traditionId, scenarioId, fingerprint);
+  return {
+    runsSettled,
+    runId,
+    catalog: rawQ.data?.catalog ?? null,
+    shard: rawQ.data?.shard ?? null,
+    notices: rawQ.data?.notices ?? [],
+    loading: !!on && rawQ.isLoading,
+  };
+}
