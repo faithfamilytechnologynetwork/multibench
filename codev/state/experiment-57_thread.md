@@ -216,3 +216,24 @@ the absolute credential path committed in the PUBLIC repo (defeats the finding +
 fail-fast/no-fallback rule). Fixed to **`${TAQWABENCH_ENV:?…}`** (fail-fast, no path in file) in all 4
 scripts. Verified: zero absolute /Users or taqwabench/.env paths anywhere in exp57 scripts+docs; all 9
 scripts pass bash -n. Items 2-4 unchanged. Commented + pinged. Awaiting re-verify → Waleed merge word.
+
+## 2026-08-07 — PR #68 MERGED (6d48053); then a SCOPE-CORRECTION docs follow-up
+
+PR #68 merged (merge commit **6d48053**), issue #57 auto-closed. Then Waleed flagged an **overreach**
+in the claim: I'd written "cross-tradition transfer." **The 50/50 split is scenario-level WITHIN each
+tradition** (each tradition contributes scenarios to both halves), so the result is
+transfer/generalization to held-out **SCENARIOS** (uniform across all 7 traditions), **NOT**
+cross-tradition transfer. The leave-one-tradition-out ablation that WOULD test cross-tradition
+generalization is **untested / HELD** (not planned).
+
+Docs-only PR off origin/main (branch `builder/experiment-57-docs`), architect-directed scope:
+- **paper `multiweights-paper.tex` §3.4**: corrected the term; added the scenario-level scope note
+  naming the untested leave-one-tradition-out ablation; **added the DPO stage** (held-out +0.90
+  [+0.82,+0.97], train-half +1.02, judge-alignment caveat verbatim); bound → **[+0.22,~+0.90]**;
+  **wired fig_transfer_dpo alongside fig_transfer_sft** (both final renders); removed a duplicate
+  scope-note paragraph. Abstract + discussion already used correct "held-out scenarios" framing.
+- **codev/reviews/57** + **experiments/57 notes.md**: same terminology correction + scope note.
+- **Rebuilt PDF** via `latexmk -xelatex -cd <abs path>` (never manual cd; fontspec needs xelatex) —
+  9pp clean; verified §3.4 text + two-panel Figure 4 render (read the PDF pages).
+- Committed a22ea7f. NEXT: push → docs-only PR → architect review + merge go (Waleed's green-light
+  covers it, no separate gate). **Cleanup still HELD until this lands.**
