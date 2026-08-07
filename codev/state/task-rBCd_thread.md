@@ -31,6 +31,14 @@ companion paper `docs/paper/multiweights-paper.tex` in the same dir.
   overclaim was corrected in PR #69; approved language is multiweights-paper.tex
   §3.4 L340-347. Paragraph ends with the leave-one-tradition-out caveat.
 
+## PR #71 review (architect, 2026-08-07)
+One required fix: opening "The distillation experiment this paragraph once
+anticipated is complete" was journey-narrative (paper must present final analysis,
+not the document's own history — standing Waleed rule). Replaced with a direct
+claim: "A companion experiment answers whether recognition can be internalized
+rather than prompted [MultiWeights]: ...". Rest of paragraph unchanged. Rebuilt
+PDF (xelatex, 0 undefined cites), pushed. Approved pending this fix.
+
 ## Status
 Docs-only change on `builder/task-rBCd` (branched at origin/main). PR opened,
 merge-commit convention. NOT merging until architect approves on the PR.
