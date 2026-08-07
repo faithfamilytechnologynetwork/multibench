@@ -1,7 +1,7 @@
 id: '51'
 title: multibrowser-raw-results-brows
 protocol: spir
-phase: verify
+phase: verified
 plan_phases:
   - id: phase_1
     title: >-
@@ -52,7 +52,7 @@ iteration: 1
 build_complete: true
 history: []
 started_at: '2026-08-06T07:30:57.553Z'
-updated_at: '2026-08-07T21:51:39.519Z'
+updated_at: '2026-08-07T21:51:40.763Z'
 force_advanced:
   phase: phase_6
   iteration: 3
