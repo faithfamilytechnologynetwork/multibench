@@ -1,0 +1,14 @@
+id: '76'
+title: experiment-prompt-fading-does-
+protocol: experiment
+phase: hypothesis
+plan_phases: []
+current_plan_phase: null
+gates:
+  experiment-complete:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-08T18:07:55.061Z'
+updated_at: '2026-08-08T18:07:55.062Z'
