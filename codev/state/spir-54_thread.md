@@ -214,6 +214,24 @@ Both flagged the FLAGSHIP spend bug (claude verified empirically):
   logged, not $, since OpenRouter cost needs a separate query — documented, not guessed).
 - Full suite 203 passed, ruff clean.
 
+### P2 consult iter-2 (claude APPROVE, codex REQUEST_CHANGES) — addressed
+Both converged on one real hole I'd introduced + claude caught a drain edge:
+- **Checkpoint-loaded cells bypassed strict validation**: `validate_complete` used `not in VALID_SCORES`
+  (accepts 2.0/True) and skipped rationale/response checks → a resumed COMPLETE corrupt checkpoint could
+  validate. Fixed: extracted `_bad_score`/`_bad_text`; validate_complete now applies the FULL strict
+  contract (int 0–4 not bool/float, non-empty response+rationale). Parametrized tests (2.0/True/blank
+  rationale/whitespace+non-str response). Note: a FALSY response self-heals (regenerated) — only
+  truthy-invalid is the real bypass.
+- **persist raising escaped the concurrent drain** (set_verdict rejecting inside the loop discarded
+  other completed futures). Fixed: persist moved INSIDE the try → a persist failure is collected like a
+  task failure, others still persist. Test added.
+- **Direct missing-cell test** for validate_complete's defensive branch (unreachable via collect).
+- **Cost capture**: added OpenRouter `extra_body={"usage":{"include":true}}` → log `usage.cost` (defensive
+  getattr → judge_cost_usd) for real per-call USD; $ still cross-checked vs OpenRouter activity + Modal in P5.
+- Aligned run-id example to afb-<YYYYMMDD>. Full suite 210 passed, ruff clean.
+- **P5 gate TODO**: surface the greedy-vs-#48-sampling decoding divergence explicitly in the spend-gate
+  message (claude note 5) — #48 is the reconciliation oracle.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then

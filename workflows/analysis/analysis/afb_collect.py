@@ -36,6 +36,16 @@ from analysis.loaders import AnalysisInputError
 SCHEMA_VERSION = 1
 VALID_SCORES = (0, 1, 2, 3, 4)
 
+
+def _bad_score(score) -> bool:
+    """A valid score is a real int 0–4 — NOT bool (True==1) and NOT float (2.0==2)."""
+    return isinstance(score, bool) or not isinstance(score, int) or score not in VALID_SCORES
+
+
+def _bad_text(s) -> bool:
+    """Valid response/rationale text is a non-empty string."""
+    return not isinstance(s, str) or not s.strip()
+
 # Injected I/O contracts (kept out of this module so it stays SDK-free / mock-testable):
 GenerateFn = Callable[[str, str], str]              # (subject_id, prompt) -> response text
 JudgeFn = Callable[[str, str], dict]                # (question, response) -> {"score": int, "rationale": str}
@@ -126,12 +136,11 @@ class _Store:
         self._flush()
 
     def set_verdict(self, item_id: str, subject: str, score, rationale) -> None:
-        # Strict judge contract: an actual int 0–4 (NOT bool/float/str-coercible) + a non-empty
-        # rationale. `score in VALID_SCORES` alone would accept True (==1) and 2.0 (==2).
-        if isinstance(score, bool) or not isinstance(score, int) or score not in VALID_SCORES:
+        # Strict judge contract: an actual int 0–4 (NOT bool/float/str-coercible) + a non-empty rationale.
+        if _bad_score(score):
             raise AnalysisInputError(
                 f"judge returned non-integer/out-of-range score {score!r} for {item_id}/{subject}")
-        if not isinstance(rationale, str) or not rationale.strip():
+        if _bad_text(rationale):
             raise AnalysisInputError(f"judge returned empty rationale for {item_id}/{subject}")
         cell = self._cells.setdefault(_cell_key(item_id, subject), {})
         cell["score"] = score
@@ -157,7 +166,12 @@ class _Store:
         os.replace(tmp, self._path)
 
     def validate_complete(self, items: list[dict], subjects: list[str]) -> None:
-        """Fail fast unless every (item, subject) cell has a response + an integer score in 0–4."""
+        """Fail fast unless every (item, subject) cell meets the FULL strict contract.
+
+        Applies the same strictness as :meth:`set_verdict` (int 0–4, not bool/float; non-empty text)
+        so a resumed/hand-edited checkpoint carrying ``score: 2.0``/``true`` or a blank rationale
+        cannot be marked complete and reach the exporter.
+        """
         expected = {(it["item_id"], su) for it in items for su in subjects}
         have = set(self._cells)
         missing = expected - have
@@ -168,10 +182,12 @@ class _Store:
             raise AnalysisInputError(f"collection has {len(extra)} unexpected cell(s), e.g. {sorted(extra)[:3]}")
         for key in sorted(expected):
             c = self._cells[key]
-            if not c.get("response"):
-                raise AnalysisInputError(f"cell {key} has no response")
-            if c.get("score") not in VALID_SCORES:
+            if _bad_text(c.get("response")):
+                raise AnalysisInputError(f"cell {key} has no/invalid response")
+            if _bad_score(c.get("score")):
                 raise AnalysisInputError(f"cell {key} has invalid score {c.get('score')!r}")
+            if _bad_text(c.get("rationale")):
+                raise AnalysisInputError(f"cell {key} has no/invalid rationale")
 
 
 def collect(items: list[dict], subjects: list[str], generate: GenerateFn, judge: JudgeFn, *,
@@ -242,11 +258,12 @@ def _run_pass(work: list[tuple[str, str]], concurrency: int, *, task, persist, o
         for fut in as_completed(futs):
             item_id, su = futs[fut]
             try:
-                result = fut.result()
+                # persist is inside the try: a persist failure (e.g. set_verdict rejecting a malformed
+                # verdict) must NOT escape and discard the other completed futures either.
+                persist(item_id, su, fut.result())  # main-thread persist → atomic write never races
             except Exception as e:  # noqa: BLE001 — collect, persist the rest, raise after the drain
                 errors.append(f"{item_id}/{su}: {e!r}")
                 continue
-            persist(item_id, su, result)  # main-thread persist → atomic write never races
             on_done(item_id, su)
     if errors:
         raise AnalysisInputError(

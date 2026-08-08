@@ -11,7 +11,7 @@ import json
 
 import pytest
 
-from analysis.afb_collect import afb_item_id, collect, load_afb_items
+from analysis.afb_collect import _Store, afb_item_id, collect, load_afb_items
 from analysis.loaders import AnalysisInputError
 
 ITEMS = [{"item_id": "AFB-001", "question": "Q1?"}, {"item_id": "AFB-002", "question": "Q2?"}]
@@ -215,6 +215,62 @@ def test_checkpoint_question_mismatch_rejected(tmp_path):
     _seed(tmp_path, cells=[{"item_id": "AFB-001", "question": "WRONG?", "subject": "mb-sft-dpo", "response": "r"}])
     with pytest.raises(AnalysisInputError):
         _collect(tmp_path, _Recorder())
+
+
+def _complete_cells(**mutate):
+    """All 4 cells fully populated (response+score+rationale); `mutate` overrides the first cell."""
+    cells = []
+    for it in ITEMS:
+        for su in SUBJECTS:
+            c = {"item_id": it["item_id"], "question": it["question"], "subject": su,
+                 "response": "r", "score": 1, "rationale": "x"}
+            cells.append(c)
+    cells[0].update(mutate)
+    return cells
+
+
+@pytest.mark.parametrize("mutate", [
+    {"score": 2.0},          # float score in a COMPLETE checkpoint (== 2, would slip `not in VALID_SCORES`)
+    {"score": True},         # bool score (== 1)
+    {"rationale": ""},       # blank rationale
+    {"response": "   "},     # whitespace response (truthy → not regenerated, but invalid)
+    {"response": 123},       # non-string truthy response
+])
+def test_complete_checkpoint_bypassing_strict_contract_rejected(tmp_path, mutate):
+    """A resumed COMPLETE checkpoint that violates the strict contract must NOT validate."""
+    _seed(tmp_path, cells=_complete_cells(**mutate))
+    with pytest.raises(AnalysisInputError):
+        _collect(tmp_path, _Recorder())  # collect does no work (all complete) → validate_complete rejects
+
+
+def test_validate_complete_rejects_missing_cell_directly(tmp_path):
+    """Direct store test for the plan's 'a run missing any cell is rejected' branch (unreachable via collect)."""
+    store = _Store(tmp_path / "collection.json", run_id="afb-test", condition="cold", subjects=SUBJECTS,
+                   judge="openai/gpt-5.6-terra", decoding=DECODING, items=ITEMS)
+    store.set_response("AFB-001", "gemma-4-31b-it", "r")
+    store.set_verdict("AFB-001", "gemma-4-31b-it", 1, "ok")  # only 1 of 4 cells done
+    with pytest.raises(AnalysisInputError):
+        store.validate_complete(ITEMS, SUBJECTS)
+
+
+def test_persist_failure_in_drain_does_not_discard_others(tmp_path):
+    """If persist (set_verdict) raises inside the concurrent drain, other completed cells still persist."""
+    out = tmp_path / "collection.json"
+
+    class BadOne(_Recorder):
+        def judge(self, question, response):
+            self.judge_calls.append((question, response))
+            if "mb-sft-dpo" in response and question == "Q2?":
+                return {"score": 2, "rationale": ""}   # blank → set_verdict (persist) raises
+            return {"score": 1, "rationale": "ok"}
+
+    with pytest.raises(AnalysisInputError):
+        collect(ITEMS, SUBJECTS, BadOne().generate, BadOne().judge, decoding=DECODING,
+                run_id="afb-test", out_path=out, concurrency=4)
+    doc = json.loads(out.read_text())
+    scored = {(c["item_id"], c["subject"]) for c in doc["cells"] if "score" in c}
+    assert scored == {("AFB-001", "gemma-4-31b-it"), ("AFB-001", "mb-sft-dpo"),
+                      ("AFB-002", "gemma-4-31b-it")}   # the 3 good cells persisted despite the persist failure
 
 
 def test_mismatched_checkpoint_refused(tmp_path):

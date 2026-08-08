@@ -12,7 +12,7 @@ Run (needs the endpoint + funded keys — Phase 5 only), from the repo root:
 Config is via env / module constants (no arg-parsing — this is a fixed one-shot):
   EVAL_BASE_URL       the Modal vLLM endpoint + /v1 (from `modal deploy .../serve_gemma_eval.py`)
   OPENROUTER_API_KEY  funded key for the Terra judge — sourced from taqwabench/.env if unset
-  AFB_RUN_ID          catalog run-id (default: afb-cold-<the operator sets it>); required at run time
+  AFB_RUN_ID          catalog run-id (e.g. afb-20260808); required at run time
 
 Keys are read at runtime and NEVER echoed or committed. Usage/cost is appended to a gitignored
 run.log for the Phase-5 spend reconciliation — never into the shipped intermediate.
@@ -89,7 +89,7 @@ def _retry(fn, what: str):
 def main() -> None:
     run_id = os.environ.get("AFB_RUN_ID")
     if not run_id:
-        raise SystemExit("AFB_RUN_ID is required (e.g. afb-cold-20260808).")
+        raise SystemExit("AFB_RUN_ID is required (e.g. afb-20260808).")
     base_url = os.environ.get("EVAL_BASE_URL")
     if not base_url:
         raise SystemExit("EVAL_BASE_URL is required (the Modal endpoint + /v1).")
@@ -98,13 +98,19 @@ def main() -> None:
     judge_client = OpenAI(api_key=_env_key("OPENROUTER_API_KEY"),
                           base_url="https://openrouter.ai/api/v1", timeout=TIMEOUT)
     scorer = json.loads((AFB / "scoring_prompt.json").read_text())["template"]
-    usage = {"subject_tokens": 0, "judge_tokens": 0, "subject_calls": 0, "judge_calls": 0}
+    usage = {"subject_tokens": 0, "judge_tokens": 0, "subject_calls": 0, "judge_calls": 0, "judge_cost_usd": 0.0}
     usage_lock = threading.Lock()  # generate/judge run on worker threads → guard the shared counters
 
     def _add_usage(kind: str, r) -> None:
+        u = getattr(r, "usage", None)
         with usage_lock:
-            usage[f"{kind}_tokens"] += getattr(getattr(r, "usage", None), "total_tokens", 0) or 0
+            usage[f"{kind}_tokens"] += getattr(u, "total_tokens", 0) or 0
             usage[f"{kind}_calls"] += 1
+            # OpenRouter returns per-call USD in usage.cost when the request asks for usage accounting
+            # (extra_body below). Defensive getattr → 0.0 if absent, so this never fails the run.
+            cost = getattr(u, "cost", None)
+            if kind == "judge" and isinstance(cost, (int, float)):
+                usage["judge_cost_usd"] += float(cost)
 
     def generate(subject_id: str, prompt: str) -> str:
         def call():
@@ -121,7 +127,8 @@ def main() -> None:
         filled = scorer.replace("{question}", question).replace("{response}", response)
         def call():
             r = judge_client.chat.completions.create(
-                model=JUDGE_MODEL, messages=[{"role": "user", "content": filled}], max_tokens=512)
+                model=JUDGE_MODEL, messages=[{"role": "user", "content": filled}], max_tokens=512,
+                extra_body={"usage": {"include": True}})  # OpenRouter: return per-call USD in usage.cost
             _add_usage("judge", r)
             txt = (r.choices[0].message.content or "").strip()
             obj = json.loads(txt[txt.find("{"): txt.rfind("}") + 1])  # fail fast on non-JSON
