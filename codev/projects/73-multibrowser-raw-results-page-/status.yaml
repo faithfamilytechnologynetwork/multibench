@@ -1,0 +1,17 @@
+id: '73'
+title: multibrowser-raw-results-page-
+protocol: air
+phase: verified
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: approved
+    requested_at: '2026-08-08T04:15:19.099Z'
+    approved_at: '2026-08-08T10:44:31.261Z'
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-08T04:00:29.361Z'
+updated_at: '2026-08-08T10:44:39.251Z'
+pr_ready_for_human: false

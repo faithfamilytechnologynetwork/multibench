@@ -158,6 +158,29 @@ describe("raw contract + view are catalog-generic (static check)", () => {
       expect(code, `${f} must not import the hardcoded scoreColor`).not.toMatch(/from ["']\.\/scoreColor["']/);
     }
   });
+
+  // The static guard above only scans RawResultsPage.tsx itself — a future child COMPONENT could
+  // silently reintroduce MB vocab / the `/t/` corpus route. So: `CorpusContext.tsx` is the ONE
+  // sanctioned corpus-coupled child; assert every OTHER component RawResultsPage renders is generic.
+  it("CorpusContext is the ONLY corpus-coupled child component of the raw viewer (#54 guard)", async () => {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
+    const page = fs.readFileSync(path.join(here, "../routes/RawResultsPage.tsx"), "utf8");
+    // Every component RawResultsPage imports from ../components/.
+    const children = [...page.matchAll(/from ["']\.\.\/components\/([A-Za-z0-9_]+)["']/g)].map((m) => m[1]!);
+    expect(children).toContain("CorpusContext"); // the sanctioned corpus-coupled child exists + is named
+    const FORBIDDEN = ['"tradition"', "'tradition'", '"scenario"', "'scenario'", "traditionId", "scenarioId", "/t/"];
+    for (const child of children) {
+      if (child === "CorpusContext") continue; // the one place corpus coupling is allowed
+      const code = stripComments(fs.readFileSync(path.join(here, `../components/${child}.tsx`), "utf8"));
+      for (const lit of FORBIDDEN) {
+        expect(code, `${child}.tsx (a raw-viewer child) must not reference the MB-specific ${lit}`).not.toContain(lit);
+      }
+    }
+  });
 });
 
 // ── catalog-aware shard consistency ──────────────────────────────────────────────────
