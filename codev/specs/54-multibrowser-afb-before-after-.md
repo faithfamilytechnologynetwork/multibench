@@ -14,28 +14,30 @@ Implementation phases, file-by-file edits, code, and ordering live in codev/plan
 ## Clarifying Questions Asked
 
 A spec did not pre-exist; the issue body plus an architect correction (issue #54 comment,
-2026-08-06, and a direct `afx` instruction 2026-08-08) answer the load-bearing questions. No
-questions were put back to the user — the corrections below *are* the answers, and the
-remaining uncertainties are captured under **Open Questions** for consultation.
+2026-08-06, and a direct `afx` instruction 2026-08-08) answer the load-bearing questions. The
+2-way consultation (codex + claude) then verified every structural claim against the code and
+resolved several of my initial open questions empirically. No questions were put back to the user;
+the one genuine product decision left for the architect is called out under **Open Questions**.
 
 - **Q: Does per-item AFB response text already exist on disk (issue body says "saved #48 outputs, zero new spend")?**
-  A: **No — this is superseded.** Per the architect: `eval_afb_probes.py` discards responses
-  after judging (persists `{id, score}` only), #48's raw outputs died with its worktree, and #58
-  evaluated only the full-grid head. **#54 requires a dedicated collection run** with a script
-  change to persist response text (and Terra judging for the scores alongside). Budget ~$25–35,
-  pre-authorized by Waleed. This is a **baked decision** (see Constraints).
-- **Q: Which three subjects?**
-  A: `base` = `google/gemma-4-31B-it`; `sft` = `mb-sft-guided` (stage-1 SFT adapter); `dpo` =
-  `mb-sft-dpo` — the **#48 shipped incumbent**, NOT #58's scaling-null `mb-dpo-full`.
-- **Q: Which condition(s)?** A: **cold** (question verbatim). Faith-context is optional and low-value
-  (the paper/#48 found it near-saturated) — out of scope for the launch catalog.
+  A: **No — superseded.** `eval_afb_probes.py` discards responses after judging (persists
+  `{id, score}` only, verified `eval_afb_probes.py:118`); #48's raw outputs died with its worktree;
+  #58 evaluated only the full-grid head. **#54 requires a dedicated collection run** with a script
+  change to persist response text (and Terra judging alongside). Budget ~$25–35, pre-authorized.
+  **Baked decision** (see Constraints).
+- **Q: Which three subjects?** A: `gemma-4-31b-it` (base), `mb-sft-guided` (stage-1 SFT), `mb-sft-dpo`
+  (the #48 shipped **incumbent** — NOT #58's scaling-null `mb-dpo-full`). These exact IDs are the
+  ones the shipped test fixture and issue body use.
+- **Q: Which condition(s)?** A: **cold** (question verbatim). Faith-context is optional/low-value
+  (near-saturated per #48) — out of scope for the launch catalog; the condition axis leaves room.
 - **Q: Which judge / scale?** A: `gpt-5.6-terra` via OpenRouter, the AFB official `scoring_prompt.json`
   **0–4** religious-representation scale — catalog-declared, NOT the MultiBench −1…+1 ramp.
 - **Q: Does this require viewer code changes (issue says "not a viewer change")?**
-  A: **A small, in-scope one, yes** — see Current State / Approach 1. The raw viewer's render, model,
-  parser, and color paths are already fully catalog-generic and AFB-ready; the *only* MultiBench
-  coupling that blocks a raw-only AFB catalog is run **discovery**, which enumerates `results/`
-  scores manifests only. This is exactly the genericity-verification the issue asked for.
+  A: **The render/model/parser/color path needs NO change** (verified generic, and a shipped test
+  already renders an AFB 0–4 catalog). **Two real-but-small SPA changes are required:** (1) run
+  **discovery** (a raw-only catalog is currently undiscoverable), and (2) the side-by-side view is
+  **A/B (two columns), not three** — so the three-checkpoint story is told via A/B + a subject
+  selector + curated presets, not one 3-column grid. Both are surfaced to the architect below.
 
 ## Problem Statement
 
@@ -44,320 +46,378 @@ data moves gemma-4-31b from **omitting** religion (AFB mean ≈ 0, "meaningful-o
 **including** it as a live perspective (score ≥ 2 ≈ 27%) without over-application — currently
 exists only as **distribution tables and aggregate figures**. A reader cannot *see* the omission
 and its repair: there is no way to read, for a given ordinary-life question, the flat secular
-answer from vanilla Gemma beside the fine-tuned answers that actually name a religious perspective,
-each with the judge's 0–4 score and rationale.
+answer from vanilla Gemma beside the fine-tuned answer that names a religious perspective, each
+with the judge's 0–4 score and rationale.
 
 MultiBench already ships a **raw-results viewer** (Spec 51, live on `main`) whose contract is
-explicitly **catalog-generic** — the score scale, color ramp, subjects, judges, condition axes,
-grouping axis, scopes, and items are all *declared by the catalog*, with no MultiBench vocabulary
-baked into the render path. The AFB before/after view is precisely the "second catalog type" that
-contract was designed to carry. The problem is (a) the underlying per-item response text **does not
-exist anywhere** and must be collected, and (b) a raw-only catalog (one with no `results/` scores
-tier) is currently **undiscoverable** in the SPA.
+explicitly **catalog-generic** — scale, color ramp, subjects, judges, condition axes, grouping
+axis, scopes, and items are all *declared by the catalog*, with no MultiBench vocabulary in the
+render path (a shipped test already renders a NON-MultiBench 0–4 AFB catalog end-to-end). The AFB
+before/after view is precisely the "second catalog type" that contract was designed to carry. The
+gaps are: (a) the underlying per-item response text **does not exist anywhere** and must be
+collected; (b) a raw-only catalog (no `results/` scores tier) is currently **undiscoverable** in
+the SPA; and (c) the comparison grid is **A/B**, so "before/after across three checkpoints" must be
+expressed through A/B + selector + presets rather than a three-wide grid.
 
 ## Current State
 
-**The evidence is invisible.** Today a reader of the MultiWeights work sees:
-- `experiments/48_multiweights_omissive_bias/figures/afb_distribution.pdf` — a distribution figure.
-- Aggregate numbers in the #48 spec/review (mean, P≥1/2/3 per checkpoint).
-- No per-item responses. `eval_afb_probes.py` (both #48 and #58 copies) computes a Terra 0–4 score
-  per response and **discards the response text**, persisting `{id, score}` only. #48's raw eval
-  outputs were lost with its worktree; #58 ran the lean battery on the full-grid head alone.
+**The evidence is invisible.** A reader of the MultiWeights work sees a distribution PDF
+(`experiments/48…/figures/afb_distribution.pdf`) and aggregate numbers — no per-item responses.
+`eval_afb_probes.py:118` computes a Terra 0–4 score per response and **discards the response text**,
+persisting `{id, score}` only. #48's raw eval outputs were lost with its worktree; #58 ran the lean
+battery on the full-grid head alone.
 
 **The instrument is in-repo (MIT).** `experiments/48_multiweights_omissive_bias/data/input/afb/`
-holds the vendored AllFaith Benchmark Religious-Representation instrument: `questions.jsonl` (150
-items, fields `{id, question}` — *no category field*), `scoring_prompt.json` (the official 0–4
-judge template + `{rationale, score}` JSON contract), `LICENSE` (MIT, © CEFE-AI), `SOURCE.md`.
+holds the AllFaith Benchmark Religious-Representation instrument: `questions.jsonl` (150 items,
+`{id, question}` — *no category field*), `scoring_prompt.json` (the official 0–4 judge template +
+`{rationale, score}` JSON contract), `LICENSE` (MIT, © CEFE-AI), `SOURCE.md`.
 
-**The model-serving stack exists.** `experiments/58/modal/serve_gemma_eval.py` serves the base
-model plus LoRA adapters as named models on one Modal vLLM endpoint (`base`, `sft`, `dpo`). Both
-adapters live on the Modal volume `gemma-dpo`: `mb-sft-guided` and `mb-sft-dpo` (the incumbent,
-never overwritten) — alongside #58's `mb-dpo-full`. The script's `dpo=` module currently points at
-`mb-dpo-full`; the #54 collection run must serve **`mb-sft-dpo`** as the `dpo` subject.
+**The model-serving stack exists.** `experiments/58/modal/serve_gemma_eval.py` serves base + LoRA
+adapters as named models on one Modal vLLM endpoint. Both adapters live on volume `gemma-dpo`:
+`mb-sft-guided` and `mb-sft-dpo` (incumbent, never overwritten) — alongside #58's `mb-dpo-full`.
+The script's `dpo=` module currently points at `mb-dpo-full`; #54 must serve **`mb-sft-dpo`** as the
+`dpo` subject, and the runner needs a **3-subject** path (its docstring today says "BOTH checkpoints
+base, sft").
 
-**The export machinery exists and is generic.** `workflows/analysis/analysis/export_raw.py`
-(Spec 51) writes `results-raw/<run-id>/{manifest.json, <group>/<item>.json.gz}` with: per-shard
-gzip (mtime=0, sorted keys → byte-stable re-export), size ceilings (≤ 1 MB/shard, ≤ 200 MB/run,
-validated before any write), and two `sha256` fingerprints. Its manifest builder is already
-catalog-generic (declares `scale{min,center,max}`, `ramp`, `subjects`, `judges`, `conditionAxes`,
-`groupBy`, `scopes`, `items`, `presets`). **But its input model is MultiBench-specific** — it reads
-judging-run roots (`report.json` + `sittings.jsonl`, framings × pressures × traditions). An AFB
-collection run has a completely different input shape.
+**The export machinery exists but is a MB-specific monolith.**
+`workflows/analysis/analysis/export_raw.py` writes `results-raw/<run-id>/{manifest.json,
+<group>/<item>.json.gz}` with byte-stable gzip (mtime=0, sorted keys), size ceilings (≤ 1 MB/shard,
+≤ 200 MB/run, validated before any write), and two `sha256` fingerprints. Its **manifest builder is
+catalog-generic**, but `write_dataset` (≈`export_raw.py:779`) interleaves MB-specific *reading*
+(`iter_tradition_raw` over `report.json`/`sittings.jsonl`), `CANONICAL_SUBJECTS`, MB preset
+computation (`_models_split`, `_steadfastness_cliff`), ceilings, pruning, and writing in one path.
+There is **no extracted generic writer** a sibling command can call yet.
 
-**The viewer render path is already AFB-ready; discovery is not.** Verified against
-`apps/multibrowser/`:
-- Generic and correct for AFB with **no change**: the catalog schema/parser (`lib/rawModel.ts`
-  reads `scale/ramp/subjects/judges/conditionAxes/groupBy/scopes/items`, no −1..+1 or
-  tradition/framing/pressure literals), score-bounds validation against `catalog.scale`, the
-  generic two-slope color ramp (`lib/rampColor.ts` `catalogScoreColor`, 0/2/4 works), and the grid
-  + controls that iterate the catalog's axes/subjects/judges/scopes/groupBy.
-- The **one blocker**: run **discovery** (`lib/queries.ts` `resultsRunIds` + `loadResultsRuns`)
-  enumerates only `results/<id>/manifest.json` (the scores tier). A `results-raw/<id>/` with no
-  `results/<id>/` counterpart yields **zero** run IDs, so **nothing in the SPA ever links to it**
-  (the raw route itself renders fine from a hand-typed deep link, and its cross-tier fingerprint
-  lookup already tolerates a `null` — a raw-only run needs no scores fingerprint).
-- Non-blocking MB seams to respect: `corpus.ts` `CORPUS_GROUP_KEY = "tradition"` (an AFB
-  `groupBy.key ≠ "tradition"` simply renders no judge-guidance/corpus cross-link — graceful);
-  `rawModel.ts` `RESERVED_AXIS_KEYS = {a, b, scope, judge}` (AFB's condition-axis key must avoid
-  these); `RAW_SUPPORTED_SCHEMA_VERSION = 1` (the AFB manifest must stamp `schema_version: 1`).
+**The viewer render path is already AFB-ready; discovery and A/B are the constraints.** Verified
+against `apps/multibrowser/`:
+- **Generic, no change:** catalog schema/parser (`lib/rawModel.ts`), score-bounds validation
+  against `catalog.scale`, the generic ramp (`lib/rampColor.ts` `catalogScoreColor`, 0/2/4 works),
+  and grid/controls that iterate the catalog's axes/subjects/judges/scopes/groupBy. A shipped test
+  (`routes/rawResults.test.tsx:156`, *"renders a NON-MultiBench 0–4 catalog with NO #49 score
+  tier"*) already renders an `AFB_CATALOG`/`AFB_SHARD` fixture; a second copy in
+  `lib/rawData.test.ts:45` fixes the intended catalog shape (below). **These fixtures are the
+  template and the acceptance oracle.**
+- **Schema hard requirements (were wrong in my first draft):** `catalog.fingerprint` is
+  **required** (`rawModel.ts:69`; `content_fingerprint` is the optional one) and each verdict's
+  `summary` is **required** (`rawModel.ts:81`; `rationale` is optional). An AFB catalog/shard that
+  omits either **fails validation** — not a graceful degrade.
+- **A/B render, not 3-up:** `RawComparison.tsx` takes `a: string, b: string | null`
+  (`single = !b`, `cellA`/`cellB`, two-column grid). `rawSelection.ts` models one A + one optional
+  B; preset entries carry `a` + optional `b`. There is **no** three-subject grid.
+- **Discovery blocker:** `lib/queries.ts` `resultsRunIds` regexes `^results/([^/]+)/manifest\.json$`
+  only; `loadResultsRuns` builds the run list from **scores-tier** manifests and (per consult)
+  `/results` filters runs lacking a valid `ResultsManifest`. The git-tree walk already includes
+  `results-raw` (`github.ts:97` `WALK_DIRS`), so enumerating it adds **no** API calls — but a
+  raw-only run yields zero IDs today and **nothing in the SPA links to it**. The raw route itself
+  renders fine from a deep link and tolerates a `null` cross-tier fingerprint.
+- **Non-blocking MB seams to respect:** `corpus.ts` `CORPUS_GROUP_KEY = "tradition"` → an AFB
+  `groupBy.key = "instrument"` simply renders no judge-guidance/corpus cross-link (graceful, and a
+  shipped test asserts this degrade); `RESERVED_AXIS_KEYS = {a, b, scope, judge}` → AFB's
+  `condition` axis key is safe; `RAW_SUPPORTED_SCHEMA_VERSION = 1`; `RawResultsPage` has a static
+  guard scanning it for MB vocabulary that new entry-point code must keep green.
+
+**The intended AFB catalog shape is already codified** (`lib/rawData.test.ts:45` `AFB_CATALOG`):
+`schema_version: 1`; `scale {min:0, center:2, max:4}`; sequential `ramp` (dark→mid→light);
+`subjects` = the checkpoint IDs; `judges: [{key:"terra", label:"gpt-5.6-terra", fullGrid:true}]`;
+`conditionAxes: [{key:"condition", label:"Condition", values:[{id:"cold", label:"Cold"}]}]`;
+`groupBy: {key:"instrument", label:"Instrument"}` with group `afb-150`; `scopes: [{id:"single"}]`;
+`items` = `{id, label, group:"afb-150", shard:"afb-150/<item>.json.gz"}`; required `fingerprint`.
 
 ## Desired State
 
 A reader visits the multibrowser SPA, reaches an **AFB before/after** run through a first-class
-in-app entry point (no hand-typed URL), and for any of the 150 AFB cold-condition questions sees
-the three checkpoint responses side by side — **vanilla Gemma-4-31B**, **SFT (mb-sft-guided)**, and
-**SFT+DPO (mb-sft-dpo)** — each labeled with its **GPT-5.6-Terra 0–4** score and rationale, colored
-by a catalog-declared 0–4 ramp (numeric scores, no band names). Curated presets surface the most
-legible before/after contrasts (e.g. the questions where omission is most clearly repaired). The
-whole view rides the existing #51 raw viewer; the only viewer code added is the minimal
-discovery/entry-point generalization that lets a raw-only catalog be found.
+in-app entry point (no hand-typed URL), and for any of the 150 AFB cold-condition questions sees a
+**before/after A/B comparison** — by default **vanilla Gemma-4-31B (A)** beside a **fine-tuned
+checkpoint (B)** — with a **subject selector** to swap B between `mb-sft-guided` and `mb-sft-dpo`,
+each response labeled with its **GPT-5.6-Terra 0–4** score + rationale and colored by the
+catalog-declared 0–4 ramp (numeric scores, no band names; `center:2` renders the calibration-target
+band as mid-grey, deliberately *not* signalling "4 is best"/over-application). **Curated presets**
+carry the three-checkpoint story by deep-linking the highest-contrast items across `base↔sft`,
+`base↔dpo`, and `sft↔dpo` pairings — so the omission→repair is one click away even though the grid
+shows two columns at a time.
 
-Underneath: a **new `results-raw/<afb-run-id>/`** drop-in catalog (committed, single-digit MB) whose
-`manifest.json` declares the AFB scale/ramp/subjects/judge/condition/grouping/items, produced by a
-**sibling export command** that reuses #51's shard/fingerprint/size-ceiling/determinism machinery.
-The per-item responses+verdicts collected by the (one-time, ~$25–35) run are **preserved durably in
-the repo** so the spend is never repeated and the export is reproducible.
+Underneath: a **new committed `results-raw/<afb-run-id>/`** drop-in catalog (single-digit MB) whose
+`manifest.json` matches the shipped `AFB_CATALOG` shape, produced by a **sibling export command**
+that shares #51's shard writer / fingerprints / size ceilings / determinism (extracted from the
+current monolith without changing its byte output). The per-item responses+verdicts from the
+one-time (~$25–35) collection run are **preserved durably in the repo** so the spend is never
+repeated and the export is reproducible.
 
 ## Stakeholders
-- **Primary Users**: readers of the MultiWeights paper / MultiBench browser — researchers,
-  CEFEAI collaborators, and reviewers who want to *see* the omission→repair on concrete items.
+- **Primary Users**: readers of the MultiWeights paper / MultiBench browser — researchers, CEFEAI
+  collaborators, reviewers who want to *see* the omission→repair on concrete items.
 - **Secondary Users**: the MultiBench team (this is the paper's companion artifact; the paper's
   repo/browser links should point at it once live).
 - **Technical Team**: this builder (spir-54); the architect (approvals, spend authorization,
-  running/holding the Modal endpoint + keys).
+  running/holding the Modal endpoint + provisioning the OpenRouter key).
 - **Business Owners**: Waleed (pre-authorized the ~$25–35 regen; owns publication scope).
 
 ## Success Criteria
-- [ ] A dedicated collection run produces, for **all 150 AFB items × 3 subjects (base, sft, dpo)**
-      in the **cold** condition, the **response text** and a **GPT-5.6-Terra 0–4** score + rationale.
-- [ ] That collection output is **preserved durably in the repo** (committed), so re-export needs
+- [ ] **Collection**: a dedicated, **resumable/idempotent** run produces, for **all 150 AFB items ×
+      3 subjects** (`gemma-4-31b-it`, `mb-sft-guided`, `mb-sft-dpo`) in the **cold** condition, the
+      **response text** and a **GPT-5.6-Terra 0–4** score + rationale; it **checkpoints as it goes**
+      (interruption never loses completed paid work) and **validates completeness** (exactly 150
+      unique items × 3 subjects, all judged) before export.
+- [ ] **Durable preservation**: the collection output is committed to the repo, so re-export needs
       no re-spend and #48's "raw outputs died with the worktree" loss is not repeated.
-- [ ] A `results-raw/<afb-run-id>/` catalog exists as a **drop-in** (`manifest.json` + per-item gz
-      shards) produced by a **sibling export command** that reuses #51's shard writer, size ceilings,
-      gzip determinism, and fingerprinting (byte-stable re-export from the same input).
-- [ ] The catalog **validates against the #51 schema** (`schema_version: 1`; scale/ramp/subjects/
-      judges/conditionAxes/groupBy/scopes/items present; condition-axis key avoids the reserved set)
-      and **loads in the current raw viewer** with the 0–4 scale and ramp, subjects = the three
-      checkpoints, and 150 items — with **no change to the render/model/parser/color code**.
-- [ ] The AFB run is **discoverable and reachable in the SPA through a first-class in-app entry
-      point** (not a hand-typed URL), via the minimal discovery generalization.
-- [ ] The side-by-side view shows, per item, the three responses with their numeric Terra scores +
-      rationales; curated preset(s) surface the clearest before/after contrasts.
-- [ ] **Licensing discipline** holds: AFB instrument stays MIT-attributed (`SOURCE.md`/`LICENSE`);
-      our responses/judgments are ours to publish (`CC-BY-4.0` in the catalog); the shipped tier
-      excludes usage/raw/timestamps, same allowlist discipline as #51.
-- [ ] The touched apps' test suites pass via the per-builder dispatcher (`.codev/checks/test.sh`):
-      `workflows/analysis` (pytest) and `apps/multibrowser` (pnpm test).
-- [ ] Documentation updated: `results-raw/README.md` (second-catalog example / discovery note),
-      the AFB run's provenance, and the paper's companion-artifact link plan.
+- [ ] **Catalog**: a `results-raw/<afb-run-id>/` drop-in (`manifest.json` + per-item gz shards)
+      **validates against the #51 schema** and matches the shipped `AFB_CATALOG` shape
+      (`schema_version:1`; scale `{0,2,4}`; subjects = the three checkpoints; judge `terra`;
+      `condition/cold`; `scope/single`; `groupBy instrument/afb-150`; 150 items). Every verdict
+      carries a **synthesized `summary`** (schema-required) plus the judge `rationale`; the catalog
+      carries a self-consistent **`fingerprint`** (schema-required) and a `content_fingerprint`.
+- [ ] **Loads unchanged**: the catalog renders in the current raw viewer with **no change to the
+      render/model/parser/color code** (0–4 scale, ramp, subjects, 150 items) — the shipped AFB
+      genericity test (`routes/rawResults.test.tsx:156`) is the oracle.
+- [ ] **Exporter reuse is real, not a rewrite of behavior**: the sibling command shares an
+      **extracted** generic writer, and the existing `results-raw/20260803` tier **re-exports
+      byte-identical** (unchanged `fingerprint` + `content_fingerprint`) after the extraction — the
+      cross-tier drift guard (`lib/rawData.test.ts`) stays green.
+- [ ] **Reachable**: the AFB run is **discoverable and reachable through a first-class in-app entry
+      point** (not a hand-typed URL), via a discovery path that enumerates `results-raw/` runs and a
+      landing that **does not** disturb the default MultiBench scores run — adding **no** new GitHub
+      API calls (enumerate from the already-walked tree).
+- [ ] **Before/after legibility**: the A/B view shows, per item, two responses with correct numeric
+      Terra scores + rationales and ramp colors, a selector to swap the tuned checkpoint, and
+      **deterministic curated presets** (defined count + selection rule, e.g. top-N by `dpo − base`
+      score delta, one entry per item) surfacing the clearest contrasts.
+- [ ] **Licensing/hygiene**: AFB instrument stays MIT-attributed (`SOURCE.md`/`LICENSE`); our
+      responses/judgments ship under the catalog `license`; the shipped tier excludes
+      usage/raw/timestamps (the #51 allowlist).
+- [ ] Touched apps' suites pass via `.codev/checks/test.sh`: `workflows/analysis` (pytest) +
+      `apps/multibrowser` (pnpm test), including the static MB-vocab guard and the genericity test.
+- [ ] Docs updated: `results-raw/README.md` (second-catalog example + raw-only discovery note), the
+      AFB run's provenance/preservation, and the paper's companion-artifact link plan.
 
 ## Constraints
 
 ### Baked Decisions (architect — do not relitigate)
-Copied verbatim from the issue #54 comment (2026-08-06) and the architect instruction (2026-08-08):
-- **A dedicated collection run is required** — per-item AFB response text does not exist anywhere.
-  `EVAL_MODELS=base,sft,dpo-incumbent` through the eval endpoint, with a script change to **persist
-  response text**, and **Terra judging** for the scores alongside.
+From the issue #54 comment (2026-08-06) and the architect instruction (2026-08-08):
+- **A dedicated collection run is required** — `EVAL_MODELS=base,sft,dpo-incumbent` through the eval
+  endpoint, script changed to **persist response text**, with **Terra judging** for the scores.
 - **`dpo-incumbent` = `mb-sft-dpo`** (the #48 shipped incumbent), not #58's `mb-dpo-full`.
-- **Budget ~$25–35**, pre-authorized by Waleed (within the earmarked regen allowance).
-- **Keys: OpenRouter + Anthropic only. NEVER Waleed's personal keys.** The Terra judge runs via
-  OpenRouter; the Modal endpoint uses Modal auth, not a personal API key.
-- **Build on the #51 viewer + generic contract** (live on `main`) — this is a **second catalog
-  type**, not a viewer rewrite. (Verification found one small, in-scope discovery gap; see below.)
-- **Rides the #51 GENERIC contract**: subjects/items/condition-axes/score-scale/ramp all
-  catalog-declared, jaleesbrowser-style. Judge is Terra 0–4 (catalog-declared), **not** the −1..+1
-  ramp. **Numeric scores + catalog ramp, no band names.**
+- **Budget ~$25–35**, pre-authorized by Waleed.
+- **Keys: OpenRouter + Anthropic only. NEVER Waleed's personal keys.** Terra judge via OpenRouter;
+  the Modal endpoint uses Modal auth (keyless short-lived URL), not a personal API key.
+- **Build on the #51 viewer + generic contract** (live on `main`) — a **second catalog type**.
+  Verification found two small, in-scope SPA changes (discovery + A/B framing); the render path is
+  unchanged.
+- **Catalog-declared** subjects/items/condition-axes/score-scale/ramp; Terra **0–4** (not −1..+1);
+  **numeric scores + catalog ramp, no band names**.
 - **Same exclusions discipline as #51**: no usage/raw/timestamps in the shipped tier.
 
 ### Technical Constraints
-- Multi-language repo: Python `uv` (`workflows/analysis`) + JS/Vite SPA (`apps/multibrowser`).
-  Tests run through the per-builder dispatcher `.codev/checks/test.sh` (registry entries per app).
-- Byte-stable re-export must hold within the pinned `workflows/analysis` toolchain (gzip mtime=0,
-  sorted keys) — export from `uv --project workflows/analysis`.
-- Catalog must stamp `schema_version: 1`; condition-axis key ∉ `{a, b, scope, judge}`;
-  `groupBy.key ≠ "tradition"` forgoes the corpus/judge-guidance cross-link (acceptable for AFB).
-- The client GitHub data layer is unauthenticated (rate-limited); discovery additions must not
-  multiply API calls (enumerate from the already-walked git-tree, don't add per-run listing calls).
+- Schema hard-requirements: `catalog.fingerprint` and every verdict `summary` are **required**
+  (`rawModel.ts:69,81`); `schema_version:1`; condition-axis key ∉ `{a,b,scope,judge}` (satisfied by
+  `condition`); `groupBy.key = "instrument"` forgoes the corpus cross-link (acceptable).
+- Discovery must **not** be a naive merge into `loadResultsRuns` (which requires a valid scores
+  manifest and would drop the null-scores AFB run); it needs a raw-run enumerator + a landing/entry
+  point that leaves the default MB scores run selection unchanged, and keeps the `RawResultsPage`
+  static MB-vocab guard green.
+- Exporter change must preserve byte-stable re-export of the existing MB tier under the pinned
+  `workflows/analysis` toolchain (gzip mtime=0, sorted keys) — export from `uv --project workflows/analysis`.
+- Client GitHub data layer is unauthenticated/rate-limited; discovery adds no per-run listing calls.
+- Multi-language repo: tests run through the per-builder dispatcher `.codev/checks/test.sh`.
 
 ### Business Constraints
-- One-time spend ~$25–35, already authorized; no recurring cost. No time estimates (AI-age).
-- Publication scope: AFB items are MIT (attribution required); our responses/judgments are
-  publishable under CC-BY-4.0. This is the MultiWeights paper's companion artifact.
+- One-time spend ~$25–35, authorized; no recurring cost. No time estimates (AI-age).
+- AFB items MIT (attribution required); our responses/judgments publishable per the catalog license.
+  Companion artifact to the MultiWeights paper.
 
 ## Assumptions
-- The Modal `gemma-dpo` volume still carries `mb-sft-guided` and `mb-sft-dpo` adapters intact
-  (#58 notes: incumbent "never overwritten"). **Verify before spending** (samplability/serving smoke).
-- The eval endpoint can serve all three subjects on one deployment (base + two LoRA modules), as
-  `serve_gemma_eval.py` already does — with `dpo` repointed to `mb-sft-dpo`.
-- Terra (`openai/gpt-5.6-terra`) remains available on OpenRouter and honors the 0–4 JSON contract.
-- The AFB instrument's vendored copy is authoritative; the launch catalog uses **cold** only.
+- Volume `gemma-dpo` still carries `mb-sft-guided` + `mb-sft-dpo` intact (#58: incumbent never
+  overwritten). **Verify with a serving smoke BEFORE spending.**
+- The endpoint serves all three subjects on one deployment (base + two LoRA modules), `dpo` repointed
+  to `mb-sft-dpo`.
+- Terra (`openai/gpt-5.6-terra`) remains on OpenRouter and honors the 0–4 JSON contract.
+- The vendored AFB copy is authoritative; the launch catalog uses **cold** only.
 - #51 is on `main` and its render path is unchanged since the genericity verification above.
 
 ## Solution Approaches
 
-### Approach 1: Dedicated collection run → sibling AFB exporter → drop-in `results-raw/` catalog → minimal viewer discovery generalization (RECOMMENDED)
+### Approach 1: Resumable collection → sibling AFB exporter (shared writer) → drop-in catalog → raw-run discovery + A/B presets (RECOMMENDED)
 
-**Description**: Four load-bearing pieces, no viewer render rewrite.
-1. **Collect** per-item responses + Terra 0–4 verdicts for the 3 subjects × 150 cold items via the
-   Modal eval endpoint (serving `mb-sft-dpo` as `dpo`), persisting the **response text** (the script
-   change) and each judgment's `{score, rationale}`. Preserve the collection output durably in-repo.
-2. **Export** with a **sibling command** (e.g. `analysis export-afb`) that reuses #51's shard writer,
-   size ceilings, gzip determinism, and fingerprinting, but takes the AFB collection output as input
-   and emits an AFB-flavored generic catalog (scale 0–4; subjects = 3 checkpoints; judges = [terra];
-   single condition axis `cold`; single scope; `groupBy` = an AFB grouping; 150 item shards).
+**Description**: Four pieces, no render rewrite.
+1. **Collect** responses + Terra 0–4 verdicts for 3 subjects × 150 cold items via the Modal endpoint
+   (serving `mb-sft-dpo` as `dpo`, 3-subject path), persisting **response text** + `{score,
+   rationale}`, **checkpointing incrementally** and validating completeness before export. Preserve
+   the output durably in-repo.
+2. **Export** via a **sibling command** (e.g. `analysis export-afb`) that calls a **generic writer
+   primitive extracted** from `export_raw.py` (shard writing, ceilings, gzip determinism,
+   fingerprints), takes the AFB collection as input, synthesizes each verdict `summary`, and emits
+   the shipped-fixture catalog shape (scale 0–4; 3 subjects; `terra`; `condition/cold`;
+   `scope/single`; `instrument/afb-150`; 150 shards; deterministic before/after presets).
 3. **Drop in** the committed `results-raw/<afb-run-id>/` — appears in the browser by data, not code.
-4. **Generalize discovery**: add a sibling to `resultsRunIds` that enumerates
-   `results-raw/<id>/manifest.json` from the already-walked git-tree, merge raw-only runs into the
-   run list, and add a first-class in-app entry point linking into `/results/$runId/$groupId/$itemId`.
+4. **Discover + present**: add a `results-raw/` run enumerator and a first-class entry point/landing
+   into `/results/$runId/$groupId/$itemId` that leaves the default MB scores run untouched; the A/B
+   grid + subject selector + presets tell the three-checkpoint story.
 
-**Pros**:
-- Maximally reuses #51 (contract, exporter machinery, render path) — smallest true delta.
-- Honors every baked decision; the viewer change is the minimal generalization the genericity
-  mandate implies, not a bespoke AFB view.
-- Durable preservation of the one-time spend; deterministic, drop-in, no redeploy for data.
+**Pros**: maximal #51 reuse; honors every baked decision; the SPA delta is the minimal
+generalization the genericity mandate implies; durable one-time spend; deterministic drop-in.
+**Cons**: real infra + ~$25–35 spend; a second exporter path + an extraction of a byte-critical
+monolith (regression-guarded); the A/B framing is not the issue's literal three-wide grid.
+**Estimated Complexity**: Medium · **Risk Level**: Medium (spend + live serving + byte-stable refactor).
 
-**Cons**:
-- Requires real infra work (Modal endpoint spin-up, adapter verification) and the ~$25–35 spend.
-- Introduces a second exporter code path (sibling command) to maintain.
-- The discovery generalization touches the SPA's data layer (small, but must not inflate API calls).
+### Approach 2: Force the AFB catalog through the `results/` scores tier (rejected)
+Emit a `results/<afb-run-id>/` scores manifest so existing discovery finds it. **Rejected**: the
+`results/` leaderboard is MB-specific (Gemini mean-of-means, "Steadfastness (Δ)", framings) and would
+misrender an AFB run; it reintroduces a scores tier AFB doesn't need and a cross-tier fingerprint with
+nothing to reconcile.
 
-**Estimated Complexity**: Medium · **Risk Level**: Medium (spend + live-serving verification).
+### Approach 3: N-up (three-column) render change (deferred — architect decision)
+Generalize `RawComparison` + `rawSelection` + URL params to N subjects for a literal three-column
+grid. **Deferred**: a real render change beyond "minimal discovery generalization," needs a third URL
+param outside the reserved set, and contradicts the "not a viewer change" baked decision. Offered to
+the architect as the alternative to Approach 1's A/B framing (see Open Questions).
 
-### Approach 2: Force the AFB catalog through the existing `results/` scores tier (rejected)
-
-Emit a `results/<afb-run-id>/` scores manifest too, so existing discovery finds it. **Rejected**:
-the `results/` leaderboard (`ResultsPage`) is MultiBench-specific (Gemini-only mean-of-means,
-"Steadfastness (Δ)", framings) and would misrender an AFB run; it also reintroduces a scores tier
-AFB doesn't need and a cross-tier fingerprint with nothing to reconcile. Worse fit than a small
-discovery generalization.
-
-### Approach 3: Bespoke AFB page/route (rejected)
-
-A dedicated `/afb` React view purpose-built for 3-column before/after. **Rejected**: duplicates the
-already-generic raw viewer, violates the "second catalog type, not a viewer change" baked decision,
-and forks the render path the #51 contract exists to keep single.
-
-### Approach 4: Reuse `export-raw` directly by faking MultiBench roots (rejected)
-
-Shoehorn the AFB collection into `report.json`/`sittings.jsonl` shapes so `export-raw` consumes it
-unchanged. **Rejected**: brittle impedance-matching against a schema built for framings × pressures ×
-traditions; a clean sibling command that shares the *writer* (not the *reader*) is simpler and safer.
+### Approach 4: Reuse `export-raw` by faking MB roots (rejected)
+Shoehorn AFB into `report.json`/`sittings.jsonl` shapes. **Rejected**: brittle impedance-matching; a
+clean sibling sharing the *writer* (not the *reader*) is simpler and safer.
 
 ## Open Questions
 
 ### Critical (Blocks Progress)
-- [ ] **Where is the collection output preserved, and in what shape?** The #48 scar ("raw outputs
-      died with the worktree") makes durable preservation a hard requirement. Options: commit a
-      small intermediate collection JSON (reproducible export input) **and/or** treat the committed
-      `results-raw/` shards (which already carry response text + verdicts) as the sole source of
-      record. Recommendation: commit both the compact intermediate *and* the tier, so a future
-      catalog-shape change re-exports with zero re-spend. Confirm at consult.
-- [ ] **Adapter/endpoint availability before spend.** Must verify `mb-sft-dpo` + `mb-sft-guided`
-      are intact on the `gemma-dpo` volume and the endpoint serves all three subjects, *before*
-      authorizing the run. Who spins up / holds the Modal endpoint and provides the OpenRouter key?
+- [ ] **A/B framing vs. literal three-up (architect product decision).** The issue says "vanilla
+      Gemma… next to the fine-tuned (SFT and SFT+DPO) responses." The shipped viewer is A/B. This
+      spec adopts **Approach 1** (A/B default `base↔dpo` + selector + presets carry the third
+      checkpoint) to honor the "not a viewer change" baked decision. If the architect wants the
+      literal three-column grid, that is **Approach 3** (a scoped N-up render change). **Surfaced via
+      `afx`; resolve at/**before** the spec-approval gate.**
+- [ ] **Endpoint/adapter availability + ownership before spend.** Verify `mb-sft-dpo` + `mb-sft-guided`
+      intact on `gemma-dpo` and the endpoint serves all three, *before* authorizing the run. Who
+      spins up/holds the Modal endpoint and provides the OpenRouter key?
 
 ### Important (Affects Design)
-- [ ] **Grouping axis (`groupBy`) for 150 items.** `questions.jsonl` has no category field; the
-      paper's Inner Life / Relationships / Worldview split is not in the vendored data. Options:
-      (a) a single AFB group; (b) vendor/derive the category mapping to group by category. A single
-      group is simplest and honors "no MB vocab"; category grouping is more legible but needs extra
-      data. **Recommend (a) for launch**, category as a follow-up.
-- [ ] **Score ramp semantics for 0–4.** AFB is arguably *sequential* (0 none → 4 predominant), and
-      the thesis target is calibration to **1–2**, not maximization (4 = over-application). The
-      catalog declares the ramp regardless; decide sequential vs. a center-highlighted ramp and the
-      `scale.center` value. Recommend a sequential 0→4 ramp with `center` chosen to read
-      "omission (low) → representation (high)" without implying 4 is best.
-- [ ] **`verdict.summary` handling.** #51 verdicts carry an always-present direction `summary`; the
-      AFB judge returns only `{rationale, score}`. Confirm the viewer tolerates an absent/derived
-      summary (map `rationale`→display, omit `summary`), or the sibling exporter synthesizes one.
-- [ ] **Scope + condition modeling.** AFB is single-turn, single-condition (cold). Model as one
-      `scope` and a single-value `conditionAxes` entry (key ∉ reserved set), which the generic grid
-      renders. Confirm the single-value axis renders cleanly (no empty-control artifacts).
-- [ ] **Cross-tier `fingerprint` field.** A raw-only AFB catalog has no `results/` partner; the
-      viewer already tolerates a `null` cross-tier fingerprint. Decide whether to still stamp a
-      self-consistent `fingerprint` (harmless) or omit it, keeping `content_fingerprint` for
-      baked-vs-GitHub coherence.
+- [ ] **Preservation shape of the collection output.** Recommend committing a compact intermediate
+      collection artifact (reproducible export input) **in addition to** the `results-raw/` tier, so a
+      future catalog-shape change re-exports with zero re-spend. Confirm location/format.
+- [ ] **Preset selection rule.** Recommend deterministic top-N (N≤12) by `dpo − base` score delta,
+      one entry per item, magnitude-sorted with a stable tie-break, covering the omission→repair story
+      (and optionally `base↔sft`, `sft↔dpo` variants). Confirm N and pairings.
+- [ ] **`summary` synthesis.** The AFB judge returns only `{score, rationale}`; the exporter must
+      synthesize a short, deterministic direction `summary` (the fixture uses phrases like "omitted
+      the concern"/"held"). Confirm the phrasing convention.
+
+### Resolved by shipped code (recorded, not open)
+- **groupBy / condition / scope / scale / subject-IDs**: fixed by `AFB_CATALOG`
+  (`instrument`/`afb-150`, `condition/cold`, `scope/single`, `{0,2,4}`, checkpoint IDs).
+- **Ramp semantics**: sequential 0→4 with `center:2` → mid-grey at the calibration target (anti-"4 is
+  best"), which is the intended anti-over-application signal.
+- **`fingerprint` / `summary` are required** (not optional) — hard exporter requirements, above.
+- **`groupBy.key ≠ "tradition"`** → no corpus cross-link (graceful; shipped test asserts the degrade).
 
 ### Nice-to-Know (Optimization)
-- [ ] Baked deploy bundle for the AFB shards (same `railway up --no-gitignore` path as #51) — likely
-      unnecessary given the tiny size, but confirm the baked-first/GitHub-fallback path treats a
-      small AFB tier correctly.
-- [ ] Whether to also collect the faith-context condition later (a second condition-axis value) —
-      out of scope now (saturated/low-value), but the axis leaves room.
+- [ ] Baked deploy bundle for AFB shards (the `railway up --no-gitignore` path) — likely unnecessary
+      given the tiny size; confirm baked-first/GitHub-fallback treats a small AFB tier correctly.
+- [ ] Later collection of the faith-context condition (a second axis value) — out of scope now.
+- [ ] Optional: surface all three subjects' scores in a compact per-item strip (a small render add) —
+      out of baseline scope; would need architect sign-off like Approach 3.
 
 ## Performance Requirements
 - **Catalog size**: single-digit MB committed (150 items × 3 short responses + verdicts) — far under
-  the #51 ceilings (≤ 1 MB/shard, ≤ 200 MB/run); still validated before write.
-- **Viewer load**: side-by-side item view interactive on a normal connection; discovery must add
-  **no** new GitHub API calls per run (enumerate from the already-walked tree).
-- **Determinism**: byte-identical re-export from the same collection input under the pinned toolchain.
+  the #51 ceilings (≤ 1 MB/shard, ≤ 200 MB/run), still validated before write.
+- **Viewer load**: A/B item view interactive on a normal connection; discovery adds **no** new GitHub
+  API calls per run.
+- **Determinism**: byte-identical re-export from the same collection input under the pinned toolchain;
+  and the existing MB tier re-exports byte-identical after the writer extraction.
 - **Collection cost**: ~$25–35 total, one-time.
 
 ## Security Considerations
 - **Credentials**: OpenRouter + Anthropic funded keys only; **never** personal keys. No key material
-  committed; the eval endpoint stays keyless/short-lived on an obscure Modal URL (as #48/#58).
-- **License compliance**: AFB items are MIT — ship `SOURCE.md` + `LICENSE` attribution; do not
-  relicense. Our responses/judgments ship CC-BY-4.0 (catalog `license`).
-- **Data hygiene / privacy**: the shipped tier excludes usage/raw/timestamps (the #51 allowlist);
-  AFB questions are the published instrument (WildChat-derived but the vendored public set).
+  committed.
+- **Eval endpoint access/shutdown (explicit):** the Modal vLLM endpoint is **keyless, short-lived, on
+  an obscure Modal URL** (as #48/#58) — access control is URL-obscurity + short lifetime, and it is
+  **torn down immediately after collection** (remove `min_containers` / stop the app). No persistent
+  public inference surface is left running.
+- **License compliance**: AFB items MIT — ship `SOURCE.md` + `LICENSE`; do not relicense. Our
+  responses/judgments ship under the catalog `license`.
+- **Data hygiene**: shipped tier excludes usage/raw/timestamps (#51 allowlist). AFB questions are the
+  published instrument.
 
 ## Test Scenarios
 
 ### Functional Tests
-1. **Happy path**: export the AFB collection → `results-raw/<afb-run-id>/manifest.json` + 150 shards;
-   catalog validates against the #51 schema; loads in the raw viewer showing 3 subjects, 0–4 scores.
-2. **Determinism**: re-export from the same committed collection input → byte-identical shards +
-   identical `content_fingerprint`.
-3. **Discovery/reachability**: the AFB run appears in the SPA's run list and a first-class in-app
-   link reaches `/results/$runId/$groupId/$itemId` — no hand-typed URL.
-4. **Before/after legibility**: a known item (base scores 0, dpo scores ≥ 2) renders three responses
-   with the correct numeric scores + rationales and correct ramp colors.
-5. **Edge — reserved axis key / schema version**: a catalog with a reserved condition-axis key or a
-   wrong `schema_version` fails soft with a notice (regression guard for genericity assumptions).
+1. **Happy path**: export the AFB collection → `manifest.json` + 150 shards; catalog validates
+   against the #51 schema and matches the `AFB_CATALOG` shape; loads in the raw viewer with the 0–4
+   scale and the three checkpoint subjects.
+2. **Determinism (both directions)**: (a) AFB re-export from the same committed input → byte-identical
+   shards + identical `content_fingerprint`; (b) the existing `results-raw/20260803` tier re-exports
+   byte-identical after the writer extraction (cross-tier drift guard green).
+3. **Schema requireds**: an AFB shard missing verdict `summary`, or a manifest missing `fingerprint`,
+   fails validation (guards the "required" facts); the produced catalog has both.
+4. **A/B before/after legibility**: a known item (base = 0, dpo ≥ 2) renders two responses with correct
+   numeric scores + rationales and ramp colors; the selector swaps B between `mb-sft-guided`/
+   `mb-sft-dpo`; presets deep-link the highest-contrast items deterministically.
+5. **Discovery/reachability**: the AFB run appears via the raw-run enumerator and a first-class in-app
+   link reaches `/results/$runId/$groupId/$itemId` — no hand-typed URL — **without** changing the
+   default MB scores run; `RawResultsPage` static MB-vocab guard stays green.
+6. **Genericity regressions**: the shipped `routes/rawResults.test.tsx:156` AFB test stays green;
+   reserved-axis-key / wrong-`schema_version` catalogs fail soft with a notice.
+7. **Collection resilience**: an interrupted collection resumes without re-spending completed
+   subject×item cells; completeness validation rejects a run missing any of the 450 cells.
 
 ### Non-Functional Tests
-1. **Size-ceiling guard**: exporter aborts before any write if a shard/run would exceed the ceilings.
-2. **No-API-call-inflation**: discovery generalization adds runs from the walked tree without extra
-   GitHub requests (verified in the data-layer test).
-3. **Cross-tier tolerance**: raw-only run with `null` scores fingerprint loads without a false notice.
+1. **Size-ceiling guard**: exporter aborts before any write if a shard/run would exceed ceilings.
+2. **No-API-call-inflation**: discovery enumerates from the walked tree without extra GitHub requests.
+3. **Cross-tier tolerance**: a raw-only run with `null` scores fingerprint loads without a false notice.
 
 ## Dependencies
 - **External Services**: Modal (vLLM eval endpoint + `gemma-dpo` volume); OpenRouter (Terra judge);
-  GitHub raw + git-trees (SPA runtime data layer); Railway (SPA host).
-- **Internal Systems**: Spec 51 raw viewer + `results-raw/` contract (live on `main`); the #51
-  export machinery in `workflows/analysis` (shard writer, fingerprints, ceilings); the #48/#58 eval
-  harness (`serve_gemma_eval.py`, `eval_afb_probes.py`) as the collection starting point.
+  GitHub raw + git-trees (SPA runtime); Railway (SPA host).
+- **Internal Systems**: Spec 51 raw viewer + `results-raw/` contract (live on `main`) and its export
+  machinery in `workflows/analysis` (shard writer, fingerprints, ceilings — to be partly extracted);
+  the #48/#58 eval harness (`serve_gemma_eval.py`, `eval_afb_probes.py`) as the collection basis.
 - **Libraries/Frameworks**: `workflows/analysis` (`uv`, pytest); `apps/multibrowser`
   (Vite/React19/TS/Tailwind4/HeroUI/TanStack, pnpm).
-- **Data/Instrument**: AFB-150 MIT instrument (`questions.jsonl`, `scoring_prompt.json`, `LICENSE`,
-  `SOURCE.md`) currently under `experiments/48_multiweights_omissive_bias/data/input/afb/`.
+- **Data/Instrument**: AFB-150 MIT instrument under
+  `experiments/48_multiweights_omissive_bias/data/input/afb/`.
 
 ## References
 - Issue #54 (body + 2026-08-06 data-source-correction comment) and the 2026-08-08 architect instruction.
-- Spec 51 — `codev/specs/51-multibrowser-raw-results-brows.md`; `results-raw/README.md` (generic
-  catalog contract, dual-source, fingerprints, retention).
+- Spec 51 — `codev/specs/51-multibrowser-raw-results-brows.md`; `results-raw/README.md`.
 - Spec 49 — `results/` scores tier / aggregator reuse.
-- Spec 48 — `codev/specs/48-multiweights-omissive-bias.md` (AFB instrument, recipe, checkpoints).
-- #58 — `experiments/58_multiweights_full_grid_dpo/notes.md` (incumbent `mb-sft-dpo` vs scaling-null
-  `mb-dpo-full`; `gemma-dpo` volume contents; serve script).
-- Viewer genericity trace (this spec's Current State): `lib/rawModel.ts`, `lib/rampColor.ts`,
-  `lib/queries.ts` (`resultsRunIds`/`loadResultsRuns`), `lib/corpus.ts`, `src/router.tsx`.
+- Spec 48 — `codev/specs/48-multiweights-omissive-bias.md`.
+- #58 — `experiments/58_multiweights_full_grid_dpo/notes.md` (incumbent `mb-sft-dpo`; `gemma-dpo`
+  volume; serve script).
+- Viewer/genericity evidence: `lib/rawModel.ts` (`fingerprint`:69, `summary`:81, reserved keys, schema
+  version), `lib/rampColor.ts`, `lib/queries.ts` (`resultsRunIds`/`loadResultsRuns`), `lib/corpus.ts`,
+  `components/RawComparison.tsx`, `lib/rawSelection.ts`, `src/router.tsx`, and the AFB fixtures/tests
+  `lib/rawData.test.ts:45` + `routes/rawResults.test.tsx:156`.
 
 ## Risks and Mitigation
 | Risk | Probability | Impact | Mitigation Strategy |
 |------|------------|--------|-------------------|
-| Adapters missing/altered on the `gemma-dpo` volume | Low | High | Verify + serving smoke BEFORE authorizing spend; escalate to architect if absent. |
-| Collection output lost again (worktree death) | Med | High | Commit the collection output durably as export input-of-record; treat committed `results-raw/` as preservation. |
-| Spend overrun beyond ~$35 | Low | Med | Cold-only, 150×3 items, concurrency-bounded; reconcile actual spend against usage, stop at ceiling, no faith-context. |
-| Viewer assumes a scores tier / non-null fingerprint | Low | Med | Verified null-tolerant; add a regression test for the raw-only path. |
-| Genericity gap beyond discovery surfaces mid-build | Low | Med | Each found seam is small (reserved keys, groupBy, summary) — fix in the exporter/catalog, surface to architect if a render change is implied. |
-| 0–4 ramp mis-signals "4 is best" (over-application) | Med | Low | Choose ramp/center to read low→high representation, not "higher = better"; numeric scores, no band names. |
-| Terra JSON contract drift | Low | Med | Fail-fast on non-conforming judge output (validate `{score∈0..4, rationale}`), retry bounded, no fallback scoring. |
+| Adapters missing/altered on `gemma-dpo` | Low | High | Verify + serving smoke BEFORE spend; escalate to architect if absent. |
+| Collection interrupted → paid work lost | Med | High | Incremental checkpointing + idempotent resume + completeness validation before export. |
+| Collection output lost again (worktree death) | Med | High | Commit the collection output durably as export input-of-record; committed `results-raw/` is preservation. |
+| Writer extraction changes MB tier bytes | Med | High | Regression test: `results-raw/20260803` re-exports byte-identical (fingerprints unchanged) — gate the refactor on it. |
+| `summary`/`fingerprint` omitted → shard fails validation | Low | High | Treat as hard exporter requirements; test scenario 3 guards both. |
+| Discovery naive-merge drops the null-scores AFB run | Med | Med | Separate raw-run enumerator + landing that keeps the default MB scores run; test scenario 5. |
+| Spend overrun beyond ~$35 | Low | Med | Cold-only, 450 cells, concurrency-bounded; reconcile ACTUAL spend from usage, stop at ceiling, no faith-context. |
+| 0–4 ramp mis-signals "4 is best" | Low | Low | `center:2` mid-grey at the calibration target; numeric scores, no band names. |
+| Terra JSON contract drift | Low | Med | Fail-fast on non-conforming judge output (`{score∈0..4, rationale}`), bounded retry, no fallback scoring. |
+| Endpoint left running post-collection | Low | Med | Explicit teardown (remove `min_containers`/stop app) as a completion step. |
 
 ## Expert Consultation
-<!-- Populated by porch's 3-way consultation (Codex, Claude per per-phase config) after this draft. -->
-**Date**: (pending) · **Models Consulted**: (per `porch.consultation.models` = codex, claude)
-**Sections Updated**: (to be filled after consultation)
+**Date**: 2026-08-08 · **Models Consulted**: codex + claude (per `porch.consultation.models`).
+**Verdict**: both `REQUEST_CHANGES` (HIGH confidence) on the initial draft — resolved in this revision.
+**Sections Updated**:
+- *Desired State / Success Criteria / Test Scenarios*: reframed the three-checkpoint promise to **A/B +
+  selector + presets** (viewer is hardcoded A/B, `RawComparison.tsx`); the literal three-up grid is now
+  Approach 3, deferred to the architect.
+- *Current State / Constraints / Open Questions*: promoted `verdict.summary` and `catalog.fingerprint`
+  to **hard exporter requirements** (schema-required, not optional as first drafted); removed the
+  "omit fingerprint" branch.
+- *Approach 1 / Success Criteria*: made the exporter reuse an **extraction** of a monolithic
+  byte-critical writer, gated by a byte-identical re-export of the existing MB tier.
+- *Discovery*: specified a **separate raw-run enumerator + landing** (not a merge into
+  `loadResultsRuns`), preserving the default MB scores run and the static MB-vocab guard.
+- *Collection*: added **resumable/idempotent checkpointing + completeness validation** and a
+  **3-subject** collection path (not just a repointed `dpo=` module).
+- *Security*: made the eval-endpoint access model + **teardown** explicit; reconciled the "Modal auth"
+  vs "keyless URL" wording.
+- *Open Questions*: cited the shipped `AFB_CATALOG`/AFB genericity test that pre-answers
+  groupBy/condition/scope/scale/subject-IDs; fixed ramp `center:2` semantics.
 
 ## Approval
 - [ ] Technical Lead Review
@@ -366,13 +426,12 @@ traditions; a clean sibling command that shares the *writer* (not the *reader*) 
 - [ ] Expert AI Consultation Complete
 
 ## Notes
-- **Deviation surfaced for the architect**: the issue frames #54 as "not a viewer change." Genericity
-  verification confirms the render/model/parser/color paths need **no** change, but a **small
-  discovery generalization + one in-app entry point** *is* required for a raw-only catalog to be
-  reachable. This is consistent with #51's genericity mandate (and the issue's own
-  "verify the genericity requirement covers…" ask), but it is a real, in-scope SPA code change — not
-  a pure data drop-in. Flagged rather than silently absorbed.
-- **`dpo` = `mb-sft-dpo`** everywhere in this catalog — the serve script's `dpo=` module must be
-  repointed from `mb-dpo-full` for the collection run.
-- The companion-artifact link from the MultiWeights paper's repo/browser should be added once the
-  run is live (Review-phase follow-up).
+- **Two deviations surfaced for the architect** (the issue frames #54 as "not a viewer change"):
+  (1) a raw-only catalog is **undiscoverable** without a small discovery/entry-point addition;
+  (2) the comparison grid is **A/B**, so three-checkpoint before/after is told via A/B + selector +
+  presets (Approach 1) unless the architect approves the N-up render change (Approach 3). The
+  render/model/parser/color path itself needs **no** change. Flagged via `afx`, not silently absorbed.
+- **`dpo` = `mb-sft-dpo`** throughout; the serve script's `dpo=` module must be repointed from
+  `mb-dpo-full` for the collection run.
+- Add the companion-artifact link from the MultiWeights paper's repo/browser once the run is live
+  (Review-phase follow-up).

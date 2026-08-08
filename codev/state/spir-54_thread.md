@@ -48,3 +48,28 @@ GENERIC raw-results viewer contract as a *second catalog type*, not a viewer rew
 - Catalog: scale 0–4, ramp catalog-declared, subjects=3 checkpoints, judges=[terra], single
   scope, conditionAxes=[condition:cold], groupBy=single AFB group (or category if vendored),
   items=150, AFB-appropriate presets (biggest base→dpo lift / still-omitted / over-applied).
+
+### Consult iter-1 (codex + claude, both REQUEST_CHANGES, HIGH conf) — resolved in spec rev
+Both verified against code; key findings incorporated:
+- **BLOCKER: viewer is A/B, not 3-up.** `RawComparison.tsx` = `a` + optional `b` (two cols). My
+  "three side-by-side" + "no render change" were contradictory. → Reframed to A/B default
+  (base↔dpo) + subject selector + curated presets carry the 3rd checkpoint (Approach 1). Literal
+  three-column grid = Approach 3, DEFERRED to architect (N-up render change).
+- **`verdict.summary` + `catalog.fingerprint` are REQUIRED** (rawModel.ts:81,69), not optional as
+  I wrote. Exporter must synthesize summary + stamp a self-consistent fingerprint. Fixed.
+- **Shipped AFB fixture is the template/oracle**: `lib/rawData.test.ts:45` AFB_CATALOG +
+  `routes/rawResults.test.tsx:156` genericity test. Fixes catalog shape: scale{0,2,4} center=2
+  (mid-grey at calibration target — anti-"4 is best"), groupBy instrument/afb-150, condition/cold,
+  scope/single, judge terra. Subject ids: gemma-4-31b-it, mb-sft-guided, mb-sft-dpo.
+- **"Reuse #51 writer" understates scope**: write_dataset (export_raw.py:779) is a MB-specific
+  monolith; sibling needs an EXTRACTED generic writer. Success criterion added: results-raw/20260803
+  re-exports byte-identical after extraction (drift guard green).
+- **Discovery can't naive-merge into loadResultsRuns** (filters null-scores runs); need a separate
+  raw-run enumerator + landing that leaves default MB scores run untouched + keeps static MB-vocab
+  guard green.
+- **Collection**: needs 3-subject path (not just repointed dpo=), resumable/idempotent checkpointing
+  + completeness validation (450 cells) before export. Endpoint: keyless short-lived, torn down after.
+
+### Next
+- Surfacing the 2 deviations (A/B-vs-3up product decision; discovery entry-point) to architect via afx.
+- Advancing porch (iter-1 consult done → next). Spec-approval gate is architect's, not mine.
