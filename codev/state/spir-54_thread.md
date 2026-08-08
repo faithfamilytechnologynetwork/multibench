@@ -265,6 +265,13 @@ Both converged on provenance + label; addressed all:
   Promoted `_json_bytes`→public `json_bytes`. Summary map tested 0–4; dup-cell + inconsistent-question tests.
   Full suite 232 passed; my files ruff-clean (html_report.py:407 F541 pre-existing/out-of-scope).
 
+### P3 consult iter-2 (claude APPROVE incl. e2e 150-item CLI run, codex REQUEST_CHANGES) — CODEX WAS RIGHT
+- I misread the convention: `analysis/fingerprint.py:_fingerprint_tuple` INCLUDES direction+rationale, and
+  BOTH #49/#51 tiers stamp it. So my score-only AFB fingerprint diverged. Fixed: AFB fingerprint now uses
+  the CANONICAL `fingerprint_line` (maps condition→pressure slot, summary→direction; includes rationale).
+  content_fingerprint still adds transcript/response coverage the judgment fp lacks. Test rewritten:
+  score OR rationale change → BOTH fps move; a RESPONSE-text change → only content_fingerprint. 232 passed.
+
 ### P2 consult iter-3: BOTH APPROVE ✅ (codex + claude). Phase 2 DONE.
 Non-blocking follow-ups captured (apply at Phase 5 / opportunistically):
 - (a) extend the serving smoke to also make ONE judge call (fail a judge misconfig before the full

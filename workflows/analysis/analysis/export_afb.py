@@ -15,7 +15,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from analysis.fingerprint import combine_fingerprint
+from analysis.fingerprint import combine_fingerprint, fingerprint_line
 from analysis.loaders import AnalysisInputError
 from analysis.raw_presets import dedup_per_item
 from analysis.raw_writer import RawTierWriter, WriteSummary, json_bytes
@@ -180,19 +180,24 @@ def export(intermediate: dict, out_root: str | Path, run_id: str) -> WriteSummar
 
     writer = RawTierWriter(out_root, run_id, prune=True)  # validates run_id
     items_meta = []
-    verdict_lines = []
+    verdict_rows = []
     for item_id in items_sorted:
         shard_path = f"{GROUP}/{item_id}.json.gz"
         writer.add_shard(shard_path, json_bytes(_shard_doc(item_id, questions[item_id], subjects, cells[item_id])))
         items_meta.append({"id": item_id, "label": _label(questions[item_id]), "group": GROUP, "shard": shard_path})
-        # Judgment fingerprint = the SCORE-level verdict identity (item, subject, condition, judge,
-        # scope, score) — mirrors #51's two-fingerprint split, where `fingerprint` is the judgment
-        # stream and `content_fingerprint` (from the writer, over the shard bytes) covers transcripts +
-        # rationale. A score change moves `fingerprint`; a rationale/transcript change moves
-        # `content_fingerprint`. AFB has no cross-tier `results/` partner, so this is self-consistent.
+        # Judgment fingerprint via the CANONICAL `fingerprint_line` (the same one both MB tiers use),
+        # so it carries the full resolved-judgment identity INCLUDING `direction` (our synthesized
+        # summary) and `rationale` — matching `analysis.fingerprint`'s convention. AFB's single
+        # `condition` axis maps onto the tuple's pressure slot; `framing` is unused. `content_fingerprint`
+        # (from the writer, over shard bytes) additionally covers the transcript/response text, which the
+        # judgment fingerprint does not. AFB has no cross-tier `results/` partner → self-consistent.
         for subject in subjects:
-            verdict_lines.append(
-                f"{item_id}\t{subject}\t{CONDITION}\t{JUDGE_KEY}\t{SCOPE}\t{cells[item_id][subject]['score']}")
+            c = cells[item_id][subject]
+            verdict_rows.append({
+                "tradition": GROUP, "subject": subject, "scenario_id": item_id,
+                "pressure": CONDITION, "framing": "", "judge": JUDGE_KEY, "scope": SCOPE,
+                "score": c["score"], "direction": SUMMARY[c["score"]], "rationale": c["rationale"],
+            })
 
     catalog = {
         "schema_version": SCHEMA_VERSION,
@@ -209,7 +214,7 @@ def export(intermediate: dict, out_root: str | Path, run_id: str) -> WriteSummar
         "presets": _dpo_base_preset(items_sorted, questions, cells, subjects),
         # Self-consistent judgment fingerprint (no cross-tier `results/` partner; the viewer tolerates
         # a null cross-tier lookup). content_fingerprint over the shard bytes comes from the writer.
-        "fingerprint": combine_fingerprint(verdict_lines),
+        "fingerprint": combine_fingerprint(fingerprint_line(r) for r in verdict_rows),
         "content_fingerprint": writer.content_fingerprint,
     }
     return writer.write(catalog)

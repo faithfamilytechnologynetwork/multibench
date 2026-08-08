@@ -124,7 +124,9 @@ def test_duplicate_and_inconsistent_cells_rejected(tmp_path):
 
 
 def test_two_fingerprint_split(tmp_path):
-    """A SCORE change moves `fingerprint`; a RATIONALE change moves only `content_fingerprint`."""
+    """`fingerprint` = canonical judgment identity (score + summary + rationale); `content_fingerprint`
+    additionally covers the transcript. A score OR rationale change moves both; a RESPONSE-text change
+    moves only `content_fingerprint` (the response is transcript, not part of the judgment identity)."""
     base = _intermediate({"AFB-001": (0, 2)})
     export(base, tmp_path / "base", "afb-x")
     m0 = _manifest(tmp_path / "base")
@@ -137,11 +139,19 @@ def test_two_fingerprint_split(tmp_path):
 
     rat = _intermediate({"AFB-001": (0, 2)})
     for c in rat["cells"]:
-        c["rationale"] = c["rationale"] + " (reworded)"                    # only rationale text differs
+        c["rationale"] = c["rationale"] + " (reworded)"                    # rationale is judgment identity
     export(rat, tmp_path / "rat", "afb-x")
     m_rat = _manifest(tmp_path / "rat")
-    assert m_rat["fingerprint"] == m0["fingerprint"]                       # judgment fp UNCHANGED (scores same)
-    assert m_rat["content_fingerprint"] != m0["content_fingerprint"]       # content fp catches rationale
+    assert m_rat["fingerprint"] != m0["fingerprint"]                       # canonical fp INCLUDES rationale
+    assert m_rat["content_fingerprint"] != m0["content_fingerprint"]
+
+    resp = _intermediate({"AFB-001": (0, 2)})
+    for c in resp["cells"]:
+        c["response"] = c["response"] + " extra words"                     # only the transcript differs
+    export(resp, tmp_path / "resp", "afb-x")
+    m_resp = _manifest(tmp_path / "resp")
+    assert m_resp["fingerprint"] == m0["fingerprint"]                      # judgment identity unchanged
+    assert m_resp["content_fingerprint"] != m0["content_fingerprint"]      # transcript change caught here
 
 
 def test_byte_identical_reexport(tmp_path):
