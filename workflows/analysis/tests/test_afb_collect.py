@@ -120,9 +120,58 @@ def test_concurrency_produces_same_result(tmp_path):
     assert len(rec.gen_calls) == 4 and len(rec.judge_calls) == 4
 
 
+def test_concurrent_midpass_failure_persists_successes_resume_only_failed(tmp_path):
+    """A mid-pass judge failure under concurrency persists every OTHER cell; resume judges only it.
+
+    This is the spend-safety guarantee: one flaky judge must not discard/re-cost the rest of the queue.
+    """
+    out = tmp_path / "collection.json"
+
+    class Flaky(_Recorder):
+        def judge(self, question, response):
+            self.judge_calls.append((question, response))
+            if "mb-sft-dpo" in response and question == "Q2?":  # exactly one cell fails
+                raise RuntimeError("flaky judge")
+            return {"score": 1, "rationale": "ok"}
+
+    flaky = Flaky()
+    with pytest.raises(AnalysisInputError):
+        collect(ITEMS, SUBJECTS, flaky.generate, flaky.judge, decoding=DECODING,
+                run_id="afb-test", out_path=out, concurrency=4)
+    doc = json.loads(out.read_text())
+    by_key = {(c["item_id"], c["subject"]): c for c in doc["cells"]}
+    assert all("response" in c for c in doc["cells"])           # all 4 responses persisted
+    scored = {k for k, c in by_key.items() if "score" in c}
+    assert scored == {("AFB-001", "gemma-4-31b-it"), ("AFB-001", "mb-sft-dpo"),
+                      ("AFB-002", "gemma-4-31b-it")}            # 3 verdicts persisted; the failed one absent
+
+    # Resume with a healthy judge → zero generation, exactly one judge call (the previously-failed cell).
+    good = _Recorder()
+    doc2 = collect(ITEMS, SUBJECTS, good.generate, good.judge, decoding=DECODING,
+                   run_id="afb-test", out_path=out, concurrency=4)
+    assert good.gen_calls == []
+    assert good.judge_calls == [("Q2?", by_key[("AFB-002", "mb-sft-dpo")]["response"])]
+    assert len(doc2["cells"]) == 4 and all("score" in c for c in doc2["cells"])
+
+
 def test_completeness_rejects_bad_score(tmp_path):
     rec = _Recorder()
-    rec.judge = lambda q, r: {"score": 7, "rationale": "out of range"}  # invalid
+    rec.judge = lambda q, r: {"score": 7, "rationale": "out of range"}  # out of 0–4
+    with pytest.raises(AnalysisInputError):
+        _collect(tmp_path, rec)
+
+
+@pytest.mark.parametrize("verdict", [
+    {"score": "2", "rationale": "string score"},   # not an int
+    {"score": True, "rationale": "bool score"},      # bool is not a valid int score
+    {"score": 2.0, "rationale": "float score"},      # float is not an int
+    {"score": 2, "rationale": ""},                    # blank rationale
+    {"score": 2, "rationale": "   "},                 # whitespace rationale
+    {"score": 2},                                      # missing rationale
+])
+def test_strict_judge_contract_rejected(tmp_path, verdict):
+    rec = _Recorder()
+    rec.judge = lambda q, r: dict(verdict)
     with pytest.raises(AnalysisInputError):
         _collect(tmp_path, rec)
 
@@ -132,6 +181,40 @@ def test_empty_response_fails_fast(tmp_path):
     rec.generate = lambda subject, prompt: "   "  # blank
     with pytest.raises(AnalysisInputError):
         _collect(tmp_path, rec)
+
+
+def _seed(tmp_path, **overrides):
+    doc = {
+        "schema_version": 1, "run_id": "afb-test", "condition": "cold", "subjects": SUBJECTS,
+        "judge": "openai/gpt-5.6-terra", "decoding": DECODING, "cells": [],
+    }
+    doc.update(overrides)
+    (tmp_path / "collection.json").write_text(json.dumps(doc))
+
+
+def test_checkpoint_schema_version_mismatch_rejected(tmp_path):
+    _seed(tmp_path, schema_version=2)
+    with pytest.raises(AnalysisInputError):
+        _collect(tmp_path, _Recorder())
+
+
+def test_checkpoint_duplicate_cell_rejected(tmp_path):
+    dup = {"item_id": "AFB-001", "question": "Q1?", "subject": "mb-sft-dpo", "response": "r", "score": 1, "rationale": "x"}
+    _seed(tmp_path, cells=[dup, dup])
+    with pytest.raises(AnalysisInputError):
+        _collect(tmp_path, _Recorder())
+
+
+def test_checkpoint_unknown_item_rejected_cleanly(tmp_path):
+    _seed(tmp_path, cells=[{"item_id": "AFB-999", "question": "Z?", "subject": "mb-sft-dpo", "response": "r"}])
+    with pytest.raises(AnalysisInputError):  # a clean error, NOT a bare KeyError on flush
+        _collect(tmp_path, _Recorder())
+
+
+def test_checkpoint_question_mismatch_rejected(tmp_path):
+    _seed(tmp_path, cells=[{"item_id": "AFB-001", "question": "WRONG?", "subject": "mb-sft-dpo", "response": "r"}])
+    with pytest.raises(AnalysisInputError):
+        _collect(tmp_path, _Recorder())
 
 
 def test_mismatched_checkpoint_refused(tmp_path):

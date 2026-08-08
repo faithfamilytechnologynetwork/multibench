@@ -195,6 +195,25 @@ Phase 1 DONE. 3 non-blocking notes captured as follow-ups (not re-litigating a u
   empty-response, mismatched-checkpoint, concurrency, item-id, loader). Full suite 192 passed, ruff clean.
 - NO SPEND this phase (runner is wiring; real run is P5). run.log gitignored.
 
+### P2 consult iter-1 (codex + claude, both REQUEST_CHANGES HIGH) — resolved
+Both flagged the FLAGSHIP spend bug (claude verified empirically):
+- **Mid-pass failure discarded completed paid work + paid for the whole remaining queue**
+  (ThreadPoolExecutor shutdown(wait=True) w/o cancel_futures + as_completed raising early). Fixed:
+  `_run_pass` now DRAINS all futures, persists every success on the main thread, collects failures,
+  raises an aggregate AFTER the drain → resume re-issues only failed cells. Test: concurrent mid-pass
+  judge failure persists the other 3 cells; resume issues exactly 1 judge call, 0 generations.
+- **Strict judge contract**: score must be a real int 0–4 (reject bool/float/str; `score in (0..4)`
+  alone accepted True==1 / 2.0==2) + non-empty rationale. Parametrized rejection tests. Runner's judge
+  also raises on non-int/blank-rationale → _retry.
+- **Checkpoint integrity**: reject schema_version mismatch, duplicate cells, unknown item (was a bare
+  KeyError on flush → now clean error), unknown subject, question mismatch. Tests for each.
+- **Usage race**: threading.Lock around the shared usage counters (worker threads). **Retry+progress
+  logging** to run.log (was a black box for a paid ceiling-gated run). **len(items)==150 assertion**.
+  **#48 decoding-divergence note** logged at start (greedy vs #48 server-default sampling — benign
+  for the P5 reconciliation). $ reconciled in P5 from OpenRouter activity + Modal billing (tokens
+  logged, not $, since OpenRouter cost needs a separate query — documented, not guessed).
+- Full suite 203 passed, ruff clean.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then

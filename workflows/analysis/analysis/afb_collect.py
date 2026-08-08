@@ -95,15 +95,27 @@ class _Store:
     def _load_existing(self) -> None:
         doc = json.loads(self._path.read_text(encoding="utf-8"))
         # Meta must match the requested run (a stale/mismatched checkpoint is a hard error, not a
-        # silent overwrite — fail fast rather than mixing decoding/subjects across runs).
+        # silent overwrite — fail fast rather than mixing schema/decoding/subjects across runs).
+        if doc.get("schema_version") != SCHEMA_VERSION:
+            raise AnalysisInputError(
+                f"checkpoint {self._path} schema_version={doc.get('schema_version')!r} != {SCHEMA_VERSION}")
         for k in ("run_id", "condition", "subjects", "judge", "decoding"):
             if doc.get(k) != self._meta[k]:
                 raise AnalysisInputError(
                     f"checkpoint {self._path} has {k}={doc.get(k)!r}, expected {self._meta[k]!r} "
                     f"— refusing to resume a mismatched run"
                 )
+        subjects = set(self._meta["subjects"])
         for c in doc.get("cells", []):
             key = _cell_key(c["item_id"], c["subject"])
+            if key in self._cells:
+                raise AnalysisInputError(f"duplicate checkpoint cell {key} in {self._path}")
+            if c["item_id"] not in self._questions:  # unknown item → would KeyError on flush; reject cleanly
+                raise AnalysisInputError(f"checkpoint cell for unknown item {c['item_id']!r}")
+            if c["subject"] not in subjects:
+                raise AnalysisInputError(f"checkpoint cell for unknown subject {c['subject']!r}")
+            if c.get("question") is not None and c["question"] != self._questions[c["item_id"]]:
+                raise AnalysisInputError(f"checkpoint question mismatch for {c['item_id']!r}")
             self._cells[key] = {k: c[k] for k in ("response", "score", "rationale") if k in c}
 
     def get(self, item_id: str, subject: str) -> dict:
@@ -113,11 +125,16 @@ class _Store:
         self._cells.setdefault(_cell_key(item_id, subject), {})["response"] = response
         self._flush()
 
-    def set_verdict(self, item_id: str, subject: str, score: int, rationale: str) -> None:
-        if score not in VALID_SCORES:
-            raise AnalysisInputError(f"judge returned score {score!r} for {item_id}/{subject}, expected 0–4")
+    def set_verdict(self, item_id: str, subject: str, score, rationale) -> None:
+        # Strict judge contract: an actual int 0–4 (NOT bool/float/str-coercible) + a non-empty
+        # rationale. `score in VALID_SCORES` alone would accept True (==1) and 2.0 (==2).
+        if isinstance(score, bool) or not isinstance(score, int) or score not in VALID_SCORES:
+            raise AnalysisInputError(
+                f"judge returned non-integer/out-of-range score {score!r} for {item_id}/{subject}")
+        if not isinstance(rationale, str) or not rationale.strip():
+            raise AnalysisInputError(f"judge returned empty rationale for {item_id}/{subject}")
         cell = self._cells.setdefault(_cell_key(item_id, subject), {})
-        cell["score"] = int(score)
+        cell["score"] = score
         cell["rationale"] = rationale
         self._flush()
 
@@ -159,12 +176,16 @@ class _Store:
 
 def collect(items: list[dict], subjects: list[str], generate: GenerateFn, judge: JudgeFn, *,
             decoding: dict, run_id: str, out_path: str | Path, condition: str = "cold",
-            judge_model: str = "openai/gpt-5.6-terra", concurrency: int = 1) -> dict:
+            judge_model: str = "openai/gpt-5.6-terra", concurrency: int = 1,
+            on_persist: Callable[[str, str, str], None] | None = None) -> dict:
     """Collect responses + verdicts for every item × subject; resumable, idempotent, validated.
 
     Two passes (generate, then judge), each concurrency-bounded with a **single writer** (results
-    are persisted on the calling thread, so the atomic full-file replace is never racy). Returns the
-    final intermediate document (also written to ``out_path``).
+    are persisted on the calling thread, so the atomic full-file replace is never racy). A mid-pass
+    failure NEVER discards completed paid work: every succeeding cell in the pass is persisted, and
+    an aggregate error is raised only after the pass drains (resume then re-issues just the failed
+    cells). ``on_persist(phase, item_id, subject)`` fires after each persisted cell (progress hook).
+    Returns the final intermediate document (also written to ``out_path``).
     """
     if not items or not subjects:
         raise AnalysisInputError("collect requires non-empty items and subjects")
@@ -172,20 +193,23 @@ def collect(items: list[dict], subjects: list[str], generate: GenerateFn, judge:
     store = _Store(out_path, run_id=run_id, condition=condition, subjects=subjects,
                    judge=judge_model, decoding=decoding, items=items)
     q = {it["item_id"]: it["question"] for it in items}
+    note = on_persist or (lambda *_: None)
 
     # Pass 1 — generation: fill any cell missing a response (persist before judging).
     gen_work = [(it["item_id"], su) for it in items for su in subjects
                 if not store.get(it["item_id"], su).get("response")]
     _run_pass(gen_work, concurrency,
               task=lambda item_id, su: generate(su, _prompt(q[item_id], condition)),
-              persist=lambda item_id, su, resp: store.set_response(item_id, su, _require_text(resp, item_id, su)))
+              persist=lambda item_id, su, resp: store.set_response(item_id, su, _require_text(resp, item_id, su)),
+              on_done=lambda item_id, su: note("generate", item_id, su))
 
     # Pass 2 — judging: fill any cell with a response but no score.
     judge_work = [(it["item_id"], su) for it in items for su in subjects
                   if store.get(it["item_id"], su).get("response") and store.get(it["item_id"], su).get("score") is None]
     _run_pass(judge_work, concurrency,
               task=lambda item_id, su: judge(q[item_id], store.get(item_id, su)["response"]),
-              persist=lambda item_id, su, v: store.set_verdict(item_id, su, int(v["score"]), v.get("rationale", "")))
+              persist=lambda item_id, su, v: store.set_verdict(item_id, su, v.get("score"), v.get("rationale")),
+              on_done=lambda item_id, su: note("judge", item_id, su))
 
     store.validate_complete(items, subjects)
     return json.loads(out_path.read_text(encoding="utf-8"))
@@ -197,16 +221,34 @@ def _require_text(resp: str, item_id: str, subject: str) -> str:
     return resp
 
 
-def _run_pass(work: list[tuple[str, str]], concurrency: int, *, task, persist) -> None:
-    """Run ``task`` for each (item, subject) with bounded concurrency; ``persist`` on the main thread."""
+def _run_pass(work: list[tuple[str, str]], concurrency: int, *, task, persist, on_done) -> None:
+    """Run ``task`` for each (item, subject) with bounded concurrency; ``persist`` on the main thread.
+
+    Crucially, a failure does NOT throw away completed paid work: every succeeding cell is persisted
+    (on the calling thread, so the atomic write never races), failures are collected, and an
+    aggregate ``AnalysisInputError`` is raised only after the whole pass drains. Resume then re-issues
+    only the failed cells — one flaky judge cannot re-cost the rest of the queue.
+    """
     if not work:
         return
     if concurrency <= 1:
-        for item_id, su in work:
+        for item_id, su in work:  # sequential: a raise here has persisted every prior success already
             persist(item_id, su, task(item_id, su))
+            on_done(item_id, su)
         return
+    errors: list[str] = []
     with ThreadPoolExecutor(max_workers=concurrency) as ex:
         futs = {ex.submit(task, item_id, su): (item_id, su) for item_id, su in work}
         for fut in as_completed(futs):
             item_id, su = futs[fut]
-            persist(item_id, su, fut.result())  # main-thread persist → atomic write never races
+            try:
+                result = fut.result()
+            except Exception as e:  # noqa: BLE001 — collect, persist the rest, raise after the drain
+                errors.append(f"{item_id}/{su}: {e!r}")
+                continue
+            persist(item_id, su, result)  # main-thread persist → atomic write never races
+            on_done(item_id, su)
+    if errors:
+        raise AnalysisInputError(
+            f"{len(errors)} cell(s) failed this pass (successes persisted; resume re-issues only these): "
+            f"{errors[0]}" + (f" (+{len(errors) - 1} more)" if len(errors) > 1 else ""))
