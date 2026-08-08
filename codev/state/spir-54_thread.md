@@ -93,3 +93,17 @@ Both folded into spec. Wrote iter-1 rebuttal.
 ### Next
 - Committing revised spec; messaging architect (they'll bring the gate to Waleed).
 - Still at spec-approval gate (WAITING). Only a human runs `porch approve 54 spec-approval`. I do not.
+
+## Phase: PLAN (spec-approval APPROVED by Waleed 2026-08-08)
+- Terra judge stands (AFB judge-of-record; keeps headline non-selection-judge-gameable per #48 review). No design change.
+- Dispatcher check: `workflows/analysis` IS registered (`uv --project workflows/analysis run pytest`)
+  + `apps/multibrowser` (pnpm). Both touched → both tested. `test_export_raw_writer.py` already exists
+  = the byte-stability guard for the writer-extraction phase.
+- Planned 5 phases (no-spend P1–P4, fixture/mock-tested; P5 = the one-time ~$17–23 run + commit + docs):
+  P1 extract generic raw-writer (byte-identical guard on results-raw/20260803);
+  P2 AFB collection module (base+dpo, persist text+Terra, resumable/idempotent, completeness=300,
+     compact intermediate schema; money-I/O injected, mock-tested; thin experiments/54 runner);
+  P3 `analysis export-afb` sibling (intermediate→AFB catalog via P1 writer, synth summary, dpo−base
+     preset, fingerprints); P4 SPA generic raw-run discovery + entry point (no AFB vocab, guard green);
+  P5 real run + commit intermediate + results-raw/<afb-run-id>/ + verify SPA path + docs/attribution.
+  Notify architect before the P5 spend (serving smoke first, reconcile actual spend).
