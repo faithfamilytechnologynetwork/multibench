@@ -186,6 +186,20 @@ describe("raw-results view", () => {
     expect(ctx.querySelector("details")?.open).toBe(true);
   });
 
+  it("reading order: question → guidance → first response on the raw item page (Waleed's fix, #73)", async () => {
+    // The live complaint: the guidance used to sit ABOVE the conversation, so readers saw the judges'
+    // Context before the question it refers to. It now rides RawComparison's slot — after the question,
+    // before the first model response — mirroring the /t/ page's order.
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    await screen.findByRole("heading", { name: "BUD-001" });
+    const question = await screen.findByText(/thinking about leaving/);     // first user turn
+    const guidance = await screen.findByText(/judge guidance for BUD-001/); // the corpus Context block
+    const response = await screen.findByText(/what's behind that/);         // first assistant response
+    expect(question.compareDocumentPosition(guidance) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(guidance.compareDocumentPosition(response) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it("cross-links the raw item page back to its corpus scenario page", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001`);

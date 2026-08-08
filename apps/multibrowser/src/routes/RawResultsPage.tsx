@@ -159,19 +159,20 @@ export function RawResultsPage() {
         </section>
       )}
 
-      {/* The scenario's judge-guidance (binding ground truth) + a cross-link to the corpus page, wired
-          through the group→corpus mapping so this generic page stays MB-vocabulary-free (#54 guard).
-          Sits between the grid and the comparison so a deep-linked reader's target cell stays near the
-          top; renders nothing for a non-corpus catalog. */}
-      <CorpusContext sha={sha} catalog={catalog} group={groupId} item={itemId} />
-
       {/* Selected cell detail — the SAME jalees-style interleaved comparison as the scenario page
-          (one renderer over one shape, no divergence). A alone, or A vs B side by side. */}
+          (one renderer over one shape, no divergence). A alone, or A vs B side by side.
+          The scenario's judge-guidance (binding ground truth) + corpus cross-link ride RawComparison's
+          context slot — rendered AFTER the question, BEFORE the first response — so a deep-linked reader
+          sees the question, then the guidance the judges use, then the answers (Waleed's reading-order
+          fix, #73). CorpusContext stays the ONE corpus-coupled child, wired through the group→corpus
+          mapping so this page stays MB-vocabulary-free (#54 guard); it renders nothing for a non-corpus
+          catalog, and the slot then degrades to no gap. */}
       {!shard ? (
         <p className="text-sm text-default-500">Raw data for this item is unavailable — see the notices above.</p>
       ) : (
         <section data-testid="cell-details">
-          <RawComparison catalog={catalog} shard={shard} a={sel.a} b={sel.b ?? null} conditions={sel.conditions} />
+          <RawComparison catalog={catalog} shard={shard} a={sel.a} b={sel.b ?? null} conditions={sel.conditions}
+            contextSlot={<CorpusContext sha={sha} catalog={catalog} group={groupId} item={itemId} />} />
         </section>
       )}
 
