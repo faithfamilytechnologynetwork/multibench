@@ -95,6 +95,19 @@ export function resultsRunIds(entries: TreeEntry[]): string[] {
   return ids.sort();
 }
 
+/** Every `results-raw/<id>/` run id from the walked tree. Independent of `resultsRunIds` — a
+ * raw-only run (a `results-raw/` tier with no `results/` score tier, e.g. the AFB explorer) is
+ * discoverable here WITHOUT ever calling `loadResultsManifest`, so it never paints a false
+ * "manifest not found" error and adds no GitHub API call beyond the existing tree walk. */
+export function rawRunIds(entries: TreeEntry[]): string[] {
+  const ids: string[] = [];
+  for (const e of entries) {
+    const m = /^results-raw\/([^/]+)\/manifest\.json$/.exec(e.path);
+    if (m && m[1]) ids.push(m[1]);
+  }
+  return ids.sort();
+}
+
 // ---- shared cached fetchers (dedupe across derived queries) ----------------------------------
 
 function ensureTree(qc: QueryClient, sha: string): Promise<TreeEntry[]> {
@@ -434,6 +447,25 @@ export function useResultsRuns(sha: string | undefined) {
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: () => loadResultsRuns(qc, sha as string),
+  });
+}
+
+/** Raw-ONLY runs — a `results-raw/` tier with no `results/` score tier — surfaced as standalone
+ * explorers (e.g. the AFB before/after dataset, #54). Derived from the already-walked tree only;
+ * never touches `loadResultsManifest`, so it adds no GitHub API call and no false error notice, and
+ * it leaves the score-tier run list / default run entirely untouched. */
+export function useRawExplorerRunIds(sha: string | undefined) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ["raw-explorers", REPO, sha],
+    enabled: !!sha,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: async () => {
+      const entries = await ensureTree(qc, sha as string);
+      const scored = new Set(resultsRunIds(entries));
+      return rawRunIds(entries).filter((id) => !scored.has(id));
+    },
   });
 }
 

@@ -142,7 +142,8 @@ describe("raw contract + view are catalog-generic (static check)", () => {
     const url = await import("node:url");
     const path = await import("node:path");
     const here = path.dirname(url.fileURLToPath(import.meta.url));
-    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "rawSelection.ts", "../routes/RawResultsPage.tsx"];
+    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "rawSelection.ts",
+                   "../routes/RawResultsPage.tsx", "../routes/RawRunPage.tsx"];
     const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
     for (const f of files) {
       const code = stripComments(fs.readFileSync(path.join(here, f), "utf8"));
@@ -156,6 +157,23 @@ describe("raw contract + view are catalog-generic (static check)", () => {
       }
       // no hardcoded scoreColor ramp constant (colors come from catalog.ramp)
       expect(code, `${f} must not import the hardcoded scoreColor`).not.toMatch(/from ["']\.\/scoreColor["']/);
+    }
+  });
+
+  // The raw-run entry points (the discovery landing + the index section) must stay dataset-generic:
+  // no AFB-specific literals — everything comes from the catalog (#54). Guards against a future edit
+  // that hardcodes a subject/group id into the SPA core.
+  it("raw-run entry points carry no dataset-specific (AFB) vocab literals", async () => {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
+    for (const f of ["../routes/RawRunPage.tsx", "../routes/IndexPage.tsx"]) {
+      const code = stripComments(fs.readFileSync(path.join(here, f), "utf8"));
+      for (const lit of ["afb-150", "mb-sft-dpo", "gemma-4-31b-it", "AFB"]) {
+        expect(code, `${f} must not hardcode the dataset literal "${lit}"`).not.toContain(lit);
+      }
     }
   });
 

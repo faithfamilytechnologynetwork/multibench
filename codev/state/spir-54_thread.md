@@ -272,6 +272,21 @@ Both converged on provenance + label; addressed all:
   content_fingerprint still adds transcript/response coverage the judgment fp lacks. Test rewritten:
   score OR rationale change → BOTH fps move; a RESPONSE-text change → only content_fingerprint. 232 passed.
 
+### P4 DONE — SPA generic raw-run discovery + entry point (the one real frontend change)
+- `queries.ts`: `rawRunIds(entries)` (regex `^results-raw/([^/]+)/manifest.json$`) + `useRawExplorerRunIds`
+  = raw-ONLY runs (results-raw with no results/), from the walked tree only — NEVER via loadResultsManifest
+  (so no false "manifest not found", no extra API call, score-tier run list/default untouched).
+- `RawRunPage.tsx` (`/raw/$runId` route): catalog-generic landing. useRawCatalog(sha,runId,NULL) →
+  dataset title/desc + shipped `<RawPresets>` + a generic item index over catalog.items. Every item link
+  carries a=subjects[0], b=subjects[1] (+scope+judge) so it opens TWO-COLUMN (b defaults null→single else).
+  All-150 reachable (presets alone = ≤12). MB-vocab-free (all from catalog).
+- `IndexPage.tsx`: "Explorers" section lists raw-only runs → /raw/$runId. `router.tsx`: +/raw/$runId route.
+- Static guard extended: RawRunPage.tsx added to the MB-vocab file list + new AFB-literal ban
+  (afb-150/mb-sft-dpo/gemma-4-31b-it/AFB) on RawRunPage+IndexPage.
+- Tests `rawRun.test.tsx` (4): rawRunIds+raw-only filter (unit); landing lists ALL items w/ a+b/scope/judge
+  links + reused presets + no false notice; landing on an item renders BOTH columns (VANILLA + TUNED);
+  index Explorers lists AFB but NOT a score-tier MB run. Full multibrowser suite 301 passed; tsc clean.
+
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
 Minor non-blocking follow-ups:
 - exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic

@@ -10,6 +10,7 @@ import { TraditionPage } from "./routes/TraditionPage";
 import { ScenarioPage } from "./routes/ScenarioPage";
 import { ResultsPage } from "./routes/ResultsPage";
 import { RawResultsPage } from "./routes/RawResultsPage";
+import { RawRunPage } from "./routes/RawRunPage";
 import { NotFound } from "./routes/NotFound";
 import { parseSearch, stringifySearch } from "./lib/searchParams";
 import { searchSchema } from "./lib/filtering";
@@ -61,7 +62,17 @@ export const rawResultsRoute = createRoute({
   validateSearch: rawSearchSchema,
 });
 
-const routeTree = rootRoute.addChildren([indexRoute, traditionRoute, scenarioRoute, resultsRoute, rawResultsRoute]);
+// A standalone raw-only explorer's run landing (#54): presets + a generic item index into the raw
+// view. No search state of its own (it only builds links), so no validateSearch.
+export const rawRunRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/raw/$runId",
+  component: RawRunPage,
+});
+
+const routeTree = rootRoute.addChildren([
+  indexRoute, traditionRoute, scenarioRoute, resultsRoute, rawResultsRoute, rawRunRoute,
+]);
 
 export function createAppRouter(history?: RouterHistory) {
   return createRouter({
