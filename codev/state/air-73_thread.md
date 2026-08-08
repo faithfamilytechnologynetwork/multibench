@@ -46,4 +46,18 @@ no raw catalog / no presets.
 - [x] typecheck + build green
 - [x] tests green — 291 passed (added: guidance-inline, cross-link, AFB-degrade, presets-off-item,
       presets-on-/results)
-- [ ] PR
+- [x] PR #74 opened, pushed; porch at **PR gate** → notified architect, awaiting approval.
+
+## PR #74 review fixes (architect, 2026-08-08)
+1. `/results` was double-resolving the raw source (null fingerprint on first paint). Now sources the
+   cross-tier fingerprint from `runsQ.data.runs` (settled with `runId`) + gates the hook on `runsQ.data`.
+2. Moved `CorpusContext` to sit **between the score grid and the comparison** (kept `defaultOpen`) so a
+   deep-linked reader's target cell stays near the top. (Final placement is Waleed's live call.)
+3. Hardened the #54 guard: new test asserts `CorpusContext` is the ONE sanctioned corpus-coupled child
+   of `RawResultsPage` and every other `../components/*` child it renders is MB-vocab/route-free.
+4. Dropped the dead path rebuild — `useCorpusGuidance` now consumes `corpusRef().guidancePath` (path
+   built in exactly one place, `lib/corpus.ts`).
+5. Missing guidance → error `Notice` (matches `ScenarioResponses`); Highlights skipped when the catalog
+   has no judges (no `?judge=` links); comment that highlights deliberately use the full-grid judge.
+
+Tests green: 292 pass. typecheck + build clean.

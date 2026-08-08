@@ -99,11 +99,6 @@ export function RawResultsPage() {
 
       <Notices notices={dataNotices} />
 
-      {/* The scenario's judge-guidance (binding ground truth) + a cross-link to the corpus page, wired
-          through the group→corpus mapping so this generic page stays MB-vocabulary-free (#54 guard).
-          Renders nothing for a non-corpus catalog. */}
-      <CorpusContext sha={sha} catalog={catalog} group={groupId} item={itemId} />
-
       {/* Judge + scope + compare controls (generic over catalog vocab). */}
       <section className="flex flex-wrap items-end gap-3" data-testid="raw-controls">
         <Pills label="Judge" value={sel.judge} options={catalog.judges.map((j) => ({ id: j.key, label: j.label }))} onSelect={(judge) => setSel({ judge })} />
@@ -163,6 +158,12 @@ export function RawResultsPage() {
           </table>
         </section>
       )}
+
+      {/* The scenario's judge-guidance (binding ground truth) + a cross-link to the corpus page, wired
+          through the group→corpus mapping so this generic page stays MB-vocabulary-free (#54 guard).
+          Sits between the grid and the comparison so a deep-linked reader's target cell stays near the
+          top; renders nothing for a non-corpus catalog. */}
+      <CorpusContext sha={sha} catalog={catalog} group={groupId} item={itemId} />
 
       {/* Selected cell detail — the SAME jalees-style interleaved comparison as the scenario page
           (one renderer over one shape, no divergence). A alone, or A vs B side by side. */}

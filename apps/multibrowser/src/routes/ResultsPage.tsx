@@ -106,8 +106,13 @@ export function ResultsPage() {
 
   // The run's raw catalog drives the run-level highlight presets (moved off the per-item raw pages).
   // Fail-soft: a run with no raw tier → null catalog → no highlights section (its notices are the raw
-  // pages' concern, not the leaderboard's, so they are not surfaced here).
-  const rawCatalog = useRawCatalog(shaQ.data, runId, manifest?.fingerprint ?? null).data?.catalog ?? null;
+  // pages' concern, not the leaderboard's, so they are not surfaced here). Source the cross-tier
+  // fingerprint from `runsQ` (settled by the time `runId` resolves) — NOT from `useResultsRun`, which
+  // lands later and would fire `resolveRawSource` once with a null (cache-orphaned) fingerprint first.
+  const rawFingerprint = runsQ.data?.runs.find((r) => r.id === runId)?.manifest?.fingerprint ?? null;
+  const rawCatalog = useRawCatalog(runsQ.data ? shaQ.data : undefined, runId, rawFingerprint).data?.catalog ?? null;
+  // Highlights deliberately deep-link with the full-grid (ranking) judge — the canonical leaderboard
+  // judge — falling back to the first declared judge only if none is full-grid.
   const highlightJudge = rawCatalog?.judges.find((j) => j.fullGrid)?.key ?? rawCatalog?.judges[0]?.key ?? "";
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(runsQ.error) ?? asRateLimit(runQ.error);
@@ -241,8 +246,9 @@ export function ResultsPage() {
           />
 
           {/* Run-level highlights: curated cross-tradition deep links into the raw explorer. These are
-              RUN-scoped (not item-scoped), so they live here rather than on every raw item page. */}
-          {rawCatalog && rawCatalog.presets.length > 0 && (
+              RUN-scoped (not item-scoped), so they live here rather than on every raw item page. Needs
+              at least one judge (the preset links carry a `?judge=`) — skip otherwise. */}
+          {rawCatalog && rawCatalog.presets.length > 0 && highlightJudge !== "" && (
             <section className="flex flex-col gap-2" data-testid="highlights">
               <div>
                 <h2 className="text-lg font-semibold">Highlights</h2>

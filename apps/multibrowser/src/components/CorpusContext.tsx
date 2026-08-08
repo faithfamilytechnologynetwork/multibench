@@ -4,6 +4,7 @@ import { corpusRef } from "../lib/corpus";
 import type { RawCatalog } from "../lib/rawModel";
 import { Collapsible } from "./Collapsible";
 import { Markdown } from "./Markdown";
+import { Notice } from "./Notice";
 
 /**
  * The raw item page's corpus context: the scenario's judge-guidance (the binding ground truth the
@@ -19,7 +20,7 @@ export function CorpusContext({ sha, catalog, group, item }: {
   sha: string | undefined; catalog: RawCatalog; group: string; item: string;
 }) {
   const ref = corpusRef(catalog, group, item);
-  const guidanceQ = useCorpusGuidance(sha, group, item, !!ref);
+  const guidanceQ = useCorpusGuidance(sha, ref?.guidancePath ?? null);
   if (!ref) return null;
   return (
     <section className="flex flex-col gap-2" data-testid="corpus-context">
@@ -33,9 +34,9 @@ export function CorpusContext({ sha, catalog, group, item }: {
         ) : guidanceQ.isLoading ? (
           <p className="text-sm text-default-400">Loading guidance…</p>
         ) : (
-          <p className="text-sm text-default-400" data-testid="guidance-unavailable">
-            The judge guidance for this item is unavailable.
-          </p>
+          // Absent guidance is a corpus DEFECT, not cosmetics — surface it as an error Notice, matching
+          // ScenarioResponses (the judges' ground truth should never be silently missing).
+          <Notice notice={{ severity: "error", scope: "section", where: ref.guidancePath, message: "Judge-guidance is missing or empty." }} />
         )}
       </Collapsible>
     </section>

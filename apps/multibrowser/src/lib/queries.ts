@@ -667,27 +667,21 @@ export function useRawCatalog(
 }
 
 /**
- * One scenario's corpus judge-guidance (`traditions/<tid>/scenarios/<sid>/judge-guidance.md`) — the
- * binding ground truth the raw item page shows inline via the documented group→corpus mapping
- * (`lib/corpus.ts`). `proseSection`-cleaned (empty/missing → null). Gated by `enabled` so a non-corpus
- * catalog never fetches.
+ * A scenario's corpus judge-guidance — the binding ground truth the raw item page shows inline via
+ * the documented group→corpus mapping. `guidancePath` is owned by `lib/corpus.ts` (the one
+ * corpus-shape module) and passed in, so the path is built in exactly one place. `proseSection`-cleaned
+ * (empty/missing → null); a `null` path (non-corpus catalog) never fetches.
  */
-export function useCorpusGuidance(
-  sha: string | undefined,
-  traditionId: string,
-  scenarioId: string,
-  enabled: boolean,
-) {
+export function useCorpusGuidance(sha: string | undefined, guidancePath: string | null) {
   const qc = useQueryClient();
-  const path = sPath(traditionId, scenarioId, FILE.judgeGuidance);
   return useQuery({
-    queryKey: ["scenarioGuidance", REPO, sha, traditionId, scenarioId],
-    enabled: enabled && !!sha,
+    queryKey: ["corpusGuidance", REPO, sha, guidancePath],
+    enabled: !!sha && !!guidancePath,
     staleTime: Infinity,
     gcTime: GC_TIME,
     queryFn: async () => {
-      const text = await ensureRaw(qc, sha as string, path);
-      return { guidance: proseSection(text, FILE.judgeGuidance, "section", path).text, where: path };
+      const text = await ensureRaw(qc, sha as string, guidancePath as string);
+      return { guidance: proseSection(text, FILE.judgeGuidance, "section", guidancePath as string).text, where: guidancePath as string };
     },
   });
 }
