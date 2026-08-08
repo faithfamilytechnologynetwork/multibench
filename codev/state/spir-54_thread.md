@@ -118,6 +118,14 @@ Two correctness-critical catches (Claude):
   a=subjects[0]+b=subjects[1] (rawSelection defaults b=null → single column) + two-column assertion;
   SEPARATE rawRunIds enumerator (never loadResultsManifest → no false "manifest not found" notice, maps
   spec NFT-3); extend static MB-vocab guard to the new entry file.
+## Plan-approval APPROVED by Waleed (2026-08-08)
+- **Ranking: KEEP absolute |dpo−base|** (paper evidence artifact; hiding regressions = curation bias;
+  biggest moves in BOTH directions ship). Signed refinement rejected.
+- Proceed P1–P4 (no-spend). **P5 requires architect's explicit GO after P4 lands** — message then.
+
+## Phase: IMPLEMENT (P1–P4 no-spend, then P5 gated)
+
+---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then
 verdict; resume judges-only); pin+record decoding (temp/seed/max_tokens) + reconcile base/dpo dist vs
