@@ -54,7 +54,7 @@ def _json_bytes(obj) -> bytes:
 class WriteSummary:
     """Sizes recorded by the writer (for the CLI's size measurement)."""
 
-    scenarios: int
+    shards: int                      # number of shards written (MB: scenarios; AFB: items)
     manifest_bytes: int
     shard_bytes: int                 # gzipped shard total
     shard_uncompressed_bytes: int    # pre-gzip shard total (for the ratio)
@@ -147,7 +147,7 @@ class RawTierWriter:
             path.write_bytes(payload)
 
         return WriteSummary(
-            scenarios=self._n, manifest_bytes=len(manifest_bytes), shard_bytes=self._shard_total,
+            shards=self._n, manifest_bytes=len(manifest_bytes), shard_bytes=self._shard_total,
             shard_uncompressed_bytes=self._shard_uncompressed, max_shard_bytes=self._max_shard,
             total_bytes=total,
         )

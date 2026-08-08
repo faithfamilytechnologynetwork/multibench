@@ -232,6 +232,23 @@ Both converged on one real hole I'd introduced + claude caught a drain edge:
 - **P5 gate TODO**: surface the greedy-vs-#48-sampling decoding divergence explicitly in the spend-gate
   message (claude note 5) — #48 is the reconciliation oracle.
 
+### P3 DONE — analysis export-afb sibling exporter
+- FIRST: applied the P1 follow-up rename `WriteSummary.scenarios`→`shards` (raw_writer + cli export-raw
+  JSON key + 2 test assertions) — done before adding the 2nd caller, as the P1 reviewer advised.
+- `workflows/analysis/analysis/export_afb.py` — intermediate → drop-in results-raw/<run-id>/ catalog via
+  the P1 RawTierWriter + raw_presets.dedup_per_item (NO MB code). Catalog matches the shipped AFB_CATALOG
+  fixture: scale{0,2,4}, subjects=[gemma-4-31b-it,mb-sft-dpo] (readable labels), judges=[terra/gpt-5.6-terra],
+  conditionAxes=[condition:cold], groupBy instrument/afb-150, scopes=[single]. Ramp = cool→grey→warm
+  (center grey at target 2 = anti-"4 is best", colorblind-safe, theme-robust). Fixed score→summary map.
+  Item label = whitespace-collapsed question ≤80 on word boundary +…. Shard = 2 cells (base,dpo) single-turn
+  transcript + terra verdict {score,summary,rationale}. fingerprint = self-consistent combine over verdict
+  lines (no cross-tier partner); content_fingerprint from the writer. Preset dpo-base = |Δ| desc, N≤12,
+  one/item (absolute per approved spec — biggest moves both directions ship).
+- `export-afb` CLI command (intermediate arg, --run-id, --out), mirrors export-raw output.
+- 14 tests (catalog shape vs fixture, shard/summary, label truncation, byte-identical re-export, preset
+  ranking + cap, invalid-intermediate rejection, missing-subject, size accounting, CLI smoke).
+  Full suite 224 passed, ruff clean. Phase 4 renders it in-app against the real parser.
+
 ### P2 consult iter-3: BOTH APPROVE ✅ (codex + claude). Phase 2 DONE.
 Non-blocking follow-ups captured (apply at Phase 5 / opportunistically):
 - (a) extend the serving smoke to also make ONE judge call (fail a judge misconfig before the full

@@ -42,7 +42,7 @@ def test_write_dataset_layout_and_gunzip(tmp_path):
     assert (run_dir / "manifest.json").is_file()
     shard = run_dir / "buddhism" / "BUD-001.json.gz"
     assert shard.is_file()
-    assert summary.scenarios == 1
+    assert summary.shards == 1
 
     manifest = _read_manifest(run_dir)
     assert manifest["schema_version"] == 1
@@ -152,7 +152,7 @@ def test_limit_writes_subset(tmp_path):
                       subjects=["gpt-5.6-terra"], judges=["gemini-3.6-flash"],
                       scenarios=("BUD-001", "BUD-002", "BUD-003"))
     summary = write_dataset([root], tmp_path / "out" / "lim", "run1", limit=2)
-    assert summary.scenarios == 2
+    assert summary.shards == 2
     items = _read_manifest(tmp_path / "out" / "lim" / "run1")["items"]
     assert [it["id"] for it in items] == ["BUD-001", "BUD-002"]
 
@@ -276,7 +276,7 @@ def test_export_raw_cli_runs(tmp_path):
                                  "--out", str(tmp_path / "out")])
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
-    assert payload["run_id"] == "run1" and payload["scenarios"] == 1
+    assert payload["run_id"] == "run1" and payload["shards"] == 1
     assert payload["compression_ratio"] > 1.0
     assert payload["shard_uncompressed_bytes"] > payload["shard_bytes"]
     assert (tmp_path / "out" / "run1" / "manifest.json").is_file()
@@ -295,7 +295,7 @@ def test_export_raw_cli_with_limit(tmp_path):
     result = runner.invoke(app, ["export-raw", str(root), "--run-id", "run1",
                                  "--out", str(tmp_path / "out"), "--limit", "2"])
     assert result.exit_code == 0, result.output
-    assert json.loads(result.output)["scenarios"] == 2
+    assert json.loads(result.output)["shards"] == 2
     items = _read_manifest(tmp_path / "out" / "run1")["items"]
     assert [it["id"] for it in items] == ["BUD-001", "BUD-002"]
 
