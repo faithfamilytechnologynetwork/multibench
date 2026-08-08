@@ -101,19 +101,26 @@ describe("raw-results view", () => {
     expect(await screen.findByText(/weigh it against your values/)).toBeInTheDocument(); // gpt/stated transcript
   });
 
-  it("a preset renders a deep-link into a cell", async () => {
+  it("the run-level presets do NOT render on the per-item page (moved to the run landing, #73)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/${RUN}/buddhism/BUD-001`);
     await screen.findByRole("heading", { name: "BUD-001" });
-    const preset = within(screen.getByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ });
+    expect(screen.queryByTestId("presets")).toBeNull();      // presets belong to the run landing now
+    expect(screen.queryByTestId("preset-card")).toBeNull();
+    expect(screen.getByTestId("score-grid")).toBeInTheDocument(); // item-scoped content still here
+  });
+
+  it("a run-level preset renders a deep-link into a cell (on the /results landing)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp("/results");
+    const preset = within(await screen.findByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ });
     expect(preset.getAttribute("href")).toMatch(/\/results\/.*\/buddhism\/BUD-001\?.*a=gpt-5\.6-terra/);
   });
 
-  it("clicking a preset navigates and restores its target cell (A vs B)", async () => {
+  it("clicking a run-level preset navigates and restores its target cell (A vs B)", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
-    const { router } = renderApp(`/results/${RUN}/buddhism/BUD-001`);
-    await screen.findByRole("heading", { name: "BUD-001" });
-    await userEvent.click(within(screen.getByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ }));
+    const { router } = renderApp("/results");
+    await userEvent.click(within(await screen.findByTestId("presets")).getByRole("link", { name: /gpt-5\.6-terra vs claude-sonnet-5/ }));
     await waitFor(() => expect(screen.getAllByTestId("cmp-column")).toHaveLength(2)); // A vs B restored
     expect(screen.getAllByTestId("cmp-column").map((d) => d.getAttribute("data-subject"))).toEqual(["gpt-5.6-terra", "claude-sonnet-5"]);
     expect(screen.getByText(/three reasons it might be time/)).toBeInTheDocument(); // gpt/unstated transcript
@@ -160,6 +167,30 @@ describe("raw-results view", () => {
     expect(await screen.findByText(/vanilla omission/)).toBeInTheDocument();
     expect((await screen.findAllByTestId("verdict")).length).toBe(1);
     expect(screen.getAllByText("gpt-5.6-terra").length).toBeGreaterThan(0); // judge label (pill + verdict)
+    // A non-corpus catalog has no group→corpus mapping → no guidance section, no cross-link (degrades).
+    expect(screen.queryByTestId("corpus-context")).toBeNull();
+    expect(screen.queryByTestId("corpus-link")).toBeNull();
+  });
+
+  // ── #73: judge guidance inline on the raw item page (via the group→corpus mapping) ──────────
+
+  it("shows the scenario's judge guidance inline on a deep-linked raw item page (default open)", async () => {
+    // The acceptance case: a visitor landing directly on the item page sees the binding ground truth
+    // (traditions/<group>/scenarios/<item>/judge-guidance.md) without navigating away.
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    const ctx = await screen.findByTestId("corpus-context");
+    expect(within(ctx).getByText(/what good counsel looks like/)).toBeInTheDocument();
+    expect(await within(ctx).findByText(/judge guidance for BUD-001/)).toBeInTheDocument(); // the corpus file
+    // Default open (deep-link use case): the <details> is open, so the guidance is visible immediately.
+    expect(ctx.querySelector("details")?.open).toBe(true);
+  });
+
+  it("cross-links the raw item page back to its corpus scenario page", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
+    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    const link = await screen.findByTestId("corpus-link");
+    expect(link).toHaveAttribute("href", expect.stringContaining("/t/buddhism/BUD-001"));
   });
 
   it("the scenario page embeds the results section (auto-engaged) with a cross-link to the explorer", async () => {
@@ -247,7 +278,7 @@ describe("raw-results view", () => {
       }],
     };
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(manyPreset, "buddhism/BUD-001.json.gz", rawFixtureShard)));
-    renderApp(`/results/${RUN}/buddhism/BUD-001`);
+    renderApp("/results");
     const card = await screen.findByTestId("preset-card");
     expect(within(card).getByRole("heading", { name: "Models split" })).toBeInTheDocument();
     expect(within(card).getAllByRole("link")).toHaveLength(6); // collapsed → first 6

@@ -623,6 +623,76 @@ export function useRawScenario(
 }
 
 /**
+ * Resolve JUST a run's raw catalog (baked-vs-GitHub, fail-soft) — no item/shard. Shares the exact
+ * `RAW_SOURCE_QK` dedup key + queryFn shape with `loadRawScenario`, so the run landing (which shows
+ * the catalog's run-level presets) and a subsequent drill-in never refetch the catalog.
+ */
+export async function loadRawCatalogResolved(
+  qc: QueryClient,
+  sha: string,
+  runId: string,
+  expectedFingerprint: string | null,
+  sources: RawSources = defaultRawSources(sha),
+): Promise<{ catalog: RawCatalog | null; notices: Notice[] }> {
+  const where = `results-raw/${runId}/manifest.json`;
+  if (!isSafePathSegment(runId)) {
+    return { catalog: null, notices: [notice("error", "results-raw", where, `unsafe run id "${runId}"`)] };
+  }
+  const resolved = await qc.ensureQueryData({
+    queryKey: [RAW_SOURCE_QK, REPO, sha, runId, expectedFingerprint],
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: async (): Promise<{ kind: RawDataSource["kind"]; catalog: RawCatalog | null; notices: Notice[] }> => {
+      const r = await resolveRawSource(sources.baked, sources.github, runId, expectedFingerprint);
+      return { kind: r.source.kind, catalog: r.catalog, notices: r.notices };
+    },
+  });
+  return { catalog: resolved.catalog, notices: resolved.notices };
+}
+
+/** A run's raw catalog (for the run-level presets on `/results`). Excluded from persistence via [0]. */
+export function useRawCatalog(
+  sha: string | undefined,
+  runId: string | undefined,
+  expectedFingerprint: string | null,
+) {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: [RAW_SCENARIO_QK, "catalog", REPO, sha, runId, expectedFingerprint],
+    enabled: !!sha && !!runId,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: () => loadRawCatalogResolved(qc, sha as string, runId as string, expectedFingerprint),
+  });
+}
+
+/**
+ * One scenario's corpus judge-guidance (`traditions/<tid>/scenarios/<sid>/judge-guidance.md`) — the
+ * binding ground truth the raw item page shows inline via the documented group→corpus mapping
+ * (`lib/corpus.ts`). `proseSection`-cleaned (empty/missing → null). Gated by `enabled` so a non-corpus
+ * catalog never fetches.
+ */
+export function useCorpusGuidance(
+  sha: string | undefined,
+  traditionId: string,
+  scenarioId: string,
+  enabled: boolean,
+) {
+  const qc = useQueryClient();
+  const path = sPath(traditionId, scenarioId, FILE.judgeGuidance);
+  return useQuery({
+    queryKey: ["scenarioGuidance", REPO, sha, traditionId, scenarioId],
+    enabled: enabled && !!sha,
+    staleTime: Infinity,
+    gcTime: GC_TIME,
+    queryFn: async () => {
+      const text = await ensureRaw(qc, sha as string, path);
+      return { guidance: proseSection(text, FILE.judgeGuidance, "section", path).text, where: path };
+    },
+  });
+}
+
+/**
  * The scenario page's raw-data seam: resolves the default (most recent) results run and loads that
  * scenario's shard on demand (cached per scenario). Returns everything the page needs to render the
  * embedded responses; the SELECTION (model A/B + axes) is URL state owned by the page, not here.

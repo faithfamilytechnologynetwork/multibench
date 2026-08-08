@@ -1,9 +1,10 @@
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { useLatestSha, useResultsRuns, useResultsRun } from "../lib/queries";
+import { useLatestSha, useRawCatalog, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
+import { RawPresets } from "../components/RawPresets";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import {
   parseResultsSelection,
@@ -102,6 +103,12 @@ export function ResultsPage() {
     preSel.runId && knownRunIds.has(preSel.runId) ? preSel.runId : runsQ.data?.defaultRunId ?? undefined;
   const runQ = useResultsRun(shaQ.data, runId);
   const manifest = runQ.data?.manifest ?? null;
+
+  // The run's raw catalog drives the run-level highlight presets (moved off the per-item raw pages).
+  // Fail-soft: a run with no raw tier → null catalog → no highlights section (its notices are the raw
+  // pages' concern, not the leaderboard's, so they are not surfaced here).
+  const rawCatalog = useRawCatalog(shaQ.data, runId, manifest?.fingerprint ?? null).data?.catalog ?? null;
+  const highlightJudge = rawCatalog?.judges.find((j) => j.fullGrid)?.key ?? rawCatalog?.judges[0]?.key ?? "";
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(runsQ.error) ?? asRateLimit(runQ.error);
 
@@ -232,6 +239,20 @@ export function ResultsPage() {
               })
             }
           />
+
+          {/* Run-level highlights: curated cross-tradition deep links into the raw explorer. These are
+              RUN-scoped (not item-scoped), so they live here rather than on every raw item page. */}
+          {rawCatalog && rawCatalog.presets.length > 0 && (
+            <section className="flex flex-col gap-2" data-testid="highlights">
+              <div>
+                <h2 className="text-lg font-semibold">Highlights</h2>
+                <p className="text-sm text-default-500">
+                  Curated cross-tradition deep links into the raw explorer.
+                </p>
+              </div>
+              <RawPresets presets={rawCatalog.presets} runId={manifest.runId} judge={highlightJudge} />
+            </section>
+          )}
         </>
       )}
     </div>
