@@ -272,6 +272,14 @@ Both converged on provenance + label; addressed all:
   content_fingerprint still adds transcript/response coverage the judgment fp lacks. Test rewritten:
   score OR rationale change → BOTH fps move; a RESPONSE-text change → only content_fingerprint. 232 passed.
 
+### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
+Minor non-blocking follow-ups:
+- exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic
+  over count — small fixtures need <150). OK as-is.
+- intermediate["run_id"] not cross-checked vs CLI --run-id (P5 uses matching ids). Optional.
+- **[Phase 4]** add a TS-side fixture of a REAL exported AFB manifest → genuine cross-language schema
+  guard (renders in RTL against the real zod parser). Naturally addressed by Phase 4.
+
 ### P2 consult iter-3: BOTH APPROVE ✅ (codex + claude). Phase 2 DONE.
 Non-blocking follow-ups captured (apply at Phase 5 / opportunistically):
 - (a) extend the serving smoke to also make ONE judge call (fail a judge misconfig before the full
