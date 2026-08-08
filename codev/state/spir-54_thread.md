@@ -287,6 +287,21 @@ Both converged on provenance + label; addressed all:
   links + reused presets + no false notice; landing on an item renders BOTH columns (VANILLA + TUNED);
   index Explorers lists AFB but NOT a score-tier MB run. Full multibrowser suite 301 passed; tsc clean.
 
+### P4 consult iter-1 (both REQUEST_CHANGES) — resolved
+Two real blocking issues:
+- **Codex**: landing ignored shaQ.isLoading/error → flashed "not found" while SHA loads + misreported SHA
+  failures permanently (catalog query disabled until SHA arrives, so catQ.isLoading alone is false). Fixed:
+  spinner on shaQ.isLoading||catQ.isLoading; rate-limit banner + error Notice on shaQ/catQ error (mirrors
+  RawResultsPage). SHA-error test (commits→500 → error, not "not found").
+- **Claude**: landing rendered kind:"source" notices as a TOP banner → the GitHub-served AFB run (no baked
+  bundle, by design) would show a permanent yellow warning. Fixed: split dataNotices/sourceNotices (source
+  → unobtrusive footer, matching RawResultsPage/model.ts contract); filter applied to the empty-notice
+  fallback too. Test asserts the "no baked bundle" note is ONLY in the footer (getAllByText length 1).
+- Also (non-blocking, done): added a **home link** on the landing (dead-end fix) + a **no-new-API-call**
+  data-layer test (git-trees called exactly once for traditions+results+explorers). Full suite 304, tsc clean.
+- Deferred: Explorers list shows bare run id (not dataset.title) — defensible (avoids N index fetches);
+  follow-up if Waleed wants richer labels. Item-page back-link → /results dead-ends for raw-only (P5 real-path).
+
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
 Minor non-blocking follow-ups:
 - exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic

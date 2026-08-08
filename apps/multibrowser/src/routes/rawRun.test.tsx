@@ -102,4 +102,42 @@ describe("raw-only explorer discovery + landing (#54)", () => {
     expect(within(explorers).queryByText("mbrun")).toBeNull();      // MB (has score tier) NOT listed
     expect(screen.queryByText(/manifest not found/i)).toBeNull();   // no false error on the index
   });
+
+  it("a SHA load failure shows an error, not a premature 'not found'", async () => {
+    // The catalog query is disabled until the SHA arrives; if the SHA fetch FAILS the page must show
+    // an error (surfacing shaQ.error), NOT the misleading "Explorer not found" (the fixed bug).
+    const base = fakeFetch(REPO, SHA, afbFiles());
+    vi.stubGlobal("fetch", ((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("/commits/")) return Promise.resolve(new Response("boom", { status: 500 }));
+      return base(input, init);
+    }) as typeof fetch);
+    renderApp(`/raw/${RUN}`);
+    expect(await screen.findByText(/Couldn't load this explorer/i)).toBeInTheDocument();
+    expect(screen.queryByText(/not found/i)).toBeNull();
+  });
+
+  it("the GitHub-served run puts the 'no baked bundle' note in the FOOTER, not a top banner", async () => {
+    // No baked bundle in the fixture → resolveRawSource emits a `kind:"source"` note. It must be a
+    // quiet footer, never a top banner (the AFB run is GitHub-served by design in Phase 5).
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, afbFiles()));
+    renderApp(`/raw/${RUN}`);
+    await screen.findByRole("heading", { name: "AFB before/after" });
+    const foot = await screen.findByTestId("source-notes");
+    expect(within(foot).getByText(/baked/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/baked/i)).toHaveLength(1); // ONLY in the footer, not also a top banner
+  });
+
+  it("useRawExplorerRunIds adds no git-trees API call beyond the shared tree walk", async () => {
+    let treeCalls = 0;
+    const base = fakeFetch(REPO, SHA, { ...resultsFiles("mbrun", {}), ...afbFiles() });
+    vi.stubGlobal("fetch", ((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === "string" ? input : input.toString();
+      if (url.includes("/git/trees/")) treeCalls++;
+      return base(input, init);
+    }) as typeof fetch);
+    renderApp("/");
+    await screen.findByTestId("explorers");
+    expect(treeCalls).toBe(1); // one recursive tree walk serves traditions + results + explorers
+  });
 });
