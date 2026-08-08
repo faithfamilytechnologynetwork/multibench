@@ -45,7 +45,7 @@ def _require_safe_relpath(relpath: str) -> None:
         _require_safe_segment(part, "shard path component")
 
 
-def _json_bytes(obj) -> bytes:
+def json_bytes(obj) -> bytes:
     """Deterministic JSON (sorted keys, compact separators) as UTF-8 bytes."""
     return (json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
 
@@ -117,7 +117,7 @@ class RawTierWriter:
         :attr:`content_fingerprint` and its own judgment ``fingerprint``). Ceiling values are
         parameters so a caller can keep them monkeypatchable at its own module scope.
         """
-        manifest_bytes = _json_bytes(catalog_doc)
+        manifest_bytes = json_bytes(catalog_doc)
         docs = dict(self._docs)          # shard order preserved; manifest last
         docs[_MANIFEST] = manifest_bytes
 

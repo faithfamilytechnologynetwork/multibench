@@ -64,7 +64,7 @@ from analysis.raw_writer import (  # generic byte-stable writer, extracted for A
     MAX_TOTAL_BYTES,
     RawTierWriter,
     WriteSummary,
-    _json_bytes,
+    json_bytes,
     _require_safe_relpath,  # noqa: F401 — re-exported for tests (add_shard validates internally)
 )
 
@@ -706,7 +706,7 @@ def build_catalog(corpus: RawCorpus) -> dict:
     accumulate_cell_scores(corpus.resolved, cells)
     # Content fingerprint over the same canonical shard bytes the writer would emit (order-independent).
     content_lines = [
-        content_fingerprint_line(_shard_path(s.group, s.scenario_id), _json_bytes(build_shard(s)))
+        content_fingerprint_line(_shard_path(s.group, s.scenario_id), json_bytes(build_shard(s)))
         for export in corpus.per_tradition.values() for s in export.scenarios
     ]
     return _catalog_doc(items, corpus.subjects, corpus.judges,
@@ -753,7 +753,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
             _require_safe_segment(scenario.scenario_id, "scenario")
             subjects_present.update(c["subject"] for c in scenario.cells)
             relpath = _shard_path(scenario.group, scenario.scenario_id)
-            writer.add_shard(relpath, _json_bytes(build_shard(scenario)))  # validates + gz + content fp
+            writer.add_shard(relpath, json_bytes(build_shard(scenario)))  # validates + gz + content fp
             items.append(_item_ref(scenario))
             written_here.add(scenario.scenario_id)
             n_scenarios += 1

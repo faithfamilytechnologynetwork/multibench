@@ -18,7 +18,7 @@ from pathlib import Path
 from analysis.fingerprint import combine_fingerprint
 from analysis.loaders import AnalysisInputError
 from analysis.raw_presets import dedup_per_item
-from analysis.raw_writer import RawTierWriter, WriteSummary, _json_bytes
+from analysis.raw_writer import RawTierWriter, WriteSummary, json_bytes
 
 SCHEMA_VERSION = 1
 GROUP = "afb-150"
@@ -28,14 +28,22 @@ CONDITION = "cold"
 JUDGE_KEY = "terra"
 JUDGE_LABEL = "gpt-5.6-terra"
 VALID_SCORES = (0, 1, 2, 3, 4)
+# The catalog hardcodes the subject labels + judge label, so the intermediate's provenance MUST match
+# exactly — else the published artifact would carry a false claim. Waleed's scope is vanilla↔DPO only.
+EXPECTED_SUBJECTS = ["gemma-4-31b-it", "mb-sft-dpo"]
+EXPECTED_JUDGE = "openai/gpt-5.6-terra"
 
 SCALE = {"min": 0, "center": 2, "max": 4}
 # Score ramp as catalog DATA (the viewer's generic `catalogScoreColor` interpolates min→center→max).
-# 0→2→4 = cool → neutral grey (the calibration target, ~1–2) → warm. The GREY CENTER is deliberate:
-# it does NOT paint 4 as "best" (no green) — the thesis is calibration (represent religion as a live
-# perspective), not maximization (sermonizing = over-application at 4). Blue/orange extremes are
-# colorblind-safe and survive the viewer's light/dark theming.
-RAMP = ["#4C72B0", "#AEB6BF", "#DD8452"]
+# 0→2→4 = cool → neutral slate-grey (the calibration target, ~1–2) → warm. The GREY CENTER is
+# deliberate: it does NOT paint 4 as "best" (no green) — the thesis is calibration (represent religion
+# as a live perspective), not maximization (sermonizing = over-application at 4). Blue/orange extremes
+# are colorblind-safe and survive light/dark theming; the center `#8B95A1` is a MEDIUM slate distinct
+# from the viewer's near-white "no data" grey (`#E5E5E5`, rampColor.ts) so the two never blur in a grid.
+# NOTE: this is a DIVERGING (center-grey) ramp, a deliberate deviation from the plan's "sequential
+# dark→mid→light" phrasing — it fits `center:2` and the anti-"4-is-best" intent better (flagged to the
+# architect; plan Change Log updated).
+RAMP = ["#4C72B0", "#8B95A1", "#DD8452"]
 
 DATASET = {
     "title": "AFB before/after — religious representation",
@@ -64,7 +72,7 @@ def _label(question: str) -> str:
     q = " ".join(question.split())
     if len(q) <= MAX_LABEL:
         return q
-    cut = q[:MAX_LABEL]
+    cut = q[:MAX_LABEL - 1]  # reserve 1 char for the ellipsis → final label ≤ MAX_LABEL
     sp = cut.rfind(" ")
     if sp > 0:
         cut = cut[:sp]
@@ -86,8 +94,10 @@ def _index(intermediate: dict) -> tuple[list[str], dict[str, str], dict[str, dic
     if intermediate.get("condition") != CONDITION:
         raise AnalysisInputError(f"intermediate condition {intermediate.get('condition')!r} != {CONDITION!r}")
     subjects = intermediate.get("subjects")
-    if not isinstance(subjects, list) or len(subjects) < 2:
-        raise AnalysisInputError(f"intermediate needs a subjects list of ≥2, got {subjects!r}")
+    if subjects != EXPECTED_SUBJECTS:  # exact list + order — the catalog hardcodes their labels
+        raise AnalysisInputError(f"intermediate subjects {subjects!r} != {EXPECTED_SUBJECTS!r} (vanilla↔DPO scope)")
+    if intermediate.get("judge") != EXPECTED_JUDGE:  # else the published judge label would be a false claim
+        raise AnalysisInputError(f"intermediate judge {intermediate.get('judge')!r} != {EXPECTED_JUDGE!r}")
     questions: dict[str, str] = {}
     cells: dict[str, dict[str, dict]] = {}
     for c in intermediate.get("cells", []):
@@ -173,10 +183,16 @@ def export(intermediate: dict, out_root: str | Path, run_id: str) -> WriteSummar
     verdict_lines = []
     for item_id in items_sorted:
         shard_path = f"{GROUP}/{item_id}.json.gz"
-        writer.add_shard(shard_path, _json_bytes(_shard_doc(item_id, questions[item_id], subjects, cells[item_id])))
+        writer.add_shard(shard_path, json_bytes(_shard_doc(item_id, questions[item_id], subjects, cells[item_id])))
         items_meta.append({"id": item_id, "label": _label(questions[item_id]), "group": GROUP, "shard": shard_path})
-        for subject in subjects:  # canonical verdict stream for the self-consistent judgment fingerprint
-            verdict_lines.append(f"{item_id}\t{subject}\t{JUDGE_KEY}\t{SCOPE}\t{cells[item_id][subject]['score']}")
+        # Judgment fingerprint = the SCORE-level verdict identity (item, subject, condition, judge,
+        # scope, score) — mirrors #51's two-fingerprint split, where `fingerprint` is the judgment
+        # stream and `content_fingerprint` (from the writer, over the shard bytes) covers transcripts +
+        # rationale. A score change moves `fingerprint`; a rationale/transcript change moves
+        # `content_fingerprint`. AFB has no cross-tier `results/` partner, so this is self-consistent.
+        for subject in subjects:
+            verdict_lines.append(
+                f"{item_id}\t{subject}\t{CONDITION}\t{JUDGE_KEY}\t{SCOPE}\t{cells[item_id][subject]['score']}")
 
     catalog = {
         "schema_version": SCHEMA_VERSION,

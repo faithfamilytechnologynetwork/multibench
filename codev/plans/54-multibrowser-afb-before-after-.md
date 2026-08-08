@@ -499,6 +499,7 @@ Phase 5 needs all of 1–4. Porch runs them sequentially in the listed order.)
 | Date | Change | Reason | Author |
 |------|--------|--------|--------|
 | 2026-08-08 | Initial plan | Spec 54 approved (Waleed); vanilla↔DPO scope | builder |
+| 2026-08-08 | Phase-3 ramp is DIVERGING (cool→slate-grey→warm), not the literal "sequential dark→mid→light" phrasing | The `center:2 → grey` + anti-"4-is-best" intent (both stated) require a grey center → diverging; a true sequential lightness ramp is theme-fragile. Center `#8B95A1` chosen distinct from the viewer's no-data grey. Flagged for architect acknowledgement at PR. | builder |
 
 ## Notes
 - **Spend isolation**: Phases 1–4 are no-spend and fully testable; the architect may review/merge them

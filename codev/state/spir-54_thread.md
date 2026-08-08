@@ -249,6 +249,22 @@ Both converged on one real hole I'd introduced + claude caught a drain edge:
   ranking + cap, invalid-intermediate rejection, missing-subject, size accounting, CLI smoke).
   Full suite 224 passed, ruff clean. Phase 4 renders it in-app against the real parser.
 
+### P3 consult iter-1 (claude APPROVE, codex REQUEST_CHANGES) — resolved
+Both converged on provenance + label; addressed all:
+- **Provenance validation** (would publish a FALSE claim): the catalog hardcodes subject labels + Terra
+  judge, so `_index` now requires subjects EXACTLY `[gemma-4-31b-it, mb-sft-dpo]` (list+order) AND judge
+  `openai/gpt-5.6-terra`. Rejection tests (wrong id, reversed order, wrong judge). Resolves the "≥2 subjects
+  but preset uses first two" concern too.
+- **Label ≤80 INCLUDING "…"** (was 81): reserve 1 char; test asserts ≤80 + hard-cut case.
+- **Fingerprint**: added `condition` to the judgment-fp line + documented the intentional #51 two-fingerprint
+  SPLIT (fingerprint=score-level judgment identity; content_fingerprint=transcripts+rationale). Codex wanted
+  rationale IN the fingerprint — but that breaks the split's purpose; instead I test it: a SCORE change moves
+  `fingerprint`, a RATIONALE change moves only `content_fingerprint`. (Rebuttal explains.)
+- Ramp center-grey distinct from no-data grey (#AEB6BF→#8B95A1); DIVERGING-vs-plan-"sequential" deviation
+  documented in code + plan Change Log (architect ack at PR). CLI catches file/JSON errors→exit 2.
+  Promoted `_json_bytes`→public `json_bytes`. Summary map tested 0–4; dup-cell + inconsistent-question tests.
+  Full suite 232 passed; my files ruff-clean (html_report.py:407 F541 pre-existing/out-of-scope).
+
 ### P2 consult iter-3: BOTH APPROVE ✅ (codex + claude). Phase 2 DONE.
 Non-blocking follow-ups captured (apply at Phase 5 / opportunistically):
 - (a) extend the serving smoke to also make ONE judge call (fail a judge misconfig before the full

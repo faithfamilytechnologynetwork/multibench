@@ -238,7 +238,7 @@ def export_afb(
     try:
         doc = _json.loads(Path(intermediate).read_text(encoding="utf-8"))
         summary = export(doc, out, run_id)
-    except AnalysisInputError as e:  # fail-fast, spec M7
+    except (AnalysisInputError, OSError, _json.JSONDecodeError) as e:  # fail-fast, spec M7
         typer.echo(f"input error: {e}", err=True)
         raise typer.Exit(code=2) from e
 

@@ -26,7 +26,7 @@ import pytest
 from analysis.export_raw import write_dataset
 from analysis.fingerprint import combine_fingerprint, content_fingerprint_line
 from analysis.loaders import AnalysisInputError
-from analysis.raw_writer import RawTierWriter, _json_bytes
+from analysis.raw_writer import RawTierWriter, json_bytes
 from tests.test_export_raw import _grid_root
 
 HERE = Path(__file__).resolve().parent
@@ -36,7 +36,7 @@ GOLDEN = json.loads((HERE / "fixtures" / "raw_writer_golden.json").read_text())
 
 
 def _shard(cells: list[dict]) -> bytes:
-    return _json_bytes({"schema_version": 1, "cells": cells})
+    return json_bytes({"schema_version": 1, "cells": cells})
 
 
 def test_content_fingerprint_delegates_to_shard_bytes(tmp_path):
@@ -176,9 +176,9 @@ def test_committed_20260803_reexport_bytes_and_fingerprint():
     """
     manifest_text = (COMMITTED_TIER / "manifest.json").read_text()
     manifest = json.loads(manifest_text)
-    # The committed manifest is itself in the writer's canonical form (pins _json_bytes:
+    # The committed manifest is itself in the writer's canonical form (pins json_bytes:
     # sort_keys/separators/trailing-newline — a drift would rewrite every shipped byte silently).
-    assert _json_bytes(manifest) == manifest_text.encode("utf-8")
+    assert json_bytes(manifest) == manifest_text.encode("utf-8")
 
     items = manifest["items"]
     step = max(1, len(items) // 24)  # ~two dozen shards spread across the manifest, deterministic
@@ -191,7 +191,7 @@ def test_committed_20260803_reexport_bytes_and_fingerprint():
         pre_gz = gzip.decompress(gz)
         lines.append(content_fingerprint_line(rel, pre_gz))  # full fp: every shard
         if i % step == 0:  # byte guard: a deterministic sample re-gzipped through the primitive
-            assert _json_bytes(json.loads(pre_gz)) == pre_gz  # shard also in canonical _json_bytes form
+            assert json_bytes(json.loads(pre_gz)) == pre_gz  # shard also in canonical json_bytes form
             w.add_shard(rel, pre_gz)
             assert w.shard_bytes(rel) == gz  # gzip settings byte-stable vs the SHIPPED tier
             sampled += 1

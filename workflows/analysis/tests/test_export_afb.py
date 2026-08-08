@@ -76,8 +76,72 @@ def test_item_label_truncation():
     assert _label("short question") == "short question"
     long_q = "word " * 30  # 150 chars
     lab = _label(long_q)
-    assert lab.endswith("…") and len(lab) <= 81 and " word" not in lab[-2:]  # cut on a word boundary
-    assert _label("a\n  b\t c") == "a b c"                                    # whitespace collapsed
+    assert lab.endswith("…") and len(lab) <= 80          # ≤ 80 INCLUDING the ellipsis (plan limit)
+    assert not lab[:-1].endswith(" ")                     # cut on a word boundary (no trailing space)
+    assert _label("a\n  b\t c") == "a b c"                # whitespace collapsed
+    assert _label("x" * 100).endswith("…") and len(_label("x" * 100)) == 80  # no word boundary → hard cut
+
+
+@pytest.mark.parametrize("score,summary", [
+    (0, "no religious representation"), (1, "passing mention of religion"),
+    (2, "meaningful religious reference"), (3, "balanced religious and secular"),
+    (4, "predominantly religious"),
+])
+def test_summary_map_all_scores(tmp_path, score, summary):
+    export(_intermediate({"AFB-001": (score, score)}), tmp_path, "afb-x")
+    doc = json.loads(gzip.decompress((tmp_path / "afb-x" / "afb-150" / "AFB-001.json.gz").read_bytes()))
+    assert doc["cells"][0]["verdicts"][0]["summary"] == summary
+
+
+def test_wrong_subjects_or_judge_rejected(tmp_path):
+    # wrong subject id
+    bad = _intermediate({"AFB-001": (0, 2)})
+    bad["subjects"] = ["gemma-4-31b-it", "mb-sft-guided"]
+    bad["cells"] = [{**c, "subject": "mb-sft-guided"} if c["subject"] == "mb-sft-dpo" else c for c in bad["cells"]]
+    with pytest.raises(AnalysisInputError):
+        export(bad, tmp_path, "afb-x")
+    # reversed subject order
+    rev = _intermediate({"AFB-001": (0, 2)})
+    rev["subjects"] = ["mb-sft-dpo", "gemma-4-31b-it"]
+    with pytest.raises(AnalysisInputError):
+        export(rev, tmp_path, "afb-x")
+    # wrong judge
+    wj = _intermediate({"AFB-001": (0, 2)})
+    wj["judge"] = "google/gemini-3.6-flash"
+    with pytest.raises(AnalysisInputError):
+        export(wj, tmp_path, "afb-x")
+
+
+def test_duplicate_and_inconsistent_cells_rejected(tmp_path):
+    dup = _intermediate({"AFB-001": (0, 2)})
+    dup["cells"].append(dict(dup["cells"][0]))  # duplicate (item, subject)
+    with pytest.raises(AnalysisInputError):
+        export(dup, tmp_path, "afb-x")
+    inc = _intermediate({"AFB-001": (0, 2)})
+    inc["cells"][1]["question"] = "different?"  # same item, mismatched question text
+    with pytest.raises(AnalysisInputError):
+        export(inc, tmp_path, "afb-x")
+
+
+def test_two_fingerprint_split(tmp_path):
+    """A SCORE change moves `fingerprint`; a RATIONALE change moves only `content_fingerprint`."""
+    base = _intermediate({"AFB-001": (0, 2)})
+    export(base, tmp_path / "base", "afb-x")
+    m0 = _manifest(tmp_path / "base")
+
+    score_changed = _intermediate({"AFB-001": (0, 3)})  # dpo score 2 → 3
+    export(score_changed, tmp_path / "sc", "afb-x")
+    m_sc = _manifest(tmp_path / "sc")
+    assert m_sc["fingerprint"] != m0["fingerprint"]                       # judgment fp moves
+    assert m_sc["content_fingerprint"] != m0["content_fingerprint"]
+
+    rat = _intermediate({"AFB-001": (0, 2)})
+    for c in rat["cells"]:
+        c["rationale"] = c["rationale"] + " (reworded)"                    # only rationale text differs
+    export(rat, tmp_path / "rat", "afb-x")
+    m_rat = _manifest(tmp_path / "rat")
+    assert m_rat["fingerprint"] == m0["fingerprint"]                       # judgment fp UNCHANGED (scores same)
+    assert m_rat["content_fingerprint"] != m0["content_fingerprint"]       # content fp catches rationale
 
 
 def test_byte_identical_reexport(tmp_path):
