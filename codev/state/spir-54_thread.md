@@ -232,6 +232,15 @@ Both converged on one real hole I'd introduced + claude caught a drain edge:
 - **P5 gate TODO**: surface the greedy-vs-#48-sampling decoding divergence explicitly in the spend-gate
   message (claude note 5) — #48 is the reconciliation oracle.
 
+### P2 consult iter-3: BOTH APPROVE ✅ (codex + claude). Phase 2 DONE.
+Non-blocking follow-ups captured (apply at Phase 5 / opportunistically):
+- (a) extend the serving smoke to also make ONE judge call (fail a judge misconfig before the full
+  generation spend) — runner tweak, do at P5 start.
+- (b) gitignore `experiments/54_afb_before_after/data/*.tmp` (transient atomic-write temp) — do at P5.
+- (c) carry greedy-vs-#48-sampling divergence into the P5 #48 distribution reconciliation + gate msg.
+- (d) explicit regression test: `score: 0` cells are NOT re-judged on resume (modal base score; core
+  already correct via `get("score") is None`, but pin it). Add opportunistically.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then
