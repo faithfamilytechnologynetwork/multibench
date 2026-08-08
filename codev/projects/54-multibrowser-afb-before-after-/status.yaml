@@ -8,17 +8,17 @@ plan_phases:
     status: complete
   - id: phase_2
     title: AFB collection module + one-time runner (no spend; mock-tested)
-    status: in_progress
+    status: complete
   - id: phase_3
     title: analysis export-afb sibling exporter → drop-in catalog
-    status: pending
+    status: in_progress
   - id: phase_4
     title: SPA generic raw-run discovery + first-class entry point
     status: pending
   - id: phase_5
     title: Execute collection run, commit catalog, verify SPA, docs + attribution
     status: pending
-current_plan_phase: phase_2
+current_plan_phase: phase_3
 gates:
   spec-approval:
     status: approved
@@ -32,8 +32,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -84,4 +84,4 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_2-iter2-claude.txt
 started_at: '2026-08-08T18:08:01.974Z'
-updated_at: '2026-08-08T23:08:18.184Z'
+updated_at: '2026-08-08T23:11:46.443Z'
