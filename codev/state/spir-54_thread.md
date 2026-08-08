@@ -178,6 +178,23 @@ Phase 1 DONE. 3 non-blocking notes captured as follow-ups (not re-litigating a u
   docstring's "preset selection/order, membership" claim is covered by test_export_raw_presets, not it —
   soften docstring or widen fixture when convenient.
 
+### P2 DONE — AFB collection module + runner (no spend; mock-tested)
+- `workflows/analysis/analysis/afb_collect.py` — SDK-FREE core (injected generate/judge). Two-state:
+  pass1 generate (persist response), pass2 judge (persist verdict); atomic full-file replace
+  (write .tmp + os.replace); single-writer even under concurrency. Resume skips satisfied state;
+  judge-after-generate resumes judge-ONLY (never re-generates). Completeness = 150×2=300 unique cells,
+  each response+score∈0..4. Records pinned decoding {temperature:0.0, seed:0, max_tokens:1024}
+  (identical both subjects → reproducible). Mismatched checkpoint (run_id/subjects/decoding) refused.
+  Intermediate schema at experiments/54_afb_before_after/data/collection.json. `afb_item_id` q0001→AFB-001.
+- `experiments/54_afb_before_after/collect_afb.py` — thin runner: builds real OpenAI clients (Modal
+  subject endpoint + OpenRouter Terra), pinned decoding, serving smoke, keys from taqwabench/.env
+  (never echoed), usage→gitignored run.log. Run via `uv --project workflows/judging run python …`.
+- `experiments/54_afb_before_after/modal/serve_gemma_eval.py` — COPY of #58's serve (not edited),
+  dpo→/vol/runs/mb-sft-dpo/adapter (incumbent, NOT mb-dpo-full), base+dpo only.
+- 11 mock-tests (resume, judge-after-gen resume, idempotence/byte-stable, completeness, bad-score,
+  empty-response, mismatched-checkpoint, concurrency, item-id, loader). Full suite 192 passed, ruff clean.
+- NO SPEND this phase (runner is wiring; real run is P5). run.log gitignored.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then

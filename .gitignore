@@ -46,3 +46,5 @@ codev/state/*.md
 
 # Harness-local hooks (worktree write-guard etc.) — not a repo artifact
 .claude/hooks/
+# usage/cost run log — never commit (allowlist discipline, #54)
+experiments/54_afb_before_after/data/run.log
