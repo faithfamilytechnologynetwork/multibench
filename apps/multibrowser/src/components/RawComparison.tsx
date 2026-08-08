@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { Fragment, useState, type ReactNode } from "react";
 import { catalogScoreColor } from "../lib/rampColor";
 import { findCell, type RawCatalog, type RawCell, type RawShard } from "../lib/rawModel";
 import { Markdown } from "./Markdown";
@@ -46,9 +46,16 @@ export function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"]
  * sit side-by-side when comparing; and the judges' verdicts are **interleaved** — the first scope's
  * verdicts right after the first response, the remaining scopes' after the last. `b === null` is the
  * single-model view. Catalog-generic (subjects/scopes/scale/ramp from `catalog`, no MB vocab).
+ *
+ * `contextSlot` is a GENERIC full-width node the host may inject — rendered AFTER the first user turn
+ * (the question) and BEFORE the first assistant response, so a reader sees WHAT was asked before any
+ * framing of the answers (the raw item page passes the corpus judge-guidance here; #73 reading-order).
+ * It stays MB-vocabulary-free — the slot is an opaque ReactNode, and a slot that renders nothing adds
+ * no DOM, so a non-corpus catalog degrades to no gap (the #54 static guard stays green).
  */
-export function RawComparison({ catalog, shard, a, b, conditions }: {
+export function RawComparison({ catalog, shard, a, b, conditions, contextSlot }: {
   catalog: RawCatalog; shard: RawShard; a: string; b: string | null; conditions: Record<string, string>;
+  contextSlot?: ReactNode;
 }) {
   const single = !b;
   const cellA = findCell(shard, a, conditions);
@@ -65,7 +72,11 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
 
   const roleAt = (i: number) => cellA?.transcript[i]?.role ?? cellB?.transcript[i]?.role;
   const assistantIdx: number[] = [];
-  for (let i = 0; i < maxTurns; i++) if (roleAt(i) === "assistant") assistantIdx.push(i);
+  let firstUser = -1;
+  for (let i = 0; i < maxTurns; i++) {
+    if (roleAt(i) === "assistant") assistantIdx.push(i);
+    else if (roleAt(i) === "user" && firstUser === -1) firstUser = i;
+  }
   const firstAssistant = assistantIdx[0];
   const lastAssistant = assistantIdx[assistantIdx.length - 1];
 
@@ -97,6 +108,9 @@ export function RawComparison({ catalog, shard, a, b, conditions }: {
     if (roleAt(i) === "user") {
       const turn = cellA?.transcript[i] ?? cellB?.transcript[i];
       if (turn) rows.push(<TurnBlock key={`t${i}`} role="user" content={turn.content} />);
+      // Full-width context slot: after the FIRST user turn (the question), before the first assistant
+      // response. A Fragment (not a wrapping div) so a slot that renders nothing adds no DOM → no gap.
+      if (i === firstUser && contextSlot) rows.push(<Fragment key="context-slot">{contextSlot}</Fragment>);
     } else {
       rows.push(
         <div className={`grid gap-6 ${colGrid}`} key={`t${i}`}>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render, screen, within } from "@testing-library/react";
 import { RawComparison } from "./RawComparison";
 import type { RawCatalog, RawShard } from "../lib/rawModel";
 
@@ -59,6 +59,29 @@ describe("RawComparison — scope interleave (generic over scope count)", () => 
     expect(initial!.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     // …and the post-pressure verdict comes AFTER the second response.
     expect(second.compareDocumentPosition(post!) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("renders contextSlot AFTER the question and BEFORE the first response (reading order, #73)", () => {
+    render(<RawComparison catalog={catalog3} shard={shard3} a="m1" b={null} conditions={{ cond: "c1" }}
+      contextSlot={<div data-testid="ctx-slot">the guidance</div>} />);
+    const question = screen.getByText("the question");
+    const slot = screen.getByTestId("ctx-slot");
+    const first = screen.getByText("first response");
+    // question → guidance …
+    expect(question.compareDocumentPosition(slot) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // … → first assistant response.
+    expect(slot.compareDocumentPosition(first) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
+  it("a contextSlot that renders nothing injects no element — degrade to no gap (AFB, #54)", () => {
+    // Mirrors CorpusContext returning null for a non-corpus catalog: the slot must add NO DOM node,
+    // so the question is immediately followed by the first response (no empty wrapper / gap between).
+    const Empty = () => null;
+    render(<RawComparison catalog={catalog3} shard={shard3} a="m1" b={null} conditions={{ cond: "c1" }}
+      contextSlot={<Empty />} />);
+    const question = screen.getByText("the question").closest("[data-role='user']")!;
+    const next = question.nextElementSibling as HTMLElement; // the very next sibling, nothing in between
+    expect(within(next).getByText("first response")).toBeInTheDocument();
   });
 
   it("single-scope catalog renders exactly one stage (no crash on the empty 'rest')", () => {
