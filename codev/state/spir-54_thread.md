@@ -70,6 +70,12 @@ Both verified against code; key findings incorporated:
 - **Collection**: needs 3-subject path (not just repointed dpo=), resumable/idempotent checkpointing
   + completeness validation (450 cells) before export. Endpoint: keyless short-lived, torn down after.
 
+### Architect ruling (2026-08-08, re-confirm at spec-approval)
+- **A/B is the call** (not 3-up). Presets: `base↔dpo` (default headline) + `base↔sft` + `sft↔dpo`.
+  Keep the "next to" deviation note so Waleed can override to a literal 3-col grid at the gate.
+- **Raw-only discovery approved in scope** — must stay catalog-GENERIC (enumerate results-raw/ runs
+  generically; NO AFB vocab in SPA core; genericity guard applies).
+Both folded into spec. Wrote iter-1 rebuttal.
+
 ### Next
-- Surfacing the 2 deviations (A/B-vs-3up product decision; discovery entry-point) to architect via afx.
-- Advancing porch (iter-1 consult done → next). Spec-approval gate is architect's, not mine.
+- porch done (rebuttal complete) → re-verify. Spec-approval gate is architect's/Waleed's, not mine.

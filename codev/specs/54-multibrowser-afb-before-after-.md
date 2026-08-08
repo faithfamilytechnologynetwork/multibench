@@ -179,8 +179,9 @@ repeated and the export is reproducible.
       API calls (enumerate from the already-walked tree).
 - [ ] **Before/after legibility**: the A/B view shows, per item, two responses with correct numeric
       Terra scores + rationales and ramp colors, a selector to swap the tuned checkpoint, and
-      **deterministic curated presets** (defined count + selection rule, e.g. top-N by `dpo − base`
-      score delta, one entry per item) surfacing the clearest contrasts.
+      **three deterministic curated presets** — `base↔dpo` (default headline), `base↔sft`, `sft↔dpo`
+      (architect-confirmed) — each top-N by the pair's `|score delta|`, one entry per item, so all
+      three checkpoints are one click apart.
 - [ ] **Licensing/hygiene**: AFB instrument stays MIT-attributed (`SOURCE.md`/`LICENSE`); our
       responses/judgments ship under the catalog `license`; the shipped tier excludes
       usage/raw/timestamps (the #51 allowlist).
@@ -277,23 +278,30 @@ clean sibling sharing the *writer* (not the *reader*) is simpler and safer.
 ## Open Questions
 
 ### Critical (Blocks Progress)
-- [ ] **A/B framing vs. literal three-up (architect product decision).** The issue says "vanilla
-      Gemma… next to the fine-tuned (SFT and SFT+DPO) responses." The shipped viewer is A/B. This
-      spec adopts **Approach 1** (A/B default `base↔dpo` + selector + presets carry the third
-      checkpoint) to honor the "not a viewer change" baked decision. If the architect wants the
-      literal three-column grid, that is **Approach 3** (a scoped N-up render change). **Surfaced via
-      `afx`; resolve at/**before** the spec-approval gate.**
 - [ ] **Endpoint/adapter availability + ownership before spend.** Verify `mb-sft-dpo` + `mb-sft-guided`
       intact on `gemma-dpo` and the endpoint serves all three, *before* authorizing the run. Who
       spins up/holds the Modal endpoint and provides the OpenRouter key?
+
+### Architect-Decided (2026-08-08 — to be RE-CONFIRMED at spec-approval)
+- **A/B + selector + presets is the call (NOT a 3-up render change).** The architect confirmed
+  Approach 1: the shipped viewer is A/B and a literal N-up grid would contradict the issue's own
+  "not a viewer change" statement. **Deviation from the issue's "next to" wording, stated explicitly
+  so Waleed can override to the literal three-column grid (Approach 3) at the gate:** the baseline
+  shows two response *texts* at a time, with the three-checkpoint story carried by a subject selector
+  + three curated presets (below), not one three-wide grid.
+- **Discovery is approved, and must stay catalog-GENERIC.** Build the raw-run enumerator + first-class
+  entry point so it enumerates `results-raw/` runs **generically** — **no AFB-specific vocabulary in
+  the SPA core**; the existing genericity/static-MB-vocab guard applies to the new code.
 
 ### Important (Affects Design)
 - [ ] **Preservation shape of the collection output.** Recommend committing a compact intermediate
       collection artifact (reproducible export input) **in addition to** the `results-raw/` tier, so a
       future catalog-shape change re-exports with zero re-spend. Confirm location/format.
-- [ ] **Preset selection rule.** Recommend deterministic top-N (N≤12) by `dpo − base` score delta,
-      one entry per item, magnitude-sorted with a stable tie-break, covering the omission→repair story
-      (and optionally `base↔sft`, `sft↔dpo` variants). Confirm N and pairings.
+- [ ] **Preset selection rule (pairings decided; N/tie-break to confirm).** Architect-confirmed
+      pairings: **`base↔dpo`** (the headline repair, default), **`base↔sft`**, and **`sft↔dpo`** — so
+      all three checkpoints are one click apart. Each preset: deterministic top-N (recommend N≤12) by
+      the pair's `|score delta|`, one entry per item, magnitude-sorted with a stable tie-break.
+      Confirm N and tie-break at plan time.
 - [ ] **`summary` synthesis.** The AFB judge returns only `{score, rationale}`; the exporter must
       synthesize a short, deterministic direction `summary` (the fixture uses phrases like "omitted
       the concern"/"held"). Confirm the phrasing convention.
@@ -426,11 +434,15 @@ clean sibling sharing the *writer* (not the *reader*) is simpler and safer.
 - [ ] Expert AI Consultation Complete
 
 ## Notes
-- **Two deviations surfaced for the architect** (the issue frames #54 as "not a viewer change"):
-  (1) a raw-only catalog is **undiscoverable** without a small discovery/entry-point addition;
-  (2) the comparison grid is **A/B**, so three-checkpoint before/after is told via A/B + selector +
-  presets (Approach 1) unless the architect approves the N-up render change (Approach 3). The
-  render/model/parser/color path itself needs **no** change. Flagged via `afx`, not silently absorbed.
+- **Two deviations surfaced for the architect** (the issue frames #54 as "not a viewer change") and
+  **both decided 2026-08-08, to be RE-CONFIRMED at spec-approval**:
+  (1) the comparison grid is **A/B**, so three-checkpoint before/after is told via A/B + selector +
+  three presets (`base↔dpo`/`base↔sft`/`sft↔dpo`) — architect confirmed **A/B (Approach 1)** over the
+  literal N-up grid (Approach 3); the deviation from the issue's "next to" wording is stated so Waleed
+  may override to the literal three-column grid at the gate.
+  (2) a raw-only catalog is **undiscoverable** without a small discovery/entry-point addition —
+  architect **approved in scope**, provided it stays **catalog-generic** (no AFB vocab in SPA core;
+  genericity guard applies). The render/model/parser/color path itself needs **no** change.
 - **`dpo` = `mb-sft-dpo`** throughout; the serve script's `dpo=` module must be repointed from
   `mb-dpo-full` for the collection run.
 - Add the companion-artifact link from the MultiWeights paper's repo/browser once the run is live
