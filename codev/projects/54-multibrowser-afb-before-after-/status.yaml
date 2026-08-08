@@ -5,10 +5,10 @@ phase: implement
 plan_phases:
   - id: phase_1
     title: Extract generic raw-writer primitive (byte-identical refactor)
-    status: in_progress
+    status: complete
   - id: phase_2
     title: AFB collection module + one-time runner (no spend; mock-tested)
-    status: pending
+    status: in_progress
   - id: phase_3
     title: analysis export-afb sibling exporter → drop-in catalog
     status: pending
@@ -18,7 +18,7 @@ plan_phases:
   - id: phase_5
     title: Execute collection run, commit catalog, verify SPA, docs + attribution
     status: pending
-current_plan_phase: phase_1
+current_plan_phase: phase_2
 gates:
   spec-approval:
     status: approved
@@ -32,8 +32,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -60,4 +60,4 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_1-iter2-claude.txt
 started_at: '2026-08-08T18:08:01.974Z'
-updated_at: '2026-08-08T22:39:57.038Z'
+updated_at: '2026-08-08T22:45:42.509Z'
