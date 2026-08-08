@@ -77,5 +77,19 @@ Both verified against code; key findings incorporated:
   generically; NO AFB vocab in SPA core; genericity guard applies).
 Both folded into spec. Wrote iter-1 rebuttal.
 
+### Waleed scope ruling + architect answers (2026-08-08) — spec revised
+- **Waleed: vanilla ↔ DPO ONLY.** Two subjects (gemma-4-31b-it, mb-sft-dpo); SFT dropped from run
+  AND catalog. Native A/B — no selector, no 3rd checkpoint, no N-up. Single `dpo−base` preset.
+  Collection shrinks to EVAL_MODELS=base,dpo-incumbent; 150×2=300 cells; budget ~$17–23 (was $25–35).
+  Matches the shipped AFB fixture subject list exactly.
+- **Architect answers to my Critical item:** (1) volume VERIFIED — mb-sft-dpo adapter intact on
+  gemma-dpo. (2) Ownership: I deploy/hold the Modal endpoint (Modal CLI machine-authed, as #48/57/58),
+  tear down after. Keys OPENROUTER_API_KEY + ANTHROPIC_API_KEY from /Users/mwk/Development/fftn/
+  taqwabench/.env — read at runtime, NEVER commit/echo. (3) Purged all stale SFT/3-preset/3-subject
+  remnants. (4) Important resolved: preservation = commit compact intermediate (APPROVED); preset =
+  top-N |dpo−base|, N≤12, tie-break at plan time; summary phrasing at plan time.
+- Spec Critical open questions now EMPTY (pre-spend gate resolved). Approach 3 (N-up) WITHDRAWN.
+
 ### Next
-- porch done (rebuttal complete) → re-verify. Spec-approval gate is architect's/Waleed's, not mine.
+- Committing revised spec; messaging architect (they'll bring the gate to Waleed).
+- Still at spec-approval gate (WAITING). Only a human runs `porch approve 54 spec-approval`. I do not.
