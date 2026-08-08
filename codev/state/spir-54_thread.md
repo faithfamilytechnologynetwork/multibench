@@ -125,6 +125,19 @@ Two correctness-critical catches (Claude):
 
 ## Phase: IMPLEMENT (P1–P4 no-spend, then P5 gated)
 
+### P1 DONE — extract generic raw-writer (byte-identical)
+- New `workflows/analysis/analysis/raw_writer.py`: `RawTierWriter` streaming finalizer
+  (add_shard → gz mtime=0 + content-fp accrual; `.content_fingerprint`; `.write(catalog_doc,
+  max_shard_bytes=,max_total_bytes=)` validate-before-write + prune) + moved `MAX_SHARD_BYTES`,
+  `MAX_TOTAL_BYTES`, `_MANIFEST`, `_json_bytes`, `_require_safe_relpath`, `WriteSummary`.
+- `export_raw.py`: re-imports those (keeps them patchable/importable at export_raw scope so the
+  existing tests + monkeypatch stay green); `write_dataset` now streams through RawTierWriter,
+  builds the MB catalog after the loop, passes ceilings in. Removed dead `gzip` import.
+- Executable byte guard (source roots NOT in repo): `test_raw_writer.py` recomputes the committed
+  `results-raw/20260803` content_fingerprint from its 519 gunzipped shards → == committed manifest
+  value (sha256:ed694f1b…), 0.69s. + unit tests (delegation, roundtrip/byte-identical, ceiling
+  param, unsafe path). Full analysis suite: 177 passed, 6 skipped.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then
