@@ -61,3 +61,8 @@ no raw catalog / no presets.
    has no judges (no `?judge=` links); comment that highlights deliberately use the full-grid judge.
 
 Tests green: 292 pass. typecheck + build clean.
+
+## Merged (2026-08-08)
+PR gate approved by Waleed. `tradition format gate` CI green (no traditions touched). Merged PR #74
+with a **merge commit** (`eba0159`, not squash) per protocol. Porch: complete / phase `verified`.
+Notified architect — ready for cleanup + deploy (`railway up --no-gitignore`) + issue close (architect handles).
