@@ -302,6 +302,18 @@ Two real blocking issues:
 - Deferred: Explorers list shows bare run id (not dataset.title) — defensible (avoids N index fetches);
   follow-up if Waleed wants richer labels. Item-page back-link → /results dead-ends for raw-only (P5 real-path).
 
+### P4 consult iter-2: BOTH APPROVE ✅ (claude verified all criteria + diff scope). Phase 4 DONE.
+Minor follow-ups for P5: (a) RawResultsPage "← Results" back-link dead-ends for a raw-only run (real-path);
+(b) item links rely on parseRawSelection condition default (fine for single cold value); (c) index heading
+uses groupBy.label over a flat list. All non-blocking.
+
+## Phase 5 (money/infra) — GATED on explicit architect approval before ANY spend
+P1–P4 complete, consult-approved, NO SPEND. Phase 5 = deploy Modal endpoint (serving smoke) → run
+collection (~$17–23) → export-afb → commit intermediate + results-raw/afb-<date>/ → deployed-path SPA
+verify → docs + AFB MIT attribution. Per plan + global rule: BLOCK on explicit architect GO before spending.
+Gate message must flag: decoding greedy (temp=0) vs #48 sampled defaults → #48 distribution reconciliation
+may diverge benignly. Also offer: review/merge P1–4 as a first PR before the spend, or authorize spend now.
+
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
 Minor non-blocking follow-ups:
 - exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic
