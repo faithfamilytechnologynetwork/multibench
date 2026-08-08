@@ -16,9 +16,12 @@ ramp, subjects, judges, condition axes, grouping axis, and items — nothing Mul
 (``tradition``/``scenario``/framing/pressure) is hardcoded in the *shape*. A non-MultiBench
 catalog (AFB 0–4) rides the same viewer unchanged.
 
-This module spans the export core: the pure transform (sitting reader + verdict join +
-generic shard/catalog builders), the deterministic streaming writer + size guards, and the
-export-computed presets. The ``export-raw`` CLI wraps :func:`write_dataset`.
+This module is the **MultiBench binding** of the raw tier: the pure transform (sitting reader +
+verdict join + MB shard/catalog builders) and the MB export-computed presets. The generic,
+catalog-agnostic pieces live alongside it — the byte-stable writer + size guards in
+:mod:`analysis.raw_writer`, and the preset cap + dedup in :mod:`analysis.raw_presets` — so a
+second catalog type (the AFB explorer, #54) reuses them without forking. The ``export-raw`` CLI
+wraps :func:`write_dataset`.
 """
 
 from __future__ import annotations
@@ -52,6 +55,10 @@ from analysis.fingerprint import (
     source_fingerprint,
 )
 from analysis.loaders import AnalysisInputError
+from analysis.raw_presets import (  # generic preset cap + per-item/round-robin dedup (#54 reuse)
+    PRESET_CAP,
+    dedup_per_item as _dedup_per_item,
+)
 from analysis.raw_writer import (  # generic byte-stable writer, extracted for AFB reuse (#54)
     MAX_SHARD_BYTES,
     MAX_TOTAL_BYTES,
@@ -557,7 +564,6 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
 # candidate that lacks the required judge/scope is simply skipped). Entries are deep-link
 # param maps the viewer feeds into the raw-view route (group/item + a/b/framing/pressure/scope).
 
-PRESET_CAP = 12
 _GEMINI = JUDGE_UI["gemini-3.6-flash"]["key"]  # "gemini"
 _OPUS = JUDGE_UI["claude-opus-4-8"]["key"]     # "opus"
 
@@ -588,36 +594,10 @@ def _entry(preset_key: str, group: str, item: str, *, framing: str, pressure: st
     return {"key": f"{preset_key}:{group}:{item}", "label": label, "params": params}
 
 
-def _dedup_per_item(sorted_entries) -> list[dict]:
-    """Dedup to one entry per (group, item), then round-robin across groups up to PRESET_CAP.
-
-    On real data hundreds of scenarios tie at the max magnitude (e.g. a −1↔+1 spread), so a
-    straight magnitude+lexicographic cut fills all 12 slots from one tradition. To make the
-    preset an actually *curated* cross-tradition view, we keep each group's candidates in the
-    incoming (magnitude-sorted, deterministic) order and interleave them by group — the
-    strongest from each tradition first, then the next, etc. Fully deterministic (groups are
-    visited in sorted name order); with a single group it degenerates to plain magnitude order.
-    """
-    seen: set[tuple] = set()
-    by_group: dict[str, list[dict]] = defaultdict(list)
-    for e in sorted_entries:
-        ident = (e["params"]["group"], e["params"]["item"])
-        if ident in seen:
-            continue
-        seen.add(ident)
-        by_group[e["params"]["group"]].append(e)
-
-    out: list[dict] = []
-    groups = sorted(by_group)
-    round_i = 0
-    while len(out) < PRESET_CAP and any(round_i < len(by_group[g]) for g in groups):
-        for g in groups:
-            if round_i < len(by_group[g]):
-                out.append(by_group[g][round_i])
-                if len(out) >= PRESET_CAP:
-                    break
-        round_i += 1
-    return out
+# `PRESET_CAP` + `_dedup_per_item` (one entry per (group,item), round-robin across groups up to
+# the cap) live in `analysis.raw_presets` — generic over the entry shape, so the AFB tier (#54
+# Phase 3) reuses them without importing this MB module. Re-imported here (top of file) so the
+# MB preset builders + existing tests keep the same names.
 
 
 def _top_gemini_subject(group_scores: dict[str, float], exclude: str) -> str | None:

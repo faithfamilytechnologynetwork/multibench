@@ -135,8 +135,23 @@ Two correctness-critical catches (Claude):
   builds the MB catalog after the loop, passes ceilings in. Removed dead `gzip` import.
 - Executable byte guard (source roots NOT in repo): `test_raw_writer.py` recomputes the committed
   `results-raw/20260803` content_fingerprint from its 519 gunzipped shards → == committed manifest
-  value (sha256:ed694f1b…), 0.69s. + unit tests (delegation, roundtrip/byte-identical, ceiling
-  param, unsafe path). Full analysis suite: 177 passed, 6 skipped.
+  value (sha256:ed694f1b…). + unit tests. Full analysis suite: 177 passed, 6 skipped.
+
+### P1 consult iter-1 (codex + claude, both REQUEST_CHANGES HIGH) — resolved
+Claude independently diffed pre/post exports hash-for-hash → confirmed byte-identical. Fixes:
+- **Byte guard now routes through the primitive + checks gz bytes** (was gunzip-only fingerprint,
+  which wouldn't catch a compresslevel/mtime drift). Committed-tier test re-gzips a deterministic
+  SAMPLE (~24 shards, `i%step==0`) through `RawTierWriter.add_shard` and asserts
+  `shard_bytes(rel)==shipped gz` (gzip drift is global → a sample catches it, keeps it ~1s vs ~17s
+  for all 519), plus the full 519-shard content_fingerprint recompute == manifest.
+- **Golden-hash fixture: SUBSUMED** by the strengthened committed-tier test (real production bytes
+  > self-recorded fixture) — stated explicitly here + in the test docstring per reviewer request.
+- **`add_shard` duplicate-relpath fail-fast** added (a second caller exists now).
+- **`PRESET_CAP` + `_dedup_per_item` extracted** → new `analysis/raw_presets.py` (`dedup_per_item`),
+  generic over the entry shape; export_raw re-imports (keeps names + test import green). Phase 3
+  AFB exporter will reuse raw_presets, not MB code.
+- Added `shard_bytes()` accessor; direct prune-true/false + total-ceiling + duplicate unit tests;
+  fixed stale export_raw module docstring. Full suite: 180 passed, 6 skipped, 3.9s.
 
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry

@@ -90,6 +90,8 @@ class RawTierWriter:
     def add_shard(self, relpath: str, raw: bytes) -> None:
         """Buffer one shard: validate its path, gzip deterministically, accrue the content fp."""
         _require_safe_relpath(relpath)
+        if relpath in self._docs:  # a second caller exists now — a collision must fail loudly
+            raise AnalysisInputError(f"duplicate shard path {relpath!r}")
         payload = gzip.compress(raw, compresslevel=9, mtime=0)  # deterministic (mtime=0)
         self._docs[relpath] = payload
         self._content_lines.append(content_fingerprint_line(relpath, raw))  # over pre-gz bytes
@@ -97,6 +99,10 @@ class RawTierWriter:
         self._shard_total += len(payload)
         self._shard_uncompressed += len(raw)
         self._max_shard = max(self._max_shard, len(payload))
+
+    def shard_bytes(self, relpath: str) -> bytes:
+        """The deterministic gz bytes buffered for ``relpath`` (for byte-level guards)."""
+        return self._docs[relpath]
 
     @property
     def content_fingerprint(self) -> str:

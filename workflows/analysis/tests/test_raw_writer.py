@@ -30,7 +30,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 COMMITTED_TIER = REPO_ROOT / "results-raw" / "20260803"
 
 
-def _shard(item_id: str, cells: list[dict]) -> bytes:
+def _shard(cells: list[dict]) -> bytes:
     return _json_bytes({"schema_version": 1, "cells": cells})
 
 
@@ -38,8 +38,8 @@ def test_content_fingerprint_delegates_to_shard_bytes(tmp_path):
     """The primitive's content fingerprint == combine over content lines of the pre-gz bytes."""
     w = RawTierWriter(tmp_path, "run1", prune=True)
     shards = {
-        "afb-150/AFB-001.json.gz": _shard("AFB-001", [{"subject": "a"}]),
-        "afb-150/AFB-002.json.gz": _shard("AFB-002", [{"subject": "b"}]),
+        "afb-150/AFB-001.json.gz": _shard([{"subject": "a"}]),
+        "afb-150/AFB-002.json.gz": _shard([{"subject": "b"}]),
     }
     for rel, raw in shards.items():
         w.add_shard(rel, raw)
@@ -52,7 +52,7 @@ def test_write_roundtrip_and_byte_identical(tmp_path):
     """write() lays out manifest + gz shards, round-trips, and re-writes byte-identically."""
     def build_and_write(dst: str) -> RawTierWriter:
         w = RawTierWriter(tmp_path / dst, "run1", prune=True)
-        w.add_shard("afb-150/AFB-001.json.gz", _shard("AFB-001", [{"subject": "a"}]))
+        w.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "a"}]))
         catalog = {"schema_version": 1, "fingerprint": "sha256:x",
                    "content_fingerprint": w.content_fingerprint, "items": []}
         w.write(catalog)
@@ -71,10 +71,40 @@ def test_write_roundtrip_and_byte_identical(tmp_path):
 def test_per_shard_ceiling_param_aborts_before_write(tmp_path):
     """The ceiling is a write() parameter (kept patchable at caller scope) — breach → no tier."""
     w = RawTierWriter(tmp_path / "out", "run1", prune=True)
-    w.add_shard("afb-150/AFB-001.json.gz", _shard("AFB-001", [{"subject": "a"}]))
+    w.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "a"}]))
     with pytest.raises(AnalysisInputError):
         w.write({"schema_version": 1}, max_shard_bytes=10)
     assert not (tmp_path / "out" / "run1").exists()  # no partial tier
+
+
+def test_per_run_total_ceiling_aborts_before_write(tmp_path):
+    w = RawTierWriter(tmp_path / "out", "run1", prune=True)
+    w.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "a"}]))
+    with pytest.raises(AnalysisInputError):
+        w.write({"schema_version": 1}, max_total_bytes=5)
+    assert not (tmp_path / "out" / "run1").exists()
+
+
+def test_prune_true_removes_stale_false_keeps(tmp_path):
+    """prune=True drops files absent from the new set; prune=False is purely additive."""
+    for prune, expect_stale in [(True, False), (False, True)]:
+        out = tmp_path / f"p{int(prune)}"
+        first = RawTierWriter(out, "run1", prune=True)
+        first.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "a"}]))
+        first.add_shard("afb-150/AFB-002.json.gz", _shard([{"subject": "b"}]))
+        first.write({"schema_version": 1})
+        second = RawTierWriter(out, "run1", prune=prune)
+        second.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "a"}]))  # drop AFB-002
+        second.write({"schema_version": 1})
+        stale = out / "run1" / "afb-150" / "AFB-002.json.gz"
+        assert stale.exists() is expect_stale
+
+
+def test_duplicate_shard_path_rejected(tmp_path):
+    w = RawTierWriter(tmp_path, "run1", prune=True)
+    w.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "a"}]))
+    with pytest.raises(AnalysisInputError):
+        w.add_shard("afb-150/AFB-001.json.gz", _shard([{"subject": "b"}]))  # collision
 
 
 def test_unsafe_shard_path_rejected(tmp_path):
@@ -86,18 +116,38 @@ def test_unsafe_shard_path_rejected(tmp_path):
 
 
 @pytest.mark.skipif(not COMMITTED_TIER.is_dir(), reason="committed results-raw/20260803 tier absent")
-def test_committed_20260803_content_fingerprint_recompute():
-    """Recompute the committed tier's content fingerprint from its shard bytes → must match.
+def test_committed_20260803_reexport_bytes_and_fingerprint():
+    """Route the committed shards through the extracted primitive → gz bytes + content fp match.
 
-    Real-data byte guard for the Phase-1 extraction: the primitive computes the content
-    fingerprint as ``combine_fingerprint`` over ``content_fingerprint_line(shard, pre_gz_bytes)``
-    (see :attr:`RawTierWriter.content_fingerprint`); recomputing that over the committed shards
-    (gunzipped to their pre-gz bytes) reproduces the value stamped in the committed manifest.
+    The Phase-1 byte guard (the ``20260803`` source run-roots are NOT in the repo, so a literal
+    re-export can't be performed):
+
+    - **gz bytes** — feed a deterministic *sample* of committed shards (gunzipped to their pre-gz
+      bytes) through :meth:`RawTierWriter.add_shard` (which re-gzips with ``compresslevel=9,
+      mtime=0``) and assert the re-gzipped bytes equal the shipped gz. A compresslevel/mtime drift
+      in the primitive is **global** (identical for every shard), so a sample catches it against
+      real production bytes — while keeping the test ~1s instead of re-gzipping all 519 (~17s).
+    - **content fingerprint** — recompute it over **every** committed shard (gunzip-only) via the
+      same ``content_fingerprint_line``/``combine_fingerprint`` the primitive uses, and assert it
+      equals the value stamped in the committed manifest.
+
+    Supersedes the plan's separate golden-hash fixture (recorded in the builder thread), being a
+    strictly stronger guard over real committed bytes.
     """
     manifest = json.loads((COMMITTED_TIER / "manifest.json").read_text())
+    items = manifest["items"]
+    step = max(1, len(items) // 24)  # ~two dozen shards spread across the manifest, deterministic
+    w = RawTierWriter(COMMITTED_TIER.parent, "recompute", prune=False)
     lines = []
-    for item in manifest["items"]:
+    sampled = 0
+    for i, item in enumerate(items):
         rel = item["shard"]  # manifest-declared "<group>/<item>.json.gz"
-        pre_gz = gzip.decompress((COMMITTED_TIER / rel).read_bytes())
-        lines.append(content_fingerprint_line(rel, pre_gz))
+        gz = (COMMITTED_TIER / rel).read_bytes()
+        pre_gz = gzip.decompress(gz)
+        lines.append(content_fingerprint_line(rel, pre_gz))  # full fp: every shard
+        if i % step == 0:  # byte guard: a deterministic sample re-gzipped through the primitive
+            w.add_shard(rel, pre_gz)
+            assert w.shard_bytes(rel) == gz  # gzip settings byte-stable vs the SHIPPED tier
+            sampled += 1
+    assert sampled >= 12  # a non-trivial sample actually exercised the primitive's re-gzip
     assert combine_fingerprint(lines) == manifest["content_fingerprint"]
