@@ -57,3 +57,21 @@ fade — values-in-weights is the selling point. Test directly with a fluff-sepa
   buddhism scenario — expected; fading signal lives in the hard tier where un-guided counsel is low).
   **STOPPED per GO sequence — reconciled actuals sent to architect; awaiting explicit go for full run.
   No full run started.**
+- 2026-08-08: Architect asked for a measured-throughput SERVE projection. Basis: smoke warm rate
+  24 sittings/78s @ concurrency 8, smoke level-mix == full-run mix → full 3,024 ≈ 2.73h warm +
+  ~0.28h overhead ≈ 3.0 H200-h → serve ~$15–19 @ ~$5.5–6.25/h. Projected total ~$56 ≤ $120.
+- 2026-08-08: **FULL RUN RELEASED by architect.** Conditions: concurrent requests (running
+  concurrency 24); measure warm throughput early, tell architect if serve projection > $25;
+  **$60 Modal tripwire → PAUSE+reconcile**; hard ceiling $150; banding $37.5 accepted; usage-
+  reconciled actuals at completion BEFORE any analysis conclusions. **Full run launched** (background,
+  5h wall-clock guard, resumable). Early warm-throughput monitor also launched. Endpoint:
+  https://waleedkadous--multibench-gemma-fading-serve-serve.modal.run
+- 2026-08-08: **Early warm-throughput measured: 2,240 sittings/h @ concurrency 24 → serve ~1.6
+  H200-h ≈ $9–10** (well under the $25 checkpoint & $60 tripwire). No pause. Told architect.
+  Projected total ≈ banding $37.5 + serve ~$10 + smoke $1.6 ≈ **~$49 all-in**.
+- 2026-08-08: Wrote + committed `analyze.py` (pre-registered: per-scenario-slope estimands,
+  scenario-clustered bootstrap 95% CIs, τ=0.15 verdicts for H1/H2/H3 + channel + L0 check vs #53
+  base-unstated ref, score-vs-separation figures). Validated on partial data — runs clean.
+- 2026-08-08: Full run progressing (~290/3024, on ~2,240/h pace). Awaiting completion notification.
+  **At completion: reconcile exact actuals (token-sum banding + wall-clock serve) BEFORE any
+  analysis conclusions leave, then run analyze.py, write Results, PR.**
