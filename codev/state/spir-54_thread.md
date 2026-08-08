@@ -167,6 +167,17 @@ Claude independently diffed pre/post exports hash-for-hash → confirmed byte-id
     full 519-shard content_fp recompute; the golden test drives the primitive fully on a small export.
     Rationale in rebuttal (all-519 re-gzip = +16s/check for zero added coverage). Full suite: 181, ruff clean.
 
+### P1 consult iter-3: BOTH APPROVE ✅ (codex + claude; claude re-verified base≡HEAD gz-identical)
+Phase 1 DONE. 3 non-blocking notes captured as follow-ups (not re-litigating a unanimous APPROVE):
+- **[Phase-3 opening task]** rename `WriteSummary.scenarios` → `shards` (MB vocab in the catalog-agnostic
+  primitive) BEFORE adding the AFB CLI consumer. Blast radius: raw_writer.py field+ctor, cli.py:201
+  (field + JSON key `"scenarios"`→`"shards"`), test_export_raw_writer.py:45,155. (export.scenarios /
+  RawScenario are UNRELATED — don't touch.)
+- **[review-doc]** golden fixture committed after the refactor (harmless — base≡HEAD proven out-of-band
+  by claude + the committed-tier test carries pre/post weight); golden fixture is 1 item/1 group so its
+  docstring's "preset selection/order, membership" claim is covered by test_export_raw_presets, not it —
+  soften docstring or widen fixture when convenient.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then
