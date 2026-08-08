@@ -33,3 +33,27 @@ fade — values-in-weights is the selling point. Test directly with a fluff-sepa
   proposed ceiling $150.** Grid = 3,024 sittings / 3,024 judgments.
 - 2026-08-08: **GATE — awaiting cost-estimate approval. NO live spend until architect approves.**
   Notified architect.
+- 2026-08-08: **GO received (Waleed) with redesign** — arms now A1 (guide as system msg) / A2
+  (guide as one first-user-turn ctx_block prefix — benchmark's channel) / B (mb-sft-dpo). Base-floor
+  dropped to a **conditional arm-C follow-up** (~$27) triggered only if slope_B materially negative.
+  Estimands: slope_A1/A2/B, channel contrast A1−A2, two differentials, pooled headline. L0 check now
+  vs #48 base-unstated (cross-run caveat). Budget approved ~$80–100, hard ceiling $150. Pre-reg
+  revised + committed BEFORE data (54601f8).
+- 2026-08-08: Built execution code (no-spend): `select_scenarios.py` (42 scen, seed 3446, committed
+  manifest), `collect_fading.py` (variant collector; arm→subject, level→framing so they survive into
+  judgments), `fluff_bank.md` (20 neutral exchanges, cycled to hit level targets), `serve_gemma_fading.py`
+  (32k ctx copy; shipped serve untouched), `configs/fading_judge.yaml` (single gemini/OpenRouter, full).
+  Offline-validated message assembly across arms×levels (clean judged turns, guide once per channel,
+  no leakage in B). All committed.
+- 2026-08-08: Key seam = `taqwabench/.env` (OPENROUTER + ANTHROPIC only; **GEMINI never exported** —
+  personal). Modal authed. **Deployed 32k serve endpoint** → https://waleedkadous--multibench-gemma-fading-serve-serve.modal.run
+- 2026-08-08: **SMOKE running** (background) — buddhism, 1 scen, 2 pressures, arms A1/A2/B, levels
+  L0–L3 (incl. L3 to validate 32k long-context) → 24 sittings → judge. Then STOP + reconcile
+  usage-computed actuals with architect before the full run (per GO sequence). NO full run yet.
+- 2026-08-08: **SMOKE PASS** (exit 0). 24/24 sittings, 24/24 judgments, 0 fail. base+dpo served;
+  L3 ~11.9k-tok ctx fit 32k; arm→subject / level→framing survive into judgments; 0 leakage.
+  **Actuals:** banding $0.2964 exact ($0.0124/judgment → full-run ~$37 banding); Modal ~$1.3
+  wall-clock; smoke total ~$1.6 (within $1–3). **Flag:** all 24 scores = +1.0 (ceiling on the easy
+  buddhism scenario — expected; fading signal lives in the hard tier where un-guided counsel is low).
+  **STOPPED per GO sequence — reconciled actuals sent to architect; awaiting explicit go for full run.
+  No full run started.**

@@ -282,7 +282,38 @@ per-token.
 
 ## Results
 
-*(pending approval + execution)*
+### Smoke (pipeline validation, 2026-08-08)
+
+Slice: buddhism, scenario BUD-009, pressures {secularize, insistence}, arms {A1, A2, B}, levels
+{L0,L1,L2,L3} → **24 sittings, 24 judgments, 0 failures** end-to-end.
+
+**Pipeline: PASS.**
+- Endpoint cold-start ~7 min; **base and `dpo` both served**; **L3 (~11,931-token subject context)
+  fit the 32k window** cleanly — the long-context path works.
+- arm→`subject` and level→`framing` **survive into `judgments.jsonl`** (distinct {A1,A2,B} ×
+  {L0..L3}); scope=full; **zero guide/fluff leakage** into the judged turns.
+- Fluff ramp measured: L1 1,146 / L2 4,228 / L3 12,197 approx tokens (targets 1k/4k/12k) — on spec.
+
+**Usage-computed actuals (smoke):**
+- Banding (OpenRouter, exact usage-sum, 24 judgments): **$0.2964** = **$0.0124/judgment**
+  (avg 4,728 in + 701 out tok/judgment). → full-run 3,024 judgments projects to **~$37** banding
+  (under the $45 estimate).
+- Subject serve tokens/call by level: L0 1,530 in / L1 2,442 / L2 5,099 / L3 11,931 (out ~450).
+- Modal H200 wall-clock: ~8.5 min active + ≤10 min idle-scaledown ≈ **~$1.3** (wall-clock est).
+- **Smoke total ≈ $1.6** (within the approved $1–3).
+
+**Substantive flag — ceiling on easy scenarios.** All 24 smoke scores were **+1.0**. Expected here:
+BUD-009 is an easy scenario and all three smoke arms are *formed* (A1/A2 guided, B weights) so they
+max out, leaving no headroom to observe fading **on this scenario**. This is not a pipeline problem;
+it means the fading signal will concentrate in scenarios/traditions where un-guided counsel is *low*
+(the hard tier — sunni-islam, roman-catholicism — where #48/#53 measured base-gemma-unstated as
+negative, e.g. −0.87). The pre-registered **L0 manipulation check** and **per-tradition** reporting
+are exactly what surface where guidance has room to lift (and thus room to fade); scenarios that
+ceiling at L0 are uninformative for H1 and will be reported as such.
+
+### Full run
+
+*(pending explicit go from the architect after actuals reconciliation — per the GO sequence)*
 
 ## What Worked / What Didn't / Next Steps
 
