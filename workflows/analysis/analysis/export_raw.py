@@ -56,7 +56,7 @@ from analysis.fingerprint import (
 )
 from analysis.loaders import AnalysisInputError
 from analysis.raw_presets import (  # generic preset cap + per-item/round-robin dedup (#54 reuse)
-    PRESET_CAP,
+    PRESET_CAP,  # noqa: F401 — re-exported for tests + Phase-3 reuse
     dedup_per_item as _dedup_per_item,
 )
 from analysis.raw_writer import (  # generic byte-stable writer, extracted for AFB reuse (#54)
@@ -65,7 +65,7 @@ from analysis.raw_writer import (  # generic byte-stable writer, extracted for A
     RawTierWriter,
     WriteSummary,
     _json_bytes,
-    _require_safe_relpath,
+    _require_safe_relpath,  # noqa: F401 — re-exported for tests (add_shard validates internally)
 )
 
 SCHEMA_VERSION = 1

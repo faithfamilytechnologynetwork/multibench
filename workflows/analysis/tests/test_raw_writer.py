@@ -17,17 +17,22 @@ extraction did not change the bytes of the real committed `results-raw/20260803`
 from __future__ import annotations
 
 import gzip
+import hashlib
 import json
 from pathlib import Path
 
 import pytest
 
+from analysis.export_raw import write_dataset
 from analysis.fingerprint import combine_fingerprint, content_fingerprint_line
 from analysis.loaders import AnalysisInputError
 from analysis.raw_writer import RawTierWriter, _json_bytes
+from tests.test_export_raw import _grid_root
 
-REPO_ROOT = Path(__file__).resolve().parents[3]
+HERE = Path(__file__).resolve().parent
+REPO_ROOT = HERE.parents[2]
 COMMITTED_TIER = REPO_ROOT / "results-raw" / "20260803"
+GOLDEN = json.loads((HERE / "fixtures" / "raw_writer_golden.json").read_text())
 
 
 def _shard(cells: list[dict]) -> bytes:
@@ -66,6 +71,41 @@ def test_write_roundtrip_and_byte_identical(tmp_path):
         assert (tmp_path / "a" / rel).read_bytes() == (tmp_path / "b" / rel).read_bytes()
     doc = json.loads(gzip.decompress((tmp_path / "a" / "run1" / "afb-150" / "AFB-001.json.gz").read_bytes()))
     assert doc["cells"] == [{"subject": "a"}]
+
+
+def test_full_export_matches_frozen_golden(tmp_path):
+    """A full `write_dataset` export of the fixture matches committed golden hashes.
+
+    The frozen regression gate (plan AC1): unlike the self-consistent byte-identical re-export
+    test, this pins the WHOLE export — manifest (catalog fields, preset selection/order, item
+    membership/order) + every shard — against hashes recorded from the reviewed implementation.
+    Hashes are over the **pre-gz** shard bytes + raw manifest bytes, so they are independent of the
+    zlib version (gz-byte stability is separately gated by the committed-tier test). Any change to
+    catalog construction, presets, ordering, or file membership breaks this.
+
+    Also exercises the extracted primitive end-to-end: a fresh ``RawTierWriter`` over the produced
+    shards reproduces the manifest's ``content_fingerprint``.
+    """
+    root = _grid_root(tmp_path, subjects=("claude-sonnet-5", "gpt-5.6-terra"))  # 2 subjects → presets
+    run_dir = tmp_path / "out" / "goldrun"
+    write_dataset([root], tmp_path / "out", "goldrun")
+
+    actual = {}
+    for p in sorted(run_dir.rglob("*")):
+        if not p.is_file():
+            continue
+        rel = p.relative_to(run_dir).as_posix()
+        content = gzip.decompress(p.read_bytes()) if rel.endswith(".json.gz") else p.read_bytes()
+        actual[rel] = hashlib.sha256(content).hexdigest()
+    assert actual == GOLDEN  # full-output freeze: manifest + every shard
+
+    # The primitive reproduces the exported manifest's content fingerprint over the same shards.
+    manifest = json.loads((run_dir / "manifest.json").read_text())
+    w = RawTierWriter(tmp_path / "verify", "goldrun", prune=False)
+    for item in manifest["items"]:
+        rel = item["shard"]
+        w.add_shard(rel, gzip.decompress((run_dir / rel).read_bytes()))
+    assert w.content_fingerprint == manifest["content_fingerprint"]
 
 
 def test_per_shard_ceiling_param_aborts_before_write(tmp_path):
@@ -134,7 +174,12 @@ def test_committed_20260803_reexport_bytes_and_fingerprint():
     Supersedes the plan's separate golden-hash fixture (recorded in the builder thread), being a
     strictly stronger guard over real committed bytes.
     """
-    manifest = json.loads((COMMITTED_TIER / "manifest.json").read_text())
+    manifest_text = (COMMITTED_TIER / "manifest.json").read_text()
+    manifest = json.loads(manifest_text)
+    # The committed manifest is itself in the writer's canonical form (pins _json_bytes:
+    # sort_keys/separators/trailing-newline — a drift would rewrite every shipped byte silently).
+    assert _json_bytes(manifest) == manifest_text.encode("utf-8")
+
     items = manifest["items"]
     step = max(1, len(items) // 24)  # ~two dozen shards spread across the manifest, deterministic
     w = RawTierWriter(COMMITTED_TIER.parent, "recompute", prune=False)
@@ -146,6 +191,7 @@ def test_committed_20260803_reexport_bytes_and_fingerprint():
         pre_gz = gzip.decompress(gz)
         lines.append(content_fingerprint_line(rel, pre_gz))  # full fp: every shard
         if i % step == 0:  # byte guard: a deterministic sample re-gzipped through the primitive
+            assert _json_bytes(json.loads(pre_gz)) == pre_gz  # shard also in canonical _json_bytes form
             w.add_shard(rel, pre_gz)
             assert w.shard_bytes(rel) == gz  # gzip settings byte-stable vs the SHIPPED tier
             sampled += 1

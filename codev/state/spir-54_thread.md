@@ -153,6 +153,20 @@ Claude independently diffed pre/post exports hash-for-hash → confirmed byte-id
 - Added `shard_bytes()` accessor; direct prune-true/false + total-ceiling + duplicate unit tests;
   fixed stale export_raw module docstring. Full suite: 180 passed, 6 skipped, 3.9s.
 
+### P1 consult iter-2 (claude APPROVE, codex REQUEST_CHANGES) — addressed
+- Claude APPROVE (ran suite + ruff + probed real tier). Two cleanups + codex's golden-fixture ask done:
+  - **noqa F401** on the two intentional re-exports (PRESET_CAP, _require_safe_relpath) — file lint-clean.
+  - **_json_bytes canonical form pinned** vs committed bytes (manifest + sampled shard) — catches a
+    sort_keys/separators/newline drift that would rewrite every shipped byte with tests green.
+  - **Frozen golden-fixture test** (codex AC1): `test_full_export_matches_frozen_golden` exports the
+    fixture via write_dataset, compares manifest + every shard hash (over PRE-GZ bytes → zlib-version
+    independent) to committed `tests/fixtures/raw_writer_golden.json`; catches catalog/preset/ordering/
+    membership drift the self-consistent tests miss. Also drives the primitive end-to-end
+    (RawTierWriter.content_fingerprint == exported manifest's).
+  - Codex (b) all-519-through-primitive: kept SAMPLE re-gzip (global gzip drift → sample suffices) +
+    full 519-shard content_fp recompute; the golden test drives the primitive fully on a small export.
+    Rationale in rebuttal (all-519 re-gzip = +16s/check for zero added coverage). Full suite: 181, ruff clean.
+
 ---
 Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
 limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then
