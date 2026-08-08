@@ -107,3 +107,22 @@ Both folded into spec. Wrote iter-1 rebuttal.
      preset, fingerprints); P4 SPA generic raw-run discovery + entry point (no AFB vocab, guard green);
   P5 real run + commit intermediate + results-raw/<afb-run-id>/ + verify SPA path + docs/attribution.
   Notify architect before the P5 spend (serving smoke first, reconcile actual spend).
+
+### Plan consult iter-1 (codex + claude, both REQUEST_CHANGES HIGH) — resolved, rebuttal written
+Two correctness-critical catches (Claude):
+- **Byte-identical guard NOT executable** — 20260803 source roots (report.json/sittings.jsonl) aren't
+  committed. Fix P1: golden-hash fixture (recorded pre-refactor) + committed-tier content_fingerprint
+  recompute (gunzip the 521 committed shards through the extracted primitive vs the committed manifest).
+- **Phase 4 reinvented shipped machinery + landed single-column, 138/150 unreachable.** Fix: reuse
+  useRawCatalog + <RawPresets>; add catalog-generic ITEM INDEX (all 150 reachable); links MUST carry
+  a=subjects[0]+b=subjects[1] (rawSelection defaults b=null → single column) + two-column assertion;
+  SEPARATE rawRunIds enumerator (never loadResultsManifest → no false "manifest not found" notice, maps
+  spec NFT-3); extend static MB-vocab guard to the new entry file.
+Other accepted fixes: P1 primitive = streaming finalizer (MB builds catalog after shard loop; carry
+limit-gated prune; pull PRESET_CAP+_dedup_per_item); P2 two-state atomic checkpoint (response then
+verdict; resume judges-only); pin+record decoding (temp/seed/max_tokens) + reconcile base/dpo dist vs
+#48 before commit (base≈0/~1%≥2, dpo~27%≥2, escalate on divergence); intermediate path =
+experiments/54_afb_before_after/data/collection.json; exact summary phrasing + ≤80-char word-boundary
+label; COPY #58 serve script (never edit its committed file); BLOCKING spend gate (explicit approval,
+not a heads-up); runner env uv --project workflows/judging (SDK-free afb_collect); usage→gitignored
+run.log. Preset ships as spec's |dpo−base|; signed refinement flagged for plan-approval.

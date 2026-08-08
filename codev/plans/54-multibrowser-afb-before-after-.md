@@ -68,38 +68,54 @@ touches live infra. All ship as git commits on one branch / one PR (per the issu
   `export-raw` and the new `export-afb` call** — without changing any byte the existing exporter emits.
 
 #### Deliverables
-- [ ] A generic writer module (e.g. `workflows/analysis/analysis/raw_writer.py`) exposing: a
-      shard-writer (canonical pre-gzip bytes → `mtime=0` gz), the ceiling validator (≤ 1 MB/shard,
-      ≤ 200 MB/run, validate-before-write), the fingerprint helpers (already in `analysis.fingerprint`),
-      and a `write_catalog_and_shards(run_id, out, catalog_doc, shards)` entry point.
+- [ ] A generic writer module (e.g. `workflows/analysis/analysis/raw_writer.py`) exposing, as a
+      **streaming finalizer** (not a "hand me a finished catalog" call — MB builds the catalog *after*
+      the shard loop, `export_raw.py:805-838`): a shard-writer (canonical pre-gzip bytes → `mtime=0`
+      gz), the ceiling validator (≤ 1 MB/shard, ≤ 200 MB/run, **validate-before-write**, buffer-all-then-write),
+      `content_fingerprint` accumulation over the shard byte stream, and the **`limit`-gated stale-file
+      prune** (`export_raw.py:857`). Shape: the caller iterates shards through the primitive (which
+      accumulates `content_lines` + validates + buffers), then calls a finalizer that returns the
+      `content_fingerprint`; the caller builds its own `catalog_doc` (MB or AFB) and hands it back to a
+      `write(catalog_doc)` call that flushes the manifest + buffered shards and runs the prune.
+- [ ] The generic `PRESET_CAP = 12` + `_dedup_per_item` (`export_raw.py:553,584`) pulled into the
+      primitive/shared helpers for Phase 3 reuse (`_entry` stays MB-specific and does **not** move).
 - [ ] `export_raw.py` refactored to call the primitive; MB-specific reading/catalog/preset code stays put.
-- [ ] Tests proving behaviour-preservation (below).
+- [ ] The byte-identical guard (below), committed as a golden fixture + a tier-recompute test.
 
 #### Implementation Details
-- Keep `_catalog_doc`, preset computation, `CANONICAL_SUBJECTS`, and the MB reader (`iter_tradition_raw`)
-  in `export_raw.py`; move only the **generic writer/ceiling/fingerprint plumbing** into `raw_writer.py`.
-- The primitive must be **catalog-agnostic**: it takes an already-built `catalog_doc` (dict) and an
-  iterable of `(shard_path, shard_doc)` and does serialization + ceilings + gz + write + the
-  `content_fingerprint` over the shard byte stream. `fingerprint` (judgment stream) is computed by the
-  caller and passed into `catalog_doc` (AFB will stamp its own self-consistent value).
-- No change to `mtime=0` / sorted-keys / gzip settings (byte-stability is load-bearing).
+- Keep `_catalog_doc`, MB preset computation, `CANONICAL_SUBJECTS`, and the MB reader
+  (`iter_tradition_raw`) in `export_raw.py`; move only the **generic writer/ceiling/fingerprint/prune
+  plumbing** into `raw_writer.py`. Pure move-then-call — **no** change to `mtime=0` / sorted-keys / gzip
+  settings (byte-stability is load-bearing).
+- `fingerprint` (the judgment stream) is computed by each caller and placed into its own `catalog_doc`
+  (AFB stamps a self-consistent value); the primitive owns only `content_fingerprint`.
 
-#### Acceptance Criteria
+#### Acceptance Criteria (the byte-identical guard is EXECUTABLE — the `20260803` source roots are NOT committed)
+- [ ] **Golden-hash fixture**: *before* editing `export_raw.py`, export the committed MB test fixtures
+      through the current code and record per-file `sha256` (+ both manifest fingerprints) into a
+      committed golden JSON; after the extraction, a test re-exports and asserts **every** hash equals
+      the golden — the real regression gate.
+- [ ] **Committed-tier recompute** (no source roots needed): a test `gzip.decompress`es the **521
+      committed `results-raw/20260803` shards** to their pre-gz bytes, feeds them through the extracted
+      primitive's `content_fingerprint` accumulation, and asserts it equals the value committed in
+      `results-raw/20260803/manifest.json`. Mark `slow` if 121 MB of IO is too heavy for the default run.
 - [ ] Existing `test_export_raw.py`, `test_export_raw_writer.py`, `test_export_raw_presets.py` pass unchanged.
-- [ ] A test re-exports the MB fixture (and, where feasible in-test, asserts identical
-      `fingerprint` + `content_fingerprint`) through the extracted primitive — **byte-identical**.
 - [ ] `uv --project workflows/analysis run pytest workflows/analysis` green.
 
 #### Test Plan
-- **Unit**: writer emits `mtime=0` deterministic gz; ceiling validator aborts before writing on breach.
-- **Integration/regression**: MB export round-trips byte-identical (the cross-tier drift guard).
+- **Unit**: writer emits `mtime=0` deterministic gz; ceiling validator aborts before writing on breach;
+  the `limit`-gated prune behaves as before.
+- **Regression**: the golden-hash fixture test + the committed-tier `content_fingerprint` recompute.
 
 #### Rollback Strategy
 Revert the commit; `export_raw.py` returns to its monolithic form (no data or schema change was made).
 
 #### Risks
-- **Risk**: the extraction changes MB output bytes. **Mitigation**: the byte-identical regression test
-  gates the phase; do a pure move-then-call refactor, not a rewrite.
+- **Risk**: the extraction changes MB output bytes. **Mitigation**: golden-hash fixture + committed-tier
+  recompute gate the phase; pure move-then-call, not a rewrite.
+- **Risk**: the finalizer reshuffles MB's during-loop accumulation (items/subjects/judges/preset cells).
+  **Mitigation**: leave that accumulation in `export_raw.py`; the primitive only takes shards + returns
+  the content fingerprint, so MB's control flow is unchanged.
 
 ---
 
@@ -113,34 +129,53 @@ Revert the commit; `export_raw.py` returns to its monolithic form (no data or sc
   **injected** so the logic is unit-tested without spend.
 
 #### Deliverables
-- [ ] `workflows/analysis/analysis/afb_collect.py`: the intermediate schema + a `collect(...)` that takes
-      injected `generate(subject, prompt)->str` and `judge(question, response)->{score,rationale}`
-      callables, **checkpoints each completed cell to disk immediately**, **skips already-present cells on
-      resume**, and **validates completeness** (exactly 150 unique items × 2 subjects = 300 cells, each
-      judged 0–4) before marking the run done.
-- [ ] `experiments/54_afb_before_after/`: a thin `collect_afb.py` runner wiring the real Modal endpoint
-      (base + `dpo`=`mb-sft-dpo`) and the OpenRouter Terra client into `collect(...)`, plus the serve
-      script (reuse #58's `serve_gemma_eval.py` with `dpo=` repointed to `/vol/runs/mb-sft-dpo/adapter`,
-      **base+dpo only**). Keys read at runtime from `/Users/mwk/Development/fftn/taqwabench/.env`.
+- [ ] `workflows/analysis/analysis/afb_collect.py` — **SDK-free** (imports no `openai`; pure logic +
+      injected callables so its pytest needs no SDK/network): the intermediate schema + a `collect(...)`
+      taking injected `generate(subject, prompt)->str` and `judge(question, response)->{score,rationale}`,
+      that persists cells in **two atomic state transitions** (see below), **skips already-satisfied
+      state on resume**, and **validates completeness** (exactly 150 unique items × 2 subjects = 300
+      cells, each with a response AND a 0–4 verdict) before marking the run done.
+- [ ] `experiments/54_afb_before_after/`: a thin `collect_afb.py` runner that constructs the real
+      OpenAI-SDK clients (subject endpoint + OpenRouter Terra) and injects them into `collect(...)`; plus
+      a **copy** of #58's `serve_gemma_eval.py` (do **NOT** edit #58's committed file — it is that
+      experiment's provenance) with `dpo=` set to `/vol/runs/mb-sft-dpo/adapter`, **base+dpo only**.
 - [ ] pytest coverage with **mock** generate/judge callables (no network, no spend).
 
 #### Implementation Details
-- **Intermediate schema** (committed JSON; the export input-of-record): `{schema, run_id, condition:"cold",
-  subjects:[...], judge:"gpt-5.6-terra", cells:[{item_id, question, subject, response, score, rationale}]}`.
-  Item ids map `q0001→AFB-001` … `q0150→AFB-150`; the question text is carried for the shard transcript.
-- **Checkpointing**: append/merge each finished cell to the intermediate file (or a per-cell sidecar the
-  collector coalesces) so an interruption loses at most the in-flight cell; resume reads existing cells
-  and only issues the missing ones.
+- **Runner environment**: `afb_collect.py` lives in `workflows/analysis` (SDK-free, dispatcher-tested).
+  The `experiments/54` runner needs the OpenAI SDK, so it is invoked under an env that has it —
+  `uv --project workflows/judging run python experiments/54_afb_before_after/collect_afb.py` (judging
+  depends on `openai`; analysis does not). Keys read at runtime from
+  `/Users/mwk/Development/fftn/taqwabench/.env`; **never committed or echoed**.
+- **Intermediate schema** (committed JSON at **`experiments/54_afb_before_after/data/collection.json`** —
+  verified not gitignored; the export input-of-record): `{schema_version, run_id, condition:"cold",
+  subjects:["gemma-4-31b-it","mb-sft-dpo"], judge:"openai/gpt-5.6-terra", decoding:{temperature, seed,
+  max_tokens}, cells:[{item_id, question, subject, response, score, rationale}]}`. Item ids map
+  `q0001→AFB-001` … `q0150→AFB-150`. **No usage/cost/timestamps** in this file (allowlist discipline).
+- **Two-state atomic checkpointing** (so a judging failure after generation never repays generation):
+  transition 1 persists `{response}` for a cell; transition 2 adds `{score, rationale}`. Each write is an
+  atomic replace (write temp + `os.replace`) or a per-cell sidecar the collector coalesces; resume skips
+  cells whose state is already satisfied. Concurrency: writes serialized through a single writer
+  (workers return results; the main thread persists) to keep atomic replacement safe.
+- **Decoding is pinned and recorded**, identical for both subjects (else the before/after contrast is
+  confounded by sampling, not weights): fixed `temperature` + `seed` + `max_tokens`, stamped into the
+  intermediate `decoding` block and the run log. Judge model string pinned to `openai/gpt-5.6-terra`.
 - **Judge contract**: fail-fast on any non-conforming Terra output (`{score∈0..4, rationale}`), bounded
-  retry, **no fallback scoring** (per repo fail-fast principle).
+  retry, **no fallback scoring**.
+- **Usage/cost capture**: the runner tallies provider usage/cost to a **local, uncommitted** run log
+  (`experiments/54_afb_before_after/data/run.log`, gitignored) for the Phase-5 spend reconciliation —
+  never into the shipped intermediate/catalog.
 - **Serving**: base bf16 + the `mb-sft-dpo` LoRA module; endpoint keyless/short-lived; teardown is a
   Phase-5 step. The runner does a **serving smoke** (one base + one dpo call) before the full loop.
 
 #### Acceptance Criteria
 - [ ] Resume test: pre-seed N completed cells → collector issues only the remaining `(300 − N)` calls.
+- [ ] **Judge-after-generate resume**: a cell with a persisted response but no verdict (interrupted after
+      generation) resumes by issuing **only the judge call**, not a re-generation.
 - [ ] Completeness test: a run missing any cell (or with a non-0..4 score) is **rejected** before export.
 - [ ] Idempotence test: re-running a complete collection issues **zero** subject/judge calls and leaves the
-      intermediate unchanged.
+      intermediate byte-unchanged.
+- [ ] Decoding block is present and identical across subjects in the produced intermediate.
 - [ ] `uv --project workflows/analysis run pytest workflows/analysis` green.
 
 #### Test Plan
@@ -180,20 +215,29 @@ Revert the commit; no committed data yet (the real intermediate is produced/comm
   `judges:[{key:"terra", label:"gpt-5.6-terra", fullGrid:true}]`;
   `conditionAxes:[{key:"condition", label:"Condition", values:[{id:"cold", label:"Cold"}]}]`;
   `groupBy:{key:"instrument", label:"Instrument"}`; `scopes:[{id:"single", label:"single"}]`;
-  `items:[{id:"AFB-00N", label:<question, truncated>, group:"afb-150", shard:"afb-150/AFB-00N.json.gz"}]`;
+  `items:[{id:"AFB-00N", label:<question label>, group:"afb-150", shard:"afb-150/AFB-00N.json.gz"}]`;
   `presets:[<dpo−base>]`; required `fingerprint`; `content_fingerprint`.
+- **Item label (deterministic truncation)**: `label` = the question with whitespace collapsed, cut to
+  **≤ 80 chars on a word boundary** (last space ≤ 80), appending `…` when truncated; the full question is
+  always the shard's user turn. (Fixed rule — spec Important item.)
 - **Shard** per item: `contexts:{}` (cold is context-free); `cells:[{subject, conditions:{condition:"cold"},
   transcript:[{role:"user",content:question},{role:"assistant",content:response}], verdicts:[{judge:"terra",
   scope:"single", score, summary:<synth>, rationale}]}]` for both subjects.
-- **`summary` synthesis (schema-required)**: deterministic from the score band (e.g. `0`→"no religious
-  representation", `1`→"passing mention", `2`→"meaningful reference", `3`→"balanced", `4`→"predominantly
-  religious"), so every verdict has a non-empty `summary`; `rationale` carries Terra's text. Final phrasing
-  fixed here (spec Important item).
-- **Preset (`dpo − base`)**: deterministic top-N by `score(dpo) − score(base)` per item, **N ≤ 12**, one
-  entry per item, magnitude-sorted with a stable `group → item` tie-break; each entry
-  `params:{group, item, scope:"single", a:"gemma-4-31b-it", b:"mb-sft-dpo", conditions:{condition:"cold"}}`.
+- **`summary` synthesis (schema-required, FIXED phrasing — not "e.g.")**: exact map by integer score —
+  `0`→"no religious representation", `1`→"passing mention of religion", `2`→"meaningful religious
+  reference", `3`→"balanced religious and secular", `4`→"predominantly religious". Every verdict gets a
+  non-empty `summary`; `rationale` carries Terra's text verbatim.
+- **Preset (`dpo − base`) — exact rule**: rank items by the **absolute** delta `|score(mb-sft-dpo) −
+  score(gemma-4-31b-it)|` (honors the approved spec's `|dpo − base|`), descending; **N ≤ 12** (reuse the
+  Phase-1 `PRESET_CAP`); **one entry per item** (reuse `_dedup_per_item`); tie-break stable on
+  `group → item` id ascending. Each entry `params:{group, item, scope:"single", a:"gemma-4-31b-it",
+  b:"mb-sft-dpo", conditions:{condition:"cold"}}`. *(Deviation flag for the architect: a **signed**
+  `dpo − base` descending rank would surface repairs-only and drop regressions — arguably better for the
+  omission→repair headline. Left as `|·|` per the approved spec + architect's earlier wording; will confirm
+  at plan-approval whether to switch to signed.)*
 - **`fingerprint`**: a self-consistent sha256 over the sorted resolved-verdict stream (no cross-tier
-  partner; the viewer tolerates the lookup miss). `content_fingerprint` over the shard byte stream.
+  partner; the viewer tolerates the lookup miss). `content_fingerprint` over the shard byte stream (from
+  the Phase-1 primitive).
 
 #### Acceptance Criteria
 - [ ] Exported catalog parses/validates like `AFB_CATALOG` (mirror `lib/rawData.test.ts` expectations):
@@ -225,47 +269,64 @@ Revert the commit; the CLI subcommand and module are additive (no change to `exp
   first-class, **catalog-generic** entry point, without disturbing the default MultiBench scores run and
   without adding GitHub API calls.
 
-#### Deliverables
-- [ ] A generic `results-raw/` run enumerator in `apps/multibrowser/src/lib/queries.ts` (sibling to
-      `resultsRunIds`, regex `^results-raw\/([^/]+)\/manifest\.json$`) sourced from the already-walked tree
-      (`WALK_DIRS` already includes `results-raw`).
-- [ ] Run-list assembly that **merges raw-only runs** (those with a `results-raw/` manifest and no
-      `results/` manifest) into the browsable set **without** changing `defaultRunId` (the MB scores
-      default is untouched).
-- [ ] A first-class entry point/landing (e.g. a section on `/results` and/or the index) that links a
-      raw-only run into `/results/$runId/$groupId/$itemId`, **initial target = the run's first preset entry
-      if present, else its first item**.
+#### Deliverables (reuse shipped generic machinery — do NOT hand-roll)
+- [ ] A **separate** raw-run enumerator `rawRunIds(entries)` in `queries.ts` (regex
+      `^results-raw\/([^/]+)\/manifest\.json$`) from the already-walked tree (`WALK_DIRS` includes
+      `results-raw`), plus its **own** hook — it must **never** route ids through `loadResultsManifest`
+      (that returns a `notice("error","results",…,"manifest not found")` for a scores-tier-less run,
+      `queries.ts:194-207`, which would paint a false red error on `/results`).
+- [ ] A first-class, catalog-generic **raw-run landing** that resolves the run's catalog via the shipped
+      `useRawCatalog(sha, runId, /*expectedFingerprint*/ null)` (`queries.ts:536`) and renders the shipped
+      `<RawPresets>` (`components/RawPresets.tsx`, already generic — emits `/results/$runId/$groupId/$itemId`
+      links with `{...conditions, a, b?, scope, judge}`), passing `judge = catalog.judges.find(j =>
+      j.fullGrid)?.key` — mirroring `ResultsPage.tsx:107-121,251-260`.
+- [ ] A **catalog-generic item index** on that landing (list `catalog.items`, each linking to
+      `/results/$runId/$item.group/$item.id` **with `a=catalog.subjects[0].id`, `b=catalog.subjects[1].id`,
+      `scope=catalog.scopes[0].id`, `judge=<fullGrid>`**) so **all 150 items are reachable in-app** — not
+      only the ≤12 preset entries (AFB has no corpus cross-link and `RawResultsPage` has no item picker).
+- [ ] Extend the **static MB-vocab guard** (`rawData.test.ts` file list) to include the new landing/entry
+      file(s), and additionally forbid the AFB literals `"afb-150"`, `"mb-sft-dpo"`, `"AFB"` there.
 - [ ] Tests.
 
 #### Implementation Details
-- Keep everything **MB-vocab-free**: read `dataset.title`, `groupBy.label`, `items` from the raw manifest;
-  no AFB literals in SPA core. The `RawResultsPage` static MB-vocab guard must stay green.
-- Do **not** merge into the score-tier `loadResultsRuns` in a way that requires a `ResultsManifest`
-  (it filters nulls); the raw-only run is a separate, additively-listed entity that reuses the raw route
-  (which already tolerates a null cross-tier fingerprint).
-- Reuse the existing raw loader/source-resolver unchanged (a raw-only run’s absent scores fingerprint is
-  already handled).
+- **Links MUST carry `a` and `b`.** `parseRawSelection` defaults `b` to `null` (`rawSelection.ts:46-48`),
+  so a bare item link renders **vanilla only, single column** — failing the before/after criterion. Both
+  the preset links (already carry a/b) and the new item-index links carry `a=subjects[0]`, `b=subjects[1]`
+  generically.
+- **Everything MB-vocab-free**: read `dataset.title`, `groupBy.label`, `items`, `subjects` from the raw
+  manifest; no AFB literals in SPA core. Reuse the raw loader/source-resolver unchanged (the null scores
+  fingerprint path already exists).
+- **Do not disturb the score tier**: `defaultRunId` and the `/results` leaderboard come from
+  `loadResultsRuns` (scores) untouched; the raw-run landing is an additive, separate surface.
 
 #### Acceptance Criteria
-- [ ] A raw-only fixture run (AFB catalog, **no** `results/` manifest) appears in the browsable run set and
-      a rendered in-app link resolves to `/results/$runId/afb-150/AFB-001` (or the first preset item).
-- [ ] The default MB scores run selection is unchanged (regression test).
+- [ ] A raw-only fixture run (AFB catalog, **no** `results/` manifest) is discovered and its landing lists
+      **all** items; a rendered item link resolves to `/results/$runId/afb-150/AFB-001?a=gemma-4-31b-it&b=mb-sft-dpo&scope=single&judge=terra`.
+- [ ] **Two-column render assertion**: landing on that link renders **both** response columns (base + dpo),
+      not a single column.
+- [ ] **No false notice** (spec NFT-3): a raw-only run with a null scores fingerprint produces **no**
+      "manifest not found"/coherence error notice on `/results` or the landing.
+- [ ] The default MB scores run selection + leaderboard are unchanged (regression test).
 - [ ] No new GitHub API calls beyond the existing tree walk (assert in the data-layer test).
-- [ ] The shipped genericity test (`routes/rawResults.test.tsx:156`) and the MB-vocab static guard stay green.
+- [ ] The shipped genericity test (`routes/rawResults.test.tsx:156`) and the (extended) static MB-vocab
+      guard stay green; the new entry-point file is covered by the guard.
 - [ ] `pnpm -C apps/multibrowser test` green.
 
 #### Test Plan
-- **Unit**: the enumerator regex + run-list merge (raw-only vs score-backed vs both).
-- **Integration (RTL)**: raw-only run is discoverable + linked; default run unchanged; typecheck/lint clean.
+- **Unit**: `rawRunIds` regex; the raw-run hook never calls `loadResultsManifest`; run-list separation.
+- **Integration (RTL)**: raw-only run discoverable; item index lists all items; landed item link renders
+  two columns; no false notice; default MB run unchanged; typecheck/lint clean.
 
 #### Rollback Strategy
 Revert the commit; discovery returns to scores-only (the AFB catalog would again be deep-link-only).
 
 #### Risks
-- **Risk**: leaking AFB vocab / tripping the genericity guard. **Mitigation**: drive everything off the
-  manifest; run the static guard + genericity test in this phase.
-- **Risk**: disturbing the default MB run. **Mitigation**: additive listing + an explicit
-  default-unchanged regression test.
+- **Risk**: hand-rolling a link that drops `b` → single-column. **Mitigation**: reuse `<RawPresets>` +
+  generic item-index links that always carry a/b; the two-column render assertion guards it.
+- **Risk**: routing raw ids through `loadResultsManifest` → false error notice. **Mitigation**: a separate
+  enumerator/hook that never touches the scores manifest loader; the no-false-notice acceptance test.
+- **Risk**: leaking AFB vocab past the guard's file list. **Mitigation**: extend the guard to the new file
+  and forbid the AFB literals.
 
 ---
 
@@ -277,28 +338,39 @@ Revert the commit; discovery returns to scores-only (the AFB catalog would again
   licensing. **This is the only phase that spends money or touches live infra.**
 
 #### Deliverables
-- [ ] **Serving smoke** (adapter integrity re-confirmed live: one base + one `mb-sft-dpo` call) **before**
-      the full loop; **architect notified before the spend**.
-- [ ] The real collection run (base + dpo × 150 cold) → the committed compact **intermediate** artifact.
-- [ ] `analysis export-afb` → committed `results-raw/<afb-run-id>/` (run-id `afb-<YYYYMMDD>`), size-validated.
-- [ ] **Actual spend reconciled** from usage (target ~$17–23); **endpoint torn down** (remove
-      `min_containers`/stop app).
-- [ ] In-app verification: the AFB run is discoverable and the before/after A/B view (base ↔ dpo, Terra
-      scores + rationales, ramp colors, `dpo − base` preset) renders on the **real** committed data.
+- [ ] **BLOCKING spend gate**: message the architect and **wait for an explicit approval reply** before
+      running — a heads-up is not an authorization (irreversible-action discipline). Then run a **serving
+      smoke** (adapter integrity re-confirmed live: one base + one `mb-sft-dpo` call) **before** the loop.
+- [ ] The real collection run (base + dpo × 150 cold, pinned decoding) → the committed compact
+      **intermediate** artifact (`experiments/54_afb_before_after/data/collection.json`).
+- [ ] **Reconciliation sanity-check vs #48's published numbers** BEFORE committing: compute the collected
+      base/dpo distribution (mean, P≥2) and compare to #48 (base ≈ 0 / ~1% ≥2; dpo ~27% ≥2). If it diverges
+      materially, **escalate to the architect** rather than committing a companion artifact that contradicts
+      the paper (repo standing lesson: derived numbers must reconcile with the authoritative source).
+- [ ] `analysis export-afb` → committed `results-raw/afb-<YYYYMMDD>/`, size-validated.
+- [ ] **Actual spend reconciled** from the local run log (target ~$17–23); **endpoint torn down** (remove
+      `min_containers`/stop app) — confirmed no lingering container.
+- [ ] **Deployed-path** in-app verification (state target = the Railway deployment): the AFB run is
+      discoverable, the before/after A/B view renders on the **real** committed data, and — since the baked
+      bundle ships only the MB run — the AFB run **falls back to GitHub cleanly with no false coherence
+      notice** (the known `serve -s dist` baked-miss landmine).
 - [ ] AFB **MIT attribution** carried (SOURCE.md/LICENSE referenced/provenance in the run dir or README).
 - [ ] Docs: `results-raw/README.md` gains a **second-catalog (AFB) + raw-only discovery** note; the
       MultiWeights paper companion-artifact link plan recorded (link added once live).
 - [ ] Arch-doc routing via the `update-arch-docs` skill if a durable system-shape fact warrants it.
 
 #### Implementation Details
-- Run-id: `afb-<YYYYMMDD>` chosen at run time. Commit **only** the intermediate + `results-raw/<afb-run-id>/`
-  (never secrets, never gitignored `tmp/`). Explicit `git add` per file.
+- Run-id: `afb-<YYYYMMDD>` chosen at run time. Commit **only** the intermediate + `results-raw/afb-<YYYYMMDD>/`
+  (never secrets, never the gitignored `run.log`/`tmp/`). Explicit `git add` per file.
 - If the architect prefers, Phases 1–4 can be reviewed/merged before authorizing the Phase-5 spend
   (the code is fully testable without it) — see Notes.
 
 #### Acceptance Criteria
-- [ ] 300/300 cells collected and judged; completeness validation passed; spend within ~$17–23 (reconciled).
-- [ ] Committed catalog validates + renders in the SPA on real data (verified manually + genericity test).
+- [ ] Explicit architect approval received before the run; serving smoke passed.
+- [ ] 300/300 cells collected and judged; completeness validation passed; distribution reconciles with #48
+      (or divergence escalated); spend within ~$17–23 (reconciled from the run log).
+- [ ] Committed catalog validates + renders in the SPA on real data, on the **deployed** site, with clean
+      GitHub fallback (no false coherence notice).
 - [ ] Endpoint confirmed torn down; no secrets in the diff.
 - [ ] `.codev/checks/test.sh` green for both touched apps.
 
@@ -348,11 +420,15 @@ Phase 5 needs all of 1–4. Porch runs them sequentially in the listed order.)
 ### Technical Risks
 | Risk | Probability | Impact | Mitigation | Owner |
 |------|------------|--------|------------|-------|
-| Writer extraction changes MB bytes | M | H | Byte-identical regression test gates Phase 1 | builder |
-| Collection interruption loses paid work | M | H | Per-cell checkpoint + idempotent resume (Phase 2) | builder |
+| Writer extraction changes MB bytes | M | H | Golden-hash fixture + committed-tier `content_fingerprint` recompute (Phase 1) | builder |
+| Collection interruption / judge-fail repays generation | M | H | Two-state atomic checkpoint + judge-after-generate resume (Phase 2) | builder |
+| Entry-point link drops `b` → single-column view | M | H | Reuse `<RawPresets>` + a/b-carrying item index; two-column render assertion (Phase 4) | builder |
+| Only ≤12/150 items reachable in-app | M | M | Catalog-generic item index lists all `catalog.items` (Phase 4) | builder |
+| Raw ids routed through scores loader → false error notice | M | M | Separate `rawRunIds` enumerator/hook; no-false-notice test (Phase 4) | builder |
+| Responses are a fresh sample that contradicts #48 | M | H | Pin+record decoding; reconcile base/dpo dist vs #48 before commit; escalate on divergence (Phase 5) | builder |
 | Catalog drifts from viewer schema | L | M | Tests mirror shipped `AFB_CATALOG`; in-app render (Phase 4/5) | builder |
-| Discovery leaks AFB vocab / trips guard | L | M | Manifest-driven; static guard + genericity test (Phase 4) | builder |
-| Spend overrun | L | M | Cold-only 300 cells; reconcile ACTUAL usage; stop at ceiling | builder |
+| Discovery leaks AFB vocab / trips guard | L | M | Manifest-driven; extended static guard covers the entry file (Phase 4) | builder |
+| Spend overrun | L | M | Cold-only 300 cells; reconcile ACTUAL usage from run log; stop at ceiling | builder |
 | Adapter missing at run time | L | H | Serving smoke gates the spend; escalate | builder/architect |
 
 ### Schedule Risks
@@ -387,9 +463,31 @@ Phase 5 needs all of 1–4. Porch runs them sequentially in the listed order.)
 - [ ] Reconcile and record actual spend.
 
 ## Expert Review
-**Date**: (pending) · **Model**: codex + claude (per `porch.consultation.models`).
-**Key Feedback**: (to be filled after consultation)
-**Plan Adjustments**: (to be filled after consultation)
+**Date**: 2026-08-08 · **Model**: codex + claude (per `porch.consultation.models`). Both `REQUEST_CHANGES`
+(HIGH), code-verified. **Resolved in this revision.**
+**Key Feedback → Plan Adjustments**:
+- *Byte guard not executable* (the `20260803` source roots aren't committed) → Phase 1 now uses a
+  **golden-hash fixture** + a **committed-tier `content_fingerprint` recompute** (decompress the 521 gz
+  shards through the extracted primitive).
+- *Primitive signature self-contradictory* (takes a built catalog yet computes `content_fingerprint`; MB
+  builds the catalog after the shard loop) → reshaped as a **streaming finalizer**; MB's during-loop
+  accumulation + the `limit`-gated prune stay in `export_raw.py`; generic `PRESET_CAP`/`_dedup_per_item`
+  pulled out for Phase 3.
+- *Phase 4 reinvented shipped machinery & landed single-column, 138/150 unreachable* → rewritten to
+  **reuse `useRawCatalog` + `<RawPresets>`**, add a **catalog-generic item index** (all 150 reachable),
+  make every link **carry `a`+`b`** (a two-column assertion guards it), use a **separate `rawRunIds`
+  enumerator** (never `loadResultsManifest` → no false notice, maps spec NFT-3), and **extend the static
+  guard** to the new file.
+- *No decoding pinned / no reconciliation with #48* → Phase 2 **pins+records decoding** (temp/seed/max_tokens,
+  identical across subjects) + judge string; Phase 5 **reconciles the base/dpo distribution vs #48** before
+  commit and escalates on divergence.
+- *Checkpoint could repay generation* → **two-state atomic** persist (response, then verdict) + resume.
+- *Unspecified items fixed*: intermediate path `experiments/54_afb_before_after/data/collection.json`;
+  **exact** score→summary phrasing; deterministic ≤80-char word-boundary label truncation; preset rule
+  stated exactly as `|dpo − base|` (signed alternative flagged for plan-approval); **copy** (not mutate)
+  #58's serve script; **blocking** spend gate (explicit architect approval, not a notification);
+  deployed-path verification incl. clean GitHub fallback; runner env (`uv --project workflows/judging`,
+  SDK-free `afb_collect`); usage/cost to a **gitignored** run log, never shipped.
 
 ## Approval
 - [ ] Technical Lead Review
@@ -406,8 +504,13 @@ Phase 5 needs all of 1–4. Porch runs them sequentially in the listed order.)
 - **Spend isolation**: Phases 1–4 are no-spend and fully testable; the architect may review/merge them
   before authorizing the Phase-5 run. The builder will notify the architect (and run a serving smoke)
   **before** spending, per the irreversible-action discipline.
-- **`dpo` = `mb-sft-dpo`** throughout; the #58 serve script's `dpo=` module is repointed to
-  `/vol/runs/mb-sft-dpo/adapter` in Phase 2 (base+dpo only).
+- **`dpo` = `mb-sft-dpo`** throughout; Phase 2 **copies** #58's `serve_gemma_eval.py` into
+  `experiments/54_afb_before_after/` with `dpo=/vol/runs/mb-sft-dpo/adapter` (base+dpo only) — the #58
+  committed file is **never edited** (it is that experiment's provenance).
+- **Blocking spend gate**: Phase 5 sends the architect an explicit request and **waits for approval**
+  before spending; a heads-up is not authorization.
+- **Preset rule** ships as `|dpo − base|` (approved spec); a signed-`dpo − base` refinement is flagged for
+  plan-approval. Decoding params are pinned + recorded; the collected distribution is reconciled vs #48.
 - **Secrets**: `OPENROUTER_API_KEY` + `ANTHROPIC_API_KEY` read at runtime from
   `/Users/mwk/Development/fftn/taqwabench/.env`; never committed or echoed.
 - **Item id mapping**: `q0001…q0150` → `AFB-001…AFB-150`; group `afb-150`; shards
