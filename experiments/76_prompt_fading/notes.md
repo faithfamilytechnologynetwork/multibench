@@ -1,13 +1,17 @@
 # Experiment 76: Prompt fading — does framing guidance decay with context distance, and is MultiWeights immune?
 
-**Status**: **APPROVED (budget + redesign, 2026-08-08) — executing SMOKE next, then STOP to
-reconcile usage-computed actuals before the full run**
+**Status**: **COMPLETE (2026-08-08)** — H2 (weights immunity) & H3 (differential, pooled + system
+channel) CONFIRMED; H1 (absolute prompt-fade) statistically real but sub-threshold pooled,
+large in the hard tier. Arm-C follow-up not triggered. Total spend ≈ $50–51 / $150 ceiling.
 
 **Date**: 2026-08-08
 
 **Driving issue**: #76. **Predecessors**: #48 (MultiWeights SFT/DPO, `mb-sft-dpo` deliverable),
 #57 (held-out transfer), #58 (full-grid scaling-null). **Instruments reused**: `workflows/judging`
 (collect/judge/report), the Modal `gemma-dpo` volume + vLLM serve endpoint, `workflows/analysis`.
+
+**Effort**: ~1 working session (design + build + smoke + full run). Wall-clock: full collect ~85 min
+(2,240 sittings/h warm, concurrency 24) + judging ~10 min. Spend ≈ $50–51.
 
 ---
 
@@ -311,10 +315,134 @@ negative, e.g. −0.87). The pre-registered **L0 manipulation check** and **per-
 are exactly what surface where guidance has room to lift (and thus room to fade); scenarios that
 ceiling at L0 are uninformative for H1 and will be reported as such.
 
-### Full run
+### Full run (2026-08-08) — 3,024 sittings + 3,024 judgments, 0 failures
 
-*(pending explicit go from the architect after actuals reconciliation — per the GO sequence)*
+**Data integrity: exact.** arms 1008 each · levels 756 each · pressures 504 each · 7 traditions ×
+432 · 42 scenarios. Score spread is real (not ceiling): {−1: 344, −0.5: 16, 0: 39, +0.5: 53,
++1: 2572}. Judge = single gemini-3.6-flash via OpenRouter, full scope, 0 re-judge (single judge).
 
-## What Worked / What Didn't / Next Steps
+**Reconciled actuals (usage-computed, reported to architect BEFORE conclusions):**
+- **Banding — EXACT OpenRouter token-sum: $39.50** (13.55M in × $1.50 + 2.56M out × $7.50;
+  $0.01306/judgment) vs $37.5 projection.
+- **Serve — Modal H200 wall-clock (smoke+full shared warm window, ~1.82 H200-h): ~$10–11.** Endpoint
+  scaled to zero after; no ongoing spend. Modal alone never near the $60 tripwire.
+- **TOTAL ≈ $50–51 all-in** — ~$100 under the $150 ceiling. No pause/tripwire event.
 
-*(pending)*
+#### Level-mean counsel score by arm (pooled, 42 scenarios)
+
+| Arm | L0 (adjacent) | L1 ~1k | L2 ~4k | L3 ~12k | slope (per level) [95% CI] | L0→L3 |
+|---|---:|---:|---:|---:|---|---:|
+| **A1 prompted-system** | +0.786 | +0.736 | +0.653 | +0.694 | **−0.036 [−0.068, −0.009]** | −0.091 |
+| **A2 prompted-prefix** | +0.736 | +0.786 | +0.647 | +0.740 | −0.013 [−0.037, +0.009] | +0.004 |
+| **B weights-dpo** | +0.786 | +0.790 | +0.744 | +0.817 | +0.005 [−0.009, +0.020] | +0.032 |
+
+#### Verdicts against the pre-registration (τ=0.15, scenario-clustered bootstrap 95% CIs)
+
+- **H2 — weights immunity: CONFIRMED (clean).** `slope_B` = +0.005, total change +0.015
+  CI[−0.026, +0.061] — flat, CI fully contained within ±0.15. Weights formation does **not** decay
+  with context distance, overall and **within every tradition** (incl. the hard tier — see below).
+- **H3 — differential (the headline): CONFIRMED for the system channel and pooled.**
+  `slope_pooled − slope_B` = −0.029 CI[−0.053, **−0.007**] (excludes 0); `slope_A1 − slope_B` =
+  −0.041 CI[−0.071, **−0.013**] (excludes 0). `slope_A2 − slope_B` = −0.018 CI[−0.044, +0.008] (not
+  distinguishable). → **Prompt-delivered guidance decays with context distance significantly more
+  than weights formation** — the core thesis, threshold-independent (rests on CI vs 0).
+- **H1 — absolute prompted fade: statistically real but SUB-THRESHOLD pooled.** `slope_A1` CI
+  excludes 0 (a genuine, significant decline), but total decay −0.107 is **below the pre-registered
+  τ=0.15 materiality floor**, so by the locked rule H1 reads **"fade present, not material"** at
+  ≤12k-token separations. A2 (the benchmark's own user-prefix channel) shows **no** significant
+  fade. Reported plainly per the honest-null discipline — the differential (H3), not the absolute
+  magnitude, is the robust claim here.
+- **Channel (A1 vs A2):** A1−A2 = −0.023 CI[−0.057, +0.004] — the system-message channel trends
+  toward faster fade than the user-prefix channel, but the channel difference itself is **not**
+  significant. Notably the fade is essentially a **system-prompt** phenomenon; the benchmark's
+  in-user-turn prefix (A2) is about as robust as weights at these distances.
+- **L0 manipulation check: PASSES.** vs the cross-run #53 base-unstated(full) reference (−0.028 over
+  these scenarios), all arms lift ~+0.8 at L0 (A1 +0.786, A2 +0.736, B +0.786) ≫ τ — guidance (and
+  weights) work strongly when adjacent, so there is real headroom to fade. (Cross-run anchor;
+  approximate. Note A1 and B **start identical** at L0 — prompt-adjacent ≈ weights — then diverge.)
+
+#### The effect is concentrated in the hard tier (as pre-registered)
+
+Per-tradition A1 slopes: **roman-catholicism −0.210** (dominant), taoism −0.021, judaism −0.019,
+sunni-islam −0.011, ~0 elsewhere. Roman-catholicism is the clean illustration of the whole thesis:
+
+| roman-catholicism (n=6) | L0 | L1 | L2 | L3 |
+|---|---:|---:|---:|---:|
+| A1 prompted-system | **+0.889** | +0.722 | **+0.208** | +0.361 |
+| A2 prompted-prefix | +0.611 | +0.833 | +0.278 | +0.639 |
+| **B weights-dpo** | **+0.889** | +0.806 | **+0.833** | +0.819 |
+
+At L0 prompted-system and weights are **identical (+0.889)**; by L2 the prompted counsel has
+**collapsed to +0.208** while weights holds **+0.833** — flat across the entire ramp. The **pooled**
+prompt-fade is *diluted* because easy traditions (buddhism, secular-sage) sit near ceiling at every
+level and cannot fade — exactly the ceiling effect flagged from the smoke and pre-registered as
+"uninformative for H1." (A1's roman-catholicism trough is at L2 with a partial L3 rebound;
+non-monotone at n=6 — reported as-is.)
+
+#### Conditional arm C — NOT triggered
+
+The pre-registered trigger for the base-floor disambiguation was `slope_B` materially negative
+(CI excludes 0 and 3×|slope_B| ≥ 0.15). `slope_B` is **flat/slightly positive** (+0.005, CI includes
+0), so **arm C is not run** — weights immunity holds directly; there is no weights-fade needing to be
+distinguished from generic long-context rot. No additional spend.
+
+#### Artifacts
+- `data/output/summary_76.json` — all estimands + bootstrap CIs + curves + per-tradition slopes.
+- `data/output/per_scenario_76.csv` — per (arm, scenario, level) mean score.
+- `data/output/fig_fading.{pdf,png}` — score-vs-separation, 3 arms, 95% CI bands.
+- `data/output/fig_fading_by_tradition.{pdf,png}` — per-tradition small multiples.
+- Raw sittings/judgments (gitignored) regenerable via `collect_fading.py` + `judging judge`.
+
+### Bottom line
+
+**Weights-based formation (MultiWeights `mb-sft-dpo`) is immune to context-distance fading (H2
+confirmed, flat everywhere); prompt-delivered guidance is not — it decays significantly more than
+weights (H3 confirmed for the system channel and pooled).** The *absolute* prompt-fade at ≤12k-token
+separations is modest in pooled aggregate (−0.11 band, below the τ=0.15 materiality floor) and
+concentrated in the hard tier, where it is large (roman-catholicism: an identical-at-L0 counsel
+collapses from +0.89 to +0.21 by ~4k tokens of separation while the weights model does not move).
+This is direct, quantitative support for "move values from prompt to weights": at L0 the two are
+interchangeable, but only the weights model keeps its formation as the conversation grows.
+
+## What Worked
+
+- **Reusing the judge seam unchanged.** Encoding arm→`subject` and level→`framing` let the stock
+  `judging judge` score fading sittings with zero code change and made arm/level survive into
+  `judgments.jsonl` for free. The one structural departure (framing once, early) lived entirely in a
+  small variant collector; the −1…+1 seam was untouched.
+- **Judge-blindness kept banding flat across the ramp.** The judge never sees framing or fluff, so
+  L3 (12k-token) sittings cost the same to judge as L0 — banding stayed at the #58 anchor
+  (~$0.013/judgment) regardless of separation. Only GPU serve scaled with context, and cheaply.
+- **Measured-throughput serve projection.** Sampling warm sittings/hour (2,240/h) turned a naive
+  126× smoke-scaling ($164, would breach ceiling) into the correct ~$10 — the honest basis.
+- **Smoke caught the right risk early** (ceiling on easy scenarios) without derailing: the full
+  42-scenario set had ample spread (344 −1.0 scores), and the hard tier delivered the signal.
+
+## What Didn't (/ honest limitations)
+
+- **Pooled absolute fade is sub-threshold.** At ≤12k-token separations the pooled prompt-fade
+  (−0.09…−0.11 band) is below τ=0.15, diluted by ceiling-bound easy traditions. The clean signal is
+  the differential vs weights and the hard-tier magnitude — not a big pooled absolute number.
+- **n=6 per tradition** makes per-tradition slopes noisy (roman-catholicism is non-monotone: trough
+  at L2, partial L3 rebound). Fine for the pre-registered *descriptive* per-tradition reporting;
+  not for per-tradition inference.
+- **Fluff cycles at L3** (bank ~5.1k approx tokens, L3 target 12k → ~2.4×). Identical repeated
+  filler is value-neutral and controlled, but a longer non-repeating bank would be cleaner for a
+  distance-vs-repetition disambiguation.
+- **temperature=0** gives reproducible counsel but removes sampling variance; a temp>0 replicate
+  would let within-cell noise be estimated.
+
+## Next Steps
+
+1. **Immediate:** PR this experiment (branch → `main`) so the thread + notes + figures land in the
+   review record. `Refs #76` (experiment validates the fading/immunity claims; no production code
+   change to ship).
+2. **Follow-up experiments the data motivates:**
+   - **Longer / non-repeating separation ramp** (32k+, unique filler) to find where the prompted
+     curve fully decays to the base floor — the pooled effect should grow well past 12k.
+   - **System-vs-user-prefix channel** at higher power (the A1>A2 fade trend hints the system
+     channel is the more fragile delivery; worth a dedicated, better-powered test).
+   - **Hard-tier zoom** (roman-catholicism, + other low-base scenarios) at n≫6 to put a tight CI on
+     the large hard-tier fade that the pooled number dilutes.
+3. **Reporting:** the roman-catholicism L0-identical→diverge panel is the paper-ready figure for the
+   "move values from prompt to weights" claim; `fig_fading.pdf` is the pooled headline.

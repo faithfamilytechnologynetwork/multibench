@@ -75,3 +75,20 @@ fade — values-in-weights is the selling point. Test directly with a fluff-sepa
 - 2026-08-08: Full run progressing (~290/3024, on ~2,240/h pace). Awaiting completion notification.
   **At completion: reconcile exact actuals (token-sum banding + wall-clock serve) BEFORE any
   analysis conclusions leave, then run analyze.py, write Results, PR.**
+- 2026-08-08: **FULL RUN COMPLETE** — 3,024 sittings + 3,024 judgments, 0 failures. Integrity exact
+  (arms 1008 / levels 756 / pressures 504 / 42 scen). **Actuals reported to architect FIRST** (cond 4):
+  banding EXACT $39.50 (token-sum), serve ~$10–11 (Modal wall-clock), total ~$50–51 / $150. Endpoint
+  scaled to zero. Score spread real: {−1:344,…,+1:2572}.
+- 2026-08-08: **RESULTS (pre-registered, τ=0.15, scenario-bootstrap CIs):**
+  - **H2 weights immunity CONFIRMED** — slope_B +0.005, tot +0.015 CI[−0.026,+0.061], flat everywhere
+    incl. hard tier.
+  - **H3 differential (headline) CONFIRMED** — pooled−B −0.029 CI[−0.053,−0.007]; A1−B −0.041
+    CI[−0.071,−0.013]. Prompted (esp. system channel) fades faster than weights.
+  - **H1 absolute prompt-fade** statistically real (slope_A1 −0.036 CI excl. 0) but **sub-threshold
+    pooled** (tot −0.107 < 0.15). A2 (user-prefix) not significant. Honest-null reported.
+  - **Hard tier drives it:** roman-catholicism A1 slope −0.210; L0-identical to weights (+0.889),
+    prompted collapses to +0.208 @ L2 while weights holds +0.833.
+  - **Channel A1−A2** −0.023 CI[−0.057,+0.004] (system trends more fragile, n.s.).
+  - **Arm-C NOT triggered** (slope_B flat/positive) → no extra spend.
+- 2026-08-08: Wrote Results + What-worked/didn't/next in notes.md; status COMPLETE. Committing
+  artifacts (notes, summary_76.json, per_scenario_76.csv, 2 figures) + thread. Next: PR (Refs #76).
