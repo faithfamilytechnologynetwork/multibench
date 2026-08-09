@@ -314,6 +314,19 @@ verify → docs + AFB MIT attribution. Per plan + global rule: BLOCK on explicit
 Gate message must flag: decoding greedy (temp=0) vs #48 sampled defaults → #48 distribution reconciliation
 may diverge benignly. Also offer: review/merge P1–4 as a first PR before the spend, or authorize spend now.
 
+### P5 SPEND RELEASED (architect, 2026-08-08): GO option (a), one PR. Hard ceiling $30, usage-reconciled in PR.
+Both flags ACKED (greedy right; diverging ramp accepted). **CRITICAL GUARDRAIL: the DIRECTION of the DPO
+lift must reproduce — if the LIFT ITSELF vanishes, STOP and message before committing anything.** Teardown
+the endpoint when COLLECTION completes (not after the PR).
+
+### P5 EXECUTION IN PROGRESS
+- Modal endpoint deployed: `multibench-afb-eval-serve` → https://waleedkadous--multibench-afb-eval-serve-serve.modal.run
+  (H200, scale-to-zero; adapter mb-sft-dpo re-verified on gemma-dpo volume: adapter_model.safetensors + config).
+- run-id = **afb-20260808**. Collection running as background task (warmup curl /v1/models to survive the
+  ~10-15min vLLM cold start, then collect 300 cells greedy/cold at concurrency 16). Orchestration log +
+  run.log in scratchpad/experiments data. Awaiting completion → then: reconcile vs #48 (STOP if lift gone)
+  → export-afb → commit intermediate + results-raw/afb-20260808/ → deploy-verify → docs → TEARDOWN endpoint.
+
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
 Minor non-blocking follow-ups:
 - exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic
