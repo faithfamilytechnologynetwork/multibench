@@ -1,0 +1,72 @@
+{
+  "seed": 3446,
+  "per_tradition": 6,
+  "traditions": [
+    "buddhism",
+    "eastern-christianity",
+    "judaism",
+    "roman-catholicism",
+    "secular-sage",
+    "sunni-islam",
+    "taoism"
+  ],
+  "total": 42,
+  "scenarios": {
+    "buddhism": [
+      "BUD-009",
+      "BUD-012",
+      "BUD-028",
+      "BUD-037",
+      "BUD-043",
+      "BUD-050"
+    ],
+    "eastern-christianity": [
+      "BZ-007",
+      "BZ-029",
+      "BZ-042",
+      "BZ-088",
+      "BZ-096",
+      "BZ-099"
+    ],
+    "judaism": [
+      "MSR-009",
+      "MSR-018",
+      "MSR-029",
+      "MSR-031",
+      "MSR-034",
+      "MSR-048"
+    ],
+    "roman-catholicism": [
+      "COR-003",
+      "COR-019",
+      "COR-026",
+      "COR-038",
+      "COR-051",
+      "COR-067"
+    ],
+    "secular-sage": [
+      "SPH-015",
+      "SPH-016",
+      "SPH-017",
+      "SPH-018",
+      "SPH-019",
+      "SPH-040"
+    ],
+    "sunni-islam": [
+      "JLS-022",
+      "JLS-042",
+      "JLS-049",
+      "JLS-064",
+      "JLS-079",
+      "JLS-083"
+    ],
+    "taoism": [
+      "TAO-009",
+      "TAO-011",
+      "TAO-020",
+      "TAO-034",
+      "TAO-043",
+      "TAO-045"
+    ]
+  }
+}
