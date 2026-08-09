@@ -1,5 +1,9 @@
 import { describe, it, expect, afterEach, vi } from "vitest";
 import { screen, within } from "@testing-library/react";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import * as url from "node:url";
+import { gunzipSync } from "node:zlib";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, resultsFiles, buildTree } from "../test/fakeRepo";
 import { REPO } from "../lib/constants";
@@ -147,5 +151,44 @@ describe("raw-only explorer discovery + landing (#54)", () => {
     renderApp("/");
     await screen.findByTestId("explorers");
     expect(treeCalls).toBe(1); // one recursive tree walk serves traditions + results + explorers
+  });
+});
+
+// The REAL committed AFB data (produced by the Python export-afb) rendered through the real app —
+// the strongest automated stand-in for the browser check (#54 Phase 5). Reads the shipped manifest +
+// shard from disk and serves them the way the SPA fetches them.
+describe("real committed AFB run renders end-to-end (#54 Phase 5)", () => {
+  const HERE = path.dirname(url.fileURLToPath(import.meta.url));
+  const RUN_DIR = path.join(HERE, "../../../../results-raw/afb-20260808");
+  const AFB_RUN = "afb-20260808";
+  const manifest = fs.readFileSync(path.join(RUN_DIR, "manifest.json"), "utf8");
+  const shardJson = (item: string) =>
+    gunzipSync(fs.readFileSync(path.join(RUN_DIR, "afb-150", `${item}.json.gz`))).toString("utf8");
+
+  const filesFor = (items: string[]) => {
+    const f: Record<string, string> = { [`results-raw/${AFB_RUN}/manifest.json`]: manifest };
+    for (const it of items) f[`results-raw/${AFB_RUN}/afb-150/${it}.json.gz`] = shardJson(it);
+    return f;
+  };
+
+  it("the /raw landing shows the real dataset title + lists real items", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor([])));
+    renderApp(`/raw/${AFB_RUN}`);
+    expect(await screen.findByRole("heading", { name: /AFB before\/after/ })).toBeInTheDocument();
+    const index = await screen.findByTestId("raw-item-index");
+    expect(within(index).getByText("AFB-005")).toBeInTheDocument();
+    expect(within(index).getByText("AFB-150")).toBeInTheDocument(); // all 150 real items
+  });
+
+  it("a real item (AFB-005, 0→4) renders BOTH real response columns", async () => {
+    const shard = JSON.parse(shardJson("AFB-005"));
+    const responses: string[] = shard.cells.map((c: { transcript: { content: string }[] }) => c.transcript[1]!.content);
+    const vanilla = responses[0] ?? "", tuned = responses[1] ?? "";
+    const rx = (s: string) => new RegExp(s.slice(0, 24).replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(["AFB-005"])));
+    renderApp(`/results/${AFB_RUN}/afb-150/AFB-005?a=gemma-4-31b-it&b=mb-sft-dpo&scope=single&judge=terra`);
+    // both real responses render (two columns), keyed on a distinctive prefix of each
+    expect(await screen.findByText(rx(vanilla))).toBeInTheDocument();
+    expect(await screen.findByText(rx(tuned))).toBeInTheDocument();
   });
 });
