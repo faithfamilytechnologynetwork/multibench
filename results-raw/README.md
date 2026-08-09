@@ -174,8 +174,40 @@ from the same run roots so their fingerprints match.
 
 ## Which run the SPA shows
 
-The raw view is reached **run-scoped** from `/results` (which selects the run). A raw view whose
-`results-raw/<run-id>/` counterpart is absent degrades to a notice.
+A MultiBench run's raw view is reached **run-scoped** from `/results` (which selects the score run);
+a raw view whose `results-raw/<run-id>/` counterpart is absent degrades to a notice.
+
+A **raw-only** run — a `results-raw/<id>/` with **no** `results/<id>/` score tier (e.g. the AFB
+explorer below) — is discovered separately (#54): `rawRunIds` enumerates `results-raw/` from the same
+git-tree walk (no extra API call, and it never touches the score-manifest loader, so no false
+"manifest not found"), the index lists such runs under **Explorers**, and each links to a first-class
+landing at **`/raw/<run-id>/`** (dataset title + curated presets + a generic item index into
+`/results/<run-id>/<group>/<item>`). The score-tier run list and default run are untouched.
+
+## Second catalog type: AFB before/after (`afb-20260808`, #54)
+
+The first **non-MultiBench** catalog on this tier — the companion artifact to the MultiWeights
+omissive-bias result (experiment #48). For each of 150 AllFaith Benchmark (AFB) *Religious
+Representation* items, in the **cold** condition, it shows the **vanilla Gemma-4-31B**
+(`gemma-4-31b-it`) response beside the fine-tuned **MultiWeights (SFT+DPO)** (`mb-sft-dpo`) response,
+each scored **0–4** by **GPT-5.6-Terra**. It rides the identical generic catalog shape — different
+values only: `scale {0,2,4}`, `groupBy: instrument` (group `afb-150`), a single `condition: cold`
+axis, a single `single` scope, and a diverging **center-grey** ramp (grey at the calibration target
+2 → deliberately *not* signalling "4 is best"; over-application at 4 is a failure mode, not a win).
+
+- **Provenance / licensing.** The **instrument** (questions + 0–4 rubric) is MIT © **CEFE-AI**
+  (`github.com/CEFEAI/allfaith-religious-representation`), vendored at
+  `experiments/48_multiweights_omissive_bias/data/input/afb/`. Our **responses + Terra judgments**
+  are ours to publish; `manifest.json` `dataset.license` reflects this. Same exclusions as every
+  tier here (no usage/cost/timestamps).
+- **Produced by** `analysis export-afb` (a sibling of `export-raw` sharing the byte-stable writer)
+  from the committed intermediate `experiments/54_afb_before_after/data/collection.json`
+  (a one-time Modal + Terra collection; endpoint torn down on completion).
+- **Fingerprints.** Self-consistent judgment `fingerprint` (the canonical `fingerprint_line`, so a
+  score/rationale change moves it) + `content_fingerprint` over the shard bytes. There is **no**
+  cross-tier `results/` partner, so the viewer tolerates a null cross-tier lookup.
+- **Served** from GitHub (the baked bundle ships only the MB run); the landing shows an unobtrusive
+  footer note when GitHub-served — not a warning banner.
 
 ## Retention policy
 
