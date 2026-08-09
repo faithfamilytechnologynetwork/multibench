@@ -327,6 +327,26 @@ the endpoint when COLLECTION completes (not after the PR).
   run.log in scratchpad/experiments data. Awaiting completion → then: reconcile vs #48 (STOP if lift gone)
   → export-afb → commit intermediate + results-raw/afb-20260808/ → deploy-verify → docs → TEARDOWN endpoint.
 
+### P5 EXECUTION COMPLETE (data + code committed; deployed-path deferred to post-merge Verify)
+- Cold-start quirk: GET /v1/models returned 303 during warmup (correctly did NOT spend). vLLM finished
+  loading (Modal logs); POST /v1/chat/completions works for BOTH base + dpo (verified). Re-ran collection
+  directly against the warm endpoint → 300/300 cells.
+- **Reconciliation vs #48 (architect gate)**: P>=2 vanilla 1.3% → DPO 22.7% (mean 0.127→0.887). LIFT
+  REPRODUCES STRONGLY (~17x) — NOT the vanished-lift STOP case. DPO 22.7% modestly below #48 sampled
+  ~27-30%, plausibly greedy-vs-sampling. Proceeded (per architect: escalate only if lift vanishes).
+- **TEARDOWN**: `modal app stop multibench-afb-eval-serve --yes` → state=stopped, 0 tasks (done right after
+  collection, per architect, before the rest of the PR work).
+- **Spend**: Terra judge $0.50 (captured via OpenRouter usage.include); Modal H200 a few $ of endpoint
+  time. Total well under the $30 ceiling (actuals to reconcile in PR body from OpenRouter activity + Modal).
+- export-afb → committed results-raw/afb-20260808/ (manifest + 150 shards, 536KB, byte-stable) + the
+  intermediate collection.json. run.log gitignored (not committed). AFB-001 real result: base 0 → dpo 2.
+- Docs: results-raw/README.md AFB second-catalog + raw-only discovery + MIT attribution (in README, NOT the
+  run dir — exporter prune would delete a run-dir SOURCE.md). Cross-language guard: TS parseRawCatalog on
+  the REAL committed manifest (35 rawData tests). Vite build clean; multibrowser 305, analysis 232.
+- **DEPLOYED-PATH check is POST-MERGE (Verify phase)**: the live Railway site reads main at runtime; #54
+  adds SPA CODE (/raw route + Explorers), so a `railway up` REDEPLOY is required after merge (data alone
+  appears without redeploy, but the discovery UI is new code). Do NOT deploy the unreviewed branch to prod.
+
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
 Minor non-blocking follow-ups:
 - exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic
