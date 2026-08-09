@@ -92,3 +92,8 @@ fade — values-in-weights is the selling point. Test directly with a fluff-sepa
   - **Arm-C NOT triggered** (slope_B flat/positive) → no extra spend.
 - 2026-08-08: Wrote Results + What-worked/didn't/next in notes.md; status COMPLETE. Committing
   artifacts (notes, summary_76.json, per_scenario_76.csv, 2 figures) + thread. Next: PR (Refs #76).
+- 2026-08-09: **PR #77 opened, architect-reviewed (science recomputation-verified from the committed
+  CSV — matched), and MERGED** (merge commit 183368e, not squash) on Waleed's word. **DONE.**
+  Per architect: `data/output/` NOT cleaned — gitignored raw sittings/judgments JSONLs remain for
+  the architect to archive before any cleanup. Modal app `multibench-gemma-fading-serve` left idle
+  (scale-to-zero, no spend). Nothing running.
