@@ -39,6 +39,12 @@ export function RawResultsPage() {
   const runsQ = useResultsRuns(sha);
   const runsSettled = !!sha && !runsQ.isLoading;
   const fingerprint = runsQ.data?.runs.find((r) => r.id === runId)?.manifest?.fingerprint ?? null;
+  // A raw-only run (no score tier) is reached from its `/raw/<runId>` explorer landing, not `/results`
+  // — send the back-link there so the reader isn't dead-ended on a leaderboard without their run (#54).
+  const isRawOnly = runsSettled && !runsQ.data?.runs.some((r) => r.id === runId);
+  const backLink = isRawOnly
+    ? <Link to="/raw/$runId" params={{ runId }} className="text-primary hover:underline">← Explorer</Link>
+    : <Link to="/results" className="text-primary hover:underline">← Results</Link>;
   const rawQ = useRawScenario(runsSettled ? sha : undefined, runsSettled ? runId : undefined, groupId, itemId, fingerprint);
 
   const catalog = rawQ.data?.catalog ?? null;
@@ -88,7 +94,7 @@ export function RawResultsPage() {
     <div className="flex flex-col gap-6">
       {rl && <RateLimitBanner error={rl} />}
       <nav className="flex items-center gap-3 text-sm">
-        <Link to="/results" className="text-primary hover:underline">← Results</Link>
+        {backLink}
         <span className="text-default-400">run {runId}</span>
       </nav>
 

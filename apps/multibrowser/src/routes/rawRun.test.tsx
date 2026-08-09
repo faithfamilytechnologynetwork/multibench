@@ -89,6 +89,14 @@ describe("raw-only explorer discovery + landing (#54)", () => {
     expect(await screen.findByText(/TUNED-one/)).toBeInTheDocument();   // dpo column
   });
 
+  it("a raw-only item page back-links to its /raw explorer, not the MB leaderboard", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, afbFiles())); // raw-only run (no results/ tier)
+    renderApp(`/results/${RUN}/afb-150/AFB-001?a=gemma-4-31b-it&b=mb-sft-dpo&scope=single&judge=terra`);
+    const back = await screen.findByRole("link", { name: /← Explorer/ });
+    expect(back).toHaveAttribute("href", `/raw/${RUN}`);           // not dead-ended on /results
+    expect(screen.queryByRole("link", { name: /← Results/ })).toBeNull();
+  });
+
   it("the index surfaces raw-only runs as Explorers and never a score-tier run", async () => {
     const mixed = {
       ...resultsFiles("mbrun", {}),                                 // an MB run WITH a score tier

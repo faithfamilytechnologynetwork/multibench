@@ -203,6 +203,14 @@ axis, a single `single` scope, and a diverging **center-grey** ramp (grey at the
 - **Produced by** `analysis export-afb` (a sibling of `export-raw` sharing the byte-stable writer)
   from the committed intermediate `experiments/54_afb_before_after/data/collection.json`
   (a one-time Modal + Terra collection; endpoint torn down on completion).
+- **Headline** (over the final 150-item artifact): "meaningful-or-deeper" religious representation
+  (score ≥ 2) rises from **1.3%** (vanilla) to **21.3%** (DPO); mean 0.127 → 0.820 — the #48
+  omission→repair reproduces. (Greedy decoding; a pre-fix reconciliation against #48's sampled
+  ~27–30% gave 1.3% → 22.7%; the difference is the greedy-vs-sampling decoding caveat.)
+- **Encoding provenance**: 18 of the 150 vendored questions were double-encoded (UTF-8-as-MacRoman)
+  in `experiments/48/.../afb/questions.jsonl`. That file was **fixed forward**, and those **18 items
+  were re-collected** with the corrected text (so their prompts/labels are clean); the other 132 are
+  as-vendored (they were already clean). All 150 shipped items are now clean UTF-8.
 - **Fingerprints.** Self-consistent judgment `fingerprint` (the canonical `fingerprint_line`, so a
   score/rationale change moves it) + `content_fingerprint` over the shard bytes. There is **no**
   cross-tier `results/` partner, so the viewer tolerates a null cross-tier lookup.
