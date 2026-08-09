@@ -358,9 +358,17 @@ the endpoint when COLLECTION completes (not after the PR).
 - **Back-link dead-end**: raw-only item pages now back-link to /raw/<runId> ('← Explorer'), not /results.
 - **MIT attribution**: © CEFE-AI clause in the shipped manifest dataset.description (re-exports deterministic).
 - **gitignore** the atomic-write *.tmp.
-- **SPEND reconciliation (final)**: Terra (OpenRouter usage.cost, exact) = **$0.5624** (leg1 0.5037 + leg2
-  0.0587); Modal H200 endpoint ~26-29 min total (main 18:59->19:16 + re-collect legs incl. 1 failed warmup)
-  ≈ $2-2.4; **TOTAL ≈ $2.5-3.0**, ~8x under the $17-23 estimate, far under the $30 ceiling. Modal dashboard authoritative.
+- **SPEND reconciliation (EXACT, dashboard)**: `modal billing report --for today` → 3 afb-eval-serve
+  instances (main $1.23787 + leg-2b $0.66081 + leg-2a-failed $0.19414) = **$2.0928 Modal**. Terra
+  (OpenRouter usage.cost) = **$0.5624** (leg1 0.5037 + leg2 0.0587). **TOTAL = $2.6552** — ~8x under the
+  $17-23 estimate, far under the $30 ceiling.
+
+### P5 consult iter-2: claude APPROVE (verified everything empirically), codex REQUEST_CHANGES on 2 items
+- Codex #2 (Modal exact): RESOLVED — dashboard figure above ($2.0928).
+- Codex #1 (deployed-path gate): claude APPROVES deferring to post-merge Verify (the real-data RTL test
+  can't catch the serve-s-dist baked-miss/GitHub-fallback landmine; needs railway up for new SPA code).
+  → requesting the architect's FORMAL sign-off to move this acceptance gate to Verify (record it).
+- claude minor: added the encoding-repair note to experiments/48/.../afb/SOURCE.md.
 - Endpoint DOWN (all afb-eval-serve apps stopped, 0 tasks). Suites: analysis 232, multibrowser 308, tsc+ruff clean.
 
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
