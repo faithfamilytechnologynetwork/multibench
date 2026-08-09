@@ -347,6 +347,22 @@ the endpoint when COLLECTION completes (not after the PR).
   adds SPA CODE (/raw route + Explorers), so a `railway up` REDEPLOY is required after merge (data alone
   appears without redeploy, but the discovery UI is new code). Do NOT deploy the unreviewed branch to prod.
 
+### P5 consult iter-1 (both REQUEST_CHANGES; science APPROVED) — all resolved
+- **Mojibake (18/150)**: architect approved re-collection (B). Repaired vendored questions.jsonl (fix-
+  forward), dropped the 18 items' cells, redeployed briefly + re-collected 36 cells with clean text, TORE
+  DOWN again. All 150 items now clean UTF-8. FINAL headline recomputed over the 150-item artifact:
+  **P>=2 vanilla 1.3% -> DPO 21.3%** (mean 0.127 -> 0.820). Pre-fix reconciliation (1.3%->22.7%) kept in PR.
+- **Real-data render (was 'never exercised')**: added an RTL test rendering the REAL committed manifest +
+  shards through the app (AFB-005 0->4 both columns; all 150 items on the landing). Deployed Railway path
+  stays post-merge Verify (needs railway up for the new SPA code).
+- **Back-link dead-end**: raw-only item pages now back-link to /raw/<runId> ('← Explorer'), not /results.
+- **MIT attribution**: © CEFE-AI clause in the shipped manifest dataset.description (re-exports deterministic).
+- **gitignore** the atomic-write *.tmp.
+- **SPEND reconciliation (final)**: Terra (OpenRouter usage.cost, exact) = **$0.5624** (leg1 0.5037 + leg2
+  0.0587); Modal H200 endpoint ~26-29 min total (main 18:59->19:16 + re-collect legs incl. 1 failed warmup)
+  ≈ $2-2.4; **TOTAL ≈ $2.5-3.0**, ~8x under the $17-23 estimate, far under the $30 ceiling. Modal dashboard authoritative.
+- Endpoint DOWN (all afb-eval-serve apps stopped, 0 tasks). Suites: analysis 232, multibrowser 308, tsc+ruff clean.
+
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
 Minor non-blocking follow-ups:
 - exporter doesn't assert 150-item count (runner collect_afb enforces len==150; exporter stays generic
