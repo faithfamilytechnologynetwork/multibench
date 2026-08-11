@@ -170,11 +170,26 @@ thread, open PR `Refs #78`. Tripwires still: banding <$350, total <$425.
   - **TOTAL $376.16** vs $425 ceiling (headroom ~$49); banding $328.60 <$350; Modal $47.56 <$80.
 - Reported reconciled actuals to architect. THEN run analysis + conclusions.
 
-## NEXT: full analysis → write-up → PR
+## COMPLETE — PR #79 open, experiment-complete gate PENDING (2026-08-11)
 
-Run analyze.py full (nboot 2000) → summary_78.json + per_scenario_78.csv + figs; write notes.md
-Full-run Results (honest verdicts per pre-registration); commit summary/csv/figs/notes/analyze/collect/
-select + thread; open PR `Refs #78`.
+- Full analysis ran (nboot 2000). Honest verdicts written to notes.md Full-run Results:
+  - **H3 differential (headline) CONFIRMED, powered:** slope_A1−slope_B −0.016 CI[−0.026,−0.006].
+  - H1 real but sub-threshold pooled (slope_A1 −0.027, tot −0.080 < τ), tightly powered.
+  - H2 immunity confirmed by equivalence (tot_B −0.033 within ±0.15); honest nuance: small
+    significant residual slope −0.011 under full power (not #76's perfect flat).
+  - Per-tradition POWERED: sunni −0.041, RC −0.038, judaism −0.027 (all sig), EC −0.026; easy flat.
+  - Normative contrast SIGNIFICANT −0.023 CI[−0.038,−0.007], robust to EC placement.
+  - Fair stated-B lifts level vs #76 unstated-B, not the flat slope (Δ −0.021 CI[−0.049,+0.002]).
+- Reconciled spend $376.16 / $425 (banding $328.60 exact + serve $47.56 modal billing). No tripwire.
+- Committed results (d7ebe09) on top of pre-reg (7e916d3). Pushed. **PR #79 open (`Refs #78`).**
+- Porch advanced hypothesis→design→execute→analyze; **experiment-complete gate REQUESTED — PENDING
+  HUMAN APPROVAL.** Will NOT self-approve. Notified architect (PR ready + gate ready).
+
+## NEXT (waiting on human)
+
+Wait for the human to approve the `experiment-complete` gate (via architect message → I run
+`porch approve 78 experiment-complete`, unless routed to the human directly). Then, on PR merge:
+`porch done 78 --merged 79` and enter verify. Nothing else to do until approval.
 
 At collect completion: (1) verify 0 failures / fill gaps by resumable re-run; (2) PROJECT remaining
 banding, confirm <\$350 cumulative + <\$425 total, then judge the remaining 5 traditions (judaism, RC,
