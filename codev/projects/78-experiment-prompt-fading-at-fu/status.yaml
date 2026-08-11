@@ -1,7 +1,7 @@
 id: '78'
 title: experiment-prompt-fading-at-fu
 protocol: experiment
-phase: hypothesis
+phase: design
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -11,4 +11,4 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-09T23:08:42.502Z'
-updated_at: '2026-08-09T23:08:42.503Z'
+updated_at: '2026-08-11T02:23:18.008Z'
