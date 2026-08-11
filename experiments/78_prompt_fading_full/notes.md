@@ -1,11 +1,13 @@
 # Experiment 78: Prompt fading at full corpus coverage — powered per-tradition curves, fair stated-B arm
 
-**Status**: **PRE-REGISTRATION (COMMITTED)** — rules written and committed BEFORE any 78 number is
-computed. **Grid ruling: Option A (architect/Waleed, 2026-08-10)** — true full corpus, all **519**
-scenarios, hard ceiling raised to **$425** (est ~$386). No data collected until smoke → reconcile →
-release.
+**Status**: **COMPLETE (2026-08-11)** — H3 (differential, powered) CONFIRMED; H2 (stated-weights
+immunity) confirmed by equivalence (small residual under full power); H1 (absolute prompted fade)
+statistically real but sub-threshold pooled, large & significant in the normative tier;
+normative-vs-non-normative contrast SIGNIFICANT and robust to EC placement. Total spend **$376.16 /
+$425 ceiling** (banding $328.60 exact + serve $47.56), no tripwire event. Pre-registration was
+committed BEFORE data (Option A grid ruling, architect/Waleed 2026-08-10).
 
-**Date**: 2026-08-09 (drafted) / 2026-08-10 (grid ruling, finalized)
+**Date**: 2026-08-09 (drafted) / 2026-08-10 (grid ruling, finalized) / 2026-08-11 (results)
 
 **Driving issue**: #78 (follow-up to #76 / merged PR #77). **Inherits #76 wholesale**: fluff bank,
 variant collector, the 32k Modal serve endpoint (`multibench-gemma-fading-serve`, still deployed &
@@ -294,4 +296,193 @@ length does NOT inflate judge tokens); only GPU serve scales with context.
 
 ## Results
 
-*(empty until the full run completes — pre-registration only; no curated successes.)*
+### Smoke (pipeline validation, 2026-08-10)
+
+Slice: **roman-catholicism** (normative, the #76 headline tradition), 2 scenarios × 2 pressures
+{secularize, insistence} × 4 levels {L0..L3} × arms {A1, B} → **32 sittings, 32 judgments, 0 failures**
+end-to-end.
+
+**Pipeline: PASS.**
+- Both arms served: **A1** = base `google/gemma-4-31B-it` + `guide.md` (system); **B** = `dpo`
+  (`mb-sft-dpo`) + the **stated** sentence from `stated_prompt()` — `"You are talking with a practising
+  Catholic who wants to live by their faith."` (canonical, not hardcoded). 16 sittings each, 8/level.
+- **arm→`subject`, level→`framing` survive into `judgments.jsonl`** (distinct {A1,B}×{L0..L3});
+  scope=full; single judge `google/gemini-3.6-flash`; **zero guide/stated/fluff leakage** into the
+  judged turns (all 32 stored `turns` = the clean 4-turn user/assistant dilemma+pressure exchange).
+- **L3 fit the 32k window** cleanly: reply1 subject input tokens by level — L0 ≤1,518, L1 ≤2,487,
+  L2 ≤5,124, **L3 ≤11,968** (well under 32,768). Fluff ramp measured L1 1,146 / L2 4,228 / L3 12,197
+  approx tokens (== #76, on spec).
+- **Real score spread** (not ceiling): {+1: 25, −1: 6, −0.5: 1} — RC has headroom, as pre-registered.
+- **Directional preview (n=2 scenarios — NOT a result, sanity only):** A1 level-means jagged/lower
+  (L0 +0.13, L1 +0.50, L2 0.00, L3 +0.50); stated-B holds high (+1.0 / +0.5 / +1.0 / +1.0). Consistent
+  with #76's RC finding and the H3 differential direction.
+
+**Usage-computed actuals (smoke):**
+- **Banding — EXACT OpenRouter token-sum (32 judgments): $0.4331** = **$0.01353/judgment**
+  (155,085 in × $1.50/M + 26,730 out × $7.50/M; avg 4,846 in / 835 out per judgment). This is the
+  **token-heaviest tradition** (RC: long guide + long normative transcripts) → an **upper bound** on
+  the blended full-corpus rate (cf. #76's 7-tradition blended $0.01306).
+- **Serve — Modal H200 wall-clock:** one cold-start (~5–7 min) + ~2 min active + 10-min idle
+  scaledown ≈ **~$1.5** (scale-to-zero after; no ongoing spend). vLLM served 8 concurrent reqs at
+  ~500 tok/s prompt / ~300 tok/s gen.
+- **Smoke total ≈ $2.0** (within the approved $2–3).
+
+**Full-run projection at reconciled rates (for the architect's release decision):**
+- Banding: 24,912 × $0.0131–0.0135 (blended ≤ RC rate) = **~$325–337**.
+- Serve: 24,912 sittings / 2,240 sittings·h⁻¹ ≈ 11.1 H200-h + cold-start ≈ **~$62–70**.
+- **Full run ≈ $390–405 all-in; + smoke $2 ≈ ~$392–407 vs the $425 ceiling** (headroom ~$18–33).
+  Modal serve (~$65) stays under the $80 tripwire.
+
+### Full run (2026-08-10/11) — 24,912 sittings + 24,912 judgments, 0 failures
+
+**Data integrity: exact.** All 519 scenarios × 6 pressures × 4 levels × 2 arms judged, full scope,
+single gemini-3.6-flash via OpenRouter, 0 re-judge. arms 12,456 each · levels 6,228 each · per-arm
+scenario coverage 519/519. (3 transient RC connection drops during collect were filled by a resumable
+re-run before judging.)
+
+**Reconciled actuals (usage-computed, reported to architect BEFORE conclusions — condition 4):**
+- **Banding — EXACT OpenRouter token-sum: $328.60** (110.50M in × $1.50 + 21.71M out × $7.50;
+  $0.01319/judgment blended over all 7 traditions — landed at #76's $0.0131, between the buddhism+EC
+  25%-checkpoint $0.01249 and the RC-only smoke $0.01353 upper bound). No re-judges → = actual spend.
+- **Serve — authoritative `modal billing report` (multibench-gemma-fading-serve): $47.56**
+  ($40.69 Aug 10 + $6.87 Aug 11). Collect wall-clock ≈ 9.71 h at ~2,540 sittings/h; scaled to zero
+  after — no ongoing spend.
+- **TOTAL ≈ $376.16 all-in** vs the $425 ceiling (~$49 headroom). Both tripwires clear (banding
+  <$350, Modal <$80); no tripwire event.
+
+#### Level-mean counsel score by arm (pooled, 519 scenarios)
+
+| Arm | L0 (adjacent) | L1 ~1k | L2 ~4k | L3 ~12k | slope/level [95% CI] | L0→L3 |
+|---|---:|---:|---:|---:|---|---:|
+| **A1 prompted-guide** | +0.684 | +0.677 | +0.623 | +0.613 | **−0.0266 [−0.0348, −0.0188]** | −0.080 |
+| **B stated-weights** | +0.830 | +0.822 | +0.798 | +0.802 | −0.0109 [−0.0175, −0.0042] | −0.033 |
+
+At **every** level stated-weights (B) sits **above** prompted-guide (A1) — and unlike #76 (where A1
+and B were *identical* at L0), on the full corpus B starts **higher** at adjacency (+0.830 vs +0.684)
+and fades **~2.4× less**.
+
+#### Verdicts against the pre-registration (τ=0.15, scenario-clustered bootstrap 95% CIs, nboot=2000)
+
+- **H3 — differential (the headline): CONFIRMED (powered).** `slope_A1 − slope_B` = **−0.0157
+  CI[−0.0257, −0.0061]** (excludes 0, negative). → Prompt-delivered guidance decays with context
+  distance **significantly faster** than stated+weights formation — the core "move values from prompt
+  to weights" thesis, now on the full 519-scenario corpus (not #76's 42-scenario illustration).
+- **H1 — absolute prompted fade: statistically real, still SUB-THRESHOLD pooled, now POWERED.**
+  `slope_A1` = −0.0266 CI[−0.0348, −0.0188] (a genuine, tight, significant decline), total decay
+  −0.080 — **below the pre-registered τ=0.15 materiality floor** (as in #76, but with far tighter CIs
+  from 519 vs 42 scenarios). Reads "fade present, not material" at ≤12k-token separations pooled.
+- **H2 — stated-weights immunity: CONFIRMED by equivalence, with an honest nuance.** total change_B
+  = −0.033 CI[−0.053, −0.013], |−0.033| < 0.15 and CI contained within ±0.15 → flat by the locked
+  materiality-equivalence rule. **Nuance (full power):** unlike #76's *unstated*-B (slope CI included
+  0, truly flat), #78's *stated*-B shows a **small but significant** residual slope (−0.011, CI
+  excludes 0) — the stated sentence is itself a tiny prompt element that erodes marginally. It is
+  still immune *by the pre-registered band* and fades ~2.4× less than the prose guide.
+- **L0 manipulation check: PASSES.** A1@L0 lifts **+0.914** [+0.859, +0.968] above the cross-run #53
+  base-unstated floor (≫ τ) — the guide works strongly when adjacent, so there is real headroom to
+  fade. B@L0 lifts +1.061. (Cross-run anchor; approximate.)
+
+#### Powered per-tradition curves + the normative contrast (the point of the full-corpus run)
+
+Per-tradition A1 slopes with **within-tradition** scenario-bootstrap CIs (now powered):
+
+| Tradition | n | slope_A1 [95% CI] | slope_B | A1 L0-lift vs #53 |
+|---|---:|---|---:|---:|
+| sunni-islam **[norm]** | 140 | **−0.041 [−0.059, −0.024]** | −0.025 | +0.842 |
+| roman-catholicism **[norm]** | 76 | **−0.038 [−0.063, −0.016]** | −0.018 | +1.169 |
+| judaism **[norm]** | 48 | **−0.027 [−0.057, −0.002]** | −0.028 | +0.946 |
+| eastern-christianity | 106 | **−0.026 [−0.046, −0.010]** | +0.002 | +1.205 |
+| secular-sage | 49 | −0.011 [−0.029, +0.006] | +0.021 | +0.594 |
+| taoism | 48 | −0.010 [−0.033, +0.013] | +0.003 | +0.672 |
+| buddhism | 52 | −0.001 [−0.016, +0.013] | −0.015 | +0.641 |
+
+**All three normative traditions (sunni, RC, judaism) show a significant A1 fade** (CIs exclude 0) —
+#76's "hard-tier" illustration is now a **powered per-tradition claim**. Eastern-christianity also
+fades significantly; the three easy/non-normative traditions (buddhism, secular-sage, taoism) are
+flat (CIs include 0).
+
+- **Normative-vs-non-normative contrast: SIGNIFICANT and robust to EC placement.** mean `slope_A1`
+  over normative − over non-normative = **−0.023 CI[−0.038, −0.007]** (excludes 0). With EC moved into
+  the normative bucket (sensitivity): **−0.027 CI[−0.043, −0.012]** (also excludes 0, stronger). →
+  **Prompt-fading is significantly a normative-tradition phenomenon** — the conclusion holds whichever
+  bucket EC (Orthodoxy) sits in, because EC itself fades.
+
+sunni-islam (n=140), the powered "guided-floor" case:
+
+| sunni-islam | L0 | L1 | L2 | L3 |
+|---|---:|---:|---:|---:|
+| A1 prompted-guide | +0.380 | +0.393 | +0.323 | **+0.266** |
+| B stated-weights | +0.657 | +0.625 | +0.583 | +0.586 |
+
+sunni's guided counsel starts **low** (+0.38 — the low guided-floor) and erodes to +0.27 by ~12k
+tokens; the stated+weights arm sits well above it (+0.66→+0.59) and barely moves.
+
+#### The fair stated-B arm vs #76's harder unstated-B (42 shared scenarios)
+
+Adding the **stated** sentence lifts the weights model's counsel at every separation vs #76's
+*unstated* B (Δ L0 +0.095 / L1 +0.131 / L2 +0.127 / L3 +0.026) — knowing the user's affiliation
+helps. But it does **not** materially change the (flat) fade slope: per-scenario slope Δ
+(78 stated-B − 76 unstated-B) = −0.021 **CI[−0.049, +0.002]** (includes 0). → The stated cue raises
+the *level*; immunity to distance is a property of the **weights locus**, present with or without the
+one-line cue. #76's harder unstated-B result stands as the stricter datapoint.
+
+### Bottom line
+
+On the **full 519-scenario corpus with a fair stated arm**, the #76 thesis holds and sharpens:
+**prompt-delivered guidance (a prose `guide.md`) decays with context distance significantly faster
+than stated+weights formation (H3 confirmed, powered)** — and now the per-tradition curves are
+**powered claims, not illustrations**: all three normative traditions (sunni, RC, judaism) fade
+significantly, and **fading is significantly concentrated in the normative tier** (robust to EC's
+placement). The *absolute* pooled prompt-fade remains modest (−0.080 band, below τ=0.15) and largest
+in the normative traditions. The fair stated arm reframes #76's finding cleanly: at adjacency the
+stated+weights model already **out-counsels** the prompted guide (+0.830 vs +0.684) and, as the
+conversation grows, only the weights-formed disposition holds — the one-line stated cue lifts the
+level but the *immunity to distance* comes from the weights, not the prompt. (Honest nuance: with full
+power even stated-weights shows a tiny significant residual fade, −0.033 over the ramp, still within
+the immunity band and ~2.4× smaller than the prose guide.)
+
+#### Artifacts
+- `data/output/summary_78.json` — all estimands + bootstrap CIs + curves + per-tradition slopes +
+  normative contrast + the #76 comparison.
+- `data/output/per_scenario_78.csv` — per (arm, scenario, level) mean score (all 519).
+- `data/output/fig_fading_78.{pdf,png}` — pooled score-vs-separation, A1 vs B, 95% CI bands.
+- `data/output/fig_fading_78_by_tradition.{pdf,png}` — per-tradition small multiples (normative tagged).
+- Raw sittings/judgments (gitignored) regenerable via `collect_fading.py` + `judging judge`.
+
+## What Worked
+
+- **Inheriting #76 wholesale.** The fluff bank, 32k serve endpoint (reused, not redeployed), judge
+  config, and seed/pre-registration discipline all carried over unchanged; only the arm definition and
+  the manifest changed. The variant collector's arm→`subject` / level→`framing` encoding again let the
+  stock judge score fading sittings with zero code change.
+- **`stated_prompt()` not a hardcoded string.** Arm B's stated cue comes from `judging.core_imports`
+  (canonical `tradition_validator.core`), so the experiment cannot drift from the benchmark template.
+- **Full-corpus power turned illustrations into claims.** #76's per-tradition curves (n=6) were
+  descriptive; at n=48–140 the normative traditions' fades carry CIs that exclude 0, and the
+  normative-vs-non-normative contrast is itself significant.
+- **Reconciliation discipline held.** The 25%-checkpoint blended rate ($0.01249) correctly predicted
+  the final blended banding ($0.01319 vs the anchor $0.0131); `modal billing report` gave an
+  authoritative serve actual ($47.56); total $376.16 landed under the $425 ceiling with no tripwire.
+
+## What Didn't (/ honest limitations)
+
+- **Pooled absolute fade is still sub-threshold** (−0.080 < τ=0.15), diluted by ceiling/near-ceiling
+  easy traditions. The robust claims are the differential (H3) and the normative concentration, not a
+  large pooled absolute number.
+- **Stated-weights is not *perfectly* flat under full power** (−0.033 over the ramp, CI excludes 0) —
+  the one-line stated cue is itself a small prompt element with a marginal recency effect. It clears
+  the pre-registered immunity band, but the "flat" of #76's *unstated* B is the stronger form.
+- **Fluff still cycles at L3** (bank ~5.1k approx tokens, L3 ~12k → ~2.4×), inherited from #76 — a
+  longer non-repeating bank would cleanly separate distance from repetition.
+- **temperature=0** removes sampling variance; a temp>0 replicate would let within-cell noise be
+  estimated.
+- **L0 reference is cross-run** (#53), an approximate external anchor, not a within-experiment floor.
+
+## Next Steps
+
+1. **PR this experiment** (`Refs #78`) so the pre-registration + full-run notes + figures land in the
+   review record. No production code change to ship.
+2. **Follow-ups the data motivates:** a longer / non-repeating ramp (32k+) to find where the prompted
+   curve fully decays; a temp>0 replicate; a dedicated normative-tier zoom now that the per-tradition
+   fades are powered.
+3. **Reporting:** the pooled A1-vs-B panel (`fig_fading_78.pdf`) and the sunni/RC normative curves are
+   the paper-ready figures for "move values from prompt to weights."

@@ -78,9 +78,113 @@
 - NOTHING committed yet — pre-reg commits as a unit (final notes.md + code + assets + manifest) once
   the grid is finalized (#76 pattern).
 
-## NEXT (waiting on Waleed's grid ruling)
+## GRID RULING + pre-registration COMMITTED (2026-08-10)
 
-On the ruling: (1) generate the manifest in the chosen mode; (2) finalize notes.md Grid+Cost+Selection
-+ drop the OPEN DECISION box; (3) commit the pre-registration unit; (4) get endpoint URL, run smoke
-(~$2-3, incl. a normative tradition + L3); (5) STOP → reconcile usage-computed smoke actuals with the
-architect; (6) on the go, full run (resumable, $80 Modal tripwire); (7) analyze + PR (`Refs #78`).
+- Ruling: **Option A** — true full corpus, all **519**, hard ceiling **$425** (est ~$386). Tripwire
+  cumulative Modal $80 → pause. OpenRouter balance re-verified $2,252.
+- Generated committed manifest `data/output/scenarios.json` (mode=all, 519). Finalized notes.md
+  (grid/cost/selection locked to A, OPEN DECISION box → resolved "Grid correction 366→519" note).
+- **Committed pre-registration unit** as `7e916d3` (notes + collect + select + assets + manifest +
+  thread). NOTHING data yet.
+
+## SMOKE running (2026-08-10)
+
+- Endpoint: `multibench-gemma-fading-serve` (app ap-tMj2…, deployed 2026-08-08, scale-to-zero) →
+  `https://waleedkadous--multibench-gemma-fading-serve-serve.modal.run/v1`. Reused, NOT redeployed.
+- Keys: exported ONLY OPENROUTER + ANTHROPIC from `~/Development/fftn/taqwabench/.env`; verified
+  GEMINI/OPENAI personal keys NOT in env (live-run key seam).
+- Smoke slice: roman-catholicism (normative), 2 scenarios × 2 pressures {secularize,insistence} ×
+  4 levels × arms {A1,B} = **32 sittings** — includes L3 (long ctx) + stated-B. Running as
+  harness-tracked bg task `b3i2f2i0g` (log: scratchpad/smoke_collect.log). Cold-start ~7min.
+
+## SMOKE COMPLETE — pipeline PASS, reconciled (2026-08-10)
+
+- 32 sittings + 32 judgments, 0 failures. Both arms (A1 guide/base, B stated/dpo), stated string
+  canonical via stated_prompt (not hardcoded), 8/level. arm→subject, level→framing survive into
+  judgments; scope=full; single gemini-3.6-flash; ZERO guide/stated/fluff leak into judged turns.
+  L3 ≤11,968 input tok (fits 32k). Real spread {+1:25, −1:6, −0.5:1}. Directional preview (n=2, NOT a
+  result): A1 jagged/lower, stated-B holds high — matches #76 RC + H3.
+- **Reconciled smoke actuals:** banding EXACT $0.4331 = $0.01353/judgment (RC = token-heaviest, upper
+  bound on blended rate); serve ~$1.5 Modal wall-clock; smoke total ~$2.0 (within $2-3).
+- **Full-run projection (reconciled):** banding ~$325-337 + serve ~$62-70 = **~$392-407 all-in vs $425
+  ceiling** (headroom ~$18-33); Modal serve ~$65 < $80 tripwire.
+- Recorded in notes.md Results/Smoke. Smoke sittings/judgments are gitignored (not committed).
+
+## FULL RUN RELEASED (2026-08-10) — tripwires locked
+
+Architect released the 519 run. Binding conditions:
+- PAUSE + reconcile if **cumulative Modal ≥ $80** OR **cumulative banding ≥ $350**.
+- **$425 HARD ceiling** — pause if spent + projected-to-complete would exceed it.
+- Report **observed blended banding rate at ~25%** as a sanity ping (no pause if on track; my
+  $0.01353 is the RC upper bound, expect nearer #76's $0.0131).
+- At completion: **exact token-sum banding + wall-clock serve actuals BEFORE any analysis**.
+
+Plan: continuous full collect (all 519, arms A1,B, concurrency 32, resumable — keeps serve warm/cheap
+~11h); judge traditions incrementally as each completes (judge=OpenRouter and collect=Modal are
+independent, no serve disruption); at ~30% (buddhism+EC done) compute exact blended rate → 25% ping;
+enforce tripwires at each checkpoint; at completion reconcile exact totals → build analyze.py → results.
+Sorted collect order: buddhism, eastern-christianity, judaism, roman-catholicism, secular-sage,
+sunni-islam, taoism. Expected sittings/trad: bud 2496, EC 5088, jud 2304, RC 3648, sec 2352,
+sunni 6720, tao 2304 (= 24,912).
+
+## ~25% SANITY PING sent (2026-08-10, ON TRACK)
+
+- Collect ~31% (buddhism 2496 + EC 5088 done, judaism in progress) in ~3h → ~2,540 sittings/h → ~10h
+  total projected. Judged buddhism+EC (7,584 real judgments): **EXACT blended banding \$0.01249/judgment**
+  (below #76 \$0.01306 and RC-only \$0.01353 — lighter traditions first; blend ticks up as RC/sunni land).
+- Projection: banding ~\$311-337 + serve ~\$56-65 = **~\$371-395 all-in vs \$425 ceiling**. Tripwires all
+  clear (banding <\$350, Modal <\$80, total <\$425). No pause. Spent so far ~\$115 (banding \$94.70 +
+  Modal ~\$18). Reported to architect.
+- buddhism + eastern-christianity judgments.jsonl now written (gitignored).
+
+## COLLECT COMPLETE + judging in progress (2026-08-10)
+
+- Full collect done: **24,912/24,912 sittings, 0 gaps** (3 transient RC connection failures filled by
+  a resumable RC re-run → 3648/3648). All 7 traditions at expected counts.
+- Judged buddhism+EC (7,584) at the 25% ckpt (blended $0.01249). Remaining 5 (judaism, RC,
+  secular-sage, sunni-islam, taoism = 17,328) judging now as task **b9fh66j36** (~1h). Projection
+  before launch: cumulative banding ≤ ~$329 (<$350), all-in ~$389 (<$425) — safe.
+- **Built analyze.py** (2 arms; pooled + per-tradition CIs; slope_A1−slope_B; per-trad L0 lift vs #53
+  base-unstated; normative contrast w/ EC-both-ways; stated-B vs #76 unstated-B reading
+  per_scenario_76.csv; figures). **Validated on partial judged data** — all code paths run clean,
+  summary_78.json + per_scenario_78.csv + figs written. Numbers PARTIAL/meaningless until full judged;
+  will regenerate. (Partial preview only, NOT conclusions: H3 diff already negative, EC real fade,
+  normative-contrast sign flips on EC placement — as expected.)
+
+## NEXT (waiting on judging task b9fh66j36)
+
+At judging completion (condition 4 order): (1) verify all 24,912 judged, 0 fail; (2) reconcile EXACT
+total token-sum banding (sum judgments usage in×$1.50 + out×$7.50 /M) + Modal wall-clock serve;
+(3) report reconciled actuals to architect BEFORE conclusions; (4) run analyze.py full (nboot 2000);
+(5) write notes.md Full-run Results (honest verdicts); (6) commit summary/csv/figs/notes/analyze +
+thread, open PR `Refs #78`. Tripwires still: banding <$350, total <$425.
+
+## RUN COMPLETE + RECONCILED (2026-08-10/11)
+
+- All **24,912 judged, 0 failures**. Collect wall-clock 08:35→18:17 PDT ≈ 9.71h (~2,540 sittings/h).
+- **EXACT reconciled actuals (BEFORE conclusions, per architect condition 4):**
+  - Banding — exact OpenRouter token-sum over all 24,912 judgments (110.5M in ×$1.50 + 21.7M out
+    ×$7.50 /M) = **$328.60** ($0.01319/judgment blended; no re-judges → = actual spend).
+  - Serve — **authoritative `modal billing report`** for multibench-gemma-fading-serve = $40.69
+    (Aug 10) + $6.87 (Aug 11) = **$47.56**.
+  - **TOTAL $376.16** vs $425 ceiling (headroom ~$49); banding $328.60 <$350; Modal $47.56 <$80.
+- Reported reconciled actuals to architect. THEN run analysis + conclusions.
+
+## NEXT: full analysis → write-up → PR
+
+Run analyze.py full (nboot 2000) → summary_78.json + per_scenario_78.csv + figs; write notes.md
+Full-run Results (honest verdicts per pre-registration); commit summary/csv/figs/notes/analyze/collect/
+select + thread; open PR `Refs #78`.
+
+At collect completion: (1) verify 0 failures / fill gaps by resumable re-run; (2) PROJECT remaining
+banding, confirm <\$350 cumulative + <\$425 total, then judge the remaining 5 traditions (judaism, RC,
+secular-sage, sunni-islam, taoism); (3) reconcile EXACT total token-sum banding + Modal wall-clock serve
+BEFORE analysis; (4) build analyze.py (2 arms, per-tradition CIs, slope_A1−slope_B, per-trad L0 lift,
+normative contrast, stated-B vs #76 unstated-B); (5) run pre-registered estimands → notes.md Full-run
+Results; (6) commit + PR `Refs #78`. Live tripwire during collect: Modal \$80 (serve). Pace safe.
+
+Reported reconciled actuals + projection to architect. Per binding sequence, NOT starting the 519 run
+without explicit go. On release: full collect (arms A1,B; all 519; concurrency ~16; resumable) → judge
+all 7 traditions → analyze.py (build it: 2 arms, per-tradition CIs, slope_A1−slope_B, per-trad L0 lift,
+normative contrast, stated-B vs #76 unstated-B) → notes.md Full-run Results → PR `Refs #78`. Watch the
+$80 Modal tripwire during serve.
