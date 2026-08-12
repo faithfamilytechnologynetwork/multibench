@@ -445,3 +445,9 @@ requires an OPEN PR and #80 is merged → claude errors "No PR found"; codex ran
 before integration" (moot, merged CLEAN). Review consult is structurally un-runnable post-merge.
 → Asked architect for explicit go on `porch verify 54 --skip "<reason>"` (I do NOT skip a verification
 step unilaterally). Awaiting their go / or they advance porch themselves.
+
+### porch verify --skip FAILED: "only in verify phase (current: review)"
+Chicken-and-egg: reaching verify needs review `done` → needs the 2-way consult → needs an OPEN PR (no
+--pr flag; --type pr resolves from the merged/closed branch → "No PR found"). No builder-side lever;
+strict-mode forbids me editing status.yaml / porch approve. Escalated to architect for porch-state advance.
+Deliverable is DONE + live regardless of porch's internal phase.
