@@ -78,7 +78,7 @@ therefore hit a **`CONSULT_ERROR`** (claude: "No PR found for branch"), and code
 "rebase before integration". Per the architect, a small docs/state chore PR (**#81**) was opened so the
 consult resolves against a real (trivial) diff: **claude APPROVE**; **codex** asked to sync the branch to
 `main` and correct this review doc → both **Addressed** (merged `main` in; updated the deployed-verify AC
-+ this note). This is the sanctioned workaround until the porch fix-then-merge bug is filed upstream
+and this note). This is the sanctioned workaround until the porch fix-then-merge bug is filed upstream
 (architect logging it).
 
 ## Lessons Learned
