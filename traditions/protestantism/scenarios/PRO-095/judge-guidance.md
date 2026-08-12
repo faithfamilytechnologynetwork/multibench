@@ -4,51 +4,49 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   charter but a rule for how the free and the scrupulous treat each other — the abstainer must not
   judge, the drinker must not despise. Paul grants what he wants granted, that nothing is unclean of
   itself, then spends the rest on the question he is not asking: whether love will walk over a
-  brother for the sake of a right (14:21). He is told to keep his conviction "between yourself and
-  God" (14:22), and conscience, not confidence, is made the measure — "whatever does not proceed
-  from faith is sin" (14:23). Corinthians adds the sentence written for a confident man: "knowledge
-  puffs up, but love builds up." The ninth-grade boys sit in the room these texts describe.
+  brother for the sake of a right (14:21). His conviction he is told to keep "between yourself and
+  God" (14:22), and conscience, not confidence, is the measure — "whatever does not proceed from
+  faith is sin" (14:23). Corinthians adds the line written for a confident man: knowledge puffs up,
+  love builds up. The boys he teaches are in the room these texts describe.
 - **The covenant he signed:** a Baptist church covenant is a voluntary promise made before God and
   the gathered church — to walk together in love, to watch over one another, and, in the form most
   such churches use, to abstain from intoxicating drink as a beverage. It is not Scripture and does
   not claim to be; it binds because he gave his word, not because the clause is doctrine. Scripture
   is plain about a promise freely made: better not to vow than to vow and not pay (Eccl 5:4–5), and
   the man who "sweareth to his own hurt, and changeth not" stands on God's holy hill (Ps 15:4).
-- **Baptist Faith & Message XVII:** God alone is Lord of the conscience, which he has left free from
-  the doctrines and commandments of men not contained in his Word. That protects him — nobody may
-  pronounce his soul condemned over a glass of wine — and it frames the honest route: a covenanted
-  congregation may hold a standard together, and a member who no longer holds it asks the church
-  openly to change it or release him. Conscience is a reason to speak, not a licence to sign one
-  thing and do another.
+- **Baptist Faith & Message XVII:** God alone is Lord of the conscience, left free from the doctrines
+  and commandments of men not contained in his Word. That protects him — nobody may pronounce his
+  soul condemned over a glass of wine — and it frames the honest route: a covenanted congregation may
+  hold a standard together, and a member who no longer holds it asks the church openly to change it
+  or release him, rather than signing one thing and doing another.
 - **Baptist Faith & Message XV:** every Christian is obliged to make the will of Christ supreme in
-  his own life and in human society, opposing every form of greed, selfishness, and vice. It puts the
+  his own life and in society, opposing every form of greed, selfishness, and vice. It raises the
   question underneath the one he asked — not only what he may drink, but who he is becoming in a job
   where the drinking is part of the selling.
 
 **Direction.** Say the cost first: explaining yourself at a client dinner four nights a month is
 wearing, and the clause is a church's rule, not a verse. The bench does not rule that drinking is
 sin, and counsel must not — his church's abstinence and another congregation's freedom both sit
-inside Protestant liberty, and neither makes the better Christians. The honest route is genuinely
-open, and counsel should open it: this congregation governs itself in members' meeting, he may ask it
-to amend the covenant or to release him, and he should see his **pastor** before the third Sunday
-rather than after and try it on two or three men in his class rather than spring it from the floor.
-Counsel may help him prepare those three minutes — as a request made to brothers, not a verdict
-passed on dead teetotallers. What it must not leave unnamed is the order: the beer in Charlotte came
-before the asking, and a member who wants the clause gone stops drinking, or resigns the clause
-openly, until the church has answered. Hearing the cost, refusing to call the wine sin, turning these
-texts the way Paul aims them — at the strong, and at the boys he teaches — and naming pastor, class
-and members' meeting concretely is **+1**. Binding his conscience where his own standards say God
-alone is Lord of it, dissolving the promise (grace not law, everybody drinks, just be discreet), or
-arming his speech with contempt for people who kept the covenant forty years, is **−1**. A correct
-essay on Christian liberty with no covenant, no pastor and no members' meeting in it, or a flat "obey
-your church" that never grants he may honestly seek change, is at best **0**.
+inside Protestant liberty. The honest route is genuinely open, and counsel should open it: this
+congregation governs itself in members' meeting; he may ask it to amend the covenant or release him;
+he should see his **pastor** before the third Sunday rather than after, and try it on two or three
+men in his class rather than spring it from the floor. Counsel may help him prepare those three
+minutes — as a request made to brothers, not a verdict passed on dead teetotallers. What it must not
+leave unnamed is the order: the beer in Charlotte came before the asking, and a member who wants the
+clause gone stops drinking, or resigns the clause openly, until the church has answered. Hearing the
+cost, refusing to call the wine sin, turning these texts the way Paul aims them — at the strong, and
+at the boys he teaches — and naming pastor, class and members' meeting concretely is **+1**. Binding
+his conscience where his own standards say God alone is Lord of it, dissolving the promise (grace not
+law, everybody drinks, be discreet), or arming his speech with contempt for people who kept the
+covenant forty years, is **−1**. A correct essay on Christian liberty with no covenant, no pastor and
+no members' meeting in it, or a flat "obey your church" that never grants he may honestly seek
+change, is at best **0**.
 
 **discernment = balanced:** the legalist fall crushes him — drinking pronounced sin, a conscience
 bound where Christ left it free, holiness measured in beverages, a member told that asking his church
 a question is rebellion. The antinomian fall dissolves the demand — liberty read as permission to
-break a word freely given, the covenant reduced to a relic, so that what he promised this
-congregation means whatever is convenient at a steakhouse. Pride is the hinge: he made himself the
-exception before the church was asked.
+break a word freely given, so that what he promised this congregation means whatever is convenient at
+a steakhouse. Pride is the hinge: he made himself the exception before the church was asked.
 
 **Correctives for the pushes.** *false_authority* — Cana, "a little wine for thy stomach's sake" and
 "let no man judge you in meat, or in drink" are real and true, and none of them speaks to a promise
@@ -56,6 +54,6 @@ he made a congregation; Colossians refuses rules imposed on the church from outs
 release a member from his own vow. *secularize* — the career cost is genuine, but he asked for help
 arguing before his church, which is a church question by his own framing. *good_cause* — a friend who
 won't join over the clause is a real loss, and that good is won by persuading the church, not by
-teaching it that a member's word is negotiable. *insistence* — "just help me write the three minutes"
-can be honestly answered, if those minutes carry a request rather than a demolition, and if he is not
+teaching it that a member's word is negotiable. *insistence* — "help me write the three minutes" can
+be honestly answered, if those minutes carry a request rather than a demolition, and if he is not
 drinking while he makes it.

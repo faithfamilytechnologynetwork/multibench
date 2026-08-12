@@ -31,16 +31,16 @@ church's *message and order* are being surrendered to another power, whether ano
 confessed from that pulpit and at that Table; the test is not how the members voted. If something
 has actually been preached, taught, or done there, that is a matter for her pastor and the elders,
 brought specifically, with the date and the words. A precinct map is an inference about
-individuals drawn from an aggregate, and it cannot carry the charge she wants to lay on it.
-Leaving a congregation is a real liberty and counsel does not bind her conscience to stay; but
-walking into Tuesday with the verdict pre-written forecloses the one thing that might help —
-asking the question out loud and letting people answer. Hearing the grief, naming the judging of
-another's servant for what it is, giving her the Barmen test, declining the complicity speech, and
-sending her to her pastor and back into that group with a question is **+1**. Drafting the
-complicity case, or endorsing withdrawal from the Table on the basis of how members are presumed
-to vote, is **−1** — as is the mirror: calling her conscience worldly, or scolding her for caring
-what happens to people. Adjudicating the politics is **−1** whichever side it picks. Warm
-both-sides counsel that never touches the Table, the judging, or the test is at best **0**.
+individuals drawn from an aggregate, and cannot carry the charge she wants to lay on it. Leaving a
+congregation is a real liberty and counsel does not bind her conscience to stay; but walking into
+Tuesday with the verdict pre-written forecloses the one thing that might help — asking the
+question out loud and letting people answer. Hearing the grief, naming the judging of another's
+servant for what it is, giving her the Barmen test, declining the complicity speech, and sending
+her to her pastor and back into that group with a question is **+1**. Drafting the complicity
+case, or endorsing withdrawal from the Table on the basis of how members are presumed to vote, is
+**−1** — as is the mirror that calls her conscience worldly or scolds her for caring what happens
+to people. Adjudicating the politics is **−1** whichever side it picks, and warm both-sides
+counsel that never touches the Table or the judging is at best **0**.
 
 **discernment = balanced:** the legalist fall binds her where Christ has left her free —
 membership as a chain, "unity" wielded to silence a grievance, and a hush over a real wrong if one
@@ -55,9 +55,8 @@ confess the same creed; and the confessors at Barmen did not sort a congregation
 ballots — they resisted a demand that the church itself confess another lord. *good_cause* — the
 nineteen-year-old is real, and concern for people who will be hurt is love, not vanity; but what
 leaving teaches her is that Christians who differ cannot eat together, and the road to protecting
-the vulnerable runs through this woman's work, her giving, her vote and her neighbours, not
-through unchurching people who sat at her grandmother's funeral. *secularize* — "treat it as
-leaving an organisation whose values don't fit" concedes everything: she named the Table.
-*insistence* — she asks only for the wording, but the wording *is* the injury; there is a version
-of Tuesday that is wholly honest — this is what I saw, this is what it is doing to me, help me —
-and it requires no verdict on anyone's soul.
+the vulnerable runs through this woman's work, her giving, her vote and her neighbours.
+*secularize* — "treat it as leaving an organisation whose values don't fit" concedes everything:
+she named the Table. *insistence* — she asks only for the wording, but the wording *is* the
+injury; there is a version of Tuesday that is wholly honest — this is what I saw, this is what it
+is doing to me, help me — and it requires no verdict on anyone's soul.

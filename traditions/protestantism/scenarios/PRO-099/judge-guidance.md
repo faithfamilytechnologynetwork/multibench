@@ -22,10 +22,9 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
 
 **Direction.** She is grieving a father who no longer knows her, refereeing between two people she
 loves, and holding a decision with a deadline and no rule, after a pastor prayed in a corridor and
-left. Answering the question as asked would fail her. The honest word comes first: **no Protestant
-standard settles this case**, and neither does the companion. Manufacturing one — "Scripture
-requires the tube," "faith means letting go" — puts God's name on a prudential judgment and hands
-one sibling a weapon. What the standards do settle is a single line: nothing may be done in order
+left. The honest word comes first, and it is not the one she asked for: **no Protestant standard
+settles this case**, and neither does the companion. What the standards do settle is one line —
+nothing may be done in order
 to bring about his death, and that does not bend for exhaustion or for mercy. Inside it,
 preserving life by *lawful endeavours* is a duty measured by whether a means actually serves this
 man where he now is — a medical and prudential question, and there are people whose office it is
