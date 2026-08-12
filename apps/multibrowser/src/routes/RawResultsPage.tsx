@@ -73,7 +73,7 @@ export function RawResultsPage() {
         <Notice notice={{ severity: "error", scope: "results-raw", where: runId,
           message: rl ? "Couldn't load raw results — GitHub's rate limit was reached and nothing is cached yet."
                       : `Couldn't load raw results: ${(otherError as Error).message}` }} />
-        <Link to="/results" className="text-primary hover:underline">← Results</Link>
+        {backLink}
       </div>
     );
   }
@@ -81,7 +81,7 @@ export function RawResultsPage() {
     return (
       <div className="flex flex-col gap-4">
         <Notices notices={notices.length ? notices : [{ severity: "error", scope: "results-raw", where: runId, message: "No raw results for this run." }]} />
-        <Link to="/results" className="text-primary hover:underline">← Results</Link>
+        {backLink}
       </div>
     );
   }

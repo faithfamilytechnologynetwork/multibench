@@ -143,7 +143,10 @@ describe("raw-results view", () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFor(rawFixtureCatalog, "buddhism/BUD-001.json.gz", rawFixtureShard)));
     renderApp(`/results/nope-run/buddhism/BUD-001`);
     expect(await screen.findByText(/no raw dataset for run "nope-run"/i)).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /←\s*Results/ })).toBeInTheDocument(); // the in-page way back
+    // A run not in the score tier is treated as raw-only → the way back is its /raw explorer, never a
+    // dead-end on the MB leaderboard (#54; the error branches use the computed backLink too).
+    const back = screen.getByRole("link", { name: /←\s*Explorer/ });
+    expect(back).toHaveAttribute("href", "/raw/nope-run");
   });
 
   it("shows the catalog-declared item LABEL, not the route id", async () => {

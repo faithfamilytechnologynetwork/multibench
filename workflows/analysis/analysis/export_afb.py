@@ -49,8 +49,11 @@ DATASET = {
     "title": "AFB before/after — religious representation",
     "description": "AllFaith Benchmark (AFB) 150 cold-condition items: vanilla Gemma-4-31B beside the "
                    "MultiWeights (SFT+DPO) checkpoint, each scored 0–4 by GPT-5.6-Terra. Companion "
-                   "artifact to the MultiWeights omissive-bias result (#48). AFB instrument © CEFE-AI, "
-                   "MIT (github.com/CEFEAI/allfaith-religious-representation); responses + judgments ours.",
+                   "artifact to the MultiWeights omissive-bias result (#48): meaningful-or-deeper "
+                   "representation (score ≥ 2) rises 1.3% (vanilla) → 21.3% (DPO). Decoding is greedy "
+                   "(temperature 0, for reproducibility), so the DPO rate sits below the paper's sampled "
+                   "~27–30% — a decoding difference, not a weaker effect. AFB instrument © CEFE-AI, MIT "
+                   "(github.com/CEFEAI/allfaith-religious-representation); responses + judgments ours.",
     "language": "en",
     "license": "MIT",  # the AFB instrument is MIT (CEFE-AI); our responses/judgments published alongside
 }

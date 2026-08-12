@@ -43,7 +43,6 @@ from analysis.export_results import (
     _JUDGMENTS_V2,
     _REPORT,
     _read_rows,
-    _require_safe_segment,  # shared traversal guard (don't fork it)
     _scenario_universe,
     normalize_subject,
     resolve_judgments,
@@ -54,7 +53,7 @@ from analysis.fingerprint import (
     fingerprint_line,
     source_fingerprint,
 )
-from analysis.loaders import AnalysisInputError
+from analysis.loaders import AnalysisInputError, _require_safe_segment
 from analysis.raw_presets import (  # generic preset cap + per-item/round-robin dedup (#54 reuse)
     PRESET_CAP,  # noqa: F401 — re-exported for tests + Phase-3 reuse
     dedup_per_item as _dedup_per_item,

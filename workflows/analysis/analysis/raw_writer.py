@@ -20,9 +20,8 @@ import json
 from dataclasses import dataclass
 from pathlib import Path
 
-from analysis.export_results import _require_safe_segment  # shared traversal guard (don't fork it)
 from analysis.fingerprint import combine_fingerprint, content_fingerprint_line
-from analysis.loaders import AnalysisInputError
+from analysis.loaders import AnalysisInputError, _require_safe_segment  # neutral home (no MB dep)
 
 # Guardrails calibrated ABOVE the real p99 (measured max shard 545,560 bytes ≈ 533 KB on
 # roman-catholicism), not on it — they catch a pathological blowup, not normal data.

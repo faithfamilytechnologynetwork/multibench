@@ -1,10 +1,19 @@
 import { Link } from "@tanstack/react-router";
-import { useLatestSha, useTraditions, useRawExplorerRunIds } from "../lib/queries";
+import { useLatestSha, useTraditions, useRawExplorerRunIds, useRawCatalog } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { TraditionCard } from "../components/TraditionCard";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
+
+/** One Explorers-list entry: shows the catalog's `dataset.title` (falls back to the run id while the
+ * manifest loads / if it can't be read). One small raw fetch per raw-only run (they are few). */
+function ExplorerLink({ sha, runId }: { sha: string | undefined; runId: string }) {
+  const title = useRawCatalog(sha, runId, null).data?.catalog?.dataset.title ?? runId;
+  return (
+    <Link to="/raw/$runId" params={{ runId }} className="text-sm text-primary hover:underline">{title}</Link>
+  );
+}
 
 export function IndexPage() {
   const shaQ = useLatestSha();
@@ -61,8 +70,7 @@ export function IndexPage() {
           <ul className="mt-2 flex flex-col gap-1">
             {explorers.map((id) => (
               <li key={id}>
-                <Link to="/raw/$runId" params={{ runId: id }}
-                  className="font-mono text-sm text-primary hover:underline">{id}</Link>
+                <ExplorerLink sha={shaQ.data} runId={id} />
               </li>
             ))}
           </ul>

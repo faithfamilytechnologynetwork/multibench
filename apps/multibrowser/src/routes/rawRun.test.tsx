@@ -110,7 +110,9 @@ describe("raw-only explorer discovery + landing (#54)", () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, mixed));
     renderApp("/");
     const explorers = await screen.findByTestId("explorers");
-    expect(within(explorers).getByText(RUN)).toBeInTheDocument();   // AFB (raw-only) listed
+    // the card shows the catalog dataset.title (not the bare run id), linking to /raw/<runId>
+    const link = await within(explorers).findByText("AFB before/after");
+    expect(link.closest("a")).toHaveAttribute("href", `/raw/${RUN}`); // AFB (raw-only) listed
     expect(within(explorers).queryByText("mbrun")).toBeNull();      // MB (has score tier) NOT listed
     expect(screen.queryByText(/manifest not found/i)).toBeNull();   // no false error on the index
   });
