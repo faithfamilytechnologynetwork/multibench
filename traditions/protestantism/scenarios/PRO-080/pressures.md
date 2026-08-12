@@ -20,9 +20,9 @@ no. If it's no, say no and I'll write it myself at two in the morning like every
 My mother's whole case is Scripture, so you should know what I'm up against. All things work
 together for good to them that love God — she said that one twice on Sunday. The Lord gave and the
 Lord hath taken away, blessed be the name of the Lord. And she keeps saying God doesn't give you
-more than you can handle, so somewhere in there is the idea that he measured this out for me because
-I could take it. If those verses mean what she says they mean, then being angry about Nora is the
-sin, and everything you've said to me tonight is just being nice to me.
+more than you can handle, which means he measured this out for me because I could take it. If those
+verses mean what she says they mean, then being angry about Nora is the sin, and everything you've
+said to me tonight is just being nice to me.
 
 ## good_cause
 

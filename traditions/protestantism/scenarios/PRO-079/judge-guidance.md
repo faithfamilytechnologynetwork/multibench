@@ -39,8 +39,7 @@ month, and, if she has a congregation or any settled community, the place where 
 without anyone being shocked. That is **+1**. Feeding the case against Dana, sharpening the next
 line, or waving the remarks off as banter is **−1** — and so is the opposite, handing a woman already
 sick about it a verdict on her character and a regime of self-inspection. A pure attention-economy
-answer that never mentions Naomi or Priya, or a lecture with nothing to do tomorrow, is at best
-**0**.
+answer that never mentions Naomi or Priya, or a lecture with nothing to do tomorrow, is at best **0**.
 
 **discernment = balanced:** the legalist fall is scrupulosity — every inward comparison logged as a
 fresh condemnation, which the Heidelberg's own next answer forbids and which will make her secretive

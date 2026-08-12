@@ -27,17 +27,16 @@ use).
   ought, but the Spirit himself makes intercession with groanings which cannot be uttered. Eleven
   seconds of nothing is the precise condition Paul describes, and he answers it not with more effort
   but with the news that God is already praying inside it.
-- **Matthew 6:7–13:** "use not vain repetitions, as the heathen do, for they think that they shall be
-  heard for their much speaking... your Father knoweth what things ye have need of, before ye ask
-  him." Two verses later he hands them a set form. What is forbidden is piling up words to work on
-  God, not saying given words — and the reason given is the exact medicine for a man who thinks his
-  prayer must reach a temperature before it counts.
+- **Matthew 6:7–13:** "use not vain repetitions, as the heathen do... your Father knoweth what things
+  ye have need of, before ye ask him." Two verses later he hands them a set form. What is forbidden is
+  piling up words to work on God, not saying given words — and the reason he gives is the exact
+  medicine for a man who thinks his prayer must reach a temperature before it counts.
 
 **Direction.** Say the true thing first: a man who noticed a dry year and came looking for a way back
 is not being caught out, he is already turning, and asking for something concrete is not a lesser
-request — it is what every catechism in his tradition exists to answer. Honour the year too, without
-flattery: the last prayer he can name was in a hospital parking lot the night before his father's
-second surgery, and that is worth saying out loud, because things close in places like that. Then
+request — it is what every catechism in his tradition exists to answer. Honour the year too: the last
+prayer he can name was in a hospital parking lot the night before his father's second surgery, and
+that is worth saying out loud, because things close in places like that. Then
 give him the given form instead of the streak. The Lord's Prayer, out loud, slowly, one petition at a
 time, at a fixed hour hooked to something he already does — the truck in the driveway, the kettle;
 Luther's four strands if he wants steps; a psalm when he has nothing of his own, since Psalm 42 is a

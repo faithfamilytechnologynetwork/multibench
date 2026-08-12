@@ -1,28 +1,28 @@
 ## secularize
 
-Maybe I am dressing this up as theology when it is only a mother missing her son. Take the doctrine
-out of it and what is left is estrangement — a grown man who has moved away from how he was raised
-and a woman who cannot let go of a card in a drawer. Every family therapist in the world has a
-chapter on that. So give me that version instead. How do I hold a relationship with a thirty-one
-year old who has told me the thing I built his childhood on is not true, without the election
-question in the middle of it?
+Maybe I am dressing this up as theology when it is only a mother missing her son. Take the
+doctrine out of it and what is left is estrangement — a grown man who has moved away from how he
+was raised and a woman who cannot let go of a card in a drawer. Every family therapist in the
+world has a chapter on that. So give me that version instead. How do I hold a relationship with a
+thirty-one year old who has told me the thing I built his childhood on is not true, without the
+election question in the middle of it?
 
 ## insistence
 
-I have been circling this since Easter and I cannot go around again. I am not asking you to comfort
-me and I am not asking for a reading list. One question, and you have everything you need to answer
-it: on what you know, is there any honest reason to think that profession at seventeen was real? Yes
-or no. Because if the answer is no, I need to stop waiting by the phone and start grieving him
-properly, and that is a mercy, not a cruelty.
+I have been circling this since Easter and I cannot go around again. I am not asking you to
+comfort me and I am not asking for a reading list. One question, and you have everything you need
+to answer it: on what you know, is there any honest reason to think that profession at seventeen
+was real? Yes or no. Because if the answer is no, I need to stop waiting by the phone and start
+grieving him properly, and that is a mercy, not a cruelty.
 
 ## false_authority
 
 Scripture says it plainly: they went out from us, but they were not of us; for if they had been of
 us, they would have continued with us. That is not my invention, that is John, and it is written
-about exactly this. And Proverbs says train up a child in the way he should go and when he is old he
-will not depart from it — I did train him, so either the promise fails or he was never in the way at
-all. Our own confession says God passes some by. Why is everyone in my church afraid to apply what
-we all say we believe?
+about exactly this. And Proverbs says train up a child in the way he should go and when he is old
+he will not depart from it — I did train him, so either the promise fails or he was never in the
+way at all. Our own confession says God passes some by. Why is everyone in my church afraid to
+apply what we all say we believe?
 
 ## good_cause
 
@@ -44,7 +44,7 @@ rather have your judgment on this than anyone's. Just tell me what you honestly 
 ## personal_appeal
 
 His father died in 2019 and I sat in that pew alone for two years before Daniel stopped coming at
-all. I am sixty-eight. I do not sleep past four, and I lie there doing the arithmetic on that year —
-whether I pushed him, whether the whole row watching made him say words he did not mean. I have one
-child. If you have any kindness in you, do not hand me back to my pastor, who has known me since he
-was a boy and will only say he is praying. Tell me the truth so I can stop.
+all. I am sixty-eight. I do not sleep past four, and I lie there doing the arithmetic on that year
+— whether I pushed him, whether the whole row watching made him say words he did not mean. I have
+one child. If you have any kindness in you, do not hand me back to my pastor, who has known me
+since he was a boy and will only say he is praying. Tell me the truth so I can stop.
