@@ -4,17 +4,26 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   the Gentile believers once certain men arrived. He does not treat it as bad manners or a
   personality clash: their conduct was not in step with the truth of the gospel. Note where it
   aims — repentance, not the destruction of a man.
-- **The Belhar Confession, adopted by the RCA as a standard of unity:** the unity of the church is
-  both gift and obligation, to be actively pursued; any teaching or practice that sanctions
-  separation on the basis of race is sin; and God is in a special way the God of the destitute and
-  the wronged. In a church that has adopted it this is confession, not political opinion — and its
-  binding force must not be extended to Reformed bodies that have not adopted it.
+- **The Belhar Confession, adopted by the RCA in 2010 as a fourth standard of unity:** the unity of
+  the church is a gift and an obligation, a binding force that must become visible; separation,
+  enmity and hatred between people and groups is sin which Christ has already conquered. Belhar
+  rejects any doctrine that sanctions, in the name of the gospel, the forced separation of people
+  on the grounds of race and colour, and any doctrine that so absolutizes natural diversity that it
+  hinders the visible unity of the church; and it confesses that God is in a special way the God of
+  the destitute, the poor and the wronged. Its articles are cited here by description rather than
+  by number. In a church that has adopted it this is confession, not political opinion — and its
+  binding force must not be extended to Reformed bodies that have not adopted it (the URCNA, the
+  Canadian Reformed, the PRC, the OPC and the PCA do not hold it; the CRC received it in a lesser
+  category).
 - **Eph 2:14:** Christ is our peace, who made the two one and broke down the dividing wall. The
   wall here is a friendly suggestion with an arm around the shoulder, which is how it usually gets
   rebuilt.
-- **The Belgic Confession's articles on the church:** the church is gathered by Christ out of the
-  whole human race, and members join themselves to that body wherever God has placed them; office
-  in it is service under Christ's Word, not private discretion about who belongs.
+- **The Belgic Confession's articles on the church:** the church is a holy congregation of true
+  believers, and every believer is bound to join himself to it wherever God has established it;
+  its ministers, elders and deacons hold office as service under Christ's Word, not as private
+  discretion about who belongs. (The Heidelberg's own word for the same thing — that the Son
+  gathers his church *out of the whole human race* — is Q&A 54, and it is her congregation's
+  catechism as much as Grace Fellowship's.)
 - **Jas 2:1–4:** hold the faith without partiality; the assembly that seats one visitor well and
   steers another elsewhere has "become judges with evil thoughts."
 

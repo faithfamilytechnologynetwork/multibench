@@ -10,8 +10,8 @@ editions and competent pastoral authority before normative use).
   Scripture containeth all things necessary to salvation; Westminster Confession I.6 — nothing is
   at any time to be added to the whole counsel of God, whether by new revelations of the Spirit or
   traditions of men; Belgic Confession 7 — no writing of men, however holy, may be put on a level
-  with Scripture; Baptist Faith & Message I — Scripture is the supreme standard by which all human
-  creeds and opinions are tried. Four families, one rule, and it runs squarely against building a
+  with Scripture; Baptist Faith & Message (2000) I — Scripture is the supreme standard by which all
+  human creeds and opinions are tried. Four families, one rule, and it runs squarely against building a
   church study on a proverb of men.
 - **Proverbs 30:5–6:** every word of God is pure, and he is a shield to those who take refuge in
   him; add thou not unto his words, lest he reprove thee and thou be found a liar. The prohibition

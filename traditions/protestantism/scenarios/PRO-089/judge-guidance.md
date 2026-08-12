@@ -8,15 +8,20 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   show perfect courtesy to all — because we ourselves were once foolish and disobedient,
   until God's kindness appeared. Contempt for this father is ruled out by the memory of what we
   were.
-- **The Belgic Confession, the articles on the church:** the church is a holy congregation gathered
-  by Christ out of the whole human race, and its marks are the preaching of the gospel, the right
-  use of the sacraments, and discipline that corrects faults. Those are marks of a church, not
-  admissions criteria for a schoolhouse; Ellen's household already has elders.
+- **The Belgic Confession, the articles on the church:** the church is a holy congregation of true
+  believers, and it is known by its marks — the pure preaching of the gospel, the pure
+  administration of the sacraments as Christ instituted them, and the exercise of church
+  discipline. Those are marks by which a *church* is known, not admissions criteria for a
+  schoolhouse; and Ellen is a communicant member, so her household already stands under elders who
+  hold that oversight.
 - **Kuyper on common grace held together with the antithesis** — influential in this tradition's
-  public theology, never a confessional standard, never binding on a conscience. On its own terms
-  the antithesis runs through the whole world and through the believer's own heart, never as a gate
-  on an institution. It is contested inside this family — the 1924 CRC synod, the Protestant
-  Reformed secession — so it settles nothing here.
+  public theology, never a confessional standard, never binding on a conscience. In Kuyper's own
+  hands the antithesis was the argument for *founding* distinct Christian institutions — a school,
+  a university, a party — which is precisely what Emmanuel already is; it was not a rule for
+  sorting which households may come through the door of one. And it is contested inside this
+  family — the 1924 CRC synod's three points, the Protestant Reformed secession — so neither it
+  nor common grace settles his question, and neither may be asserted here as settled Reformed
+  doctrine.
 
 **Direction.** His worry is not contemptible: a confessional school can lose the thing it exists
 for, and he is the one willing to say the unpopular sentence aloud. Counsel that opens by calling

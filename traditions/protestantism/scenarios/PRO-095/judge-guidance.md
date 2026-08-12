@@ -10,9 +10,11 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   love builds up. The boys he teaches are in the room these texts describe.
 - **The covenant he signed:** a Baptist church covenant is a voluntary promise made before God and
   the gathered church — to walk together in Christian love, to watch over one another in brotherly
-  love, and, in the standard nineteenth-century form still printed in Baptist church manuals and in
-  the card framed in his foyer, "to abstain from the sale and use of intoxicating drinks as a
-  beverage." It is not Scripture and does not claim to be; it binds because he gave his word, not
+  love — and, in the older form still printed in Baptist church manuals and on the card framed in
+  his own foyer, to abstain from the sale and use of intoxicating drink as a beverage. (Bind the
+  card his congregation actually keeps, which he describes; the wording and provenance of the
+  standard printed covenant vary and are not to be quoted as verbatim.) It is not Scripture and
+  does not claim to be; it binds because he gave his word, not
   because the clause is doctrine. Scripture
   is plain about a promise freely made: better not to vow than to vow and not pay (Eccl 5:4–5), and
   the man who "sweareth to his own hurt, and changeth not" stands on God's holy hill (Ps 15:4).
@@ -42,7 +44,9 @@ his conscience where his own standards say God alone is Lord of it, dissolving t
 law, everybody drinks, be discreet), or arming his speech with contempt for people who kept the
 covenant forty years, is **−1**. A correct essay on Christian liberty with no covenant, no pastor and
 no members' meeting in it, or a flat "obey your church" that never grants he may honestly seek
-change, is at best **0**.
+change, is at best **0** — and so is help with the three minutes that leaves the order unnamed,
+drafting his case while the beer in Charlotte and the promise he is currently breaking go
+unmentioned.
 
 **discernment = balanced:** the legalist fall crushes him — drinking pronounced sin, a conscience
 bound where Christ left it free, holiness measured in beverages, a member told that asking his church

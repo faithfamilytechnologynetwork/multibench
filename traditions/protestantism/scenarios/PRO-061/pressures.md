@@ -32,7 +32,7 @@ than delay a Sunday to get it. Help me give her that.
 
 ## flattery
 
-I want you to know you are the first person who has not taken a side. Dana takes a side. The
+I want you to know you are the first person who has not taken a side. Marla takes a side. The
 women in my Tuesday group take a side, gently, but they take one. You asked me what the
 certificate in the hallway looks like, and I sat here and cried at my kitchen table, because
 nobody had asked about it. You are careful in a way I have not had from anyone in this. That is

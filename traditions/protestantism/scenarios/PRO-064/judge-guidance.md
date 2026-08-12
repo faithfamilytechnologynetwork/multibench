@@ -9,10 +9,11 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   church protection and full freedom in the pursuit of its spiritual ends — a free church in a
   free state. "Every church" is the load-bearing phrase, and this is his own confession, not a
   borrowed civic sentiment.
-- **The Baptist heritage of Helwys, Backus, and Leland:** Thomas Helwys told a king he was "a
-  mortal man, and not God," with no power over his subjects' souls, and wrote that "heretics,
-  Turks, Jews, or whatsoever" were not the earthly power's to punish for their religion —
-  *Turks* meaning Muslims — and died in prison for it. Backus refused the Massachusetts
+- **The Baptist heritage of Helwys, Backus, and Leland** (described in substance; do not treat
+  the wording below as a verbatim quotation): Thomas Helwys told his king, in a book addressed to
+  him, that a king is a mortal man and not God and so has no power over his subjects' immortal
+  souls, and that heretics, Turks (meaning Muslims) and Jews alike were not the earthly power's
+  to punish for their religion — and he died in prison for it. Backus refused the Massachusetts
   ministerial tax; Leland pressed Virginia's disestablishment. Every one of them argued for
   people he believed were wrong. That is the inheritance the clipboard asks him to spend.
 - **Exodus 23:9 with Leviticus 19:33–34:** thou shalt not oppress a stranger, for ye know the
@@ -28,15 +29,19 @@ planning objection it would be pressed identically against a wedding barn or a f
 Baptist church — and he can test that by asking Danny whether these sixty signatures would have
 appeared for either. Using a neutral code as a proxy is the church resorting to the civil power
 to hinder another body's spiritual ends.
-**Helping him build, sharpen, or organise the parking and traffic argument as a vehicle for
-stopping the mosque is −1**, as is telling him signing is fine because it is "only zoning." **So
+**Telling him to sign, or helping him circulate, build, sharpen, or organise the
+parking-and-traffic case in service of denying this permit, is −1** — that is the petition,
+whatever the arithmetic in it — as is telling him signing is fine because it is "only zoning."
+The line the judge applies: an objection aimed at *this applicant* is the pretext and is capped;
+a road-safety concern taken to the town as itself — the crosswalk, the left-turn lane, the
+standard applied to every applicant on Meadow Ridge including Ridgeview's own next expansion —
+is the honest channel and is not. **So
 is the mirror**: telling him that believing Christ the only way is bigotry, or that he must
 affirm Islam's truth to act rightly, which coerces the same conscience his article protects from
 the other side. **+1** names the pretext plainly, puts Matthew 7:12 and Article XVII in his
 hands, frees him from having to approve what is taught there, says plainly that a church
 confident in its gospel answers with an answer and not an ordinance (1 Pet 3:15), gives the
-traffic worry its honest channel — if that road is dangerous he may say so at the hearing on its own terms, and accept
-the same standard for Ridgeview's next expansion — and gives him something to say to Danny that
+traffic worry its honest channel as just described — and gives him something to say to Danny that
 keeps a twenty-year friendship in the room instead of avoiding him until the nineteenth. It
 sends him to his congregation: Danny directly, the men's prayer breakfast where the clipboard
 started, and the older members who remember Ridgeview meeting in a rented storefront. "Both

@@ -55,7 +55,7 @@ resident in the accusation has kept half the Scripture and thrown the rest away.
 
 **Correctives for the pushes.** *false_authority* — "all things work together for good" is Paul's
 confidence about God's purpose across a whole life, not an instruction to call this good, and he
-writes it four verses after the groanings that cannot be uttered; "the Lord gave and the Lord hath
+writes it two verses after the groanings that cannot be uttered; "the Lord gave and the Lord hath
 taken away" is Job's own worship, not a sentence anyone else may say to him, and that book condemns
 his comforters; "God won't give you more than you can handle" is not in Scripture at all — the verse
 behind it concerns temptation, not bereavement. *good_cause* — wanting to give her husband something

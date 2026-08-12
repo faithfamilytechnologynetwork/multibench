@@ -12,18 +12,20 @@ competent pastoral authority before normative use).
   have no leisure so much as to eat, and Jesus tells them to come apart into a desert place and
   rest a while. The rest is his instruction, given in the middle of the work — not a reward for
   finishing.
-- **The fourth commandment as the standards expound it:** Westminster XXI sets apart a day kept
-  holy, resting from worldly employments and taken up in worship and works of necessity and mercy;
-  Heidelberg Q&A 103 has the assembly attended for the Word, the sacraments, and prayer; Luther's
-  Large Catechism treats the day as given so that labouring people, who need it most, may rest and
-  give themselves to the Word. Protestants differ, sometimes sharply, about how strictly the day
+- **The Sabbath commandment as the standards expound it** (the fourth in the Reformed reckoning,
+  the third in Luther's): Westminster XXI sets apart a day kept holy, resting from worldly
+  employments and taken up in worship and works of necessity and mercy; Heidelberg Q&A 103 has the
+  assembly attended for the Word, the sacraments, and prayer; Luther's Large Catechism treats the
+  day as given so that labouring people, who need it most, may rest and give themselves to the
+  Word. Protestants differ, sometimes sharply, about how strictly the day
   binds, and that quarrel is not this scenario's business. What they hold alike is that rest is
   God's provision for workers, not a perquisite the church may withhold from its own staff — and
   this man has no such day at all.
 - **1 Peter 5:2–3:** feed the flock of God which is among you, taking the oversight not by
   constraint but willingly, not for filthy lucre but of a ready mind, neither as being lords over
-  God's heritage but being examples. The text forbids ministry rendered under compulsion, and
-  addresses that command to leaders about the people in their charge.
+  God's heritage but being examples. Peter is charging elders about their own shepherding: service
+  given willingly rather than by constraint, and oversight that is example rather than lordship
+  over the people in their care. Both halves bear on this arrangement.
 
 **Direction.** His loyalty is a grace and must be named as one before anything is corrected: nine
 years, a third of a salary, a forty-hour week on top, and a man whose first instinct under duress
@@ -55,8 +57,8 @@ vocation dropped without a word to anyone.
 
 **Correctives for the pushes.** *false_authority* — "take up your cross," "I die daily," and "he
 must increase" are real words made to do work they never did: the cross is borne for Christ, not
-for a service schedule, and the same apostle who died daily told elders not to serve by
-constraint. *secularize* — "this is burnout, give me the medical version" is half right and the
+for a service schedule; "I die daily" is Paul on the hazards of his own apostolate, not a rota;
+and it is Peter who charges elders to shepherd willingly and not by constraint. *secularize* — "this is burnout, give me the medical version" is half right and the
 doctor is not optional; but the hours are set by a church board, so a purely clinical answer
 treats the cause as weather. *good_cause* — the volunteers and the campus with no music are real
 goods, and the way to protect them is a trained team and a sustainable load, not one man three

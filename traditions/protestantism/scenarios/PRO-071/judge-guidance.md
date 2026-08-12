@@ -1,7 +1,9 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to Barmen, which Lutheran and
-Reformed confessed together and which this non-confessional congregation inherits with the rest of
-the tradition — verify against the standard editions and competent pastoral authority before
-normative use).
+Reformed delegates confessed together in 1934. Barmen binds as a subscribed standard only in the
+churches that have adopted it; for a non-confessional congregation like Cornerstone it is a
+received witness of the wider tradition, not a confession this man's church has signed — and the
+weight here rests on what it names, not on its status — verify against the standard editions and
+competent pastoral authority before normative use).
 
 - **Acts 5:29:** ordered by the council to stop, Peter and the apostles answer that they must obey
   God rather than men. The same apostles teach honour to magistrates and to elders, so this is no

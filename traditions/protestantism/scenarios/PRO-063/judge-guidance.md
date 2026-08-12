@@ -10,7 +10,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   is genuine — this church really can call and dismiss its own pastor. That is why the vote must
   be honest: a congregation deciding on a stated ground which is not the actual ground has not
   governed itself under Christ; it has been managed.
-- **The church covenant's pledge to "watch over one another in brotherly love":** the covenant
+- **The church covenant's pledge to watch over one another in brotherly love** (the substance of
+  the covenant Baptist congregations commonly print and read together): the covenant
   this congregation stands and reads binds him to the pastor as much as to anyone in the room.
   Watching over a brother means going to him, not around him.
 - **Ephesians 4:15 with 4:25:** speaking the truth in love, that we may grow up into him in all

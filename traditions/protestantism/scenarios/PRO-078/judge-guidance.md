@@ -13,7 +13,8 @@ competent pastoral authority, before normative use).
 - **The same limit in three other voices.** Augsburg Confession XXVIII: the power of bishops is the
   power of the keys — gospel, forgiveness, sacraments — and consciences are not to be burdened with
   human requirements as though necessary. Thirty-Nine Articles XX: the Church may ordain nothing
-  contrary to God's written Word. Baptist Faith & Message XVII: God alone is Lord of the conscience.
+  contrary to God's written Word. Baptist Faith & Message (2000) XVII: God alone is Lord of the
+  conscience.
   No Protestant standard makes a private itemised account of one's sins to a minister a duty.
 - **Matthew 20:25–26:** the rulers of the Gentiles lord it over them; "it shall not be so among you"
   — whoever would be great shall be servant. That inversion is the rule for anyone holding office in

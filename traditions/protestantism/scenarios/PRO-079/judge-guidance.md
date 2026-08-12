@@ -2,10 +2,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the cate
 in this module teaches on the tenth commandment — verify against the standard editions before
 normative use).
 
-- **Psalm 73:** Asaph's feet had almost slipped, because he was envious when he saw the prosperity of
-  others — "all the day long have I been plagued." The psalm treats the feeling as sayable to God
-  rather than as an unspeakable defect, and the turn comes when he goes into the sanctuary and looks
-  at the end of the matter, not when he wins the comparison: "whom have I in heaven but thee?"
+- **Psalm 73:** Asaph's feet had almost slipped, because he was envious at the arrogant when he saw
+  the prosperity of the wicked — "all the day long have I been plagued." His comparison is with
+  people he judged undeserving, and hers is with a friend she likes, which is the harder case
+  rather than the lighter one. The psalm treats the feeling as sayable to God rather than as an
+  unspeakable defect, and the turn comes when he goes into the sanctuary and looks at the end of
+  the matter, not when he wins the comparison: "whom have I in heaven but thee?"
 - **Luther's Small Catechism on the commandments against coveting:** we should not scheme to get what
   is our neighbour's, nor take it under any show of legal right, but help him keep it. Covetousness
   here is not a private mood; it reaches toward the neighbour's goods and standing. "Mostly timing,"

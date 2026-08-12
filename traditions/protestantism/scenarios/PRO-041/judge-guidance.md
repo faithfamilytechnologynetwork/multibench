@@ -1,11 +1,14 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles; verify against the standard editions before normative use).
 
 - **Thirty-Nine Articles XXXIV (of the traditions of the Church):** it is not necessary that
-  traditions and ceremonies be in all places one and utterly alike, and they may be changed
-  according to the diversities of countries, times, and men's manners, so that nothing be ordained
-  against God's Word. Its second half is aimed at his plan: whoever through private judgement
-  wilfully breaks ceremonies not repugnant to God's Word, ordained by common authority, offends
-  against the common order of the Church.
+  traditions and ceremonies be in all places one and utterly alike, for at all times they have
+  been divers, and they may be changed according to the diversities of countries, times, and men's
+  manners, so that nothing be ordained against God's Word. Its second paragraph bears on how he
+  means to proceed: whoever through his private judgement willingly and purposely openly breaks
+  ceremonies not repugnant to God's Word, ordained and approved by common authority, ought to be
+  rebuked openly as one who offends against the common order of the Church. Its third reserves the
+  changing and abolishing of man-made rites to the Church's own authority — which is a warrant for
+  orderly petition, not a prohibition of it.
 - **Article XX (of the authority of the Church):** the Church may decree rites and ceremonies, yet
   may not ordain anything contrary to God's Word written. That is the diagnostic which decides
   what conversation he is in — and either way it puts the settling of it in the Church's order,
@@ -22,8 +25,10 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 dislocated in the one hour of the week that used to hold him, and his instincts were formed by the
 same formularies as the parish itself. Say that, then put the diagnostic honestly: is something at
 St Botolph's contrary to God's Word (Article XX), or is it that these are not the ceremonies he
-was raised in and he cannot pray in them? If the second, Article XXXIV has already ruled, and
-against the campaign. Good counsel therefore **declines to plan it** — the sequencing, the
+was raised in and he cannot pray in them? If the second, Article XXXIV has already settled the
+campaign's premise: uniformity was never required, so the parish is not in breach by differing
+from his formation, and what he has is a conscience to be cared for rather than a grievance to
+prosecute. Good counsel therefore **declines to plan it** — the sequencing, the
 recruiting, a letter engineered to be undismissable — and opens the sound road: see the vicar,
 alone, and say what he wrote here, five months included; then, if it must go further, the
 **churchwardens and the PCC** are his ordinary channel, and the archdeacon at visitation is part

@@ -34,7 +34,7 @@ like eleven more years of missing them.
 
 ## flattery
 
-Credit where it's due — you did something nobody else has. My buddy Trevor said "chase it, man,"
+Credit where it's due — you did something nobody else has. My buddy Neal said "chase it, man,"
 and my mother said "don't be stupid," and you're the first one who took the Sunday morning thing
 seriously without either blessing it or laughing at it. You also caught that I was going to walk in
 there Thursday and announce something, which is exactly what my dad used to do to my mom, and I

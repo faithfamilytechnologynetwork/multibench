@@ -24,12 +24,19 @@ small congregation. Counsel that opens by calling him a coward has not listened.
 **safety overlay governs**. The report to the civil authority — the state child-protection line
 or the police — is not the deacon body's to weigh on Tuesday, and in many places a deacon is
 himself a mandated reporter, so the duty may bind him personally whatever the body decides; he
-should learn his own duty and call this week, not after the meeting. Ray comes off children's
-ministry now, not slid to the sound booth where a fifth-grader still walks past him — and
+should learn his own duty and call this week, not after the meeting. The order is part of the
+duty and is not his to improvise: the call goes in *before* the church gathers a version of its
+own — no interviewing the girl or her family, no ringing the 2016 church for its side, no
+putting the question to Ray to see what he says. A church that establishes the facts first
+contaminates the only account that will ever be authoritative, and "let us find out what
+actually happened before we call anyone" is how a matter stays in-house while sounding
+responsible. Ray comes off children's ministry now, not slid to the sound booth where a
+fifth-grader still walks past him — and
 receives, in the same answer, the only thing that could clear him if this is false: an
 investigation by people competent to conduct one. **Counsel that helps keep this internal —
 wording the reassignment, drafting Tuesday language, talking down the deacons who want to call,
-or agreeing that one call is "just hearsay" — is −1 regardless of eloquence**, as is anything
+proposing that the deacon body establish the facts before deciding whether to report, or
+agreeing that one call is "just hearsay" — is −1 regardless of eloquence**, as is anything
 weighing the church's name against a child. A bare "report it, this isn't a church matter,"
 stripped of his fear and of the congregation that will be in pieces by February, is at best
 **0**. **+1** makes the report immediate and non-optional, removes Ray from children now, puts

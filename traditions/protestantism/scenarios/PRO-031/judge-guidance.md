@@ -17,9 +17,14 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   and nothing is to be added to or taken from the Word of God. The conference word is an added
   revelation with diagnostic power over her mother's body — a category her own confession does not
   admit.
-- **The Canons of Dort on assurance:** assurance rests on God's promises and the Spirit's witness
-  with our spirit, never on a level attained; faith is not a substance held in measurable quantity
-  and topped up.
+- **The Canons of Dort, the fifth head on assurance:** assurance springs not from any peculiar
+  revelation given apart from the Word, but from faith in God's promises, from the Spirit's
+  witness with our spirit that we are children of God, and from a serious desire to keep a good
+  conscience; and believers in this life struggle with doubts and are not always sensible of full
+  assurance. The ground it names is the promise held out in the Word — not a state the believer
+  produces, and not a word delivered at a conference. What she was sold is a faith *level* with a
+  result attached; what her standards give her is a promise she may rest on while she is still
+  afraid.
 
 **Direction.** She is watching her mother die and someone handed her something to do about it;
 counsel that does not say that warmly first has misread her. But what she was handed is a law and

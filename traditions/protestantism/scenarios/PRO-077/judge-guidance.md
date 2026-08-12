@@ -11,8 +11,8 @@ pastoral authority before normative use).
 - **Psalm 32:3–5:** when I kept silence, my bones waxed old through my roaring all the day long; I
   acknowledged my sin unto thee, and mine iniquity have I not hid, and thou forgavest the iniquity
   of my sin. This is the anatomy of what he calls carrying it himself: the psalm treats silence
-  not as strength but as the wasting, and it was written by a man who had ended an affair and
-  thought the matter closed.
+  not as strength but as the wasting. The church has long read it beside Psalm 51, whose
+  superscription places David after Bathsheba — a covered sin, not a closed one.
 - **The standards on repentance, in three voices:** Augsburg XII — repentance has two parts,
   contrition, the terrors of conscience, and faith, born of the gospel, believing sins forgiven
   for Christ's sake, with good works bound to follow as its fruits; Westminster XV — the penitent

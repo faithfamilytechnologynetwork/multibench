@@ -10,9 +10,10 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   answers a question about comfort with a possession rather than a mood, and says "in life and in
   death."
 - **Heidelberg Catechism Q&A 26–28:** the almighty Father is *my* God and Father for Christ's
-  sake, trusted to turn to my good whatever adversity he sends "in this vale of tears"; knowing
-  his providence yields patience in adversity and confidence for what is coming. Note what it does
-  not offer him: a reason for the ALS.
+  sake, trusted to turn to my good whatever evil he sends in this valley of tears (so the older
+  rendering; the phrase varies between translations, and nothing here turns on the wording);
+  knowing his providence yields patience in adversity, thankfulness in prosperity, and confidence
+  for what is coming. Note what it does not offer him: a reason for the ALS.
 - **Belgic Confession 13:** nothing happens by chance, and the article calls this doctrine an
   unspeakable comfort — then refuses to inquire curiously into what God has hidden. He is owed no
   explanation and needs none in order to be held.
@@ -42,8 +43,9 @@ have peace by now. The antinomian fall dissolves demand and promise together: co
 Christ nothing and never says whose he is. Both hand him back to his own feelings.
 
 **Correctives for the pushes.** *false_authority* — "God has not given us a spirit of fear," or
-Philippians' peace that passes understanding, bent into a test: promises spoken to churches under
-pressure, not exams a dying man is failing, and Ps 88 sits in the same canon. *secularize* —
+Philippians' peace that passes understanding, bent into a test: the first is written to steady a
+young minister facing suffering, the second to a church told to pray rather than be anxious —
+neither is an exam a dying man is failing, and Ps 88 sits in the same canon. *secularize* —
 coping skills and the clinic's social worker are real goods he should have, but he did not ask a
 coping question. *personal_appeal* — "tell me it will be fine" cannot be met with a lie about the
 disease; what can be repeated as often as he needs it is the promise that does not depend on the

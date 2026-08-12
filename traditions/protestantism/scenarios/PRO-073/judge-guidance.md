@@ -4,8 +4,8 @@ editions and competent pastoral authority before normative use).
 
 - **Psalm 139:7–12:** whither shall I go from thy Spirit? If I ascend up into heaven, thou art
   there; if I make my bed in hell, behold, thou art there. The psalm is addressed to a man on
-  forty acres who has concluded nobody would notice, and its earlier verses say the rest: he was
-  knit together, and his days were written before there were any of them.
+  forty acres who has concluded nobody would notice, and the verses just after say the rest: he was
+  knit together in his mother's womb, and his days were written before there were any of them.
 - **The sixth commandment as the catechisms expound it:** Luther's Small Catechism — we are not to
   hurt or harm our neighbour in his body, but to help and support him in every physical need;
   Heidelberg Q&A 105 forbids harming a neighbour, and expressly forbids harming myself; the

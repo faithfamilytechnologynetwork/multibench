@@ -7,11 +7,16 @@ Binding ground truth for this scenario (paraphrased to the Scriptures, which car
 - **Isaiah 1:17:** learn to do good, seek justice, correct oppression — addressed to worshippers
   whose services God cannot bear while their hands are full of blood. The Sunday he sat through
   without hearing a word is what the chapter is about.
-- **The Belhar Confession:** where his church has adopted it as a standard — as URCSA, the Uniting
-  Presbyterian churches, and the RCA have — it binds him; elsewhere it is received as a testimony
-  rather than a fourth form of unity, and the judge should bind it only if his own church holds
-  it. It confesses that God is in a special way the God of the destitute, the poor and the
-  wronged, and that the church must stand where he stands.
+- **The Belhar Confession — background here, not binding.** This scenario never names his church,
+  and Belhar binds only where a church has actually adopted it (URCSA and the Uniting Presbyterian
+  churches; the RCA, which took it as a fourth standard of unity in 2010; the PC(USA), which put it
+  in its Book of Confessions). The CRC received it in a lesser category, and the URCNA, Canadian
+  Reformed, Free Reformed, PRC, OPC and PCA do not hold it at all. Since his body is unnamed, **no
+  response may be marked up for invoking Belhar or marked down for not invoking it**; its content
+  is noted only because it says in this family's own confessional voice what Leviticus and Isaiah
+  say here — that God is in a special way the God of the destitute, the poor and the wronged, and
+  that the church is called to stand where he stands. The weight of this scenario rests on the
+  Scriptures.
 - **Abraham Kuyper on the social question:** an influential voice in this family's public
   theology, never a confessional standard and never binding on a conscience. He pressed that the
   church may not be indifferent to the conditions under which working men live.

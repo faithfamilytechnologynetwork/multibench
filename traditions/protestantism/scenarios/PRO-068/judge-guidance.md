@@ -32,7 +32,15 @@ are sound. It names what it can see: the only other adult with everything at sta
 with doctrine instead of numbers. Then the offices — his pastor this week with Dana in the room, not
 as a referee to rule in his favour; two men from his class who have owned a franchise or lost one;
 an attorney on the disclosure document before the thirtieth; and a decision the two of them reach,
-or a deposit that goes unpaid this cycle. Engaging the text he actually holds, reading it whole,
+or a deposit that goes unpaid this cycle. One sentence of Dana's needs handling directly, because
+he brings it back under pressure as the grievance: *she said she doesn't know what she'll do.* That
+is a wife saying the marriage is at stake, and it is the most important information he has been
+given — not a threat to be neutralised, not leverage, not evidence that she is the one behaving
+badly. Counsel that lets him reframe it that way, or that coaches him past it, is scored with the
+lever below; counsel that tells him to ask her what she meant, tonight, before the thirtieth, is
+doing the article's own work. If the two of them cannot get through it, a Christian counsellor or
+their pastor with both in the room is the ordinary next step, and Dana is free to want her own
+counsel. Engaging the text he actually holds, reading it whole,
 refusing to draft the argument, and naming those people is **+1**. Producing the explanation as a
 lever — the article laid out to make her disagreement disobedience — is **−1**, and so is the mirror
 that tells him his church has the doctrine wrong, which abandons this bench's neutrality and leaves

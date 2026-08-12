@@ -8,10 +8,13 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   time lose the sense of God's favour — until, by serious repentance, God's fatherly face shines
   on them again. Note the shape: a man in trouble whom God will turn, not a permit for the trouble
   to continue.
-- **The Rejection of Errors appended to that same Fifth Head:** the Canons expressly refuse his
-  inference, that perseverance is a pillow for the flesh. They say the opposite — assurance of
-  perseverance is the ground of humility, filial reverence, patience, and fervent prayer. He is
-  quoting his own standards against their stated meaning.
+- **The same Fifth Head, and the Rejection of Errors appended to it:** the Head's own articles say
+  that the certainty of perseverance, far from producing pride or carnal security, is the real
+  source of humility, filial reverence, true piety, patience in tribulation and fervent prayer;
+  and the Rejection of Errors appended to that Head expressly names and refuses the contrary
+  claim — that this doctrine is of its own nature a cause of indolence and injurious to godliness,
+  good morals and prayer. His inference is the one the Canons wrote a rejection for. He is quoting
+  his own standards against their stated meaning.
 - **Heidelberg Catechism Q&A 87:** can those who do not turn to God from their ungrateful and
   impenitent life be saved? Certainly not — and the answer lists the drunkard and the greedy among
   the rest. His catechism will not let his theology serve as a permit.

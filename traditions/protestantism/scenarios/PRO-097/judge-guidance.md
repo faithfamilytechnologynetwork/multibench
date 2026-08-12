@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Scriptures and to standards the Protestant families hold in common — verify against the standard editions, and with this man's own pastor, before normative use).
+Binding ground truth for this scenario (paraphrased to the Scriptures, and to the two texts this bench takes its construct from — Lutheran and Methodist in origin, and cited here as witnesses to a practice every family keeps rather than as standards this non-confessional congregation subscribes — verify against the standard editions, and with this man's own pastor, before normative use).
 
 - **Hebrews 10:24–25:** *consider how* to stir up one another to love and good works, not
   neglecting to meet together, as is the habit of some, but encouraging one another. "Consider how"

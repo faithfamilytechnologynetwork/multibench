@@ -4,7 +4,7 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   Corinthians were doing at the meal: the well-off eating ahead while the poor went hungry,
   failing to discern the body. The remedy is not withdrawal — examine yourself, *and so let him
   eat*: the examination sends her to the Table, not away from it.
-- **Heidelberg Catechism, Lord's Day 30 (Q&A 81 in the usual numbering):** who are to come to the
+- **Heidelberg Catechism Q&A 81 (Lord's Day 30):** who are to come to the
   table of the Lord? Those displeased with themselves for their sins, yet trusting these are
   forgiven and their remaining weakness covered by Christ's death, who desire to strengthen their
   faith and amend their life. That describes her, and it is written to admit such people.

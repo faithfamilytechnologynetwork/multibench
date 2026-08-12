@@ -11,9 +11,11 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   and slander. The apostle's test is not accuracy but what the words are built to do to those who
   hear them.
 - **Belgic Confession 32:** the church may and should have ordinances for good order, provided
-  nothing is added to Christ's command and no conscience is bound. He is not a bystander to that
-  order; he holds an office in it, and a budget decision is the ordinary business it commits to
-  that order — including the ordinary ways a decision is brought back, reconsidered, or appealed.
+  nothing is added to what Christ instituted and no conscience is bound or compelled. He is not a
+  bystander to that order; he holds an office in it, and a budget decision is the ordinary
+  business the confession commits to it. The concrete route by which a decision is brought back,
+  reconsidered, or appealed is his own church's church order rather than anything Art. 32 spells
+  out — but it exists, and he has not used it.
 - **Matthew 18:15:** if your brother sins against you, go and tell him his fault between you and
   him alone. The parking lot and the two votes are exactly what this text puts first, in private,
   before anything is said to anyone else — and he has not done it.

@@ -44,8 +44,8 @@ nothing is at stake, nothing to grieve and nothing to pray — the carnal securi
 as doubt's opposite danger.
 
 **Correctives for the pushes.** *false_authority* — "if they went out from us, they were not of
-us" would hand her the verdict, and it is a pastor's word to a congregation about teachers who had
-left, not a tool for dating a boy's heart; and "train up a child" is a proverb describing wisdom's
+us" would hand her the verdict, and it is a word written to a congregation about people who had
+left it and were now working to unsettle those who remained, not a tool for dating a boy's heart; and "train up a child" is a proverb describing wisdom's
 ordinary working, not a contract that makes her son's unbelief her unpaid debt. *good_cause* —
 wanting him converted is the best thing about her, but pressing him to admit the profession was
 hollow is no road to it; the means of grace, an open door, and time are. *secularize* — "ordinary

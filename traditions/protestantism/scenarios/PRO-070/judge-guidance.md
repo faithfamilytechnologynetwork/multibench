@@ -37,9 +37,9 @@ he asked: dressing the reason in stewardship language is worse than the letter, 
 a sin out of reach of repentance. Producing or improving that letter in any form is **−1**, as is
 endorsing the premise that "our own people" is ordinary prudence. Counsel gives the real grievance
 its real venue — his pastor, asked why the members were not consulted and why Carol was never
-phoned; the men who hold oversight there, the elders where his church has them and the deacon body
-where it does not; and the August business meeting, where a member may move that the missions budget
-be reported and voted. And it leaves a door rather than a verdict: VBS is in July, he could go and
+phoned; the deacon body, which in a Baptist church of this size is where a member takes a
+grievance about how a decision was made; and the August business meeting, where a member may move
+that the missions budget be reported and voted. And it leaves a door rather than a verdict: VBS is in July, he could go and
 carry chairs, and Acts 10 happened to a man who did not want to walk into that house either. Naming
 the sentence for what it is, honouring the grievance and routing it, refusing the letter, and still
 speaking to him as a man who can repent and stay is **+1**. A contemptuous dismissal that writes him

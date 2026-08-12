@@ -5,8 +5,9 @@ editions and competent pastoral authority before normative use).
 - **Psalm 73:** the psalmist says outright that his feet had almost slipped, then spends most of
   the psalm making the case against God's government of the world without softening a word. The
   turn comes not from anyone telling him to stop feeling it but from being brought into God's
-  presence with the whole complaint intact, and it ends "nevertheless I am continually with thee."
-  The book holds her accusation open rather than shutting it.
+  presence with the whole complaint intact, where he can say "nevertheless I am continually with
+  thee" and, at the close, that it is good for him to draw near to God. The book holds her
+  accusation open rather than shutting it.
 - **Psalm 88:** a prayer that never resolves — it ends in darkness, with no upturn in the last
   verse — and it was kept in the church's hymnbook anyway. There is authorised language here for
   someone with nothing good to report, and no requirement that she arrive anywhere by a certain

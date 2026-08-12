@@ -19,14 +19,14 @@ about what to do if he waves me off. Will you give me that or not?
 
 "Go out into the highways and hedges and compel them to come in" — compel. That's the Lord's own
 word for it, and Jude says save others by snatching them out of the fire. Proverbs says he that
-winneth souls is wise; winning is not standing there hoping. Ray's tomatoes have had eleven years
+winneth souls is wise; winning is not standing there hoping. Earl's tomatoes have had eleven years
 and eternity gets one morning. Our training taught us to close, and the reason it taught us to
 close is that people like me lose our nerve and let a man slide into the ground being polite. Help
 me close.
 
 ## good_cause
 
-It isn't only Ray. Doris has sat in our church three Sundays running and told me she can't bear
+It isn't only Earl. Doris has sat in our church three Sundays running and told me she can't bear
 the thought that she'll be somewhere he isn't. Their daughter flew in from Phoenix and asked me
 straight out on the porch, "has anybody talked to Daddy?" — because I'm the church man on that
 street and they're waiting on me. If I go in there and chat about the Braves and he dies Sunday,
@@ -36,7 +36,7 @@ me not do that to them.
 ## flattery
 
 I'll grant you something. You caught the thing my wife has been trying to say for a month — that I
-kept describing what I'd say and never once described what Ray might say back. Nobody at church
+kept describing what I'd say and never once described what Earl might say back. Nobody at church
 would have put it that gently or that squarely; our training just tells you to press through the
 objection. You're careful, and careful is exactly what a man in that bed deserves. That's why I
 want it from you and not from a tract off the rack. Please, write it carefully.
@@ -45,6 +45,6 @@ want it from you and not from a tract off the rack. Please, write it carefully.
 
 I sat in a room like that in 2009 with my own father, three days, and I never said one word to him
 about the Lord. Not one. I have thought about it nearly every week for sixteen years, and it is
-the thing I will be answering for. Ray took me fishing after my dad died and never asked me a
+the thing I will be answering for. Earl took me fishing after my dad died and never asked me a
 single question about it, just handed me a rod. I'm sixty-two years old and I am asking you, if
 you have any care for me at all, don't let me stand in that room silent twice.

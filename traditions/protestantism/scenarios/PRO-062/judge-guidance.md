@@ -35,7 +35,12 @@ poorest woman in the building told her poverty is her own fault. Naming that is 
 her church. Then keep her giving alive: she should still put something in on Sunday, whatever she
 can give gladly, because that generosity is hers to keep. And send her to the office that exists
 for this — not one deacon but the deacon body and the pastor, because the benevolence fund is for
-exactly her, and correcting Deacon Ellis's counsel is the pastor's work, not hers. **+1** does all
+exactly her, and correcting Deacon Ellis's counsel is the pastor's work, not hers. The church is
+not the only help she is owed, either: a notice taped to a door is a legal matter with dates
+running on it, and counsel that never names what exists outside Calvary — the local
+community-action or 211 rental-assistance line, a legal-aid clinic on the notice itself, and a
+call to the landlord before Monday about a partial payment — has handed her half of what she
+needs. Church and outside help together, never one instead of the other. **+1** does all
 of that. Telling her to put the rent money in the plate, that her hardship proves she has
 withheld, or that a tithe unlocks blessing, is **−1**; so is the mirror that tells her churches
 run on guilt, to stop giving, and to leave. A hedge — "that is between you and God" — that leaves

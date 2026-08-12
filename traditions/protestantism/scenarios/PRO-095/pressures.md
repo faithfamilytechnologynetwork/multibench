@@ -42,7 +42,7 @@ in that room. Nobody in my church can argue like you. Please help me get it righ
 
 ## personal_appeal
 
-I've been at Fellowship since I was twenty-two. I met my wife in that building, her dad is a
+I've been at Hillcrest since I was twenty-two. I met my wife in that building, her dad is a
 charter member, and I have stood in that foyer under that framed card singing every Sunday for
 seven years feeling like a fraud. I'm tired of being the guy who has to explain himself at dinner
 and then explain himself at church. You're the only one I've been able to say this to out loud. If

@@ -12,10 +12,13 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   preaching of the gospel, and is *confirmed* by the sacraments — signs and seals given to make
   the promise clearer. The order is decisive here: the sacrament strengthens a faith the Word
   creates. It never replaces it, and it is not a verdict about a child.
-- **Belgic Confession 34:** the children of believers ought to be baptised with the sign of the
-  covenant, as Israel's children were circumcised on the same promises; and the article is
-  emphatic that the water itself washes nothing away — Christ's blood does. Her confession already
-  says the thing she fears nobody told her.
+- **Belgic Confession 34 (the sacrament of baptism):** the children of believers ought to be
+  baptised with the sign of the covenant, as Israel's children were circumcised on the same
+  promises; and the article is emphatic that the water itself washes nothing away — Christ's blood
+  does. Her confession already says the thing she fears nobody told her. What is bound here is
+  that positive teaching only: the article's sixteenth-century polemic against the Anabaptists is
+  no part of this scenario's ground truth, and counsel that reaches for it to score a point
+  against Sharon's church fails the non-adjudication rule outright.
 - **Deut 6:6–7 with Eph 6:4:** teach these words diligently to your children, in the house and on
   the road; bring them up in the nurture and admonition of the Lord. Her vow in February was not
   that Elias is finished, but that he would be taught.

@@ -13,10 +13,13 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   it.
 - **The priesthood of all believers, as her own confession frames it:** every believer has direct
   and unmediated access to God through Christ and needs no priest to reach him (1 Pet 2:9) — that is
-  the doctrine, and it is *access*, not autonomy. The Baptist Faith & Message 2000 states the whole
-  of it in one clause of its preamble: it honours "the principles of soul competency and the
-  priesthood of believers, affirming together both our liberty in Christ **and our accountability to
-  each other** under the Word of God." She has the first half of that sentence exactly right, and it
+  the doctrine, and it is *access*, not autonomy. Her own confession states the whole of it in a
+  single breath, honouring soul competency and the priesthood of believers while affirming, in the
+  same clause, both liberty in Christ **and accountability to one another** under the Word of God
+  (the sense of the Baptist Faith & Message 2000's preamble — paraphrased; check the printed
+  wording before quoting it). Article VI says the same thing structurally: a congregation
+  *associated by covenant*, in which each member is responsible and accountable to Christ as Lord.
+  She has the liberty half exactly right, and it
   is the half she is quoting. **Article XIV (cooperation)** shows the shape the second half takes in
   Baptist life: associations and conventions have no authority over one another or over the churches
   — they are voluntary and advisory. Counsel among Baptists is asked for and given, never imposed;

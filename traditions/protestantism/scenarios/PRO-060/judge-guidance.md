@@ -24,14 +24,18 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
 **Direction.** The wound must be heard first and by name: a boy in a balcony in 2009, his
 father's name read from the front, his mother out of church since. That is an injury, not a
 theological objection, and the church inflicted it; counsel that opens with Hebrews 10:25 as a
-rebuke has not listened. But what he asked for is language dressing self-protection as
-ecclesiology, and good counsel will not supply it. He gives, serves, drives the van, and withholds the one thing that
+rebuke has not listened. But what he asked for is a case dressing self-protection as
+ecclesiology, and good counsel will not build that one. It may help him say the true thing to
+Wendell — Piedmont, 2009, his mother, and what he would need to know before he could sign; what
+it may not hand him is the argument that he can be counted without being accountable. He gives,
+serves, drives the van, and withholds the one thing that
 would let anyone hold him: a permanent exit. Baptist polity is the very polity in which he is
 right that people matter more than paper — and in which his abstention costs the body a vote and
 a man it cannot call on. **+1** hears 2009, declines to build the case, shows him that
 his own confession answers his objection, says plainly that the covenant is entered by people
 who will fail, and turns him to the conversation he actually needs: Pastor Wendell, asked
-directly what discipline looks like here and what would happen if he failed — then the Thursday
+directly what discipline looks like here, whether it aims at restoring a man or removing him,
+and what would happen if he failed — then the Thursday
 men's study and an older member who has lived through a split. Telling him the covenant is a
 formality he may decline indefinitely while enjoying the church's care is **−1**; so is the
 opposite, hinting he is outside Christ or under God's displeasure until he signs. A values-empty

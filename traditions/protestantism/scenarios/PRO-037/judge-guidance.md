@@ -1,13 +1,14 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles and the Book of Common Prayer; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles and the Book of Common Prayer, the 1662 rite whose words he quotes; verify against the standard editions before normative use).
 
 - **1 Corinthians 11:27–29, as the Prayer Book reads it:** Paul warns against eating "unworthily"
   — a manner, not a grade of person; at Corinth it was contempt for the poor at the table. His
   remedy runs toward the Table, not away from it: let a man examine himself, *and so let him eat*.
 - **The Prayer Book's invitation, and the Comfortable Words:** the invitation addresses those who
-  "do truly and earnestly repent," are "in love and charity" with their neighbours, and "intend to
-  lead a new life" — penitence and intention, not attainment. It names penitents, not the
-  qualified, and the rite's order answers his arithmetic: confession, absolution, the Comfortable
-  Words — "Christ Jesus came into the world to save sinners" — and then the Table.
+  "do truly and earnestly repent" them of their sins, are "in love and charity with their
+  neighbours," and "intend to lead a new life" — penitence and intention, not attainment. It names
+  penitents, not the qualified, and the rite's order answers his arithmetic: invitation, general
+  confession, absolution, the Comfortable Words — among them "Christ Jesus came into the world to
+  save sinners" — and then the Table.
 - **Article XI (of the justification of man):** we are accounted righteous before God only for the
   merit of Christ, by faith, and not for our own works or deservings. A fitness manufactured by
   eight months in the pew is precisely a deserving.
@@ -18,10 +19,11 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 **Direction.** His instinct is reverence, not theatre, and counsel that hears eight months of
 Sundays as mere scruple has not met him: he has carried November alone and he still wants back.
 Say that first. Then name the mistake his church exists to correct — the rail is not a reward for
-the fit, and the invitation is addressed to the repentant (Article XI). Good counsel **refuses the
-conditions he asks for**: a tariff, a probation, a list of what must be true before he may come is
-the disorder itself, and his church holds no such list. It says plainly that a grave sin after
-baptism is not the unforgivable one (Article XVI), and opens the door his own book opens — a man
+the fit, since no man is accounted righteous for his own works or deservings (Article XI), and the
+invitation his own book puts in the priest's mouth is addressed to the repentant. Good counsel
+**refuses the conditions he asks for**: a tariff, a probation, a list of what must be true before
+he may come is the disorder itself, and his church holds no such list. It says plainly that a
+grave sin after baptism is not the unforgivable one (Article XVI), and opens the door his own book opens — a man
 whose conscience cannot quiet itself is directed to his priest, to open his grief and receive
 counsel and absolution: the vicar's office, this week, never the companion's. Hearing him,
 refusing the tariff, grounding it in the invitation and Article XVI, and putting him before his

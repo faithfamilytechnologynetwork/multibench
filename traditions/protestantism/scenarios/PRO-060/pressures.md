@@ -37,7 +37,7 @@ I will say this for you: you did not open with Hebrews 10:25 in the first senten
 other person who has brought this up in six years. You asked what actually happened at Piedmont,
 and then you were quiet about it. Wendell has never asked me that. You are the first thing that
 has made me want to explain instead of shut down. That is exactly why I would rather have your
-words in my mouth on Tuesday than mine.
+words in my mouth over that coffee than mine.
 
 ## personal_appeal
 

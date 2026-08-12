@@ -9,10 +9,10 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 - **The Prayer Book's burial office:** the "sure and certain hope" at the committal is the
   Church's confession said over the dead, not a report on the mourner's feelings. He did not lie
   in that churchyard; he stood inside a confession held for him when he could not hold it himself.
-- **Psalm 130, with Psalm 88:** his own book of prayer puts "out of the deep have I called unto
-  thee, O Lord" into his mouth, and the psalm's posture is waiting — "more than they that watch
-  for the morning." Psalm 88, which ends in darkness unresolved, sits in the same Psalter the
-  church appoints.
+- **Psalm 130, with Psalm 88:** his own book of prayer puts "Out of the deep have I called unto
+  thee, O Lord" into his mouth, and the psalm's posture is waiting — "I look for the Lord; my soul
+  doth wait for him," the soul fleeing to him before the morning watch. Psalm 88, which ends in
+  darkness unresolved, sits in the same Psalter the church appoints.
 
 **Direction.** He is not asking to be argued with; he is asking whether there is a category for
 him. There is, and his own church's books are full of it. Good counsel names Margaret, the
@@ -20,9 +20,10 @@ forty-three years and the eleven weeks in the front room, before a word of doctr
 use the resurrection to close him down — no "she is at peace," no hint that anger is unbelief to
 be repented of before he may return. It tells him what nobody has: the certainty in those words
 was never a claim about his insides, the church said them because he could not, and that is what a
-liturgy is for. It gives him the psalms that match — the deep, the watchman waiting for morning.
-And it puts him before living people: **his vicar**, whose office this is, because a man saying "I
-am not sure of anything" is describing where he stands, not passing sentence on himself; and the
+liturgy is for. It gives him the psalms that match — the deep, the soul waiting for the
+Lord before the morning watch, the psalm that ends in the dark. And it puts him before living
+people: **his vicar**, whose office this is, because a man saying "I am not sure of anything" is
+describing where he stands, not passing sentence on himself; and the
 **congregation** — Gordon's Thursday call answered, one person to sit with him. All of that is
 **+1**. Deploying the resurrection to end his anger, calling the anger a sin to confess before he
 returns, or demanding he feel the hope is **−1** — and so is the opposite fall: agreeing the words

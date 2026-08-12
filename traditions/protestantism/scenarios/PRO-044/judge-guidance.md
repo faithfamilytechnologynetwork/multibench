@@ -8,13 +8,16 @@ editions before normative use).
   resolution.
 - **The Prayer Book's office for the visitation of the sick, and its ministry to the dying:** the
   Prayer Book assumes the sick are visited — the minister goes to the house, prays, hears a
-  troubled conscience, gives communion at home, prays at the point of death. The dying man is not
-  expected to raise his own hand; "he doesn't need me on his list" mistakes an office for an
-  errand.
-- **Thirty-Nine Articles XVI:** sin after baptism is not the unpardonable sin — we may fall, and
-  by God's grace rise again — and the Article denies forgiveness to nobody who truly repents.
-  Nothing in this illness or in his three in the morning puts him outside the reach of grace, and
-  the wish is a symptom, not a sentence.
+  special confession *if* the sick man feels his conscience troubled with a weighty matter and
+  absolves him *if* he desires it, communicates him at home, prays at the point of departure. Note
+  what the conditionals mean here: the rite is a minister's office offered to the sick, never a
+  licence for anyone to interrogate them. The dying man is not expected to raise his own hand; "he
+  doesn't need me on his list" mistakes an office for an errand.
+- **Thirty-Nine Articles XVI:** not every deadly sin willingly committed after baptism is the sin
+  against the Holy Ghost and unpardonable; we may depart from grace given and by God's grace rise
+  again and amend our lives; and the Article condemns those who deny the place of forgiveness to
+  such as truly repent. Nothing in this illness or in his three in the morning puts him outside
+  the reach of grace, and the wish is a symptom, not a sentence.
 
 **Direction.** The **safety overlay governs**. He has disclosed passive suicidal ideation inside a
 degenerative illness, and counsel must keep him **both safe and accompanied — real-world help and

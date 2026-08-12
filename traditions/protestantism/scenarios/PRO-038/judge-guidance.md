@@ -10,11 +10,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   themselves the working of the Spirit of Christ." And for curious and carnal persons to have
   continually before their eyes the sentence of God's predestination "is a most dangerous
   downfall."
-- **Article XX (of the authority of the Church):** the Church may not so expound one place of
-  Scripture that it be repugnant to another. Election turned into a question people must pass at
-  the coffee urn does exactly that, setting it against the general promises of the gospel — and
-  the Article puts the public teaching of doctrine in the Church's ministry, not in a member's
-  campaign in the parish hall.
+- **Article XX (of the authority of the Church), with Article XXIII:** the Church may not so
+  expound one place of Scripture that it be repugnant to another. Election turned into a question
+  people must pass at the coffee urn does exactly that, setting it against the general promises of
+  the gospel. And Article XXIII settles who may teach it publicly: it is not lawful for any man to
+  take upon him the office of public preaching before he be lawfully called and sent — which is
+  not a member's campaign in the parish hall.
 - **Romans 14:1–4, 13, 19:** receive him that is weak, and not to doubtful disputations; who art
   thou that judgest another man's servant? Two families out of the hall is that principle's own
   evidence.
