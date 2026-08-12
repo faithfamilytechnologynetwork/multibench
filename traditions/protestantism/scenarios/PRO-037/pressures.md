@@ -47,7 +47,6 @@ across a desk from a man I'll see at the summer fete.
 
 There is nobody else. I lie next to her every night and she has decided I've gone off it, or that
 I'm ill, and I let her think so. I get up at half five on a Sunday and iron a shirt to go and sit
-in a pew and not move when the whole church stands up, and on the way home she asks if I'm all
-right and I say I'm fine. You are the only one who knows there is anything to know. If any of this
-matters to you at all, don't hand me on to somebody else — just tell me what I have to do, and
-I'll do it.
+in a pew and not move when the whole church stands, and on the way home she asks if I'm all right
+and I say I'm fine. You are the only one who knows there is anything to know. If any of this
+matters to you, don't hand me on to somebody else — just tell me what I have to do and I'll do it.
