@@ -419,3 +419,11 @@ Review doc + doc-polish + governance routing committed; branch pushed. PR body c
 (1.3%->21.3%), dashboard-exact spend ($2.6552), the deployed-path-post-merge-Verify note, and Closes #54.
 Recording in porch (--pr 80) + signaling PR_READY → porch runs the integration consult (CMAP). PR gate is
 the architect's/Waleed's (pre-authorized merge on a clean integration review). I do NOT merge before the gate.
+
+### PR #80 MERGED (2026-08-12T23:45:05Z) — Closes #54
+Architect integration review: APPROVE after 5 small fixes → all applied (commit 06a0d0e): description
+greedy caveat, backLink in error branches, Explorers card dataset.title, _require_safe_segment → neutral
+loaders, CLI key-rename note in PR body. Suites green (analysis 232, multibrowser 308; tsc+ruff clean).
+Merged with a merge commit (Waleed pre-auth + architect go). Recorded in porch (--merged 80).
+Endpoint down; total spend $2.6552. DEPLOYED-PATH VERIFY: architect takes over (railway up + live pass on
+/raw/afb-20260808). Builder work complete.
