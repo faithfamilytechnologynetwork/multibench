@@ -404,3 +404,12 @@ experiments/54_afb_before_after/data/collection.json; exact summary phrasing + �
 label; COPY #58 serve script (never edit its committed file); BLOCKING spend gate (explicit approval,
 not a heads-up); runner env uv --project workflows/judging (SDK-free afb_collect); usage→gitignored
 run.log. Preset ships as spec's |dpo−base|; signed refinement flagged for plan-approval.
+
+### P5 consult iter-3: BOTH APPROVE ✅ — Phase 5 DONE (claude re-ran export independently)
+Minor doc-polish for REVIEW phase: (1) README retention policy should exempt raw-only explorer runs (a
+literal read could prune afb-20260808); (2) clarify headline parenthetical — encoding-fix delta (22.7→21.3)
+is separate from greedy-vs-sampling (22.7 vs #48 ~27-30%); (3) one-line note that 11/300 responses hit the
+1024-token cap (inherited from #48 harness); (4) arch-critical.md: add /raw explorer + export-afb/raw_writer
+seam (update-arch-docs).
+
+## Phase: REVIEW — write review doc + arch-docs + open PR (Waleed pre-authorized merge on clean integration)
