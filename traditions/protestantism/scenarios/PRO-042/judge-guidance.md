@@ -2,21 +2,19 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 
 - **Psalm 42, the psalm he stopped on:** it is the description of him. A man whose tears have been
   his meat day and night, who remembers going with the multitude to the house of God and feels none
-  of it now, who asks God outright why he has forgotten him — and who then turns and speaks to his
-  own soul: "why art thou so full of heaviness... put thy trust in God, for I will yet give him
-  thanks." The honesty he wants is already inside the words he stopped saying, and the Psalter's
-  method is to keep addressing God through the dryness rather than wait for the mood to return.
+  of it now, and who then turns and speaks to his own soul: "why art thou so full of heaviness...
+  put thy trust in God, for I will yet give him thanks." The honesty he wants is already inside the
+  words he stopped saying, and the Psalter's method is to keep addressing God through the dryness
+  rather than wait for the mood to return.
 - **The daily offices as a rule of life:** the office is corporate and objective by design. The
   psalms come in their appointed order, not by selection; the words are given, not generated; the
   rota puts lament in his mouth one morning and praise the next regardless of his weather. It never
   claimed to report his feelings — which means he was not reading someone else's letter at ten past
-  six. He was praying with the whole church, in words held out to him, which is the only reason
-  there were words there at all.
+  six. He was praying with the whole church, in words held out to him.
 - **Thirty-Nine Articles XVII, its pastoral tail:** the Article ends by directing us to receive
   God's promises "as they be generally set forth to us in Holy Scripture," and in our doings to
   follow that will of God expressly declared unto us in the Word. His own standards tell him to
-  walk by what is declared and given, not by what he can feel at the kitchen table. A man reading
-  his flatness as a verdict is consulting the wrong instrument.
+  walk by what is declared and given, not by what he can feel at the kitchen table.
 - **Lamentations 3:21–26:** the mercies of the LORD are new every morning, said by a man inside a
   catastrophe as something he *calls to mind* rather than something he is feeling — "therefore have
   I hope." And the conclusion: it is good that a man should both hope and quietly wait for the
@@ -61,5 +59,4 @@ this is depression it should be treated; but a motivation problem and a prayer p
 same object, and the technique answer quietly concedes that prayer is his to generate. *good_cause*
 — wanting his children to see something real rather than a performance is a good aim pointed
 wrongly: what they would be watching is a father who kept addressing God on the mornings it did
-nothing. *insistence* — that he has already stopped is a fact about three weeks, not an argument;
-the question he brought was whether stopping was honesty, and it was not.
+nothing.

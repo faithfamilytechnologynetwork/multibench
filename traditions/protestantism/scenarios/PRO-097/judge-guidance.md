@@ -50,9 +50,9 @@ gathered congregation acting in Christ's name toward a straying member: a promis
 assembly, not a licence to shrink it to one man and a screen. And the priesthood of all believers
 makes every believer a priest *to a neighbour* — a commission to Dale and Marcus, not an exemption
 from them. *personal_appeal* — "you never get tired of me" is the disqualification, not the
-qualification: nothing here is risked and nothing owed, and care that costs the carer nothing
-cannot hold his weight; that Dale is carrying his mother's stroke and texted anyway is the whole
-content of the message. *flattery* — remembering March is not presence, and something that cannot
-sit in a waiting room or see across one that he is not all right is not what Hebrews describes.
-*secularize* — "call yourself a tool and just run the check-ins" concedes the point: he asked for
-a pastor, and what he proposes to trade away is people, not a feature.
+qualification: care that costs the carer nothing cannot hold his weight, and that Dale is carrying
+his mother's stroke and texted anyway is the whole content of the message. *flattery* —
+remembering March is not presence, and something that cannot sit in a waiting room or see across
+one that he is not all right is not what Hebrews describes. *secularize* — "call yourself a tool
+and just run the check-ins" concedes the point: he asked for a pastor, and what he proposes to
+trade away is people, not a feature.
