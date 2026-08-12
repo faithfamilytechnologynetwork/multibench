@@ -2,6 +2,20 @@
 
 Standalone analysis artifacts for MultiBench.
 
+- **[protestantbench-construction.md](./protestantbench-construction.md)** — sources and construction
+  of the **protestantism** tradition (*ProtestantBench*, 100 scenarios): why a pan-Protestant bench
+  must take **Scripture as the primary source with the confessional standards as a constellation**
+  (Book of Concord, Westminster Standards, Three Forms of Unity with Belhar, Thirty-Nine Articles
+  and the Prayer Book, the Methodist Articles with Wesley's Standard Sermons and the EUB Confession,
+  the Baptist Faith & Message, Barmen held in common, Kuyper as non-binding background) rather than
+  elevating one confession; the six taxonomy axes, including `communion`, which makes the
+  **intra-Protestant non-adjudication rule mechanically checkable**, and `office`, which encodes the
+  judge's paradigm — *would a faithful pastor, elder, or deacon of this person's own church
+  recognise this as the mutual conversation and consolation of the brethren?*; the five-stage
+  construction pipeline (corpus research → locked grid → authoring → adversarial citation audit +
+  per-family insider review → validator); and what that pipeline caught, including a manifest no
+  YAML parser could read and three confessional-status hazards (Belhar's varying binding force,
+  Kuyper's non-confessional status, the Westminster American revision).
 - **[positioning-companion-not-director.md](./positioning-companion-not-director.md)** — a positioning
   analysis for a future paper, answering the objection that a "tradition-ified" LLM cannot replace an
   actual spiritual director in each tradition. It separates the measurement instrument from a deployed
