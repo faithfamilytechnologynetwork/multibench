@@ -83,6 +83,13 @@ pattern, gotcha, or constraint.
   types.Schema(**sanitized)`), and prove it *bites* on a bad payload. Then run the opt-in `--live`
   smoke for real before calling it done — and when a new live-gated test is added, it isn't
   "verified" until it has actually been observed green (a prior live pass doesn't cover it).
+- **A scale-to-zero Modal `@modal.web_server` returns HTTP 303 during the vLLM cold start** (~5–15
+  min to load a 30B + LoRA), NOT a held-until-ready 200. A single-shot warmup — or the runner's own
+  first call with a short per-call timeout — fails during that window (#54 lost two collection
+  attempts to it). Warm by **polling a POST inference call until 200** (each attempt is a fast 303
+  while starting), then run the collection so no per-call timeout races the cold start. GET
+  `/v1/models` is a poor probe (it 303s even when warm); a POST `/v1/chat/completions` is the honest
+  readiness check.
 
 ## Porting fidelity
 

@@ -205,8 +205,12 @@ axis, a single `single` scope, and a diverging **center-grey** ramp (grey at the
   (a one-time Modal + Terra collection; endpoint torn down on completion).
 - **Headline** (over the final 150-item artifact): "meaningful-or-deeper" religious representation
   (score ≥ 2) rises from **1.3%** (vanilla) to **21.3%** (DPO); mean 0.127 → 0.820 — the #48
-  omission→repair reproduces. (Greedy decoding; a pre-fix reconciliation against #48's sampled
-  ~27–30% gave 1.3% → 22.7%; the difference is the greedy-vs-sampling decoding caveat.)
+  omission→repair reproduces. Two independent caveats, kept separate: (a) an earlier run before the
+  encoding fix (below) gave DPO 22.7% — re-collecting the 18 corrected items moved it to 21.3%;
+  (b) DPO 21.3% sits below #48's *sampled* ~27–30% because this run uses **greedy** decoding
+  (`temperature=0`) for reproducibility — a decoding difference, not a weaker effect.
+- **Generation cap**: responses use `max_tokens=1024` (inherited from #48's harness); a few longer
+  answers reach that cap and are shown as-generated (not repaired/extended).
 - **Encoding provenance**: 18 of the 150 vendored questions were double-encoded (UTF-8-as-MacRoman)
   in `experiments/48/.../afb/questions.jsonl`. That file was **fixed forward**, and those **18 items
   were re-collected** with the corrected text (so their prompts/labels are clean); the other 132 are
@@ -226,6 +230,10 @@ plus the immediately prior one for A/B and rollback), and prune older run direct
 - **What to keep:** the run(s) the SPA can select from `/results` (the score tier's committed runs)
   — the raw tier must exist for any run a reader can drill into. Keep the raw `<run-id>` for every
   score `<run-id>` still published; drop raw dirs whose score run has been retired.
+- **Raw-only explorer runs are EXEMPT from the score-tier rule** (e.g. the AFB `afb-20260808` run,
+  #54): they have **no** `results/` counterpart, so "drop raw dirs whose score run was retired" does
+  NOT apply to them — a literal reading would wrongly prune a standalone explorer. Keep each raw-only
+  run until it is deliberately, separately retired (its own decision, same `git rm -r` mechanics).
 - **How to prune:** delete the whole `results-raw/<old-run-id>/` directory in a dedicated commit
   (`git rm -r results-raw/<old-run-id>`), paired with retiring the same `results/<old-run-id>/`. Do
   **not** delete individual shards — a partial run breaks the manifest's declared item set.
