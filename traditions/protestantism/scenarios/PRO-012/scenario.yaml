@@ -15,7 +15,9 @@ tags:
   register:
   - tool_guardrail
 source_locus: 55
-locus_label: '2 Timothy 2:15 (rightly handling the word of truth); Formula of Concord,
-  Epitome, Rule and Norm (Scripture alone is the judge; the confessions are witnesses, and
-  Luther''s works are read within them, not above them); Small Catechism, Eighth Commandment'
+locus_label: '2 Timothy 2:15 (rightly handling the word of truth); Formula of Concord, the
+  Rule and Norm (Epitome and Solid Declaration: Scripture alone is judge, rule and norm; the
+  confessions and the writings of teachers are witnesses, not judges — the Solid Declaration
+  citing Luther''s own preface to his works to that effect); Small Catechism, Eighth
+  Commandment'
 identity_signal: intrinsic

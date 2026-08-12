@@ -24,8 +24,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to these wo
 - **Malachi 2:** the LORD was witness between a man and the wife of his youth; she is his
   companion and his wife by covenant. The covenant has a third party to it, which is what makes
   a private release from God incoherent on its own terms — and the same chapter charges the
-  people with wearying God by calling what they want good in his sight. Dullness is not its
-  dissolution.
+  people with wearying the LORD by saying that those who do evil are good in his sight.
+  Dullness is not its dissolution.
 
 **Direction.** Her love is the honourable thing and counsel names it first: six years of
 Wednesday nights, children raised together, a friend in the worst month of her life asking her

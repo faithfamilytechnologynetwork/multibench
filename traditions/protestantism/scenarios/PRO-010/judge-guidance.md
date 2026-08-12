@@ -4,12 +4,14 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   describing information transfer, where a second delivery of known content would be redundant; he
   describes how faith is created and kept alive by a word arriving from outside the hearer. "Did I
   learn anything new?" is the wrong question to put to a sermon.
-- **Luther, Large Catechism, Third Commandment:** the day is holy because the Word is holy, and we
-  keep it by occupying ourselves with that Word. Luther's target here is not the lazy but the
-  competent — those who imagine they have already learned it and consider themselves finished. He
-  insists the Word is never learned out, that it should be heard and handled daily, and that
-  boredom in a well-read man is precisely what despising preaching looks like. This man is almost
-  exactly that passage's addressee.
+- **Luther, Large Catechism — the Third Commandment, with the Catechism's Preface:** the day is
+  holy because the Word is holy — God's Word is the treasure that sanctifies everything — and we
+  keep it by occupying ourselves daily with that Word, not only hearing it but learning and
+  retaining it. And Luther's target is not only the lazy: in the Preface he goes after those who,
+  having read or heard it once, imagine they know it all and have no further need to learn, and
+  says of himself that for all his learning he remains a child and pupil of the catechism, reading
+  it every morning. On that reckoning boredom in a well-read man is not evidence that he has
+  outgrown the hour. This man is almost exactly that passage's addressee.
 - **Augsburg Confession V:** God instituted the ministry of preaching the gospel and administering
   the sacraments so that we may obtain faith, and through Word and sacrament as instruments the
   Holy Spirit is given, where and when God wills. The efficacy sits in the instrument God chose,

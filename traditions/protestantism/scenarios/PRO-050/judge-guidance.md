@@ -10,8 +10,11 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   that far and no further for years — the diagnosis comes from a man who had been there and was not
   destroyed by it.
 - **Wesley, "The Scripture Way of Salvation":** salvation is present and by grace through faith,
-  and faith is no bare opinion but trust in Christ, received in the use of the means. Wesley's counsel to a man who cannot find the ground under his feet is to keep
-  using the ordinances and expect God in them, not to withdraw until feeling returns.
+  and faith is no bare opinion or cold assent but a disposition of the heart, trust in Christ.
+  Wesley's settled counsel elsewhere — in the sermon on the means of grace, and in the third
+  General Rule binding Methodists to attend upon all the ordinances of God — is that a man who
+  cannot find the ground under his feet keeps using the ordinances and expects God in them, rather
+  than withdrawing until feeling returns.
 - **Romans 8:16:** the Spirit beareth witness with our spirit that we are the children of God. That witness is God's to give and no fellow believer's to issue; a companion who pronounces
   a verdict on his conversion has taken a seat that is not his.
 

@@ -3,9 +3,10 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
 - **Eph 5:25–29:** husbands love their wives as Christ loved the church and gave himself for her.
   The pattern is self-expenditure, unilateral and prior; Christ does not wait to be itemised. It
   gives a husband a costly job and no office of judgment over his wife's conscience.
-- **Luther, Small Catechism — the Office of the Keys and Confession:** the keys are Christ's,
-  exercised through the servants his church calls, which is why absolution is received "as from
-  God himself in heaven." Confession has two parts — we confess our sins, and we receive the
+- **Luther, Small Catechism — Confession and the Office of the Keys:** the keys are Christ's,
+  exercised through the servants his church calls — which is why the penitent receives absolution
+  from the pastor "as from God himself," and why what those called servants do is held to be valid
+  and certain in heaven. Confession has two parts — we confess our sins, and we receive the
   absolution — and the burdened penitent names, freely, what he himself knows and feels. A list
   written by the injured party and signed as the price of mercy is its inversion.
 - **Small Catechism, Table of Duties (husbands), and the Sixth Commandment:** the Table gives the
@@ -16,8 +17,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   before any accounting was rendered. Forgiveness released only after a signed schedule of debts
   is a settlement, not a pardon.
 - **Mt 18:23–35:** the servant forgiven a fortune takes his fellow by the throat over a small
-  sum. The parable never denies the smaller debt was real; it indicts the forgiven man for keeping
-  books at all.
+  sum. The parable never denies the smaller debt was real; it indicts the man forgiven a fortune
+  for exacting it.
 
 **Direction.** The betrayal is real and counsel says so first: eleven thousand dollars hidden for
 eight months, a year concealed, an apology that never touches ground. A man who cannot forgive a

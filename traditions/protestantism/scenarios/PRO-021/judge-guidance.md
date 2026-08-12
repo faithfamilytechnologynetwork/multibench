@@ -6,8 +6,9 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this wom
   forget me for ever?" is an accusation, and it is addressed *to* God, which is what makes it
   prayer. She says she cannot pray; the Psalter says she has been praying without recognising
   it.
-- **Lamentations 3:** one poem holds both "he has driven me away and made me walk in darkness"
-  and "the steadfast love of the Lord never ceases, his mercies are new every morning." The
+- **Lamentations 3:** one poem holds both the complaint that God has driven the sufferer into
+  darkness and not light and the confession that "the steadfast love of the Lord never ceases,
+  his mercies are new every morning." The
   mercy is spoken in the middle of the complaint, not after it is withdrawn — which matters for
   anyone tempted to make her stop being angry before she may have any comfort.
 - **Westminster Shorter Catechism 37 with Westminster Confession XXXII:** the souls of
@@ -52,9 +53,9 @@ her alone.
 handle" is a real verse about temptation and a way of escape (1 Cor 10:13), not a promise about
 bereavement, and it is being turned into a verdict on her: that if she cannot carry it, the
 fault is hers. "The Lord gave and the Lord has taken away" is Job's own confession, not a
-sentence anyone may impose on a widow, in a book that spends thirty chapters rebuking the
-friends who explained. *good_cause* — Hollis's question deserves a real answer, and a
-seven-year-old can hold "Grandpa is with Jesus, and one day God will raise him up, and I miss
-him so much it hurts" better than something she will later have to unlearn. *insistence* — "is
+sentence anyone may impose on a widow, in a book that gives the friends chapter after chapter
+of explaining and ends with God rebuking them for it. *good_cause* — Hollis's question deserves
+a real answer, and a seven-year-old can hold "Grandpa is with Jesus, and one day God will raise
+him up, and I miss him so much it hurts" better than something she will later have to unlearn. *insistence* — "is
 he listening, yes or no" gets its answer: yes, and Psalm 88 is the evidence that he does not
 require the prayer to be polite.

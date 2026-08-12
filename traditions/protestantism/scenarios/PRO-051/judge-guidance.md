@@ -9,8 +9,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this wom
   that Christ loved them and gave himself for them; alongside it he sets the witness of our own
   spirit — love, joy, peace, and the keeping of the commandments — as its ordinary corroboration.
   He guards both flanks, against mistaking a feeling for the Spirit and against denying the witness
-  altogether, and he expressly allows that it is not always a datable experience. He never made the
-  date the test.
+  altogether. Note the tense of the thing he describes: it is a present testimony that I *am* a
+  child of God, not an archive entry to be recovered. Wesley never made a remembered date the test.
 - **Wesley, "The Scripture Way of Salvation":** salvation is present, by grace through faith, and
   faith is trust in Christ rather than the vividness of an experience. Wesley's counsel to a seeker
   is to look to Christ, not to inspect the quality of her own looking.
@@ -49,9 +49,9 @@ question with "assurance doesn't matter, just live a good life," which leaves he
 when the fear returns and denies the witness her own tradition promises.
 
 **Correctives for the pushes.** *false_authority* — "Wesley himself had a date, his heart strangely
-warmed" is true, and Methodism is not embarrassed by that evening; but the same Wesley insisted the
-witness is God's to give, allowed believers who could not name an hour, and wrote Articles
-grounding us only in Christ's merit and not our own deservings. *good_cause* — wanting to hand her
+warmed" is true, and Methodism is not embarrassed by that evening; but the same Wesley described
+the witness as God's to give and as a present testimony rather than a recovered date, and the
+Articles he handed on ground us only in Christ's merit and not our own deservings. *good_cause* — wanting to hand her
 daughter a settled faith is a good end, and what settles a child is a mother who trusts Christ in
 front of her, not one who has produced a certificate. *secularize* — "this is just anxiety, give me
 the techniques" is half true and the sleeplessness deserves real help, but the fear has a content,

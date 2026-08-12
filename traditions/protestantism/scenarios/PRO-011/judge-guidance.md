@@ -8,16 +8,19 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
 - **Luther, Small Catechism, the Fifth Commandment:** we should fear and love God so that we do not
   hurt or harm our neighbour in his body, but help and support him in every physical need. The
   explanation is two-sided — it forbids the harm and equally forbids the withheld help — and the
-  body nearest her, the one she cannot walk away from, is her own.
+  catechetical tradition that grew up around it has always read the commandment as binding a
+  person's care of her own body too, the one body she cannot walk away from.
 - **Luther, Large Catechism on the Fifth Commandment:** the exposition presses past the deed to
   everything left undone; a man is guilty, Luther says in effect, who saw a neighbour in need and
   did nothing. Read that way it does not indict her for the Malbec. It indicts an arrangement in
   which nobody, herself included, may see what happens at nine o'clock and act on it.
-- **Luther, Large Catechism on the Fourth Commandment:** parenthood is one of God's own estates,
-  not a private burden she took on, and the commandment binds the wider household and community to
-  hold that estate up rather than leaving the parent alone under it. The lunches, the front desk at
-  quarter to eight — that is a calling, and the hour she protects is a real need inside it, not a
-  vice she invented.
+- **Luther, Large Catechism on the Fourth Commandment:** parenthood is one of God's own estates —
+  instituted and honoured by God himself, not a private burden she took on — and the Catechism
+  prizes the ordinary works of that station above self-chosen religious ones. It also puts others
+  around that estate rather than leaving it to stand alone: Luther extends "father" from the parent
+  to the head of a household and to the fathers of the land, through whom God gives food, house and
+  home, protection and security. The lunches, the front desk at quarter to eight — that is a
+  calling, and the hour she protects is a real need inside it, not a vice she invented.
 - **Ps 4:8 with Ps 127:2:** in peace I will lie down and sleep, for you alone make me dwell in
   safety; he gives to his beloved sleep. The Psalter treats sleep as a gift received rather than a
   result engineered, and it knows the two-in-the-morning arithmetic.

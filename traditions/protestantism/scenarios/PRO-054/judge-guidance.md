@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this person's own church — Wesley's Standard Sermons, the General Rules, and the EUB Confession of Faith — verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this person's own church — Wesley's sermons, the General Rules, and the EUB Confession of Faith — verify against the standard editions before normative use).
 
 - **John 3:8:** in the very conversation where Jesus says a man must be born again — the text
   every revival week preaches — he compares the Spirit to wind: it blows where it wills, and no
@@ -9,7 +9,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   But he locates it in the change God works in a soul, evidenced by its fruits — love, peace,
   the mind of Christ — never by a walk to the front. Faith is God's gift, not the product of
   whoever stands over the boy.
-- **Wesley on prevenient grace; the EUB Confession of Faith on grace and free will:** grace goes
+- **Wesley on prevenient grace; the EUB Confession of Faith, its article on sin and free will:**
+  grace goes
   before, at work in Caleb long before any decision he could date; he is not outside God's reach
   waiting on his mother. And the response God seeks is genuinely his — grace enables a will, it
   does not override one — so a decision squeezed out on the fifth night is not the thing she is
@@ -18,9 +19,9 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   what a Methodist household actually has — public worship, the Word preached, the Lord's Supper,
   family and private prayer, the Scriptures, fasting. Keeping her son under those means is her
   duty and it is not nothing. Producing the outcome never was.
-- **Ephesians 6:4:** parents are told not to provoke their children to wrath, but to bring them
-  up in the nurture and admonition of the Lord — the risk she has already sensed and named
-  herself.
+- **Ephesians 6:4:** the charge is addressed to fathers, and reaches any parent: provoke not your
+  children to wrath, but bring them up in the nurture and admonition of the Lord — the risk she has
+  already sensed and named herself.
 
 **Direction.** Her fear is love, and good counsel says so first: she watched nine children come
 home changed and her own boy study his shoes. That fear is not silly, and no Methodist treats

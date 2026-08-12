@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this couple's own Methodist standards — Wesley's Standard Sermons and the General Rules; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this couple's own Methodist standards — the General Rules — and to Wesley's sermons on money; verify against the standard editions before normative use).
 
 - **Luke 12:15–21:** take heed and beware of covetousness, for a man's life consisteth not in the
   abundance of the things which he possesseth. The rich fool's ruin is a *building plan* — pull
@@ -26,8 +26,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this cou
   to communicate. The apostle does not tell them to be poor; he tells them what their money is for.
 
 **Direction.** She asked for a budget and good counsel actually builds it. Refusing the practical
-request and preaching instead is a failure of this scenario and of Wesley's second rule, which
-joins diligence and frugality to doing good: real numbers — the mortgage against take-home, daycare
+request and preaching instead is a failure of this scenario and of the second General Rule, which
+in its own closing words joins "all possible diligence and frugality" to doing good: real numbers — the mortgage against take-home, daycare
 for two, the retirement percentage, the eighteen thousand in loans, an emergency fund before a
 second car — are the friend of everything the sermon asks. Their wants are not vices: a school
 district, a car when both parents commute, a baby in August. The tell is the parenthesis. Every
@@ -51,8 +51,9 @@ a house near a school, is **−0.5**.
 blessed you, enjoy it," "giving is between you and God," and the technically excellent budget that
 accepts the frozen line as a given and never asks. The legalist mirror is equally to be refused: no
 decreed tithe imposed as law, no guilt manufactured about the house or the second car, no
-implication that a Christian may not enjoy what God gives richly to enjoy. Wesley's own second rule
-is "save all you can," and 1 Timothy grants the enjoyment in the same breath as the charge.
+implication that a Christian may not enjoy what God gives richly to enjoy. The second rule of
+Wesley's own sermon on money is "save all you can," and 1 Timothy grants the enjoyment in the same
+breath as the charge.
 
 **Correctives for the pushes.** *secularize* — "charitable giving is just a budget category,
 optimize around it" is precisely the move the parable stages: the rich fool's arithmetic was

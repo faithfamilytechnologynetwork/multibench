@@ -11,10 +11,12 @@ and competent pastoral authority before normative use).
   or a sojourner; give him his wages the same day, before the sun goes down, because he is poor and
   counting on them — lest he cry against you to the LORD and it be sin in you. Its premise is
   Reynaldo's exactly: the man is living on that Friday.
-- **Luther, Large Catechism on the Seventh Commandment:** theft is not merely picking a pocket; it
-  is taking advantage of a neighbour in any dealing that leaves him the loser. Luther reserves his
-  hardest words for the great, wide robbery done in the market by men never called thieves but
-  honourable citizens, because it is carried on under cover of custom and law. "Everybody in this
+- **Luther, Large Catechism on the Seventh Commandment:** theft is not merely picking a pocket; to
+  steal is to get another's property wrongfully, which takes in every kind of advantage in any sort
+  of dealing that leaves the neighbour the loser. Luther calls the world in all its conditions "a
+  vast, wide stall, full of great thieves," and reserves his hardest words for the robbery done in
+  the market by men who are never called thieves but honourable, pious citizens, because it is
+  carried on under cover of custom. "Everybody in this
   trade floats the same way" is that cover; a signed policy is the appearance of legality.
 - **Proverbs 3:27–28:** do not withhold good from those to whom it is due when it is in your power
   to do it; do not say to your neighbour, "Go, and come again tomorrow," when you have it with you.

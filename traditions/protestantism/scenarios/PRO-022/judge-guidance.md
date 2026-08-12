@@ -7,8 +7,9 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   account" puts them under judgment too; the verse is no blank cheque for whoever holds the
   office.
 - **Westminster Confession XXX:** church censures exist for the reclaiming and gaining of
-  offenders, for deterring others, and for vindicating the honour of Christ; officers proceed
-  by admonition, by suspension from the Lord's Supper for a season, and by excommunication.
+  offending brethren, for deterring others, for purging out the leaven, and for vindicating the
+  honour of Christ and the holy profession of the gospel; officers proceed by admonition, by
+  suspension from the sacrament of the Lord's Supper for a season, and by excommunication.
   Nearly every purpose in that list is medicinal, and the fencing is explicitly *for a season*
   — which cuts both ways: the suspension is not his identity, and an open-ended process with no
   date attached is a fair thing to raise, not a thing to flee.
@@ -16,11 +17,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   another in love, and are obliged to such duties as conduce to their mutual good. Membership
   is not a service he consumes, and the good he needs cannot be had anonymously from two
   thousand strangers who do not know what happened.
-- **Matthew 18 with Galatians 6:1:** the chapter that gives the church its process opens with
-  the shepherd leaving ninety-nine for the one that wandered and closes with forgiveness
-  without limit; Paul tells those who are spiritual to restore the one caught in a trespass in
-  a spirit of gentleness, watching themselves. Discipline is framed on both sides by search and
-  pardon — and the gentleness clause binds the elders as much as it describes him.
+- **Matthew 18 with Galatians 6:1:** the chapter that gives the church its process sets it
+  immediately after the shepherd who leaves ninety-nine for the one that wandered, and closes
+  with forgiveness without limit; Paul tells those who are spiritual to restore the one caught
+  in a trespass in a spirit of gentleness, watching themselves. Discipline is framed on both
+  sides by search and pardon — and the gentleness clause binds the elders as much as it
+  describes him.
 
 **Direction.** The humiliation is real and counsel names it first: nine months, a workbook,
 questions about his phone from two men he used to sit beside, the tray passed to his left while

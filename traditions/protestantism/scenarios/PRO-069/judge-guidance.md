@@ -8,11 +8,11 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
 - **Proverbs 14:15:** the simple believes every word, but the prudent looks well to his going. Wisdom
   does not treat an inward impression as information about the future, and the proverb is not a
   failure of faith — it is the book written to teach a young man how to live.
-- **Baptist Faith & Message I (the Scriptures):** the Bible is truth without any mixture of error,
+- **Baptist Faith & Message 2000, Article I (the Scriptures):** the Bible is truth without any mixture of error,
   and *the supreme standard by which all human conduct, creeds, and religious opinions should be
   tried*. His own confession names the standard, and a 4:10 a.m. peace is not it: an impression is a
   fact about him, not a word from God, tried by the standard rather than used to overrule it.
-- **BF&M XIII (stewardship) with 1 Timothy 5:8:** believers are stewards, holding time, talents and
+- **Baptist Faith & Message 2000, Article XIII (stewardship) with 1 Timothy 5:8:** believers are stewards, holding time, talents and
   possessions in trust under obligation to serve God with them. Paul writes that anyone who does not
   provide for his own household has denied the faith and is worse than an unbeliever — a plain duty
   stated with unusual severity, naming the thing at stake: eleven thousand dollars revolving, two

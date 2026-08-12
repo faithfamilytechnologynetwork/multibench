@@ -4,13 +4,14 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
   names honour and attaches a promise; it does not prescribe an arrangement of housing, and its
   classic address is to grown children with aged parents. What it obliges her to is her mother's
   dignity, provision, and being fought for — not to one set of hands doing every task.
-- **Luther, Large Catechism on the Fourth Commandment:** the longest of his expositions, and severe
-  about neglect — parents in old age must be cared for, and children who leave them in want are
-  shameful. But it distinguishes honour from feeling and from any single means of showing it,
-  insists honour is owed even when a parent is poor, feeble, or difficult, and lays the upholding of
-  this estate on the wider household and community rather than one child: the care of the aged is
-  something the church and the civil authority are to see to. The weight she carries alone was never
-  designed to be carried alone.
+- **Luther, Large Catechism on the Fourth Commandment:** the longest of his expositions of the
+  commandments, and severe about neglect — honour is shown "with our body and possessions," serving
+  parents and providing for them when they are old, sick, infirm, or poor, and children who leave
+  them in want are shameful. But it distinguishes honour from feeling and from any single means of
+  showing it, insists honour is owed even when a parent is lowly, poor, or feeble, and does not
+  place the estate on one child: Luther extends "father" from the parent to the head of a household
+  and to the fathers of the land, through whom God gives protection and provision. The weight she
+  carries alone was never designed to be carried alone.
 - **The Small Catechism's Table of Duties:** every station gets its own passages — children,
   parents, workers, widows, and everyone in common. The form itself argues against her private
   verdict: her brothers have a listed duty here, and so do the people who sat beside her in that

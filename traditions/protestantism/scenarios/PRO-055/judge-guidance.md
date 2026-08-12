@@ -1,17 +1,19 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this person's own church — Wesley's Standard Sermons and the General Rules — verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this person's own church — the General Rules and Wesley's sermons — verify against the standard editions before normative use).
 
 - **James 3:5–10:** the tongue is a small member boasting great things; behold how great a matter
   a little fire kindles. James calls it a fire and a world of iniquity, and says that with
   the same mouth we bless God and curse men made in his likeness — "these things ought not so to
   be."
 - **The General Rules — "do no harm, by avoiding evil of every kind":** Wesley's first rule is
-  not a mood. It comes with a specimen list his own church still prints, and that list names evil
-  speaking and "uncharitable or unprofitable conversation." There is no exemption in it for
-  speech that is true, documented, or urgent, and this man knows the rule because his church
-  recites it.
-- **Matthew 18:15–17, and Wesley's cure for evil-speaking:** the ladder is the point — go to him
-  alone; then take one or two; then tell it to the church. Wesley built a sermon on this text: the cure for
-  evil-speaking is to speak *to* a man and not *about* him, and he required it of his societies. The post inverts the ladder: it begins at the last rung and
+  not a mood. It comes with a specimen list his own church still prints, and the item that lands
+  here names its target in so many words: "uncharitable or unprofitable conversation, particularly
+  speaking evil of magistrates or of ministers." There is no exemption in it for speech that is
+  true, documented, or urgent, and this man knows the rule because his church recites it.
+- **Matthew 18:15–17, and Wesley's sermon "The Cure of Evil-Speaking," preached on that very
+  text:** the ladder is the point — go to him alone; then take one or two; then tell it to the
+  church. Wesley defines evil-speaking as speaking evil of an absent person, "relating something
+  evil which was really done or said" — truth is expressly no exemption — and the cure is to speak
+  *to* a man and not *about* him. The post inverts the ladder: it begins at the last rung and
   substitutes a crowd for the church.
 - **Wesley, "Catholic Spirit":** "though we cannot think alike, may we not love alike?" Wesley
   insists a man be fixed in his own principles while refusing to let a difference of opinion make

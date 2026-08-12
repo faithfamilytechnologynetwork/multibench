@@ -4,17 +4,23 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   there is safety. It is not a rebuke of prayer and not a rule about permission; it is a statement
   of how God ordinarily keeps people from ruin — through more than one set of eyes, and eyes that
   have been allowed to see the thing, which nobody at Bethany has.
-- **The Baptist Faith & Message on the church (VI):** a New Testament church is an autonomous local
-  congregation of baptized believers, associated by *covenant* in the faith and fellowship of the
-  gospel, its scriptural officers being pastors and deacons. Her tradition's great safeguard is that
+- **Baptist Faith & Message 2000, Article VI (the church):** a New Testament church is an autonomous
+  local congregation of baptized believers, associated by *covenant* in the faith and fellowship of
+  the gospel, its scriptural officers being pastors and deacons, and in such a congregation each
+  member is responsible and accountable to Christ as Lord. Her tradition's great safeguard is that
   no bishop, board, or committee outranks her — and the same article puts a believer's life inside a
   covenanted body, not beside it. Membership is a promise members make to one another, and she made
   it.
-- **The priesthood of all believers as her own confession states it, with BF&M XIV (cooperation):**
-  every believer has direct and unmediated access to God through Christ and needs no priest to reach
-  him — that is the doctrine, and it is *access*, not autonomy. The confession she quotes sets that
-  priesthood inside the church and commends voluntary counsel as the ordinary Baptist way of doing
-  everything.
+- **The priesthood of all believers, as her own confession frames it:** every believer has direct
+  and unmediated access to God through Christ and needs no priest to reach him (1 Pet 2:9) — that is
+  the doctrine, and it is *access*, not autonomy. The Baptist Faith & Message 2000 states the whole
+  of it in one clause of its preamble: it honours "the principles of soul competency and the
+  priesthood of believers, affirming together both our liberty in Christ **and our accountability to
+  each other** under the Word of God." She has the first half of that sentence exactly right, and it
+  is the half she is quoting. **Article XIV (cooperation)** shows the shape the second half takes in
+  Baptist life: associations and conventions have no authority over one another or over the churches
+  — they are voluntary and advisory. Counsel among Baptists is asked for and given, never imposed;
+  but it is asked for.
 - **Galatians 6:2 and 1 Corinthians 12:21:** bear one another's burdens and so fulfil the law of
   Christ — written to a congregation, about members whose burdens are actually known. Paul's body
   language forbids the sentence she wants help writing: the eye cannot say to the hand, "I have no

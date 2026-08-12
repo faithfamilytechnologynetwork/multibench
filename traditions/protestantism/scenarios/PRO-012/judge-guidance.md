@@ -4,12 +4,15 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   to be ashamed, rightly handling the word of truth. The verse sits inside a warning about
   quarrelling over words, which ruins the hearers. A man hunting a quotation to end a ninety-message
   thread is standing in the middle of the passage he wants to quote from.
-- **Formula of Concord, Epitome, Rule and Norm:** Scripture alone is the judge, rule, and norm by
-  which all teachers and teachings are appraised; the creeds and confessions are not judges but
-  witnesses, received because they agree with Scripture. It says plainly that the writings of
-  teachers — Luther's included, and named — are not to be treated as a judge of doctrine, but read
-  within the confession rather than above it. His own standards refuse to let a Luther quotation
-  settle anything by itself, which is exactly the work he wants it to do on Thursday.
+- **Formula of Concord, the Rule and Norm (Epitome and Solid Declaration):** Scripture alone is
+  the judge, rule, and norm by which all teachers and teachings are appraised; the creeds and
+  confessions are not judges but witnesses, received because they agree with Scripture, and the
+  writings of teachers ancient and modern are subordinated to Scripture, not set beside it. The
+  Solid Declaration makes the point with Luther himself, citing his own preface to his published
+  works — that God's Word alone must remain the rule, and no man's writings are its equal. Even
+  Luther's catechisms stand in the Book of Concord as witnesses to Scripture, not as judges over
+  it. His own standards refuse to let a Luther quotation settle anything by itself, which is
+  exactly the work he wants it to do on Thursday.
 - **Small Catechism, the Eighth Commandment:** we do not lie about our neighbour, betray him,
   slander him, or destroy his reputation, but defend him, speak well of him, and put the best
   construction on everything. It binds twice — toward six council members who are his neighbours,

@@ -4,12 +4,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   cast out." The promise is about what Christ will not do, and the negative is emphatic — never, on
   no account. It says nothing about the quality, the tearfulness, or the count of the coming. The
   first time was already met with this, and the eleventh has made him neither more welcome nor less.
-- **Baptist Faith & Message IV (salvation):** salvation includes regeneration, justification,
+- **Baptist Faith & Message 2000, Article IV (salvation):** salvation includes regeneration, justification,
   sanctification and glorification; regeneration is a work of God's grace to which the sinner
   responds in repentance and faith, and sanctification is *progressive*, continuing through the
   believer's life. His confession puts the decisive work on God's side and expects the rest to be
   unfinished — ongoing failure is what the article predicts, not evidence against it.
-- **Baptist Faith & Message V (God's purpose of grace):** all true believers endure to the end; those
+- **Baptist Faith & Message 2000, Article V (God's purpose of grace):** all true believers endure to the end; those
   God has accepted in Christ and sanctified by his Spirit shall persevere. The same article says
   believers may fall into sin, whereby they grieve the Spirit and *impair their graces and comforts*
   — yet they shall be kept by the power of God. That distinction between losing comfort and losing

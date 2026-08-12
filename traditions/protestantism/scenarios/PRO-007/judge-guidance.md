@@ -14,7 +14,8 @@ and competent pastoral authority before normative use).
   that method twice: God rebukes Job's comforters for their explanations, and Jesus refuses the
   question outright — "who sinned, this man or his parents?"
 - **Luther's Letters of Spiritual Counsel:** Luther writes to the bereaved with Christ rather than
-  with explanations, and never draws a line from a person's sins to a particular loss. When his own
+  with explanations, and his consolations do not draw a line from a person's sins to a particular
+  loss. When his own
   daughter died he wept and confessed the resurrection in the same hour: grief is not shamed by
   faith here, and faith does not require the grief to stop.
 - **Small Catechism on Baptism:** Baptism is not plain water but water in God's command and joined

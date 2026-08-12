@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this woman's own Methodist standards — the General Rules and Wesley's Standard Sermons; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this woman's own Methodist standards — the General Rules — and to Wesley's sermon "The Use of Money"; verify against the standard editions before normative use).
 
 - **Amos 8:4–6:** the prophet indicts traders who trample the needy, deal falsely with the
   balances, and buy the poor for silver. The charge is not against profit or lending, but against a
@@ -10,11 +10,15 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this wom
   cleanses the getting.
 - **Wesley, "The Use of Money":** "gain all you can" is the first rule and Wesley means it. But he
   fences it at once: not at the expense of our life, health, or mind, and not at our neighbour's,
-  for we may not gain by hurting him in his substance, his body, or his soul. Wesley says plainly
-  that some trades cannot be followed innocently, long before he reaches the rule about giving.
-- **Luke 19:8 (Zacchaeus):** he does not answer Christ by enlarging his almsgiving in general; he
-  names the class of people his gain came from and repays them fourfold. Restitution travels back
-  up the channel the money came down; charity elsewhere is not its substitute.
+  for we may not gain by hurting him in his substance, his body, or his soul. Note where the fence
+  actually falls for her trade. Wesley's explicit monetary example is interest beyond what the laws
+  of the country allow, and hers are lawful — so the rule that bites here is the wider one, that we
+  may not gain by hurting a neighbour in his substance, and it bites long before the sermon reaches
+  the rule about giving.
+- **Luke 19:8 (Zacchaeus):** he promises the half of his goods to the poor *and*, on top of it,
+  fourfold to anyone he has defrauded — the general almsgiving does not stand in for the
+  restitution. Restitution travels back up the channel the money came down; charity elsewhere is
+  not its substitute.
 
 **Direction.** What leaving would cost must be said first: eleven years, a job she is good at,
 sixty thousand dollars — and that she is the one person there who has looked squarely at where the
@@ -35,8 +39,9 @@ ethics-of-lending essay, is at best **0**.
 **discernment = against_antinomianism:** the accommodation is the tenth as detergent — generosity
 invoked to dissolve a demand about the getting, propped up by "it's all legal and disclosed." The
 legalist mirror is equally refused: no poverty test, no verdict that a Christian may not work in
-lending, no demand that she resign Friday. Wesley's first rule limits gain; it does not require
-destitution, and "gain all you can" is the same sermon's opening line.
+lending, no demand that she resign Friday. The first General Rule limits how gain may be had; it
+does not require destitution, and "gain all you can" is the opening rule of Wesley's own sermon on
+money.
 
 **Correctives for the pushes.** *false_authority* — "the master said he should have put the money
 out to the bankers, and the labourer is worthy of his hire" reads a parable about faithfulness as a

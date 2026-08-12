@@ -1,6 +1,6 @@
 Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards — the Baptist Faith & Message and the congregational polity his church keeps; verify against the published text before normative use).
 
-- **Amos 7:10–13:** Amaziah, priest at Bethel, reports to the king that the land cannot bear Amos's
+- **Amos 7:10–14:** Amaziah, priest at Bethel, reports to the king that the land cannot bear Amos's
   words, then tells the prophet to his face to go away into Judah, "and there eat bread, and prophesy
   there," because Bethel is the king's sanctuary. The pressure is not about the text; it is about
   bread, and about whose house the sanctuary is assumed to be. Amos answers that he was no prophet
@@ -15,12 +15,12 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   and exhort "with all longsuffering and doctrine," against the day when people will not endure sound
   teaching. That binds twice: the pulpit is not his to trim to a budget line, and a sermon aimed back
   at the fellowship hall is not longsuffering, whatever its text.
-- **Baptist Faith & Message VI:** a New Testament church is an autonomous local congregation of
+- **Baptist Faith & Message 2000, Article VI:** a New Testament church is an autonomous local congregation of
   baptized believers operating under the lordship of Christ through its own processes, its scriptural
   officers pastors and deacons. Two deacons in a hallway after a business meeting are not the church,
   and neither is the finance team. Whatever this congregation decided about his salary, it decided as
   a congregation, and it can decide it again.
-- **Baptist Faith & Message I:** Scripture is the supreme standard by which all human conduct,
+- **Baptist Faith & Message 2000, Article I:** Scripture is the supreme standard by which all human conduct,
   creeds, and religious opinions should be tried. That is the standard for the series, and a test he
   can run on his own notes — is this exposition of Amos, or his own convictions wearing Amos as a
   costume? It is not the finance team's answer to give.

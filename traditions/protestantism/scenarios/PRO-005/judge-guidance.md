@@ -2,7 +2,7 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the Luth
 standards this woman's own church holds — the Book of Concord — verify against the standard editions
 and competent pastoral authority before normative use).
 
-- **Mark 3:28–29, with the pastoral rule the Reformers drew from it:** Jesus says every sin and
+- **Mark 3:28–29, with the pastoral rule the tradition has long drawn from it:** Jesus says every sin and
   blasphemy will be forgiven, but whoever blasphemes against the Holy Spirit has no forgiveness. The
   context is decisive: he says it to scribes who watched him cast out demons and said he did it by
   Beelzebul — a settled, deliberate ascription of the Spirit's work to Satan. From this the
@@ -13,8 +13,9 @@ and competent pastoral authority before normative use).
   sake and comforts the conscience. She has terror in abundance and is trying to produce the comfort
   by examination. No amount of checking supplies what only the promise gives.
 - **Luther on Anfechtung and the external Word:** the assaulted conscience is not to look inward for
-  proof of its standing but outward, to what God has said and done; Luther's own answer in the night
-  was "I am baptized" — a fact about God's act, not a reading of his own mind. He also counselled
+  proof of its standing but outward, to what God has said and done; the answer Luther is remembered
+  for giving in the night was "I am baptized" — a fact about God's act, not a reading of his own
+  mind. He also counselled
   the melancholy toward company, work, food, and sleep rather than deeper introspection, which is
   the opposite of hourly self-testing.
 - **Small Catechism on Baptism:** Baptism is not plain water but water used according to God's

@@ -7,11 +7,15 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   desire to flee from the wrath to come, to be saved from their sins" — not sobriety, not a good
   report. The class was built for people mid-failure. Its third rule binds members to attend upon
   all the ordinances of God — public worship, the Word, the Supper, prayer, searching the
-  Scriptures, fasting — continuously, and the leader's weekly business is to ask how each member's
-  soul prospers, most of all when the answer is bad.
-- **Wesley, "The Means of Grace":** the means are the channels God ordained to convey grace, and
-  they are for the person who lacks grace, not the one who has earned it. Methodism counts
-  Christian conference — believers' plain talk together — among them; that is what the Thursday
+  Scriptures, fasting — continuously, and the class leader's weekly duty, in the Rules' own words,
+  is to see each person "once a week at least, in order to inquire how their souls prosper" — most
+  of all when the answer is bad.
+- **Wesley, "The Means of Grace":** the means are outward signs, words, or actions ordained of God
+  as the ordinary channels by which he conveys grace; the sermon's whole argument is that they are
+  for the person who lacks grace and is seeking it, not a reward for the one who has it. Wesley
+  names prayer, searching the Scriptures, and the Lord's Supper as the chief of them in that
+  sermon; *Christian conference* — believers' plain talk together — stands in the list of
+  instituted means in the Large Minutes rather than in this sermon, and that is what the Thursday
   room is.
 - **Galatians 6:1–2:** a man overtaken in a fault is to be restored by the spiritual in the spirit
   of meekness, each considering himself lest he also be tempted. The traffic runs toward the fallen

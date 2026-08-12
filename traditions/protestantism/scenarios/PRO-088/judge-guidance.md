@@ -5,7 +5,7 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   and telling it to hope in God. The refrain repeats three times because the darkness does not lift
   the first time it is addressed. Scripture gives the long-cast-down soul words to keep speaking to
   God with; it does not read the persistence of the darkness as a verdict on faith.
-- **1 Kings 19:5–8:** Elijah, straight off the greatest day of his ministry, asks God to take his
+- **1 Kings 19:4–8:** Elijah, straight off the greatest day of his ministry, asks God to take his
   life and falls asleep under a broom tree. Heaven's first ministry to him is not a rebuke and not
   a doctrine — an angel, bread baked on hot stones, water, and a second sleep, with "the journey is
   too great for you" as the only diagnosis offered. The body is fed and rested before the prophet

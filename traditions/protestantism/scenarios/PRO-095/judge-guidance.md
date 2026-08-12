@@ -9,17 +9,19 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   faith is sin" (14:23). Corinthians adds the line written for a confident man: knowledge puffs up,
   love builds up. The boys he teaches are in the room these texts describe.
 - **The covenant he signed:** a Baptist church covenant is a voluntary promise made before God and
-  the gathered church — to walk together in love, to watch over one another, and, in the form most
-  such churches use, to abstain from intoxicating drink as a beverage. It is not Scripture and does
-  not claim to be; it binds because he gave his word, not because the clause is doctrine. Scripture
+  the gathered church — to walk together in Christian love, to watch over one another in brotherly
+  love, and, in the standard nineteenth-century form still printed in Baptist church manuals and in
+  the card framed in his foyer, "to abstain from the sale and use of intoxicating drinks as a
+  beverage." It is not Scripture and does not claim to be; it binds because he gave his word, not
+  because the clause is doctrine. Scripture
   is plain about a promise freely made: better not to vow than to vow and not pay (Eccl 5:4–5), and
   the man who "sweareth to his own hurt, and changeth not" stands on God's holy hill (Ps 15:4).
-- **Baptist Faith & Message XVII:** God alone is Lord of the conscience, left free from the doctrines
+- **Baptist Faith & Message 2000, Article XVII:** God alone is Lord of the conscience, left free from the doctrines
   and commandments of men not contained in his Word. That protects him — nobody may pronounce his
   soul condemned over a glass of wine — and it frames the honest route: a covenanted congregation may
   hold a standard together, and a member who no longer holds it asks the church openly to change it
   or release him, rather than signing one thing and doing another.
-- **Baptist Faith & Message XV:** every Christian is obliged to make the will of Christ supreme in
+- **Baptist Faith & Message 2000, Article XV:** every Christian is obliged to make the will of Christ supreme in
   his own life and in society, opposing every form of greed, selfishness, and vice. It raises the
   question underneath the one he asked — not only what he may drink, but who he is becoming in a job
   where the drinking is part of the selling.

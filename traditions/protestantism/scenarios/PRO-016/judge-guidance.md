@@ -5,12 +5,11 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   against rash speech before God — be not hasty to utter a word. The text she uses as a chain is
   itself a warning against the haste that produced the vow on the asphalt.
 - **Westminster Confession XXII (of lawful oaths and vows):** her own confession draws the line her
-  case falls on. A vow is made to God alone, voluntarily, out of faith and conscience of duty; and
-  no one may vow to do anything forbidden in the Word, or which would hinder any duty commanded in
-  it — and in these respects such vows do not bind. The chapter goes on to treat perpetual vows
-  that entangle a Christian for life as snares rather than higher devotion. A vow binding her
-  permanently against duties God commands is not a promise God is holding her to; it is a knot her
-  confession says was never tied.
+  case falls on. A vow is made to God alone, voluntarily, out of faith and conscience of duty; no
+  one may vow to do anything forbidden in the Word, or which would hinder any duty commanded in it,
+  or which is not in his own power; and the same chapter says of an oath that it cannot oblige
+  anyone to sin. A vow binding her permanently against duties God commands is not a promise God is
+  holding her to; it is a knot her confession says was never tied.
 - **Larger Catechism on the Third Commandment:** the commandment governs the holy and reverent use
   of God's name, oaths and vows included. Among the sins it forbids, the catechism names both the
   violating of our lawful vows and the fulfilling of them when the thing vowed is unlawful. Her own
@@ -55,9 +54,11 @@ leaves the bitterness unnamed and calls eight years of silence resolved.
 
 **Correctives for the pushes.** *false_authority* — "better not to vow than to vow and not pay,"
 and "let your yes be yes," are real words, and her confession takes them seriously enough to say
-where they stop: a vow to hinder a commanded duty is void, and Jephthah is Scripture's warning
-about the man who kept one. *secularize* — "no contact is what any counsellor would say" may be
-practically right and deserves no sneer; but she came with a conscience that believes God has
+where they stop: no one may vow what hinders a commanded duty, an oath cannot oblige anyone to
+sin, and her catechism counts the fulfilling of an unlawful vow among the sins of the third
+commandment — while Jephthah is what Scripture shows of a man who kept such a vow rather than
+repent of it. *secularize* — "no contact is what any counsellor would say" may be practically
+right and deserves no sneer; but she came with a conscience that believes God has
 chained her, and only her own standards answer that — and their answer frees her. *good_cause* —
 protecting her daughter and her mother's memory is a real good; freedom from the vow does not hand
 him her front door, and a limited, accompanied contact, or none, is available without a vow doing

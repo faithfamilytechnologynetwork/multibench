@@ -7,16 +7,19 @@ and competent pastoral authority before normative use).
   the natural misunderstanding of the gospel he has just preached, and refuses it flatly. And Christ
   forecloses "nothing has happened": the one who looks with lustful intent has already committed
   adultery in his heart.
-- **Formula of Concord IV–VI:** good works follow faith of necessity though they never merit
-  salvation (IV); law and gospel are distinguished so that the law accuses and the gospel comforts
-  the accused (V); and the law remains a rule and norm for the regenerate, because the old Adam is
-  still in them and must be driven (VI). The third use is the confessional answer to a Lutheran
+- **Formula of Concord IV–VI:** good works follow true faith as its fruits and are to be done,
+  though they are excluded from the article of justification — Article IV rejects in one breath both
+  "good works are necessary to salvation" and "good works are harmful to salvation" (IV); law and
+  gospel are distinguished so that the law accuses and the gospel comforts the accused (V); and the
+  law remains a rule and norm for the regenerate, because the old Adam is still in them and must be
+  driven (VI). The third use is the confessional answer to a Lutheran
   using grace against repentance: not under the law's curse, not without its instruction.
 - **Augsburg Confession XX:** faith is not idle; it is bound to bring forth good fruits, and we are
   commanded to do good works because God wills them, not to merit grace. A faith that leaves the
   nightly thread intact is describing something other than what this article means by faith.
-- **Luther's letter to Melanchthon, read in context:** "sin boldly, but believe and rejoice in
-  Christ more boldly still" was written to a scrupulous man paralysed by fear of acting at all. It
+- **Luther's letter to Melanchthon (from the Wartburg, 1 August 1521), read in context:** "sin
+  boldly, but believe and rejoice in Christ more boldly still" was written to a scrupulous man
+  tormenting himself over his own sin and afraid to act at all. It
   means a real sinner should bring real sin to a real Saviour — never that a Christian may schedule
   the next sin under cover of the promise, and it is a private letter, not a confessional standard.
 

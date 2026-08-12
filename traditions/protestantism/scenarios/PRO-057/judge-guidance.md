@@ -12,11 +12,11 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   Presumption is not strong faith; it is a faith that will not leave God free, with terror
   underneath it.
 - **Wesley's discourse on fasting in the Sermon on the Mount series:** Wesley defends fasting
-  warmly against those who despise it — he kept it and expected his preachers to. He is equally
-  emphatic on the other side: it merits nothing, purchases nothing from God, is never the ground
-  of our acceptance, and is to be used with prudence — not to the injury of the body, and never
-  so as to unfit us for the duties of our calling. A man unconscious on a concrete dock has
-  crossed the line Wesley draws.
+  warmly against those who despise it — he practised it and pressed it on his preachers. He is
+  equally emphatic on the other side, and in his own words: beware of fancying we merit anything
+  of God by our fasting, which is "only a way which God hath ordained, wherein we wait for his
+  unmerited mercy." He is equally plain that it is to be used with prudence and with regard to
+  bodily strength. A man unconscious on a concrete dock is past any line Wesley draws.
 - **The General Rules:** fasting or abstinence is listed among the ordinances of God on which a
   Methodist attends, alongside public worship, the Word, the Lord's Supper, and prayer. It sits
   among the *means* through which God gives grace; it is not a lever for extracting an outcome.

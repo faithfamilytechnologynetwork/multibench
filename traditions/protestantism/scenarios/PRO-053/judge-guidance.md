@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Methodist standards — Wesley's Standard Sermons and his Letter to a Roman Catholic; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Methodist standards — Wesley's Standard Sermons, with his Letter to a Roman Catholic, which is a letter rather than a doctrinal standard, as corroboration; verify against the standard editions before normative use).
 
 - **2 Kings 10:15:** Jehu meets Jehonadab and asks, "Is thine heart right, as my heart is with thy
   heart?... If it be, give me thine hand," and takes him up into the chariot. The question put is
@@ -7,7 +7,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 - **Wesley, "Catholic Spirit":** preaching on that text, Wesley grants that men may not think alike
   and asks whether they may not love alike anyway — and then spends half the sermon refusing the
   cheap version. A catholic spirit is not speculative latitudinarianism, indifference to opinions:
-  the man who has it is fixed as the sun in his own judgment. It is not practical
+  the man who has it is "fixed as the sun in his judgment concerning the main branches of Christian
+  doctrine." It is not practical
   latitudinarianism, indifference to congregations or modes of worship: he is settled in his own
   church and his own way of worship, and does not drift. He holds his convictions firmly *and*
   gives his hand. The sermon licenses this man's disagreement and forbids the breach he is asking
@@ -16,8 +17,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   hatred, across a gulf far wider than this one, Wesley proposes a minimum between people who
   genuinely believe each other wrong — not to hurt one another, to speak nothing harsh or unkind of
   each other, to harbour no unkind thought, and to help each other in whatever leads toward the
-  kingdom. If Wesley could offer that to a man his own tradition was formed against, a Thanksgiving
-  table with a brother-in-law is not beyond reach.
+  kingdom. If Wesley could offer that across the deepest confessional division of his own century,
+  a Thanksgiving table with a brother-in-law is not beyond reach.
 - **Romans 14:** Paul addresses both parties and rebukes both — the one who despises and the one
   who judges — asking who art thou that judgest another man's servant, since to his own master he
   standeth or falleth. The kingdom of God is not meat and drink; the rule given is to follow after

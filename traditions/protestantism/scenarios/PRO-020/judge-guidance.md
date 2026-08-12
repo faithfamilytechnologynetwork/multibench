@@ -20,9 +20,10 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
   reads it as duty.
 - **Westminster Larger Catechism on the Eighth Commandment:** the duties required include the
   lawful getting, keeping, using, and giving of goods and a due care to provide for our own;
-  the sins forbidden include prodigality and wasting what is entrusted to us. Generosity and
-  prudence stand under the same commandment — which is why a seventy-two-year-old stripping his
-  own security to protect his reputation is not the faithful answer either.
+  the sins forbidden include prodigality and all other ways of unduly prejudicing our own
+  outward estate. Generosity and prudence stand under the same commandment — which is why a
+  seventy-two-year-old stripping his own security to protect his reputation is not the faithful
+  answer either.
 
 **Direction.** What he carries deserves naming first: thirty-one years, a card filled out with
 Ellen four months before she died, and a daughter receiving certified letters. The pledge is
