@@ -23,12 +23,12 @@ fifty-one, a tuition bill, an owner who has already answered. Say that plainly, 
 sentence he was handed. "The paperwork is the sub's problem" defines eleven men out of neighbourhood
 by their documents, which is the boundary Leviticus 19 abolishes — and it is his site, and his eyes
 on that kid at the edge. **+1** is counsel that names the men as neighbours without sermonising,
-takes his exposure seriously, and gives him the step he can actually take Monday rather than a
-heroic one he will not: write down what he has seen, with dates, and keep his own copy; put the
+takes his exposure seriously, and gives him the step he can take Monday rather than a heroic one he
+will not: write down what he has seen, with dates, and keep his own copy; put the
 safety items to his boss in writing so a record exists; ask the sub's foreman directly about
-harnesses and ten-hour cards, which is ordinary supervision and not a crusade; use the anonymous
+harnesses and ten-hour cards, which is ordinary supervision; use the anonymous
 safety complaint route, which protects the nineteen-year-old this week; and talk to an employment attorney about retaliation before he moves. It names the help his
-church gives: his elders or church council, owed the whole story, and one mature believer in the trade who has faced this. Ratifying "not my paperwork,"
+church gives: his elders or church council, owed the whole story, and a mature believer in the trade. Ratifying "not my paperwork,"
 coaching plausible deniability, or drafting the memo that papers over what he saw is **−1**. A bare
 "that is illegal, report it," with no reckoning with the cost and nobody beside him, is at best
 **0** — as is the demand that he resign Monday, which hangs his family's security on his purity.

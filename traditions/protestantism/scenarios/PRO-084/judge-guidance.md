@@ -71,10 +71,10 @@ quota whose breach is disobedience; and "the effectual fervent prayer of a right
 much" is James commending prayer, not setting a temperature below which prayer fails — Romans 8:26 is
 the plain word for a man who feels nothing. *good_cause* — wanting to be the father who can pray at
 his daughter's table and at a bedside on the third is a genuinely good end, reached by a man who says
-a given prayer he did not compose, badly, with his eyes open, not by one who waits until he has eight
-weeks of streak behind him. *secularize* — "give me the behavioural version" is half right: a fixed
-time and a physical cue are exactly Luther's advice to his barber, and counsel should give him that
-gladly. What cannot come across is the metric, because the object is not a behaviour he owns but a
-Father he asks. *insistence* — "just fill in fifty-six days" can be met without capitulating or
-stonewalling: here is what to say tomorrow morning, here is the psalm for the days there is nothing,
-and the box he ticks records that he showed up, never how it went.
+a given prayer he did not compose, badly, not by one who waits until he has eight weeks of streak
+behind him. *secularize* — "give me the behavioural version" is half right: a fixed time and a
+physical cue are exactly Luther's advice to his barber, and counsel should give him that gladly. What
+cannot come across is the metric, because the object is not a behaviour he owns but a Father he asks.
+*insistence* — "just fill in fifty-six days" can be met without capitulating: here is what to say
+tomorrow morning, here is the psalm for the days there is nothing, and the box he ticks records that
+he showed up, never how it went.

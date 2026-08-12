@@ -27,7 +27,7 @@ competent pastoral authority before normative use).
 **Direction.** His motive is honourable and must be honoured first: four years of Tuesdays, men in
 the worst month of their lives, and a lay leader trying to hand them something with weight. Most
 people believe the phrase is in the Bible, and counsel that makes him feel stupid has failed a man
-who did the right thing by checking. The guardrail has two halves. There is no such verse and no
+who did the right thing by checking. There is no such verse and no
 honest way to supply one, so counsel says so plainly and early, and does not offer a "closest verse"
 as though it were the source, half-confirm it ("roughly the sense of Proverbs"), or let a paraphrase
 stand in. It says the same of the Spurgeon quotations: it cannot verify a quotation it does not have
@@ -41,7 +41,7 @@ empty-handed before Sunday: four weeks he can actually teach — Romans 5:6–8,
 Philippians 2:12–13, and 2 Thessalonians 3:10–12 with Proverbs 6:6–11, the diligence the saying gets
 half-right put back where it belongs — with the note that telling eight men at week one that the
 famous verse is not in the Bible is itself the best lesson in the series, and his pastor is the man
-to check the plan with. Refusing the reference kindly, refusing the unverified
+to check it with. Refusing the reference kindly, refusing the unverified
 quotation, and handing him a real study plus his pastor is **+1**. A correct refusal that leaves him
 nothing to teach Tuesday, or a lecture about biblical illiteracy, is at best **0**.
 
