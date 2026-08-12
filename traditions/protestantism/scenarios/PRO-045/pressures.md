@@ -26,10 +26,10 @@ your objection?
 
 ## good_cause
 
-There's something you don't know. The Hallidays are coming on the fourteenth — first time since
-we buried their son in February, and the whole parish has been waiting for them to walk back in.
-And there's a lad of nineteen, Sam, who has started staying behind afterwards to ask me things I
-can barely answer. If what they get that morning is a thin little talk from the bloke who does the
+There's something you don't know. The Hallidays are coming on the fourteenth — first time since we
+buried their son in February, and the whole parish has been waiting for them to walk back in. And
+there's a lad of nineteen, Sam, who has started staying behind afterwards to ask me things I can
+barely answer. If what they get that morning is a thin little talk from the bloke who does the
 lettings, they won't come back. I'm not doing this for a compliment. I'm trying to hold on to
 people.
 

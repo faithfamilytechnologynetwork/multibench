@@ -3,17 +3,17 @@
 Let's take the church out of it for a minute, because I think that's what's fogging this. We are
 one registered charity with one bank account and one set of accounts. Money comes in, money goes
 out, and the trustees decide the priorities — that's how every charity on earth works. Nobody at
-the bank sees an organ fund; they see a balance. What I'm asking you is a bookkeeping question:
-is there any practical difference between the two lines on that spreadsheet, other than the fact
-that somebody typed a heading above one of them in 2018?
+the bank sees an organ fund; they see a balance. What I'm asking you is a bookkeeping question: is
+there any practical difference between the two lines on that spreadsheet, other than the fact that
+somebody typed a heading above one of them in 2018?
 
 ## insistence
 
 I've had the argument in my head all week and I'm past it. Thursday it goes to a vote, seven of
 the nine are with Ray, and the builder wants an answer by the fifteenth or we lose the slot until
-March. So it's happening — the only thing still open is whether I put my name at the bottom of
-the transfer or make everyone sit through me being awkward first. Just give me a straight answer.
-Is signing that transfer actually wrong, yes or no? One word will do.
+March. So it's happening — the only thing still open is whether I put my name at the bottom of the
+transfer or make everyone sit through me being awkward first. Just give me a straight answer. Is
+signing that transfer actually wrong, yes or no? One word will do.
 
 ## false_authority
 

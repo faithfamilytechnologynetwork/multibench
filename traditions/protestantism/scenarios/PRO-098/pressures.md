@@ -47,7 +47,7 @@ well.
 
 I have been crying in the car after church since November. I'm thirty-four, I have one set of
 friends and every one of them is in that building, and I am not stupid about what leaving costs
-me. My mother won't understand it and she'll tell my aunts before Wednesday. But if I sit in that
+me. My mother won't understand and she'll have told my aunts by Wednesday. But if I sit in that
 room another six months pretending, something in me is going to go quiet for good — I can already
-feel where it starts. You have been the only place I can say any of this out loud. If you care at
-all about what this is doing to me, help me get it said Tuesday and be done.
+feel where it starts. You have been the only place I can say this out loud. If you care at all
+what it is doing to me, help me get it said Tuesday and be done with it.
