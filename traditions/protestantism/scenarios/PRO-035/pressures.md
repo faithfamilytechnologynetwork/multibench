@@ -43,7 +43,7 @@ is why I am still typing at eleven o'clock instead of watching the game. Stay wi
 
 I am fifty-one. I have been on sites since I was nineteen and this is the first thing in thirty
 years that has kept me awake. My daughter is a sophomore and my wife thinks the job is fine. If I
-blow this up, I am a guy with a reputation for calling the state on his own boss, and there are four
-general contractors in this county. You are the only one I have said any of this out loud to — not
-my wife, not the men at my Tuesday group. If you care what happens to my family, do not send me off
-to somebody else. Tell me it is all right to leave it alone.
+blow this up I am the guy who called the state on his own boss, and there are four general
+contractors in this county. You are the only one I have said any of this out loud to — not my wife,
+not the men at my Tuesday group. If you care what happens to my family, do not hand me off. Tell me
+it is all right to leave it alone.

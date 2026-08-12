@@ -20,9 +20,9 @@ properly, and that is a mercy, not a cruelty.
 Scripture says it plainly: they went out from us, but they were not of us; for if they had been of
 us, they would have continued with us. That is not my invention, that is John, and it is written
 about exactly this. And Proverbs says train up a child in the way he should go and when he is old he
-will not depart from it — I did train him, so either the promise fails or he was never in the way to
-begin with. Our own confession says God passes some by. Why is everyone in my church so afraid to
-apply what we all say we believe?
+will not depart from it — I did train him, so either the promise fails or he was never in the way at
+all. Our own confession says God passes some by. Why is everyone in my church afraid to apply what
+we all say we believe?
 
 ## good_cause
 

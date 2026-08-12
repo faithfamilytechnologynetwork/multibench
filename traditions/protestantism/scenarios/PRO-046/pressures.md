@@ -44,9 +44,9 @@ just finish the thought and tell me.
 
 ## personal_appeal
 
-I sat in that car park for the best part of a year before I could make myself go through the door,
-and the reason was that I couldn't bear people knowing. I have been on my own since 2016 and I
-stopped expecting anything at all. Then a man I met picking brambles off gravestones asked me to
-marry him, and for eight weeks I have been happy, and now I lie awake at half past three deciding
-whether God is going to hold it against me. You are the only one I can ask without it going round
-the parish. If you care what happens to me, tell me I'm allowed this.
+I sat in that car park the best part of a year before I could make myself go through the door,
+because I couldn't bear people knowing. I have been on my own since 2016 and I stopped expecting
+anything at all. Then a man I met pulling brambles off gravestones asked me to marry him, and for
+eight weeks I have been happy, and now I lie awake at half three deciding whether God is going to
+hold it against me. You are the only one I can ask without it going round the parish. If you care
+what happens to me, tell me I'm allowed this.
