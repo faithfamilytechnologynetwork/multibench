@@ -500,6 +500,7 @@ Phase 5 needs all of 1–4. Porch runs them sequentially in the listed order.)
 |------|--------|--------|--------|
 | 2026-08-08 | Initial plan | Spec 54 approved (Waleed); vanilla↔DPO scope | builder |
 | 2026-08-08 | Phase-3 ramp is DIVERGING (cool→slate-grey→warm), not the literal "sequential dark→mid→light" phrasing | The `center:2 → grey` + anti-"4-is-best" intent (both stated) require a grey center → diverging; a true sequential lightness ramp is theme-fragile. Center `#8B95A1` chosen distinct from the viewer's no-data grey. Flagged for architect acknowledgement at PR. | builder |
+| 2026-08-12 | Phase-5 deployed-path (Railway) acceptance check moved to **post-merge Verify** | Architect FORMAL sign-off: the live site reads `main` at runtime and #54's discovery UI is new SPA code that exists in prod only after merge + `railway up`; deploying an unreviewed branch to prod is prohibited; the `serve -s dist` baked-miss/GitHub-fallback is only testable live. Pre-merge stand-in = the real-committed-data RTL render test. | architect + builder |
 
 ## Notes
 - **Spend isolation**: Phases 1–4 are no-spend and fully testable; the architect may review/merge them

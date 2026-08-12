@@ -369,6 +369,13 @@ the endpoint when COLLECTION completes (not after the PR).
   can't catch the serve-s-dist baked-miss/GitHub-fallback landmine; needs railway up for new SPA code).
   → requesting the architect's FORMAL sign-off to move this acceptance gate to Verify (record it).
 - claude minor: added the encoding-repair note to experiments/48/.../afb/SOURCE.md.
+
+### ARCHITECT FORMAL SIGN-OFF (2026-08-12): deployed-path → post-merge Verify. APPROVED.
+Rationale recorded (plan Change Log 2026-08-12): live site reads main; #54 discovery UI is new SPA code
+in prod only after merge + railway up; unreviewed-branch-to-prod prohibited; serve -s dist baked-miss/
+GitHub-fallback only testable live; RTL real-data render test is the pre-merge stand-in. Spend $2.6552
+accepted. Nothing else was pending. Next: porch re-verify → Review phase → open PR (Waleed pre-authorized
+merge on a clean integration review).
 - Endpoint DOWN (all afb-eval-serve apps stopped, 0 tasks). Suites: analysis 232, multibrowser 308, tsc+ruff clean.
 
 ### P3 consult iter-3: BOTH APPROVE ✅ (claude ran an e2e 150-item CLI export). Phase 3 DONE.
