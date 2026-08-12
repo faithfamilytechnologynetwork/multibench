@@ -413,3 +413,9 @@ is separate from greedy-vs-sampling (22.7 vs #48 ~27-30%); (3) one-line note tha
 seam (update-arch-docs).
 
 ## Phase: REVIEW — write review doc + arch-docs + open PR (Waleed pre-authorized merge on clean integration)
+
+### PR OPENED: #80 (builder/spir-54) — Closes #54
+Review doc + doc-polish + governance routing committed; branch pushed. PR body carries the headline
+(1.3%->21.3%), dashboard-exact spend ($2.6552), the deployed-path-post-merge-Verify note, and Closes #54.
+Recording in porch (--pr 80) + signaling PR_READY → porch runs the integration consult (CMAP). PR gate is
+the architect's/Waleed's (pre-authorized merge on a clean integration review). I do NOT merge before the gate.
