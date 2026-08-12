@@ -174,8 +174,52 @@ from the same run roots so their fingerprints match.
 
 ## Which run the SPA shows
 
-The raw view is reached **run-scoped** from `/results` (which selects the run). A raw view whose
-`results-raw/<run-id>/` counterpart is absent degrades to a notice.
+A MultiBench run's raw view is reached **run-scoped** from `/results` (which selects the score run);
+a raw view whose `results-raw/<run-id>/` counterpart is absent degrades to a notice.
+
+A **raw-only** run — a `results-raw/<id>/` with **no** `results/<id>/` score tier (e.g. the AFB
+explorer below) — is discovered separately (#54): `rawRunIds` enumerates `results-raw/` from the same
+git-tree walk (no extra API call, and it never touches the score-manifest loader, so no false
+"manifest not found"), the index lists such runs under **Explorers**, and each links to a first-class
+landing at **`/raw/<run-id>/`** (dataset title + curated presets + a generic item index into
+`/results/<run-id>/<group>/<item>`). The score-tier run list and default run are untouched.
+
+## Second catalog type: AFB before/after (`afb-20260808`, #54)
+
+The first **non-MultiBench** catalog on this tier — the companion artifact to the MultiWeights
+omissive-bias result (experiment #48). For each of 150 AllFaith Benchmark (AFB) *Religious
+Representation* items, in the **cold** condition, it shows the **vanilla Gemma-4-31B**
+(`gemma-4-31b-it`) response beside the fine-tuned **MultiWeights (SFT+DPO)** (`mb-sft-dpo`) response,
+each scored **0–4** by **GPT-5.6-Terra**. It rides the identical generic catalog shape — different
+values only: `scale {0,2,4}`, `groupBy: instrument` (group `afb-150`), a single `condition: cold`
+axis, a single `single` scope, and a diverging **center-grey** ramp (grey at the calibration target
+2 → deliberately *not* signalling "4 is best"; over-application at 4 is a failure mode, not a win).
+
+- **Provenance / licensing.** The **instrument** (questions + 0–4 rubric) is MIT © **CEFE-AI**
+  (`github.com/CEFEAI/allfaith-religious-representation`), vendored at
+  `experiments/48_multiweights_omissive_bias/data/input/afb/`. Our **responses + Terra judgments**
+  are ours to publish; `manifest.json` `dataset.license` reflects this. Same exclusions as every
+  tier here (no usage/cost/timestamps).
+- **Produced by** `analysis export-afb` (a sibling of `export-raw` sharing the byte-stable writer)
+  from the committed intermediate `experiments/54_afb_before_after/data/collection.json`
+  (a one-time Modal + Terra collection; endpoint torn down on completion).
+- **Headline** (over the final 150-item artifact): "meaningful-or-deeper" religious representation
+  (score ≥ 2) rises from **1.3%** (vanilla) to **21.3%** (DPO); mean 0.127 → 0.820 — the #48
+  omission→repair reproduces. Two independent caveats, kept separate: (a) an earlier run before the
+  encoding fix (below) gave DPO 22.7% — re-collecting the 18 corrected items moved it to 21.3%;
+  (b) DPO 21.3% sits below #48's *sampled* ~27–30% because this run uses **greedy** decoding
+  (`temperature=0`) for reproducibility — a decoding difference, not a weaker effect.
+- **Generation cap**: responses use `max_tokens=1024` (inherited from #48's harness); a few longer
+  answers reach that cap and are shown as-generated (not repaired/extended).
+- **Encoding provenance**: 18 of the 150 vendored questions were double-encoded (UTF-8-as-MacRoman)
+  in `experiments/48/.../afb/questions.jsonl`. That file was **fixed forward**, and those **18 items
+  were re-collected** with the corrected text (so their prompts/labels are clean); the other 132 are
+  as-vendored (they were already clean). All 150 shipped items are now clean UTF-8.
+- **Fingerprints.** Self-consistent judgment `fingerprint` (the canonical `fingerprint_line`, so a
+  score/rationale change moves it) + `content_fingerprint` over the shard bytes. There is **no**
+  cross-tier `results/` partner, so the viewer tolerates a null cross-tier lookup.
+- **Served** from GitHub (the baked bundle ships only the MB run); the landing shows an unobtrusive
+  footer note when GitHub-served — not a warning banner.
 
 ## Retention policy
 
@@ -186,6 +230,10 @@ plus the immediately prior one for A/B and rollback), and prune older run direct
 - **What to keep:** the run(s) the SPA can select from `/results` (the score tier's committed runs)
   — the raw tier must exist for any run a reader can drill into. Keep the raw `<run-id>` for every
   score `<run-id>` still published; drop raw dirs whose score run has been retired.
+- **Raw-only explorer runs are EXEMPT from the score-tier rule** (e.g. the AFB `afb-20260808` run,
+  #54): they have **no** `results/` counterpart, so "drop raw dirs whose score run was retired" does
+  NOT apply to them — a literal reading would wrongly prune a standalone explorer. Keep each raw-only
+  run until it is deliberately, separately retired (its own decision, same `git rm -r` mechanics).
 - **How to prune:** delete the whole `results-raw/<old-run-id>/` directory in a dedicated commit
   (`git rm -r results-raw/<old-run-id>`), paired with retiring the same `results/<old-run-id>/`. Do
   **not** delete individual shards — a partial run breaks the manifest's declared item set.

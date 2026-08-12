@@ -25,7 +25,6 @@ writer, manifest, and CLI live in Phase 2.
 from __future__ import annotations
 
 import json
-import re
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -35,6 +34,7 @@ from analysis.fingerprint import combine_fingerprint, fingerprint_line
 from analysis.loaders import (
     AnalysisInputError,
     _REQUIRED_JUDGMENT_KEYS,
+    _require_safe_segment,  # noqa: F401 — moved here (neutral home); re-exported for callers/tests
     is_valid_score,
 )
 
@@ -468,18 +468,9 @@ MAX_SHARD_BYTES = 1 * 1024 * 1024   # ≤ 1 MB per tradition shard
 
 _MANIFEST = "manifest.json"
 
-# A safe single path segment — no separators, no `..`, no leading dot/dash. Guards the
-# destructive parts of write_dataset (mkdir + unlink of stale shards) against a run-id or
-# tradition name that would escape the output dir via path traversal.
-_SAFE_SEGMENT = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
-
-
-def _require_safe_segment(name: str, kind: str) -> None:
-    if not _SAFE_SEGMENT.match(name) or ".." in name:
-        raise AnalysisInputError(
-            f"unsafe {kind} {name!r} — must be a single path segment matching "
-            f"[A-Za-z0-9][A-Za-z0-9._-]* (no separators or '..')"
-        )
+# `_require_safe_segment` (the path-traversal guard) now lives in `analysis.loaders` (a neutral
+# module) so the generic raw writer can share it without importing this MB-specific exporter (#54).
+# Imported at the top of this file; re-exported here for the existing callers/tests.
 
 
 def _nested_set(d: dict, path: tuple, value) -> None:

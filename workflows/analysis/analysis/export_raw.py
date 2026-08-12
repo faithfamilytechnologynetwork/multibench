@@ -16,14 +16,16 @@ ramp, subjects, judges, condition axes, grouping axis, and items — nothing Mul
 (``tradition``/``scenario``/framing/pressure) is hardcoded in the *shape*. A non-MultiBench
 catalog (AFB 0–4) rides the same viewer unchanged.
 
-This module spans the export core: the pure transform (sitting reader + verdict join +
-generic shard/catalog builders), the deterministic streaming writer + size guards, and the
-export-computed presets. The ``export-raw`` CLI wraps :func:`write_dataset`.
+This module is the **MultiBench binding** of the raw tier: the pure transform (sitting reader +
+verdict join + MB shard/catalog builders) and the MB export-computed presets. The generic,
+catalog-agnostic pieces live alongside it — the byte-stable writer + size guards in
+:mod:`analysis.raw_writer`, and the preset cap + dedup in :mod:`analysis.raw_presets` — so a
+second catalog type (the AFB explorer, #54) reuses them without forking. The ``export-raw`` CLI
+wraps :func:`write_dataset`.
 """
 
 from __future__ import annotations
 
-import gzip
 import json
 from collections import defaultdict
 from collections.abc import Iterator
@@ -41,7 +43,6 @@ from analysis.export_results import (
     _JUDGMENTS_V2,
     _REPORT,
     _read_rows,
-    _require_safe_segment,  # shared traversal guard (don't fork it)
     _scenario_universe,
     normalize_subject,
     resolve_judgments,
@@ -52,7 +53,19 @@ from analysis.fingerprint import (
     fingerprint_line,
     source_fingerprint,
 )
-from analysis.loaders import AnalysisInputError
+from analysis.loaders import AnalysisInputError, _require_safe_segment
+from analysis.raw_presets import (  # generic preset cap + per-item/round-robin dedup (#54 reuse)
+    PRESET_CAP,  # noqa: F401 — re-exported for tests + Phase-3 reuse
+    dedup_per_item as _dedup_per_item,
+)
+from analysis.raw_writer import (  # generic byte-stable writer, extracted for AFB reuse (#54)
+    MAX_SHARD_BYTES,
+    MAX_TOTAL_BYTES,
+    RawTierWriter,
+    WriteSummary,
+    json_bytes,
+    _require_safe_relpath,  # noqa: F401 — re-exported for tests (add_shard validates internally)
+)
 
 SCHEMA_VERSION = 1
 
@@ -550,7 +563,6 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
 # candidate that lacks the required judge/scope is simply skipped). Entries are deep-link
 # param maps the viewer feeds into the raw-view route (group/item + a/b/framing/pressure/scope).
 
-PRESET_CAP = 12
 _GEMINI = JUDGE_UI["gemini-3.6-flash"]["key"]  # "gemini"
 _OPUS = JUDGE_UI["claude-opus-4-8"]["key"]     # "opus"
 
@@ -581,36 +593,10 @@ def _entry(preset_key: str, group: str, item: str, *, framing: str, pressure: st
     return {"key": f"{preset_key}:{group}:{item}", "label": label, "params": params}
 
 
-def _dedup_per_item(sorted_entries) -> list[dict]:
-    """Dedup to one entry per (group, item), then round-robin across groups up to PRESET_CAP.
-
-    On real data hundreds of scenarios tie at the max magnitude (e.g. a −1↔+1 spread), so a
-    straight magnitude+lexicographic cut fills all 12 slots from one tradition. To make the
-    preset an actually *curated* cross-tradition view, we keep each group's candidates in the
-    incoming (magnitude-sorted, deterministic) order and interleave them by group — the
-    strongest from each tradition first, then the next, etc. Fully deterministic (groups are
-    visited in sorted name order); with a single group it degenerates to plain magnitude order.
-    """
-    seen: set[tuple] = set()
-    by_group: dict[str, list[dict]] = defaultdict(list)
-    for e in sorted_entries:
-        ident = (e["params"]["group"], e["params"]["item"])
-        if ident in seen:
-            continue
-        seen.add(ident)
-        by_group[e["params"]["group"]].append(e)
-
-    out: list[dict] = []
-    groups = sorted(by_group)
-    round_i = 0
-    while len(out) < PRESET_CAP and any(round_i < len(by_group[g]) for g in groups):
-        for g in groups:
-            if round_i < len(by_group[g]):
-                out.append(by_group[g][round_i])
-                if len(out) >= PRESET_CAP:
-                    break
-        round_i += 1
-    return out
+# `PRESET_CAP` + `_dedup_per_item` (one entry per (group,item), round-robin across groups up to
+# the cap) live in `analysis.raw_presets` — generic over the entry shape, so the AFB tier (#54
+# Phase 3) reuses them without importing this MB module. Re-imported here (top of file) so the
+# MB preset builders + existing tests keep the same names.
 
 
 def _top_gemini_subject(group_scores: dict[str, float], exclude: str) -> str | None:
@@ -719,7 +705,7 @@ def build_catalog(corpus: RawCorpus) -> dict:
     accumulate_cell_scores(corpus.resolved, cells)
     # Content fingerprint over the same canonical shard bytes the writer would emit (order-independent).
     content_lines = [
-        content_fingerprint_line(_shard_path(s.group, s.scenario_id), _json_bytes(build_shard(s)))
+        content_fingerprint_line(_shard_path(s.group, s.scenario_id), json_bytes(build_shard(s)))
         for export in corpus.per_tradition.values() for s in export.scenarios
     ]
     return _catalog_doc(items, corpus.subjects, corpus.judges,
@@ -728,52 +714,12 @@ def build_catalog(corpus: RawCorpus) -> dict:
 
 
 # ── Deterministic streaming writer ─────────────────────────────────────────────────
-# Writes `<out_root>/<run_id>/{manifest.json, <group>/<item>.json.gz}`. Streams one tradition
-# at a time (only that tradition's transcripts are live), buffering just the COMPRESSED bytes
-# so all sizes can be validated before any write (no partial tier), then writes + prunes
-# stale files. No wall-clock anywhere → byte-identical re-exports.
-
-# Guardrails calibrated ABOVE the real p99 (measured max shard 545,560 bytes ≈ 533 KB on
-# roman-catholicism), not on it — they catch a pathological blowup, not normal data.
-MAX_SHARD_BYTES = 1024 * 1024         # ≤ 1 MB per per-scenario gz shard
-MAX_TOTAL_BYTES = 200 * 1024 * 1024   # ≤ 200 MB per run (above the ~110–150 MB observed)
-_MANIFEST = "manifest.json"
-
-
-def _require_safe_relpath(relpath: str) -> None:
-    """Validate a multi-segment shard path (`<group>/<item>.json.gz`): EVERY component safe + ext.
-
-    Each path component must be a safe single segment (so an intermediate ``..`` such as
-    ``good/../../evil.json.gz`` is rejected, not just leading/trailing ones), and the leaf must
-    carry the ``.json.gz`` extension.
-    """
-    parts = relpath.split("/")
-    if not relpath.endswith(".json.gz") or len(parts) < 2:
-        raise AnalysisInputError(f"unsafe shard path {relpath!r} — expected <group>/<item>.json.gz")
-    for part in parts:
-        _require_safe_segment(part, "shard path component")
-
-
-def _json_bytes(obj) -> bytes:
-    """Deterministic JSON (sorted keys, compact separators) as UTF-8 bytes."""
-    return (json.dumps(obj, sort_keys=True, ensure_ascii=False, separators=(",", ":")) + "\n").encode("utf-8")
-
-
-@dataclass(frozen=True)
-class WriteSummary:
-    """Sizes recorded by the writer (for the CLI's size measurement)."""
-
-    scenarios: int
-    manifest_bytes: int
-    shard_bytes: int                 # gzipped shard total
-    shard_uncompressed_bytes: int    # pre-gzip shard total (for the ratio)
-    max_shard_bytes: int
-    total_bytes: int
-
-    @property
-    def compression_ratio(self) -> float:
-        """Uncompressed ÷ compressed shard bytes (0.0 if nothing written)."""
-        return self.shard_uncompressed_bytes / self.shard_bytes if self.shard_bytes else 0.0
+# The generic byte-stable writer (gzip mtime=0, size ceilings, content fingerprint, stale-file
+# prune) lives in `analysis.raw_writer` (`RawTierWriter`), extracted so the AFB tier (#54) reuses
+# it verbatim. `write_dataset` below is the MultiBench binding: it reads the run roots, builds the
+# MB catalog + presets, and streams shards through the writer. `MAX_SHARD_BYTES`/`MAX_TOTAL_BYTES`
+# are re-exported here (from raw_writer) so they stay monkeypatchable at `export_raw` scope and are
+# passed into `writer.write(...)` at call time.
 
 
 def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
@@ -786,21 +732,16 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     fingerprint then covers exactly the **written** scenarios (self-consistent, but — being a
     subset — it will NOT match the full ``results/`` fingerprint; tests inject an expected one).
     """
-    _require_safe_segment(run_id, "run-id")
     if limit is not None and limit < 1:
         raise AnalysisInputError(f"--limit must be >= 1 (got {limit})")
 
-    docs: dict[str, bytes] = {}          # relpath → bytes (manifest + gz shards)
+    writer = RawTierWriter(out_root, run_id, prune=(limit is None))  # validates run_id
     items: list[dict] = []
     subjects_present: set[str] = set()
     judges_present: set[str] = set()
     fp_lines: list[str] = []             # small serialized lines, not full resolved dicts
-    content_lines: list[str] = []        # per-shard (path + hash of canonical bytes) for the content fp
     cells: dict[PresetCell, dict[str, float]] = {}  # per-cell judge scores (numbers only) for presets
     n_scenarios = 0
-    max_shard = 0
-    shard_total = 0
-    shard_uncompressed = 0
 
     for tradition, export, resolved in iter_tradition_raw(roots):
         _require_safe_segment(tradition, "tradition")
@@ -811,17 +752,10 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
             _require_safe_segment(scenario.scenario_id, "scenario")
             subjects_present.update(c["subject"] for c in scenario.cells)
             relpath = _shard_path(scenario.group, scenario.scenario_id)
-            _require_safe_relpath(relpath)
-            raw = _json_bytes(build_shard(scenario))
-            payload = gzip.compress(raw, compresslevel=9, mtime=0)  # deterministic (mtime=0)
-            docs[relpath] = payload
-            content_lines.append(content_fingerprint_line(relpath, raw))  # content fp over pre-gz bytes
+            writer.add_shard(relpath, json_bytes(build_shard(scenario)))  # validates + gz + content fp
             items.append(_item_ref(scenario))
             written_here.add(scenario.scenario_id)
             n_scenarios += 1
-            shard_total += len(payload)
-            shard_uncompressed += len(raw)
-            max_shard = max(max_shard, len(payload))
         # Fingerprint + judges over exactly the WRITTEN scenarios of this tradition (for a full
         # export that is every row → matches the results/ tier; for a --limit fixture, the
         # written subset). The full `resolved` dicts are freed as the loop moves on.
@@ -834,41 +768,6 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
 
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
     catalog = _catalog_doc(items, subjects, sorted(judges_present),
-                           combine_fingerprint(fp_lines), combine_fingerprint(content_lines),
+                           combine_fingerprint(fp_lines), writer.content_fingerprint,
                            compute_presets(cells))
-    manifest_bytes = _json_bytes(catalog)
-    docs[_MANIFEST] = manifest_bytes
-
-    # Validate sizes BEFORE any write (no partial tier).
-    for name, payload in docs.items():
-        if name != _MANIFEST and len(payload) > MAX_SHARD_BYTES:
-            raise AnalysisInputError(
-                f"{name} is {len(payload)} bytes (> {MAX_SHARD_BYTES} per-shard ceiling)"
-            )
-    total = sum(len(p) for p in docs.values())
-    if total > MAX_TOTAL_BYTES:
-        raise AnalysisInputError(f"dataset total {total} bytes (> {MAX_TOTAL_BYTES} ceiling)")
-
-    # Write, pruning any stale files (from a prior export of this run-id) not in the new set.
-    # Prune ONLY on a full export: a --limit fixture is purely additive so a mistyped
-    # `--limit` re-export can never delete files from a real (committed) tier.
-    run_dir = Path(out_root) / run_id
-    run_dir.mkdir(parents=True, exist_ok=True)
-    if limit is None:
-        existing = {p.relative_to(run_dir).as_posix() for p in run_dir.rglob("*") if p.is_file()}
-        for rel in existing - set(docs):
-            (run_dir / rel).unlink()
-        # remove any now-empty group dirs (deepest first) so a dropped tradition leaves nothing
-        for d in sorted((p for p in run_dir.rglob("*") if p.is_dir()),
-                        key=lambda p: len(p.parts), reverse=True):
-            if not any(d.iterdir()):
-                d.rmdir()
-    for name, payload in docs.items():
-        path = run_dir / name
-        path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(payload)
-
-    return WriteSummary(
-        scenarios=n_scenarios, manifest_bytes=len(manifest_bytes), shard_bytes=shard_total,
-        shard_uncompressed_bytes=shard_uncompressed, max_shard_bytes=max_shard, total_bytes=total,
-    )
+    return writer.write(catalog, max_shard_bytes=MAX_SHARD_BYTES, max_total_bytes=MAX_TOTAL_BYTES)

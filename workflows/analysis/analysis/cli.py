@@ -198,7 +198,55 @@ def export_raw(
         _json.dumps({
             "run_id": run_id,
             "out": str(Path(out) / run_id),
-            "scenarios": summary.scenarios,
+            "shards": summary.shards,
+            "shard_bytes": summary.shard_bytes,
+            "shard_uncompressed_bytes": summary.shard_uncompressed_bytes,
+            "compression_ratio": round(summary.compression_ratio, 2),
+            "max_shard_bytes": summary.max_shard_bytes,
+            "manifest_bytes": summary.manifest_bytes,
+            "total_bytes": summary.total_bytes,
+        })
+    )
+
+
+@app.command(name="export-afb")
+def export_afb(
+    intermediate: str = typer.Argument(
+        ..., metavar="INTERMEDIATE",
+        help="The Phase-2 collection intermediate JSON (responses + Terra 0–4 verdicts).",
+    ),
+    run_id: str = typer.Option(
+        ..., "--run-id", help="Dataset id — the results-raw/<run-id>/ directory name (e.g. afb-20260808)."
+    ),
+    out: str = typer.Option(
+        "results-raw", "--out",
+        help="Root output dir; writes <out>/<run-id>/manifest.json + afb-150/<item>.json.gz.",
+    ),
+) -> None:
+    """Export the AFB collection intermediate into a drop-in results-raw/<run-id>/ catalog (#54).
+
+    The AFB before/after explorer as a SECOND catalog type on the Spec 51 raw viewer: 0–4 scale,
+    two checkpoint subjects, the Terra judge, a single cold condition. Reuses the byte-stable writer
+    (deterministic, gzip mtime=0) → byte-identical re-exports.
+    """
+    import json as _json
+    from pathlib import Path
+
+    from analysis.export_afb import export
+    from analysis.loaders import AnalysisInputError
+
+    try:
+        doc = _json.loads(Path(intermediate).read_text(encoding="utf-8"))
+        summary = export(doc, out, run_id)
+    except (AnalysisInputError, OSError, _json.JSONDecodeError) as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    typer.echo(
+        _json.dumps({
+            "run_id": run_id,
+            "out": str(Path(out) / run_id),
+            "shards": summary.shards,
             "shard_bytes": summary.shard_bytes,
             "shard_uncompressed_bytes": summary.shard_uncompressed_bytes,
             "compression_ratio": round(summary.compression_ratio, 2),

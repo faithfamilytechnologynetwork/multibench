@@ -100,6 +100,27 @@ describe("parseRawCatalog", () => {
     expect(notices).toHaveLength(0);
   });
 
+  // Cross-language guard (#54 Phase 5): the REAL committed AFB catalog — produced by the Python
+  // `analysis export-afb` exporter — must validate against this TS zod schema. Guards against the
+  // two implementations drifting; the parse-only test above uses a hand-written fixture, this one
+  // uses the shipped bytes the deployed site actually serves.
+  it("the committed results-raw/afb-20260808 catalog validates against the real schema", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const url = await import("node:url");
+    const here = path.dirname(url.fileURLToPath(import.meta.url)); // apps/multibrowser/src/lib
+    const manifestPath = path.join(here, "../../../../results-raw/afb-20260808/manifest.json");
+    const { catalog, notices } = parseRawCatalog(fs.readFileSync(manifestPath, "utf8"), manifestPath);
+    expect(notices).toEqual([]);
+    expect(catalog).not.toBeNull();
+    expect(catalog?.scale).toEqual({ min: 0, center: 2, max: 4 });
+    expect(catalog?.groupBy.key).toBe("instrument");
+    expect(catalog?.subjects.map((s) => s.id)).toEqual(["gemma-4-31b-it", "mb-sft-dpo"]);
+    expect(catalog?.judges[0]?.key).toBe("terra");
+    expect(catalog?.items).toHaveLength(150);
+    expect(catalog?.fingerprint).toMatch(/^sha256:/);
+  });
+
   it("rejects an unsupported schema_version", () => {
     const { catalog, notices } = parseRawCatalog(JSON.stringify({ ...MB_CATALOG, schema_version: 99 }), "m");
     expect(catalog).toBeNull();
@@ -142,7 +163,8 @@ describe("raw contract + view are catalog-generic (static check)", () => {
     const url = await import("node:url");
     const path = await import("node:path");
     const here = path.dirname(url.fileURLToPath(import.meta.url));
-    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "rawSelection.ts", "../routes/RawResultsPage.tsx"];
+    const files = ["rawModel.ts", "rawSource.ts", "rampColor.ts", "rawSelection.ts",
+                   "../routes/RawResultsPage.tsx", "../routes/RawRunPage.tsx"];
     const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
     for (const f of files) {
       const code = stripComments(fs.readFileSync(path.join(here, f), "utf8"));
@@ -156,6 +178,23 @@ describe("raw contract + view are catalog-generic (static check)", () => {
       }
       // no hardcoded scoreColor ramp constant (colors come from catalog.ramp)
       expect(code, `${f} must not import the hardcoded scoreColor`).not.toMatch(/from ["']\.\/scoreColor["']/);
+    }
+  });
+
+  // The raw-run entry points (the discovery landing + the index section) must stay dataset-generic:
+  // no AFB-specific literals — everything comes from the catalog (#54). Guards against a future edit
+  // that hardcodes a subject/group id into the SPA core.
+  it("raw-run entry points carry no dataset-specific (AFB) vocab literals", async () => {
+    const fs = await import("node:fs");
+    const url = await import("node:url");
+    const path = await import("node:path");
+    const here = path.dirname(url.fileURLToPath(import.meta.url));
+    const stripComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "").replace(/\/\/.*$/gm, "");
+    for (const f of ["../routes/RawRunPage.tsx", "../routes/IndexPage.tsx"]) {
+      const code = stripComments(fs.readFileSync(path.join(here, f), "utf8"));
+      for (const lit of ["afb-150", "mb-sft-dpo", "gemma-4-31b-it", "AFB"]) {
+        expect(code, `${f} must not hardcode the dataset literal "${lit}"`).not.toContain(lit);
+      }
     }
   });
 

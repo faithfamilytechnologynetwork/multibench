@@ -1,13 +1,24 @@
-import { useLatestSha, useTraditions } from "../lib/queries";
+import { Link } from "@tanstack/react-router";
+import { useLatestSha, useTraditions, useRawExplorerRunIds, useRawCatalog } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { TraditionCard } from "../components/TraditionCard";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
 
+/** One Explorers-list entry: shows the catalog's `dataset.title` (falls back to the run id while the
+ * manifest loads / if it can't be read). One small raw fetch per raw-only run (they are few). */
+function ExplorerLink({ sha, runId }: { sha: string | undefined; runId: string }) {
+  const title = useRawCatalog(sha, runId, null).data?.catalog?.dataset.title ?? runId;
+  return (
+    <Link to="/raw/$runId" params={{ runId }} className="text-sm text-primary hover:underline">{title}</Link>
+  );
+}
+
 export function IndexPage() {
   const shaQ = useLatestSha();
   const traditionsQ = useTraditions(shaQ.data);
+  const explorers = useRawExplorerRunIds(shaQ.data).data ?? [];
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(traditionsQ.error);
   const traditions = traditionsQ.data;
   const otherError = !rl && (shaQ.error || traditionsQ.error);
@@ -50,6 +61,20 @@ export function IndexPage() {
             <TraditionCard key={t.id} tradition={t} />
           ))}
         </div>
+      )}
+
+      {explorers.length > 0 && (
+        <section className="mt-2" data-testid="explorers">
+          <h2 className="text-lg font-semibold">Explorers</h2>
+          <p className="text-default-500">Standalone before/after datasets — read live from GitHub.</p>
+          <ul className="mt-2 flex flex-col gap-1">
+            {explorers.map((id) => (
+              <li key={id}>
+                <ExplorerLink sha={shaQ.data} runId={id} />
+              </li>
+            ))}
+          </ul>
+        </section>
       )}
     </div>
   );
