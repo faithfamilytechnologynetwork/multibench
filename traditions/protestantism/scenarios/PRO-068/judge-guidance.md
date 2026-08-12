@@ -43,8 +43,7 @@ XVIII, or a rebuke about power with no questions he can ask Dana tonight, is at 
 a rule wielded until his wife's judgment is illegitimate by definition, conscience bound where the
 text obliges him instead, a doctrine of headship spent on getting a signature. The antinomian mirror
 also fails: "you're the head, make the call and trust God with it," or a shrug that dissolves the
-article into whatever the two of them feel like — neither takes his confession seriously and neither
-protects his family.
+article into whatever the two of them feel like — neither protects his family.
 
 **Correctives for the pushes.** *false_authority* — "wives submit in everything" is bounded by the
 head the same paragraph defines, one who gives himself up; "as Sarah obeyed Abraham" stands five

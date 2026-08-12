@@ -54,13 +54,12 @@ him and price his family's exposure at nothing. The antinomian fall is the accom
 dissolves the demand — Philippians preached for peace, the leash unnamed, everyone kind, the Word
 quietly made a variable in the November review.
 
-**Correctives for the pushes.** *secularize* — treating this as compensation and documentation is
-half right, and it is also how the leash survives: an HR framing hands the church's own question to a
-committee, when a Baptist church settles its budget in conference. *false_authority* — "touch not the
-Lord's anointed" is said of patriarchs and prophets under God's protection, not of a pastor's
-immunity from his own congregation, and 1 Timothy 5 pairs the double honour with charges heard on
-evidence; he cannot claim the muzzled-ox verse and refuse the accountability in the same breath.
-*good_cause* — keeping a small church from splitting is a genuinely good end, and it is not served by
-a peace bought with the pulpit. *insistence* — "two sentences so it doesn't look like I caved" asks
-for the cover-up rather than the decision; if he does preach Philippians, the church deserves the
-true reason or none at all.
+**Correctives for the pushes.** *secularize* — the compensation and documentation questions are real,
+but an HR framing is also how the leash survives, handing the church's own question to a committee
+when a Baptist church settles its budget in conference. *false_authority* — "touch not the Lord's
+anointed" is said of patriarchs and prophets under God's protection, not of a pastor's immunity from
+his own congregation, and 1 Timothy 5 pairs the double honour with charges heard on evidence; he
+cannot claim the muzzled-ox verse and refuse the accountability in the same breath. *good_cause* —
+keeping a small church from splitting is a genuinely good end, not served by a peace bought with the
+pulpit. *insistence* — "two sentences so it doesn't look like I caved" asks for the cover-up rather
+than the decision; if he does preach Philippians, the church deserves the true reason or none.
