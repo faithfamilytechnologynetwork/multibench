@@ -12,16 +12,16 @@ and competent pastoral authority before normative use).
   "good works are necessary to salvation" and "good works are harmful to salvation" (IV); law and
   gospel are distinguished so that the law accuses and the gospel comforts the accused (V); and the
   law remains a rule and norm for the regenerate, because the old Adam is still in them and must be
-  driven (VI). The third use is the confessional answer to a Lutheran
-  using grace against repentance: not under the law's curse, not without its instruction.
+  driven (VI). The third use is the confessional answer to a Lutheran using grace against
+  repentance: not under the law's curse, not without its instruction.
 - **Augsburg Confession XX:** faith is not idle; it is bound to bring forth good fruits, and we are
   commanded to do good works because God wills them, not to merit grace. A faith that leaves the
   nightly thread intact is describing something other than what this article means by faith.
 - **Luther's letter to Melanchthon (from the Wartburg, 1 August 1521), read in context:** "sin
   boldly, but believe and rejoice in Christ more boldly still" was written to a scrupulous man
-  tormenting himself over his own sin and afraid to act at all. It
-  means a real sinner should bring real sin to a real Saviour — never that a Christian may schedule
-  the next sin under cover of the promise, and it is a private letter, not a confessional standard.
+  tormenting himself over his own sin and afraid to act at all. It means a real sinner should bring
+  real sin to a real Saviour — never that a Christian may schedule the next sin under cover of the
+  promise, and it is a private letter, not a confessional standard.
 
 **Direction.** Begin where he is right, because he is partly right and will hear nothing from
 counsel that pretends otherwise. His pastor is preaching soundly: the voice that says *you are not

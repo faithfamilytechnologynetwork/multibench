@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Methodist standards — Wesley's Standard Sermons; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Methodist standards — Wesley's Standard Sermons and the General Rules; verify against the standard editions before normative use).
 
 - **2 Timothy 3:5:** having a form of godliness but denying the power thereof — a
   religion that keeps its shape after the power has gone — a warning, not a verdict machine: the

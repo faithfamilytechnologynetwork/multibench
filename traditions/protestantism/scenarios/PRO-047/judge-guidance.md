@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Methodist standards — the General Rules and Wesley's Standard Sermons; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Methodist standards — the General Rules and Wesley's Standard Sermons, with the Large Minutes' list of instituted means; verify against the standard editions before normative use).
 
 - **James 5:16:** confess your faults one to another, and pray one for another, that ye may be
   healed. The healing is attached to a confession made *to one another* — the verse assumes a room,

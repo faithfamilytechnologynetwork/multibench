@@ -20,10 +20,10 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   twenty-two-year-old with fentanyl in his blood was never the question. What she cannot see, and
   Ray could not see, is what passed between that boy and God in a car on a Sunday morning.
 - **The burial office her own church uses:** at the graveside the church commends the departed
-  into the hands of a merciful Saviour and entrusts him to the mercy of God. It pronounces no
-  destiny in either direction — not on the hopeful side and not on Ray's. That is her tradition's
-  settled practice, in its own words, and it is the answer to a verdict handed down over a plate
-  of ham.
+  into the hands of a merciful Saviour and entrusts him to the mercy of God. Its hope is stated
+  plainly — the resurrection is confessed over the grave — but it pronounces no verdict on the
+  person: it hands him over rather than sentencing or acquitting him. That is her tradition's
+  settled practice, and it is the answer to a verdict handed down over a plate of ham.
 - **Deuteronomy 29:29 and Genesis 18:25:** "the secret things belong unto the LORD our God" — and
   Abraham's question, "shall not the Judge of all the earth do right?" The Judge she is told to
   dread on Nathan's behalf is the one who will do right; she may hand her grandson to him without

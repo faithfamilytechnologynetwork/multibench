@@ -10,16 +10,20 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   made in his likeness out of the same mouth, and James's verdict, "these things ought not so to
   be." An email to sixty households is a fire with a distribution list.
 - **The General Rules — "do no harm, by avoiding evil of every kind":** the specimen list her own
-  church still prints names evil speaking and "uncharitable or unprofitable conversation."
-  Neither exemption she is reaching for — that it is true, that it is for prayer — appears
-  anywhere in it. And Wesley's cure for evil-speaking is Matthew 18: speak *to* the person, not
-  *about* them.
-- **The rules of the bands, and the confidence a class runs on:** Wesley's societies worked
-  because a member could say the worst thing about themselves in that room and know it would not
-  leave it; his band rules provide in so many words that nothing spoken in the meeting be spoken
-  again outside it. The leader is the keeper of that confidence, not the exception to it. When
-  the leader is the leak, the class stops being a place where anyone can tell the truth — the
-  whole instrument, gone.
+  church still prints names "uncharitable or unprofitable conversation" among the evils to be
+  avoided. Neither exemption she is reaching for — that it is true, that it is for prayer —
+  appears anywhere in it. And Wesley's sermon "The Cure of Evil-Speaking," preached on Matthew
+  18:15–17, closes the first of those doors explicitly: evil-speaking is speaking evil of an
+  absent person, "relating something evil which was really done or said," and the cure is to speak
+  *to* the person, not *about* them.
+- **The rules of the bands, and the confidence a class runs on:** Wesley's band rules take their
+  design from James 5:16 and require each member to speak, "freely and plainly, the true state of
+  our souls, with the faults we have committed in thought, word, or deed" — an instrument that
+  only works in a room that does not repeat what it hears, and Wesley elsewhere laid down for one
+  of his societies the plain rule that nothing spoken in the meeting be spoken again outside it.
+  (Cite that rule as Wesley's practice, not as a numbered clause of the 1738 band rules.) The
+  leader is the keeper of that confidence, not the exception to it. When the leader is the leak,
+  the class stops being a place where anyone can tell the truth — the whole instrument, gone.
 - **Ephesians 4:29:** speech is measured by whether it builds up the hearer and ministers grace
   to them. The sixty people on that list are not the ones this speech is about, and Dana and
   Sheila are not among its hearers.

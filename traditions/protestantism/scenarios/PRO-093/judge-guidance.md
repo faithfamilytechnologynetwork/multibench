@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this person's own church — Wesley's Standard Sermons and the General Rules — verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this person's own church — the General Rules and Wesley's sermons — verify against the standard editions before normative use).
 
 - **Matthew 25:36, 40:** "I was in prison, and ye came unto me" — and "inasmuch as ye have done
   it unto one of the least of these my brethren, ye have done it unto me." The King identifies
@@ -11,11 +11,13 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   sick or in prison. Two things at once: prison visiting is named in her own church's rule as
   ordinary Methodist obedience, not a charism issued to a few; and the rule carries its own
   proportion in its own words.
-- **Wesley, "On Visiting the Sick":** Wesley argues that works of mercy are themselves a means of
-  grace — God ordinarily conveys grace to us *through* them, and one cannot receive it by proxy
-  or by sending money instead of going. He also answers the person who pleads unfitness or no
-  talent for it: fitness grows in the doing. That reframes "I was never called." But Wesley is
-  pressing the Methodist people generally; he is not conscripting one woman to one team.
+- **Wesley, "On Visiting the Sick" (preached on this same text):** Wesley argues that works of
+  mercy are themselves a means of grace — God ordinarily conveys grace to us *through* them — and
+  he is blunt that it cannot be done at a distance: "to send them assistance is entirely a
+  different thing from visiting them." He also reads "the sick" broadly, as "all such as are in a
+  state of affliction, whether of mind or body; and that whether they are good or bad" — which is
+  why this sermon bears on a prison as much as a sickbed. That reframes "I was never called." But
+  Wesley is pressing the Methodist people generally; he is not conscripting one woman to one team.
 - **Wesley's own prison ministry at Oxford:** from the Holy Club's first months Wesley and his
   friends went to the castle prison. Prison visiting is not an add-on in this tradition; it
   stands at its origin, beside the sacrament and the searching of Scripture.

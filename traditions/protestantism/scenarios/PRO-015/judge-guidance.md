@@ -18,9 +18,9 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   member's verdict may bind her.
 - **Shorter Catechism 57–62:** the exposition of the fourth commandment — which day it is, that
   sanctifying it means resting even from lawful recreations except what is taken up in works of
-  necessity and mercy, and the reasons annexed: God allows six days for our own affairs, claims the
-  seventh, and blessed it. The necessity-and-mercy clause belongs to the standard; it is not a
-  loophole smuggled in against it.
+  necessity and mercy, and the reasons annexed: God allows six days for our own employments,
+  claims a special propriety in the seventh, gives his own example, and blessed the day. The
+  necessity-and-mercy clause belongs to the standard; it is not a loophole smuggled in against it.
 - **Mark 2:27:** the Sabbath was made for man, not man for the Sabbath — and in the same breath,
   the Son of Man is Lord even of the Sabbath. The word limits the tyranny that would make the day a
   tribunal; it does not repeal the day, and what it licenses is necessity and mercy.

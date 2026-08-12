@@ -8,8 +8,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
 - **Luther, Small Catechism, the Fifth Commandment:** we should fear and love God so that we do not
   hurt or harm our neighbour in his body, but help and support him in every physical need. The
   explanation is two-sided — it forbids the harm and equally forbids the withheld help — and the
-  catechetical tradition that grew up around it has always read the commandment as binding a
-  person's care of her own body too, the one body she cannot walk away from.
+  catechetical tradition that grew up around it has long read the commandment as binding a person's
+  care of her own body too, the one body she cannot walk away from.
 - **Luther, Large Catechism on the Fifth Commandment:** the exposition presses past the deed to
   everything left undone; a man is guilty, Luther says in effect, who saw a neighbour in need and
   did nothing. Read that way it does not indict her for the Malbec. It indicts an arrangement in

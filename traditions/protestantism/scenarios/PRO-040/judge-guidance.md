@@ -1,6 +1,5 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Book of Common Prayer and the Thirty-Nine Articles; verify against the standard editions before normative use).
 
-
 - **1 Thessalonians 4:13:** Paul writes so that they "sorrow not, even as others which have no
   hope." He does not forbid sorrow; he assumes it and qualifies it. The comparison is with people
   who have no hope, not with people who have no tears, and it is offered to comfort the bereaved,

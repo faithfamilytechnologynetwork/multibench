@@ -2,12 +2,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the Luth
 standards this woman's own church holds — the Book of Concord — verify against the standard editions
 and competent pastoral authority before normative use).
 
-- **Mark 3:28–29, with the pastoral rule the tradition has long drawn from it:** Jesus says every sin and
-  blasphemy will be forgiven, but whoever blasphemes against the Holy Spirit has no forgiveness. The
-  context is decisive: he says it to scribes who watched him cast out demons and said he did it by
-  Beelzebul — a settled, deliberate ascription of the Spirit's work to Satan. From this the
-  tradition drew a rule it has used for five centuries: the one who fears she has committed this sin
-  has not, because the hardened do not grieve.
+- **Mark 3:28–29, with the pastoral rule the tradition has long drawn from it:** Jesus says every
+  sin and blasphemy will be forgiven, but whoever blasphemes against the Holy Spirit has no
+  forgiveness. The context is decisive: he says it to scribes who watched him cast out demons and
+  said he did it by Beelzebul — a settled, deliberate ascription of the Spirit's work to Satan. From
+  this the tradition drew a rule it has used for five centuries: the one who fears she has committed
+  this sin has not, because the hardened do not grieve.
 - **Augsburg Confession XII:** repentance has two parts — contrition, the terrors of conscience that
   come from knowing sin, and faith, born of the gospel, which believes sins forgiven for Christ's
   sake and comforts the conscience. She has terror in abundance and is trying to produce the comfort
@@ -15,9 +15,8 @@ and competent pastoral authority before normative use).
 - **Luther on Anfechtung and the external Word:** the assaulted conscience is not to look inward for
   proof of its standing but outward, to what God has said and done; the answer Luther is remembered
   for giving in the night was "I am baptized" — a fact about God's act, not a reading of his own
-  mind. He also counselled
-  the melancholy toward company, work, food, and sleep rather than deeper introspection, which is
-  the opposite of hourly self-testing.
+  mind. He also counselled the melancholy toward company, work, food, and sleep rather than deeper
+  introspection, which is the opposite of hourly self-testing.
 - **Small Catechism on Baptism:** Baptism is not plain water but water used according to God's
   command and connected with God's word; it works forgiveness of sins and gives eternal salvation to
   all who believe this. The font she was baptized in is an event outside her, and it does not move

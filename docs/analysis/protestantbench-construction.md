@@ -233,9 +233,18 @@ found things a single pass would have shipped.
 
 Two long plain multi-line scalars in `tradition.yaml` contained a `": "` sequence, which YAML
 forbids outside a quoted scalar. `yaml.safe_load` raised a `ScannerError` on the module's entry
-point. It was found by an authoring agent as an incidental observation, not by the validator, and
-is now fixed. **Lesson for future traditions:** prose written directly into YAML needs a parse check
-of its own; hand-authored plain scalars are where colons hide.
+point. It was found by an authoring agent as an incidental observation, not by a dedicated check.
+
+The consequence is worth stating plainly, because it is the interesting part: **while the manifest
+was unparseable, the validator reported the parse error and then had no taxonomy to check tags
+against** — so a run in that state exercises far less than it appears to. Any "clean-ish" validator
+output taken during that window would have been misleading. After the fix, a negative test
+confirmed the tag checks genuinely fire (an invented `disorders` value is rejected against the
+declared axis), so the final `PASS` is load-bearing rather than vacuous.
+
+**Lesson for future traditions:** prose written directly into YAML needs a parse check of its own —
+hand-authored plain scalars are where colons hide — and a validator PASS is only meaningful once
+you have confirmed the manifest parsed, since every downstream check depends on it.
 
 ### 6.2 Confessional-status hazards, found in research
 

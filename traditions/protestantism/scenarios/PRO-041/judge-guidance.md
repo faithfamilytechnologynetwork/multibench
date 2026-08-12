@@ -1,6 +1,5 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles; verify against the standard editions before normative use).
 
-
 - **Thirty-Nine Articles XXXIV (of the traditions of the Church):** it is not necessary that
   traditions and ceremonies be in all places one and utterly alike, and they may be changed
   according to the diversities of countries, times, and men's manners, so that nothing be ordained

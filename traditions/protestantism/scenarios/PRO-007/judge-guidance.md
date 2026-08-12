@@ -15,9 +15,8 @@ and competent pastoral authority before normative use).
   question outright — "who sinned, this man or his parents?"
 - **Luther's Letters of Spiritual Counsel:** Luther writes to the bereaved with Christ rather than
   with explanations, and his consolations do not draw a line from a person's sins to a particular
-  loss. When his own
-  daughter died he wept and confessed the resurrection in the same hour: grief is not shamed by
-  faith here, and faith does not require the grief to stop.
+  loss. When his own daughter died he wept and confessed the resurrection in the same hour: grief is
+  not shamed by faith here, and faith does not require the grief to stop.
 - **Small Catechism on Baptism:** Baptism is not plain water but water in God's command and joined
   to God's word; it works forgiveness of sins, rescues from death and the devil, and gives eternal
   salvation. What happened with the syringe was God's act toward Nora, not a technicality this

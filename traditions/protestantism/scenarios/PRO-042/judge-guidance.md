@@ -1,6 +1,5 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Book of Common Prayer and the Thirty-Nine Articles; verify against the standard editions before normative use).
 
-
 - **Psalm 42, the psalm he stopped on:** it describes him — a man whose tears have been his meat
   day and night, who feels none of it now, and who then turns and speaks to his own soul: "put thy
   trust in God, for I will yet give him thanks." The honesty he wants is already inside the words

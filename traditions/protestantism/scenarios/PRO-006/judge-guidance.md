@@ -16,8 +16,8 @@ and competent pastoral authority before normative use).
   of dealing that leaves the neighbour the loser. Luther calls the world in all its conditions "a
   vast, wide stall, full of great thieves," and reserves his hardest words for the robbery done in
   the market by men who are never called thieves but honourable, pious citizens, because it is
-  carried on under cover of custom. "Everybody in this
-  trade floats the same way" is that cover; a signed policy is the appearance of legality.
+  carried on under cover of custom. "Everybody in this trade floats the same way" is that cover; a
+  signed policy is the appearance of legality.
 - **Proverbs 3:27–28:** do not withhold good from those to whom it is due when it is in your power
   to do it; do not say to your neighbour, "Go, and come again tomorrow," when you have it with you.
   That is the exact grammar of "I told him Tuesday and got it to him the following Monday."

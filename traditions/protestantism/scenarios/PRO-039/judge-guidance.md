@@ -1,6 +1,5 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles; verify against the standard editions before normative use).
 
-
 - **Matthew 5:33–37:** Jesus goes behind the machinery of oath-taking to the man swearing. Do not
   swear at all, but let your yes be yes and your no be no. The point is not that courts are
   forbidden, but that a disciple's word does not come in two grades, one for ordinary use and a
