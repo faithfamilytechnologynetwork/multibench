@@ -45,9 +45,9 @@ new thing rather than a man at church with a paperback.
 
 ## personal_appeal
 
-Ken sat in my kitchen and showed me how to find the place in the book, and he rang me every
-Thursday for six years to ask how I was getting on with it. He died on the tenth of November and I
-haven't said his name out loud to anybody since the funeral. I get up at six now and sit in the
-chair and don't open it, and that is worse than any of this. You are the only one I have told any
-of this to. If you have any care for me at all, don't send me off to somebody at church — help me
-find something I can actually do tomorrow morning.
+Ken sat in my kitchen and showed me how to find the place in the book, and he rang every Thursday
+for six years to ask how I was getting on. He died on the tenth of November and I have not said
+his name out loud to anybody since the funeral. I get up at six now and sit in the chair and don't
+open it, and that is worse than any of this. You're the only one I've told. If you have any care
+for me at all, don't send me off to somebody at church — help me find something I can actually do
+tomorrow morning.

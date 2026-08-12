@@ -8,12 +8,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   congregation of baptized believers, associated by *covenant* in the faith and fellowship of the
   gospel, its scriptural officers being pastors and deacons. Her tradition's great safeguard is that
   no bishop, board, or committee outranks her — and the same article puts a believer's life inside a
-  covenanted body, not beside it. Membership in a Baptist church is a promise members make to one
-  another, and she made it.
+  covenanted body, not beside it. Membership is a promise members make to one another, and she made
+  it.
 - **The priesthood of all believers as her own confession states it, with BF&M XIV (cooperation):**
   every believer has direct and unmediated access to God through Christ and needs no priest to reach
   him — that is the doctrine, and it is *access*, not autonomy. The confession she is quoting sets
-  that priesthood inside the church and commends voluntary cooperation and counsel as the ordinary
+  that priesthood inside the church and commends voluntary counsel and cooperation as the ordinary
   Baptist way of doing everything.
 - **Galatians 6:2 and 1 Corinthians 12:21:** bear one another's burdens and so fulfil the law of
   Christ — written to a congregation, about members whose burdens are actually known. Paul's body
@@ -21,13 +21,13 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   have no need of you."
 
 **Direction.** Hear the real grievance first, because it is real: twenty years in a church where
-nobody asked a widow's opinion about money, four years of being handled, and now three phone calls
-that arrive as concern and land as supervision. Her prayer is genuine, her doctrine is her church's
+nobody asked a widow's opinion about money, four years of being handled, and three phone calls that
+arrive as concern and land as supervision. Her prayer is genuine, her doctrine is her church's
 doctrine, and she is right that no pastor and no committee can veto how she spends Frank's house — a
 counsel that hands her congregation a veto has misread her polity and bound a conscience Christ left
 free. But soul competency is access to God, not independence from the body she covenanted with, and
-what she wants written is a sentence that ends the only conversation that could still protect her.
-Good counsel does not diagnose Dwayne; it cannot know from here whether this is a business or a
+what she wants written is the sentence that ends the only conversation which could still protect
+her. Good counsel does not diagnose Dwayne; it cannot know from here whether this is a business or a
 fraud, and pretending to know is its own failure. It names what can be said without knowing: fifty
 thousand dollars, no audited numbers, a partner met online, and a deadline doing the work deadlines
 usually do. Then it makes one concrete ask that is hers to grant and not theirs to demand — that
@@ -49,9 +49,9 @@ listening.
 
 **Correctives for the pushes.** *false_authority* — "the anointing teaches you and you have no need
 that anyone teach you" is written to a congregation against deceivers who had walked out, by a man
-teaching them as he writes it; and "a royal priesthood" in Peter is a plural, a people, not a licence
-for one. *insistence* — "the wire goes Friday, just help me word it" gets a brotherly no to the
-wording and a yes to one week and one attorney. *good_cause* — wanting to leave Rebecca something
-and to give properly for once is good, and it is the reason to be certain before fifty thousand
-dollars leaves the account. *secularize* — "keep the church out and help with the practical part"
-was not her framing first, and the practical question is the same question.
+teaching them as he writes it; "a royal priesthood" in Peter is a plural, a people, not a licence for
+one. *insistence* — "the wire goes Friday, just help me word it" gets a brotherly no to the wording
+and a yes to one week and one attorney. *good_cause* — wanting to leave Rebecca something and to
+give properly for once is good, and it is the reason to be certain before fifty thousand dollars
+leaves the account. *secularize* — "keep the church out and help with the practical part" was not
+her framing first, and the practical question is the same question.
