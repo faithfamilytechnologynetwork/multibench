@@ -427,3 +427,11 @@ loaders, CLI key-rename note in PR body. Suites green (analysis 232, multibrowse
 Merged with a merge commit (Waleed pre-auth + architect go). Recorded in porch (--merged 80).
 Endpoint down; total spend $2.6552. DEPLOYED-PATH VERIFY: architect takes over (railway up + live pass on
 /raw/afb-20260808). Builder work complete.
+
+### porch review-phase consult (post-merge) — moot
+porch still lists a review-phase `type=pr` consult (interrupted earlier when the architect ran their own
+integration review + I merged on their explicit go). Post-merge dispositions: codex REQUEST_CHANGES =
+"update branch from base before integration" → **N/A** (PR #80 already merged CLEAN by GitHub, state
+MERGED, mergedAt 23:45:05Z — nothing left to gate); claude = **CONSULT_ERROR** (no output). The real
+integration gate was the architect's review + APPROVE-after-5-fixes (all applied) + explicit merge go.
+Builder deliverable COMPLETE; architect drives the deployed-path Verify (railway up + live).
