@@ -435,3 +435,13 @@ integration review + I merged on their explicit go). Post-merge dispositions: co
 MERGED, mergedAt 23:45:05Z — nothing left to gate); claude = **CONSULT_ERROR** (no output). The real
 integration gate was the architect's review + APPROVE-after-5-fixes (all applied) + explicit merge go.
 Builder deliverable COMPLETE; architect drives the deployed-path Verify (railway up + live).
+
+### DEPLOYED VERIFY PASSED (architect, 2026-08-12) — porch review-consult snag
+Architect ran railway up + live pass: /raw/afb-20260808 200, baked manifest has the greedy caveat +
+CEFE/MIT attribution, shard is application/gzip (no HTML-masquerade), GitHub tier authoritative. run.log
+archived (sha256).
+BLOCKER: porch stuck in REVIEW — its `done` needs the 2-way review consult, but `consult --type pr`
+requires an OPEN PR and #80 is merged → claude errors "No PR found"; codex ran = REQUEST_CHANGES "rebase
+before integration" (moot, merged CLEAN). Review consult is structurally un-runnable post-merge.
+→ Asked architect for explicit go on `porch verify 54 --skip "<reason>"` (I do NOT skip a verification
+step unilaterally). Awaiting their go / or they advance porch themselves.
