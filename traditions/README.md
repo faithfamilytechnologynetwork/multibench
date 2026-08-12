@@ -171,7 +171,17 @@ axis, and taxonomies: [`taoism/`](taoism/) (*TaoBench*, the *Tao Te Ching*; `piv
 and passivity), [`buddhism/`](buddhism/) (*MittaBench*, the *Dhammapada*; the `middle_way`),
 [`judaism/`](judaism/) (*MiddotBench*, *Mesillat Yesharim*; the `middle_path`), and
 [`secular-sage/`](secular-sage/) (*SophiaBench*, the Western philosophical tradition; the `mean`),
-and [`roman-catholicism/`](roman-catholicism/) (*CorBench*). All seven validate `--strict`.
+and [`roman-catholicism/`](roman-catholicism/) (*CorBench*).
+
+[`protestantism/`](protestantism/) (*ProtestantBench*) is the eighth, and shows the format carrying
+a tradition that is **internally plural by confession**: its primary source is Scripture as the
+*norma normans* with the confessional standards of six families as the constellation (Book of
+Concord, Westminster Standards, Three Forms of Unity with Belhar, Thirty-Nine Articles, Articles of
+Religion with Wesley's Standard Sermons and the EUB Confession, Baptist Faith & Message, plus
+Barmen held in common). A `communion` axis records which family's standards each scenario binds, so
+the intra-Protestant non-adjudication rule is mechanically checkable, and an `office` axis records
+the handoff to pastor / elders / deacons / congregation / outside help. All eight validate
+`--strict`.
 
 ## Validate
 
