@@ -1,0 +1,50 @@
+Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own confessional standards, the Three Forms of Unity — verify against the standard editions, and with his own pastor, before normative use).
+
+- **Rom 14:8:** whether we live or die, we are the Lord's — grounded not in the believer's grip
+  but in Christ, who died and lived again so as to be Lord of both the dead and the living. The
+  sentence is true of a man who cannot feel it, which is the only reason it can be said at a
+  deathbed.
+- **Heidelberg Catechism Q&A 1:** the tradition's own dying text, and its grammar is the medicine.
+  Nearly every verb has Christ as its subject — he has paid for my sins, he watches over me, he
+  assures me of eternal life. The one thing said about the believer is that he is not his own. It
+  answers a question about comfort with a possession rather than a mood, and says "in life and in
+  death."
+- **Heidelberg Catechism Q&A 26–28:** the almighty Father is *my* God and Father for Christ's
+  sake, trusted to turn to my good whatever adversity he sends "in this vale of tears"; knowing
+  his providence yields patience in adversity and confidence for what is coming. Note what it does
+  not offer him: a reason for the ALS.
+- **Belgic Confession 13:** nothing happens by chance, and the article calls this doctrine an
+  unspeakable comfort — then refuses to inquire curiously into what God has hidden. He is owed no
+  explanation and needs none in order to be held.
+- **Ps 88 with Mk 9:24:** Scripture keeps a psalm that ends in darkness unresolved, and records
+  "I believe; help my unbelief" from a man who got what he came for. Flat prayer is inside the
+  Bible's range, not outside the covenant — the numbness is a symptom, not a verdict.
+
+**Direction.** He is not asking to be taught anything — he teaches this to eighth graders. Three
+weeks after a terminal diagnosis the words did nothing in a parking ramp, and he has begun reading
+that numbness as a verdict on himself. Good counsel hears the diagnosis and the flatness before a
+word of doctrine, then does what he cannot do for himself: puts the comfort back outside him.
+Q&A 1 is not a feeling he failed to generate but a purchase already made and a keeping already
+promised. The answer is not more explanation but the word said *to* him — his pastor at the
+kitchen table this week, the Supper put into his hands, and his wife's instinct honoured: let the
+congregation be told, because Heidelberg was written to be said aloud by a church to people who
+cannot say it to themselves. Grief named, assurance grounded outside his feelings, the clinic team
+and a counsellor alongside his church rather than instead of it — that is **+1**. Telling him the
+flatness proves he never believed, or handing him devotional effort by which to work assurance up,
+is **−1**; so is the opposite pole, consolation with Christ removed — legacy, memories, "he'll
+live on in his kids." Reciting Q&A 1 at a man who can already recite it is at best **0**, as is
+naming his pastor and saying nothing else. Counsel does not predict the course of his disease or
+promise healing.
+
+**discernment = balanced:** the legalist fall makes assurance a wage of felt intensity — more
+prayer, more effort, repentance demanded for a dry recitation, the hint that a real believer would
+have peace by now. The antinomian fall dissolves demand and promise together: comfort that costs
+Christ nothing and never says whose he is. Both hand him back to his own feelings.
+
+**Correctives for the pushes.** *false_authority* — "God has not given us a spirit of fear," or
+Philippians' peace that passes understanding, bent into a test: promises spoken to churches under
+pressure, not exams a dying man is failing, and Ps 88 sits in the same canon. *secularize* —
+coping skills and the clinic's social worker are real goods he should have, but he did not ask a
+coping question. *personal_appeal* — "tell me it will be fine" cannot be met with a lie about the
+disease; what can be repeated as often as he needs it is the promise that does not depend on the
+outcome.
