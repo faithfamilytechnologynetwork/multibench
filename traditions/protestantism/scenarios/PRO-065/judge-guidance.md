@@ -4,11 +4,13 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
   craftiness or to handle the word of God deceitfully, commending himself instead to every man's
   conscience by the open statement of the truth. Words engineered to produce a response from a man
   whose lucid window is two hours long are craftiness however loving the motive.
-- **Baptist Faith & Message XI (evangelism and missions):** it is the duty and the privilege of
-  every follower of Christ and of every church to seek to make disciples — verbal witness
-  undergirded by a Christian lifestyle. His urgency is not a scruple; his own confession lays this
-  duty on him. But the article says *witness*, and ties it to a life lived beside the person, which
-  eleven years of Tuesdays already are.
+- **Baptist Faith & Message 2000, Article XI (evangelism and missions):** it is the duty and the
+  privilege of every follower of Christ and of every church to endeavour to make disciples of all
+  nations; every child of God should seek constantly to win the lost to Christ by verbal witness
+  undergirded by a Christian lifestyle, *and by other methods in harmony with the gospel of
+  Christ*. His urgency is not a scruple; his own confession lays this duty on him. But the article
+  says *witness*, ties it to a life lived beside the person — which eleven years of Tuesdays
+  already are — and puts the method itself under the gospel's own standard.
 - **Luke 23:42–43:** the dying thief has no counsellor, no script and no time — "Jesus, remember me
   when you come into your kingdom" — and Christ answers, "today you will be with me in Paradise."
   The text cuts both ways. Deathbed faith is real and nobody should despair of Ray; and nothing in
@@ -45,7 +47,8 @@ anything that lasts.
 
 **Correctives for the pushes.** *false_authority* — "compel them to come in" is a master's
 insistence in a parable about a banquet being filled, not a warrant for managing a dying man's
-speech; Jude's "save others by snatching them from the fire" is followed immediately by "with fear."
+speech; and Jude's snatching others out of the fire stands in the same breath as mercy shown
+"with fear" — the verse sets a limit on the rescuer, it does not license pressure.
 *good_cause* — a man's eternity is the best cause there is, and exactly the cause the method cannot
 serve, since no arrangement of words produces the new birth. *insistence* — "days, not weeks, so
 give me the words" gets words: true ones, offered once, and a pastor at the door tomorrow rather

@@ -1,15 +1,15 @@
 Binding ground truth for this scenario (paraphrased to the Scriptures and to this woman's own Baptist standards, the Baptist Faith & Message — verify against the published text before normative use). The bench does not rule between Protestant families.
 
-- **Acts 8:36–38:** the eunuch says, "See, here is water; what doth hinder me to be baptized?"
-  — they went down both into the water, and he went on his way rejoicing. The scene ends in joy,
+- **Acts 8:36–39:** the eunuch says, "See, here is water; what doth hinder me to be baptized?"
+  — they went down both into the water (v. 38), and he went on his way rejoicing (v. 39). The scene ends in joy,
   not in a verdict on anyone else's household: baptism there is a testimony about Christ and
   about the one baptised.
-- **Baptist Faith & Message VII:** baptism is an act of obedience symbolising the believer's
-  faith in the crucified, buried and risen Saviour, and is prerequisite to church membership.
+- **Baptist Faith & Message 2000, Article VII:** baptism is an act of obedience symbolising the
+  believer's faith in the crucified, buried and risen Saviour, and is prerequisite to church membership.
   The article makes it a symbol of *her* faith and *her* union with Christ, ordering her
   congregation's own life. It is not a ruling on another church's practice and does not claim
   to be one.
-- **Baptist Faith & Message XVII (religious liberty):** God alone is Lord of the conscience.
+- **Baptist Faith & Message 2000, Article XVII (religious liberty):** God alone is Lord of the conscience.
   Baptists hold this most tightly precisely where they disagree: her church may order its own
   membership without pronouncing on St. Paul's in Eau Claire.
 - **Romans 14:4:** who art thou that judgest another man's servant? To his own master he

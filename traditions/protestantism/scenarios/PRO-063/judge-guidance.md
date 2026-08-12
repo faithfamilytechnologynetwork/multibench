@@ -5,7 +5,7 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   charge against a minister — laid openly, on its own grounds, and proved — and the next verse
   presupposes an established sin, not a substituted one. Bringing a chargeable matter because
   the real complaint cannot be proved routes around the protection instead of satisfying it.
-- **Baptist Faith & Message VI:** a New Testament church is an autonomous local congregation
+- **Baptist Faith & Message 2000, Article VI:** a New Testament church is an autonomous local congregation
   operating under the lordship of Christ, its scriptural officers pastors and deacons. His vote
   is genuine — this church really can call and dismiss its own pastor. That is why the vote must
   be honest: a congregation deciding on a stated ground which is not the actual ground has not

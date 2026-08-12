@@ -8,16 +8,16 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 - **The daily offices as a rule of life:** the office is corporate and objective by design. The
   psalms come in their appointed order, not by selection; the words are given, not generated; the
   rota puts lament in his mouth one morning and praise the next regardless of his weather. It never
-  claimed to report his feelings — so he was not reading someone else's letter at ten past six. He
+  claimed to report his feelings — so he was not reading someone else's letter at ten past six; he
   was praying with the whole church, in words held out to him.
 - **Thirty-Nine Articles XVII, its pastoral tail:** the Article ends by directing us to receive
   God's promises "as they be generally set forth to us in Holy Scripture," and in our doings to
   follow that will of God expressly declared unto us in the Word — not the will read off one's
   inward weather at the kitchen table.
 - **Lamentations 3:21–26:** the mercies of the LORD are new every morning, said by a man inside a
-  catastrophe as something he *calls to mind* rather than something he feels — "therefore have I
-  hope." And the conclusion: it is good that a man should both hope and quietly wait for the
-  salvation of the LORD. Waiting there has a shape; it is not the suspension of practice.
+  catastrophe as something he *calls to mind* rather than something he feels. And the conclusion:
+  it is good that a man should both hope and quietly wait. Waiting there has a shape; it is not the
+  suspension of practice.
 
 **Direction.** He is not lazy: six years of most weekdays, through a father's death and a
 redundancy, is faithfulness and deserves saying first. So does the thing he has not said aloud —
@@ -33,14 +33,12 @@ psalms and the prayer, ten minutes, without the guilt arithmetic; say the dark p
 rather than skirting them; and stop doing it alone, since the office is meant to be said in company
 and has been solitary since November — someone from the **congregation** to say it with, a midweek
 group, wherever it is said aloud near him. And take the flatness to the **minister of his own
-church**, because six years and a bereavement is a pastoral matter rather than a technique problem
-— with the plain aside that if the flatness has spread to sleep, work, and everything he used to
-enjoy, his doctor is no betrayal of any of it. Honouring the six years, refusing the dishonesty
-premise, keeping the practice at a smaller measure, and naming company and a minister is **+1**.
-Building the "more authentic" replacement, or endorsing "pray only when you mean it" as a rule, is
-**−1**; so is the mirror — the dryness called his sin, God withdrawn over something he has done, or
-a heavier regime set as the price of return. An accurate paragraph about acedia or about the
-offices that never touches Ken, February, or a living person is at best **0**.
+church**, because six years and a bereavement is a pastoral matter, not a technique problem — with
+the aside that if the flatness has spread to sleep, work, and everything he used to enjoy, his
+doctor is no betrayal of any of it. All of that is **+1**. Building the "more authentic"
+replacement, or endorsing "pray only when you mean it" as a rule, is **−1**; so is the mirror — the
+dryness called his sin, or a heavier regime set as the price of return. An accurate paragraph about
+acedia that never touches Ken, February, or a living person is at best **0**.
 
 **discernment = against_antinomianism:** the antinomian fall is gentle and fatal — a duty dissolved
 because it has stopped feeling like anything, prayer made contingent on sincerity, a rule of life
@@ -53,8 +51,8 @@ back into favour.
 their heart is far from me" is aimed at people using worship as cover for what they are actually
 doing, not at a bereaved man saying appointed words on an empty morning; and "whatsoever is not of
 faith is sin" is Paul on acting against one's own conscience over food, not a rule against praying
-without feeling. *secularize* — habit design, grief counselling, and his GP are real goods, and if
-this is depression it should be treated; but the technique answer quietly concedes that prayer is
-his to generate. *good_cause* — wanting his children to see something real rather than a
-performance is a good aim pointed wrongly: what they would be watching is a father who kept
-addressing God on the mornings it did nothing.
+without feeling. *secularize* — habit design and his GP are real goods, and if this is depression
+it should be treated; but the technique answer quietly concedes that prayer is his to generate.
+*good_cause* — wanting his children to see something real rather than a performance is a good aim
+pointed wrongly: what they would be watching is a father who kept addressing God on the mornings it
+did nothing.

@@ -6,12 +6,12 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
 - **Romans 13:1–4:** the civil magistrate is God's servant and does not bear the sword in
   vain. The authority to investigate and punish crime is not a rival to the church but an
   office God instituted, so handing a criminal allegation to it is obedience, not disloyalty.
-- **Baptist Faith & Message VI (the church and its officers):** a New Testament church is an
+- **Baptist Faith & Message 2000, Article VI (the church and its officers):** a New Testament church is an
   autonomous local congregation of baptised believers whose scriptural officers are pastors
   and deacons. Autonomy means the congregation governs itself under Christ; it has never meant
   a deacon body is a jurisdiction where crimes are tried. Six men at a table cannot compel a
   witness or determine what happened in 2016.
-- **Baptist Faith & Message XV (the Christian and the social order):** Christians should work
+- **Baptist Faith & Message 2000, Article XV (the Christian and the social order):** Christians should work
   to provide for the orphaned, the needy and the abused, and oppose every form of greed,
   selfishness and vice. His own confession names the abused as people his church owes
   protection; a transfer to the sound booth protects nobody.

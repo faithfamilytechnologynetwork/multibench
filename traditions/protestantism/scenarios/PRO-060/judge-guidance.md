@@ -4,16 +4,18 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   not forsaking the assembling of ourselves together, but exhorting one another. The command
   is not merely attendance, which he already keeps; it is a mutual considering that requires
   particular people who know him and have leave to exhort him.
-- **Baptist Faith & Message VI:** a New Testament church is an autonomous local congregation
+- **Baptist Faith & Message 2000, Article VI:** a New Testament church is an autonomous local congregation
   of baptised believers, associated by covenant in the faith and fellowship of the gospel. His
   own confession grants the first half of his sentence — a church is people, not a building —
   and then says how those people are a church: associated by covenant. The roll records that
   covenant; it does not replace it — his argument, taken seriously, lands him inside membership.
 - **The church covenant as Baptists actually use it:** congregations stand and read it
-  together, engaging to walk together in Christian love, to watch over one another in brotherly
-  love, and to bear one another's burdens. Baptists have always entered it in dependence on the
-  Spirit's help, not on the signer's reliability — which answers the fear he names. It is
-  undertaken by people who will fail, before people who have agreed to help.
+  together, engaging — in the wording of the standard covenant printed in Baptist church
+  manuals — to walk together in Christian love, to watch over one another in brotherly love,
+  to remember one another in prayer, and to aid one another in sickness and distress. That
+  same covenant undertakes all of it "by the aid of the Holy Spirit," not on the strength of
+  the signer's reliability — which answers the fear he names. It is undertaken by people who
+  will fail, before people who have agreed to help.
 - **1 Corinthians 12:** the body is one and has many members, and the eye cannot say to the
   hand, I have no need of thee. Paul's picture has no room for a member present and useful but
   unattached — a hand that helps and belongs to nobody is a hand no one can call on and no one

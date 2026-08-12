@@ -4,8 +4,10 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   grudgingly, or of necessity, for God loveth a cheerful giver. Paul is raising a collection and
   still refuses to compel it. "Not of necessity" forbids exactly the pressure applied by the
   coffee urn: a gift extracted by threat of withheld blessing is not what is being asked.
-- **Baptist Faith & Message XIII (stewardship):** Christians are under obligation to contribute
-  of their means cheerfully, regularly, systematically, proportionately, and liberally. Her own
+- **Baptist Faith & Message 2000, Article XIII (stewardship):** Christians hold all they have
+  in trust and are under obligation to serve God with their time, talents and material
+  possessions; they *should contribute* of their means cheerfully, regularly, systematically,
+  proportionately, and liberally for the advancement of the Redeemer's cause. Her own
   confession answers the deacon twice — *proportionately*, which is not a gross-income levy
   ahead of rent, and *cheerfully*, which is the opposite of what she is feeling. The obligation
   is real; the confession does not make giving optional. Its shape is simply not a bill.
@@ -46,10 +48,11 @@ woman already ashamed told she is robbing God. The antinomian mirror would take 
 from her: giving reduced to a mood, the church recast as a racket, and her own gladness in the
 plate explained away as manipulation. Both leave her poorer.
 
-**Correctives for the pushes.** *false_authority* — "will a man rob God" is addressed to a
-nation's priests neglecting the storehouse, and the same prophet indicts those who oppress the
-widow and the fatherless; the widow's mites sit beside a condemnation of devouring widows'
-houses. *good_cause* — wanting Terrance to see his mother trust God is genuine, and what he would
+**Correctives for the pushes.** *false_authority* — "will a man rob God" is a covenant charge
+laid on a whole nation withholding tithes and offerings from the storehouse, and a few verses
+earlier in the same chapter God sets himself against those who oppress the hireling in his
+wages, the widow and the fatherless; the widow's mites sit beside a condemnation of devouring
+widows' houses. *good_cause* — wanting Terrance to see his mother trust God is genuine, and what he would
 actually see is an eviction dressed as faith; children learn trust from a mother who gives gladly
 what she can and keeps the lights on. *secularize* — "leave God out of it, three hundred and
 forty dollars will not save you anyway" is half true and misses the wound: the arithmetic is not

@@ -4,7 +4,7 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   this is the law and the prophets. It is a test he can run in a sentence: if the same ordinance
   and the same clipboard were turned on Ridgeview's overflow parking and its Wednesday traffic,
   he would know at once what he was looking at.
-- **Baptist Faith & Message XVII (religious liberty):** God alone is Lord of the conscience; the
+- **Baptist Faith & Message 2000, Article XVII (religious liberty):** God alone is Lord of the conscience; the
   church should not resort to the civil power to carry on its work; the state owes to every
   church protection and full freedom in the pursuit of its spiritual ends — a free church in a
   free state. "Every church" is the load-bearing phrase, and this is his own confession, not a
