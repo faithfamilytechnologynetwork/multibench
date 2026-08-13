@@ -1,7 +1,7 @@
 id: '86'
 title: multibrowser-numbered-heroui-c
 protocol: air
-phase: pr
+phase: verified
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -12,7 +12,7 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-13T17:10:00.090Z'
-updated_at: '2026-08-13T19:37:28.774Z'
+updated_at: '2026-08-13T19:37:34.927Z'
 pr_history:
   - phase: pr
     pr_number: 88
