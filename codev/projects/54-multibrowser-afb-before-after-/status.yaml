@@ -1,7 +1,7 @@
 id: '54'
 title: multibrowser-afb-before-after-
 protocol: spir
-phase: review
+phase: verify
 plan_phases:
   - id: phase_1
     title: Extract generic raw-writer primitive (byte-identical refactor)
@@ -29,124 +29,21 @@ gates:
     requested_at: '2026-08-08T20:32:15.350Z'
     approved_at: '2026-08-08T22:12:27.318Z'
   pr:
-    status: pending
+    status: approved
+    requested_at: '2026-08-12T23:58:48.297Z'
+    approved_at: '2026-08-13T00:00:00.112Z'
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
-history:
-  - iteration: 1
-    plan_phase: phase_1
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_1-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_1-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_1
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_1-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_1-iter2-claude.txt
-  - iteration: 1
-    plan_phase: phase_2
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_2-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_2-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_2
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_2-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_2-iter2-claude.txt
-  - iteration: 1
-    plan_phase: phase_3
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_3-iter1-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_3-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_3
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_3-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_3-iter2-claude.txt
-  - iteration: 1
-    plan_phase: phase_4
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_4-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_4-iter1-claude.txt
-  - iteration: 1
-    plan_phase: phase_5
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_5-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_5-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_5
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_5-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-54/codev/projects/54-multibrowser-afb-before-after-/54-phase_5-iter2-claude.txt
+build_complete: false
+history: []
 started_at: '2026-08-08T18:08:01.974Z'
-updated_at: '2026-08-12T23:34:54.756Z'
+updated_at: '2026-08-13T00:00:22.879Z'
 pr_history:
   - phase: review
     pr_number: 80
     branch: builder/spir-54
     created_at: '2026-08-12T23:34:42.128Z'
+    merged: true
+    merged_at: '2026-08-12T23:45:20.750Z'
+pr_ready_for_human: false

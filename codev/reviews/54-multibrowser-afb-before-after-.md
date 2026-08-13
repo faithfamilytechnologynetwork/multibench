@@ -19,7 +19,10 @@ under estimate). Headline reproduces: **P≥2 vanilla 1.3% → DPO 21.3%** (mean
 - [x] Before/after legibility: A/B columns + Terra scores/rationales + a deterministic `|dpo−base|` preset (Phases 3, 4)
 - [x] Licensing/hygiene: AFB MIT © CEFE-AI attributed; no usage/raw/timestamps shipped (Phases 3, 5)
 - [x] Touched suites green via `.codev/checks/test.sh` (analysis 232, multibrowser 308); docs updated
-- [~] **Deployed-path (Railway) verification** — formally moved to **post-merge Verify** (architect sign-off, plan Change Log 2026-08-12); pre-merge stand-in = the real-committed-data RTL render test
+- [x] **Deployed-path (Railway) verification** — **PASSED post-merge** (architect, 2026-08-12, with receipts:
+  `railway up` shipped the raw-explorer bundle; `/raw/afb-20260808` → 200; baked manifest carries the
+  greedy caveat + CEFE/MIT attribution; shard is `application/gzip` (no HTML-masquerade); GitHub tier
+  authoritative). Pre-merge stand-in was the real-committed-data RTL render test.
 
 ## Deviations from Plan
 
@@ -66,7 +69,17 @@ Per-phase consult was `[codex, claude]` (Gemini can't see the worktree here). Ev
   dashboard spend ($2.0928 Modal + $0.5624 Terra), MIT attribution in the manifest, raw-only back-link
   fix, real-committed-data RTL render test. **N/A / moved**: deployed-path → Verify (architect sign-off).
 
-No COMMENT verdicts; no `CONSULT_ERROR`.
+No COMMENT verdicts in the implement phases.
+
+### Review Phase (post-merge, PR #81)
+A fix-then-merge flow left porch wedged in review: its `--type pr` consult needs an **open** PR, but the
+feature PR #80 was already merged (architect integration review + explicit merge go). The first attempt
+therefore hit a **`CONSULT_ERROR`** (claude: "No PR found for branch"), and codex returned a moot
+"rebase before integration". Per the architect, a small docs/state chore PR (**#81**) was opened so the
+consult resolves against a real (trivial) diff: **claude APPROVE**; **codex** asked to sync the branch to
+`main` and correct this review doc → both **Addressed** (merged `main` in; updated the deployed-verify AC
+and this note). This is the sanctioned workaround until the porch fix-then-merge bug is filed upstream
+(architect logging it).
 
 ## Lessons Learned
 
@@ -109,10 +122,10 @@ No flaky tests encountered.
 
 ## Follow-up Items
 
-- **Verify phase**: deployed-path check on Railway after merge + `railway up` (the discovery UI is new
-  SPA code; confirm Explorers → `/raw/afb-20260808` → item two-column + clean GitHub fallback, no false
-  coherence notice).
-- Link this artifact from the MultiWeights paper's repo/browser once live, **carrying the greedy-decoding
+- ~~Deployed-path check on Railway~~ — **DONE** post-merge (architect, receipts above).
+- Link this artifact from the MultiWeights paper's repo/browser, **carrying the greedy-decoding
   caveat** next to the headline.
+- File the porch **fix-then-merge bug** upstream (a PR merged before its review consult completes wedges
+  the review phase; the chore-PR #81 workaround is the interim pattern) — architect logging.
 - (Optional) the #58 copy of `afb/questions.jsonl` has the same pre-fix encoding bug — a separate cleanup.
 - (Optional) Explorers list shows the bare run id; a dataset-title label is a one-line follow-up if wanted.

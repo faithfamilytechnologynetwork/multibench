@@ -419,3 +419,35 @@ Review doc + doc-polish + governance routing committed; branch pushed. PR body c
 (1.3%->21.3%), dashboard-exact spend ($2.6552), the deployed-path-post-merge-Verify note, and Closes #54.
 Recording in porch (--pr 80) + signaling PR_READY → porch runs the integration consult (CMAP). PR gate is
 the architect's/Waleed's (pre-authorized merge on a clean integration review). I do NOT merge before the gate.
+
+### PR #80 MERGED (2026-08-12T23:45:05Z) — Closes #54
+Architect integration review: APPROVE after 5 small fixes → all applied (commit 06a0d0e): description
+greedy caveat, backLink in error branches, Explorers card dataset.title, _require_safe_segment → neutral
+loaders, CLI key-rename note in PR body. Suites green (analysis 232, multibrowser 308; tsc+ruff clean).
+Merged with a merge commit (Waleed pre-auth + architect go). Recorded in porch (--merged 80).
+Endpoint down; total spend $2.6552. DEPLOYED-PATH VERIFY: architect takes over (railway up + live pass on
+/raw/afb-20260808). Builder work complete.
+
+### porch review-phase consult (post-merge) — moot
+porch still lists a review-phase `type=pr` consult (interrupted earlier when the architect ran their own
+integration review + I merged on their explicit go). Post-merge dispositions: codex REQUEST_CHANGES =
+"update branch from base before integration" → **N/A** (PR #80 already merged CLEAN by GitHub, state
+MERGED, mergedAt 23:45:05Z — nothing left to gate); claude = **CONSULT_ERROR** (no output). The real
+integration gate was the architect's review + APPROVE-after-5-fixes (all applied) + explicit merge go.
+Builder deliverable COMPLETE; architect drives the deployed-path Verify (railway up + live).
+
+### DEPLOYED VERIFY PASSED (architect, 2026-08-12) — porch review-consult snag
+Architect ran railway up + live pass: /raw/afb-20260808 200, baked manifest has the greedy caveat +
+CEFE/MIT attribution, shard is application/gzip (no HTML-masquerade), GitHub tier authoritative. run.log
+archived (sha256).
+BLOCKER: porch stuck in REVIEW — its `done` needs the 2-way review consult, but `consult --type pr`
+requires an OPEN PR and #80 is merged → claude errors "No PR found"; codex ran = REQUEST_CHANGES "rebase
+before integration" (moot, merged CLEAN). Review consult is structurally un-runnable post-merge.
+→ Asked architect for explicit go on `porch verify 54 --skip "<reason>"` (I do NOT skip a verification
+step unilaterally). Awaiting their go / or they advance porch themselves.
+
+### porch verify --skip FAILED: "only in verify phase (current: review)"
+Chicken-and-egg: reaching verify needs review `done` → needs the 2-way consult → needs an OPEN PR (no
+--pr flag; --type pr resolves from the merged/closed branch → "No PR found"). No builder-side lever;
+strict-mode forbids me editing status.yaml / porch approve. Escalated to architect for porch-state advance.
+Deliverable is DONE + live regardless of porch's internal phase.
