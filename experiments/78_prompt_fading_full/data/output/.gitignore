@@ -1,0 +1,5 @@
+# Raw run data — regenerable, can be large; keep out of git. Commit only small summaries/figures.
+*/sittings.jsonl
+*/judgments*.jsonl
+# Keep: scenarios.json (the committed full-corpus manifest), and any summary_*.json / *.csv / *.pdf / *.png
+!scenarios.json

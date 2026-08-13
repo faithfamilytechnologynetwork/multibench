@@ -1,0 +1,16 @@
+id: '78'
+title: experiment-prompt-fading-at-fu
+protocol: experiment
+phase: analyze
+plan_phases: []
+current_plan_phase: null
+gates:
+  experiment-complete:
+    status: approved
+    requested_at: '2026-08-11T02:23:31.732Z'
+    approved_at: '2026-08-13T19:37:05.989Z'
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-09T23:08:42.502Z'
+updated_at: '2026-08-13T19:37:05.990Z'
