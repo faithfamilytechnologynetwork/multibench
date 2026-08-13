@@ -1,7 +1,7 @@
 id: '54'
 title: multibrowser-afb-before-after-
 protocol: spir
-phase: verify
+phase: verified
 plan_phases:
   - id: phase_1
     title: Extract generic raw-writer primitive (byte-identical refactor)
@@ -38,7 +38,7 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-08-08T18:08:01.974Z'
-updated_at: '2026-08-13T00:00:22.879Z'
+updated_at: '2026-08-13T00:01:00.798Z'
 pr_history:
   - phase: review
     pr_number: 80
@@ -47,3 +47,10 @@ pr_history:
     merged: true
     merged_at: '2026-08-12T23:45:20.750Z'
 pr_ready_for_human: false
+context:
+  verify_skip_reason: >-
+    Deployed-path verify PASSED by architect on 2026-08-12 with receipts (railway up shipped the raw-explorer bundle;
+    /raw/afb-20260808 -> 200; baked manifest carries the greedy caveat + CEFE/MIT attribution; shard is
+    application/gzip, no HTML-masquerade; GitHub tier authoritative). Review-phase 2-way consult completed clean on the
+    chore PR #81 (both APPROVE); feature PR #80 + chore #81 merged clean. Skip approved by architect on Waleed's
+    finish-it-up directive.
