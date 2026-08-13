@@ -451,3 +451,14 @@ Chicken-and-egg: reaching verify needs review `done` → needs the 2-way consult
 --pr flag; --type pr resolves from the merged/closed branch → "No PR found"). No builder-side lever;
 strict-mode forbids me editing status.yaml / porch approve. Escalated to architect for porch-state advance.
 Deliverable is DONE + live regardless of porch's internal phase.
+
+### PROTOCOL COMPLETE (2026-08-13)
+Option-c workaround executed cleanly: chore PR #81 (docs/state) gave the review consult an open PR →
+BOTH APPROVE after syncing the branch to main + correcting the review doc. pr gate APPROVED by architect
+(explicit). #81 MERGED (merge commit). `porch verify 54 --skip` (architect-approved reason: deployed-path
+verify already PASSED with receipts) → VERIFIED. `porch done 54` → "already verified — nothing to do".
+porch phase = **verified**.
+
+FINAL: feature PR #80 + completion PR #81 both merged clean; AFB explorer LIVE on Railway (/raw/afb-20260808,
+verified with receipts); total spend $2.6552 (~8x under estimate); endpoint down. Builder work COMPLETE —
+ready for worktree cleanup (architect-driven). Filed the porch fix-then-merge bug as a review follow-up.
