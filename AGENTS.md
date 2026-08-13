@@ -99,6 +99,35 @@ Use sequential numbering with descriptive names:
 - Plan: `codev/plans/1-feature-name.md`
 - Review: `codev/reviews/1-feature-name.md`
 
+## Contributing WITHOUT the builder machinery (external/collaborator sessions)
+
+Most work here flows through the Codev builder machinery — a porch-driven worktree that emits
+the spec/plan/review trail for you. If you are an external or collaborator session editing this
+repo **directly** (no porch, no builder worktree), the same governance still holds, and it is on
+**you, the assistant, to author the documents** as part of the change.
+
+**The tier rule.** A **feature-scale** change — rough guide: **>300 lines**, or **any new
+user-facing surface** (a page, command, endpoint, or dataset tier) — must land all three Codev
+documents **in the same PR**, named by PR number:
+
+- `codev/specs/<PR#>-<name>.md` — **WHAT**: problem, goals, success criteria, constraints, open questions.
+- `codev/plans/<PR#>-<name>.md` — **HOW**: phases, files touched, test strategy. As-built is fine.
+- `codev/reviews/<PR#>-<name>.md` — **what happened**: verification evidence, deviations, lessons. May start as a stub, completed after review.
+
+**Small fixes and pure docs need none of this** — skip the ceremony.
+
+You won't have the PR number until the PR is opened: open it, read its number, then add or rename
+the three files to `<PR#>-<name>.md` in a follow-up commit on the same branch.
+
+**Retro-authoring is fine.** If the code landed first, write the docs after the fact — but say
+**"retrospective"** on the face of each (a line at the top), so a reader knows the spec followed
+the code rather than preceding it.
+
+**Mirror the existing documents** — reuse their structure, don't reinvent it:
+[spec](codev/specs/54-multibrowser-afb-before-after-.md) ·
+[plan](codev/plans/54-multibrowser-afb-before-after-.md) ·
+[review](codev/reviews/48-multiweights-omissive-bias.md).
+
 ## Git Workflow
 
 **NEVER use `git add -A` or `git add .`** - Always add files explicitly.
