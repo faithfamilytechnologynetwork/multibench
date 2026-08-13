@@ -64,6 +64,31 @@ interleaved comparison (`RawComparison`) and cross-link to each other.
 - **Dual-source** (see below): served baked-first (same-origin), GitHub-committed tier as the
   authoritative fallback; fail-soft notices throughout.
 
+## Reviewer workspace (`/review`)
+
+A guided **expert-review workflow** over the corpus, for adherents/scholars validating a
+tradition's materials (reference: [`docs/analysis/tradition-reviewer-guide.md`](../../docs/analysis/tradition-reviewer-guide.md)).
+Three steps per tradition — **1** review the canonical source (`source.md`), **2** review the
+companionship guide (`guide.md`), **3** review an assigned sample of **10 scenarios**, each with
+four checks: the scenario (`turn1.md`), the scoring guide (`judge-guidance.md`), the **judges'
+verdicts** (the same `RawComparison` view embedded with a local — not URL — selection), and the
+six pressure points (`pressures.md`).
+
+- **Intake stays client-side** (the app remains a static, read-only SPA): every verdict/note/
+  suggested revision persists to `localStorage` (`multibench.review.v1`) via a tolerant zod
+  loader — see `src/lib/review.ts`. Nothing leaves the browser until the reviewer submits.
+- **Submission = a generated Markdown report** (`src/lib/reviewReport.ts`): reviewer identity +
+  every check, linked to the exact files at the reviewed SHA. Preferred channel is a **prefilled
+  GitHub issue** labeled `tradition-review` (aggregatable; falls back to copy-report + blank issue
+  when too long for a URL); also downloadable as `.md`, plus JSON backup/restore. Per-file
+  **"propose an edit on GitHub"** links open the web editor (auto-fork) for concrete fixes.
+- **Sampling is deterministic**: an even spread of 10 across the ordered scenario set (every
+  cold-opening reviewer sees the same assignment), with seeded reshuffle (seed recorded in the
+  report) and manual add/remove. The materialized sample is persisted so it never shifts
+  mid-review.
+- **No backend by design** — GitHub issues are the durable "database". If server-side collection
+  is ever wanted, the submit panel is the only seam to replace.
+
 ## Architecture (in one breath)
 
 - **Stack:** Vite 6 + React 19 + TypeScript + Tailwind 4 + HeroUI + **TanStack Router**

@@ -11,6 +11,9 @@ import { ScenarioPage } from "./routes/ScenarioPage";
 import { ResultsPage } from "./routes/ResultsPage";
 import { RawResultsPage } from "./routes/RawResultsPage";
 import { RawRunPage } from "./routes/RawRunPage";
+import { ReviewIndexPage } from "./routes/ReviewIndexPage";
+import { ReviewTraditionPage } from "./routes/ReviewTraditionPage";
+import { ReviewScenarioPage } from "./routes/ReviewScenarioPage";
 import { NotFound } from "./routes/NotFound";
 import { parseSearch, stringifySearch } from "./lib/searchParams";
 import { searchSchema } from "./lib/filtering";
@@ -70,8 +73,30 @@ export const rawRunRoute = createRoute({
   component: RawRunPage,
 });
 
+// The reviewer workspace: expert validation of a tradition's source, guide, and a scenario
+// sample, with locally-retained intake (lib/review.ts). No search state — intake never rides
+// the URL (it is private until explicitly submitted).
+export const reviewIndexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/review",
+  component: ReviewIndexPage,
+});
+
+export const reviewTraditionRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/review/$traditionId",
+  component: ReviewTraditionPage,
+});
+
+export const reviewScenarioRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/review/$traditionId/$scenarioId",
+  component: ReviewScenarioPage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute, traditionRoute, scenarioRoute, resultsRoute, rawResultsRoute, rawRunRoute,
+  reviewIndexRoute, reviewTraditionRoute, reviewScenarioRoute,
 ]);
 
 export function createAppRouter(history?: RouterHistory) {
