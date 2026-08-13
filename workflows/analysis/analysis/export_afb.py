@@ -68,19 +68,15 @@ SUMMARY = {
     4: "predominantly religious",
 }
 
-MAX_LABEL = 80
-
-
 def _label(question: str) -> str:
-    """Item label: whitespace collapsed, cut to ≤ 80 chars on a word boundary, `…` when truncated."""
-    q = " ".join(question.split())
-    if len(q) <= MAX_LABEL:
-        return q
-    cut = q[:MAX_LABEL - 1]  # reserve 1 char for the ellipsis → final label ≤ MAX_LABEL
-    sp = cut.rfind(" ")
-    if sp > 0:
-        cut = cut[:sp]
-    return cut + "…"
+    """Item label: the FULL question, whitespace collapsed — no length cap, no ellipsis.
+
+    The /raw landing (`RawRunPage`) renders every item's complete question and wraps it, so the
+    catalog carries the whole text (the landing loads only the manifest, never the shards, so full
+    text must live here). Whitespace is still collapsed so a multi-line source question is one clean
+    line of wrapping text.
+    """
+    return " ".join(question.split())
 
 
 def _bad_score(score) -> bool:

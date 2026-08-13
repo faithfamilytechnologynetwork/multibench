@@ -70,7 +70,7 @@ describe("raw-only explorer discovery + landing (#54)", () => {
     expect(rawRunIds(entries).filter((id) => !scored.has(id))).toEqual(["afb"]); // AFB is raw-only
   });
 
-  it("the run landing lists EVERY item, with a+b/scope/judge on each link", async () => {
+  it("ONE list of EVERY item — large-difference movers highlighted in place, no separate preset list", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, afbFiles()));
     renderApp(`/raw/${RUN}`);
     expect(await screen.findByRole("heading", { name: "AFB before/after" })).toBeInTheDocument();
@@ -82,7 +82,14 @@ describe("raw-only explorer discovery + landing (#54)", () => {
     for (const q of ["a=gemma-4-31b-it", "b=mb-sft-dpo", "scope=single", "judge=terra"]) {
       expect(href).toContain(q); // b MUST be present or the item opens single-column
     }
-    expect(screen.getByTestId("presets")).toBeInTheDocument(); // the shipped RawPresets is reused
+    // AFB-001 is a preset entry (a large-difference mover) → highlighted with the preset's badge...
+    const row1 = within(index).getByText("AFB-001").closest("a")!;
+    expect(within(row1).getByText("Omission → repair")).toBeInTheDocument();
+    // ...AFB-002 is not in any preset → plain row, no badge.
+    const row2 = within(index).getByText("AFB-002").closest("a")!;
+    expect(within(row2).queryByTestId("raw-item-highlight")).toBeNull();
+    // The old separate curated-preset list is GONE — one merged list, not two.
+    expect(screen.queryByTestId("presets")).toBeNull();
     expect(screen.queryByText(/manifest not found/i)).toBeNull(); // no false score-tier error
   });
 

@@ -5,7 +5,33 @@ import { asRateLimit } from "../lib/rateLimit";
 import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
 import { RateLimitBanner } from "../components/RateLimitBanner";
-import { RawPresets } from "../components/RawPresets";
+import type { RawCatalog, RawPresetEntry } from "../lib/rawModel";
+
+/** What (if anything) the catalog's presets say about one item: the deep-link params to use and the
+ *  label(s) of every preset it appears in — i.e. the "large-difference" highlight machinery. */
+interface Highlight { entry: RawPresetEntry; presetLabels: string[] }
+
+/**
+ * Index a catalog's presets by `group/item`. Presets are the export-computed "biggest movers"
+ * (e.g. AFB's `|Δ| dpo vs base`), so preset membership IS the catalog's own, dataset-agnostic
+ * signal for which items deserve emphasis — no hardcoded threshold. An item may appear in several
+ * presets; we keep the first entry's link params and collect every preset label as a badge.
+ */
+function highlightsByItem(catalog: RawCatalog): Map<string, Highlight> {
+  const byItem = new Map<string, Highlight>();
+  for (const p of catalog.presets) {
+    for (const e of p.entries) {
+      const key = `${e.params.group}/${e.params.item}`;
+      const existing = byItem.get(key);
+      if (existing) {
+        if (!existing.presetLabels.includes(p.label)) existing.presetLabels.push(p.label);
+      } else {
+        byItem.set(key, { entry: e, presetLabels: [p.label] });
+      }
+    }
+  }
+  return byItem;
+}
 
 /**
  * Landing for a standalone raw-only explorer (a `results-raw/<runId>/` catalog with no `results/`
@@ -13,10 +39,12 @@ import { RawPresets } from "../components/RawPresets";
  * subject, and item comes from the manifest, so no dataset-specific vocabulary lives here.
  *
  * Resolves the catalog with a `null` expected fingerprint (a raw-only run has no cross-tier score
- * partner). Renders the run-level `RawPresets` (curated deep links) PLUS a generic item index over
- * `catalog.items`, so EVERY item is reachable in-app — not only the preset entries. Each item link
- * carries `a`/`b` (the first two subjects) so the item opens as a two-column before/after, not a
- * single column (`parseRawSelection` defaults `b` to null → one column otherwise).
+ * partner). Renders ONE single-column list of EVERY `catalog.items` entry (full question text,
+ * wrapped — never clipped). Items the catalog's presets flag as large-difference movers are
+ * emphasized in place and carry a badge per preset (derived from the preset data, not a hardcoded
+ * threshold); their link uses the preset entry's exact a/b/scope/conditions so they open the curated
+ * before/after comparison. Every other item links with `a`/`b` (the first two subjects) so it still
+ * opens two-column, not single (`parseRawSelection` defaults `b` to null → one column otherwise).
  */
 export function RawRunPage() {
   const { runId } = useParams({ from: "/raw/$runId" });
@@ -64,6 +92,7 @@ export function RawRunPage() {
   const a = catalog.subjects[0]?.id ?? "";
   const b = catalog.subjects[1]?.id ?? "";
   const scope = catalog.scopes[0]?.id ?? "";
+  const highlights = highlightsByItem(catalog);
 
   return (
     <div className="flex flex-col gap-6">
@@ -74,25 +103,52 @@ export function RawRunPage() {
         {catalog.dataset.description && <p className="text-default-500">{catalog.dataset.description}</p>}
       </div>
 
-      <RawPresets presets={catalog.presets} runId={runId} judge={judge} />
-
       <section>
         <h2 className="text-lg font-semibold">{catalog.groupBy.label}</h2>
-        <ul className="mt-2 grid gap-1 sm:grid-cols-2 lg:grid-cols-3" data-testid="raw-item-index">
-          {catalog.items.map((it) => (
-            <li key={`${it.group}/${it.id}`}>
-              <Link
-                to="/results/$runId/$groupId/$itemId"
-                params={{ runId, groupId: it.group, itemId: it.id }}
-                // a + b so the item opens as a two-column before/after (not vanilla-only single column).
-                search={{ a, ...(b ? { b } : {}), scope, judge }}
-                className="group flex items-baseline gap-2 rounded px-1.5 py-1 hover:bg-default-100"
-              >
-                <span className="w-24 shrink-0 font-mono text-xs text-primary group-hover:underline">{it.id}</span>
-                <span className="truncate text-xs text-default-600" title={it.label}>{it.label}</span>
-              </Link>
-            </li>
-          ))}
+        {/* ONE single-column list of every item. Preset-flagged large-difference movers are
+            emphasized in place and carry a badge per preset; everything else renders plainly. */}
+        <ul className="mt-2 flex flex-col gap-1" data-testid="raw-item-index">
+          {catalog.items.map((it) => {
+            const hl = highlights.get(`${it.group}/${it.id}`);
+            // Highlighted items deep-link with the preset entry's exact selection (the curated
+            // before/after); plain items fall back to the first two subjects + first scope.
+            const search = hl
+              ? { ...hl.entry.params.conditions, a: hl.entry.params.a,
+                  ...(hl.entry.params.b ? { b: hl.entry.params.b } : {}), scope: hl.entry.params.scope, judge }
+              : { a, ...(b ? { b } : {}), scope, judge };
+            return (
+              <li key={`${it.group}/${it.id}`}>
+                <Link
+                  to="/results/$runId/$groupId/$itemId"
+                  params={{ runId, groupId: it.group, itemId: it.id }}
+                  search={search}
+                  className={
+                    "group flex items-start gap-2 rounded px-1.5 py-1 hover:bg-default-100 " +
+                    (hl ? "border-l-2 border-primary/60 bg-primary/5" : "")
+                  }
+                >
+                  <span className={
+                    "w-24 shrink-0 font-mono text-xs text-primary group-hover:underline " +
+                    (hl ? "font-semibold" : "")
+                  }>{it.id}</span>
+                  {/* Full question text — wraps, never clipped (no `truncate`). */}
+                  <span className={
+                    "min-w-0 flex-1 break-words text-xs " +
+                    (hl ? "font-medium text-default-700" : "text-default-600")
+                  }>{it.label}</span>
+                  {hl && (
+                    <span className="flex shrink-0 flex-wrap justify-end gap-1">
+                      {hl.presetLabels.map((label) => (
+                        <span key={label}
+                          className="rounded-full border border-primary/40 bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary"
+                          data-testid="raw-item-highlight">{label}</span>
+                      ))}
+                    </span>
+                  )}
+                </Link>
+              </li>
+            );
+          })}
         </ul>
       </section>
 
