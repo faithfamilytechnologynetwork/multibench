@@ -32,6 +32,12 @@ export function RootLayout() {
             >
               Results
             </Link>
+            <Link
+              to="/review"
+              className="text-sm text-default-500 hover:text-default-700 [&.active]:text-primary"
+            >
+              Review
+            </Link>
           </div>
           <a
             href={`https://github.com/${REPO}/tree/${ref}/traditions`}

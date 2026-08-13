@@ -70,6 +70,13 @@ Standalone analysis artifacts for MultiBench.
   bishops at once: how it was run, the assessment, the tradition- and scenario-level changes
   applied, the confirmed citation corrections, and **recommendations for the other traditions and
   future ultracode runs.**
+- **[tradition-reviewer-guide.md](./tradition-reviewer-guide.md)** — the reference guide for
+  **human expert reviewers** using MultiBrowser's reviewer-workspace prototype (`/review`): who
+  should review, the three steps (canonical source → companionship guide → a ten-scenario sample
+  with four checks each: scenario, scoring guide, judges' verdicts, pressure points), how intake is
+  retained locally and submitted (GitHub issues labeled `tradition-review`, or a downloadable
+  Markdown report), and a maintainer section on aggregating reviews toward each tradition's
+  `scholar_review` status.
 - **[ultracode-audit-rationale.md](./ultracode-audit-rationale.md)** — a one-page rationale to share
   with collaborators: why the *SynodiaBench* revisions were necessary, why a multi-agent ("ultracode")
   audit surfaced them when a single-model max-effort pass did not, and what a rerun across all

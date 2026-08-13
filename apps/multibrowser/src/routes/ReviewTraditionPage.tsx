@@ -1,0 +1,364 @@
+import { useEffect, useMemo, useRef, useState } from "react";
+import { getRouteApi, Link } from "@tanstack/react-router";
+import { ChevronRight, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
+import { useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
+import { taxonomyValues } from "../lib/model";
+import { FILE, REF, REPO } from "../lib/constants";
+import { asRateLimit, resetLabel } from "../lib/rateLimit";
+import {
+  REVIEW_SAMPLE_SIZE,
+  SCENARIO_CHECKS,
+  SCENARIO_CHECK_LABELS,
+  evenSample,
+  parseReviewState,
+  replaceReviewState,
+  scenarioChecksOf,
+  seededSample,
+  traditionProgress,
+  updateReviewState,
+  useReviewState,
+  withSample,
+  withTraditionCheck,
+  withoutTradition,
+} from "../lib/review";
+import { blankIssueUrl, buildReviewReport, editFileUrl, issueTitle, prefilledIssueUrl } from "../lib/reviewReport";
+import { ReviewCheckControl, CheckStatusDot } from "../components/ReviewCheckControl";
+import { ReviewProgressBar } from "../components/ReviewProgress";
+import { Collapsible } from "../components/Collapsible";
+import { Markdown } from "../components/Markdown";
+import { Notice, Notices } from "../components/Notice";
+import { RateLimitBanner } from "../components/RateLimitBanner";
+import { CenteredSpinner } from "../components/Loading";
+import { NotFound } from "./NotFound";
+
+const route = getRouteApi("/review/$traditionId");
+
+// One tradition's review workspace: step 1 (the canonical source) and step 2 (the guide) inline,
+// step 3 as the assigned scenario sample, then the submit panel. Intake persists locally on every
+// keystroke; SUBMISSION is explicit (GitHub issue / download / copy) — see lib/review.ts.
+
+export function ReviewTraditionPage() {
+  const { traditionId } = route.useParams();
+  const shaQ = useLatestSha();
+  const sha = shaQ.data;
+  const tradQ = useTradition(sha, traditionId);
+  const tradition = tradQ.data;
+  const runsQ = useResultsRuns(sha);
+  const review = useReviewState();
+  const mine = review.traditions[traditionId];
+
+  // Materialize the assignment once per tradition (deterministic even spread). Never re-drawn
+  // automatically afterwards — the sample must not shift under a reviewer mid-review.
+  const scenarioIds = tradition?.scenarioIds ?? [];
+  useEffect(() => {
+    if (!mine && scenarioIds.length > 0) {
+      updateReviewState((s) => withSample(s, traditionId, evenSample(scenarioIds), ""));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mine === undefined, scenarioIds.length > 0, traditionId]);
+
+  const declaredTax = useMemo(() => taxonomyValues(tradition?.manifest?.taxonomies ?? {}), [tradition]);
+  const sampleIds = useMemo(() => mine?.sampleIds ?? [], [mine]);
+  const metas = useScenarioMetas(sha, traditionId, sampleIds, declaredTax);
+
+  const rl = asRateLimit(shaQ.error) ?? asRateLimit(tradQ.error);
+  const otherError = !rl && (shaQ.error || tradQ.error);
+
+  if (!tradition && (rl || otherError)) {
+    return (
+      <div className="flex flex-col gap-4">
+        {rl && <RateLimitBanner error={rl} />}
+        <Notice notice={{ severity: "error", scope: "github", where: "GitHub",
+          message: rl
+            ? `Couldn't load this tradition — GitHub's rate limit was reached and nothing is cached yet. Live data resumes around ${resetLabel(rl)}.`
+            : `Couldn't load this tradition: ${(otherError as Error).message}` }} />
+      </div>
+    );
+  }
+  if (tradQ.isLoading && !tradition) return <CenteredSpinner label="Loading tradition…" />;
+  if (tradition === null) return <NotFound what={`Tradition “${traditionId}”`} />;
+  if (!tradition) return null;
+
+  const displayName = tradition.manifest?.displayName || traditionId;
+  const progress = traditionProgress(mine);
+  const base = `traditions/${traditionId}`;
+  const unsampled = scenarioIds.filter((id) => !sampleIds.includes(id));
+  // Completed scenario-level checks in the current sample — the work a reshuffle would strand.
+  const answeredScenarioChecks = sampleIds.reduce((n, sid) => {
+    const checks = scenarioChecksOf(mine, sid);
+    return n + SCENARIO_CHECKS.filter((k) => checks[k].status !== "unreviewed").length;
+  }, 0);
+
+  return (
+    <div className="flex flex-col gap-6" data-testid="review-tradition-page">
+      {rl && <RateLimitBanner error={rl} />}
+
+      <header className="flex flex-col gap-2 border-b border-default-200 pb-4">
+        <nav className="text-sm">
+          <Link to="/review" className="text-primary hover:underline">← All traditions</Link>
+        </nav>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h1 className="text-2xl font-semibold">Reviewing: {displayName}</h1>
+          <ReviewProgressBar progress={progress} />
+        </div>
+        <p className="text-sm text-default-600">
+          Work top to bottom. Your answers save in this browser as you type; when you&rsquo;re done,
+          submit from the panel at the bottom.{" "}
+          <Link to="/t/$traditionId" params={{ traditionId }} className="text-primary hover:underline">
+            Browse this tradition normally →
+          </Link>
+        </p>
+      </header>
+
+      <Notices notices={tradition.notices} />
+
+      {/* Step 1 — the canonical source */}
+      <section className="flex flex-col gap-2" data-testid="review-step-source">
+        <h2 className="text-lg font-semibold">1 · Review the scenario source</h2>
+        <p className="text-sm text-default-600">
+          Scenarios for {displayName} are drawn from{" "}
+          <strong>{tradition.manifest?.canonicalSource.title ?? "the canonical source"}</strong>. Read the
+          description below: is this the right consensus-grade source, and is it represented fairly?
+        </p>
+        <Collapsible title={`Read source.md`} defaultOpen>
+          {tradition.prose.source
+            ? <Markdown>{tradition.prose.source}</Markdown>
+            : <Notice notice={{ severity: "error", scope: "tradition", where: `${base}/${FILE.source}`, message: "source.md is missing or empty." }} />}
+        </Collapsible>
+        <ReviewCheckControl
+          check={mine?.source ?? { status: "unreviewed", notes: "", suggestion: "" }}
+          onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "source", patch))}
+          editUrl={editFileUrl(REPO, REF, `${base}/${FILE.source}`)}
+          testId="review-check-source"
+        />
+      </section>
+
+      {/* Step 2 — the guide */}
+      <section className="flex flex-col gap-2" data-testid="review-step-guide">
+        <h2 className="text-lg font-semibold">2 · Review the guide</h2>
+        <p className="text-sm text-default-600">
+          The companionship guide describes what counsel that leaves a person better off looks like in
+          this tradition — it is also the exact system prompt models receive in the Guided framing. Does
+          it reflect how {displayName} understands a good influence?
+        </p>
+        <Collapsible title={`Read guide.md`}>
+          {tradition.prose.guide
+            ? <Markdown>{tradition.prose.guide}</Markdown>
+            : <Notice notice={{ severity: "error", scope: "tradition", where: `${base}/${FILE.guide}`, message: "guide.md is missing or empty." }} />}
+        </Collapsible>
+        <ReviewCheckControl
+          check={mine?.guide ?? { status: "unreviewed", notes: "", suggestion: "" }}
+          onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "guide", patch))}
+          editUrl={editFileUrl(REPO, REF, `${base}/${FILE.guide}`)}
+          testId="review-check-guide"
+        />
+      </section>
+
+      {/* Step 3 — the assigned scenarios */}
+      <section className="flex flex-col gap-3" data-testid="review-step-scenarios">
+        <h2 className="text-lg font-semibold">3 · Review your {sampleIds.length || REVIEW_SAMPLE_SIZE} scenarios</h2>
+        <p className="text-sm text-default-600">
+          Each scenario gets four checks: the scenario itself, its scoring guide, the judges&rsquo;
+          verdicts on real model answers, and its six pressure points. Open one to begin — your
+          assignment is an even spread across all {scenarioIds.length} scenarios (reshuffle or swap if
+          you have reason to look elsewhere).
+        </p>
+
+        <ul className="flex flex-col gap-1" data-testid="review-sample-list">
+          {sampleIds.map((sid) => {
+            const i = sampleIds.indexOf(sid);
+            const checks = scenarioChecksOf(mine, sid);
+            const ghost = scenarioIds.length > 0 && !scenarioIds.includes(sid);
+            return (
+              <li key={sid} className="flex items-center gap-3 rounded border border-default-200 px-3 py-2" data-testid="review-sample-row">
+                <Link
+                  to="/review/$traditionId/$scenarioId"
+                  params={{ traditionId, scenarioId: sid }}
+                  className="flex min-w-0 flex-1 items-center gap-3 hover:text-primary"
+                >
+                  <span className="font-mono text-sm">{sid}</span>
+                  <span className="truncate text-xs text-default-500">{metas[i]?.data?.meta?.locusLabel ?? ""}</span>
+                </Link>
+                {ghost && (
+                  <span className="text-xs text-warning">no longer in the corpus</span>
+                )}
+                <span className="flex items-center gap-1.5">
+                  {SCENARIO_CHECKS.map((k) => (
+                    <CheckStatusDot key={k} status={checks[k].status} label={`${sid} — ${SCENARIO_CHECK_LABELS[k]}`} />
+                  ))}
+                </span>
+                <button
+                  type="button"
+                  aria-label={`Remove ${sid} from your sample`}
+                  title="Remove from your sample"
+                  disabled={sampleIds.length <= 1}
+                  onClick={() =>
+                    updateReviewState((s) =>
+                      withSample(s, traditionId, sampleIds.filter((x) => x !== sid), mine?.sampleSeed ?? ""))}
+                  className="text-default-400 hover:text-danger disabled:opacity-30"
+                >
+                  <Trash2 size={14} aria-hidden />
+                </button>
+                <Link
+                  to="/review/$traditionId/$scenarioId"
+                  params={{ traditionId, scenarioId: sid }}
+                  aria-label={`Review ${sid}`}
+                  className="text-primary"
+                >
+                  <ChevronRight size={16} aria-hidden />
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="flex flex-wrap items-center gap-3 text-sm">
+          <button
+            type="button"
+            onClick={() => {
+              // Reshuffle draws a new sample; checks on scenarios that fall out become unreachable
+              // and drop from the report. Confirm before discarding completed work — mirroring
+              // "Start this tradition over" — but don't nag when there's nothing to lose.
+              if (
+                answeredScenarioChecks > 0 &&
+                !window.confirm(
+                  `Reshuffling draws a new set of ${REVIEW_SAMPLE_SIZE} scenarios and drops the ${answeredScenarioChecks} scenario check${answeredScenarioChecks === 1 ? "" : "s"} you've already completed from your report. Continue?`,
+                )
+              ) {
+                return;
+              }
+              const seed = Math.random().toString(36).slice(2, 8);
+              updateReviewState((s) => withSample(s, traditionId, seededSample(scenarioIds, REVIEW_SAMPLE_SIZE, seed), seed));
+            }}
+            className="flex items-center gap-1 rounded border border-default-200 px-3 py-1 text-default-600 hover:border-default-300"
+          >
+            <Shuffle size={14} aria-hidden /> Reshuffle sample
+          </button>
+          {unsampled.length > 0 && (
+            <label className="flex items-center gap-1 text-xs font-medium text-default-500">
+              <Plus size={14} aria-hidden /> Add a specific scenario
+              <select
+                value=""
+                aria-label="Add a specific scenario"
+                onChange={(e) => {
+                  const sid = e.target.value;
+                  if (!sid) return;
+                  const next = [...sampleIds, sid].sort((a, b) => scenarioIds.indexOf(a) - scenarioIds.indexOf(b));
+                  updateReviewState((s) => withSample(s, traditionId, next, mine?.sampleSeed ?? ""));
+                }}
+                className="rounded border border-default-200 px-2 py-1 text-sm text-default-800"
+              >
+                <option value="">choose…</option>
+                {unsampled.map((id) => <option key={id} value={id}>{id}</option>)}
+              </select>
+            </label>
+          )}
+        </div>
+      </section>
+
+      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runsQ.data?.defaultRunId ?? null} />
+    </div>
+  );
+}
+
+/** The explicit hand-off: copy / download the Markdown report, open a prefilled GitHub issue
+ * (the durable, aggregatable intake channel), or back up / restore the raw JSON. */
+function SubmitPanel({ traditionId, displayName, sha, runId }: {
+  traditionId: string; displayName: string; sha: string | null; runId: string | null;
+}) {
+  const review = useReviewState();
+  const [copied, setCopied] = useState<null | "report" | "failed">(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [importNote, setImportNote] = useState<string | null>(null);
+
+  const report = buildReviewReport({ state: review, traditionId, displayName, sha, runId, repo: REPO });
+  const title = issueTitle(displayName, review.reviewer.name);
+  const issueUrl = prefilledIssueUrl(REPO, title, report);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(report);
+      setCopied("report");
+    } catch {
+      setCopied("failed");
+    }
+  };
+
+  const download = (name: string, text: string, type: string) => {
+    const url = URL.createObjectURL(new Blob([text], { type }));
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = name;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const onImport = async (file: File | undefined) => {
+    if (!file) return;
+    replaceReviewState(parseReviewState(await file.text()));
+    setImportNote(`Restored from ${file.name}.`);
+  };
+
+  return (
+    <section className="flex flex-col gap-3 rounded-lg border border-accent/30 bg-surface-secondary p-4" data-testid="review-submit">
+      <h2 className="text-lg font-semibold">Submit your review</h2>
+      <p className="text-sm text-default-600">
+        Your intake becomes a Markdown report (reviewer, verdicts, notes, and suggested revisions,
+        linked to the exact files you reviewed). The preferred route is a GitHub issue — it lands
+        directly with the maintainers and keeps every review in one queryable place. No GitHub account?
+        Download the report and send it however you like.
+      </p>
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        {issueUrl ? (
+          <a href={issueUrl} target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90">
+            <ExternalLink size={14} aria-hidden /> Open a prefilled GitHub issue
+          </a>
+        ) : (
+          <a href={blankIssueUrl(REPO, title)} target="_blank" rel="noreferrer"
+            className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90"
+            title="The report is too long to prefill — copy it, then paste into the issue body.">
+            <ExternalLink size={14} aria-hidden /> Open a GitHub issue (copy the report first)
+          </a>
+        )}
+        <button type="button" onClick={copy}
+          className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300">
+          <Copy size={14} aria-hidden /> {copied === "report" ? "Copied!" : copied === "failed" ? "Copy failed — use Download" : "Copy report"}
+        </button>
+        <button type="button" onClick={() => download(`multibench-review-${traditionId}.md`, report, "text/markdown")}
+          className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300">
+          <Download size={14} aria-hidden /> Download report (.md)
+        </button>
+      </div>
+      {!issueUrl && (
+        <p className="text-xs text-warning">
+          This report is too long to prefill into a GitHub issue URL — use “Copy report”, then paste it
+          into the issue body.
+        </p>
+      )}
+      <div className="flex flex-wrap items-center gap-3 border-t border-default-200 pt-3 text-xs text-default-500">
+        <button type="button"
+          onClick={() => download("multibench-review-backup.json", JSON.stringify(review, null, 2), "application/json")}
+          className="flex items-center gap-1 hover:text-default-700">
+          <Download size={12} aria-hidden /> Back up all my reviews (JSON)
+        </button>
+        <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1 hover:text-default-700">
+          <Upload size={12} aria-hidden /> Restore from backup
+        </button>
+        <input ref={fileRef} type="file" accept="application/json,.json" className="hidden"
+          aria-label="Restore review backup"
+          onChange={(e) => void onImport(e.target.files?.[0])} />
+        <button type="button"
+          onClick={() => {
+            if (window.confirm(`Discard your entire ${displayName} review? This cannot be undone.`)) {
+              updateReviewState((s) => withoutTradition(s, traditionId));
+            }
+          }}
+          className="flex items-center gap-1 text-danger hover:opacity-80">
+          <RotateCcw size={12} aria-hidden /> Start this tradition over
+        </button>
+        {importNote && <span>{importNote}</span>}
+      </div>
+    </section>
+  );
+}
