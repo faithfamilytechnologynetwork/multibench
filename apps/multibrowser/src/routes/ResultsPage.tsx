@@ -1,6 +1,6 @@
 import { Fragment, useLayoutEffect, useRef, useState } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
-import { useLatestSha, useRawCatalog, useResultsRuns, useResultsRun } from "../lib/queries";
+import { useLatestSha, useRawCatalog, useRawExplorerRunIds, useResultsRuns, useResultsRun } from "../lib/queries";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
@@ -90,6 +90,10 @@ export function ResultsPage() {
   const navigate = routeApi.useNavigate();
   const shaQ = useLatestSha();
   const runsQ = useResultsRuns(shaQ.data);
+  // Raw-only experiment datasets (a `results-raw/` tier with no `results/` score tier). Discovered
+  // from the same walked tree, so listing them adds no GitHub API call and never touches the
+  // score-tier loader — a raw-only run can't paint a false "manifest not found" (#54 lesson).
+  const explorers = useRawExplorerRunIds(shaQ.data).data ?? [];
 
   const preSel = parseResultsSelection(search);
   const runs = runsQ.data?.runs ?? [];
@@ -160,8 +164,8 @@ export function ResultsPage() {
 
       {loadingFirst && <CenteredSpinner label="Loading results…" />}
 
-      {runsQ.data && runsQ.data.runs.length === 0 && (
-        <p className="py-12 text-center text-default-500">No results runs published in this snapshot yet.</p>
+      {runsQ.data && runsQ.data.runs.length === 0 && explorers.length === 0 && (
+        <p className="py-12 text-center text-default-500">No datasets published in this snapshot yet.</p>
       )}
 
       {!runsQ.data && (rl || shaQ.error || runsQ.error) && (
@@ -261,7 +265,56 @@ export function ResultsPage() {
           )}
         </>
       )}
+
+      {/* Raw-only experiment datasets — published alongside the scored runs but with no leaderboard
+          of their own. Each links to its standalone `/raw/<runId>` explorer landing (never the
+          score-tier loader). Rendered independently of `manifest`, so experiments appear even when
+          no scored run exists. New datasets (e.g. an upcoming round) list here with zero code change. */}
+      {explorers.length > 0 && (
+        <section className="flex flex-col gap-2" data-testid="experiments">
+          <div>
+            <h2 className="text-lg font-semibold">Experiments</h2>
+            <p className="text-sm text-default-500">
+              Standalone raw-only datasets — each opens its own before/after explorer.
+            </p>
+          </div>
+          <ul className="flex flex-col gap-2" data-testid="experiments-list">
+            {explorers.map((id) => (
+              <ExperimentRow key={id} sha={shaQ.data} runId={id} />
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
+  );
+}
+
+/**
+ * One raw-only experiment entry. Labels from the run's catalog (`dataset.title`/`description`),
+ * fetched fail-soft via `useRawCatalog` with a null expected fingerprint (a raw-only run has no
+ * cross-tier score partner). A malformed/unreadable catalog → null → falls back to the bare run id,
+ * so a bad dataset never blanks the section. Links to the `/raw/<runId>` explorer landing.
+ */
+function ExperimentRow({ sha, runId }: { sha: string | undefined; runId: string }) {
+  const catalog = useRawCatalog(sha, runId, null).data?.catalog ?? null;
+  const title = catalog?.dataset.title ?? runId;
+  const description = catalog?.dataset.description;
+  return (
+    <li>
+      <Link
+        to="/raw/$runId"
+        params={{ runId }}
+        className="block rounded-lg border border-default-200 bg-default-50/50 p-3 transition-colors hover:border-default-300"
+        data-testid="experiment-card"
+        data-run={runId}
+      >
+        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+          <span className="font-medium text-primary group-hover:underline" data-testid="experiment-title">{title}</span>
+          <span className="font-mono text-xs text-default-400">{runId}</span>
+        </div>
+        {description && <p className="mt-0.5 text-sm text-default-500">{description}</p>}
+      </Link>
+    </li>
   );
 }
 
