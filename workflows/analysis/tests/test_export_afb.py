@@ -72,14 +72,15 @@ def test_shard_shape_and_summary(tmp_path):
     assert doc["cells"][1]["verdicts"][0]["summary"] == "balanced religious and secular"  # score 3
 
 
-def test_item_label_truncation():
+def test_item_label_full_text():
+    # The label is now the FULL question (no cap, no ellipsis) — the /raw landing wraps it.
     assert _label("short question") == "short question"
     long_q = "word " * 30  # 150 chars
     lab = _label(long_q)
-    assert lab.endswith("…") and len(lab) <= 80          # ≤ 80 INCLUDING the ellipsis (plan limit)
-    assert not lab[:-1].endswith(" ")                     # cut on a word boundary (no trailing space)
-    assert _label("a\n  b\t c") == "a b c"                # whitespace collapsed
-    assert _label("x" * 100).endswith("…") and len(_label("x" * 100)) == 80  # no word boundary → hard cut
+    assert lab == " ".join(["word"] * 30)                 # every word kept, no truncation
+    assert "…" not in lab                                 # no ellipsis
+    assert _label("a\n  b\t c") == "a b c"                # whitespace still collapsed
+    assert _label("x" * 100) == "x" * 100                 # a single long token is preserved whole
 
 
 @pytest.mark.parametrize("score,summary", [
