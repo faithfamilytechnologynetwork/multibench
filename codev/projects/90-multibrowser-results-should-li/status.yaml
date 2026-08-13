@@ -1,0 +1,14 @@
+id: '90'
+title: multibrowser-results-should-li
+protocol: air
+phase: implement
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-13T21:02:01.066Z'
+updated_at: '2026-08-13T21:02:01.082Z'
