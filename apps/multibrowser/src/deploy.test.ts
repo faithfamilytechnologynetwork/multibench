@@ -70,6 +70,45 @@ describe("build / deploy invariants", () => {
     expect(readFileSync("vite.config.ts", "utf8")).toMatch(/base:\s*["']\/["']/);
   });
 
+  it("numbered HeroUI shades emit real rules mapped onto theme-aware tokens (#86 shim)", () => {
+    // @heroui/styles v3 ships ONLY semantic tokens (--color-default, --color-warning, …) — no
+    // numbered scale — so before the src/styles.css @theme shim, EVERY numbered utility the app
+    // uses (text-default-500, border-default-200, bg-warning-50, …) compiled to nothing (the #55
+    // tooltip scar, root-caused). Assert against the REAL built CSS that each such utility now
+    // emits a rule whose value is a color-mix over HeroUI's theme-aware poles (--foreground /
+    // --background / the semantic hue) — that construction is what keeps the ramp flipping
+    // correctly between light and dark mode, so a static-color regression would fail here too.
+    const css = readdirSync("dist/assets")
+      .filter((f) => f.endsWith(".css"))
+      .map((f) => readFileSync(join("dist/assets", f), "utf8"))
+      .join("\n");
+    // Representative classes drawn from actual app usage, spanning both the neutral ramp and the
+    // status hues, and both the "toward background" (low) and "toward foreground" (high) ends.
+    const probes: { cls: string; prop: string; pole: string }[] = [
+      { cls: "text-default-400", prop: "color", pole: "foreground" },
+      { cls: "text-default-500", prop: "color", pole: "foreground" },
+      { cls: "text-default-900", prop: "color", pole: "foreground" },
+      { cls: "border-default-200", prop: "border-color", pole: "foreground" },
+      { cls: "bg-default-50", prop: "background-color", pole: "foreground" },
+      { cls: "bg-warning-50", prop: "background-color", pole: "warning" },
+      { cls: "text-warning-800", prop: "color", pole: "warning" },
+      { cls: "border-warning-200", prop: "border-color", pole: "warning" },
+      { cls: "bg-danger-50", prop: "background-color", pole: "danger" },
+      { cls: "text-danger-700", prop: "color", pole: "danger" },
+    ];
+    for (const { cls, prop, pole } of probes) {
+      // The utility must exist at all (the whole bug was that it did not) ...
+      const rule = new RegExp(`\\.${cls}\\{${prop}:[^}]+\\}`, "g");
+      expect(css, `.${cls} emits no rule — numbered shade is a no-op again`).toMatch(rule);
+      // ... and its live (color-mix) value must be a mix over a theme-aware token, not a static
+      // color, so the shade stays correct in dark mode.
+      const themed = new RegExp(
+        `\\.${cls}\\{${prop}:(?:var\\(--${pole}\\)|color-mix\\(in oklab,var\\(--${pole}\\))`,
+      );
+      expect(css, `.${cls} is not mapped onto the theme-aware --${pole} token`).toMatch(themed);
+    }
+  });
+
   it("a normal build bundles NO baked raw tier — public/data-raw/ is deploy-only (#51)", () => {
     // The ~126 MB gz raw tier is baked into `public/data-raw/` ONLY at `railway up` time (see
     // scripts/bake-and-deploy.sh) and gitignored; a normal `pnpm build` (this test's beforeAll)

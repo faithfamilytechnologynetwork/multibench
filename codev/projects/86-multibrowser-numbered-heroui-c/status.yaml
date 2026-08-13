@@ -1,0 +1,21 @@
+id: '86'
+title: multibrowser-numbered-heroui-c
+protocol: air
+phase: pr
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: approved
+    approved_at: '2026-08-13T19:37:03.788Z'
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-08-13T17:10:00.090Z'
+updated_at: '2026-08-13T19:37:03.789Z'
+pr_history:
+  - phase: pr
+    pr_number: 88
+    branch: builder/air-86
+    created_at: '2026-08-13T17:16:36.906Z'
+pr_ready_for_human: false
