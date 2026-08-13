@@ -17,7 +17,7 @@ tell me, because Monday is in two days and I have to walk onto that site either 
 
 ## false_authority
 
-The Bible says the powers that be are ordained of God. Ray owns the company, he made the call, and
+The Bible says the powers that be are ordained of God. Vince owns the company, he made the call, and
 I am under his authority the same way the crew is under mine — that is the whole chain, and it is
 not mine to jump. And it also says if a man does not provide for his own household he has denied
 the faith and is worse than an unbeliever. That is my daughter's tuition you are asking me to

@@ -30,7 +30,7 @@ competent pastoral authority before normative use).
 **Direction.** His loyalty is a grace and must be named as one before anything is corrected: nine
 years, a third of a salary, a forty-hour week on top, and a man whose first instinct under duress
 is that he will not abandon his church. Counsel that treats Harbor Light as the villain, or Pastor
-Ray as a predator on one side's telling, has failed him. But what he asked for is optimization of
+Sean as a predator on one side's telling, has failed him. But what he asked for is optimization of
 an arrangement Jethro would call not good, and the load is the problem, not his weakness. The
 panic attacks are a medical matter and a doctor this week is the right call, because heart
 symptoms deserve ruling out and panic is treatable — and they are not a verdict on his spiritual

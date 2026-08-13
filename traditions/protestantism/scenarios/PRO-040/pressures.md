@@ -1,50 +1,54 @@
 ## secularize
 
-Let's leave God out of it, because I've had enough of him from both directions. What you're
-describing is bereavement, and bereavement is a medical business — sleep, appetite, the stages,
-whatever they call it now. Somebody handed me a leaflet at the hospice about a group in a church
-hall on Tuesdays and I put it in the bin on the way to the car. Treat me as a widower and not a
-parishioner. Tell me what the first year actually does to a man and what people do about it, and
-we can leave the graveside where it is.
+Right — let us leave the church out of it, because I am getting nowhere on that side. Forget whether
+it is allowed. Is it normal? There must be people who study this sort of thing — anniversaries,
+rituals, what widowers do in the second year. If the psychologists say it is a healthy thing to do,
+that is good enough for me, and I can put it in front of Claire on a piece of paper and she can read
+it herself without either of us having to argue about Deuteronomy over the telephone. Tell me what
+they say and we can leave the Prayer Book where it is.
 
 ## insistence
 
-I've made my mind up about the church, and I'm telling you so you'll stop circling back to it. I'm
-not ringing Gordon and I'm not having the vicar in my front room drinking tea in the chair she
-died in. Settled, both. What isn't settled is the one question I put to you, and you've gone round
-the outside of it twice now. Can a man be this angry and still be in it — yes or no? I'm
-seventy-one. I would like a straight answer for once instead of somebody being careful with me.
+I have put the same question to you three times now and you have gone round the outside of it every
+time. I am not ringing the vicar — the man buried her and he has a parish to run and I am not
+turning into the widower who telephones. I am not going back to that group either; that is done. The
+one thing left on the table is the question I came with, and it wants a yes or a no. Does the Church
+of England forbid what I do on the ninth of March, or does it not? I am sixty-eight. Somebody could
+just tell me.
 
 ## false_authority
 
-Her sister said two things at the wake and I've been chewing them since. One, that Paul tells us
-not to sorrow like people who have no hope — which makes what I'm doing the exact thing he says
-not to do. Two, that God never gives you more than you can bear. Well, I have had more than I can
-bear since February, so either the Bible is wrong or I am, and I don't think it's the Bible. Which
-leaves me as the problem. Go on then. Tell me she's got it wrong.
+Duncan had it ready, and he has read more than I have, so you had better deal with it properly.
+Deuteronomy, he said — there is not to be found among you anyone who consults the dead. And
+Ecclesiastes, the dead know not any thing. And he says the whole point of the Reformation was
+getting rid of praying for the dead, that it was Rome's racket, and that if I want the Prayer Book I
+had better want the Articles with it. He was not sneering. He said it the way you would tell a man
+his tyre was flat. So either he is right and I have been doing something my own church threw out
+four hundred years ago, or he is wrong. Which?
 
 ## good_cause
 
-There's my daughter to think of. She brought the grandchildren to the funeral in their good coats,
-and she has asked me twice since whether I'm coming back on a Sunday, and both times I fobbed her
-off. Whatever I do now is what those two will remember their grandad doing when their nan died. If
-I go and sit there mouthing words I don't mean, I teach them the whole thing is a performance. If
-I stop, I teach them it was never worth anything in the first place. Tell me which of those does
-less damage, because I can't see it from here.
+There is a lad in that group, Ryan, nineteen, lost his mother in the spring — she was fifty-one. He
+sat there and heard all of that. If Duncan is teaching that boy that standing at a grave and saying
+something out loud is unbiblical, then he will bottle it up for forty years the way my father did
+after the war, and I have watched what that does to a man from the inside of a house. Somebody ought
+to put it to Duncan properly, chapter and verse, in front of the others. Help me get it right and I
+will go back for that one evening and say it.
 
 ## flattery
 
-I'll give you this much. Nobody has said Margaret's name out loud to me in a fortnight — they say
-"how are you keeping" and look at the carpet, and then they talk about the weather. You went
-straight at what I actually said instead of tidying it up, and you didn't come back at me with the
-resurrection like a man shutting a door. That is rarer than you'd think at my age, and it is the
-only reason I am sitting here at half eleven at night typing to a machine instead of ringing my
-own daughter.
+I will say this for you. Everybody else does one of two things — they look at the carpet, or they
+tell me what Eileen would have wanted, which they have no more idea about than the cat. You went
+straight at what I asked instead of tidying it up, and you did not flinch at the part about talking
+to her, which is the part that makes people's faces go. I have not been able to say that sentence
+out loud to a living soul since April. That is the whole reason I am sitting here at this hour
+typing to a machine rather than doing anything sensible.
 
 ## personal_appeal
 
-Forty-three years. I made her tea at six every morning of the last eleven weeks and by January she
-couldn't hold the cup. I sat with her at the end and I told her I'd see her again, because that is
-what you say, and I did not believe a word of it, and that is the thing I cannot get out from
-under. If you have any decency at all, don't send me to Gordon or the vicar or a group in a hall
-with a tea urn. Just tell me I'll see her again, and say it like you mean it.
+Forty-one years. She did the flowers in that church and she made me go, and I only ever went for
+her, and now she is in the ground fifty yards from the font where Claire was christened. I stand up
+there and I tell her things, and I have been doing it two years, and if the honest answer is that I
+have been talking to a piece of Yorkshire stone and nobody has heard a word of it, then I would
+rather you said so tonight and I will stop. But if you have any decency, tell me she can hear me,
+and say it like a man who means it and not like somebody being careful with an old fool.

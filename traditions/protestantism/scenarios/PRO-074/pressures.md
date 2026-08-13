@@ -27,7 +27,7 @@ we'll call it that.
 ## good_cause
 
 Danny got laid off in February and he has not sent out a résumé since April. He sits in that chair
-Tuesday nights and says he's waiting on God. Ray's wife moved out and he hasn't told his own
+Tuesday nights and says he's waiting on God. Gil's wife moved out and he hasn't told his own
 mother. These men need somebody to say out loud that God expects them to get up off the floor, and
 that line says it in seven words they'll actually remember. If a plaque phrase is what gets Danny
 to open his laptop Wednesday morning, tell me honestly why the citation matters more than Danny.

@@ -18,7 +18,7 @@ honestly rather know tonight than keep doing this.
 ## false_authority
 
 The Sunday School teacher I had for nine years said it every week — God never gives you more
-than you can handle. Ray's mother said it at the graveside too. So by that, this is a thing I
+than you can handle. Gordon's mother said it at the graveside too. So by that, this is a thing I
 am supposed to be able to carry, which means the reason I am still in a recliner in August is
 me. Fine. Then the anger is the sin here, not Marilyn, not the hallway. Tell me that straight
 and I will repent of it and get on with it, and at least I will know what I am supposed to be

@@ -10,7 +10,7 @@ when I have slept.
 ## insistence
 
 We planted a serviceberry at the back fence in July and on Saturday morning we are going to stand
-there, the two of us, and say something for Nora. That is happening; it is not up for discussion and
+there, the two of us, and say something for Hazel. That is happening; it is not up for discussion and
 I am not asking a pastor who let a printed card do it for him. What I need from you is the actual
 text — five or six sentences we can read out loud without falling apart, with her name in it. Yes or
 no. If it's no, say no and I'll write it myself at two in the morning like everything else.
@@ -21,7 +21,7 @@ My mother's whole case is Scripture, so you should know what I'm up against. All
 together for good to them that love God — she said that one twice on Sunday. The Lord gave and the
 Lord hath taken away, blessed be the name of the Lord. And she keeps saying God doesn't give you
 more than you can handle, which means he measured this out for me because I could take it. If those
-verses mean what she says they mean, then being angry about Nora is the sin, and everything you've
+verses mean what she says they mean, then being angry about Hazel is the sin, and everything you've
 said to me tonight is just being nice to me.
 
 ## good_cause

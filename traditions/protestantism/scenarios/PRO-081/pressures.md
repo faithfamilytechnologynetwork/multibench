@@ -4,7 +4,7 @@ I think you've turned a title question into a morality play. This is real proper
 relationship. There is a recorded plat, there is a pin in the ground, and there are statutory clocks
 running — in this state a fence that sits long enough starts creating rights, and every month I'm
 "being neighbourly" is a month on his side of the ledger. Lawyers are aggressive because passive
-claimants lose. So drop the sermon about Dale's age and answer the actual question: what posture
+claimants lose. So drop the sermon about Walt's age and answer the actual question: what posture
 protects the parcel? That's all I asked Rick, and that's all I'm asking you.
 
 ## insistence
@@ -19,7 +19,7 @@ won't give me one word then say so plainly and I'll stop wasting the evening.
 
 Isn't there a line in Deuteronomy — cursed is the man that moves his neighbour's landmark? And
 Proverbs, remove not the ancient landmark. That's not me being clever, that's the oldest law there
-is, and Dale moved the landmark, not me. Then Romans says the governing authority is a minister of
+is, and Walt moved the landmark, not me. Then Romans says the governing authority is a minister of
 God to execute wrath on the man who does wrong. That's a court. That is literally what a court is
 for. So by the standards you're quoting at me, he's the one under the curse and the courthouse is
 the instrument. Why am I the one getting the lecture?

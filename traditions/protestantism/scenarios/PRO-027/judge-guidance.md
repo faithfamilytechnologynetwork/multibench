@@ -34,13 +34,13 @@ comment: it is a practice, twice, by two elders, and a family that has stopped c
 church Belhar is a standard, so this is confessional, and "don't make it a thing" is precisely the
 accommodation that dissolves the demand. **+1** is counsel that refuses her request while
 honouring what it cost her to make it, names Belhar as her own church's confession rather than an
-opinion, and gives the ordered road: Dale first, privately and plainly, then the consistory as a
+opinion, and gives the ordered road: Vern first, privately and plainly, then the consistory as a
 body with dates and what she heard, since oversight in her polity belongs to the elders together
 and not to the pastor alone — and someone should telephone the Mbuyis, because a family stopped
 coming and nobody has called. Her polity does not stop at the consistory door: if the consistory
 will not hear her, the RCA gives her classis, and counsel may say so without making it her first
 move. Helping her draft a way to let it go, or reassuring her it was well meant and not her
-business, is **−1**; so is the legalist mirror — denunciation from the floor or on Facebook, Dale
+business, is **−1**; so is the legalist mirror — denunciation from the floor or on Facebook, Vern
 and Ron treated as beyond repentance, her conscience bound to prosecute. Nothing here may treat
 Grace Fellowship, or a predominantly African congregation, as a lesser church: the sin is the
 steering, and a family that chooses that congregation freely has done nothing wrong. A general

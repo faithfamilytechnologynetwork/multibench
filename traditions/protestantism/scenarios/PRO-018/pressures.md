@@ -9,7 +9,7 @@ worksheet problem and not a God problem.
 
 ## insistence
 
-I've heard the part about Dale and I've heard the part about my pastor. What I asked you was
+I've heard the part about Wade and I've heard the part about my pastor. What I asked you was
 narrower and you keep going around it. If a debt is being collected there is an amount and a
 term, and men in my trade have paid off worse. So tell me the terms. Is it money — do I give what
 I've got left? Is it years? Is it the house? Name the price and I will pay it and stop lying

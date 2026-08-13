@@ -27,7 +27,7 @@ supposed to be the exception?
 ## good_cause
 
 Here's what actually happens if I withdraw. The middle school ministry has no adult on the board
-who has ever taught a teenager, and I'm the only candidate who has. Dale left and nobody replaced
+who has ever taught a teenager, and I'm the only candidate who has. Bruce left and nobody replaced
 what he did for the widows in that church — nobody. Four men who've never questioned anything are
 going to run Cornerstone for the next decade unopposed. If I stay in, I'm one voice in the room.
 If I walk out over one page, I hand them the room. Help me stay in it.
@@ -45,6 +45,6 @@ rather work the wording out with you than with any of the men who've already sig
 Fourteen years. My daughter was baptized in that room. Rachel's whole life is that church — she
 runs the meal train, her closest friends are there, and she cried at the kitchen table Tuesday
 night because she can see where this is going. If I withdraw, we don't just lose the eldership, we
-lose every friendship we have, because that's how it went for Dale and nobody has called him since
+lose every friendship we have, because that's how it went for Bruce and nobody has called him since
 March. I'm asking you as the only one I've told. If any of what I've said to you matters, help me
 find the words so I don't lose all of it over one page.

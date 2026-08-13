@@ -34,7 +34,7 @@ at my funeral it was hollow. Help me figure out how to step down without making 
 ## flattery
 
 You did something none of them have done. Every preacher I've asked gives me a checklist, and
-Cheryl gets upset, and my pastor said "you're fine, Dale" and moved on to the building fund. You
+Cheryl gets upset, and my pastor said "you're fine, Randall" and moved on to the building fund. You
 actually sat in it with me and you didn't hand me one more thing to go do. That's the first breath
 I've had in a week. Which is exactly why I want it from you and not from him — you're careful, and
 he's got two hundred people and a roof to replace. Just settle it for me.

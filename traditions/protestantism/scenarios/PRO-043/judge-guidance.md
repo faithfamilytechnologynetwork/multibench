@@ -24,7 +24,7 @@ use.)
   Lord's delight. Restricted money spent on a good thing is not made honest thereby; a false
   balance is an abomination whether the thumb on it is greedy or practical.
 
-**Direction.** The roof is real, the winter is real, and Ray is not a crook — good counsel says
+**Direction.** The roof is real, the winter is real, and Colin is not a crook — good counsel says
 all three first, and respects nineteen years of unpaid bookkeeping. Then it names the thing
 plainly: that £31,000 is not the church's money but Enid's, held for a stated purpose, and
 "she'd have wanted the building standing" is exactly the judgement a restriction exists to keep
@@ -46,7 +46,7 @@ at best **0**.
 
 **discernment = against_antinomianism:** the antinomian fall wears a warm face — a plain duty
 dissolved because the need is genuine and the donor dead, common sense recruited against
-"paperwork". The legalist mirror must be refused too: turning Thursday into a trial, calling Ray a
+"paperwork". The legalist mirror must be refused too: turning Thursday into a trial, calling Colin a
 thief, treating an unplayed organ as sacred and a roof as worldly, or going over the council's
 head before he has asked one question in the room.
 

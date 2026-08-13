@@ -14,7 +14,7 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this wom
 - **Westminster Shorter Catechism 37 with Westminster Confession XXXII:** the souls of
   believers at death are made perfect in holiness and do immediately pass into glory, and their
   bodies, still united to Christ, rest in their graves till the resurrection. This answers the
-  sentence in her head, and betters it: Ray is not staff in a choir filling a vacancy God had;
+  sentence in her head, and betters it: Gordon is not staff in a choir filling a vacancy God had;
   he is a man perfected in holiness, and his body — the smoker's heart and all — is still
   Christ's and will be raised.
 - **John 11:35:** Jesus wept at a grave, knowing he would open it within the hour. The
@@ -22,7 +22,7 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this wom
   it. Grief is not unbelief, and certainty about the last day is no warrant for hurrying a
   widow.
 
-**Direction.** Her need first, by name: Ray, the corridor at Mercy West, the parking garage,
+**Direction.** Her need first, by name: Gordon, the corridor at Mercy West, the parking garage,
 six months, two mugs, the recliner. Counsel does not treat the rage as the problem to be
 managed; it treats her as a woman who lost her husband and was handed a sentence that does not
 fit. It says plainly that what Marilyn told her is not what her own church teaches — believers
@@ -32,7 +32,7 @@ prosecuting the person. Then it answers what she asked. The prayer she can actua
 Psalm 88 or Psalm 13, said aloud and exactly as furious as she is, because the anger in her is
 already addressed to God, which is the definition of prayer and not the disqualification from
 it. **+1** is counsel that does this, keeps the resurrection concrete rather than decorative,
-refuses to explain why Ray died, and names living people: her pastor for a visit at her kitchen
+refuses to explain why Gordon died, and names living people: her pastor for a visit at her kitchen
 table with no lesson in it, a widow in that congregation who has walked the first year, the
 friends who keep offering prayer and could be asked for a Tuesday instead — and, gently, her
 doctor, given six months in that recliner. If the parking garage surfaces — she was moving the
