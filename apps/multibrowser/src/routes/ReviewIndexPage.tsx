@@ -130,6 +130,9 @@ export function ReviewIndexPage() {
               onChange={(e) => updateReviewState((s) => withReviewer(s, { contact: e.target.value }))}
               className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800"
             />
+            <span className="font-normal text-default-400">
+              Submitted issues are public — a GitHub handle is safer to share here than an email.
+            </span>
           </label>
           <label className="flex flex-col gap-1 text-xs font-medium text-default-500">
             Background (your standing to review)

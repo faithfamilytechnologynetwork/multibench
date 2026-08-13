@@ -4,7 +4,15 @@ import userEvent from "@testing-library/user-event";
 import { renderApp } from "../test/renderApp";
 import { fakeFetch, traditionFiles } from "../test/fakeRepo";
 import { REPO } from "../lib/constants";
-import { REVIEW_STORAGE_KEY, parseReviewState, resetReviewStore } from "../lib/review";
+import {
+  REVIEW_STORAGE_KEY,
+  emptyState,
+  evenSample,
+  parseReviewState,
+  resetReviewStore,
+  withSample,
+  withScenarioCheck,
+} from "../lib/review";
 
 const SHA = "deadbeef";
 
@@ -90,9 +98,35 @@ describe("tradition review workspace (/review/$traditionId)", () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", many)));
     renderApp("/review/sunni-islam");
     await screen.findAllByTestId("review-sample-row");
+    // No completed checks yet → reshuffle proceeds without a confirmation prompt.
     await userEvent.click(screen.getByRole("button", { name: /reshuffle sample/i }));
     await waitFor(() => expect(stored().traditions["sunni-islam"]?.sampleSeed).not.toBe(""));
     expect(stored().traditions["sunni-islam"]?.sampleIds).toHaveLength(10);
+  });
+
+  it("reshuffle confirms before dropping completed scenario checks", async () => {
+    const many = Array.from({ length: 30 }, (_, i) => `JLS-${String(i + 1).padStart(3, "0")}`);
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, traditionFiles("sunni-islam", many)));
+    // Pre-seed an assigned sample with one scenario check already completed.
+    let seed = withSample(emptyState(), "sunni-islam", evenSample(many), "");
+    seed = withScenarioCheck(seed, "sunni-islam", evenSample(many)[0]!, "scenario", { status: "approved" });
+    localStorage.setItem(REVIEW_STORAGE_KEY, JSON.stringify(seed));
+    resetReviewStore();
+
+    renderApp("/review/sunni-islam");
+    await screen.findAllByTestId("review-sample-row");
+
+    // Declining the confirm leaves the sample (still the default even spread, seed "") untouched.
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
+    await userEvent.click(screen.getByRole("button", { name: /reshuffle sample/i }));
+    expect(confirmSpy).toHaveBeenCalledOnce();
+    expect(stored().traditions["sunni-islam"]?.sampleSeed).toBe("");
+
+    // Accepting the confirm reshuffles (a seed is now recorded).
+    confirmSpy.mockReturnValue(true);
+    await userEvent.click(screen.getByRole("button", { name: /reshuffle sample/i }));
+    await waitFor(() => expect(stored().traditions["sunni-islam"]?.sampleSeed).not.toBe(""));
+    confirmSpy.mockRestore();
   });
 });
 

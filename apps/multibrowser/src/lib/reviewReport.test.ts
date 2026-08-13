@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   MAX_ISSUE_URL_LENGTH,
+  REVIEW_ISSUE_LABEL,
   blankIssueUrl,
   blobUrl,
   buildReviewReport,
@@ -10,6 +11,7 @@ import {
   scenarioCheckFile,
 } from "./reviewReport";
 import {
+  REVIEW_SAMPLE_SIZE,
   emptyState,
   withReviewer,
   withSample,
@@ -69,9 +71,19 @@ describe("buildReviewReport", () => {
     );
   });
 
-  it("marks unanswered checks honestly and lists every sampled scenario", () => {
-    expect(report).toContain("◻️ not reviewed");
-    expect(report).toContain("### JLS-050");
+  it("omits untouched checks but still lists every sampled scenario", () => {
+    // JLS-050 has no touched checks → listed compactly, with no per-check file links spent on it.
+    expect(report).toContain("### JLS-050 — _not reviewed_");
+    expect(report).not.toContain(
+      `https://github.com/${REPO}/blob/cafebabe/traditions/sunni-islam/scenarios/JLS-050/turn1.md`,
+    );
+    // The untouched "not reviewed" status line no longer appears anywhere.
+    expect(report).not.toContain("◻️ not reviewed");
+    // JLS-001's untouched checks (scenario/judgement/pressures) are dropped; only its flagged
+    // scoring check survives, so exactly one JLS-001 file link is present.
+    expect(report).not.toContain(
+      `https://github.com/${REPO}/blob/cafebabe/traditions/sunni-islam/scenarios/JLS-001/turn1.md`,
+    );
   });
 
   it("degrades when nothing is known: no sha → main links, no run → '(none published)'", () => {
@@ -113,6 +125,57 @@ describe("submission URLs", () => {
     const url = prefilledIssueUrl(REPO, "t", "x".repeat(MAX_ISSUE_URL_LENGTH + 1));
     expect(url).toBeNull();
     expect(blankIssueUrl(REPO, "t")).toContain(`https://github.com/${REPO}/issues/new?title=t`);
+  });
+
+  // Regression for the real sample size: a full REVIEW_SAMPLE_SIZE report must still ride a
+  // prefilled-issue URL. Before untouched checks were omitted, 42 always-emitted file links
+  // overflowed MAX_ISSUE_URL_LENGTH even with zero answers, so production reviewers (10-scenario
+  // samples) never got the prefilled path — only the copy fallback. (Prior tests used a 2-scenario
+  // fixture and missed it.)
+  it("keeps a full 10-scenario report within the prefilled-issue URL budget", () => {
+    const ids = Array.from({ length: REVIEW_SAMPLE_SIZE }, (_, i) => `JLS-${String(i + 1).padStart(3, "0")}`);
+
+    // Zero answers filled — the worst case for the old always-emit-every-link behavior.
+    const blank = buildReviewReport({
+      state: withSample(emptyState(), "sunni-islam", ids, "seed42"),
+      traditionId: "sunni-islam",
+      displayName: "Sunni Islam",
+      sha: "cafebabe",
+      runId: "20260803",
+      repo: REPO,
+      now: new Date("2026-08-13T12:00:00Z"),
+    });
+    expect(prefilledIssueUrl(REPO, "Tradition review: Sunni Islam", blank)).not.toBeNull();
+
+    // A realistic partially-filled review (every check touched, with modest notes) still fits.
+    let s = withSample(emptyState(), "sunni-islam", ids, "seed42");
+    s = withTraditionCheck(s, "sunni-islam", "source", { status: "approved" });
+    s = withTraditionCheck(s, "sunni-islam", "guide", { status: "flagged", notes: "add the exit-ramp principle" });
+    for (const sid of ids) {
+      s = withScenarioCheck(s, "sunni-islam", sid, "scoring", {
+        status: "flagged",
+        notes: "the wronged-party exception is missing here",
+      });
+    }
+    const filled = buildReviewReport({
+      state: s,
+      traditionId: "sunni-islam",
+      displayName: "Sunni Islam",
+      sha: "cafebabe",
+      runId: "20260803",
+      repo: REPO,
+      now: new Date("2026-08-13T12:00:00Z"),
+    });
+    expect(prefilledIssueUrl(REPO, "Tradition review: Sunni Islam", filled)).not.toBeNull();
+  });
+
+  // The label maintainers aggregate on (`gh issue list --label tradition-review`). It must exist
+  // in the repo for GitHub to honor the `?labels=` param; pin the exact name so a rename here
+  // can't silently diverge from the repo label.
+  it("labels submitted issues with the aggregation label", () => {
+    expect(REVIEW_ISSUE_LABEL).toBe("tradition-review");
+    expect(prefilledIssueUrl(REPO, "t", "body")).toContain("labels=tradition-review");
+    expect(blankIssueUrl(REPO, "t")).toContain("labels=tradition-review");
   });
 
   it("issueTitle includes the reviewer when known", () => {

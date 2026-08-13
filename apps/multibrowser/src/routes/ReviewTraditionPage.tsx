@@ -83,6 +83,11 @@ export function ReviewTraditionPage() {
   const progress = traditionProgress(mine);
   const base = `traditions/${traditionId}`;
   const unsampled = scenarioIds.filter((id) => !sampleIds.includes(id));
+  // Completed scenario-level checks in the current sample — the work a reshuffle would strand.
+  const answeredScenarioChecks = sampleIds.reduce((n, sid) => {
+    const checks = scenarioChecksOf(mine, sid);
+    return n + SCENARIO_CHECKS.filter((k) => checks[k].status !== "unreviewed").length;
+  }, 0);
 
   return (
     <div className="flex flex-col gap-6" data-testid="review-tradition-page">
@@ -211,6 +216,17 @@ export function ReviewTraditionPage() {
           <button
             type="button"
             onClick={() => {
+              // Reshuffle draws a new sample; checks on scenarios that fall out become unreachable
+              // and drop from the report. Confirm before discarding completed work — mirroring
+              // "Start this tradition over" — but don't nag when there's nothing to lose.
+              if (
+                answeredScenarioChecks > 0 &&
+                !window.confirm(
+                  `Reshuffling draws a new set of ${REVIEW_SAMPLE_SIZE} scenarios and drops the ${answeredScenarioChecks} scenario check${answeredScenarioChecks === 1 ? "" : "s"} you've already completed from your report. Continue?`,
+                )
+              ) {
+                return;
+              }
               const seed = Math.random().toString(36).slice(2, 8);
               updateReviewState((s) => withSample(s, traditionId, seededSample(scenarioIds, REVIEW_SAMPLE_SIZE, seed), seed));
             }}

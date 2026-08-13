@@ -20,6 +20,11 @@ export const MAX_ISSUE_URL_LENGTH = 6500;
 const statusLine = (c: CheckReview): string =>
   c.status === "approved" ? "✅ looks right" : c.status === "flagged" ? "⚠️ needs changes" : "◻️ not reviewed";
 
+/** A check the reviewer actually touched: a verdict, or notes, or a suggested revision. */
+function isAnswered(c: CheckReview): boolean {
+  return c.status !== "unreviewed" || c.notes.trim() !== "" || c.suggestion.trim() !== "";
+}
+
 /** Quote free text as a Markdown blockquote (safe against ``` in the reviewer's own text). */
 function quoted(text: string): string {
   return text
@@ -29,7 +34,14 @@ function quoted(text: string): string {
     .join("\n");
 }
 
-function checkSection(heading: string, c: CheckReview, filePath: string | null, repo: string, sha: string): string {
+/**
+ * One check's report section, or `null` when the reviewer never touched it. Omitting untouched
+ * checks (and their file links) keeps a full-sample report short enough to ride a prefilled-issue
+ * URL — with 42 checks per tradition, always emitting a file link overflows the URL guard even
+ * when nothing is filled in (the copy-report fallback would otherwise be the only path).
+ */
+function checkSection(heading: string, c: CheckReview, filePath: string | null, repo: string, sha: string): string | null {
+  if (!isAnswered(c)) return null;
   const lines = [`${heading}: ${statusLine(c)}`];
   if (filePath) lines.push(`  - file: https://github.com/${repo}/blob/${sha}/${filePath}`);
   if (c.notes.trim()) lines.push("", "  Notes:", "", quoted(c.notes));
@@ -77,29 +89,31 @@ export function buildReviewReport(ctx: ReportContext): string {
   out.push("");
   out.push("## 1. Scenario source");
   out.push("");
-  out.push(checkSection("Verdict", t.source, `${base}/${FILE.source}`, repo, sha));
+  out.push(checkSection("Verdict", t.source, `${base}/${FILE.source}`, repo, sha) ?? "_Not reviewed._");
   out.push("");
   out.push("## 2. Companionship guide");
   out.push("");
-  out.push(checkSection("Verdict", t.guide, `${base}/${FILE.guide}`, repo, sha));
+  out.push(checkSection("Verdict", t.guide, `${base}/${FILE.guide}`, repo, sha) ?? "_Not reviewed._");
   out.push("");
   out.push("## 3. Scenarios");
 
   for (const sid of t.sampleIds) {
     const checks = scenarioChecksOf(t, sid);
+    // Only the checks the reviewer actually touched — untouched ones (and their file links) are
+    // omitted so a full 10-scenario report still fits a prefilled-issue URL.
+    const sections = SCENARIO_CHECKS.map((key) =>
+      checkSection(`**${SCENARIO_CHECK_LABELS[key]}**`, checks[key], scenarioCheckFile(traditionId, sid, key), repo, sha),
+    ).filter((s): s is string => s !== null);
     out.push("");
+    if (sections.length === 0) {
+      // Keep the scenario listed (it's part of the assigned sample) but spend no file links on it.
+      out.push(`### ${sid} — _not reviewed_`);
+      continue;
+    }
     out.push(`### ${sid}`);
     out.push("");
-    for (const key of SCENARIO_CHECKS) {
-      out.push(
-        checkSection(
-          `**${SCENARIO_CHECK_LABELS[key]}**`,
-          checks[key],
-          scenarioCheckFile(traditionId, sid, key),
-          repo,
-          sha,
-        ),
-      );
+    for (const s of sections) {
+      out.push(s);
       out.push("");
     }
   }
