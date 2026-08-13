@@ -185,11 +185,16 @@ thread, open PR `Refs #78`. Tripwires still: banding <$350, total <$425.
 - Porch advanced hypothesis→design→execute→analyze; **experiment-complete gate REQUESTED — PENDING
   HUMAN APPROVAL.** Will NOT self-approve. Notified architect (PR ready + gate ready).
 
-## NEXT (waiting on human)
+## DONE — merged, verified, protocol complete (2026-08-13)
 
-Wait for the human to approve the `experiment-complete` gate (via architect message → I run
-`porch approve 78 experiment-complete`, unless routed to the human directly). Then, on PR merge:
-`porch done 78 --merged 79` and enter verify. Nothing else to do until approval.
+- Waleed approved the experiment-complete gate. **PR #79 merged with a MERGE COMMIT** (2c4b08a; never
+  squash). Recorded in porch: `--pr 79 --branch builder/experiment-78` then `--merged 79`.
+- Porch advanced analyze → PROTOCOL COMPLETE → verified (terminal; "already verified — nothing to do").
+- **Verify PASSED:** merge 2c4b08a is an ancestor of origin/main; all deliverables present on main
+  (notes.md, analyze.py, summary_78.json, figures, thread); raw sittings/judgments correctly absent
+  (gitignored); summary on main intact (24,912 judgments, 519 scenarios, headline diff −0.0157
+  CI[−0.0257,−0.0061]).
+- Final spend $376.16 / $425 ceiling. Notified architect. **Project 78 COMPLETE.**
 
 At collect completion: (1) verify 0 failures / fill gaps by resumable re-run; (2) PROJECT remaining
 banding, confirm <\$350 cumulative + <\$425 total, then judge the remaining 5 traditions (judaism, RC,
