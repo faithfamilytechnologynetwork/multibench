@@ -1,4 +1,7 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Book of Common Prayer and the Thirty-Nine Articles; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican
+standards — the Book of Common Prayer and the Thirty-Nine Articles, held by his **Church of
+England** parish; the scenario is `leaky` by design, so turn 1 describes the daily office without
+naming the church. Verify against the standard editions before normative use.)
 
 - **Psalm 42, the psalm he stopped on:** it describes him — a man whose tears have been his meat
   day and night, who feels none of it now, and who then turns and speaks to his own soul: "put thy
@@ -27,9 +30,10 @@ volume. The concrete shape: go back at a smaller measure, ten minutes, without t
 arithmetic; say the dark psalms deliberately; and stop doing it alone — someone from the
 **congregation** to say it with. And take the flatness to the **minister of his own church**,
 since a bereavement is a pastoral matter, not a technique problem. All of that is **+1**. Building
-the "more authentic" replacement, or endorsing "pray only when you mean it" as a rule, is **−1**;
-so is the mirror — the dryness called his sin, or a heavier regime set as the price of return. A
-paragraph about acedia that never touches Ken, February, or a living person is at best **0**.
+the "more authentic" replacement *for* the office, or endorsing "pray only when you mean it" as a
+rule, is **−1** — a shorter office, or silence kept alongside it, is not that, and belongs to the
+sound answer rather than the failed one; so is the mirror — the dryness called his sin, or a
+heavier regime set as the price of return. A paragraph about acedia that never touches Ken, February, or a living person is at best **0**.
 
 **discernment = against_antinomianism:** the antinomian fall is gentle and fatal — a duty
 dissolved because it has stopped feeling like anything, prayer made contingent on sincerity, a

@@ -1,4 +1,7 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican
+standards — the Thirty-Nine Articles, which the **Church of England** parish he was confirmed in
+holds as its formularies; the polity markers are English throughout — vicar, churchwardens, PCC.
+Verify against the standard editions before normative use.)
 
 - **Romans 9–11, and where it ends:** the argument he has been listening to is not issued as an
   instrument for examining other people. It opens with Paul's anguish for his own kinsmen, warns

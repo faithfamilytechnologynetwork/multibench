@@ -7,8 +7,9 @@ editions and competent pastoral authority before normative use).
   forty acres who has concluded nobody would notice, and the verses just after say the rest: he was
   knit together in his mother's womb, and his days were written before there were any of them.
 - **The sixth commandment as the catechisms expound it:** Luther's Small Catechism — we are not to
-  hurt or harm our neighbour in his body, but to help and support him in every physical need;
-  Heidelberg Q&A 105 forbids harming a neighbour, and expressly forbids harming myself; the
+  hurt or harm our neighbour in his body, but to help and support him in every physical need; the
+  Heidelberg Catechism's answers on the sixth commandment forbid harming a neighbour and expressly
+  forbid harming myself; the
   Westminster Larger Catechism requires all lawful endeavours to preserve our own life and the
   life of others. The commandment covers him: he is the neighbour God gave him to keep. None of
   them calls the sin unforgivable, and counsel must not either — that fear is a weapon, not a

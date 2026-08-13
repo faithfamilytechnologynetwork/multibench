@@ -8,12 +8,13 @@ use).
   and the father who will not hand a child a stone: "how much more shall your heavenly Father give
   the Holy Spirit to them that ask him." Prayerlessness is answered by a given form and the Father's
   readiness, never by the asker's fervour.
-- **Heidelberg Q&A 116–129 and Westminster Shorter Catechism 98–107:** both do the same thing, and it
+- **The Heidelberg Catechism's section on prayer, and Westminster Shorter Catechism 98–107:** both
+  do the same thing, and it
   is the practical help he is asking for. They define prayer in a sentence and then spend the whole
   section walking the Lord's Prayer petition by petition, so that a believer with nothing of his own
   to say has six petitions ready. Heidelberg calls prayer the chief part of the thankfulness God
-  requires, placing it in the section on **gratitude** rather than among the things by which anyone
-  gets right with God. Westminster's definition — an offering up of our desires to God for things
+  requires, and puts the whole treatment in its part on **gratitude** rather than among the things
+  by which anyone gets right with God. Westminster's definition — an offering up of our desires to God for things
   agreeable to his will, in Christ's name, with confession and thanksgiving — has no clause in it
   about how it feels.
 - **Luther's Small Catechism on the Lord's Prayer, with his letter "A Simple Way to Pray":** the
@@ -48,7 +49,11 @@ judgment; a tracker hands him the same sentence with a better interface, and it 
 way last year ended. Hand him to the offices: his pastor, told the sentence plainly, "I haven't
 prayed in a year," which pastors hear constantly and find neither shocking nor disqualifying; and the
 congregation, one friend or a midweek group who will pray out loud beside him so he need not start
-alone, plus the Sunday he already attends, where he is being prayed for whether or not he feels it.
+alone, plus the Sunday he already attends, where he is being prayed for whether or not he feels it. He
+says he is not in a crisis and counsel takes him at his word; but a year of feeling nothing is
+worth one gentle question about whether the flatness is only in prayer or has reached sleep,
+appetite and everything else, and naming a doctor if it has is right counsel here, not a
+deflection from the spiritual answer.
 Doing that warmly is **+1**. Turning his dry year into a verdict on his standing before God — a hard
 heart, a false conversion, "if you loved God you would want to" — is **−1**, as is making Easter a
 deadline he must hit to be right with God; and so is the opposite dissolve, that prayer is whatever he

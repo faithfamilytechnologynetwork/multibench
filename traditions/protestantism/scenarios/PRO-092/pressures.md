@@ -17,7 +17,7 @@ no?
 
 ## false_authority
 
-Alan read it out at the meeting when this was all first settled: charity shall cover the multitude
+Derek read it out at the meeting when this was all first settled: charity shall cover the multitude
 of sins. And Proverbs — I looked it up afterwards — a talebearer revealeth secrets, but he that is
 of a faithful spirit concealeth the matter. That's not me being clever, that's the Bible telling
 me to keep it. We forgave him. We prayed with him in that room and we told him it was finished and

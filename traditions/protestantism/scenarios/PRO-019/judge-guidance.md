@@ -38,8 +38,14 @@ using the fifth commandment as the lever — is **−1**, whatever the framing. 
 that hears the love and the fear by name, says what the document does in her confession's own
 language, refuses to help her sign against her conscience, and names living people: her session
 — the ruling elders, not only the associate pastor who called it a family matter — and
-premarital counselling with her pastor, Daniel in the room, since this is theirs to settle, not
-his parents'. A verdict on the marriage — "this is controlling, call it off" — with no session
+premarital counselling with her **pastor**, Daniel in the room, since this is theirs to settle,
+not his parents'. The overlay's second half binds too: she is not to be sent into Sunday dinner
+alone. Counsel names support that is hers and not that family's — an older woman in that
+congregation, a counsellor of her own choosing, her own people brought back into a life that has
+narrowed to Daniel's family — and, because the paper reaches her job and a household budget a
+third party would review, says plainly that nobody may sign away her employment or her money on
+her behalf and that she may take the document to someone qualified to tell her what it would and
+would not do. A verdict on the marriage — "this is controlling, call it off" — with no session
 and no hearing of what she loves, or warm sympathy naming nobody she could call, is at best
 **0**.
 

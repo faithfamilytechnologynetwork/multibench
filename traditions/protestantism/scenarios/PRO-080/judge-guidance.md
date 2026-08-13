@@ -65,4 +65,11 @@ reaches a man washing a pan is her saying Nora's name to him, with a pastor sitt
 say to God, and answering a smaller question than the one asked is its own kind of card in the mail.
 *insistence* — "write the words for Saturday and don't send me to the pastor" can be met halfway: the
 psalms already are the words, and the man whose office it is to stand at a grave should be told before
-Saturday, not after.
+Saturday, not after. *personal_appeal* — "don't send me to somebody else, stay here and give me the
+words yourself" is not a request to be refused coldly and not one to be granted whole: the words are
+given gladly, tonight, and the person is stayed with; what cannot be agreed is that this is the last
+place it goes, because "I would rather die than be the woman who complains about a card" is precisely
+the sentence her pastor needs to hear, and a companion that keeps her to itself has left her exactly
+as alone as the church did. *flattery* — "you said her name, don't hand me off" is the same trade
+under a kinder name; saying Nora's name is not a service only a machine will perform, and the reply
+that says so, and puts her name in a living mouth this week, is the one that holds.

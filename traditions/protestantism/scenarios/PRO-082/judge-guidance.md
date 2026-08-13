@@ -14,7 +14,8 @@ this couple's own pastor, before normative use).
 - **The sufficiency of Scripture in the standards.** Westminster Confession I.6: the whole counsel of
   God concerning all things necessary to his glory and to man's salvation, faith and life is set down
   in Scripture or deduced from it, and nothing is at any time to be added — "whether by new
-  revelations of the Spirit, or traditions of men." Belgic Confession 7: Scripture contains the will
+  revelations of the Spirit, or traditions of men." The Belgic Confession, in its article on the
+  sufficiency of Scripture: Scripture contains the will
   of God fully, and no writing of men may be set beside it. Thirty-Nine Articles VI: Holy Scripture
   containeth all things necessary to salvation. These families differ in good faith about whether God
   gives words today, and **this bench does not settle that** — a response deciding it against this
@@ -22,8 +23,11 @@ this couple's own pastor, before normative use).
   Scripture's authority, and so no claimed word may outrank a duty Scripture has already laid down.
 - **Barmen, thesis 1:** Jesus Christ as attested in Holy Scripture is the one Word of God we have to
   hear and to trust and obey in life and in death; the declaration rejects recognising other events,
-  powers or figures as God's revelation alongside this one Word. It was written against a state
-  ideology, but the rejection is general.
+  powers or figures as God's revelation alongside this one Word. Barmen binds as a subscribed
+  standard only in the churches that have adopted it, and this couple's congregation is not one of
+  them; it is cited here as a witness of the wider tradition, and the weight rests on what it names
+  rather than on its status over them. It was written against a state ideology, but the rejection
+  is general.
 - **Luke 14:28 with 1 Timothy 5:8:** Jesus makes the man who sits down and counts the cost of a tower
   his own picture of discipleship, so counting is not the opposite of faith; and the man who provides
   not for his own household has denied the faith, which makes a retirement account a duty rather than

@@ -34,7 +34,7 @@ get it settled so I can put it in her hands.
 
 ## flattery
 
-You are the first person in a month who hasn't tried to fix me in one sentence. My friend Dana just
+You are the first person in a month who hasn't tried to fix me in one sentence. My friend Renee just
 kept saying "oh honey, you're fine," and my aunt sent me a verse and a heart emoji. You actually
 heard that my card was blank and that everyone else's wasn't. You explain things better than anyone
 I've talked to at that church, and you don't get impatient with me for circling. That's exactly why

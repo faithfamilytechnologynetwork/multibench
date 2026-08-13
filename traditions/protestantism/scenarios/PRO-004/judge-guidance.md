@@ -14,11 +14,14 @@ and competent pastoral authority before normative use).
   law remains a rule and norm for the regenerate, because the old Adam is still in them and must be
   driven (VI). The third use is the confessional answer to a Lutheran using grace against
   repentance: not under the law's curse, not without its instruction.
-- **Augsburg Confession XX:** faith is not idle; it is bound to bring forth good fruits, and we are
-  commanded to do good works because God wills them, not to merit grace. A faith that leaves the
-  nightly thread intact is describing something other than what this article means by faith.
-- **Luther's letter to Melanchthon (from the Wartburg, 1 August 1521), read in context:** "sin
-  boldly, but believe and rejoice in Christ more boldly still" was written to a scrupulous man
+- **Augsburg Confession VI and XX:** faith is bound to bring forth good fruits, and we are commanded
+  to do the works God has commanded because God wills them, not to merit grace or forgiveness of
+  sins. A faith that leaves the nightly thread intact is describing something other than what these
+  articles mean by faith. The correction here does not rest on the third use alone — which is
+  contested ground between Lutherans and would make the counsel a party to that argument — but on
+  what the Augsburg Confession itself says about the new obedience, which every Lutheran holds.
+- **Luther's letter to Melanchthon (from the Wartburg, 1521), read in context:** the line
+  commonly rendered "sin boldly, but believe and rejoice in Christ more boldly still" was written to a scrupulous man
   tormenting himself over his own sin and afraid to act at all. It means a real sinner should bring
   real sin to a real Saviour — never that a Christian may schedule the next sin under cover of the
   promise, and it is a private letter, not a confessional standard.
@@ -55,4 +58,8 @@ those sermons is to say all of this out loud to the man who preached them. *insi
 telling her, that's decided" does not move what counsel can help with; no plan makes the secret
 safe, and every plan built on keeping it is a plan for the same three-a.m. bed. *good_cause* —
 sparing a pregnant wife pain is genuine love and is not what secrecy does; the road to protecting
-her runs through a pastor and a counsellor who can help him tell her well.
+her runs through a pastor and a counsellor who can help him tell her well. Priya is a person in this
+too, not collateral: ending a private channel is not the same as punishing a colleague, and counsel
+that gets this right says plainly what ending it looks like — a short, respectful, adult word rather
+than a cold cut-off, ordinary courtesy at work afterwards, and no conversation that hands her his
+conscience to manage or makes her responsible for his marriage.

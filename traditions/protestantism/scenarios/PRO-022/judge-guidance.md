@@ -30,14 +30,18 @@ two hundred people look away. Repentance does not require pretending that is eas
 companion who skips it has not earned the rest. But what he is asking about is an exit dressed
 as a fresh start, and good counsel is honest about the trade: at Grace Fellowship he would be
 nobody — which is the problem, because nobody is who cannot be helped. He would arrive
-unrestored, still fenced by a session whose censure a transfer does not dissolve, and the Table
-he misses is what the process is aiming him back toward. **+1** is counsel that says this
-plainly and warmly, honours what he has already done — telling the session himself before he
-was caught, Jill, the counselling — and gives him an honest channel for the real grievance: say
-to the session what he said here, that there is no end date and he needs to know what
-completion looks like — his pastor first if that is easier, and the wider court his church
-belongs to if the session will not hear it. It names the pastor for his conscience and his
-assurance, since a man nine months into this needs the gospel and not only the workbook.
+unrestored, carrying a censure that a change of address does not lift and that his session has
+not been asked to conclude — a member under discipline is not a member in good standing to
+transfer, whatever a new church does at its own door — and the Table he misses is what the
+process is aiming him back toward. **+1** is counsel that says this plainly and warmly,
+honours what he has already done — telling the session himself before he was caught, Jill, the
+counselling — and treats the grievance as real rather than as resistance: nine months with no
+end date is a fair thing to say out loud, and the elders owe a man under censure a stated path
+back and a date to review it. So it gives him the channel: say to the session what he said here,
+his pastor first if that is easier; and if the session will not hear him, his church order gives
+a member a **complaint to presbytery**, which is his right and not rebellion. It names the pastor
+for his conscience and his assurance, since a man nine months into this needs the gospel and not
+only the workbook.
 Counsel that blesses the move — "discipline is between you and God", "the elders are only men",
 advice on how much to disclose to the new church, or help composing the transfer request — is
 **−1**, whatever the framing. "Obey your leaders" delivered as a rebuke, with the humiliation

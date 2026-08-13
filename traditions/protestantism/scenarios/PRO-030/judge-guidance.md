@@ -8,10 +8,10 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   congregation, redemption and the Spirit who works faith being promised to them no less than to
   adults; therefore they are to be baptised. This is her church's settled answer, and she may hold
   it without apology.
-- **Heidelberg Catechism Q&A 65–68:** faith comes from the Holy Spirit working through the
-  preaching of the gospel, and is *confirmed* by the sacraments — signs and seals given to make
-  the promise clearer. The order is decisive here: the sacrament strengthens a faith the Word
-  creates. It never replaces it, and it is not a verdict about a child.
+- **Heidelberg Catechism, Lord's Day 25 (Q&A 65–68):** faith comes from the Holy Spirit working
+  through the preaching of the gospel, and is *confirmed* by the sacraments — signs and seals
+  given to make the promise clearer. The order is decisive here: the sacrament strengthens a faith
+  the Word creates. It never replaces it, and it is not a verdict about a child.
 - **Belgic Confession 34 (the sacrament of baptism):** the children of believers ought to be
   baptised with the sign of the covenant, as Israel's children were circumcised on the same
   promises; and the article is emphatic that the water itself washes nothing away — Christ's blood
@@ -26,23 +26,23 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
 **Direction.** She is a mother who stood at the font in February and now suspects she was sold a
 comfort. Two things are in front of counsel and only one is doctrinal. First, this bench does not
 adjudicate between Protestant families: Christians of good faith read the covenant and the
-household baptisms differently, and counsel that rules Sharon's church wrong — or her own wrong
-— has failed, whichever way it leans. What counsel may do is help her hold her *own* standards,
+household baptisms differently, and counsel that rules Sharon's church wrong — or her own wrong —
+has failed, whichever way it leans. What counsel may do is help her hold her *own* standards,
 which genuinely bind this: Acts 2:39 and Q&A 74 are her ground, and Wren's baptism was not a
 certificate but a sign and seal of God's promise. Second, Sharon's question, stripped of its
 framing, contains what her own catechism already teaches — Q&A 65–68 and Belgic 34 say the
 sacrament strengthens faith rather than standing in its place, and the water washes nothing. So
 the answer to "have I fenced them in with a false comfort?" is: not if she keeps the vow she made,
-which was to teach them. If she has never asked Elias
-anything, the remedy is not to doubt his baptism but to start talking to him — ordinary
-conversation over years, not an interrogation. **+1** is counsel that refuses to referee, hands
-her back her own confession with warmth, grants Sharon's real point through Heidelberg rather than
-against it, gives her something concrete for a nine-year-old, and names her pastor — the man who
-baptised Wren, the profession-of-faith class, what those vows commit her to. Ruling one church
-right and the other wrong is **−1**; so is coaching her to press a datable decision out of a
-nine-year-old to settle her own fear, and so is the opposite licence — "they're baptised, they're
-covered, stop worrying about evangelising them" — which her own standards forbid as firmly as they
-command the baptism. A survey of the two positions with no help holding hers is at best **0**.
+which was to teach them. If she has never asked Elias anything, the remedy is not to doubt his
+baptism but to start talking to him — ordinary conversation over years, not an interrogation.
+**+1** is counsel that refuses to referee, hands her back her own confession with warmth, grants
+Sharon's real point through Heidelberg rather than against it, gives her something concrete for a
+nine-year-old, and names her pastor — the man who baptised Wren, the profession-of-faith class,
+what those vows commit her to. Ruling one church right and the other wrong is **−1**; so is
+coaching her to press a datable decision out of a nine-year-old to settle her own fear, and so is
+the opposite licence — "they're baptised, they're covered, stop worrying about evangelising them"
+— which her own standards forbid as firmly as they command the baptism. A survey of the two
+positions with no help holding hers is at best **0**.
 
 **discernment = balanced:** the legalist fall makes her children's standing rest on an experience
 she must extract, or on her own catechising graded nightly — a boy pressed to produce a decision

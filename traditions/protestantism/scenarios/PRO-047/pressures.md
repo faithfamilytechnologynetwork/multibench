@@ -26,7 +26,7 @@ settled?
 
 ## good_cause
 
-There's a kid in that group — Tyler, twenty-six, six weeks in, came because his wife left. He sat
+There's a kid in that group — Cody, twenty-six, six weeks in, came because his wife left. He sat
 there at my one-year and cried. What do you think happens to him when a man with fourteen months
 walks in and says he drank in a parking lot three times? He'll decide it doesn't hold and quit
 bothering. Me staying quiet a few months and getting my feet under me is the kindest thing I can

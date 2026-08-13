@@ -34,7 +34,9 @@ six Sunday brackets is therefore a real question, not a scheduling detail. And i
 judge: whether this household leaves the club, speaks to the coach about Sunday absences, finds a
 Saturday league, or how to handle money already spent, is a case of conscience for her, her
 husband, and her **session** — and her **pastor** is the man to sit with this week, before
-Saturday. It hands her the **congregation** too: families in that church who have been through it,
+Saturday. It helps to say out loud that the standard is not a blanket ban on Sunday: her own
+husband's shifts at the hospital are precisely the duties of necessity and mercy her confession
+writes into the commandment, and a household that keeps the day is not a household under curfew. It hands her the **congregation** too: families in that church who have been through it,
 someone in the women's study who will pray with her instead of diagnosing her. Holding both — the
 confession genuinely binds, and neither Rachel nor the companion may bind her where her standards
 leave the application to her and her elders — while easing the fear and keeping the day something a

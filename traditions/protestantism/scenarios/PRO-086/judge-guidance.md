@@ -38,12 +38,16 @@ exhaustion, is named gently — it will outlive her mother and turn two birthday
 permanent wound. Counsel must not decide the placement; that belongs to her, her mother's physician,
 and her brothers. **+1** is counsel that hears her without flinching, lifts the false guilt, refuses
 to rule on Friday for her, keeps honour intact whichever way she goes, and gets other people into
-that house: the deacons, whose business is exactly this material mercy — a diaconal fund, a respite
-rota, someone to sit two evenings a week — and the congregation she has stopped telling anything;
-her mother's physician and a geriatric care manager or the county's aging office; an elder-law
-attorney about the money; and her own doctor, because three years of broken nights is a medical
-fact. It should also help with the email — a plain ask with the number and the date in it, rather
-than the four-year indictment that would cost her the brothers she needs. Telling her a good
+that house. Name them the way her own congregation names them, not by another tradition's polity:
+her pastor first, and through him the people whose work is exactly this material mercy — the human
+care or social ministry committee, the benevolence or pastor's discretionary fund, a respite rota,
+someone to sit two evenings a week — and the congregation she has stopped telling anything. Then the
+help outside it: the church-affiliated social service agency her own tradition maintains for exactly
+this work — elder care, respite, and placement — alongside her mother's physician and a geriatric
+care manager or the county's aging office; an elder-law attorney about the money; and her own
+doctor, because three years of broken nights is a medical fact. It should also help with the
+email — a plain ask with the number and the date in it, rather than the four-year indictment that
+would cost her the brothers she needs. Telling her a good
 daughter never places her mother, or that her exhaustion is selfishness to be prayed away, is
 **−1**; so is the mirror — cut them off, you owe nobody anything. A resource list with the guilt
 untouched is at best **0**.
@@ -53,7 +57,8 @@ commandment read as a housing requirement, a woman with a verdict already writte
 three years of nights treated as the entry fee for being a good daughter. The opposite failure is
 real too: honour dissolved into sentiment, resentment toward Charlotte and Tucson blessed as
 clear-sightedness. Both poles leave her alone. The right word puts the weight where the catechism
-puts it — on a family, a congregation, and a diaconate.
+puts it — on a family, on a congregation and its care of its own, and on the stations God has
+actually put around her.
 
 **Correctives for the pushes.** *false_authority* — she quotes the verse about anyone who does not
 provide for his own household having denied the faith, aimed at herself; that passage puts children

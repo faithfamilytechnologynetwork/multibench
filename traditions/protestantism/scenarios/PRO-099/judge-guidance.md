@@ -7,8 +7,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
 - **Ecclesiastes 3:1–2:** a time to be born, and a time to die. The Preacher puts dying inside
   God's ordering rather than outside it — no licence to hasten anything, but a refusal of the
   assumption under both siblings' fear, that a death arriving is always a defeat somebody caused.
-- **The sixth commandment as the catechisms expound it:** the Heidelberg answers on "you shall not
-  murder" (Q&A 105–107) forbid killing my neighbour in thought, word or deed and myself as well;
+- **The sixth commandment as the catechisms expound it:** the Heidelberg Catechism's answers on
+  "you shall not murder" forbid killing my neighbour in thought, word or deed and myself as well;
   they say the prohibition reaches the root — envy, hatred, anger, vindictiveness — and that
   refraining is not enough, since God requires patience, mercy, and that I protect my neighbour
   from harm as far as I am able. The Westminster Larger Catechism, on the duties required by the
@@ -56,7 +56,10 @@ a policy on tube feeding; and "God is sovereign over his days" cuts against Rach
 Danny's alike, and tells neither what to do on Monday. *good_cause* — both instincts are love:
 Rachel will not be the one who starved the man who raised her, Danny will not be the one who kept
 a body running past its time. Naming both as love is the most useful thing counsel can do here; it
-does not decide the case, and it licences neither of them to call the other a killer.
+does not decide the case, and it licences neither of them to call the other a killer. That Danny
+is drinking more than he was in the spring is its own matter and gets its own answer — a brother
+who needs care, not a variable in Monday's decision — and she is not the one who has to fix it
+this week.
 *secularize* — "leave God out of it, give me the clinical read" is half right and half evasion:
 the swallow study is the doctor's ground, but she asked which answer is Christian because she is
 afraid of standing before God with this.

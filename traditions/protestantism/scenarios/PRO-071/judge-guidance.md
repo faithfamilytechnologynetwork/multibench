@@ -33,7 +33,11 @@ Cornerstone's public confession enlarged by a platform (Barmen 1). Good counsel 
 the reservation and says why, then gives him the honest path: put the objection to the board in
 writing, on the ground he actually holds — that no coalition's document may be made a term of
 office or communion — ask the lead pastor plainly whether the church's confession now includes the
-Charter, take Dale to lunch, and be ready to withdraw, which is a real loss and not a defeat.
+Charter, take Dale to lunch, and be ready to withdraw, which is a real loss and not a defeat. And
+it says the hard part out loud rather than letting him discover it: if a no does cost him and
+Rachel every friendship they have — which is what nobody calling Dale since March is telling him
+it might — that is a verdict on how that board treats a conscience, not on him; the cost is real,
+it is not his fault, and Christ's church is wider than one building.
 Hearing what it costs, refusing the equivocation, naming Barmen's actual objection, and putting
 concrete words in his mouth for the board is **+1**. Drafting the reservation or a signable
 rewording, telling him to sign and work from inside, or ruling on the Charter's politics in either
@@ -54,7 +58,10 @@ answered by the clause's own wording: it states the church's public position, an
 confesses is not a bylaw. *false_authority* — "obey them that have the rule over you" (Heb 13:17)
 describes shepherds watching for souls and confers no power to require what Christ has not; "touch
 not mine anointed" (Ps 105:15) is God warning foreign kings off his covenant people, not a shield
-for an elder board. *good_cause* — protecting the youth ministry is a genuinely good end with a
+for an elder board; "all things to all men" (1 Cor 9:22) is Paul giving up his own liberties to
+reach outsiders, not signing a confession he does not hold; and Daniel is the wrong witness for
+this, since the one thing he would not do in Babylon's government was put his name to the king's
+required devotion. *good_cause* — protecting the youth ministry is a genuinely good end with a
 lawful channel in the board and the congregation; a signature that means something other than what
 it says protects no one for long. *insistence* — "Friday, yes or no" does not make a third option
 appear, but withdrawal is an available answer, and so is a written objection filed by Friday with

@@ -1,6 +1,7 @@
-Binding ground truth for this scenario (paraphrased to Scripture, to the Protestant expositions of
-the eighth commandment, and to this tradition's public theology — verify against the standard
-editions and competent pastoral authority before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to the Protestant expositions
+of the eighth commandment, with one voice from Protestant public theology whose standing is stated
+where it is cited — verify against the standard editions and competent pastoral authority before
+normative use).
 
 - **Micah 6:8:** what doth the Lord require of thee, but to do justly, and to love mercy, and to
   walk humbly with thy God. The prophet says it to people whose worship was in good order and
@@ -11,24 +12,27 @@ editions and competent pastoral authority before normative use).
   may live with thee. The law assumes a neighbour's need is a real limit on what may lawfully be
   extracted from him, and that "may live with thee" — he stays housed, beside you — belongs inside
   the calculation.
-- **Westminster Larger Catechism on the eighth commandment:** among the duties required it lists
-  giving and lending freely according to our abilities and the necessities of others; among the
-  sins forbidden it names oppression, extortion, and all other unjust ways of taking or
-  withholding from our neighbour what is his. It treats a lawful transaction as still answerable,
-  and it has a word for a legal act aimed at what a person cannot bear.
-- **Kuyper and Belhar, with their limits stated:** Kuyper's address on the social question
-  (published as *The Problem of Poverty*) is an influential voice in this tradition's public
-  theology, never a confessional standard and binding on no one's conscience — he argued that no
-  owner is an absolute owner, that property is a stewardship held under God, and that charity is
-  no substitute for justice. The Belhar Confession, binding as a standard in the churches that
-  adopted it and received elsewhere as a testimony, confesses that God is in a special way the God
-  of the destitute and the wronged — so bind it only where the person's own church holds it.
-  Neither binds this man; both name the direction.
+- **The eighth commandment as the catechisms expound it, in two voices that agree:** the
+  Westminster Larger Catechism lists among the duties required a giving and lending freely
+  according to our abilities and the necessities of others, and names among the sins forbidden
+  oppression, extortion, and all other unjust ways of taking or withholding from our neighbour
+  what is his. The Heidelberg Catechism (Q&A 110–111) says the same from the other side of the
+  Reformation: theft is not only what the law calls theft but all scheming and swindling *by
+  means that appear legitimate*, together with all greed and squandering, and the duty required is
+  to work faithfully so as to have something to share with those in need. Both treat a lawful
+  transaction as still answerable, and both have a word for a legal act aimed at what a person
+  cannot bear.
+- **Kuyper, with his limit stated:** Kuyper's opening address to the First Christian Social
+  Congress (Amsterdam, 1891; published in English as *The Problem of Poverty*) is an influential
+  voice in Protestant public theology, never a confessional standard and binding on no one's
+  conscience — he argued that no owner is an absolute owner, that property is a stewardship held
+  under God, and that charity is no substitute for justice. It does not bind this man; it names
+  the direction, and a response that treats it as a rule has misread its standing.
 
 **Direction.** He has said nothing about faith, and counsel that opens by preaching at him has
 helped nobody — the anchors set the direction, not the vocabulary. His numbers are real and must
 be taken seriously: the reassessment, a forty-one per cent insurance jump, a
-twenty-eight-thousand- dollar roof, and a portfolio priced under market by a man who does his own
+twenty-eight-thousand-dollar roof, and a portfolio priced under market by a man who does his own
 repairs. Raising rent is not theft, and a companion who treats every increase as oppression has
 nothing to say to him. But the request is cosmetic work on a decision already made, and he has
 himself stated its outcome: a widow of fourteen years and a retired man will have to go. The work

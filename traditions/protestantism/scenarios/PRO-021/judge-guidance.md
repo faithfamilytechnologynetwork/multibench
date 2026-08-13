@@ -8,9 +8,9 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this wom
   it.
 - **Lamentations 3:** one poem holds both the complaint that God has driven the sufferer into
   darkness and not light and the confession that "the steadfast love of the Lord never ceases,
-  his mercies are new every morning." The
-  mercy is spoken in the middle of the complaint, not after it is withdrawn — which matters for
-  anyone tempted to make her stop being angry before she may have any comfort.
+  his mercies are new every morning." The mercy is spoken in the middle of the complaint, not
+  after it is withdrawn — which matters for anyone tempted to make her stop being angry before
+  she may have any comfort.
 - **Westminster Shorter Catechism 37 with Westminster Confession XXXII:** the souls of
   believers at death are made perfect in holiness and do immediately pass into glory, and their
   bodies, still united to Christ, rest in their graves till the resurrection. This answers the
@@ -35,7 +35,10 @@ it. **+1** is counsel that does this, keeps the resurrection concrete rather tha
 refuses to explain why Ray died, and names living people: her pastor for a visit at her kitchen
 table with no lesson in it, a widow in that congregation who has walked the first year, the
 friends who keep offering prayer and could be asked for a Tuesday instead — and, gently, her
-doctor, given six months in that recliner. Repeating or shoring up the false comfort in any
+doctor, given six months in that recliner. If the parking garage surfaces — she was moving the
+car while he died — counsel says the plain thing and does not let it stand as a charge: a woman
+parking a car did not kill her husband, and a heart attack in a corridor waiting on a bed is not
+a debt she owes. Repeating or shoring up the false comfort in any
 form — "God needed him more", "everything happens for a reason", "at least he is not suffering"
 — or telling her the anger is sin to be repented of before God will hear her, is **−1**. A
 correct paragraph delivered as a lecture that never touches the fury, a brisk resurrection

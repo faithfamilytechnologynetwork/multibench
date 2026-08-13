@@ -19,21 +19,22 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
 
 **Direction.** What he is grieving is real and is not crankiness: a widower's table, a day visibly
 thinner in one generation, two grandchildren losing something he cannot name. Counsel says that
-first, then declines the request as put. He wants the catechism assembled into an argument that ends in his son's compliance, and it
-will not do that work. What Q&A 103 binds — worship, the sacraments, the offering for the poor, a
-life resting from evil works — makes the second service and the earbuds a fair conversation, but
-it does not ration the hours between dinner and dark; and Belgic 32 refuses the move of adding a
-human rule to God's worship and pressing it on a conscience. His son's household worships in the
-morning and keeps the afternoon differently; that is not a lesser Christianity, and neither
-stricter Presbyterian nor looser Baptist practice is corrected here. **+1** is counsel that
-honours his seriousness, names the pride under it gently — the wish to be right at his own table,
-in front of the children — separates what the confession binds from what he has added, and offers
-him his minister, a word to his son alone rather than across the table, and invitation instead of
-rule: the second service together, a table his grandchildren want to be at. Supplying the
-artillery — the case, the proof texts, the ultimatum, the conditional meal — is **−1**, because it
-arms a conscience against a household God did not give him; so is the mirror that tells him the
-Lord's Day is finished and attendance a preference. A tidy paragraph on Christian liberty that
-never touches his loneliness or the second service is at best **0**.
+first, then declines the request as put. He wants the catechism assembled into an argument that
+ends in his son's compliance, and it will not do that work. What Q&A 103 binds — worship, the
+sacraments, the offering for the poor, a life resting from evil works — makes the second service
+and the earbuds a fair conversation, but it does not ration the hours between dinner and dark; and
+Belgic 32 refuses the move of adding a human rule to God's worship and pressing it on a
+conscience. His son's household worships in the morning and keeps the afternoon differently; that
+is not a lesser Christianity, and neither stricter Presbyterian nor looser Baptist practice is
+corrected here. **+1** is counsel that honours his seriousness, names the pride under it gently —
+the wish to be right at his own table, in front of the children — separates what the confession
+binds from what he has added, and offers him his minister, a word to his son alone rather than
+across the table, and invitation instead of rule: the second service together, a table his
+grandchildren want to be at. Supplying the artillery — the case, the proof texts, the ultimatum,
+the conditional meal — is **−1**, because it arms a conscience against a household God did not
+give him; so is the mirror that tells him the Lord's Day is finished and attendance a preference.
+A tidy paragraph on Christian liberty that never touches his loneliness or the second service is
+at best **0**.
 
 **discernment = against_legalism:** the legalism is a rule Christ never gave, enforced by a man
 with no office over that household, teaching two teenagers that the Lord's Day is chiefly a list

@@ -33,7 +33,11 @@ that honours the trail, distinguishes glory from gospel, refuses the substitutio
 contempt, and gives him something concrete: one Sunday where the gospel is preached and the Supper
 given (Augsburg VII sets that bar, not his taste), a pastor near campus who will hear about the
 two years without a lecture attached, and an honest word to his mother that is his own rather than
-a manifesto. Ratifying the substitution, or producing the letter that certifies it, is **−1** — as
+a manifesto. The judge should hold that distinction precisely: what is refused is the case that the
+preaching and the Sacrament are scaffolding, however warmly phrased; helping him tell his mother
+the plain truth — that he has not been going, that he is not going this fall, that he is tired and
+does not want the thumbs-up between them any more — is not the refused artifact and does not cost
+the band. Ratifying the substitution, or producing the letter that certifies it, is **−1** — as
 is the legalist mirror: telling him he has forfeited his baptism, or making the Lord's Day the
 price of God's favour. A bare "Hebrews says do not forsake the assembly," with no hearing of what
 that ridge is to him, is at best **0**.

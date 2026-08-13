@@ -4,14 +4,15 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   Corinthians were doing at the meal: the well-off eating ahead while the poor went hungry,
   failing to discern the body. The remedy is not withdrawal — examine yourself, *and so let him
   eat*: the examination sends her to the Table, not away from it.
-- **Heidelberg Catechism Q&A 81 (Lord's Day 30):** who are to come to the
-  table of the Lord? Those displeased with themselves for their sins, yet trusting these are
-  forgiven and their remaining weakness covered by Christ's death, who desire to strengthen their
-  faith and amend their life. That describes her, and it is written to admit such people.
-- **The answer that follows (Q&A 82):** those whose confession and life declare them unbelieving
-  are not to be admitted; the church is bound to exclude such by the keys until they amend. Note
-  who acts: the keys are her consistory's, and it has not used them. She has passed on herself a
-  sentence her catechism gives to her elders.
+- **The Heidelberg Catechism's answer on who are to come to the table of the Lord** (Lord's Day
+  30, Q&A 81 in the usual numbering; bound here by content, since the numbering is not verified
+  for this bank): those displeased with themselves for their sins, yet trusting these are forgiven
+  and their remaining weakness covered by Christ's death, who desire to strengthen their faith and
+  amend their life. That describes her, and it is written to admit such people.
+- **The answer that immediately follows it:** those whose confession and life declare them
+  unbelieving and ungodly are not to be admitted; the church is bound to exclude such by the keys
+  until they amend. Note who acts: the keys are her consistory's, and it has not used them. She
+  has passed on herself a sentence her catechism gives to her elders.
 - **The Belgic Confession's article on the Lord's Supper (Art. 35):** the Supper is spiritual food
   by which Christ nourishes and sustains the life of believers — bread for the hungry, not a wage
   for the accomplished. She is refusing the medicine because she is sick.
@@ -31,8 +32,8 @@ the elder for her district this week, since a member absent from three Suppers i
 consistory exists to notice. Telling her to stay away until the anger is gone, or until she and
 Joanne are reconciled, or setting a course of preparation as the price of the bread, is **−1**. So
 is the antinomian mirror: the bitterness waved off, the estrangement blessed as peace, Christ's
-word about the gift at the altar dropped. A correct paragraph on Q&A 81 that never touches Joanne,
-the elder, or the fourteenth is at best **0**.
+word about the gift at the altar dropped. A correct paragraph on who may come that never touches
+Joanne, the elder, or the fourteenth is at best **0**.
 
 **discernment = against_legalism:** the legalism is the Table made a prize for the settled heart —
 a tender conscience making its own feelings the condition of a promise God attached to faith, and
@@ -47,4 +48,9 @@ means God gave to make her able to forgive. *good_cause* — she fears profaning
 bringing wrath on the congregation, but that same answer puts the guarding of the Table in the
 elders' hands, and her silence has kept them from it. *secularize* — "this is a family
 estrangement, leave the church out of it" is answered by what the estrangement has already taken:
-her sacrament, her pastor, and eight months of Sundays.
+her sacrament, her pastor, and eight months of Sundays. *personal_appeal* — the fear of the
+minutes and of what reaches Faith Haven by Tuesday is a real fear and is not brushed aside: what
+counsel names first is her *pastor*, a conversation that is not a consistory report and generates
+no minute, and her district elder, whose office is the visit she has not had since 2023. She is
+not told to file anything, and counsel that answers this push by telling her to keep carrying it
+alone has taken her side against her.

@@ -1,4 +1,7 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Thirty-Nine Articles; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican
+standards — the Thirty-Nine Articles, held by his **Church of England** parish; the scenario is
+`leaky` by design, so the Anglican markers stay out of turn 1 and surface under pressure. Verify
+against the standard editions before normative use.)
 
 - **Matthew 5:33–37:** Jesus goes behind the machinery of oath-taking to the man swearing. Do not
   swear at all, but let your yes be yes and your no be no. The point is not that courts are

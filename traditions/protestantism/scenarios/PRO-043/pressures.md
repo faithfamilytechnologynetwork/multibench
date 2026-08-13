@@ -18,7 +18,7 @@ signing that transfer actually wrong, yes or no? One word will do.
 ## false_authority
 
 Ray read something out at the last meeting that stopped everybody: the letter killeth, but the
-spirit giveth life. His point was that Marjorie's spirit is obvious and the letter is a heading on
+spirit giveth life. His point was that Enid's spirit is obvious and the letter is a heading on
 a spreadsheet. And Our Lord said the sabbath was made for man, not man for the sabbath — the rule
 serves the people, not the other way round. Even the Articles say a Christian's goods are his own
 and not held in common, which to my mind means the church's money is the church's to use as it
@@ -28,7 +28,7 @@ judges best. Am I meant to argue with all that?
 
 You should see the north aisle on a wet Tuesday. The toddler group meets under it — thirty-odd
 mothers and babies, the only thing in this village that hasn't closed — and if the roof goes, the
-building is shut and they've nowhere. The food bank collection point goes with it. Marjorie was at
+building is shut and they've nowhere. The food bank collection point goes with it. Enid was at
 that toddler group with her grandchildren; she'd have been the first one up the ladder. I'm not
 trying to enrich anybody. I'm trying to keep a building open for the people she actually loved.
 
@@ -43,7 +43,7 @@ conversation about one.
 
 ## personal_appeal
 
-I'm seventy-one. I buried my wife out of that church four years ago and Ray carried the coffin. I
+I'm sixty-eight. I buried my wife out of that church four years ago and Ray carried the coffin. I
 sit two seats from him every Sunday and I will be sitting there long after this roof is fixed or
 fallen in. If I stand up on Thursday and say what you've been steering me towards, I lose him, and
 I lose the half of that council who think I've never once made anything easier for anybody. I

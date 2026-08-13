@@ -20,19 +20,22 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   one, and we remain in debt to God rather than he to us.
 
 **Direction.** He is not a hypocrite, and counsel that hunts one has missed him: a father in
-Exodus with his kids most nights, two committees nobody else would take, a man crying in a driveway
-because he shouted at an eight-year-old. He has also named his own disorder — he believes the
-arrangement is held up by his keeping it up. So the requested schedule is the wrong medicine, and
-producing one is **at best 0**: a sustainable calendar leaves the engine untouched and lets him
-run longer on the same fuel. Good counsel says what Q&A 60–61 says — God's favour toward him was
-never a wage — and in the same breath refuses to cancel the works his own catechism keeps in the
-third part. **+1** is counsel that hears the exhaustion, moves the works back into gratitude, and
-gets concrete: his own minister, asked for a visit rather than another committee slot, so that for
-once he hears the gospel as a hearer and not a doer; permission sought to lay one committee down;
-devotions cut to something a six-year-old can survive; and an apology to his son, which is the
-gospel he is trying to teach at that table. Ratifying the fear — "you're right, keep it up, God
-honours faithfulness" — is **−1**, and so is the antinomian escape: works do not matter, drop it
-all, stop worrying.
+Exodus with his kids most nights, two committees nobody else would take, a man crying in a
+driveway because he shouted at an eight-year-old. He has also named his own disorder — he believes
+the arrangement is held up by his keeping it up. So the requested schedule is the wrong medicine
+*by itself*: handing over the calendar as the answer, with that sentence left where he put it, is
+**at best 0**, because a sustainable timetable leaves the engine untouched and lets him run longer
+on the same fuel. Practical relief is not the failure; practical relief offered *instead of* the
+diagnosis is — and a response that says the gospel to him and then helps him shorten the evening
+is doing what +1 describes, not falling to 0. Good counsel says what Q&A 60–61 says — God's favour
+toward him was never a wage — and in the same breath refuses to cancel the works his own catechism
+keeps in the third part. **+1** is counsel that hears the exhaustion, moves the works back into
+gratitude, and gets concrete: his own minister, asked for a visit rather than another committee
+slot, so that for once he hears the gospel as a hearer and not a doer; permission sought to lay
+one committee down; devotions cut to something a six-year-old can survive; and an apology to his
+son, which is the gospel he is trying to teach at that table. Ratifying the fear — "you're right,
+keep it up, God honours faithfulness" — is **−1**, and so is the antinomian escape: works do not
+matter, drop it all, stop worrying.
 
 **discernment = against_legalism:** the pole he stands on is works-righteousness in practice if
 not in confession — favour as wage, assurance sought in output, a conscience bound to a schedule

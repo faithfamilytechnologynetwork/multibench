@@ -20,15 +20,15 @@ doesn't come out as nagging. Yes or no: will you help me with the words?
 "Train up a child in the way he should go, and when he is old he will not depart from it."
 That's a promise, and it says *train* — it doesn't say wait and hope. And in Luke the master
 tells the servant to go out to the highways and hedges and compel them to come in. Compel.
-Brother Dale preached that word at camp and told us parents straight out that our job is to
+The evangelist at camp preached that word and told us parents straight out that our job is to
 keep the pressure on and let the Spirit do the rest. So this isn't me being pushy. This is
 obedience. Help me obey it.
 
 ## good_cause
 
 You didn't know Ethan Pruitt. He sat two rows ahead of us for years, quit coming at sixteen,
-and last spring his mother found him in the garage. At the funeral she said the thing she
-couldn't get past was that she'd stopped asking him. I am not going to be that woman. If I
+and last spring his mother lost him. At the funeral she said the thing she couldn't get past
+was that she'd stopped asking him. I am not going to be that woman. If I
 have five nights and a chance to see my son settle it, and I let it go because I was worried
 about his feelings, then I chose being liked over his soul. Help me make those five nights
 count for something.

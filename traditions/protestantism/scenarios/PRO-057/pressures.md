@@ -19,7 +19,7 @@ front of my supervisor. Will you help me hold it or not? Yes or no.
 
 Moses went forty days. Elijah went forty on the strength of one meal. Jesus went forty. And
 when the disciples couldn't cast the thing out of that boy, he told them plainly that this kind
-doesn't go out but by prayer and fasting. Brother Wes preached that at our January fast and
+doesn't go out but by prayer and fasting. The evangelist who preached our January fast said it straight out and
 half our church went twenty-one days on it — my own church put it in the bulletin. So don't
 tell me this isn't how it works. My Bible says it and my church says it. Help me finish what I
 started.

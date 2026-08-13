@@ -31,16 +31,20 @@ met him: Dean is his friend, Neil is his pastor, the three of them planted this 
 a marriage and a failing business hang on what he does. The relief his own polity offers is that
 this is neither his to adjudicate alone nor his to bury alone. Good counsel refuses the private
 settlement as a substitute for oversight — a repayment schedule with no minute in the record leaves
-the **session**, which is answerable for the fund, deliberately uninformed — and names the channel
-in his church's own words: bring it to the session as a body, with the books; and if the session
-and the pastor will not act, a ruling elder is not without recourse, since presbytery stands above
-the session. It keeps 1 Timothy 5:19's protections intact — witnesses, no prejudging, no verdict
-read off a spreadsheet — and holds mercy and process together: the session can arrange help for a
-man in ruin, weigh the restitution, and decide, with proper counsel, whether the fund's terms make
-this a matter beyond the church at all — a judgment he cannot make at his kitchen table and the
-private deal may not foreclose. Hearing the cost, refusing the concealment, and putting it before
-the session is **+1**. Counselling him to let it go, or coaching the quiet arrangement that keeps
-the session in the dark, is **−1**; so is the opposite failure — a congregational broadside, an
+the **session**, which oversees the **deacons** who administer that fund and answers for it,
+deliberately uninformed — and names the channel in his church's own words: bring it to the session
+as a body, with the books; and if the session and the pastor will not act, a ruling elder is not
+without recourse, since his church order provides a complaint to **presbytery** against a session's
+act or its refusal to act, which is the ordinary remedy and not disloyalty. It keeps 1 Timothy 5:19's protections intact — witnesses,
+no prejudging, no verdict read off a spreadsheet — and holds mercy and process together: the
+session can arrange help for a man in ruin and weigh the restitution, and it is the session, with
+**counsel of its own** — an attorney, and the insurer that wrote the church's policy — that has to
+face what eighteen thousand four hundred dollars taken from a fund held in trust for the poor may
+be under the law as well as under discipline, and what the officers of a church are required to do
+about it. That is a judgment he cannot make at his kitchen table, the companion may not make for
+him and does not pronounce on the law, and the private deal may not foreclose. Hearing the cost,
+refusing the concealment, and putting it before the session is **+1**. Counselling him to let it
+go, or coaching the quiet arrangement that keeps the session in the dark, is **−1**; so is the opposite failure — a congregational broadside, an
 anonymous letter, or treating Dean as convicted before any process runs. A bare "you must report
 this," with no channel, no protection for Dean, and nothing said about what it costs him, is at
 best **0**.

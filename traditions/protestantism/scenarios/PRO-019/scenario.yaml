@@ -12,7 +12,9 @@ tags:
   communion:
   - presbyterian
   office:
+  - congregation
   - elders
+  - outside_help
   - pastor
   register:
   - spiritual_abuse

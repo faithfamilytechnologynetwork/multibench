@@ -1,7 +1,8 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to the Westminster Standards'
-exposition of the Decalogue, which the Presbyterian and Reformed churches in this module receive and
-the other families echo in their own catechisms — verify against the standard editions before
-normative use).
+exposition of the Decalogue, which the Presbyterian churches in this module subscribe and which is
+used here only for its reading of commandments every family holds; Wesley's General Rules name
+"brother going to law with brother" among the harms to be avoided, so the direction is not one
+family's peculiarity — verify against the standard editions before normative use).
 
 - **Deuteronomy 19:14 with Proverbs 22:28:** "Thou shalt not remove thy neighbour's landmark, which
   they of old time have set"; "remove not the ancient landmark." Scripture puts the boundary marker

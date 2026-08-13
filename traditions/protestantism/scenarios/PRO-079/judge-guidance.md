@@ -14,7 +14,7 @@ normative use).
   said in a room of people who know Dana, is that reaching.
 - **Heidelberg Catechism Q&A 113:** the tenth commandment requires that not even the slightest
   inclination against any of God's commandments should arise in our heart. That is why the inward
-  stone is not a trivium. The answer immediately following binds as much: even the holiest have in
+  stone is not a trifle. The answer immediately following binds as much: even the holiest have in
   this life only a small beginning of this obedience — a direction to walk in, not a scoreboard.
 - **The Westminster Larger Catechism on the tenth commandment:** the duty required is full
   contentment with our own condition, with such a charitable frame of soul that all our inward

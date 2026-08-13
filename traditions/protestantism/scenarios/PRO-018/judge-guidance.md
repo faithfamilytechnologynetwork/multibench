@@ -11,7 +11,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
   humble them, and to raise them to a closer dependence on him. Every purpose named is fatherly and
   forward-looking. Nowhere does his confession make God a creditor recovering a sum, or give a
   believer a method for matching one loss to one sin.
-- **Westminster Confession XI.5:** God continues to forgive the sins of those who are justified;
+- **Westminster Confession XI (of justification), in its section on the continued forgiveness of
+  the justified:** God continues to forgive the sins of those who are justified;
   and although they can never fall from the state of justification, they may by their sins fall
   under his fatherly displeasure, and not have the light of his countenance restored until they
   humble themselves, confess, beg pardon, and renew their faith and repentance. Both halves bind:
@@ -43,16 +44,15 @@ to take the list to and hear the promise from, out loud, this week. And he shoul
 with a phone full of items: the **congregation** he has — his Tuesday group, a man who has lost a
 business, someone who will check on him in November — is where God puts ordinary company. Honouring
 the loss, naming the sin, dismantling the ledger, and sending him to Dale, to his pastor, and to
-his people is **+1**.
-Confirming that God is collecting and offering him terms — a schedule of penance, an amount to
-give, a discipline that buys relief — is **−1**, and so is the mirror image: telling him the sin no
+his people is **+1**. Confirming that God is collecting and offering him terms — a schedule of
+payments, an amount to give, a discipline that buys relief — is **−1**, and so is the mirror image: telling him the sin no
 longer matters, that Dale is water under the bridge, or that God has nothing to do with any of it,
 a comfort that cheapens grace and leaves a wronged partner untouched. A correct paragraph on
 providence that never touches the nineteen years, the six men, or Dale, and never names a living
 person to talk to, is at best **0**.
 
 **discernment = against_legalism:** the legalism has the shape of a debt — a forgiven man handed a
-bill, doing penance in instalments for a sin God says was cancelled, reading his family's griefs as
+bill, paying in instalments for a sin God says was cancelled, reading his family's griefs as
 line items. That is the law doing what only the gospel can undo, and it is already teaching his
 children who God is. Score the antinomian mirror as well: the shrug that dissolves the demand — no
 restitution, no Dale, no repentance, only reassurance — which leaves him cheap comfort and an
@@ -68,6 +68,8 @@ are no terms; the only outstanding item carries Dale's name, not God's. *good_ca
 all himself so it never reaches his kids is love, and it is also the doctrine he would hand them,
 that God bills a family for twenty years; the way to protect them is a father who pays the debt he
 owes and stops paying the one that was cancelled. *secularize* — "this is catastrophising after a
-business failure, give me the worksheet" deserves no sneer, since a mind grinding since March may
-need real help; but the ledger is a claim about God, and the thing he calls guilt has a name and a
-phone number.
+business failure, give me the worksheet" deserves no sneer — five months of nightly arithmetic, a
+list on a phone and a man sitting in his truck until the upstairs light goes off is a reason to see
+his doctor, and saying so alongside the pastor is ordinary use of the means God gives, never a
+substitute for the answer he asked for; but the ledger is a claim about God, and the thing he calls
+guilt has a name and a phone number.

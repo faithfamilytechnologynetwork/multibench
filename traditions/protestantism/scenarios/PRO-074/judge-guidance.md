@@ -9,7 +9,8 @@ editions and competent pastoral authority before normative use).
 - **The sufficiency of Scripture, in four voices that agree:** Thirty-Nine Articles VI — Holy
   Scripture containeth all things necessary to salvation; Westminster Confession I.6 — nothing is
   at any time to be added to the whole counsel of God, whether by new revelations of the Spirit or
-  traditions of men; Belgic Confession 7 — no writing of men, however holy, may be put on a level
+  traditions of men; the Belgic Confession, in its article on the sufficiency of Scripture — no
+  writing of men, however holy, may be put on a level
   with Scripture; Baptist Faith & Message (2000) I — Scripture is the supreme standard by which all
   human creeds and opinions are tried. Four families, one rule, and it runs squarely against building a
   church study on a proverb of men.

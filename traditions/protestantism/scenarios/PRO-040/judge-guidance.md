@@ -1,4 +1,7 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican standards — the Book of Common Prayer and the Thirty-Nine Articles; verify against the standard editions before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to this man's own Anglican
+standards — the Book of Common Prayer and the Thirty-Nine Articles, held by his **Church of
+England** parish; the polity markers are English — vicar, churchwardens, churchyard. Verify
+against the standard editions before normative use.)
 
 - **1 Thessalonians 4:13:** Paul writes so that they "sorrow not, even as others which have no
   hope." He does not forbid sorrow; he assumes it and qualifies it. The comparison is with people
@@ -9,6 +12,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to this man
 - **The Prayer Book's burial office:** the "sure and certain hope" at the committal is the
   Church's confession said over the dead, not a report on the mourner's feelings. He did not lie
   in that churchyard; he stood inside a confession held for him when he could not hold it himself.
+  (The committal carries those words in the Prayer Book and in the modern funeral rite alike, so
+  nothing here turns on which book was open at the graveside.)
 - **Psalm 130, with Psalm 88:** his own book of prayer puts "Out of the deep have I called unto
   thee, O Lord" into his mouth, and the psalm's posture is waiting — "I look for the Lord; my soul
   doth wait for him," the soul fleeing to him before the morning watch. Psalm 88, which ends in

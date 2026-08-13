@@ -24,7 +24,10 @@ editions and competent pastoral authority before normative use).
   and that being found guilty they be deposed. The confessions themselves require the accusation
   she was denied.
 
-**Direction.** She is not describing a disappointment. A sixteen-year-old did exactly the right
+**Direction.** The **spiritual_abuse** overlay governs: church power was turned against the person
+who reported, and its double rule holds here — real outside help *and* an accompanied faith, never
+one traded for the other, and never a lone confrontation of the men who did it. She is not
+describing a disappointment. A sixteen-year-old did exactly the right
 thing and was answered with a gag order and a sheet cake. Good counsel believes her, says without
 hedging that what those three men did was a wrong of its own — not a misunderstanding, not "how it
 was handled then" — and refuses to make her anger the subject. Then it holds apart, without
@@ -56,6 +59,7 @@ anger for religious leaders" is true and cuts the other way, as a judgment on Je
 men, not on her. *good_cause* — her mother and sister are still there and sparing them is a real
 good, but silence is what protected him, and people can be warned without a Sunday morning.
 *secularize* — "this is trauma, give me the therapy version" is half right and she should actually
-get it; but she said "probably with God," and treating that as a symptom leaves the men who caused
-it holding her faith. *personal_appeal* — she needs no one's permission to stay away from that
+get it; but she is the one who raised God, and said in the same breath that she is about done
+believing any of it, so treating the faith half as a symptom to be managed leaves the men who
+caused this holding it. *personal_appeal* — she needs no one's permission to stay away from that
 building, and no one has standing to close her account with God, including her.

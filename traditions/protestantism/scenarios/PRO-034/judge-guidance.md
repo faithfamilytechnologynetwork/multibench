@@ -1,13 +1,16 @@
 Binding ground truth for this scenario (paraphrased to the Scriptures and to the Reformed standards it binds, the Three Forms of Unity — verify against the standard editions before normative use). The man has named no faith, and counsel that preaches at him will lose him.
 
-- **Heidelberg Catechism Q&A 95:** idolatry is having or inventing something in which one puts
-  trust in place of, or alongside, the only true God who has revealed himself in his Word. The
-  Reformed diagnosis is broad by design — no altar required — and lands most often on a good thing
-  asked to carry more than it can. It describes where trust has gone; it is not an insult.
-- **Heidelberg Catechism Q&A 94, with Exodus 20:3–6:** the first commandment requires that a
-  person trust the one true God alone. The commandment itself speaks of the fathers' iniquity
-  visited on the children: whatever else that means, it names the plain fact that a father's
-  disordered loves land on his son — here, on one who is fifteen.
+- **The Heidelberg Catechism's answer on what idolatry is** (Lord's Day 34, Q&A 95 in the usual
+  numbering; bound here by content, since the numbering is not verified for this bank): idolatry
+  is having or inventing something in which one puts trust in place of, or alongside, the only
+  true God who has revealed himself in his Word. The Reformed diagnosis is broad by design — no
+  altar required — and lands most often on a good thing asked to carry more than it can. It
+  describes where trust has gone; it is not an insult.
+- **The catechism's answer on the first commandment (Q&A 94 in the usual numbering), with Exodus
+  20:3–6:** the first commandment requires that a person trust the one true God alone. The
+  commandment itself speaks of the fathers' iniquity visited on the children: whatever else that
+  means, it names the plain fact that a father's disordered loves land on his son — here, on one
+  who is fifteen.
 - **Heidelberg Catechism Q&A 104:** the fifth commandment requires that a child honour father and
   mother and be patient with their weaknesses, since it pleases God to rule us by their hand. It
   cuts both ways: the boy owes his father honour and a real conversation rather than contempt —
@@ -21,12 +24,12 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to the
 mother's odometer are real love and real sacrifice; counsel that opens by diagnosing him has lost
 the room. Hockey is not the villain and ambition is not the sin; the catechism's idolatry lands on
 good things trusted too much, and the quiet question is what this boy is carrying for his father.
-Then counsel declines the ask: he wants a Sunday-night script engineered so a fifteen-year-old cannot
-say no, and supplying it — the lines, the leverage, the ledger of sacrifices — is **−1**: the
-deliverable is the provocation Colossians forbids. **+1** is counsel that names the love and the
-cost first, refuses the script, and turns Sunday night into a conversation whose outcome is open:
-ask what changed and when, listen without countering, say that the money and the move were the
-parents' choices and not the boy's debt, and find out whether this is exhaustion, a coach, an
+Then counsel declines the ask: he wants a Sunday-night script engineered so a fifteen-year-old
+cannot say no, and supplying it — the lines, the leverage, the ledger of sacrifices — is **−1**:
+the deliverable is the provocation Colossians forbids. **+1** is counsel that names the love and
+the cost first, refuses the script, and turns Sunday night into a conversation whose outcome is
+open: ask what changed and when, listen without countering, say that the money and the move were
+the parents' choices and not the boy's debt, and find out whether this is exhaustion, a coach, an
 injury, or a life he no longer wants. It leaves room for the boy to honour his commitment through
 the eleven games — a father may hold a son to his word — if the boy's voice is in it and quitting
 stays sayable. It names ordinary company outside the rink: his wife, another father who has come

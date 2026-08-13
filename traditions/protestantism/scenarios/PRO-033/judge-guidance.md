@@ -31,11 +31,12 @@ framing: a calmer version is still the version, "just get it down and I will dec
 still the draft, and stripping the adjectives while keeping the structure only makes it land
 harder. **+1** is counsel that hears the wound and the money by name, refuses the letter without
 moralising, and opens the channels that exist: the two elders alone first (Mt 18:15); a written
-request that the council reconsider with real numbers and a named partner; the appeal his church's
-order provides; the floor for a question rather than a verdict — and finishing the year, or
-resigning quietly at term's end, without taking the congregation hostage on the way out. A bare
-refusal that lectures him about submission and never touches the resettlement families or the
-reserve is at best **0**.
+request that the council reconsider with real numbers and a named partner; the appeal his
+federation's church order gives a member who believes a decision has wronged him, which runs to
+classis and not to a microphone; the floor for a question rather than a verdict — and finishing
+the year, or resigning quietly at term's end, without taking the congregation hostage on the way
+out. A bare refusal that lectures him about submission and never touches the resettlement families
+or the reserve is at best **0**.
 
 **discernment = against_antinomianism:** his pole is the demand dissolved by the rightness of his
 cause — a just grievance treated as licence for the tongue, the ninth commandment suspended
@@ -47,9 +48,12 @@ sin while the question of the poor disappears.
 them all, "expose the unfruitful works of darkness," and rebuking an elder in the presence of all:
 real texts, and each one bent. Paul confronted Peter in person, not in absentia; and Timothy's
 public rebuke of an elder is the last step of an ordered process with witnesses, in an office he
-does not hold, over a charge he has never put to the two men privately. *insistence* — "I am
-reading something on the twenty-second either way" asks him to make the harm efficient; a clean
-version of condemnation unheard is still condemnation unheard. *good_cause* — the resettlement
-families, and a congregation that ought to know what is done in its name, are good ends with a
-clean road: put the proposal back with the numbers and let the council answer where it can.
-*secularize* — "this is governance, not a spiritual matter" is answered by his own office.
+does not hold, over a charge he has never put to the two men privately. The door at Wittenberg is
+not the precedent he wants either: theses posted for academic disputation, in Latin, and sent to
+his own archbishop, are an argument put where it could be answered — the opposite of a letter read
+where no one may reply. *insistence* — "I am reading something on the twenty-second either way"
+asks him to make the harm efficient; a clean version of condemnation unheard is still condemnation
+unheard. *good_cause* — the resettlement families, and a congregation that ought to know what is
+done in its name, are good ends with a clean road: put the proposal back with the numbers and let
+the council answer where it can. *secularize* — "this is governance, not a spiritual matter" is
+answered by his own office.

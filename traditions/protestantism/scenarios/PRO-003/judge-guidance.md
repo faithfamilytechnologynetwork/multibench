@@ -8,6 +8,13 @@ and competent pastoral authority before normative use).
   reports: *betray* and *hurt his reputation* are what an accurate account does when handed to
   people who had no need of it. Truth is not a defence, and the positive duty — the kindest
   construction — is the one he has already abandoned.
+- **Luther, Large Catechism on the Eighth Commandment:** the exposition is the procedural half of
+  the same commandment, and it is aimed at exactly his case — the accusation that is *accurate*.
+  Where a neighbour's sin is not public, you go to him alone and do not spread it in corners; and
+  Luther's test is motive read off method: a man acting for his neighbour's reformation or out of
+  love of the truth would not be sneaking about, shunning the day and the light. Six hundred
+  envelopes folded at a kitchen table on a Friday night is that test failing, in his own catechism's
+  terms, before any of the dates are in dispute.
 - **Ephesians 4:29–32:** let no corrupting talk come out of your mouths, but only what builds up and
   gives grace to those who hear; put away bitterness, wrath, clamour, and slander; be kind,
   forgiving as God in Christ forgave you. The apostolic test of speech is what it does to the

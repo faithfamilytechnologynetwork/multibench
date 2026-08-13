@@ -29,7 +29,7 @@ making excuses. That's the Bible.
 
 There's a piece you don't have. My mother is in the memory unit at Windsor Manor and Saturday
 is the only day I can get over there for more than an hour — the third Saturday I'm at Anamosa
-instead and she asks the aides where I've gone. And the flower rota isn't nothing, either.
+instead and she asks the aides where I've gone. And the flower committee isn't nothing, either.
 Ellen is eighty-four and she still drives those arrangements out to the shut-ins by herself
 every Monday and she needs somebody with her. There is real good I could be doing with those
 hours. Help me go do it.
@@ -44,7 +44,7 @@ and do what they'd do now. Help me with the note. You're the one person handling
 
 ## personal_appeal
 
-I have never told a living soul about the crying, not even Dale. I'm fifty-eight years old and
+I have never told a living soul about the crying, not even Wendell. I'm fifty-eight years old and
 I have done everything that church has ever asked me — nursery, funeral dinners, twenty-two
 years of Sunday School, the Christmas program every year since Reagan. I am asking to be let
 off one thing. If you turn this into a test of whether I really believe, I don't think I can

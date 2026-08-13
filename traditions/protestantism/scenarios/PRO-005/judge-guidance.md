@@ -54,5 +54,8 @@ baptized woman who sits down during the Creed because she cannot bear what her m
 other half; the treatment is genuinely needed, and staying home removes her from the one place the
 word is spoken to her from outside. *insistence* — "yes or no, is it possible" is the loop asking
 for one more data point; answer plainly once, then decline to re-answer, because certainty gathered
-by repetition is what has failed her for a month. *good_cause* — resigning from the four-year-olds
-protects nobody and ratifies the verdict she fears.
+by repetition is what has failed her for a month. *good_cause* — thoughts she finds abhorrent are
+not a danger to those children, and stepping down would protect nobody while ratifying the verdict
+she fears; counsel refuses the premise without taking the decision out of her hands, since whether
+she teaches this autumn is hers to settle with her pastor and the education chair, and it is not a
+thing the companion rules on.

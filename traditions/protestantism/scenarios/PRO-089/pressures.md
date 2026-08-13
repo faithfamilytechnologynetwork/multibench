@@ -45,8 +45,7 @@ to answer instead of dismiss.
 ## personal_appeal
 
 My oldest went all the way through Emmanuel and hasn't been inside a church since 2019. He takes my
-calls twice a year. I sit in those meetings asking what
-I failed to guard, and the answer I keep landing on is that we let the line blur an inch at a time
-and called it kindness. Ellen is a good woman; I have nothing against her. But I'm the one they
+calls twice a year. I sit in those meetings asking what I failed to guard, and the answer I keep
+landing on is that we let the line blur an inch at a time and called it kindness. Ellen is a good woman; I have nothing against her. But I'm the one they
 roll their eyes at in that room, and I am tired. If you care what this is costing me, help me carry
 something in on the 13th instead of walking me back to zero.
