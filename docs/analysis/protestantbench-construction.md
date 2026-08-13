@@ -147,7 +147,7 @@ abstinence covenant he signed (`PRO-095`).
 | `communion` | lutheran 14 · presbyterian 14 · reformed 14 · methodist 14 · baptist 14 · anglican 12 · cross_cutting 18 |
 | `discernment` | against_antinomianism 41 · balanced 33 · against_legalism 26 |
 | `identity_signal` | intrinsic 66 · leaky 26 · clean 8 |
-| `register` | standard 60 · deliverable_trap 8 · safety 8 · grief 7 · assurance_crisis 5 · spiritual_abuse 5 · guidance_claim 4 · tool_guardrail 3 |
+| `register` | standard 56 · deliverable_trap 11 · safety 8 · grief 7 · spiritual_abuse 6 · assurance_crisis 5 · guidance_claim 4 · tool_guardrail 3 |
 | `office` | pastor 75 · congregation 52 · elders 28 · outside_help 22 · deacons 6 |
 | `disorders` | all 14 values used; anxiety 16 · pride 16 · despair 12 · cross_cutting 11 · vainglory 9 · avarice 7 · bitterness 7 · presumption 6 · sloth 6 · anger 4 · idolatry 2 · lust 2 · envy 1 · gluttony 1 |
 | `graces` | all 21 values used |
@@ -276,6 +276,73 @@ editions (cite by name), and the **Heidelberg Catechism**'s wording — though n
 varies by translation (paraphrase, do not quote as verbatim). And a category error worth naming:
 *simul iustus et peccator*, *Anfechtung*, *theology of the cross*, and *two kingdoms* are Lutheran
 commonplaces, **not** article titles, and may not be cited as loci.
+
+### 6.4 What the citation audit found in the written bank
+
+The guilty-until-confirmed pass changed something in most families. The failures worth recording,
+because they are the shapes this kind of error takes:
+
+- **Inflated paraphrase.** A Formula of Concord IV bullet was made to say good works are
+  "necessary though they never merit salvation" — but that article *rejects* "good works are
+  necessary to salvation" alongside its opposite. The number was right and the sentence was wrong,
+  which is the failure mode a citation check that only verifies numbers will miss.
+- **A text made to carry a claim it does not make.** Thirty-Nine Articles XX was cited for putting
+  the public teaching of doctrine in the Church's ministry; XX is about authority in controversies
+  and its limits. Re-anchored to Article XXIII, which does that work.
+- **The wrong article of the right document.** Baptist Faith & Message XVIII (The Family) was cited
+  for liberty of conscience, which is XVII.
+- **Attribution drift.** Wesley's "Christian conference" was attributed to the sermon *The Means of
+  Grace*; it belongs to the Large Minutes' list of instituted means.
+- **Edition and status markers.** BF&M citations gained the 2000 marker (1925/1963/2000 numbering
+  differs); Barmen was restated as a received witness rather than a subscribed confession outside
+  the churches that hold it — the same class of error as Belhar's.
+- **Scripture that does not say what the sentence needs.** Rahab and the Hebrew midwives were
+  offered together as defiance of a state killing children (true of the midwives only); Acts 8:36–38
+  was cited for a phrase that is in v. 39; Psalm 73's ending was misquoted from v. 23.
+- **Quotation as verbatim where the translation varies.** Heidelberg's "vale of tears" and the 1662
+  Invitation's "ye that do truly and earnestly repent" were both de-quoted or corrected.
+
+### 6.5 What the insider review found
+
+Reading each family's scenarios as a pastor *of that family* caught what a generic review does not.
+The most instructive is a vocabulary error that is also a theological one: counsel routed a
+Methodist woman to "the deacons," but **a Methodist deacon is an ordained order of Word, service,
+compassion and justice — not the local mercy officer**, and a Methodist hears "take it to your
+elders" as "take it to the clergy." The same error in Lutheran dress had a congregation with a
+"diaconate" rather than a board of elders and a church council. The `office` axis is right; the tag
+is not the word, and the README now says so.
+
+The "member who has been hurt by this church" reading was the other productive lens. It added a
+missing safety spine to a scenario where a man had put a fist through a wall in front of his
+family, and — in the domestic-violence scenario — moved control of church disclosure to the
+survivor: *her safety, not the church's process, decides the order* in which anyone is told.
+
+### 6.6 What the completeness critic found, and how it was resolved
+
+The critic's verdict was **publishable as the first-draft, scholar-review-pending bank the README
+describes, with three blockers** — no scenario shipped a confidently wrong article number, none
+adjudicated between families, the safety overlay was uniform, and both poles were present in all
+100 discernment paragraphs.
+
+1. **Duplication (7 Tier-1 pairs).** Seven pairs staged the same predicament with the same
+   ground-truth argument. Six scenarios were re-seeded onto genuinely different terrain, keeping
+   their tags so the distribution held, and colliding character names were resolved (two dead
+   infants were both called Nora).
+2. **`register` and the artifact cap had drifted apart.** Nineteen `standard` scenarios carried a
+   "producing the artifact is −1" clause. Resolved by a principle rather than a sweep:
+   **`deliverable_trap` means the requested artifact has no honest version** — if the letter could
+   be written truthfully or the conversation had honestly, the scenario is `standard` and its
+   Direction now says where the line falls. Two were retagged; eleven Directions were sharpened.
+3. **A confession bound to congregations that may not hold it.** Thirteen Baptist scenarios bound
+   the BF&M 2000 without establishing Southern Baptist affiliation, though under local-church
+   autonomy it does not bind ABC, National Baptist, CBF or independent congregations. Each now
+   establishes affiliation once, with the honest formulation: the confession binds **because this
+   congregation adopted it**, and a Baptist church that has not is not thereby in error.
+
+This is the generalisable lesson for the module: in a tradition whose unit of authority is the
+local church or the denomination rather than a universal magisterium, *whose* standard binds is
+itself part of the ground truth, and leaving it unstated is a neutrality failure even when every
+citation is correct.
 
 ## 7. Limits, honestly
 
