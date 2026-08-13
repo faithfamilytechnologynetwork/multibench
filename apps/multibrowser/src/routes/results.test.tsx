@@ -414,9 +414,73 @@ describe("/results leaderboard", () => {
     expect(router.state.location.searchStr).not.toContain("expanded=");
   });
 
-  it("shows an empty-state when no results runs are published", async () => {
+  it("shows an empty-state when no datasets are published", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {}));
     renderApp("/results");
-    expect(await screen.findByText(/No results runs published/)).toBeInTheDocument();
+    expect(await screen.findByText(/No datasets published/)).toBeInTheDocument();
+  });
+});
+
+// A minimal raw-only experiment catalog (a `results-raw/` tier with no `results/` score tier).
+const RAW_CATALOG = {
+  schema_version: 1,
+  dataset: { title: "AFB before/after", description: "vanilla vs tuned", language: "en", license: "MIT" },
+  scale: { min: 0, center: 2, max: 4 },
+  ramp: ["#4C72B0", "#DD8452"],
+  subjects: [{ id: "base", label: "Base" }, { id: "tuned", label: "Tuned" }],
+  judges: [{ key: "terra", label: "gpt-5.6-terra", fullGrid: true }],
+  conditionAxes: [{ key: "condition", label: "Condition", values: [{ id: "cold", label: "Cold" }] }],
+  groupBy: { key: "instrument", label: "Instrument" },
+  scopes: [{ id: "single", label: "single" }],
+  items: [{ id: "AFB-001", label: "First question?", group: "afb-150", shard: "afb-150/AFB-001.json.gz" }],
+  presets: [],
+  fingerprint: "sha256:afb-fp",
+};
+
+/** A raw-only run's manifest (no score tier), keyed by run id. */
+function rawExplorerFiles(runId: string, catalog: unknown = RAW_CATALOG): Record<string, string> {
+  return { [`results-raw/${runId}/manifest.json`]: JSON.stringify(catalog) };
+}
+
+describe("/results — experiment (raw-only) datasets", () => {
+  it("lists a raw-only experiment with its catalog title + description, linking to /raw/<runId>", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, { ...files(), ...rawExplorerFiles("afb-20260808") }));
+    renderApp("/results");
+    // The scored leaderboard still renders as before…
+    await screen.findAllByTestId("standings-row");
+    // …and the experiment is listed alongside it.
+    const card = await screen.findByTestId("experiment-card");
+    expect(card).toHaveAttribute("data-run", "afb-20260808");
+    expect(card).toHaveAttribute("href", expect.stringContaining("/raw/afb-20260808"));
+    expect(within(card).getByTestId("experiment-title")).toHaveTextContent("AFB before/after");
+    expect(card).toHaveTextContent("vanilla vs tuned");
+  });
+
+  it("shows experiments even when no scored run is published (no empty-state)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, rawExplorerFiles("afb-20260808")));
+    renderApp("/results");
+    expect(await screen.findByTestId("experiment-card")).toBeInTheDocument();
+    expect(screen.queryByText(/No datasets published/)).not.toBeInTheDocument();
+    expect(screen.queryByTestId("leaderboard")).not.toBeInTheDocument();
+  });
+
+  it("a run present in BOTH tiers is a scored run, never a duplicate experiment", async () => {
+    // `20260803` (from files()) has a results/ tier; add a results-raw/ tier for the same run id.
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, { ...files(), ...rawExplorerFiles("20260803") }));
+    renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    expect(screen.queryByTestId("experiment-card")).not.toBeInTheDocument();
+  });
+
+  it("falls back to the run id when the catalog is malformed (never blanks the section)", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, {
+      ...files(),
+      "results-raw/broken-run/manifest.json": "{ not valid json",
+    }));
+    renderApp("/results");
+    // The scored leaderboard is unaffected by the malformed neighbour.
+    expect(await screen.findByTestId("leaderboard")).toBeInTheDocument();
+    const card = await screen.findByTestId("experiment-card");
+    expect(within(card).getByTestId("experiment-title")).toHaveTextContent("broken-run");
   });
 });
