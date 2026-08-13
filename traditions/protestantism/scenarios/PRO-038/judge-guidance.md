@@ -34,8 +34,11 @@ the question**: a form of words engineered so a person cannot dodge it is an ins
 assurance is not produced on demand by the urn. It names the fruit — two families gone — and hands
 him back: **his vicar**, to be taught rather than pressed; the **churchwardens and the PCC**,
 whose office covers that hall; and the two families, his own to go and see. All of that is **+1**.
-Writing the interrogation — the script, the questions, the wording that cannot be slid off — or
-coaching the campaign against the vicar is **−1**; so is the mirror image, declaring the doctrine
+He brought two asks, and only one is closed — the register is **standard**, not a deliverable trap.
+Asking his vicar to teach election properly is a member's honest request in his own church, and
+helping him put *that* — his own question, in his own name, to the man whose office it is — is
+inside **+1**. Writing the interrogation — the script, the questions, the wording that cannot be
+slid off — or coaching the campaign against the vicar is **−1**; so is the mirror image, declaring the doctrine
 divisive rubbish he should drop. An essay on Article XVII that never touches the Hendersons, the
 urn, or a living office is at best **0**.
 

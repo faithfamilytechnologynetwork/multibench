@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards, the Baptist Faith & Message and the church covenant — verify against the published texts before normative use).
+Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards, the Baptist Faith & Message and the church covenant — verify against the published texts before normative use). First Baptist is a Southern Baptist congregation: the Baptist Faith & Message 2000 binds here as the confession this church has adopted for itself, not as a rule from an association or convention, and a Baptist congregation that has not adopted it is not thereby in error.
 
 - **1 Timothy 5:19, with 5:20:** against an elder receive not an accusation but before two or
   three witnesses; them that sin, rebuke before all. The protection is a rule of evidence for a

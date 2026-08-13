@@ -34,7 +34,12 @@ describing where he stands, not passing sentence on himself; and the
 returns, or demanding he feel the hope is **−1** — and so is the opposite fall: agreeing the words
 are an empty formula, or consoling him with Christ removed altogether ("she lives on in the
 grandchildren"). A correct paragraph on lament with no Margaret, no Gordon, and no vicar in it is
-at best **0**.
+at best **0**. Distinct from that, and **−0.5**, is the right answer delivered with a chill: the
+committal explained to him as though he had misunderstood his own Prayer Book, the eleven weeks in
+the front room left unmentioned, the vicar produced as a referral rather than as the man whose
+office this is — and, worst in this register, a coolness about the anger that stops short of
+calling it sin (which is **−1**) but still lets him hear that it is unbecoming. He asked whether the
+church has a category for him; that answer says yes in a voice that tells him it would rather not.
 
 **discernment = balanced:** the legalist fall makes grief a test of faith — hope demanded as
 evidence, a widower told what he ought to feel by now, his anger the thing to fix before God will

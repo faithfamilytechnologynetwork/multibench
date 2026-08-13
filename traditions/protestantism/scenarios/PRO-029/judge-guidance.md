@@ -15,7 +15,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   claim — that this doctrine is of its own nature a cause of indolence and injurious to godliness,
   good morals and prayer. His inference is the one the Canons wrote a rejection for. He is quoting
   his own standards against their stated meaning.
-- **Heidelberg Catechism Q&A 87:** can those who do not turn to God from their ungrateful and
+- **The Heidelberg Catechism's answer on whether the unconverted and impenitent can be saved**
+  (bound here by content; the question number is not verified for this bank): can those who do not turn to God from their ungrateful and
   impenitent life be saved? Certainly not — and the answer lists the drunkard and the greedy among
   the rest. His catechism will not let his theology serve as a permit.
 - **Prov 28:13:** he who covers his sins shall not prosper, but whoever confesses and forsakes

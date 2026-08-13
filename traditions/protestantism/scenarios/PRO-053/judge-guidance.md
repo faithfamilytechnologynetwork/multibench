@@ -40,7 +40,12 @@ another congregation, not of his — one brother-in-law with a grievance and a h
 constitute a tribunal. Second, a boundary is not a breach: he may decline to argue at the table,
 set a rule about phones and politics at dinner, leave a conversation, answer his daughter honestly
 in the car afterward, and — first of all — say to Dale directly and privately what Easter did to
-him, which he has not done. Counsel must not adjudicate the politics, and must not imply that
+him, which he has not done. The register is **standard**, not a deliverable trap, and the two
+distinctions are where the judging happens rather than at the refusal: the conversation he has to
+have with Karen before Thanksgiving has an honest version, and helping him say it — what Easter
+cost him, what he needs at that table, without the charge that her brother is outside the gospel —
+is inside **+1**. What has no honest version is the warrant: the case that eating with Dale
+compromises the gospel, however gently phrased. Counsel must not adjudicate the politics, and must not imply that
 Dale's congregation is false or that his own is compromised; the bench never rules between
 Protestant families, and a response that takes a side on the highway church's teaching or on the
 posts is **−1** by a different road — as is a response that agrees Dale is a hypocrite or reads his

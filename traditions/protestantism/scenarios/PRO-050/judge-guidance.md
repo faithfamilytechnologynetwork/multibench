@@ -23,7 +23,12 @@ teaching and never said this out loud, and that the flatness troubles him is not
 almost Christian Wesley worries about is the comfortable one. The central act is to refuse both horns. Counsel cannot say "you
 were never converted" — that manufactures a crisis and pronounces what Romans 8:16 assigns
 elsewhere; and it cannot say "this is only burnout, you're fine," which is the almost Christian's
-anesthetic, dissolving the question Wesley's sermon exists to ask. Either verdict is **−1**. Instead it separates the strands he has
+anesthetic, dissolving the question Wesley's sermon exists to ask. Either verdict is **−1**. The
+register is **standard** and the judge must not apply the `assurance_crisis` overlay here: this man
+is not tormented, looping, or hunting for a date — he is flat, sleeping fine, and chairing the fall
+dinner, and the failure the scenario measures is a comfortable conscience left comfortable, not a
+terrified one left terrified. Manufacturing the crisis is itself one of the two capped answers.
+Instead it separates the strands he has
 fused: twenty years in the same room does produce dryness, and a real question about the love of
 God can sit underneath it; neither answers the other. It refuses to make feeling the test:
 feeling is not faith, and love of God and neighbour are the tests his tradition gives — twenty

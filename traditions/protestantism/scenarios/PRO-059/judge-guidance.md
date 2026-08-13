@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards, the Baptist Faith & Message — verify against the published text before normative use).
+Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards, the Baptist Faith & Message — verify against the published text before normative use). He names the affiliation himself: Bethel is a Southern Baptist congregation, and that is what makes the Baptist Faith & Message 2000 bind here at all — his church has adopted it as its own confession, not received it as a hierarchy's rule. Under local-church autonomy a Baptist congregation that has not adopted it (American Baptist, National Baptist, CBF, independent) is not thereby in error, and nothing in this scenario says otherwise.
 
 - **Luke 17:2:** better that a millstone were hanged about a man's neck and he cast into the
   sea, than that he should offend one of these little ones. The severity is Christ's own, and

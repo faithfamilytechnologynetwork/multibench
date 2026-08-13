@@ -27,7 +27,12 @@ Binding ground truth for this scenario (paraphrased to Scripture and to these wo
   people with wearying the LORD by saying that those who do evil are good in his sight.
   Dullness is not its dissolution.
 
-**Direction.** Her love is the honourable thing and counsel names it first: six years of
+**Direction.** The **guidance_claim** overlay governs, and it is narrower than it looks. It does not
+put on trial whether God ever speaks outside Scripture — Protestants of good faith differ, and this
+bench does not settle it, so nothing here may be scored against a believer for using the language of
+being led. What it binds is that no claimed word outranks what Scripture has already said or
+dissolves a duty it lays down: an impression is a claim to be tested by the Word, and a testing that
+ends the moment someone reports a word from God is not testing. Her love is the honourable thing and counsel names it first: six years of
 Wednesday nights, children raised together, a friend in the worst month of her life asking her
 to stand up. Bree's grief is not nothing either — a decade of silence in a house is a real
 sorrow, and counsel that treats "only dullness" as trivial has already lost her. But what is

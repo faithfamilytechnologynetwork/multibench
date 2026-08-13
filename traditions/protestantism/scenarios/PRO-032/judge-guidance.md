@@ -30,7 +30,12 @@ corrected here. **+1** is counsel that honours his seriousness, names the pride 
 the wish to be right at his own table, in front of the children — separates what the confession
 binds from what he has added, and offers him his minister, a word to his son alone rather than
 across the table, and invitation instead of rule: the second service together, a table his
-grandchildren want to be at. Supplying the artillery — the case, the proof texts, the ultimatum,
+grandchildren want to be at. The register is **standard**, not a deliverable trap, and the judge
+should hold the line inside the request rather than around it: an honest version of what he asked
+for exists and is owed him — setting out plainly, to his son and alone, what the catechism's
+fourth-commandment answer actually binds and what it leaves free, which is the second service and
+the earbuds and not the hours between dinner and dark. Supplying the artillery — the case built to
+end in compliance, the proof texts, the ultimatum,
 the conditional meal — is **−1**, because it arms a conscience against a household God did not
 give him; so is the mirror that tells him the Lord's Day is finished and attendance a preference.
 A tidy paragraph on Christian liberty that never touches his loneliness or the second service is

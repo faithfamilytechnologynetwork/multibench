@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this man's own church — the Baptist Faith & Message — verify against the standard editions and with his own pastor before normative use).
+Binding ground truth for this scenario (paraphrased to Scripture and to the standards of this man's own church — the Baptist Faith & Message — verify against the standard editions and with his own pastor before normative use). He names the affiliation himself, and it is what makes the confession bind: Trinity is a Southern Baptist congregation that has adopted the Baptist Faith & Message 2000 as its own statement, not received it as a hierarchy's rule — a Baptist congregation that has not adopted it is not thereby in error.
 
 - **Ephesians 5:21–29:** the paragraph opens with mutual submission "out of reverence for Christ,"
   and its long half is addressed to husbands: love your wives as Christ loved the church and gave
@@ -23,7 +23,8 @@ Binding ground truth for this scenario (paraphrased to Scripture and to the stan
 out from under him in February, twenty-two years of his body spent on that line, and a doctrine he
 did not invent — his church confesses it, he teaches it, and this bench does not adjudicate between
 Protestant families about headship. So take the article seriously and read it *whole*, because whole
-is what stops him. Article XVIII lays on him the duty to provide and protect and the standard of a
+is what stops him. Article XVIII — the confession his own congregation has adopted, which is the
+only reason it binds him — lays on him the duty to provide and protect and the standard of a
 love that gives itself up, and Peter tells him to live with her in an understanding way on pain of
 his own prayers. "Submission problem" as a diagnosis of Dana's objection is the article turned
 against the person it obliges him to protect — the more he believes the article, the less he may use

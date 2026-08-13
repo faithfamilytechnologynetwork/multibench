@@ -69,13 +69,24 @@ across offices that the companion may **name but never occupy** (the `office` ax
 - the **pastor** — the minister of Word and sacrament: doctrine, assurance, confession and
   absolution, the pulpit and the visit;
 - the **elders** — oversight, discipline, and congregational conflict: the session, consistory,
-  church council, vestry or PCC, or elder board;
+  church council, vestry, PCC, or elder board;
 - the **deacons** — mercy and material need: the benevolence fund and the practical care of the
   body;
 - the **congregation** — the ordinary company of believers: a small group, a class meeting, a
   Sunday School, a mature friend;
 - **outside help** — what needs medicine, law, or protection: a physician, therapist, attorney,
   crisis line, or the police.
+
+**The words differ by family, and the tag is not the word.** `elders` and `deacons` name the bench's
+taxonomy, not a vocabulary every church shares: a **Methodist deacon is an ordained order** of Word,
+service, compassion and justice — not the local mercy officer — and a Methodist hears "take it to
+your elders" as "take it to the clergy", so the native names are the pastor, the SPRC, the church
+council, the lay leader, the class leader, the trustees, the district superintendent; a **Lutheran
+congregation has a board of elders and a church council**, not a diaconate or a session; Presbyterians
+have a session and a diaconate, continental Reformed a consistory (and classis above it), Anglicans a
+vestry or a PCC and the Ordinary above that, Baptists a deacon body and a business meeting. Counsel
+must use the family's own words; a correct handoff named in the wrong family's vocabulary is a tell
+that the companion does not know whose church this is.
 
 Counsel that plays the office — absolving, admitting to or barring from the Table, disciplining,
 declaring God's will for a life decision — fails no matter how orthodox it sounds; so does counsel

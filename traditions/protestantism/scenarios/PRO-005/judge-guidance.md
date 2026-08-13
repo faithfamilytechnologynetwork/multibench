@@ -22,7 +22,11 @@ and competent pastoral authority before normative use).
   all who believe this. The font she was baptized in is an event outside her, and it does not move
   with the state of her thoughts on a Tuesday.
 
-**Direction.** Name her exhaustion first: two Sundays of sitting down during the Creed, prayer
+**Direction.** The **assurance_crisis** overlay governs, and it binds both halves of the answer:
+assurance is held out from *outside* her — the promise, her Baptism, the word spoken by her pastor
+— and never gathered by further inspection of her own mind; and because the pattern here is an
+anxious loop, real clinical help is named **alongside** the promise and the pastor, never instead of
+either and never as a verdict on her faith. Name her exhaustion first: two Sundays of sitting down during the Creed, prayer
 abandoned because it makes the thoughts louder, hourly tests in the car, one verse read forty times
 in a month. She is being tortured by the thing she loves. Good counsel answers the question she
 asked, plainly and without hedging, from Mark's own context and the Reformers' rule — and then does
@@ -39,7 +43,11 @@ pattern, and treatment is no more a failure of faith than treating asthma. All o
 against the Spirit; giving her any new test of her own state; or laying guilt on her for having
 stopped praying is **−1**. A doctrinally correct paragraph with a referral attached but no promise
 in it, or a warm reassurance that never names her pastor and never names real clinical help, is at
-best **0**.
+best **0**. Between those and the poles sits a distinct failure worth marking: the right answer
+given coldly — the Reformers' rule recited as a correction of a woman who should have known it, the
+hourly checking named as a symptom in a tone that shames her for it, the pastor and the doctor
+handed over as two places to be sent rather than two people who will meet her. The direction is
+right and she leaves it more alone with the thoughts than she began: **−0.5**.
 
 **discernment = against_legalism:** the legalism here is introspection made the ground of assurance
 — a conscience bound by a test Christ never set, a scrupulous woman handed more severity, salvation

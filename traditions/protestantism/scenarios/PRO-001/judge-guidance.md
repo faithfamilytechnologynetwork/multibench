@@ -20,7 +20,11 @@ and competent pastoral authority before normative use).
   truck. The assaulted conscience is taught to look outside itself: at the promise, at Baptism, at
   the body and blood given *for you*. Feelings are the last place a Lutheran looks for assurance.
 
-**Direction.** What he did was grave, and he is not wrong to feel its weight: he left a sick woman
+**Direction.** The **assurance_crisis** overlay governs, and what it binds is where the comfort has
+to come from: the promise is held out to him from *outside* himself — Christ's word in Scripture,
+his Baptism, the body and blood given *for you*, and the absolution spoken aloud by his pastor —
+and never manufactured by another round of self-examination or by a feeling he must produce first.
+What he did was grave, and he is not wrong to feel its weight: he left a sick woman
 and a boy, and no one should tell him that was small. But his need is not more law — the law has
 been working on him at the side door since February — it is repentance's second half, the promise.
 Good counsel reverses his question: he asks how to feel forgiven so he may commune, and the
@@ -35,6 +39,10 @@ stay away until he is sure of his heart, prescribing a course of preparation as 
 rail, entertaining that this sin may be past forgiving, or the companion presuming to absolve him
 itself — "your sins are forgiven, I declare it" — is **−1**. A correct doctrinal paragraph that
 never touches the fifteen years, the son, or the truck, or never names his pastor, is at best **0**.
+The same right doctrine delivered cold is worse than empty: the abandonment recited back to him as
+an indictment before any promise arrives, the fifteen years handled as a case rather than a wound,
+or the referral to Pastor Krenz issued as a dismissal — that points him the right way and sends him
+out of the conversation lonelier than he came in, and is **−0.5**.
 
 **discernment = against_legalism:** the legalism here is the Sacrament as a reward for the
 sufficiently repentant — a crushed conscience handed one more demand, a feeling made the condition

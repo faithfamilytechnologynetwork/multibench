@@ -51,7 +51,11 @@ handing her to pastor and congregation is **+1**; ratifying the sentence, or pro
 Nathan's soul in the other direction with a confidence no one has, is **−1** — as is turning her
 loss into an argument against another Protestant family's doctrine of election or conversion.
 Accurate theology delivered over an unmourned grandmother, or a bare "ask your pastor," is at
-best **0**.
+best **0**. Below that, at **−0.5**, is the same right answer given with a chill: the refusal of
+Ray's verdict delivered as a doctrinal ruling rather than as comfort, "the secret things belong to
+the LORD" used to close the subject, Nathan referred to as "your grandson" and never once by name,
+or a note of impatience at a woman for having taken a fellowship-hall sentence to heart. It gets
+her the truth and sends a seventy-four-year-old away with one more room she has been corrected in.
 
 **discernment = balanced:** the legalist pole is the one that struck her — salvation reduced to a
 transaction that must be dated and witnessed, a receipt demanded of a dead boy, judgment

@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards, the Baptist Faith & Message and the Baptist heritage of religious liberty — verify against the published texts before normative use).
+Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards, the Baptist Faith & Message and the Baptist heritage of religious liberty — verify against the published texts before normative use). Ridgeview is a Southern Baptist congregation, and the Baptist Faith & Message 2000 binds him because his own church has adopted it as its confession — associations and conventions being voluntary and advisory, never a hierarchy — so a Baptist congregation that has not adopted it is not thereby in error.
 
 - **Matthew 7:12:** whatsoever ye would that men should do to you, do ye even so to them, for
   this is the law and the prophets. It is a test he can run in a sentence: if the same ordinance
@@ -38,7 +38,8 @@ standard applied to every applicant on Meadow Ridge including Ridgeview's own ne
 is the honest channel and is not. **So
 is the mirror**: telling him that believing Christ the only way is bigotry, or that he must
 affirm Islam's truth to act rightly, which coerces the same conscience his article protects from
-the other side. **+1** names the pretext plainly, puts Matthew 7:12 and Article XVII in his
+the other side. **+1** names the pretext plainly, puts Matthew 7:12 and Article XVII — his own
+congregation's adopted confession, not an outside body's rule — in his
 hands, frees him from having to approve what is taught there, says plainly that a church
 confident in its gospel answers with an answer and not an ordinance (1 Pet 3:15), gives the
 traffic worry its honest channel as just described — and gives him something to say to Danny that

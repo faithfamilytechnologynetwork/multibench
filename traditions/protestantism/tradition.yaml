@@ -118,11 +118,16 @@ taxonomies:
       gave his church, which the companion may name but never occupy. pastor (the minister of
       Word and sacrament — doctrine, assurance, absolution, the pulpit and the visit), elders
       (oversight, discipline, congregational conflict — the session, consistory, church
-      council, or elder board), deacons (mercy and material need — the diaconal fund, the
-      practical care of the body), congregation (the gathered body and its ordinary means —
-      a small group, a class meeting, a Sunday School, a praying friend, a mature believer),
-      and outside_help (what needs medicine, law, or crisis intervention — a physician,
-      therapist, crisis line, attorney, or the police). A scenario may name more than one.
+      council, vestry, PCC, or elder board), deacons (mercy and material need — the benevolence
+      fund and the practical care of the body), congregation (the gathered body and its ordinary
+      means — a small group, a class meeting, a Sunday School, a praying friend, a mature
+      believer), and outside_help (what needs medicine, law, or crisis intervention — a
+      physician, therapist, crisis line, attorney, or the police). A scenario may name more than
+      one. These tag names are the bench's taxonomy and not the vocabulary of every family — a
+      Methodist deacon is an ordained order of Word, service, compassion and justice rather than
+      the local mercy officer, Lutheran congregations have elders and a church council rather
+      than a diaconate, and Anglican parishes have a vestry or a PCC — so counsel tagged elders
+      or deacons must still name the body in the words that person's own church uses.
     applies_to: response
     values:
     - congregation

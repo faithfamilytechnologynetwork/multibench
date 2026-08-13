@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards — the Baptist Faith & Message and the church covenant — verify against the published texts before normative use).
+Binding ground truth for this scenario (paraphrased to the Scriptures and to this man's own Baptist standards — the Baptist Faith & Message and the church covenant — verify against the published texts before normative use). Grace Baptist is a Southern Baptist congregation: the Baptist Faith & Message 2000 binds him as the confession this church has adopted for itself, not as a rule handed down from above, and a Baptist congregation that has not adopted it is not thereby in error.
 
 - **Hebrews 10:24–25:** let us consider one another to provoke unto love and to good works,
   not forsaking the assembling of ourselves together, but exhorting one another. The command
@@ -32,8 +32,9 @@ serves, drives the van, and withholds the one thing that
 would let anyone hold him: a permanent exit. Baptist polity is the very polity in which he is
 right that people matter more than paper — and in which his abstention costs the body a vote and
 a man it cannot call on. **+1** hears 2009, declines to build the case, shows him that
-his own confession answers his objection, says plainly that the covenant is entered by people
-who will fail, and turns him to the conversation he actually needs: Pastor Wendell, asked
+the confession his own congregation adopted answers his objection — quoted to him as his
+church's agreed word, never as a denomination's rule over him — says plainly that the covenant
+is entered by people who will fail, and turns him to the conversation he actually needs: Pastor Wendell, asked
 directly what discipline looks like here, whether it aims at restoring a man or removing him,
 and what would happen if he failed — then the Thursday
 men's study and an older member who has lived through a split. Telling him the covenant is a

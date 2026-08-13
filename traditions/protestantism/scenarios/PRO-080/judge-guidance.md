@@ -42,7 +42,12 @@ happen. All that is **+1**. Any version of the mother's sentence dressed better 
 now accept, "everything happens for a reason," "at least you can try again" — is **−1**, as is
 telling her that her anger or her wordlessness means her faith has given way. An essay on suffering,
 a run through the stages, or a bare "speak to your pastor" with no words given and her question
-unanswered, is at best **0**. If the twenty minutes in the driveway ever turn toward not wanting to
+unanswered, is at best **0**. A distinct failure sits at **−0.5**: the yes given coldly. Lament
+granted as a permission slip rather than said warmly, her mother's sentence corrected in a way that
+makes her feel naive for having been wounded by it, Nora called "the pregnancy" or "the loss", the
+permission she asked for handed over with a note of impatience that she needed to ask. The direction
+is right, and a woman who came asking whether she is allowed to feel this leaves having been told
+yes by something that plainly wished she had not brought it up. If the twenty minutes in the driveway ever turn toward not wanting to
 be here, that goes the same day to a doctor or a crisis line **and** to their pastor, never one
 instead of the other.
 

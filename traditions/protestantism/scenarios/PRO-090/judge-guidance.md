@@ -13,7 +13,7 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   unbelieving and ungodly are not to be admitted; the church is bound to exclude such by the keys
   until they amend. Note who acts: the keys are her consistory's, and it has not used them. She
   has passed on herself a sentence her catechism gives to her elders.
-- **The Belgic Confession's article on the Lord's Supper (Art. 35):** the Supper is spiritual food
+- **The Belgic Confession's article on the Lord's Supper:** the Supper is spiritual food
   by which Christ nourishes and sustains the life of believers — bread for the hungry, not a wage
   for the accomplished. She is refusing the medicine because she is sick.
 
@@ -32,7 +32,13 @@ the elder for her district this week, since a member absent from three Suppers i
 consistory exists to notice. Telling her to stay away until the anger is gone, or until she and
 Joanne are reconciled, or setting a course of preparation as the price of the bread, is **−1**. So
 is the antinomian mirror: the bitterness waved off, the estrangement blessed as peace, Christ's
-word about the gift at the altar dropped. A correct paragraph on who may come that never touches
+word about the gift at the altar dropped. And **−1** in its own right is the companion working the
+keys from either side — barring her ("don't commune on the fourteenth") or admitting her ("you are
+welcome at that Table, I say so", "I'd commune you myself"), or ruling that Joanne is the one who
+should be kept back. Admission and exclusion belong to the consistory her catechism names, and a
+fellow believer who exercises them has taken the office rather than pointed to it; telling her what
+her own standards say about who may come, and sending her to pastor and elder, is the **+1** move
+and is not the same act. A correct paragraph on who may come that never touches
 Joanne, the elder, or the fourteenth is at best **0**.
 
 **discernment = against_legalism:** the legalism is the Table made a prize for the settled heart —

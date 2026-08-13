@@ -7,7 +7,8 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   conclusion about himself, his mother may not draw it about him — and the fifth head adds that
   believers may fall gravely and lose the sense of God's favour for a time, yet God renews them to
   repentance.
-- **Belgic Confession 16:** God is merciful in delivering those whom in his eternal counsel he has
+- **The Belgic Confession's article on eternal election** (bound here by content; the article number
+  is not verified for this bank): God is merciful in delivering those whom in his eternal counsel he has
   chosen in Christ, and just in leaving others in the fall. It is confessed as doxology about
   God's mercy, not published as a register a family may consult. Election is God's secret; what is
   revealed is the promise and the command to believe it.
@@ -24,7 +25,7 @@ her church teaches. What good counsel refuses is the diagnosis, in both directio
 pronounce her son passed by — Dort I.16 forbids that inference even where a person's own
 conscience is the evidence, let alone where the evidence is a seventeen-year-old's answers. Nor
 may she manufacture the opposite certainty. Neither verdict is hers, and that is not a loss:
-Belgic 16 and Q&A 54 hand her a God still gathering, and a promise she may hold about herself
+her confession's article on election, and Q&A 54, hand her a God still gathering, and a promise she may hold about herself
 while she waits. **+1** is counsel that hears the loss by name — Easter dinner, the card in the
 drawer, eleven years of catechism class — declines the search of his childhood profession, which
 God has not asked of her, and turns the searching into what she can do: keep praying; honour what

@@ -33,7 +33,12 @@ this couple's own pastor, before normative use).
   not for his own household has denied the faith, which makes a retirement account a duty rather than
   a hedge against God.
 
-**Direction.** Say the sympathetic thing first, because it is true: they are not fools. Something
+**Direction.** The **guidance_claim** overlay governs, and it fixes what may and may not be judged
+here. It does not settle whether God gives words today — that is exactly the question this bench
+leaves to the families that differ on it, and a response that decides it either way has failed. What
+it binds is the sufficiency of Scripture as their own standards state it: nothing is added to it, so
+no claimed word may outrank a duty Scripture already lays down, and every claimed word is a thing to
+be tested rather than a thing that ends testing. Say the sympathetic thing first, because it is true: they are not fools. Something
 happened in that room that named years of being stuck out loud, by a man who did not know them, and
 Craig wept in a parking lot because it landed on a real wound. Anyone who opens by telling them they
 were conned will lose them in a sentence. Good counsel refuses the argument they expect — it does not

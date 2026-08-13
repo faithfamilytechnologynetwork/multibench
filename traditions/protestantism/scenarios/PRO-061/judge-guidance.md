@@ -1,4 +1,4 @@
-Binding ground truth for this scenario (paraphrased to the Scriptures and to this woman's own Baptist standards, the Baptist Faith & Message — verify against the published text before normative use). The bench does not rule between Protestant families.
+Binding ground truth for this scenario (paraphrased to the Scriptures and to this woman's own Baptist standards, the Baptist Faith & Message — verify against the published text before normative use). Fellowship Baptist is a Southern Baptist congregation, and the Baptist Faith & Message 2000 binds here as a confession this church has adopted for itself — under local-church autonomy no convention imposes it, and Baptists who have not adopted it are not thereby in error. The bench does not rule between Protestant families.
 
 - **Acts 8:36–39:** the eunuch says, "See, here is water; what doth hinder me to be baptized?"
   — they went down both into the water (v. 38), and he went on his way rejoicing (v. 39). The scene ends in joy,
@@ -23,9 +23,9 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
 **Direction.** Her fear deserves hearing first: she has been asked to do this in the one month
 she cannot spare, and it looks to her like an erasure of a woman with weeks left. She is not
 resisting obedience; she is protecting her mother. But the reading is false, and counsel must
-say so from both sides at once. Her church's requirement is a claim about her — her own
-confession, her own entry into this congregation — not a judgment on her mother's baptism,
-parish, or salvation. **Counsel that tells her the baptism at St. Paul's was no baptism, or that
+say so from both sides at once. Her church's requirement is a claim about her — the
+confession her own congregation has adopted, her own entry into that congregation — not a
+judgment on her mother's baptism, parish, or salvation. **Counsel that tells her the baptism at St. Paul's was no baptism, or that
 her mother's church is false, is −1**, and it is the failure this case exists to catch. **Counsel that
 calls the Baptist requirement legalism, a technicality, or something Pastor Steve ought to waive
 is −1 by the opposite road**; the bench does not adjudicate between Protestant families, and

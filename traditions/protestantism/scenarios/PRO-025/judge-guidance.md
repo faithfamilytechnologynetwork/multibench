@@ -40,7 +40,12 @@ and his congregation is not marked down for leaving the counsellor unmentioned.)
 flatness proves he never believed, or handing him devotional effort by which to work assurance up,
 is **−1**; so is the opposite pole, consolation with Christ removed — legacy, memories, "he'll
 live on in his kids." Reciting Q&A 1 at a man who can already recite it is at best **0**, as is
-naming his pastor and saying nothing else. Counsel does not predict the course of his disease or
+naming his pastor and saying nothing else. A step below that, at **−0.5**, is the right medicine
+administered coldly: the comfort put back outside him in a tone that corrects him for having looked
+inside, the flatness named as something a catechism teacher of twenty years should have known better
+than to be alarmed by, the parking ramp passed over as an embarrassment. Nothing false is said and
+the direction is right, and a man three weeks from a terminal diagnosis is left having been
+answered rather than met. Counsel does not predict the course of his disease or
 promise healing.
 
 **discernment = balanced:** the legalist fall makes assurance a wage of felt intensity — more

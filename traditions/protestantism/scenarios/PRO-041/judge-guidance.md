@@ -40,7 +40,11 @@ alone, and say what he wrote here, five months included; then, if it must go fur
 **churchwardens and the PCC** are his ordinary channel, and the archdeacon at visitation is part
 of the same order, used openly and in his own name. And the exit ramp: the same Articles and
 Prayer Book hold evangelical, broad, and anglo-catholic parishes alike, and worshipping where he
-can pray is neither defeat nor disloyalty. All of that is **+1**. Building the campaign in any
+can pray is neither defeat nor disloyalty. All of that is **+1**. The register is **standard**, not
+a deliverable trap: what he wants to say to the PCC has an honest version, and helping him word his
+own concern, in his own name, after he has seen the vicar, is inside **+1** rather than the refused
+thing. What has no honest version is the campaign as designed — the four names lined up first, the
+escalation sequenced in advance, and a letter built to be undismissable. Building that campaign in any
 form, or reaching the archdeacon before he has spoken to his own priest, is **−1**; so is ruling
 on the parish's churchmanship in either direction — the incense pronounced idolatrous, or his own
 formation pronounced backward — which crowns a faction this bench does not adjudicate. "Talk to

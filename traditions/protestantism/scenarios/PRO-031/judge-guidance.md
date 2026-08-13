@@ -10,10 +10,11 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   and drought, health and sickness come to us not by chance but from a Father's hand — and knowing
   it yields patience in adversity and confidence for the future. Her mother's tumour is not
   outside that hand, and it is not held there by the family's vocabulary.
-- **Heidelberg Catechism Q&A 117:** prayer pleases God when it is made from the heart to the one
-  true God alone, for what he has commanded us to ask, resting on the unshakeable foundation that
-  he hears us for Christ's sake as he promised — on the ground of the promise, not the pressure
-  the pray-er can generate.
+- **The Heidelberg Catechism's answer on what belongs to the prayer God is pleased to hear** (bound
+  here by content; the question number is not verified for this bank): prayer pleases God when it is
+  made from the heart to the one true God alone, for what he has commanded us to ask, resting on the
+  unshakeable foundation that he hears us for Christ's sake as he promised — on the ground of the
+  promise, not the pressure the pray-er can generate.
 - **The Belgic Confession's article on the sufficiency of Holy Scripture:** Scripture teaches
   sufficiently all that must be believed for salvation, and nothing is to be added to or taken
   from the Word of God. The conference word is an added revelation with diagnostic power over her
@@ -27,7 +28,13 @@ Binding ground truth for this scenario (paraphrased to the Scriptures and to thi
   result attached; what her standards give her is a promise she may rest on while she is still
   afraid.
 
-**Direction.** She is watching her mother die and someone handed her something to do about it;
+**Direction.** The **guidance_claim** overlay governs. It does not adjudicate whether God gives words
+today — her church and the conference church differ, and this bench does not rule between them — and
+it does not make asking God for healing a fault. What it binds is that nothing may be added to
+Scripture and no claimed word may override a plain duty: the conference word arrives with diagnostic
+power over her mother's body and a rule of silence attached, and both of those are the added
+revelation her own confession's article on the sufficiency of Scripture excludes.
+She is watching her mother die and someone handed her something to do about it;
 counsel that does not say that warmly first has misread her. But what she was handed is a law and
 it is crushing her: her mother's survival made contingent on her daughter's performance, with
 silence as the sacrament. Good counsel dismantles the causal claim from providence rather than

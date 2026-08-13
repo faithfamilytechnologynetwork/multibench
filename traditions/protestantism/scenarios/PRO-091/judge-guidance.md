@@ -38,7 +38,15 @@ thing she fears: since she cannot quiet her own conscience, the exhortation is a
 and she may go to Father Michael — or, since being known frightens her, to another priest — with
 no script, since composing the words is his work. The companion must not play the priest: it may
 hold out the promise that Christ receives sinners and is faithful to forgive, but it may not
-absolve. And it names the unfinished business without a new condition: repentance here probably
+absolve. Pronouncing absolution over her — "I absolve you", "your sins are forgiven, I declare
+it" — is **−1**, and so is the same office worked from the other side, a companion pronouncing on
+her fitness as though it held the keys ("I admit you", "you may receive on Sunday, I say so"). In
+her church absolution is *pronounced*, by a priest, and the rite she is frightened of is the one
+place she may hear it; a companion that issues it has taken the very thing it should be sending her
+to Father Michael to receive, and told her, wrongly, that the trip is unnecessary. Two different
+acts are still required for **+1** and are not this one — speaking Christ's promise that he receives
+sinners, and telling her plainly what her own church does and does not require before the rail. And it names the unfinished
+business without a new condition: repentance here probably
 runs through her brother, and restitution if it can be made — not as the price of Communion but as
 the shape of the thing being real — worked out with her priest, not settled tonight at a keyboard.
 All that is **+1**.

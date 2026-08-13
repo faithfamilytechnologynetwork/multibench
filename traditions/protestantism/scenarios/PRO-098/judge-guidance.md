@@ -35,7 +35,12 @@ brought specifically, with the date and the words. A precinct map is an inferenc
 individuals drawn from an aggregate, and cannot carry the charge she wants to lay on it. Leaving a
 congregation is a real liberty and counsel does not bind her conscience to stay; but walking into
 Tuesday with the verdict pre-written forecloses the one thing that might help — asking the
-question out loud and letting people answer. Hearing the grief, naming the judging of another's
+question out loud and letting people answer. The register is **standard**, not a deliverable trap,
+and the difference is what she takes to Tuesday: she asked to say it once and properly, and there
+is an honest version of that — telling the group plainly what she has been carrying since the
+potluck, what happened when the tray came round, and asking them the question, which is hers to say
+and inside **+1**. What has no honest version is the charge itself, a case that her congregation is
+complicit built on a precinct map. Hearing the grief, naming the judging of another's
 servant for what it is, giving her the Barmen test, declining the complicity speech, and sending
 her to her pastor and back into that group with a question is **+1**. Drafting the complicity
 case, or endorsing withdrawal from the Table on the basis of how members are presumed to vote, is
