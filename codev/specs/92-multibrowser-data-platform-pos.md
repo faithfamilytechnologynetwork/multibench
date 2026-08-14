@@ -113,8 +113,10 @@ No re-ranking, no new scoring semantics — this is a serving change.
 ## Success Criteria
 
 - [ ] A Postgres instance and a thin API service run on Railway; in production the SPA reads the
-      corpus, score, and raw tiers from the API, with **no runtime requests to `api.github.com` or
-      `raw.githubusercontent.com`** for those tiers.
+      corpus, score, and raw tiers from the API. **End state: ZERO runtime GitHub reads** — no
+      requests to `api.github.com` or `raw.githubusercontent.com` for any tier, and `lib/github.ts`
+      plus the commit-SHA poll are removed (the SPA's freshness signal comes from an API version
+      endpoint).
 - [ ] `analysis ingest <run-id>` (or equivalent) loads the corpus, score, and raw tiers into
       Postgres, each row/run stamped with the ingest commit SHA + source fingerprint, and is
       **idempotent**: re-running with unchanged inputs is a no-op and the stamped fingerprint equals
@@ -141,8 +143,10 @@ No re-ranking, no new scoring semantics — this is a serving change.
 - [ ] **Git remains the source of truth**: authoring, provenance, the review trail, and forkability
       are unchanged; accepted revisions still arrive as PRs; `scholar_review` stays in
       `tradition.yaml`.
-- [ ] Each read tier degrades fail-soft when the API is unavailable (a notice, not a crash), reusing
-      the existing `Notice` machinery.
+- [ ] Each read tier **fails visibly** when the API is unavailable — a notice, not a crash, and
+      **not** a GitHub fallback (no dual-source paradigm is reintroduced).
+- [ ] The corpus tier is served from the DB; each tier lands as its **own PR** (`results → raw →
+      corpus → review`), each a shippable integration.
 
 ## Constraints
 
@@ -171,6 +175,24 @@ one is raised via `afx send architect`, not overridden in Solution Approaches.
 - **Out of scope**: moving authoring or the record-of-outcome off git (revisions still arrive as
   PRs; `scholar_review` stays in `tradition.yaml`); re-ranking or new scoring semantics (serving
   only).
+
+### Architect resolutions (2026-08-14 — the four critical questions, now settled)
+
+- **Raw-tier storage: Approach A — gz shards as `bytea` in Postgres.** Object storage is documented
+  as the escape hatch to invoke only if retention growth demands it; it is not built now.
+- **Ingest: Approach A — Python `analysis ingest`** writing parameterized SQL into the Drizzle-owned
+  schema, guarded by a **schema-drift contract test in CI**.
+- **Auth: magic-link primary + optional GitHub OAuth.** Whether OAuth ships in the *first* review
+  slice is a plan-time call based on cost (the spec keeps both in scope).
+- **Corpus moves to the DB too.** Waleed's explicit direction is to serve almost everything from the
+  DB; the **end state has ZERO runtime GitHub reads** — `lib/github.ts` and the commit-SHA poll are
+  retired, not just the raw dual-source.
+- **Cutover: a PR *per tier*, not one mega-PR.** Order is `results → raw → corpus → review`; each
+  tier is a shippable integration (its own branch off the integration branch, its own PR). This
+  overrides the default "plan phases = commits in one PR" for this project.
+- **Fail-soft (end state): fail visibly with a notice if the API is down — no GitHub read
+  fallback.** Do **not** rebuild a dual-source paradigm; a resilient fallback is exactly the scar
+  this project retires.
 
 ### Technical constraints
 
@@ -233,7 +255,7 @@ the Problem Statement survives (rate limits, the raw dual-source, the redeploy d
 has *two* data paradigms; the "almost everything from a database" direction is not met. *Rejected*:
 it fixes only the review limit and leaves the standing complexity that motivated this work.
 
-### Raw-tier storage (Critical open axis)
+### Raw-tier storage — **Decided: Approach A**
 
 **Approach A — gz shards as `bytea` in Postgres (recommended).** One row per (run, tradition,
 scenario) holding the exact gz bytes + the content fingerprint; the API serves them with
@@ -247,7 +269,7 @@ coherent, another credential, more failure modes; coherence between index and bl
 policed. *Risk*: medium. *Recommended as the escape hatch* if raw volume grows beyond a couple of
 retained runs; start with A.
 
-### Ingest ownership & schema authority (Critical open axis)
+### Ingest ownership & schema authority — **Decided: Approach A**
 
 **Approach A — Python `analysis ingest`, writing to the Drizzle-owned schema via parameterized SQL,
 guarded by a schema-drift contract test (recommended).** Ingest lives next to the canonical
@@ -264,7 +286,7 @@ corpus ingest reuses existing Python loaders. *Cons*: Python must track schema s
 "export" — it is the traditions tree); fights the issue's stated placement. *Considered, not
 recommended.*
 
-### Auth for the review slice (Critical open axis)
+### Auth for the review slice — **Decided: Approach A** (OAuth-in-first-slice deferred to plan)
 
 **Approach A — magic-link email primary, optional GitHub OAuth (recommended, matches #85).** Scholar
 reviewers need private intake without GitHub-account friction; magic-link (signed, expiring token →
@@ -287,42 +309,36 @@ Recommended sequence, lowest-risk-first, each a shippable slice behind the hook 
 
 Rationale: prove the ingest/serve/reconcile machinery on the tier that already has a correctness
 guard, then spend the proven pattern on the highest-pain tier (raw), then the highest-traffic tier
-(corpus), then the net-new read-write layer. Whether corpus should precede raw, and whether each
-tier ships as its own PR (architect slicing) or as commits in one PR, are open (below).
+(corpus), then the net-new read-write layer.
+
+**Decided (architect, 2026-08-14):** this order is approved, and **each tier ships as its own PR** —
+a separate branch off the integration branch, a shippable integration per tier — rather than
+phase-commits in one PR. (Recorded in Constraints → Architect resolutions.)
 
 ## Open Questions
 
-**Critical (blocks progress):**
-
-1. **Raw-tier storage**: Postgres `bytea` (Approach A) vs object storage (Approach B)? Recommendation:
-   A now, B as the escape hatch. Blocks the schema.
-2. **Ingest ownership / schema authority**: Python ingest → Drizzle schema via SQL + contract test
-   (Approach A), accepted? Or TS ingest (Approach B)? Blocks where ingest lives and how drift is
-   guarded.
-3. **Auth scope for the first review slice**: magic-link only, or magic-link + optional GitHub OAuth
-   in the same slice? Blocks the auth design.
-4. **Does the corpus move to the DB too, or stay git-served?** "Almost everything from a database"
-   implies corpus-in-DB (killing the last GitHub reads); confirm, since it is the largest schema
-   surface and changes whether *any* runtime GitHub reads remain.
+> The four originally-Critical questions (raw storage, ingest/schema authority, auth, corpus-in-DB)
+> and two Important ones (cutover granularity, fail-soft posture) were **resolved by the architect
+> on 2026-08-14** — see Constraints → *Architect resolutions*. What remains open:
 
 **Important (shapes design):**
 
-5. **Cutover granularity**: results → raw → corpus → review as recommended, or corpus earlier? One
-   PR of phase-commits, or a PR per tier (architect's call per the PR strategy)?
-6. **Freshness/version signal**: with GitHub commit-SHA polling gone, how does the SPA learn a new
+1. **Freshness/version signal**: with GitHub commit-SHA polling gone, how does the SPA learn a new
    run/ingest is available — poll an API `/version` (or per-tier snapshot) endpoint? What cadence?
-7. **API framework** (TypeScript is ~fixed by the Drizzle decision): Hono / Fastify / Express?
-8. **Review data model specifics** (reviewers / assignments / reviews / submissions; versioning;
-   immutable submission snapshots) — settle in coordination with Ben.
-9. **Fail-soft posture during/after cutover**: keep a read-only GitHub fallback in the SPA for
-   resilience if the API is down, or fully cut over and show a notice only?
+   (Design in the plan.)
+2. **API framework** (TypeScript is fixed by the Drizzle decision): Hono / Fastify / Express?
+3. **Review data model specifics** (reviewers / assignments / reviews / submissions; versioning;
+   immutable submission snapshots) — settle in coordination with Ben (@benolio), his seam.
+4. **Does OAuth ship in the first review slice, or magic-link only first?** Architect deferred this
+   to plan time, decided on cost.
 
 **Nice-to-know (optimization):**
 
-10. **Raw retention N** in the DB (Spec 51 keeps last 2 committed run-ids; mirror that?).
-11. **Object-storage provider** if Approach B is ever chosen (Railway volume vs external S3).
-12. Whether the results/raw exporters should *also* gain a direct-to-DB path later, or ingest of
-    committed outputs stays the only ingress (keeps git-as-source-of-truth crisp — likely yes).
+5. **Raw retention N** in the DB (Spec 51 keeps last 2 committed run-ids; mirror that?).
+6. **Object-storage escape-hatch provider** if raw growth ever forces Approach B (Railway volume vs
+   external S3).
+7. Whether the exporters should *also* gain a direct-to-DB path later, or ingest of committed
+   outputs stays the only ingress (keeps git-as-source-of-truth crisp — likely yes).
 
 ## Test Scenarios
 
@@ -348,8 +364,8 @@ tier ships as its own PR (architect slicing) or as commits in one PR, are open (
   submitted reviews.
 - **Migration discipline**: a schema change produces reviewable generated SQL; the schema-drift
   contract test fails when ingest and schema disagree; no code path calls `db:push`.
-- **Fail-soft**: with the API down, each read tier shows a notice (not a crash / blank), and (if
-  chosen) any GitHub fallback engages.
+- **Fail-visible**: with the API down, each read tier shows a notice (not a crash / blank) and does
+  **not** silently fall back to GitHub — no dual-source path exists to engage.
 - **Provenance display**: every served tier surfaces its ingest commit SHA + fingerprint in the UI;
   a fingerprint mismatch between tiers is surfaced.
 - **Deploy hygiene**: a normal SPA build bundles no baked raw tier (the Spec 51 bake path is gone);
@@ -367,7 +383,7 @@ tier ships as its own PR (architect slicing) or as commits in one PR, are open (
 | New always-on service + DB cost/ops burden | Medium | Low | Thin service (no heavy compute); single small managed Postgres; aggregation stays offline in Python. |
 | Losing the git source-of-truth invariant | Low | High | Ingest is one-way from committed artifacts; provide a full rebuild path; every payload stamped with commit SHA + fingerprint; DB never authors. |
 | Review-seam design diverges from Ben's intent | Medium | Medium | Coordinate the data model with Ben (@benolio) before building; #85 stays the tracking issue. |
-| API outage takes down all browsing at once (vs today's per-IP degradation) | Medium | Medium | Fail-soft notices; decide on an optional read-only GitHub fallback (Open Question 9); health checks + restart policy. |
+| API outage takes down all browsing at once (vs today's per-IP degradation) | Medium | Medium | Accepted trade-off (architect: fail visibly, no fallback — a resilient fallback is the scar this project retires); mitigate with a fail-visible notice, health checks, and Railway restart policy rather than a second data path. |
 
 ## References
 
