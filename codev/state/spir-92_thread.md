@@ -58,6 +58,23 @@ Phase→PR: P3→PR1(results), P5→PR2(raw), P7→PR3(corpus, deletes github.ts
 Flagged risk: porch multi-PR-per-project gate friction — raise w/ architect before P3 opens PR1.
 Checks pass (plan_exists, has_phases_json, 9 phases). Signaling PLAN_DRAFTED → porch 2-way consult.
 
+## Plan consult iter1 (2026-08-14): codex + claude BOTH REQUEST_CHANGES, HIGH — accepted ~all
+Claude verified vs worktree; both surfaced real implementability gaps. Revised 9→11 phases. Key fixes:
+- **Drift-guard had no CI** — cross-registered contract test in .codev/checks/test.sh (Phase 1).
+- **No test-Postgres** — PGlite (TS) + pytest-postgresql (Python), DATABASE_URL-gated (Phase 1).
+- **Immutable-cache unsafe on stable URLs** — fingerprint-qualified content URLs; /api/version no-store.
+- **Ingest committed-tree-bound** (refuse dirty paths) → provenance-rebuild + full drop-and-rebuild tests.
+- **Retention N=2** actually implemented: transactional prune, per-dataset-lineage (AFB never evicted).
+- **Phase 7 github.ts blast radius** corrected: rateLimit.ts, queryClient.ts, fakeRepo.ts, 9 sites
+  (incl. RootLayout); zero-GitHub guard scoped to RUNTIME hosts only (reviewReport opt-in links kept).
+- **fakeApi.ts harness** built Phase 3; git-modeling tests named as rewrites (not "unchanged").
+- **Phase 9 split → 9/10/11** (sync→async persistence / submission+assignment / aggregation); dropped
+  misapplied "only seam" quote.
+- Topology (CORS + cross-site cookies), PII-deletion endpoint, optimistic-concurrency conflict, verified
+  backup/restore (Phase 8). Cost gate = Phase 1 precondition. RAW_SCENARIO_QK exclusion KEPT (scar).
+Committed `[Spec 92] Plan with multi-agent review`. Rebuttal written. → porch done, expect plan-approval gate.
+Flagged to raise w/ architect: porch pr-gate × multi-PR before Phase 3 opens PR1.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
