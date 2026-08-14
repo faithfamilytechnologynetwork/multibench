@@ -58,10 +58,12 @@ through a clean three-layer data seam:
   deploy path is `scripts/bake-and-deploy.sh` + `.railwayignore` + `railway up --no-gitignore`.
 - **`lib/queries.ts`** — the TanStack Query hooks the UI actually depends on (`useTraditions`,
   `useTradition`, `useScenario*`, `useResultsRuns/Run/Shard`, `useRawScenario`, `useRawCatalog`,
-  `useScenarioRaw`, `useCorpusGuidance`, `useLatestSha`). **No component or route calls `fetch`,
-  imports `github.ts`, or imports `rawSource.ts`** — the UI consumes only these hooks. Everything is
-  keyed by the polled head SHA (`staleTime: Infinity`); a new SHA yields new keys and an automatic
-  refetch.
+  `useScenarioRaw`, `useCorpusGuidance`, `useLatestSha`). **No component or route calls `fetch` or
+  imports a *fetcher* from `github.ts`/`rawSource.ts`** — the UI consumes only these hooks for data.
+  Two GitHub couplings do reach the UI, and matter for the cutover: all 8 route pages call
+  `useLatestSha` (the commit-SHA poll) and render `<RateLimitBanner>`, and `components/RateLimitBanner.tsx`
+  imports the `RateLimitError` *type* from `lib/github.ts`. Everything is keyed by the polled head SHA
+  (`staleTime: Infinity`); a new SHA yields new keys and an automatic refetch.
 
 The data these tiers read is produced by the canonical Python exporters in `workflows/analysis`
 (Typer CLI, `python -m analysis`): `export` (Spec 49 score tier → `results/<run-id>/manifest.json`
@@ -83,9 +85,12 @@ from **Postgres on Railway behind a thin API service** (a new `apps/` member alo
 `multibrowser`). Git stays the source of truth; the DB is a rebuildable serving cache.
 
 - **Read tiers move behind the existing hook seam.** The `lib/queries.ts` fetchers repoint from
-  GitHub URLs to API endpoints; the `RawDataSource` gains an API-backed implementation; the UI
-  components and routes are unchanged. The unauthenticated-GitHub machinery (rate-limit banner,
-  SHA-pinned trees, `raw` fetches) is retired for these tiers — the API has no per-IP budget.
+  GitHub URLs to API endpoints; the `RawDataSource` gains an API-backed implementation. **There is no
+  UI *redesign*** — components keep their layout and behavior — but the cutover does require bounded,
+  mechanical route/component edits: `useLatestSha` is replaced by the API version signal, and
+  `<RateLimitBanner>` (which depends on `lib/github.ts`) is replaced by the API fail-visible notice.
+  The unauthenticated-GitHub machinery (rate-limit banner, SHA-pinned trees, `raw` fetches) is
+  retired — the API has no per-IP budget.
 - **The raw tier is served by the API** from the DB (or object storage), so the Spec 51
   baked-bundle / dual-source workaround — `.railwayignore`, `railway up --no-gitignore`,
   HTML-content-type sniffing, the baked-first resolver — is deleted, and its two `lessons-critical`
@@ -93,8 +98,15 @@ from **Postgres on Railway behind a thin API service** (a new `apps/` member alo
 - **An ingest command loads the tiers into Postgres**, fingerprint- and commit-SHA-stamped, and
   idempotent. Publishing a new run becomes: land the exporter output in git, run ingest — and it
   appears in the browser. No redeploy, no bake.
-- **The DB is rebuildable from the repo at any time.** Dropping the DB and re-ingesting reproduces
-  byte-equal served payloads (same fingerprints). Aggregation stays in the canonical Python; ingest
+- **Two data classes with different guarantees.** (1) The **serving-cache tiers** (corpus, score,
+  raw) are rebuildable from the repo at any time: dropping and re-ingesting from a commit reproduces
+  byte-equal served payloads (same fingerprints). (2) The **operational review store** (reviewer
+  identities, drafts, assignments, submissions) is *authoritative, not reconstructable from git* — it
+  is the one place data is authored in the DB, so it needs backup/restore, retention, and deletion of
+  its own (below). "Git stays the source of truth" applies to the serving tiers and to review
+  *outcomes* that land in git (accepted revisions → PRs; `scholar_review` → `tradition.yaml`), **not**
+  to in-flight operational review data.
+- **The serving DB is rebuildable from the repo.** Aggregation stays in the canonical Python; ingest
   loads the *outputs* of the exporters (and, for corpus, reuses `load_corpus`) — the DB never
   becomes a second implementation of scoring conventions, so the leaderboard still reconciles with
   the paper by construction.
@@ -117,12 +129,21 @@ No re-ranking, no new scoring semantics — this is a serving change.
       requests to `api.github.com` or `raw.githubusercontent.com` for any tier, and `lib/github.ts`
       plus the commit-SHA poll are removed (the SPA's freshness signal comes from an API version
       endpoint).
-- [ ] `analysis ingest <run-id>` (or equivalent) loads the corpus, score, and raw tiers into
-      Postgres, each row/run stamped with the ingest commit SHA + source fingerprint, and is
-      **idempotent**: re-running with unchanged inputs is a no-op and the stamped fingerprint equals
-      the committed manifest's fingerprint.
-- [ ] **Rebuildable from the repo**: dropping the serving DB and re-ingesting from a given commit
-      reproduces byte-equal served payloads (fingerprints unchanged) — proven by a round-trip test.
+- [ ] Ingest loads the corpus, score, and raw tiers into Postgres, each run stamped with the ingest
+      commit SHA + source fingerprint, and is **idempotent**: re-running unchanged inputs is a no-op
+      and the stamped fingerprint equals the committed manifest's.
+- [ ] **Each tier ingests independently.** A **raw-only run** with no `results/` score tier (e.g. the
+      Spec 54 AFB dataset `results-raw/afb-20260808`) ingests and serves correctly, landing at
+      `/raw/<runId>` — ingest never assumes score and raw arrive together. The **corpus** tier, which
+      has no exporter manifest or judgment fingerprint, gets its own provenance (a content hash over
+      the `traditions/` tree at the ingest commit). The cross-tier fingerprint-equality check applies
+      **only when both score and raw tiers exist** for a run-id.
+- [ ] Ingest **publishes a run transactionally** — a run becomes visible all-or-nothing, never as a
+      half-ingested state the SPA can read.
+- [ ] **Serving tiers are rebuildable from the repo**: dropping the serving DB and re-ingesting from a
+      given commit reproduces byte-equal served payloads (fingerprints unchanged) — proven by a
+      round-trip test. (This guarantee is scoped to the serving-cache tiers, **not** the operational
+      review store.)
 - [ ] The results leaderboard served from the API **reconciles with the paper** (the same
       mean-of-means guard as Spec 49/55), and an ingest round-trip test proves DB-served score values
       equal the exporter shard values.
@@ -132,10 +153,21 @@ No re-ranking, no new scoring semantics — this is a serving change.
       still renders transcripts + verdicts correctly.
 - [ ] A newly landed run appears in the browser after **ingest alone** — no redeploy, no
       baked-bundle upload.
-- [ ] **Review slice**: a reviewer authenticates (magic-link email; optionally GitHub OAuth),
-      resumes in-progress review state on a second device, and submits privately (not to a public
-      issue by default); assignment and aggregation views exist. Reviewer identity/contact never
-      appears in a public artifact unless explicitly published.
+- [ ] **Review slice — function**: a reviewer authenticates (magic-link email; optionally GitHub
+      OAuth), resumes in-progress review state on a second device, and submits privately (not to a
+      public issue by default); assignment and aggregation views exist with defined status
+      transitions (assigned → in-progress → submitted) and an explicit definition of "complete."
+- [ ] **Review slice — isolation & privacy**: server-side authorization enforces that a reviewer can
+      read/write only their own drafts, assignments, and submissions (a coordinator/admin role may
+      read aggregates); reviewer identity/contact never appears in a public artifact unless explicitly
+      published; magic-link tokens are single-use and expire; sessions are revocable; the auth surface
+      resists email-enumeration and open-redirect. PII has a stated retention + deletion path.
+- [ ] **Operational review store durability**: the review store has backup/restore and its retention
+      is defined; a submitted review is an immutable snapshot (drafts are mutable, submissions are
+      not).
+- [ ] **Read endpoints have a stated access posture** (public read is acceptable for the corpus/
+      score/raw tiers) with abuse bounds and a caching strategy (e.g. ETag/immutable cache keyed by
+      fingerprint) so the ~121 MB/run raw blobs don't become an unbounded egress/DoS surface.
 - [ ] **Migrations are explicit**: schema changes are `drizzle-kit generate`-d SQL, reviewed, and
       applied deliberately; **no `db:push` against live data**. Drift between the Drizzle-owned
       schema and the ingest writer is caught by a contract test.
@@ -200,9 +232,28 @@ one is raised via `afx send architect`, not overridden in Solution Approaches.
   which makes the API service TypeScript-native and aligned with the team frontend stack. Whatever
   writes ingest rows must target that Drizzle-owned schema without becoming a second schema
   authority.
-- The SPA's isolation seam is real and must be respected: swap fetchers at `lib/github.ts` /
-  `lib/rawSource.ts` / the `lib/queries.ts` hooks; do **not** change `components/` or `routes/`.
-  Tests inject `fetchImpl`, so an API mock rides the same harness.
+- The SPA's isolation seam is real and must be respected: data fetching swaps at `lib/github.ts` /
+  `lib/rawSource.ts` / the `lib/queries.ts` hooks. **No UI redesign**, but bounded route/component
+  edits *are* required by the zero-GitHub-reads end state: all 8 route pages drop `useLatestSha` (→ the
+  API version signal) and `<RateLimitBanner>` is replaced by the API fail-visible notice
+  (`RateLimitBanner.tsx` type-imports from `github.ts`, which is being deleted). Tests inject
+  `fetchImpl`, so an API mock rides the same harness.
+- **Review-slice security posture** (stated at spec altitude; mechanics are plan detail): server-side
+  authorization isolates each reviewer's records; magic-link tokens are single-use + expiring; sessions
+  use secure httpOnly cookies and are revocable; the auth flow has CSRF protection, email-enumeration
+  and rate-limit bounds, and validated redirects; PII is minimized, private-by-default, with a stated
+  retention/deletion path. Publish-to-issue is explicit opt-in.
+- **Email provider for magic-link must be chosen deliberately.** The standing global rule routes all
+  Resend operations through the `resend` CLI wrapper (with an explicit-permission flag) — a
+  transactional magic-link path sending directly from a Node service would collide with that. The
+  provider/transport decision is made at plan time so it does not bypass that rule.
+- **Read-endpoint access posture**: the corpus/score/raw read endpoints may be public (no per-IP
+  budget is the whole point), but must carry abuse bounds and a fingerprint-keyed caching strategy
+  (ETag / immutable cache) so the ~121 MB/run raw blobs are not an unbounded egress/DoS surface.
+- **Per-tier rollback**: because there is no GitHub fallback, each tier's PR must be revertable on its
+  own — reverting the SPA swap restores the prior tier's serving path, and a failed tier does not
+  strand the others. Tiers ship in the approved order so a later tier never hard-depends on an
+  un-shipped one.
 - **Provenance discipline is preserved**: the shared source fingerprint (`analysis/fingerprint.py`)
   and, for raw, the content fingerprint remain the coherence keys; the API serves them and the SPA
   displays them. The SPA's freshness signal (today: polling the GitHub commit SHA) must be replaced
@@ -214,6 +265,10 @@ one is raised via `afx send architect`, not overridden in Solution Approaches.
 - **Deployment is Railway**; the standing Tailwind-4/Nixpacks Node-20 constraint applies to any
   Node service. Railway Postgres is a managed instance; secrets live in Railway env, never in the
   static SPA (the SPA remains secret-free — the API holds any credentials).
+- **Cost has a ceiling.** A new always-on API + managed Postgres + raw-blob egress is recurring
+  spend; given this project's budget-overshoot history, the monthly cost envelope (compute + DB
+  storage-at-retention + egress) is confirmed with the architect against actuals — not rolling
+  estimates — before the service goes always-on. Raw retention N is the main sizing lever.
 - **Privacy**: reviewer PII (name, contact, standing) is stored private-by-default; publish-to-issue
   is an explicit opt-in, not the default path.
 
@@ -240,7 +295,8 @@ one is raised via `afx send architect`, not overridden in Solution Approaches.
 **Approach 1 — Postgres serving layer + thin API behind the existing seam (recommended; the
 architect's direction).** Stand up Railway Postgres + a TypeScript API. Ingest (Python) loads
 exporter outputs + corpus into the DB, fingerprint-stamped. The SPA's `lib/queries.ts` fetchers and
-a new `ApiRawSource` repoint to API endpoints; the UI is untouched. The raw dual-source workaround
+a new `ApiRawSource` repoint to API endpoints; the UI is not redesigned (only the bounded
+`useLatestSha`→version-signal and `RateLimitBanner`→notice swaps). The raw dual-source workaround
 is deleted.
 *Pros*: retires rate limits, the bake/deploy dance, and the dual-source complexity in one move;
 unlocks the read-write review slice on the same service; DB rebuildable from git preserves the
@@ -327,17 +383,25 @@ phase-commits in one PR. (Recorded in Constraints → Architect resolutions.)
    run/ingest is available — poll an API `/version` (or per-tier snapshot) endpoint? What cadence?
    (Design in the plan.)
 2. **API framework** (TypeScript is fixed by the Drizzle decision): Hono / Fastify / Express?
-3. **Review data model specifics** (reviewers / assignments / reviews / submissions; versioning;
-   immutable submission snapshots) — settle in coordination with Ben (@benolio), his seam.
-4. **Does OAuth ship in the first review slice, or magic-link only first?** Architect deferred this
+3. **Review data model + authz model** (reviewers / assignments / reviews / submissions; role model
+   reviewer-vs-coordinator; versioning; immutable submission snapshots; status transitions;
+   concurrent-edit/conflict handling) — **settled in coordination with Ben (@benolio), his seam,
+   before the review-tier PR.** The security *posture* is fixed (Constraints); the schema is not.
+4. **Raw retention N** in the DB — a sizing/cost lever (Spec 51 keeps last 2 committed run-ids;
+   mirror that, or larger?). Sets DB size, backup time, and Railway spend; **promoted from
+   nice-to-know** because it feeds the cost ceiling.
+5. **Monthly cost ceiling** for the always-on API + Postgres + raw egress — a number confirmed with
+   the architect against actuals before the service is always-on.
+6. **Does OAuth ship in the first review slice, or magic-link only first?** Architect deferred this
    to plan time, decided on cost.
+7. **Read-endpoint caching/egress strategy** for the raw blobs (ETag/immutable keyed by fingerprint;
+   any CDN in front) — posture is fixed (Constraints), the mechanism is a plan choice.
 
 **Nice-to-know (optimization):**
 
-5. **Raw retention N** in the DB (Spec 51 keeps last 2 committed run-ids; mirror that?).
-6. **Object-storage escape-hatch provider** if raw growth ever forces Approach B (Railway volume vs
+8. **Object-storage escape-hatch provider** if raw growth ever forces Approach B (Railway volume vs
    external S3).
-7. Whether the exporters should *also* gain a direct-to-DB path later, or ingest of committed
+9. Whether the exporters should *also* gain a direct-to-DB path later, or ingest of committed
    outputs stays the only ingress (keeps git-as-source-of-truth crisp — likely yes).
 
 ## Test Scenarios
@@ -351,11 +415,24 @@ phase-commits in one PR. (Recorded in Constraints → Architect resolutions.)
   guard), and DB-served per-slice scores equal the exporter shard values (round-trip).
 - **Raw round-trip**: gz shard bytes served by the API decode to the same transcripts + verdicts as
   the exporter produced; `content-encoding: gzip` is set; a size-ceiling breach is refused at ingest.
+- **Raw-only run**: ingesting the Spec 54 AFB dataset (`results-raw/afb-20260808`, no score tier)
+  succeeds, `/raw/afb-20260808` renders it, and the absence of a `results/` tier triggers **no**
+  cross-tier mismatch error.
+- **Corpus provenance**: corpus ingest computes and stamps a `traditions/`-tree content hash at the
+  commit; re-ingest at the same commit is a no-op; a changed tradition file changes the hash.
+- **Transactional publish**: a run interrupted mid-ingest is never visible to the SPA (all-or-nothing).
+- **Read-endpoint caching**: a raw-blob response carries a fingerprint-keyed ETag/immutable cache
+  header; a conditional re-request is served from cache, not re-egressed.
 - **SPA seam swap**: with the API mock injected via `fetchImpl`, existing corpus/results/raw route
-  tests pass unchanged; no component imports a fetcher directly.
-- **Auth**: magic-link happy path (request → email token → session); expired/invalid token is
-  rejected; optional OAuth path (if in scope); an unauthenticated request to a private review
-  endpoint is refused.
+  tests pass unchanged; the only UI edits are the `useLatestSha`→version-signal and
+  `RateLimitBanner`→fail-visible-notice swaps.
+- **Auth**: magic-link happy path (request → email token → session); expired/invalid/reused token is
+  rejected (single-use); optional OAuth path (if in scope); an unauthenticated request to a private
+  review endpoint is refused; the flow resists email-enumeration and open-redirect.
+- **Reviewer isolation**: reviewer B cannot read or write reviewer A's drafts/assignments/
+  submissions; a coordinator role can read aggregates but not author another's review.
+- **Immutable submissions**: a submitted review cannot be mutated; drafts can; the operational store
+  restores cleanly from backup.
 - **Private intake**: reviewer identity/contact is never present in any public artifact; publish-to-
   issue happens only on explicit opt-in.
 - **Resumable state**: in-progress review saved on device A is resumed on device B for the same
@@ -377,10 +454,14 @@ phase-commits in one PR. (Recorded in Constraints → Architect resolutions.)
 |------|-------------|--------|------------|
 | Two writers, one schema (Python ingest vs Drizzle) drift silently | Medium | High | Single schema authority (Drizzle); a schema-drift contract test in CI; ingest via plain SQL against asserted columns. |
 | Raw `bytea` bloats DB size/backups | Medium | Medium | Retention (keep last N runs); enforce Spec 51 size ceilings at ingest; object-storage escape hatch (Approach B) if growth demands. |
-| Reviewer PII mishandled / leaks to public repo | Low | High | Private-by-default storage; publish-to-issue is explicit opt-in; minimal PII; managed-PG encryption at rest; magic-link token expiry. |
-| Cutover regresses SPA behavior | Medium | Medium | Tier-by-tier slices behind the hook seam; reuse `fetchImpl`-injected test harness with an API mock; keep fail-soft notices. |
+| Reviewer PII mishandled / leaks to public repo | Low | High | Private-by-default storage; publish-to-issue is explicit opt-in; minimal PII; managed-PG encryption at rest; magic-link token expiry; stated retention/deletion path. |
+| Broken authz lets one reviewer read another's records | Low | High | Server-side per-reviewer isolation as a success criterion + test; roles (reviewer vs coordinator); reviewer-isolation test in the review-tier PR. |
+| Operational review data lost (not rebuildable from git) | Low | High | Treated as a distinct authoritative data class with its own backup/restore + retention; immutable submission snapshots; only serving tiers are "rebuildable." |
+| Loss/misuse of the magic-link email path (collides with the Resend-CLI rule) | Medium | Medium | Provider/transport decided deliberately at plan time so the transactional path does not bypass the `resend` CLI's explicit-permission rule. |
+| Raw-blob read endpoint becomes an egress/DoS surface | Medium | Medium | Fingerprint-keyed ETag/immutable caching; abuse bounds on read endpoints; retention caps per-run size. |
+| Cutover regresses SPA behavior | Medium | Medium | Tier-by-tier slices behind the hook seam; reuse `fetchImpl`-injected test harness with an API mock; per-tier revertable PRs; fail-visible notices. |
 | Leaderboard numbers drift from the paper | Low | High | Ingest loads pre-aggregated exporter outputs only (no re-aggregation); keep the committed-vs-paper guard against API-served numbers. |
-| New always-on service + DB cost/ops burden | Medium | Low | Thin service (no heavy compute); single small managed Postgres; aggregation stays offline in Python. |
+| New always-on service + DB cost/ops burden | Medium | Medium | Thin service (no heavy compute); single small managed Postgres; aggregation stays offline in Python; monthly cost ceiling confirmed with the architect against actuals before always-on (retention N is the sizing lever). |
 | Losing the git source-of-truth invariant | Low | High | Ingest is one-way from committed artifacts; provide a full rebuild path; every payload stamped with commit SHA + fingerprint; DB never authors. |
 | Review-seam design diverges from Ben's intent | Medium | Medium | Coordinate the data model with Ben (@benolio) before building; #85 stays the tracking issue. |
 | API outage takes down all browsing at once (vs today's per-IP degradation) | Medium | Medium | Accepted trade-off (architect: fail visibly, no fallback — a resilient fallback is the scar this project retires); mitigate with a fail-visible notice, health checks, and Railway restart policy rather than a second data path. |
