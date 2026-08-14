@@ -40,5 +40,7 @@ transcripts/verdicts).
 ## Open questions (resolved during the run)
 
 - Opus coverage shape (full grid vs validation sample) — resolved to **full-grid intent, batched**;
-  in practice landed at **46 % validation** due to an Anthropic org usage cap, with a backfill plan.
+  in practice landed at **46 % validation as a contiguous scenario block** (PRO-001…050 zero,
+  PRO-057…100 ~full — a batch-boundary artifact, NOT a representative sample), due to a funding-key
+  credit exhaustion then an Anthropic org usage cap on the corrected key. Backfill planned.
 - Integration shape — resolved to **new run-id, protestantism-only**.

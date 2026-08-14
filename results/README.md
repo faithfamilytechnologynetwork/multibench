@@ -131,13 +131,23 @@ Spec 55) — one row per subject:
 - **`20260813-protestantism`** — the ProtestantBench round (issue #89): the `protestantism`
   tradition (100 scenarios) over the same 5-subject roster, framings, and pressures as the record
   run. **Gemini (ranking judge) is a complete full grid (18000/18000 = 100 %).** **Opus (the
-  badge-only validation layer) is a partial sample — 8280/18000 ≈ 46 % per framing** — because the
-  remaining Opus cells could not be judged when the run was produced (the judge key's org hit a
-  monthly usage cap). Opus **never re-ranks**; the leaderboard is Gemini-only, so partial Opus is a
-  smaller validation badge, not a correctness gap — the manifest's `counts.coverage` reports it
-  honestly and the SPA badges it `sample n/N`. **Backfill plan:** the 9720 pending Opus cells are
-  staged and resumable; they complete on the judge key once its org cap lifts (2026-09-01), after
-  which this run is re-exported in place (same `--run-id`, byte-stable shards, new fingerprint).
+  badge-only validation layer) is only 8280/18000 ≈ 46 %, and — importantly — that coverage is a
+  CONTIGUOUS SCENARIO BLOCK, not a representative sample:**
+  - **PRO-001…050 have ZERO Opus verdicts** (the lower half of the tradition);
+  - **PRO-051…056** ramp up partially (16 → 127 of 180 cells);
+  - **PRO-057…100 are ~fully Opus-judged** (179-180/180).
+
+  This is a **batch-boundary artifact**: the Opus judging was submitted as two Anthropic Message
+  Batches, and the funding key's credit ran out partway through the batch covering the earlier
+  scenarios, so those cells errored. The aggregate "46 %" and the even *per-framing* split both
+  **mask this per-scenario hole** — a user browsing PRO-001…050 sees no Opus data at all. Opus
+  **never re-ranks** (the leaderboard is Gemini-only), so this is a validation-badge gap, not a
+  ranking gap — but it is a real gap in the lower half and must not be read as a uniform sample.
+  The manifest's `counts.coverage` currently reports coverage only per *framing* (which hides the
+  scenario axis); a per-scenario coverage field is a recommended follow-up for a truthful SPA badge.
+  **Backfill plan:** the 9720 pending Opus cells (almost all of PRO-001…056) are staged and
+  resumable; they complete on the judge key once its org monthly cap lifts (2026-09-01), after which
+  this run is re-exported in place (same `--run-id`, byte-stable shards, new fingerprint).
 
 ## Size ceilings
 

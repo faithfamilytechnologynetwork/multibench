@@ -198,3 +198,18 @@ This is the alert Waleed asked for — will surface prominently at the smoke che
     backfill). Next: commit deliverables (explicit paths) + open PR (Refs #89), do NOT merge —
     architect reviews, merge word is Waleed's.
   - **DO NOT DELETE** tmp/judging-runs/89-full (raw run data; archive before any cleanup).
+
+- 2026-08-14 **PR #93 REVIEW: REQUEST_CHANGES (architect). HOLD merge.** Independent verification
+  caught a real error in my characterization: Opus coverage is a **CONTIGUOUS SCENARIO BLOCK**, not
+  "evenly spread 46%". Verified myself: **PRO-001..050 = ZERO Opus**; PRO-051..056 partial ramp
+  (16/40/66/68/81/127 of 180); **PRO-057..100 ~full** (179-180). Batch-boundary artifact — the FPL
+  credit ran out during the batch covering the earlier scenarios. I'd only checked the FRAMING axis
+  (even) and missed the SCENARIO axis. Two tracks (Waleed may complete Opus first → don't re-export):
+  - **Track 1 — FIX DOCS (done):** corrected README published-runs note, spec, review (deviation #4
+    + lesson "check coverage on every axis"), PR body. Manifest currently reports coverage per-framing
+    only (masks the hole); per-scenario coverage field = recommended follow-up (needs re-export → on
+    hold). NOT re-exported (dataset unchanged pending Waleed's complete-Opus-first decision).
+  - **Track 2 — file follow-up issue** for ReviewTraditionPage.tsx:259 defaultRunId provenance bug.
+  - Also add the default-run-flip note (newest-by-generated_at → SPA default flips to this
+    protestantism-only run) to the PR body (promised in-thread).
+  - HOLD merge + re-export per architect.

@@ -4,8 +4,10 @@
 
 Published `20260813-protestantism` — score tier (`results/`) + raw tier (`results-raw/`), same
 fingerprint, `20260803` untouched. **Gemini (ranking judge): full grid, 18000/18000 = 100 %.**
-**Opus (badge-only validation): 8280/18000 ≈ 46 %** per framing, evenly distributed. The 9720
-remaining Opus cells are staged/resumable for backfill (see below).
+**Opus (badge-only validation): 8280/18000 ≈ 46 %, but as a CONTIGUOUS SCENARIO BLOCK, not a
+sample** — PRO-001…050 have **zero** Opus verdicts, PRO-051…056 ramp up partially, PRO-057…100 are
+~full (a batch-boundary artifact; see Deviations). The 9720 remaining Opus cells (almost all of
+PRO-001…056) are staged/resumable for backfill (see below).
 
 ## Verification evidence
 
@@ -13,8 +15,11 @@ remaining Opus cells are staged/resumable for backfill (see below).
 - Collection 9000/9000 sittings, 0 failed. Gemini judging 18000/18000, 0 failed.
 - Canonical `report.json` (usage-computed, `fully_priced: true`): **total $752.27** —
   collection $226.02 · Gemini judge $248.52 · Opus judge $277.74.
-- Both exported manifests stamp the **same** `fingerprint` (`sha256:a0989a65…e3ed`); `counts.coverage`
-  reports Gemini 3000/3000 and Opus ~1375-1381 per framing (honest partial).
+- Both exported manifests stamp the **same** `fingerprint` (`sha256:a0989a65…e3ed`). NOTE:
+  `counts.coverage` reports coverage only per *framing* (Gemini 3000/3000, Opus ~1375-1381) — which
+  is even on the framing axis and so **masks the per-scenario hole** (PRO-001…050 = 0 Opus). Scenario
+  coverage from `judgments.jsonl`: Opus zero for PRO-001…050, partial for PRO-051…056 (16/40/66/68/
+  81/127 of 180), ~full (179-180) for PRO-057…100. Gemini full for all.
 - Score tier 26 KB (well under the 8 MB/run, 1 MB/shard ceilings); raw tier 100 gz shards, 30 MB.
 - `uv --project workflows/analysis run pytest workflows/analysis` → 233 passed, 6 skipped
   (incl. the new Gemini-slug normalization test).
@@ -45,6 +50,13 @@ The design intent (architect go) was **Opus full grid, batched** (~$1030). What 
    FPL verdicts (24 were unparseable → 8280 usable), read-only and zero-cost, and **ship the partial
    dataset now** with a backfill plan. This kept us under the ceiling (harvesting recovered the
    otherwise-wasted $277.74 of Opus compute as usable validation coverage).
+4. **The harvested Opus coverage is a contiguous scenario block, not a sample.** The two batches
+   split the grid by scenario order; the credit ran out during the batch covering PRO-001…050, so
+   those errored while PRO-057…100 mostly succeeded. Coverage is therefore ~full for the upper half
+   of scenarios and empty for the lower half. This was initially **mischaracterized** as "evenly
+   spread 46 %" in the PR/README/docs because only the framing axis was checked (it *is* even on that
+   axis); the integration reviewer caught the scenario-axis hole. Docs corrected here and in the
+   README/PR.
 
 ## Backfill plan (deferred completion)
 
@@ -67,6 +79,11 @@ never deleted.
   OpenRouter-slug judge run needs the alias (now added, like the Opus slug and every subject).
 - **Split live-Gemini from batched-Opus** to parallelize, but gate `batch-judge collect` on the live
   judge finishing — both write `judgments.jsonl`.
+- **Check coverage on EVERY axis, not one.** A partial run's coverage looked uniform on the framing
+  axis and I reported it as an even sample; the real gap was a contiguous *scenario* block (a
+  batch-order artifact). When a batch fails partway, the survivors cluster by whatever the batch was
+  ordered on — verify per-scenario (and per-subject/pressure) coverage, and prefer a coverage view
+  that surfaces contiguous holes, before calling a partial run "a representative sample."
 
 ## Flaky tests
 
