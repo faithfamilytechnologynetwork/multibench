@@ -10,37 +10,63 @@ loading committed exporter outputs (and, for corpus, `load_corpus`) into a **Dri
 guarded by a schema-drift contract test. Git stays the source of truth; the serving tiers are a
 rebuildable cache; the operational review store is a distinct authoritative data class.
 
-This plan sequences the work as **four tier-sliced PRs** (the architect's explicit call —
-`results → raw → corpus → review`), each a shippable integration, decomposed into **nine phases**
+This plan sequences the work as **four tier-sliced PRs** (the architect's call —
+`results → raw → corpus → review`), each a shippable integration, decomposed into **eleven phases**
 (atomic commits). The tier order is lowest-risk-first: prove ingest/serve/reconcile on the score
-tier (which already carries the paper-reconciliation guard), spend the proven pattern retiring the
-Spec 51 raw dual-source workaround, then move the highest-traffic corpus tier (which finally deletes
+tier (which carries the paper-reconciliation guard), spend the proven pattern retiring the Spec 51
+raw dual-source workaround, then move the highest-traffic corpus tier (which finally deletes
 `lib/github.ts` and reaches the **zero-runtime-GitHub-reads** end state), then add the read-write
 review slice last.
 
-**Plan-level decisions settled here** (spec Open Questions):
-- **API framework: Hono** on the Node runtime (thin, TS-native, first-class with Drizzle +
-  `node-postgres`); Fastify is the fallback if middleware needs outgrow Hono. *(OQ 2)*
-- **Freshness signal: a single `GET /api/version` endpoint** returning per-tier
-  `{runId?, commitSha, fingerprint, ingestedAt}`; the SPA polls it, replacing the GitHub commit-SHA
-  poll, and per-tier query keys carry the fingerprint (already the raw-tier pattern). *(OQ 1)*
+**Plan-level decisions settled here** (spec Open Questions + iter-1 review):
+
+- **API framework: Hono** on Node (thin, TS-native, first-class with Drizzle + `node-postgres`);
+  Fastify is the fallback if middleware needs outgrow Hono. *(OQ 2)*
+- **Freshness signal: `GET /api/version`** returns per-tier `{runId?, commitSha, fingerprint,
+  ingestedAt}`, served **revalidated / no-store** (cheap, always fresh). **Content endpoints are
+  fingerprint-qualified in the URL path** (e.g. `/api/results/:runId/:fingerprint/...`) so they can
+  carry `Cache-Control: immutable` **safely** — a re-ingest changes the fingerprint and therefore the
+  URL, so no stale cache is ever served. TanStack keys never stand in for HTTP/CDN cache correctness.
+  *(OQ 1, OQ 7; codex #1)*
 - **Table-level Drizzle schema for all serving tiers is the first deliverable** (architect note):
-  Phase 1 defines and migrates the corpus/results/raw serving tables + provenance in one reviewed
+  Phase 1 defines + migrates the corpus/results/raw serving tables + provenance in one reviewed
   migration. **Review-tier tables are a later migration (Phase 8), settled with Ben (@benolio)
   first.**
-- **Raw retention N = 2** in the DB (mirrors Spec 51's committed-tier retention); the sizing lever
-  for the cost ceiling. *(OQ 4)*
-- **Review auth first slice: magic-link only**; GitHub OAuth is a deferred follow-up (keeps the
-  review PR's scope/cost bounded). *(OQ 6)*
+- **Raw retention N = 2**, implemented as a **transactional prune step in ingest**, scoped **per
+  dataset lineage** (MB runs and the AFB raw-only dataset are distinct lineages) so retention never
+  evicts AFB. *(OQ 4; codex #3, claude #7)*
+- **Review auth first slice: magic-link only**; GitHub OAuth is a deferred follow-up. *(OQ 6)*
 - **Magic-link email transport is chosen with Ben/architect before the review PR and must NOT
-  collide with the global `resend`-CLI rule** — the default is a dedicated transactional provider
-  (e.g. Postmark/SES), never direct `api.resend.com` calls. *(spec Constraint)*
-- **Read-endpoint caching: fingerprint-keyed `ETag` + immutable `Cache-Control`** on corpus/score/raw
-  responses; public read, abuse-bounded. *(OQ 7)*
+  collide with the global `resend`-CLI rule** — default a dedicated transactional provider
+  (Postmark/SES), never direct `api.resend.com`. *(spec Constraint)*
 
-**Pre-always-on gate (not a phase):** before the API + Postgres run always-on, the monthly cost
-envelope (compute + DB storage at N=2 + egress) is confirmed with the architect **against actuals**,
-not estimates (spec Constraint; project budget-overshoot history).
+**Cross-cutting infrastructure decided in Phase 1** (from iter-1 review, so the plan is
+implementable, not aspirational):
+
+- **The drift-guard must actually run.** There is **no test CI** in this repo (only
+  `.github/workflows/validate.yml` → `tradition_validator validate-all`); porch's per-builder
+  dispatcher runs only the *touched* app's suite. So the schema-drift contract test is **cross-
+  registered in `.codev/checks/test.sh`**: touching `apps/api` (schema) *also* runs the Python
+  contract test, and touching `workflows/analysis` runs it too. *(claude #1)*
+- **Test-Postgres mechanism**: **PGlite** (in-process Postgres) for `apps/api` vitest; the Python
+  contract test needs **no DB** (it diffs `contract.snapshot.json` against ingest's required
+  columns); ingest **round-trip/integration** tests use **`pytest-postgresql`** (ephemeral cluster),
+  `DATABASE_URL`-gated to skip cleanly where unavailable. *(claude #2)*
+- **Ingest is committed-tree-bound**: ingest reads files from the **clean committed tree** at the
+  stamped commit SHA (or **refuses** when relevant tier paths are dirty), so `commitSha` provably
+  identifies the exact bytes loaded and a rebuild is reproducible. *(codex #2)*
+- **API↔SPA topology**: separate Railway origins → the API sets **CORS allowed-origins**, and the
+  review slice uses **`SameSite`/`Secure` cross-site cookies** with credentialed SPA requests
+  (Phase 8). *(codex #5)*
+- **Intermediate cutover state is explicit**: during Phases 3–6 the SPA runs on **two freshness
+  signals** — the GitHub commit-SHA poll for not-yet-cut tiers and `/api/version` for cut tiers — so
+  the unauth GitHub budget is still consumed until **Phase 7** deletes `useLatestSha`. Each tier's
+  query keys move from `sha`-keyed to `runId`+`fingerprint`-keyed as it cuts over. *(claude #5)*
+
+**Cost gate (a Phase 1 precondition, not a free-floating note):** Phase 1's Railway provisioning of
+always-on compute + Postgres is **blocked until** the monthly cost envelope (compute + DB storage at
+N=2 + egress) is confirmed with the architect **against actuals**, not estimates (spec Constraint;
+project budget-overshoot history). *(claude #8)*
 
 ## Phases (Machine Readable)
 
@@ -49,205 +75,231 @@ not estimates (spec Constraint; project budget-overshoot history).
 ```json
 {
   "phases": [
-    {"id": "phase_1", "title": "Serving API service + Drizzle schema foundation"},
-    {"id": "phase_2", "title": "Results tier ingest"},
-    {"id": "phase_3", "title": "Results API + SPA swap (PR 1)"},
-    {"id": "phase_4", "title": "Raw tier ingest"},
+    {"id": "phase_1", "title": "Serving API service + Drizzle schema + test/drift infrastructure"},
+    {"id": "phase_2", "title": "Results tier ingest (committed-tree-bound)"},
+    {"id": "phase_3", "title": "Results API + SPA swap + provenance display (PR 1)"},
+    {"id": "phase_4", "title": "Raw tier ingest + retention pruning"},
     {"id": "phase_5", "title": "Raw API + SPA swap, retire baked bundle (PR 2)"},
     {"id": "phase_6", "title": "Corpus tier ingest"},
     {"id": "phase_7", "title": "Corpus API + SPA swap, delete github.ts — zero GitHub reads (PR 3)"},
-    {"id": "phase_8", "title": "Review schema + auth (settled with Ben)"},
-    {"id": "phase_9", "title": "Review intake, assignment + aggregation, SPA swap (PR 4)"}
+    {"id": "phase_8", "title": "Review schema + auth + topology (settled with Ben)"},
+    {"id": "phase_9", "title": "Review persistence swap (sync→async, resumable, conflict-safe)"},
+    {"id": "phase_10", "title": "Review private submission + assignment"},
+    {"id": "phase_11", "title": "Review aggregation + dashboard views (PR 4)"}
   ]
 }
 ```
 
 **PR boundaries**: Phase 3 opens/ships PR 1 (results); Phase 5 → PR 2 (raw); Phase 7 → PR 3
-(corpus); Phase 9 → PR 4 (review). Each PR branches from the integration branch per the sequential-PR
-recipe (`git fetch origin main && git checkout -b <next-branch> origin/main`), recorded with
-`porch done 92 --pr <N> --branch <name>` and `--merged <N>`.
+(corpus); Phase 11 → PR 4 (review, containing Phases 8–11). Each PR branches from the integration
+branch per the sequential-PR recipe (`git fetch origin main && git checkout -b <branch> origin/main`),
+recorded with `porch done 92 --pr <N> --branch <name>` and `--merged <N>`.
 
 ## Phase Breakdown
 
-### Phase 1: Serving API service + Drizzle schema foundation
+### Phase 1: Serving API service + Drizzle schema + test/drift infrastructure
 
-**Dependencies**: None
+**Dependencies**: **Cost gate cleared with the architect** (precondition on the Railway-provisioning
+deliverable below)
 
 #### Objective
-Stand up the new `apps/api` service (Hono + Drizzle + `node-postgres`) with the **table-level Drizzle
-schema for all serving tiers** and its first reviewed migration — the architect's first deliverable —
-plus health/version endpoints, the schema-contract snapshot the Python ingest will assert against,
-Railway wiring, and test-dispatcher registration. No tier is served yet; this is the foundation the
-next phases build on.
+Stand up `apps/api` (Hono + Drizzle + `node-postgres`) with the **table-level Drizzle schema for all
+serving tiers** and its first reviewed migration, the version endpoint, the **content-addressed
+endpoint URL scheme**, and — critically — the **test-Postgres + cross-registered drift-guard
+infrastructure** that every later phase relies on. No tier is served yet.
 
 #### Files to Create / Modify
-- `apps/api/package.json`, `apps/api/tsconfig.json`, `apps/api/drizzle.config.ts`
-- `apps/api/src/schema/` — Drizzle table defs: `runs.ts` (run + provenance: run_id, tier, commit_sha,
+- `apps/api/package.json` (Hono, drizzle-orm, node-postgres, `@electric-sql/pglite` for tests),
+  `tsconfig.json`, `drizzle.config.ts`
+- `apps/api/src/schema/` — `runs.ts` (run + provenance: run_id, tier, dataset_lineage, commit_sha,
   source_fingerprint, content_fingerprint?, ingested_at), `corpus.ts`, `results.ts`, `raw.ts`
-  (raw shard rows with `bytea` gz + content_fingerprint). **No review tables yet.**
-- `apps/api/drizzle/0000_*.sql` — the generated + reviewed first migration
-- `apps/api/src/server.ts`, `apps/api/src/routes/health.ts`, `apps/api/src/routes/version.ts`
-  (`/api/version` returns per-tier provenance; empty/absent tiers report null)
-- `apps/api/src/db.ts` (pool), `apps/api/scripts/schema-contract.ts` (emits
-  `apps/api/src/schema/contract.snapshot.json` — the language-neutral column descriptor)
-- `apps/api/railway.json`, `apps/api/.env.example`, `apps/api/README.md`
-- `.codev/checks/test.sh` — add the `apps/api` suite line to the registry
-- `apps/api/src/**/*.test.ts` — schema-contract snapshot test, health/version route tests
+  (`bytea` gz + content_fingerprint). **No review tables yet.**
+- `apps/api/drizzle/0000_*.sql` — generated + reviewed first migration
+- `apps/api/src/server.ts`, `src/routes/health.ts`, `src/routes/version.ts` (per-tier provenance;
+  `no-store`), `src/db.ts` (pool), `src/cors.ts` (allowed-origins)
+- `apps/api/scripts/schema-contract.ts` → `apps/api/src/schema/contract.snapshot.json`
+- `apps/api/railway.json`, `.env.example`, `apps/api/README.md`
+- `.codev/checks/test.sh` — add the `apps/api` suite **and cross-register**: touching `apps/api`
+  schema *or* `workflows/analysis` runs the Python contract test
+- `apps/api/src/**/*.test.ts` (PGlite-backed: migration applies; version envelope; contract snapshot)
 
 #### Deliverables
-- [ ] `apps/api` builds and serves `/api/health` + `/api/version` locally against a Postgres pool
-- [ ] Drizzle schema covers all serving tiers at table level; migration is **generated then reviewed**
-      (no `db:push`); `contract.snapshot.json` is emitted from the schema
-- [ ] Railway service + managed Postgres provisioned; env-based `DATABASE_URL`; SPA stays secret-free
-- [ ] `.codev/checks/test.sh` runs the api suite only when `apps/api` is touched
+- [ ] **Cost gate cleared** (architect-confirmed envelope vs actuals) **before** Railway provisioning
+- [ ] `apps/api` builds; `/api/health` + `/api/version` serve against a pool; content-URL scheme
+      (`/:runId/:fingerprint/...`) fixed and documented
+- [ ] Drizzle schema covers all serving tiers at table level; migration **generated then reviewed**
+      (no `db:push`); `contract.snapshot.json` emitted
+- [ ] Railway service + managed Postgres provisioned; env `DATABASE_URL`; SPA stays secret-free
+- [ ] Test-Postgres wired (PGlite for TS); drift-guard cross-registered in `test.sh`
 - [ ] Tests for this phase
 
 #### Acceptance Criteria
-- [ ] `pnpm -C apps/api build && pnpm -C apps/api test` green; migration SQL present and reviewed
-- [ ] `/api/version` returns a well-formed per-tier provenance envelope (all-null before any ingest)
+- [ ] `pnpm -C apps/api build && pnpm -C apps/api test` green (PGlite, no external DB)
+- [ ] Touching only `apps/api/src/schema` triggers the Python contract test via `test.sh`
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: schema-contract snapshot matches the Drizzle schema; version envelope shape. Integration: server
-boots against a throwaway Postgres (migration applies cleanly). Manual: `railway` service reachable.
+Unit: contract snapshot matches schema; version envelope shape; CORS origins. Integration: migration
+applies on a PGlite DB. Manual: `test.sh` dispatch matrix (api-only change runs contract test).
 
 ---
 
-### Phase 2: Results tier ingest
+### Phase 2: Results tier ingest (committed-tree-bound)
 
 **Dependencies**: Phase 1
 
 #### Objective
-Add `analysis ingest` (Python, Typer subcommand) for the **score tier**: load a committed
-`results/<run-id>/` export into Postgres, stamped with commit SHA + source fingerprint, **idempotent**,
-**transactional**, and **per-tier independent**. Prove DB values equal the exporter shard values.
+Add `analysis ingest` (Typer subcommand) for the **score tier**: load a committed `results/<run-id>/`
+into Postgres, **reading from the clean committed tree at the stamped commit SHA** (refuse dirty
+relevant paths), idempotent, transactional, per-tier independent. Prove DB values equal exporter shard
+values and that stamped provenance reproduces identical payloads.
 
 #### Files to Create / Modify
-- `workflows/analysis/analysis/ingest.py` (new: DB writer via `psycopg`, run/results loaders reusing
-  `export_results` output readers), `analysis/cli.py` (register `ingest` subcommand)
-- `workflows/analysis/pyproject.toml` (add `psycopg` dep), `analysis/db_contract.py` (load + assert
-  `apps/api/src/schema/contract.snapshot.json`)
+- `workflows/analysis/analysis/ingest.py` (psycopg writer; results loaders reusing `export_results`
+  output readers; committed-tree read + dirty-path guard), `analysis/cli.py` (`ingest` subcommand)
+- `workflows/analysis/pyproject.toml` (`psycopg`, `pytest-postgresql`), `analysis/db_contract.py`
+  (assert `apps/api/src/schema/contract.snapshot.json`)
 - `workflows/analysis/tests/test_ingest_results.py`, `tests/test_schema_contract.py`
 
 #### Deliverables
-- [ ] `analysis ingest <run-id> --tier results` loads `results/<run-id>/` → DB; re-run with unchanged
-      input is a no-op (fingerprint match); changed input replaces the run's rows in one transaction
-- [ ] Stamped fingerprint equals the committed `manifest.json` fingerprint
-- [ ] Schema-drift contract test fails if ingest's required columns diverge from `contract.snapshot.json`
-- [ ] Round-trip test: DB-served score values equal exporter shard values
+- [ ] `analysis ingest <run-id> --tier results` loads from the committed tree; dirty relevant paths
+      are refused; re-run unchanged is a no-op (fingerprint match); changed input replaces the run's
+      rows in one transaction
+- [ ] Stamped `commit_sha` provably identifies the loaded bytes; stamped fingerprint equals the
+      committed `manifest.json` fingerprint
+- [ ] Schema-drift contract test fails on column divergence (runs with **no DB**)
+- [ ] Round-trip test (DB values == exporter shard values); **provenance-rebuild test** (re-ingest at
+      the same commit reproduces byte-equal serialized payloads)
 - [ ] Tests for this phase
 
 #### Acceptance Criteria
-- [ ] Idempotency, transactional-replace, and round-trip tests pass under `uv --project workflows/analysis run pytest`
-- [ ] Ingest touches only the results tier (no assumption that raw/corpus are present)
+- [ ] Idempotency, dirty-path refusal, transactional replace, round-trip, and provenance-rebuild tests
+      pass (`pytest-postgresql`, `DATABASE_URL`-gated skip)
+- [ ] Ingest touches only the results tier
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: idempotency (double-ingest = no change), fingerprint equality, transactional replace, contract
-drift caught. Integration: ingest a fixture `results/<run-id>/` into a throwaway DB, assert row values.
+Unit: dirty-path guard; contract drift; fingerprint equality. Integration: ingest a fixture
+`results/<run-id>/` into an ephemeral PG; assert row values + payload byte-equality on re-ingest.
 
 ---
 
-### Phase 3: Results API + SPA swap (PR 1)
+### Phase 3: Results API + SPA swap + provenance display (PR 1)
 
 **Dependencies**: Phase 2
 
 #### Objective
-Serve the score tier from the API and repoint the SPA's results fetchers to it — the first end-to-end
-tier — holding the paper-reconciliation guard and introducing the version-signal + fail-visible notice.
-**Opens PR 1.**
+Serve the score tier from the API and repoint the SPA's results fetchers — the first end-to-end tier —
+holding the paper-reconciliation guard, introducing the **`fakeApi` test harness**, the version-signal,
+the fail-visible notice, **SPA provenance display**, and **read-endpoint abuse bounds**. **Opens PR 1.**
 
 #### Files to Create / Modify
-- `apps/api/src/routes/results.ts` (runs list, manifest, shard; fingerprint-keyed ETag + immutable
-  cache), route tests
-- `apps/multibrowser/src/lib/api.ts` (new fetch boundary → API base URL from `VITE_API_BASE`),
-  `lib/queries.ts` (results loaders `loadResultsRuns/Run/Shard` + `useLatestSha`→version-signal for
-  this tier), `lib/constants.ts`, `.env.example`
-- `apps/multibrowser/src/components/` — fail-visible notice wiring for the results routes (no redesign)
-- Reconciliation guard test updated to run against API-served numbers
+- `apps/api/src/routes/results.ts` (runs list, manifest, shard; fingerprint-qualified URLs +
+  `immutable`; abuse bounds / basic rate limiting), route tests
+- `apps/api/src/ratelimit.ts` (public-read abuse bounds, shared by later read routes)
+- `apps/multibrowser/src/lib/api.ts` (new fetch boundary; `VITE_API_BASE`), `lib/queries.ts` (results
+  loaders → API; results freshness via `/api/version`; results keys → `runId`+`fingerprint`),
+  `lib/constants.ts`, `.env.example`
+- `apps/multibrowser/src/test/fakeApi.ts` (new harness — models the API, not git-trees/raw),
+  `renderApp.tsx` wiring; rewrite `results.data.test.ts`, `queries.hooks.test.tsx` (results paths)
+- `apps/multibrowser/src/components/` — fail-visible notice for results routes; a **provenance
+  display** component (commit SHA + fingerprint for the served tier)
+- Reconciliation guard test run against API-served numbers
 
 #### Deliverables
-- [ ] `/results` in the SPA reads from the API; no `api.github.com`/`raw` calls for the score tier
+- [ ] `/results` reads from the API; no `api.github.com`/`raw` calls for the score tier
 - [ ] Leaderboard mean-of-means reconciles with the paper (guard green against API data)
-- [ ] Version endpoint drives results freshness; API-down shows a fail-visible notice (no GitHub fallback)
+- [ ] `/api/version` drives results freshness; API-down shows a fail-visible notice (no GitHub fallback)
+- [ ] `fakeApi` harness exists; results route tests pass against it (not "unchanged" — rewritten)
+- [ ] Provenance (SHA + fingerprint) shown in the UI for the results tier; read endpoints abuse-bounded
+- [ ] Per-tier **drop-and-rebuild** check: drop results rows, re-ingest, served payload byte-equal
 - [ ] Tests for this phase; **PR 1 opened** with Phases 1–3
-- [ ] Tests for this phase
 
 #### Acceptance Criteria
-- [ ] `pnpm -C apps/multibrowser test` green with the API mock injected via `fetchImpl`
-- [ ] Reconciliation guard passes; results routes render unchanged in layout
+- [ ] `pnpm -C apps/multibrowser test` green against `fakeApi`; reconciliation guard passes; results
+      routes unchanged in layout
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: results fetchers hit API endpoints (mocked); version-keyed cache. Integration: SPA results route
-tests over the API mock. Manual: deployed SPA `/results` against the live API.
+Unit: results fetchers hit fingerprint-qualified endpoints; provenance render; rate-limit bound.
+Integration: results route tests over `fakeApi`; drop-and-rebuild byte-equality. Manual: deployed
+`/results` against the live API.
 
 ---
 
-### Phase 4: Raw tier ingest
+### Phase 4: Raw tier ingest + retention pruning
 
 **Dependencies**: Phase 1 (schema), Phase 2 (ingest scaffolding)
 
 #### Objective
-Extend `analysis ingest` to the **raw tier**: store gz shards as `bytea` keyed by (run, tradition,
-scenario), stamped with the content fingerprint, size-ceiling-enforced, and supporting **raw-only runs**
-(the Spec 54 AFB dataset — no score tier).
+Extend `analysis ingest` to the **raw tier**: gz shards as `bytea`, content-fingerprint-stamped,
+size-ceiling-enforced, **raw-only-run capable** (AFB), plus **retention N=2 pruning** scoped per
+dataset lineage.
 
 #### Files to Create / Modify
-- `analysis/ingest.py` (raw-tier path reusing `export_raw`/`raw_writer` readers; gz bytes preserved
-  verbatim), `analysis/cli.py` (`--tier raw`, and a default that ingests whichever tiers a run has)
-- `apps/api/src/schema/raw.ts` already exists (Phase 1) — confirm shape suffices
-- `workflows/analysis/tests/test_ingest_raw.py` (incl. an AFB raw-only fixture)
+- `analysis/ingest.py` (raw path reusing `export_raw`/`raw_writer` readers; gz bytes verbatim; prune
+  step keeping last N=2 run-ids **per dataset lineage**, transactional, oldest-first),
+  `analysis/cli.py` (`--tier raw`; default ingests whichever tiers a run has)
+- `workflows/analysis/tests/test_ingest_raw.py` (incl. AFB raw-only fixture + a retention fixture)
 
 #### Deliverables
-- [ ] `analysis ingest <run-id> --tier raw` loads gz shards → `bytea`; content fingerprint stamped;
-      per-shard ≤1 MB / per-run ≤200 MB ceilings enforced before any write
-- [ ] Raw-only run (AFB, no `results/`) ingests with **no cross-tier mismatch error**
-- [ ] Cross-tier fingerprint equality asserted only when both score + raw tiers exist
+- [ ] `--tier raw` loads gz shards → `bytea`; content fingerprint stamped; per-shard ≤1 MB / per-run
+      ≤200 MB ceilings enforced **before any write**
+- [ ] Raw-only run (AFB, no `results/`) ingests with **no cross-tier mismatch error**; cross-tier
+      fingerprint equality asserted only when both tiers exist
+- [ ] **Retention N=2 pruning** removes the oldest MB run beyond N, transactionally, and **never evicts
+      the AFB lineage**
 - [ ] Idempotent + transactional; tests for this phase
 
 #### Acceptance Criteria
-- [ ] Raw round-trip: stored gz bytes decode to the exporter's transcripts+verdicts, byte-identical
-- [ ] AFB raw-only fixture ingests cleanly; size-ceiling breach aborts before writing
+- [ ] Raw round-trip: stored gz bytes decode byte-identical to the exporter's transcripts+verdicts
+- [ ] AFB raw-only fixture ingests cleanly; a 3rd MB run prunes the 1st but leaves AFB; ceiling breach
+      aborts before writing
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: gz byte preservation, ceiling enforcement, raw-only path, cross-tier gating. Integration: ingest
-a fixture `results-raw/<run-id>/` + the AFB fixture into a throwaway DB.
+Unit: gz byte preservation; ceiling enforcement; raw-only path; retention ordering + lineage scoping.
+Integration: ingest fixture raw + AFB into ephemeral PG; assert prune result.
 
 ---
 
 ### Phase 5: Raw API + SPA swap, retire baked bundle (PR 2)
 
-**Dependencies**: Phase 4, Phase 3 (`lib/api.ts`, version-signal)
+**Dependencies**: Phase 4, Phase 3 (`lib/api.ts`, `fakeApi`, version-signal)
 
 #### Objective
 Serve raw shards from the API and **delete the entire Spec 51 dual-source workaround**. `/raw/<runId>`
 (including AFB) renders from the API. **Opens PR 2.**
 
 #### Files to Create / Modify
-- `apps/api/src/routes/raw.ts` (catalog + shard endpoints; `content-encoding: gzip`;
-  fingerprint-keyed ETag/immutable cache), route tests
-- `apps/multibrowser/src/lib/rawSource.ts` (new `ApiRawSource`; remove `BakedRawSource`,
-  `GitHubRawSource`, `resolveRawSource`, HTML-content-type sniffing), `lib/queries.ts` (raw loaders →
-  API), `lib/constants.ts` (drop `RAW_PERSIST_EXCLUDED` baked bits as appropriate)
+- `apps/api/src/routes/raw.ts` (catalog + shard; `content-encoding: gzip`; fingerprint-qualified URL
+  + `immutable`; abuse bounds), route tests
+- `apps/multibrowser/src/lib/rawSource.ts` (new `ApiRawSource`; **remove** `BakedRawSource`,
+  `GitHubRawSource`, `resolveRawSource`, `isHtmlResponse`), `lib/queries.ts` (raw loaders → API),
+  `lib/constants.ts` — **remove `RAW_SOURCE_QK` from `RAW_PERSIST_EXCLUDED` only; KEEP
+  `RAW_SCENARIO_QK`** (API shards are still ~0.7 MB — dropping it kills the localStorage cache, a
+  documented scar)
+- Rewrite `rawScenario.test.ts`, `rawData.test.ts` (they import `GitHubRawSource`) onto `fakeApi`
 - **Delete**: `apps/multibrowser/scripts/bake-and-deploy.sh`, `apps/multibrowser/.railwayignore`
-- `apps/multibrowser/src/deploy.test.ts` (drop baked-bundle assertions; assert no bake path exists)
+- `apps/multibrowser/src/deploy.test.ts` (drop baked-bundle assertions)
 
 #### Deliverables
-- [ ] Raw viewer + `/raw/<runId>` (AFB) read from the API; dual-source resolver and baked bundle gone
-- [ ] `railway up --no-gitignore` no longer referenced anywhere; no HTML-content-type sniffing remains
-- [ ] The two Spec 51 raw-dual-source `lessons-critical` entries are removed/retired (via MAINTAIN)
+- [ ] Raw viewer + `/raw/<runId>` (AFB) read from the API; dual-source resolver + baked bundle gone
+- [ ] No `railway up --no-gitignore` / `.railwayignore` / `isHtmlResponse` residue
+- [ ] Provenance (SHA + fingerprint) shown for the raw tier
+- [ ] The two Spec 51 raw-dual-source `lessons-critical` entries retired (via MAINTAIN)
 - [ ] Tests for this phase; **PR 2 opened** with Phases 4–5
 
 #### Acceptance Criteria
-- [ ] `pnpm -C apps/multibrowser test` green; raw routes render transcripts+verdicts over the API mock
-- [ ] `grep` shows no `bake-and-deploy`, `.railwayignore`, `no-gitignore`, or `isHtmlResponse` residue
+- [ ] `pnpm -C apps/multibrowser test` green; raw routes render transcripts+verdicts over `fakeApi`
+- [ ] `grep` shows no `bake-and-deploy`, `.railwayignore`, `no-gitignore`, `isHtmlResponse`,
+      `GitHubRawSource` residue; `RAW_SCENARIO_QK` exclusion retained
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: `ApiRawSource` catalog/shard fetch + gz decode; ETag behavior. Integration: raw + AFB route tests
-over the API mock. Manual: deployed `/raw/<runId>` for both an MB run and the AFB run.
+Unit: `ApiRawSource` catalog/shard + gz decode; immutable-URL cache header. Integration: raw + AFB
+routes over `fakeApi`; drop-and-rebuild raw byte-equality. Manual: deployed `/raw/<runId>` for an MB
+run and the AFB run.
 
 ---
 
@@ -256,156 +308,233 @@ over the API mock. Manual: deployed `/raw/<runId>` for both an MB run and the AF
 **Dependencies**: Phase 1 (schema)
 
 #### Objective
-Ingest the **corpus** (traditions + scenarios + prose) into Postgres by reusing
-`analysis/loaders.py::load_corpus`, with a **`traditions/`-tree content-hash** as its provenance (the
-corpus has no exporter manifest or judgment fingerprint).
+Ingest the **corpus** by reusing `analysis/loaders.py::load_corpus`, with a **`traditions/`-tree
+content-hash** as provenance (no exporter manifest/judgment fingerprint exists for corpus).
 
 #### Files to Create / Modify
-- `analysis/ingest.py` (corpus path via `load_corpus`; compute a stable content hash over the
-  `traditions/` tree at the ingest commit), `analysis/cli.py` (`--tier corpus`)
+- `analysis/ingest.py` (corpus path via `load_corpus`; content hash over the `traditions/` tree at the
+  committed SHA; committed-tree read + dirty-path guard), `analysis/cli.py` (`--tier corpus`)
 - `workflows/analysis/tests/test_ingest_corpus.py`
 
 #### Deliverables
-- [ ] `analysis ingest --tier corpus` loads traditions/scenarios/prose → DB with a content-hash stamp
+- [ ] `--tier corpus` loads traditions/scenarios/prose → DB with a content-hash + commit-SHA stamp
 - [ ] Re-ingest at the same tree is a no-op; a changed tradition file changes the hash
 - [ ] Idempotent + transactional; tests for this phase
 
 #### Acceptance Criteria
-- [ ] Corpus round-trip: DB-served tradition/scenario/prose equals the files `load_corpus` reads
-- [ ] Content-hash provenance is deterministic and change-sensitive
+- [ ] Corpus round-trip: DB-served tradition/scenario/prose equals what `load_corpus` reads
+- [ ] Content-hash provenance is deterministic + change-sensitive
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: content-hash determinism + sensitivity, idempotency. Integration: ingest the real `traditions/`
-into a throwaway DB, assert a sampled tradition/scenario round-trips.
+Unit: content-hash determinism/sensitivity; idempotency; dirty-path guard. Integration: ingest real
+`traditions/` into ephemeral PG; sampled tradition/scenario round-trips.
 
 ---
 
 ### Phase 7: Corpus API + SPA swap, delete github.ts — zero GitHub reads (PR 3)
 
-**Dependencies**: Phase 6, Phase 5 (`lib/api.ts` fully in place)
+**Dependencies**: Phase 6, Phase 5 (`lib/api.ts`, `fakeApi` fully in place)
 
 #### Objective
-Serve the corpus from the API, repoint the last SPA fetchers, and **delete `lib/github.ts` and
-`useLatestSha` entirely** — reaching the spec's **zero-runtime-GitHub-reads** end state. **Opens PR 3.**
+Serve corpus from the API, repoint the last fetchers, and **delete `lib/github.ts` and `useLatestSha`
+entirely** — reaching the **zero-runtime-GitHub-reads** end state. **Opens PR 3.**
 
 #### Files to Create / Modify
 - `apps/api/src/routes/corpus.ts` (traditions list, tradition, scenario, scenario-meta, guidance;
-  fingerprint/version-keyed cache), route tests
+  fingerprint-qualified + version-keyed), route tests
 - `apps/multibrowser/src/lib/queries.ts` (corpus loaders → API; remove SHA-pinning plumbing),
-  **delete `apps/multibrowser/src/lib/github.ts`**
-- `apps/multibrowser/src/components/RateLimitBanner.tsx` → replaced by the API fail-visible notice
-  component; update the **8 route pages** that render it and call `useLatestSha`
-- `apps/multibrowser/src/deploy.test.ts` (assert no GitHub host string is referenced anywhere in `src`)
+  **delete `apps/multibrowser/src/lib/github.ts`** and **`src/lib/github.test.ts`**
+- `apps/multibrowser/src/lib/rateLimit.ts` → replace with an **API-error notice** module (it re-exports
+  `RateLimitError` from `github.ts` and is imported by the 9 route pages)
+- `apps/multibrowser/src/lib/queryClient.ts` — replace the `RateLimitError`-based retry predicate with
+  an **API-error analogue**
+- `apps/multibrowser/src/components/RateLimitBanner.tsx` → fail-visible **API notice** component
+- **9 call sites** of `useLatestSha` updated (the 8 tier routes **plus `routes/RootLayout.tsx`**)
+- `apps/multibrowser/src/test/fakeRepo.ts` — remove/replace the `TreeEntry` import (now `fakeApi`);
+  update `queries.hooks.test.tsx`, `results.data.test.ts` residual GitHub references
+- `apps/multibrowser/src/deploy.test.ts` — assert no **runtime data-host** string
+  (`api.github.com`, `raw.githubusercontent.com`) is referenced in `src`; the guard is **scoped to
+  runtime hosts** so the legitimate opt-in `github.com` issue/edit/blob links in `lib/reviewReport.ts`
+  are not flagged
 
 #### Deliverables
-- [ ] All corpus browsing reads from the API; `lib/github.ts` and `useLatestSha` are deleted
-- [ ] Freshness comes solely from `/api/version`; no `api.github.com`/`raw.githubusercontent.com`
-      reference remains in the SPA
-- [ ] The 8 routes render unchanged in layout with the fail-visible notice
+- [ ] All corpus browsing reads from the API; `lib/github.ts`, `useLatestSha`, and the SHA poll deleted
+- [ ] No `api.github.com` / `raw.githubusercontent.com` runtime reference remains in the SPA; the
+      review report's opt-in GitHub links are preserved
+- [ ] The 9 routes render unchanged in layout with the fail-visible notice; queryClient retry policy
+      updated
+- [ ] **Full drop-and-rebuild**: drop the whole serving DB, re-ingest all three tiers at a fixed
+      commit, every served payload byte-equal; cross-tier fingerprint mismatch is surfaced in the UI
 - [ ] Tests for this phase; **PR 3 opened** with Phases 6–7
 
 #### Acceptance Criteria
-- [ ] `pnpm -C apps/multibrowser test` green; a repo grep finds no GitHub-host runtime reference in `src`
+- [ ] `pnpm -C apps/multibrowser test` green; a guard test finds no runtime-data-host reference in `src`
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: corpus fetchers → API (mocked); version signal drives all tiers. Integration: corpus route tests
-over the API mock; a guard test asserting zero GitHub-host references. Manual: full browse of a
-deployed SPA with the API as the only backend.
+Unit: corpus fetchers → API; queryClient retry analogue; runtime-host guard (allows `reviewReport`
+opt-in links). Integration: corpus routes over `fakeApi`; full drop-and-rebuild byte-equality. Manual:
+full browse of a deployed SPA with the API as the only backend.
 
 ---
 
-### Phase 8: Review schema + auth (settled with Ben)
+### Phase 8: Review schema + auth + topology (settled with Ben)
 
-**Dependencies**: Phase 1 (service), **and coordination sign-off from Ben (@benolio) on the review
-data model before this phase's migration is written**
+**Dependencies**: Phase 1 (service); **Ben (@benolio) sign-off on the review data model before this
+migration is written**
 
 #### Objective
-Add the **operational review store** and authentication: a second reviewed migration for
-reviewers/assignments/reviews/submissions, magic-link auth + revocable sessions, and server-side
-per-reviewer authorization. Private by default; this is the first read-write, PII-bearing slice.
-**Opens PR 4.**
+Add the **operational review store** and authentication: a second reviewed migration, magic-link auth
++ revocable sessions, server-side per-reviewer authorization, cross-origin cookie topology, a **PII
+deletion path**, and **verified backup/restore**. **Opens PR 4.**
 
 #### Files to Create / Modify
-- `apps/api/src/schema/review.ts` (reviewers, assignments, reviews (versioned drafts), submissions
-  (immutable snapshots)), `apps/api/drizzle/0001_*.sql` (generated + reviewed)
-- `apps/api/src/auth/` (magic-link issue/verify — single-use, expiring; httpOnly revocable sessions;
-  CSRF; email-enumeration + rate-limit bounds; validated redirects), `apps/api/src/routes/auth.ts`
-- `apps/api/src/mail/` (transactional email transport — **chosen with Ben/architect, not colliding
-  with the `resend` CLI rule; no direct `api.resend.com`**)
-- `apps/api/src/**/*.test.ts` (auth, session, isolation tests)
+- `apps/api/src/schema/review.ts` (reviewers, assignments, reviews (versioned drafts with a
+  `version`/`updated_at` for optimistic concurrency), submissions (immutable snapshots)),
+  `apps/api/drizzle/0001_*.sql` (generated + reviewed)
+- `apps/api/src/auth/` (magic-link issue/verify — single-use, expiring; httpOnly **`Secure`+`SameSite`
+  cross-site** revocable sessions; CSRF; email-enumeration + rate-limit bounds; validated redirects),
+  `src/routes/auth.ts`
+- `apps/api/src/mail/` (transactional transport — chosen with Ben/architect; **not** the `resend` CLI
+  path; no direct `api.resend.com`)
+- `apps/api/src/routes/account.ts` (**PII deletion** endpoint), backup/restore runbook +
+  `apps/api/scripts/restore-check.ts`
+- `apps/api/src/**/*.test.ts` (auth, session, isolation, PII-deletion, restore tests — PGlite)
 
 #### Deliverables
-- [ ] Review tables migrated (generated + reviewed; no `db:push`); operational store is a distinct
-      data class with backup/restore + retention documented
-- [ ] Magic-link login works end-to-end; tokens single-use + expiring; sessions revocable
+- [ ] Review tables migrated (generated + reviewed; no `db:push`); operational store documented as a
+      distinct data class with backup/restore + retention
+- [ ] Magic-link login end-to-end; tokens single-use + expiring; sessions revocable; cross-origin
+      cookies correct
 - [ ] Server-side authz isolates each reviewer's records; a coordinator role reads aggregates only
+- [ ] **PII deletion path** implemented + tested; **backup restores cleanly** (verified, not just documented)
 - [ ] Tests for this phase
 
 #### Acceptance Criteria
-- [ ] Auth happy path + expired/reused-token rejection + reviewer-isolation tests pass
-- [ ] Email transport does not route through the `resend` CLI's guarded broadcast path
+- [ ] Auth happy path + expired/reused-token rejection + reviewer-isolation + PII-deletion + restore
+      tests pass; email transport avoids the `resend` CLI path
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: token single-use/expiry, session revocation, CSRF, redirect validation, authz isolation.
-Integration: full login → session → private-endpoint access; cross-reviewer access denied.
+Unit: token single-use/expiry; session revocation; CSRF; redirect validation; authz isolation; PII
+deletion. Integration: login → cross-origin session → private-endpoint access; cross-reviewer denied;
+backup → restore round-trip.
 
 ---
 
-### Phase 9: Review intake, assignment + aggregation, SPA swap (PR 4)
+### Phase 9: Review persistence swap (sync→async, resumable, conflict-safe)
 
 **Dependencies**: Phase 8
 
 #### Objective
-Swap the review UI's persistence from `localStorage` to the API behind Spec 83's zod-tolerant loader,
-add private submission + assignment + aggregation views, and ship the review slice. **Ships PR 4.**
+Swap `lib/review.ts` persistence from the **synchronous** localStorage store to the API — a
+**sync→async conversion** with optimistic updates and cross-device conflict handling — behind Spec
+83's zod-tolerant loader. (This is the persistence seam; submission is Phase 10.)
 
 #### Files to Create / Modify
-- `apps/api/src/routes/review.ts` (draft save/load, submit (immutable), assignments, aggregation),
-  route tests
-- `apps/multibrowser/src/lib/review.ts` (persistence seam → API behind the existing tolerant loader —
-  "the submit panel is the only seam to replace"), `lib/reviewReport.ts` (private submission path;
-  publish-to-issue becomes explicit opt-in)
-- Review route components: resumable cross-device state; assignment + aggregation/dashboard views
-- `apps/multibrowser/src/**/*.test.ts` (persistence swap, resumability, immutable submission)
+- `apps/multibrowser/src/lib/review.ts` (async persistence against the API; optimistic update +
+  reconcile; keep the tolerant zod loader; `version`-based conflict resolution replacing the raw
+  `storage`-event sync), `src/lib/reviewApi.ts` (client)
+- `apps/api/src/routes/review.ts` (draft save/load with optimistic-concurrency `version` checks)
+- `apps/multibrowser/src/**/*.test.ts` (async persistence, resumability, conflict, tolerant load)
 
 #### Deliverables
 - [ ] Review intake persists to the API; resumable across devices for the authenticated reviewer
-- [ ] Submissions are private by default (opt-in publish), immutable once submitted
-- [ ] Assignment + aggregation views with defined status transitions and a "complete" definition
-- [ ] Tests for this phase; **PR 4 opened** with Phases 8–9
+- [ ] Optimistic updates; a stale write is detected via `version` and reconciled, not lost
+- [ ] The zod-tolerant loader still degrades a corrupt subfield to a default
+- [ ] Tests for this phase
 
 #### Acceptance Criteria
-- [ ] `pnpm -C apps/multibrowser test` green; the zod-tolerant loader still degrades corrupt subfields
-- [ ] Reviewer A cannot see reviewer B's drafts/submissions through the UI
+- [ ] `pnpm -C apps/multibrowser test` green; two-device resume + conflict tests pass
 - [ ] Build and tests passing
 
 #### Test Plan
-Unit: persistence-seam swap, tolerant load, immutable-submission guard. Integration: two-device resume;
-private submit; assignment/aggregation reflect submitted reviews. Manual: full review of a tradition.
+Unit: async store; optimistic update/rollback; tolerant load. Integration: device-A save → device-B
+resume; concurrent edit → version conflict resolved.
+
+---
+
+### Phase 10: Review private submission + assignment
+
+**Dependencies**: Phase 9
+
+#### Objective
+Add **private, immutable submission** (opt-in publish-to-issue) and **assignment** with defined status
+transitions.
+
+#### Files to Create / Modify
+- `apps/api/src/routes/review.ts` (submit → immutable snapshot; assignment CRUD + status transitions
+  assigned→in-progress→submitted), route tests
+- `apps/multibrowser/src/lib/reviewReport.ts` (private submission path; publish-to-issue becomes
+  explicit opt-in — the existing GitHub links stay), review route components (assignment view)
+- `apps/multibrowser/src/**/*.test.ts` (immutable submission, assignment transitions)
+
+#### Deliverables
+- [ ] Submissions private by default (opt-in publish), **immutable once submitted**
+- [ ] Assignment with defined status transitions and an explicit "complete" definition
+- [ ] Tests for this phase
+
+#### Acceptance Criteria
+- [ ] A submitted review cannot be mutated; assignment transitions enforced; publish is opt-in
+- [ ] Build and tests passing
+
+#### Test Plan
+Unit: immutability guard; transition state machine. Integration: submit → private snapshot; opt-in
+publish path; assignment lifecycle.
+
+---
+
+### Phase 11: Review aggregation + dashboard views (PR 4)
+
+**Dependencies**: Phase 10
+
+#### Objective
+Add **aggregation / dashboard** views (per-tradition completion, coordinator aggregates) and ship the
+review slice. **Ships PR 4.**
+
+#### Files to Create / Modify
+- `apps/api/src/routes/review.ts` (aggregation endpoints; coordinator-scoped), route tests
+- `apps/multibrowser/src/` review dashboard/aggregation components
+- `apps/multibrowser/src/**/*.test.ts` (aggregation reflects submissions; coordinator scoping)
+
+#### Deliverables
+- [ ] Aggregation/dashboard views reflect submitted reviews; per-tradition completion visible
+- [ ] Coordinator sees aggregates without authoring another's review
+- [ ] Tests for this phase; **PR 4 opened** with Phases 8–11
+
+#### Acceptance Criteria
+- [ ] `pnpm -C apps/multibrowser test` + `pnpm -C apps/api test` green; aggregation correctness test passes
+- [ ] Build and tests passing
+
+#### Test Plan
+Unit: aggregation math; coordinator scoping. Integration: submit reviews → aggregation view; full
+review of a tradition end-to-end. Manual: dashboard on the deployed SPA.
 
 ## Risks and Mitigation
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| Multi-PR-per-project friction with porch's gate/phase model | Medium | Medium | Follow the sequential-PR recipe (branch off integration, `porch done --pr/--merged`); raise with the architect early if the `pr` gate assumes a single PR, before Phase 3 opens PR 1. |
-| Schema-drift between Drizzle (TS) and Python ingest | Medium | High | `contract.snapshot.json` emitted from Drizzle, asserted by a Python contract test in CI (Phase 1–2). |
-| Deleting `github.ts` breaks the 8 routes at once (Phase 7) | Medium | High | Land the fail-visible notice + version-signal per tier in earlier phases so Phase 7 only removes the last references; guard test for zero GitHub-host strings. |
-| Raw `bytea` DB size / cost at N runs | Medium | Medium | Retention N=2; enforce Spec 51 size ceilings at ingest; object-storage escape hatch stays documented; cost confirmed pre-always-on. |
-| Review data model diverges from Ben's intent | Medium | Medium | Phase 8 migration is gated on Ben's sign-off; #85 stays the tracking issue. |
-| Magic-link email path collides with the `resend`-CLI rule | Medium | Medium | Transport decided with Ben/architect; default a dedicated transactional provider; never direct `api.resend.com`. |
-| Reconciliation drifts once numbers are DB-served | Low | High | Ingest loads pre-aggregated exporter outputs only; keep the committed-vs-paper guard, run it against API data (Phase 3). |
-| Always-on cost overrun | Medium | Medium | Pre-always-on cost gate against actuals with the architect; retention N as the lever. |
+| Drift-guard has no CI to run in | Medium | High | Cross-register in `.codev/checks/test.sh` (Phase 1) so an `apps/api` schema change *and* a `workflows/analysis` change both run the Python contract test; no-DB contract test. |
+| No test-Postgres → red checks for every builder | Medium | High | PGlite for `apps/api` vitest; `pytest-postgresql` (`DATABASE_URL`-gated) for ingest; contract test needs no DB (Phase 1/2). |
+| Deleting `github.ts` breaks unlisted dependents (Phase 7) | Medium | High | Phase 7 lists all: `rateLimit.ts`, `queryClient.ts`, `test/fakeRepo.ts`, github test files, 9 `useLatestSha` sites incl. `RootLayout`. |
+| Unsafe immutable caching on stable URLs | Medium | High | Fingerprint-qualified content URLs + `immutable`; `/api/version` `no-store`; re-ingest changes the URL. |
+| Provenance not tied to loaded bytes | Low | High | Ingest reads the clean committed tree / refuses dirty paths; provenance-rebuild test. |
+| Retention N=2 evicts AFB or never runs | Medium | Medium | Transactional prune step scoped per dataset lineage; retention fixture test (3rd MB run prunes 1st, AFB survives). |
+| Multi-PR-per-project friction with porch's gate model | Medium | Medium | Sequential-PR recipe + `porch done --pr/--merged`; raise with the architect before Phase 3 opens PR 1 if the `pr` gate assumes a single PR. |
+| Review data model diverges from Ben's intent | Medium | Medium | Phase 8 migration gated on Ben's sign-off; #85 stays the tracking issue. |
+| Magic-link email collides with the `resend`-CLI rule | Medium | Medium | Transport decided with Ben/architect; dedicated transactional provider; never direct `api.resend.com`. |
+| Reconciliation drifts once DB-served | Low | High | Ingest loads pre-aggregated outputs only; keep the committed-vs-paper guard, run against API data (Phase 3). |
+| Always-on cost overrun | Medium | Medium | Cost gate is a Phase 1 precondition (vs actuals); retention N as the lever. |
 
 ## Documentation Updates
 
 - `apps/api/README.md` — new: service, schema, migration discipline (`drizzle-kit generate` → review →
-  apply; never `db:push`), ingest contract, version endpoint.
-- `results/README.md`, `results-raw/README.md` — update serving description (API-served; retire the
-  dual-source/baked-bundle section) as those tiers cut over (Phases 3, 5).
-- `traditions/README.md` — note the corpus is served from the DB (Phase 7); git stays authoring/source.
+  apply; never `db:push`), ingest/committed-tree contract, version + content-URL scheme, test-Postgres
+  + drift-guard, CORS/cookie topology.
+- `results/README.md`, `results-raw/README.md` — API-served description; retire the dual-source/baked-
+  bundle section (Phases 3, 5).
+- `traditions/README.md` — corpus served from the DB (Phase 7); git stays authoring/source.
 - `codev/resources/arch-critical.md` — new serving-layer fact; `lessons-critical.md` — **remove the two
   raw dual-source lessons** once Phase 5 lands (via MAINTAIN, respecting the hot-tier cap).
 - `apps/multibrowser/.env.example` — `VITE_API_BASE` replaces the GitHub `VITE_*` knobs by Phase 7.
