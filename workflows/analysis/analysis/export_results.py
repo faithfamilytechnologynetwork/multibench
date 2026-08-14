@@ -61,9 +61,12 @@ _SUBJECT_ALIAS: dict[str, str] = {
 }
 _SUBJECT_ALIAS.update({canon: canon for canon in _SUBJECT_VARIANTS})
 
-# canonical judge model-id → source variants. The two Opus aliases collapse to one.
+# canonical judge model-id → source variants. The two Opus aliases collapse to one; the Gemini
+# judge run via OpenRouter (issue #43 funded path) records the provider-prefixed slug
+# ``google/gemini-3.6-flash``, which collapses to the canonical ``gemini-3.6-flash`` — same
+# slug-normalization the Opus judge and every subject already get (a #89 OpenRouter-slug run).
 _JUDGE_VARIANTS: dict[str, tuple[str, ...]] = {
-    "gemini-3.6-flash": (),
+    "gemini-3.6-flash": ("google/gemini-3.6-flash",),
     "claude-opus-4-8": ("anthropic/claude-opus-4.8",),
 }
 _JUDGE_ALIAS: dict[str, str] = {
