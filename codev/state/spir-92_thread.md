@@ -26,6 +26,16 @@ Builder thread. Project 92 / issue #92. Protocol: SPIR (strict). Spec + plan gat
 - Fail-soft: **fail visibly with a notice, NO GitHub fallback** (don't rebuild dual-source — the scar).
 - Spec finalized with these; running porch check/done → consult → spec-approval gate.
 
+## Consult iter1 (2026-08-14): codex REQUEST_CHANGES, claude COMMENT — both HIGH, converged
+Accepted ~all. Spec revised + rebuttal written. Key fixes:
+- "UI unchanged" ⚔ "zero GitHub reads" contradiction (8 routes use useLatestSha, RateLimitBanner
+  imports github.ts) → reworded to "no redesign, bounded mechanical swaps"; fixed false Current-State claim.
+- Ingest: independent per-tier + raw-only runs (AFB) + corpus content-hash provenance + transactional publish.
+- Two data classes: serving-cache (rebuildable) vs operational review store (authoritative, backup/restore).
+- Review security posture: authz isolation, single-use tokens, CSRF, PII deletion, email-provider (Resend collision).
+- Read-endpoint posture + caching; retention N → Important; cost ceiling (actuals, not estimates); per-tier rollback.
+Committed `[Spec 92] Specification with multi-agent review`. Running porch done → re-verify.
+
 ## Still-open (plan-time)
 Freshness/version endpoint · API framework (Hono/Fastify/Express) · review data model (w/ Ben) ·
 OAuth-in-first-slice y/n · raw retention N.
