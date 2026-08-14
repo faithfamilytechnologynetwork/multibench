@@ -104,6 +104,12 @@ def test_judge_alias_collapses_to_one_opus():
     assert normalize_judge("gemini-3.6-flash") == "gemini-3.6-flash"
 
 
+def test_gemini_openrouter_slug_normalizes():
+    # A run whose Gemini judge went through OpenRouter (#43 funded path / #89) records the
+    # provider-prefixed slug; it must collapse to the canonical id like the Opus slug does.
+    assert normalize_judge("google/gemini-3.6-flash") == "gemini-3.6-flash"
+
+
 # ── Overlay + alias-collision dedup ───────────────────────────────────────────────
 
 

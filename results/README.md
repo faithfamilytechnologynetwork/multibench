@@ -124,6 +124,21 @@ Spec 55) — one row per subject:
 - Numbers reconcile with the paper's standings (`tab_standings` / `subj_overall`) to displayed
   precision.
 
+## Published runs
+
+- **`20260803`** — the benchmark-of-record (7 traditions / 519 scenarios), the paper's snapshot.
+  Guarded by the paper-reconciliation test; **never mutate it**.
+- **`20260813-protestantism`** — the ProtestantBench round (issue #89): the `protestantism`
+  tradition (100 scenarios) over the same 5-subject roster, framings, and pressures as the record
+  run. **Gemini (ranking judge) is a complete full grid (18000/18000 = 100 %).** **Opus (the
+  badge-only validation layer) is a partial sample — 8280/18000 ≈ 46 % per framing** — because the
+  remaining Opus cells could not be judged when the run was produced (the judge key's org hit a
+  monthly usage cap). Opus **never re-ranks**; the leaderboard is Gemini-only, so partial Opus is a
+  smaller validation badge, not a correctness gap — the manifest's `counts.coverage` reports it
+  honestly and the SPA badges it `sample n/N`. **Backfill plan:** the 9720 pending Opus cells are
+  staged and resumable; they complete on the judge key once its org cap lifts (2026-09-01), after
+  which this run is re-exported in place (same `--run-id`, byte-stable shards, new fingerprint).
+
 ## Size ceilings
 
 Enforced by the exporter (and by tests): **≤ 8 MB total per run**, **≤ 1 MB per tradition shard**.
