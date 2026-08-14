@@ -40,6 +40,24 @@ Committed `[Spec 92] Specification with multi-agent review`. Running porch done 
 Freshness/version endpoint · API framework (Hono/Fastify/Express) · review data model (w/ Ben) ·
 OAuth-in-first-slice y/n · raw retention N.
 
+## Spec gate: APPROVED by Waleed (2026-08-14). Advanced to PLAN.
+
+## Plan (2026-08-14) — DRAFTED
+9 phases across **4 tier-PRs** (results→raw→corpus→review), architect's PR-per-tier call.
+Plan-level decisions settled:
+- API framework: **Hono** (+Drizzle +node-postgres); Fastify fallback.
+- Freshness: single **`GET /api/version`** per-tier provenance envelope; replaces SHA poll.
+- **Table-level Drizzle schema for all serving tiers = Phase 1** (architect note). Review tables =
+  Phase 8 migration, gated on Ben's sign-off.
+- Raw retention **N=2**; review auth first slice = **magic-link only** (OAuth deferred).
+- Magic-link email transport chosen w/ Ben, **must not collide with `resend` CLI rule** (no direct
+  api.resend.com; default Postmark/SES).
+- Read cache: fingerprint-keyed ETag + immutable.
+- Pre-always-on **cost gate** vs actuals (not a phase).
+Phase→PR: P3→PR1(results), P5→PR2(raw), P7→PR3(corpus, deletes github.ts → ZERO GitHub reads), P9→PR4(review).
+Flagged risk: porch multi-PR-per-project gate friction — raise w/ architect before P3 opens PR1.
+Checks pass (plan_exists, has_phases_json, 9 phases). Signaling PLAN_DRAFTED → porch 2-way consult.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
