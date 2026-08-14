@@ -213,3 +213,21 @@ This is the alert Waleed asked for — will surface prominently at the smoke che
   - Also add the default-run-flip note (newest-by-generated_at → SPA default flips to this
     protestantism-only run) to the PR body (promised in-thread).
   - HOLD merge + re-export per architect.
+
+- 2026-08-14 **MERGE WORD (Waleed): Option 2 — ship partial. PR #93 MERGED** (merge commit,
+  22:52:55Z; CI "tradition format gate" passed). Post-merge:
+  - Files confirmed on origin/main: results/20260813-protestantism + results-raw/…/100 shards.
+  - **No redeploy needed** — SPA reads both tiers from GitHub at runtime. **Raw tier for this run is
+    NOT in the baked same-origin bundle** (only `railway up --no-gitignore` bakes; this merge doesn't
+    rebuild the bundle) → it serves via the **committed-GitHub fallback path**. Acceptable per
+    architect (noted here as instructed).
+  - **Per-scenario manifest coverage / SPA badge: DEFERRED PERMANENTLY** unless the 2026-09-01
+    backfill slips (architect decision) — the gap closes at backfill; README honesty covers interim.
+  - Issue #89 left OPEN with a comment: shipped partial via #93; remaining = 9720-cell Opus backfill
+    on the CEFE key after 2026-09-01, then re-export in place. Follow-up bug #94 filed.
+  - Live /results check: verified data on main + SPA-discoverable (newest generated_at → default;
+    20260803 via selector). Could NOT load the rendered Railway UI myself (railway CLI not linked in
+    worktree; URL not in repo) — asked architect to eyeball live or share URL.
+  - **WIND-DOWN. DO NOT clean up tmp/judging-runs/89-full** (archive-before-cleanup; needed for the
+    Sept-1 backfill). Backfill recipe: probe CEFE key → `batch-judge submit`/`collect` the 9720
+    pending Opus cells (JUDGE-key wrapper tmp/run-judging-judgekey.sh) → re-export same run-id.
