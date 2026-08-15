@@ -201,3 +201,10 @@ schema · API surface · ingest contract · raw-tier storage (DB bytea vs object
 
 ## Coordination
 - Review-slice design is **Ben's (@benolio) seam** — coordinate. #85 stays the tracking issue.
+
+## Phase 2 consult iter3: codex + claude BOTH REQUEST_CHANGES (HIGH) — my iter2 fix had a real bug.
+requireJsonRequest used includes() substring → `text/plain;charset=application/json` (CORS-safelisted,
+no preflight) bypassed it; c.req.json() parses regardless → session-fixation reopened (claude repro'd 200).
+FIX: compare MIME essence exactly (split ';'[0]==='application/json'). +regression test. Minors: password
+length cap 1024 (unbounded argon2 DoS), email format check. Build green, **29/29**. Redeployed (2f4fd80f),
+verifying essence fix live. Committed. Iter3 rebuttal written. → re-signal for iter4.
