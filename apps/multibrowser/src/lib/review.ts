@@ -185,11 +185,16 @@ export interface ReviewStatus {
   reconciled: string | null;
 }
 
-/** A 401 means the session expired mid-work — flip to signed-out so the gate re-prompts sign-in. */
+/**
+ * A 401 means the session expired mid-work. **Clear all draft state** before showing the sign-in form:
+ * otherwise a different reviewer signing in on a shared browser would see (and could re-save under
+ * their own account) the previous reviewer's cached drafts — corrupting the authoritative store and
+ * crossing the private-intake line.
+ */
 function handleAuthError(e: unknown): boolean {
   if (e instanceof ReviewApiError && e.status === 401) {
-    status = { auth: "out", reviewer: null, saving: false, error: "your session expired — sign in again", errorKind: null, reconciled: null };
-    emit();
+    resetReviewStore(); // wipes current/versions/loadState/prefetched, sets auth "unknown"
+    setStatus({ auth: "out", reviewer: null, error: "your session expired — sign in again" });
     return true;
   }
   return false;
@@ -271,19 +276,28 @@ function scheduleRetry(tid: string): void {
     tid,
     setTimeout(() => {
       retryTimers.delete(tid);
-      if (pendingDeletes.has(tid)) {
-        const p = persistDelete(tid).finally(() => inflight.delete(tid));
-        inflight.set(tid, p);
-      } else if (dirty.has(tid)) {
-        runSave(tid);
-      }
+      if (pendingDeletes.has(tid)) void enqueue(tid, () => persistDelete(tid));
+      else if (dirty.has(tid)) runSave(tid);
     }, SAVE_RETRY_MS),
   );
 }
 
+/**
+ * Serialize operations per tradition: a save and a "start over" delete (and the auto-redraw's save)
+ * must not race — chaining them guarantees ordering, so a delete can't clobber a subsequent fresh
+ * draft and an in-flight save can't resurrect a deleted one.
+ */
+function enqueue(tid: string, op: () => Promise<void>): Promise<void> {
+  const prev = inflight.get(tid) ?? Promise.resolve();
+  const next = prev.catch(() => {}).then(op).finally(() => {
+    if (inflight.get(tid) === next) inflight.delete(tid);
+  });
+  inflight.set(tid, next);
+  return next;
+}
+
 function runSave(tid: string): void {
-  const p = persistTradition(tid).finally(() => inflight.delete(tid));
-  inflight.set(tid, p);
+  void enqueue(tid, () => persistTradition(tid));
 }
 
 async function persistTradition(tid: string): Promise<void> {
@@ -332,6 +346,9 @@ async function persistTradition(tid: string): Promise<void> {
     setStatus({ error: null, errorKind: null });
   } catch (e) {
     if (handleAuthError(e)) return;
+    // A 403 usually means the CSRF token is missing/stale — refresh it so the retry can succeed,
+    // instead of looping 403s forever.
+    if (e instanceof ReviewApiError && e.status === 403) await fetchCsrf().catch(() => {});
     // Keep the optimistic state, leave the tradition dirty, and schedule a real retry.
     dirty.add(tid);
     scheduleRetry(tid);
@@ -362,10 +379,9 @@ export async function flushReviewSaves(): Promise<void> {
     timers.delete(tid);
     dirty.add(tid);
   }
-  for (const tid of [...pendingDeletes]) {
-    const p = persistDelete(tid).finally(() => inflight.delete(tid));
-    inflight.set(tid, p);
-  }
+  // Only force deletes that aren't already queued/in-flight (scheduleDelete enqueues immediately) —
+  // this covers a delete waiting on a failed-retry timer without double-running the live one.
+  for (const tid of [...pendingDeletes]) if (!inflight.has(tid)) void enqueue(tid, () => persistDelete(tid));
   for (const tid of [...dirty]) runSave(tid);
   await Promise.all([...inflight.values()]);
   if (dirty.size === 0 && pendingDeletes.size === 0) setStatus({ saving: false });
@@ -421,8 +437,7 @@ function scheduleDelete(tid: string): void {
     timers.delete(tid);
   }
   setStatus({ saving: true });
-  const p = persistDelete(tid).finally(() => inflight.delete(tid));
-  inflight.set(tid, p);
+  void enqueue(tid, () => persistDelete(tid));
 }
 
 /**
@@ -497,12 +512,13 @@ export async function prefetchDrafts(): Promise<void> {
   }
 }
 
-/** Replace the whole state (JSON import). Marks every tradition dirty so it saves. */
+/** Replace the whole state (JSON import): save present traditions, delete ones dropped by the import. */
 export function replaceReviewState(next: ReviewState): void {
   const prev = current;
   current = next;
   for (const tid of new Set([...Object.keys(prev.traditions), ...Object.keys(next.traditions)])) {
-    scheduleSave(tid);
+    if (next.traditions[tid] === undefined) scheduleDelete(tid);
+    else scheduleSave(tid);
   }
   emit();
 }
@@ -549,17 +565,23 @@ export async function initReview(): Promise<void> {
     setStatus({
       auth: "out",
       reviewer: null,
-      error: e instanceof Error ? e.message : "couldn't reach the review service",
+      error: "couldn't reach the review service — check your connection and try again",
     });
   } finally {
     initInFlight = false;
   }
 }
 
+/** Clear any residual draft state if a DIFFERENT reviewer is signing in on this browser. */
+function resetIfReviewerChanged(nextId: string): void {
+  if (status.reviewer && status.reviewer.id !== nextId) resetReviewStore();
+}
+
 export async function loginReview(email: string, password: string): Promise<void> {
   const reviewer = await apiLogin(email, password);
+  resetIfReviewerChanged(reviewer.id);
   current = { ...current, reviewer: reviewerInfoFrom(reviewer) };
-  setStatus({ auth: "in", reviewer, error: null });
+  setStatus({ auth: "in", reviewer, error: null, errorKind: null });
 }
 
 export async function signupReview(input: {
@@ -570,11 +592,13 @@ export async function signupReview(input: {
   inviteCode: string;
 }): Promise<void> {
   const reviewer = await apiSignup(input);
+  resetIfReviewerChanged(reviewer.id);
   current = { ...current, reviewer: reviewerInfoFrom(reviewer) };
-  setStatus({ auth: "in", reviewer, error: null });
+  setStatus({ auth: "in", reviewer, error: null, errorKind: null });
 }
 
 export async function logoutReview(): Promise<void> {
+  await flushReviewSaves(); // don't drop debounced edits on the way out
   await apiLogout();
   resetReviewStore();
   setStatus({ auth: "out", reviewer: null });

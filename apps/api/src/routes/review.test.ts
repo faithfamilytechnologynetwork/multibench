@@ -136,4 +136,16 @@ describe('review drafts', () => {
     });
     expect(res.status).toBe(400);
   });
+
+  it('rejects an over-large draft body (bodyLimit)', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    const big = { state: { blob: 'x'.repeat(600 * 1024) }, version: 0 };
+    const res = await app.request('/api/review/sunni-islam', {
+      method: 'PUT',
+      headers: authed(jar, json),
+      body: JSON.stringify(big),
+    });
+    expect(res.status).toBe(413);
+  });
 });

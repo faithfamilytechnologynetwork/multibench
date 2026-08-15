@@ -78,11 +78,8 @@ export function ReviewSaveStatus() {
       </p>
     );
   }
-  return (
-    <p className="text-xs text-default-400" role="status" data-testid="review-save-status">
-      Saved to your account.
-    </p>
-  );
+  // Idle with nothing pending — say nothing rather than a premature "Saved".
+  return null;
 }
 
 function ReviewAuthForm({ initError }: { initError?: string | null }) {
@@ -130,7 +127,7 @@ function ReviewAuthForm({ initError }: { initError?: string | null }) {
 
       {initError && (
         <p className="text-sm text-danger" role="alert" data-testid="review-service-error">
-          Couldn&rsquo;t reach the review service ({initError}). Check your connection and try again.
+          {initError}
         </p>
       )}
 

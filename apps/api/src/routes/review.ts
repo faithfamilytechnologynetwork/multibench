@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { bodyLimit } from 'hono/body-limit';
 import { and, eq, sql } from 'drizzle-orm';
 import type { AppDb } from '../db';
 import { reviews } from '../schema';
@@ -49,8 +50,9 @@ export function reviewRoutes(db: AppDb): Hono<AppEnv> {
   });
 
   // Save (create or update) with optimistic concurrency. Body: {state: object, version: number}.
-  // version 0 = "new draft" (insert); >0 = update only if it matches the stored version.
-  route.put('/:traditionId', async (c) => {
+  // version 0 = "new draft" (insert); >0 = update only if it matches the stored version. A draft is a
+  // handful of KB; cap the body so an authenticated reviewer can't store arbitrarily large JSONB.
+  route.put('/:traditionId', bodyLimit({ maxSize: 512 * 1024 }), async (c) => {
     const reviewerId = c.get('reviewerId');
     const traditionId = c.req.param('traditionId');
     const body = await c.req.json().catch(() => null);

@@ -9,6 +9,7 @@ import {
   peekVersion,
   resetReviewStore,
   updateReviewState,
+  withSample,
   withScenarioCheck,
   withTraditionCheck,
   withoutTradition,
@@ -244,6 +245,65 @@ describe("review store — async persistence", () => {
     await flushReviewSaves();
     expect(deleted).toBe(true);
     expect(server.has("t")).toBe(false);
+  });
+
+  it("clears all cached draft state when the session expires (no cross-reviewer leak)", async () => {
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") return json({ state: { source: { status: "approved", notes: "A" } }, version: 2 });
+      if (method === "PUT") return json({ error: "unauthorized" }, 401); // session expired mid-save
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    await ensureTraditionLoaded("t"); // reviewer A's saved draft is now in memory
+    expect(peekReviewState().traditions.t?.source.status).toBe("approved");
+    updateReviewState((s) => withTraditionCheck(s, "t", "guide", { status: "flagged" }));
+    await flushReviewSaves(); // PUT → 401
+
+    // The store is wiped and signed out — a different reviewer signing in next sees nothing of A's.
+    expect(peekReviewState().traditions).toEqual({});
+    expect(peekVersion("t")).toBe(0);
+    expect(peekReviewStatus().auth).toBe("out");
+  });
+
+  it("serializes a start-over delete before a re-drawn save so the fresh draft wins", async () => {
+    const server = new Map<string, Draft>([["t", { state: { source: { status: "approved" } }, version: 4 }]]);
+    const ops: string[] = [];
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") return json(server.get("t") ?? { state: null, version: 0 });
+      if (method === "DELETE") {
+        ops.push("del");
+        server.delete("t");
+        return json({ ok: true });
+      }
+      if (method === "PUT") {
+        ops.push("put");
+        const b = JSON.parse(String(init?.body ?? "{}"));
+        const cv = server.get("t")?.version ?? 0;
+        if (b.version === cv) {
+          server.set("t", { state: b.state, version: cv + 1 });
+          return json({ version: cv + 1 });
+        }
+        return json({ error: "conflict", state: server.get("t")?.state ?? null, version: cv }, 409);
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    await ensureTraditionLoaded("t");
+    updateReviewState((s) => withoutTradition(s, "t")); // start over → delete
+    updateReviewState((s) => withSample(s, "t", ["S-1"], "")); // re-drawn fresh sample → save
+    await flushReviewSaves();
+
+    expect(ops).toEqual(["del", "put"]); // delete ran first, then the fresh save
+    expect(server.get("t")?.version).toBe(1); // a fresh draft exists server-side
+    expect((server.get("t")?.state as any).sampleIds).toEqual(["S-1"]);
   });
 
   it("loads an existing draft from the API tolerantly", async () => {
