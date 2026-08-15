@@ -7,6 +7,23 @@ Keep implementation phases, file paths, code, and "first we will… then we will
 out of the spec — those belong in codev/plans/92-*.md.
 -->
 
+> **Amendment — 2026-08-15 (Waleed, final; supersedes the text below where they conflict).** After
+> this spec was approved, Waleed re-cut the review slice. Two decisions in the body are **superseded**;
+> the as-built follows this amendment, not the original wording:
+> 1. **Auth is email + password (argon2id) — NOT magic-link, and there is no email transport or OAuth.**
+>    Every "magic-link"/"OAuth"/"email provider" reference below (Success Criteria, Constraints,
+>    Solution Approaches, Test Scenarios) is superseded by: email + password, an invite-code signup
+>    gate (`REVIEW_INVITE_CODE`, fail-closed), server-side revocable sessions, httpOnly `Secure`
+>    `SameSite=None` cookies, and double-submit CSRF. Scale is a ~5-user internal test tool, so
+>    enumeration/rate-limit hardening and custom backup tooling are intentionally out of scope.
+> 2. **Delivery is REVIEW-FIRST — not results-first.** The tier order `results → raw → corpus → review`
+>    below is superseded: the **review backend ships first** (PR 1–2), the serving tiers
+>    (results → raw → corpus) follow (PR 3–5), and review coordination is PR 6. See the plan for the
+>    phase→PR mapping.
+>
+> The Problem Statement, the invariants (git as source of truth, aggregation stays in Python, explicit
+> reviewed migrations / never `db:push`), and the serving-tier design are **unchanged**.
+
 ## Problem Statement
 
 `apps/multibrowser` serves every data tier — corpus, score results, raw transcripts — by reading
@@ -153,8 +170,10 @@ No re-ranking, no new scoring semantics — this is a serving change.
       still renders transcripts + verdicts correctly.
 - [ ] A newly landed run appears in the browser after **ingest alone** — no redeploy, no
       baked-bundle upload.
-- [ ] **Review slice — function**: a reviewer authenticates (magic-link email; optionally GitHub
-      OAuth), resumes in-progress review state on a second device, and submits privately (not to a
+<!-- Amended 2026-08-15: auth is email+password (no magic-link/OAuth) — see the Amendment note at the top. -->
+- [ ] **Review slice — function**: a reviewer authenticates (~~magic-link email; optionally GitHub
+      OAuth~~ → **email + password**, per the 2026-08-15 amendment), resumes in-progress review state
+      on a second device, and submits privately (not to a
       public issue by default); assignment and aggregation views exist with defined status
       transitions (assigned → in-progress → submitted) and an explicit definition of "complete."
 - [ ] **Review slice — isolation & privacy**: server-side authorization enforces that a reviewer can
@@ -216,12 +235,17 @@ one is raised via `afx send architect`, not overridden in Solution Approaches.
   schema, guarded by a **schema-drift contract test in CI**.
 - **Auth: magic-link primary + optional GitHub OAuth.** Whether OAuth ships in the *first* review
   slice is a plan-time call based on cost (the spec keeps both in scope).
+  > **Superseded 2026-08-15 (Waleed, final):** auth is **email + password (argon2id), no magic-link,
+  > no email transport, no OAuth**, with an invite-code signup gate. See the Amendment note at the top.
 - **Corpus moves to the DB too.** Waleed's explicit direction is to serve almost everything from the
   DB; the **end state has ZERO runtime GitHub reads** — `lib/github.ts` and the commit-SHA poll are
   retired, not just the raw dual-source.
 - **Cutover: a PR *per tier*, not one mega-PR.** Order is `results → raw → corpus → review`; each
   tier is a shippable integration (its own branch off the integration branch, its own PR). This
   overrides the default "plan phases = commits in one PR" for this project.
+  > **Superseded 2026-08-15 (Waleed, final):** delivery is **review-first** — the review backend ships
+  > first (PR 1–2), then the serving tiers `results → raw → corpus` (PR 3–5), then review coordination
+  > (PR 6). PR-per-tier is retained; only the *order* changed. See the Amendment note at the top and the plan.
 - **Fail-soft (end state): fail visibly with a notice if the API is down — no GitHub read
   fallback.** Do **not** rebuild a dual-source paradigm; a resilient fallback is exactly the scar
   this project retires.

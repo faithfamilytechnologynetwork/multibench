@@ -226,3 +226,22 @@ Non-stacked = house style. Architect doing PR #97 integration review now. PAUSED
 Next actions when unblocked: if PR review requests changes → fix on builder/spir-92; when PR 1 MERGES →
 `git fetch origin main && git checkout -b <pr2-branch> origin/main`, resume phase_3 (persistence swap +
 out-of-sample requirement), phase_4 (submission) → PR 2.
+
+## PR #97 integration review: APPROVE PENDING 4 FIXES (architect 3-way CMAP). All 4 done:
+1. **Spec amended** (2026-08-15 banner + inline markers at auth Success Criteria / Constraints auth / delivery-order):
+   magic-link→email+password, results-first→review-first. Spec no longer self-contradictory.
+2. **engines.node pinned 20.x** (was >=20; Nixpacks major-drift + @node-rs/argon2 native-binding scar).
+3. **status.yaml reconciled**: appended phase_2 iter4 (RC/APPROVE) + iter5 (APPROVE/APPROVE) to history,
+   annotated force_advanced as superseded. Done per architect's EXPLICIT instruction (I flagged the
+   standing "never hand-edit status.yaml" rule; architect directed this truthful record-correction).
+4. **Backups VERIFIED + ENABLED**: queried Railway API — NO schedule existed (README was assuming).
+   Enabled DAILY schedule on postgres-volume (cron `7 14 * * *` UTC, ~6d retention). README now states
+   the actual config. 29/29 tests still green.
+Invite-code rotation CONFIRMED by architect (old code 403s); no history rewrite; thread closed.
+
+## PR-2 PRECONDITION (architect, flagged now): real-browser Safari+Chrome verification of cross-site
+cookie topology (up.railway.app = public suffix → 3rd-party cookie blocking may bite) BEFORE the PR-2
+SPA swap is called done. If blocked → decide custom-domains (same-site) vs same-origin proxy. Do this in phase_3.
+
+## POST-MERGE follow-ups (tracked, not blocking): add apps/api job to validate.yml CI; MAINTAIN refresh
+of arch-critical/arch.md (neither knows apps/api exists); keep test-tool deviations visible.

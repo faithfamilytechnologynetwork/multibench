@@ -5,7 +5,7 @@
   "type": "module",
   "packageManager": "pnpm@10.30.2",
   "engines": {
-    "node": ">=20"
+    "node": "20.x"
   },
   "description": "MultiBench API — thin Postgres-backed serving/review backend for the multibrowser SPA (Spec 92).",
   "scripts": {

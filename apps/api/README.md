@@ -56,8 +56,11 @@ if the `sessions` table ever grows.
 
 ## Data durability
 
-The review store is authoritative (not rebuildable from git). At this test-tool scale, **Railway's
-managed-Postgres built-in backups suffice** — there is no custom backup/restore tooling.
+The review store is authoritative (not rebuildable from git), so a backup **schedule** is configured
+(availability of the feature is not the same as active backups): the `multibench-api` Postgres volume
+has a **daily** Railway backup schedule (cron `7 14 * * *` UTC, ~6-day retention). Restore is via the
+Railway dashboard/API. No custom backup/restore tooling beyond that at this test-tool scale; adjust the
+schedule/retention on the volume if the data grows in value.
 
 ## Migrations
 
