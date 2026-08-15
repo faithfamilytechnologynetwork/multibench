@@ -273,3 +273,18 @@ review route components (async load + auth gate + out-of-sample affordance + pro
 fakeApi. Then phase_3 consult. **PR-2 completion gate: real-browser Safari+Chrome cross-site cookie check**
 (up.railway.app public-suffix → 3rd-party-cookie block risk) — surface early to architect if it fails.
 Did NOT run phase_3 consult yet (SPA half unbuilt).
+
+## Phase 3 SPA half — DONE (2026-08-15). Dispatcher green: apps/api 34 + apps/multibrowser 359.
+- reviewApi.ts: credentialed+CSRF client (fetch injectable for tests) — auth + draft get/put.
+- review.ts: async API-backed store, SAME public API (useReviewState/updateReviewState/pure updaters).
+  Optimistic in-memory + debounced per-tradition save via reference-diff; version conflict reconcile
+  (last-write-wins, edit preserved; server-wins fallback + notice). Auth (initReview/login/signup/logout).
+  out-of-sample: scenarios accepts any id (already), progress counts sample only + beyondSample "+N".
+- ReviewAuthGate.tsx: gate (spinner/login-signup/children) + ReviewerBadge + ReviewSaveStatus + auth form.
+- Pages wired: ReviewIndexPage (gate + badge, identity form removed), ReviewTraditionPage (gate + inner,
+  loaded-gated auto-draw, save status), ReviewScenarioPage (gate + ensureTraditionLoaded, out-of-sample note).
+- Tests: reviewStore.test.ts (4: optimistic/version/reconcile/load), review.test.ts (15), review.test.tsx
+  rewritten (10, combined GitHub+API fake, pre-auth, flush-then-assert). 0 type errors.
+Committed. **REMAINING for PR 2 completion**: real-browser Safari+Chrome cross-site cookie verification
+(deploy SPA w/ VITE_API_BASE → login→draft-save in both; if 3rd-party-cookie blocked → custom-domain vs
+proxy decision to Waleed). Then phase_3 consult → phase_4 (submission) → open PR 2.
