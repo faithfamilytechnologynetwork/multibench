@@ -26,6 +26,10 @@ export interface AuthConfig {
 }
 
 const MIN_PASSWORD_LENGTH = 8;
+// Cap password length: argon2 hashes the full input, so an unauthenticated caller submitting a
+// multi-MB password would make the service do unbounded work. 1024 is far above any real password.
+const MAX_PASSWORD_LENGTH = 1024;
+const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
 /** Auth routes: signup (invite-gated), login, logout, and `me`. */
 export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
@@ -57,8 +61,11 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
       return c.json({ error: 'invalid invite code' }, 403);
     }
     const email = body.email.trim().toLowerCase();
-    if (!email || body.password.length < MIN_PASSWORD_LENGTH) {
-      return c.json({ error: 'email required and password must be at least 8 characters' }, 400);
+    if (!EMAIL_RE.test(email)) {
+      return c.json({ error: 'a valid email is required' }, 400);
+    }
+    if (body.password.length < MIN_PASSWORD_LENGTH || body.password.length > MAX_PASSWORD_LENGTH) {
+      return c.json({ error: 'password must be between 8 and 1024 characters' }, 400);
     }
     const passwordHash = await hashPassword(body.password);
     // Insert with onConflictDoNothing on the unique email, then treat an empty result as "taken".
@@ -84,6 +91,11 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
     const body = await c.req.json().catch(() => null);
     if (!body || typeof body.email !== 'string' || typeof body.password !== 'string') {
       return c.json({ error: 'invalid body' }, 400);
+    }
+    // Reject an over-long password before hashing it (unbounded argon2 work); it can't match a stored
+    // hash anyway (those come from <=1024-char passwords).
+    if (body.password.length > MAX_PASSWORD_LENGTH) {
+      return c.json({ error: 'invalid credentials' }, 401);
     }
     const email = body.email.trim().toLowerCase();
     const rows = await db.select().from(reviewers).where(eq(reviewers.email, email)).limit(1);

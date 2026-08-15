@@ -17,8 +17,12 @@ export type AppEnv = { Variables: { reviewerId: string } };
  */
 export function requireJsonRequest(): MiddlewareHandler {
   return async (c, next) => {
-    const contentType = (c.req.header('content-type') ?? '').toLowerCase();
-    if (!contentType.includes('application/json')) {
+    // Compare the MIME *essence* (the part before `;`) exactly — NOT a substring. A substring check
+    // accepts `text/plain;charset=application/json`, whose essence is the CORS-safelisted `text/plain`
+    // (so it triggers no preflight), reopening the cross-site login-CSRF path; `c.req.json()` would
+    // then parse it regardless of content-type.
+    const essence = (c.req.header('content-type') ?? '').split(';')[0]?.trim().toLowerCase() ?? '';
+    if (essence !== 'application/json') {
       return c.json({ error: 'content-type must be application/json' }, 415);
     }
     await next();

@@ -79,6 +79,12 @@ describe('signup (invite-gated)', () => {
     expect((await signup(app)).status).toBe(201);
     expect((await signup(app)).status).toBe(409); // same email again
   });
+
+  it('rejects an over-long password and a malformed email', async () => {
+    const app = await makeApp();
+    expect((await signup(app, { password: 'x'.repeat(1025) })).status).toBe(400);
+    expect((await signup(app, { email: 'not-an-email' })).status).toBe(400);
+  });
 });
 
 describe('login / me / logout', () => {
@@ -133,6 +139,19 @@ describe('cross-site request rejection (login/logout CSRF)', () => {
     const res = await app.request('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ email: 'reviewer@example.com', password: 'a-good-password' }),
+    });
+    expect(res.status).toBe(415);
+  });
+
+  it('rejects the parameter-smuggling bypass (text/plain;charset=application/json)', async () => {
+    const app = await makeApp();
+    await signup(app);
+    // MIME essence is the CORS-safelisted `text/plain` (no preflight), so it must be rejected even
+    // though the string contains "application/json". An essence-exact check catches it.
+    const res = await app.request('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=application/json' },
       body: JSON.stringify({ email: 'reviewer@example.com', password: 'a-good-password' }),
     });
     expect(res.status).toBe(415);
