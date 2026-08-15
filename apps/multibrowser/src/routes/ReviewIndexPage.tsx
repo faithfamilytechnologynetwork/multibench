@@ -12,8 +12,8 @@ import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
 
 // The reviewer workspace's front door: says WHAT an expert reviewer is asked to do (the three
-// steps), captures who they are, and routes them into a tradition. Everything they type is kept
-// in this browser (localStorage) until they explicitly submit from the tradition page.
+// steps) and routes them into a tradition. Behind the auth gate — reviewer identity is the
+// authenticated account, and drafts persist to the API (see lib/review.ts), not localStorage.
 
 export function ReviewIndexPage() {
   const shaQ = useLatestSha();

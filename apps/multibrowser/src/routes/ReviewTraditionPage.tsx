@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getRouteApi, Link } from "@tanstack/react-router";
+import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
 import { useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
@@ -11,6 +11,7 @@ import {
   SCENARIO_CHECK_LABELS,
   ensureTraditionLoaded,
   evenSample,
+  flushReviewSaves,
   parseReviewState,
   replaceReviewState,
   scenarioChecksOf,
@@ -36,8 +37,8 @@ import { NotFound } from "./NotFound";
 const route = getRouteApi("/review/$traditionId");
 
 // One tradition's review workspace: step 1 (the canonical source) and step 2 (the guide) inline,
-// step 3 as the assigned scenario sample, then the submit panel. Intake persists locally on every
-// keystroke; SUBMISSION is explicit (GitHub issue / download / copy) — see lib/review.ts.
+// step 3 as the assigned scenario sample, then the submit panel. Intake persists to the reviewer's
+// account (debounced, optimistic) as they work; SUBMISSION is explicit — see lib/review.ts.
 
 export function ReviewTraditionPage() {
   return (
@@ -49,6 +50,7 @@ export function ReviewTraditionPage() {
 
 function ReviewTraditionPageInner() {
   const { traditionId } = route.useParams();
+  const navigate = useNavigate();
   const shaQ = useLatestSha();
   const sha = shaQ.data;
   const tradQ = useTradition(sha, traditionId);
@@ -63,11 +65,14 @@ function ReviewTraditionPageInner() {
   useEffect(() => {
     setLoaded(false);
     let alive = true;
-    void ensureTraditionLoaded(traditionId).finally(() => {
-      if (alive) setLoaded(true);
+    // Only mark loaded on SUCCESS — a failed load must not let the auto-draw below run, or a blank
+    // freshly-drawn sample could overwrite the reviewer's saved server draft.
+    void ensureTraditionLoaded(traditionId).then((ok) => {
+      if (alive && ok) setLoaded(true);
     });
     return () => {
       alive = false;
+      void flushReviewSaves(); // persist any debounced edits when leaving the page
     };
   }, [traditionId]);
 
@@ -270,6 +275,27 @@ function ReviewTraditionPageInner() {
                   if (!sid) return;
                   const next = [...sampleIds, sid].sort((a, b) => scenarioIds.indexOf(a) - scenarioIds.indexOf(b));
                   updateReviewState((s) => withSample(s, traditionId, next, mine?.sampleSeed ?? ""));
+                }}
+                className="rounded border border-default-200 px-2 py-1 text-sm text-default-800"
+              >
+                <option value="">choose…</option>
+                {unsampled.map((id) => <option key={id} value={id}>{id}</option>)}
+              </select>
+            </label>
+          )}
+          {unsampled.length > 0 && (
+            <label className="flex items-center gap-1 text-xs font-medium text-default-500">
+              <ExternalLink size={14} aria-hidden /> Review one beyond your sample
+              <select
+                value=""
+                aria-label="Review a scenario beyond your sample"
+                data-testid="review-beyond-sample-picker"
+                onChange={(e) => {
+                  const sid = e.target.value;
+                  if (!sid) return;
+                  // Open it for review WITHOUT adding to sampleIds — it stays out-of-sample (extra),
+                  // so it doesn't change the required-completion count.
+                  void navigate({ to: "/review/$traditionId/$scenarioId", params: { traditionId, scenarioId: sid } });
                 }}
                 className="rounded border border-default-200 px-2 py-1 text-sm text-default-800"
               >

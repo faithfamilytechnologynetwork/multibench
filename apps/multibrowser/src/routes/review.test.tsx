@@ -80,6 +80,20 @@ describe("review landing (/review)", () => {
     expect(screen.getByTestId("reviewer-badge")).toHaveTextContent(/Imam Test/);
   });
 
+  it("fails visibly with a notice when the review service is unreachable", async () => {
+    const gh = fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001"]));
+    const impl = (async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      if (path.startsWith("/api/")) throw new Error("offline"); // service down (not a 401)
+      return gh(input as never, init);
+    }) as typeof fetch;
+    vi.stubGlobal("fetch", impl);
+    renderApp("/review");
+    // Signed-out form with a service-unreachable notice — not a permanent spinner.
+    expect(await screen.findByTestId("review-service-error")).toBeInTheDocument();
+    expect(screen.getByTestId("review-auth-form")).toBeInTheDocument();
+  });
+
   it("shows the sign-in form when there is no session", async () => {
     const gh = fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001"]));
     const impl = (async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -120,6 +134,31 @@ describe("tradition review workspace (/review/$traditionId)", () => {
     await userEvent.click(within(sourceCheck).getByRole("button", { name: /looks right/i }));
     await flushReviewSaves();
     expect(stored(drafts, "sunni-islam").source.status).toBe("unreviewed");
+  });
+
+  it("shows '+N beyond sample' and offers an affordance to review a non-sampled scenario", async () => {
+    const many = Array.from({ length: 30 }, (_, i) => `JLS-${String(i + 1).padStart(3, "0")}`);
+    const { drafts } = harness(traditionFiles("sunni-islam", many));
+    // Seed: a 3-scenario required sample, plus one answered check on an OUT-of-sample scenario.
+    seedDraft(drafts, "sunni-islam", {
+      sampleSeed: "",
+      sampleIds: ["JLS-001", "JLS-002", "JLS-003"],
+      source: { status: "unreviewed", notes: "", suggestion: "" },
+      guide: { status: "unreviewed", notes: "", suggestion: "" },
+      scenarios: { "JLS-020": { scenario: { status: "approved", notes: "", suggestion: "" }, scoring: { status: "unreviewed", notes: "", suggestion: "" }, judgement: { status: "unreviewed", notes: "", suggestion: "" }, pressures: { status: "unreviewed", notes: "", suggestion: "" } } },
+    });
+    const { router } = renderApp("/review/sunni-islam");
+    // (b) the "+N beyond sample" count renders
+    expect(await screen.findByTestId("review-beyond-sample")).toHaveTextContent("+1 beyond sample");
+    // (a) the affordance navigates to a non-sampled scenario WITHOUT adding it to the sample
+    const picker = screen.getByTestId("review-beyond-sample-picker");
+    await userEvent.selectOptions(picker, "JLS-025");
+    await waitFor(() =>
+      expect(router.state.location.pathname).toBe("/review/sunni-islam/JLS-025"),
+    );
+    expect(await screen.findByTestId("out-of-sample-note")).toBeInTheDocument();
+    await flushReviewSaves();
+    expect(stored(drafts, "sunni-islam").sampleIds).toEqual(["JLS-001", "JLS-002", "JLS-003"]); // unchanged
   });
 
   it("reshuffle draws a seeded sample and records the seed", async () => {

@@ -18,6 +18,12 @@ export function ReviewProgressBar({ progress }: { progress: ReviewProgress }) {
       <span className="whitespace-nowrap text-xs text-default-500">
         {progress.done}/{progress.total} checks
         {progress.flagged > 0 && <span className="text-warning"> · {progress.flagged} flagged</span>}
+        {progress.beyondSample > 0 && (
+          <span className="text-default-400" data-testid="review-beyond-sample">
+            {" "}
+            · +{progress.beyondSample} beyond sample
+          </span>
+        )}
       </span>
     </div>
   );

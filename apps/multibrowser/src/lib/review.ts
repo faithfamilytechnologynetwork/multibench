@@ -147,8 +147,6 @@ const stateSchema = z
   })
   .catch(emptyState());
 
-export const REVIEW_STORAGE_KEY = "multibench.review.v1";
-
 /** Parse an untrusted whole-state payload (imported JSON backup) into a valid state. Never throws. */
 export function parseReviewState(text: string | null): ReviewState {
   if (text === null) return emptyState();
@@ -182,12 +180,19 @@ export interface ReviewStatus {
   reconciled: string | null;
 }
 
+/** How long a failed save waits before retrying. */
+export const SAVE_RETRY_MS = 3000;
+
+type LoadState = "loading" | "ok" | "error";
+
 let current: ReviewState = emptyState();
 let status: ReviewStatus = { auth: "unknown", reviewer: null, saving: false, error: null, reconciled: null };
 const versions = new Map<string, number>();
-const loaded = new Set<string>();
+const loadState = new Map<string, LoadState>();
+const loadPromises = new Map<string, Promise<boolean>>();
 const dirty = new Set<string>();
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
+const retryTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const inflight = new Map<string, Promise<void>>();
 
 const listeners = new Set<() => void>();
@@ -209,6 +214,18 @@ function setStatus(patch: Partial<ReviewStatus>): void {
   emit();
 }
 
+// Best-effort: persist any debounced edits when the tab is hidden/closed, so up to SAVE_DEBOUNCE_MS
+// of typing isn't lost on close. (The async flush may not finish on a hard close, but it starts.)
+if (typeof window !== "undefined") {
+  const flushOnHide = () => {
+    if (dirty.size > 0 || timers.size > 0) void flushReviewSaves();
+  };
+  window.addEventListener("pagehide", flushOnHide);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") flushOnHide();
+  });
+}
+
 /** Read the shared review state (re-renders on any update). */
 export function useReviewState(): ReviewState {
   return useSyncExternalStore(subscribe, snapshot);
@@ -226,22 +243,58 @@ export function peekReviewState(): ReviewState {
 export function peekVersion(tid: string): number {
   return versions.get(tid) ?? 0;
 }
+export function peekReviewStatus(): ReviewStatus {
+  return status;
+}
 
 // --- saving ---
 
+function scheduleRetry(tid: string): void {
+  if (retryTimers.has(tid)) return;
+  retryTimers.set(
+    tid,
+    setTimeout(() => {
+      retryTimers.delete(tid);
+      if (dirty.has(tid)) runSave(tid);
+    }, SAVE_RETRY_MS),
+  );
+}
+
+function runSave(tid: string): void {
+  const p = persistTradition(tid).finally(() => inflight.delete(tid));
+  inflight.set(tid, p);
+}
+
 async function persistTradition(tid: string): Promise<void> {
-  dirty.delete(tid);
   const t = current.traditions[tid];
-  if (!t) return;
+  if (!t) {
+    dirty.delete(tid);
+    return;
+  }
+  // Never save before we know the server's version. Saving a version-0 PUT for a tradition whose
+  // initial load FAILED would 409 and the last-write-wins retry would clobber the saved server draft.
+  // So resolve the load first; if it fails, keep the edit dirty and retry later — do not save blind.
+  if (loadState.get(tid) !== "ok") {
+    const ok = await ensureTraditionLoaded(tid);
+    if (!ok) {
+      dirty.add(tid);
+      scheduleRetry(tid);
+      if (dirty.size === 0) setStatus({ saving: false });
+      return;
+    }
+  }
+  dirty.delete(tid);
+  const t2 = current.traditions[tid];
+  if (!t2) return;
   let version = versions.get(tid) ?? 0;
   try {
-    let result = await putDraft(tid, t, version);
+    let result = await putDraft(tid, t2, version);
     if (!result.ok) {
       // Conflict: another device advanced this tradition. Last-write-wins for the active device —
       // retry once with the server's version (our optimistic edits are preserved, not dropped).
       version = result.conflict.version;
       versions.set(tid, version);
-      const retry = await putDraft(tid, current.traditions[tid] ?? t, version);
+      const retry = await putDraft(tid, current.traditions[tid] ?? t2, version);
       if (retry.ok) {
         result = retry;
       } else {
@@ -253,13 +306,14 @@ async function persistTradition(tid: string): Promise<void> {
       }
     }
     versions.set(tid, result.version);
-    setStatus({ error: null });
+    setStatus({ error: null, reconciled: null });
   } catch (e) {
-    // Keep the optimistic state and leave the tradition dirty so a later flush retries.
+    // Keep the optimistic state, leave the tradition dirty, and schedule a real retry.
     dirty.add(tid);
+    scheduleRetry(tid);
     setStatus({ error: e instanceof Error ? e.message : "save failed" });
   } finally {
-    if (dirty.size === 0 && inflight.size <= 1) setStatus({ saving: false });
+    if (dirty.size === 0) setStatus({ saving: false });
   }
 }
 
@@ -272,20 +326,19 @@ function scheduleSave(tid: string): void {
     tid,
     setTimeout(() => {
       timers.delete(tid);
-      const p = persistTradition(tid).finally(() => inflight.delete(tid));
-      inflight.set(tid, p);
+      runSave(tid);
     }, SAVE_DEBOUNCE_MS),
   );
 }
 
-/** Force all pending saves now and await them (navigation, submit, tests). */
+/** Force all pending/failed saves now and await them (navigation, page-hide, submit, tests). */
 export async function flushReviewSaves(): Promise<void> {
   for (const [tid, timer] of timers) {
     clearTimeout(timer);
     timers.delete(tid);
-    const p = persistTradition(tid).finally(() => inflight.delete(tid));
-    inflight.set(tid, p);
+    dirty.add(tid);
   }
+  for (const tid of [...dirty]) runSave(tid);
   await Promise.all([...inflight.values()]);
   if (dirty.size === 0) setStatus({ saving: false });
 }
@@ -298,6 +351,7 @@ export async function flushReviewSaves(): Promise<void> {
 export function updateReviewState(fn: (s: ReviewState) => ReviewState): void {
   const prev = current;
   current = fn(prev);
+  if (status.reconciled !== null) status = { ...status, reconciled: null }; // a fresh edit clears the notice
   const ids = new Set([...Object.keys(prev.traditions), ...Object.keys(current.traditions)]);
   for (const tid of ids) {
     if (current.traditions[tid] !== prev.traditions[tid]) scheduleSave(tid);
@@ -305,24 +359,38 @@ export function updateReviewState(fn: (s: ReviewState) => ReviewState): void {
   emit();
 }
 
-/** Ensure a tradition's draft is loaded from the API (once). Safe to call on every render. */
-export async function ensureTraditionLoaded(tid: string): Promise<void> {
-  if (loaded.has(tid) || current.traditions[tid]) {
-    loaded.add(tid);
-    return;
-  }
-  loaded.add(tid);
-  try {
-    const draft = await getDraft(tid);
-    versions.set(tid, draft.version);
-    if (draft.state !== null && current.traditions[tid] === undefined) {
-      current = { ...current, traditions: { ...current.traditions, [tid]: parseTraditionReview(draft.state) } };
+/**
+ * Ensure a tradition's draft is loaded from the API. Returns whether the load SUCCEEDED — callers
+ * (and `persistTradition`) must not draw a fresh sample or save until it did, or a failed load would
+ * let a blank draft overwrite the saved server copy. Idempotent + coalesced; a failed load can retry.
+ */
+export function ensureTraditionLoaded(tid: string): Promise<boolean> {
+  if (loadState.get(tid) === "ok") return Promise.resolve(true);
+  const existing = loadPromises.get(tid);
+  if (existing) return existing;
+  loadState.set(tid, "loading");
+  const p = (async () => {
+    try {
+      const draft = await getDraft(tid);
+      versions.set(tid, draft.version);
+      // Only adopt the server state if the reviewer hasn't already started editing locally.
+      if (draft.state !== null && current.traditions[tid] === undefined) {
+        current = { ...current, traditions: { ...current.traditions, [tid]: parseTraditionReview(draft.state) } };
+      }
+      loadState.set(tid, "ok");
+      setStatus({ error: null });
       emit();
+      return true;
+    } catch (e) {
+      loadState.set(tid, "error");
+      setStatus({ error: e instanceof Error ? e.message : "load failed" });
+      return false;
+    } finally {
+      loadPromises.delete(tid);
     }
-  } catch (e) {
-    loaded.delete(tid); // allow a retry
-    setStatus({ error: e instanceof Error ? e.message : "load failed" });
-  }
+  })();
+  loadPromises.set(tid, p);
+  return p;
 }
 
 /** Replace the whole state (JSON import). Marks every tradition dirty so it saves. */
@@ -340,10 +408,13 @@ export function resetReviewStore(): void {
   current = emptyState();
   status = { auth: "unknown", reviewer: null, saving: false, error: null, reconciled: null };
   versions.clear();
-  loaded.clear();
+  loadState.clear();
+  loadPromises.clear();
   dirty.clear();
   for (const t of timers.values()) clearTimeout(t);
   timers.clear();
+  for (const t of retryTimers.values()) clearTimeout(t);
+  retryTimers.clear();
   inflight.clear();
   emit();
 }
@@ -365,7 +436,15 @@ export async function initReview(): Promise<void> {
     await fetchCsrf();
     const reviewer = await apiMe();
     current = { ...current, reviewer: reviewer ? reviewerInfoFrom(reviewer) : current.reviewer };
-    setStatus({ auth: reviewer ? "in" : "out", reviewer });
+    setStatus({ auth: reviewer ? "in" : "out", reviewer, error: null });
+  } catch (e) {
+    // The review service is unreachable (network error, not a 401). Fail VISIBLY — resolve to
+    // signed-out with an error so the gate shows the sign-in form + a notice, never a permanent spinner.
+    setStatus({
+      auth: "out",
+      reviewer: null,
+      error: e instanceof Error ? e.message : "couldn't reach the review service",
+    });
   } finally {
     initInFlight = false;
   }

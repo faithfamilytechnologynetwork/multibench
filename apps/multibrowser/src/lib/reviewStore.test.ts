@@ -3,7 +3,9 @@ import { setReviewFetch } from "./reviewApi";
 import {
   ensureTraditionLoaded,
   flushReviewSaves,
+  initReview,
   peekReviewState,
+  peekReviewStatus,
   peekVersion,
   resetReviewStore,
   updateReviewState,
@@ -11,8 +13,10 @@ import {
   withTraditionCheck,
 } from "./review";
 
+type Draft = { state: unknown; version: number };
+
 /** A tiny in-memory fake of the review API that models optimistic-concurrency versions. */
-function fakeApi(seed: Record<string, { state: unknown; version: number }> = {}) {
+function fakeApi(seed: Record<string, Draft> = {}) {
   const store = new Map(Object.entries(seed));
   const puts: Array<{ tid: string; version: number }> = [];
   const json = (obj: unknown, status = 200) =>
@@ -80,23 +84,102 @@ describe("review store — async persistence", () => {
     expect(api2.puts.map((p) => p.tid)).toEqual(["b"]); // "a" not re-saved
   });
 
-  it("reconciles a version conflict (last-write-wins) without dropping the active edit", async () => {
-    // Server already at version 3 (another device advanced it); our store thinks it's new (0).
-    const api = fakeApi({ t: { state: { source: { status: "unreviewed" } }, version: 3 } });
+  it("reconciles a genuine concurrent conflict (last-write-wins) without dropping the active edit", async () => {
+    // Load first (version 1), then another device advances the server to version 2 out-of-band.
+    const api = fakeApi({ t: { state: { source: { status: "unreviewed" } }, version: 1 } });
     setReviewFetch(api.impl);
+    await ensureTraditionLoaded("t");
+    expect(peekVersion("t")).toBe(1);
+    api.store.set("t", { state: { source: { status: "unreviewed" } }, version: 2 }); // concurrent write
 
     updateReviewState((s) => withScenarioCheck(s, "t", "S-1", "scenario", { status: "flagged" }));
     await flushReviewSaves();
 
-    // First PUT (version 0) → 409; retry with the server's version 3 → succeeds at 4.
+    // PUT version 1 → 409 (server is at 2); retry with the server's version 2 → succeeds at 3.
     expect(api.puts).toEqual([
-      { tid: "t", version: 0 },
-      { tid: "t", version: 3 },
+      { tid: "t", version: 1 },
+      { tid: "t", version: 2 },
     ]);
-    expect(peekVersion("t")).toBe(4);
+    expect(peekVersion("t")).toBe(3);
+    expect(api.store.get("t")?.version).toBe(3);
     // The active device's edit survived the reconcile.
-    expect(api.store.get("t")?.version).toBe(4);
     expect((api.store.get("t")?.state as any).scenarios["S-1"].scenario.status).toBe("flagged");
+  });
+
+  it("does NOT overwrite a saved server draft when the initial load fails", async () => {
+    // Server has a real saved draft (version 3). GET fails (network), but the user starts editing.
+    const server = new Map<string, Draft>([
+      ["t", { state: { source: { status: "approved", notes: "server work" } }, version: 3 }],
+    ]);
+    const puts: Array<{ version: number }> = [];
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") throw new Error("network down"); // draft load fails
+      if (method === "PUT") {
+        const b = JSON.parse(String(init?.body ?? "{}"));
+        puts.push({ version: b.version });
+        const cur = server.get("t")!;
+        if (b.version === cur.version) {
+          server.set("t", { state: b.state, version: cur.version + 1 });
+          return json({ version: cur.version + 1 });
+        }
+        return json({ error: "conflict", state: cur.state, version: cur.version }, 409);
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    updateReviewState((s) => withTraditionCheck(s, "t", "guide", { status: "flagged" }));
+    await flushReviewSaves();
+
+    // The save must have been HELD (no PUT), because the load failed — the server draft is intact.
+    expect(puts).toEqual([]);
+    expect(server.get("t")?.version).toBe(3);
+    expect((server.get("t")?.state as any).source.notes).toBe("server work");
+    expect(peekReviewStatus().error).toBeTruthy();
+  });
+
+  it("retries a failed save on the next flush", async () => {
+    let failNext = true;
+    const saved = new Map<string, Draft>();
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") return json({ state: null, version: 0 });
+      if (method === "PUT") {
+        if (failNext) {
+          failNext = false;
+          throw new Error("network blip");
+        }
+        const b = JSON.parse(String(init?.body ?? "{}"));
+        saved.set("t", { state: b.state, version: (saved.get("t")?.version ?? 0) + 1 });
+        return json({ version: saved.get("t")!.version });
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    updateReviewState((s) => withTraditionCheck(s, "t", "source", { status: "approved" }));
+    await flushReviewSaves(); // first attempt throws → held dirty + error
+    expect(saved.has("t")).toBe(false);
+    expect(peekReviewStatus().error).toBeTruthy();
+
+    await flushReviewSaves(); // retry succeeds
+    expect(saved.get("t")?.version).toBe(1);
+    expect(peekReviewStatus().error).toBeNull();
+  });
+
+  it("fails visibly (signed-out) rather than hanging when the service is unreachable", async () => {
+    setReviewFetch((async () => {
+      throw new Error("offline");
+    }) as unknown as typeof fetch);
+    await initReview();
+    const st = peekReviewStatus();
+    expect(st.auth).toBe("out");
+    expect(st.error).toBeTruthy();
   });
 
   it("loads an existing draft from the API tolerantly", async () => {

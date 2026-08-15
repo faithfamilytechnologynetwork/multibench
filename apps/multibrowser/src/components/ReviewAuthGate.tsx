@@ -23,7 +23,7 @@ export function ReviewAuthGate({ children }: { children: ReactNode }) {
   }, [status.auth]);
 
   if (status.auth === "unknown") return <CenteredSpinner label="Checking your session…" />;
-  if (status.auth === "out") return <ReviewAuthForm />;
+  if (status.auth === "out") return <ReviewAuthForm initError={status.error} />;
   return <>{children}</>;
 }
 
@@ -81,7 +81,7 @@ export function ReviewSaveStatus() {
   );
 }
 
-function ReviewAuthForm() {
+function ReviewAuthForm({ initError }: { initError?: string | null }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -123,6 +123,12 @@ function ReviewAuthForm() {
       <p className="text-sm text-default-500">
         Your review drafts are saved privately to your account and sync across your devices.
       </p>
+
+      {initError && (
+        <p className="text-sm text-danger" role="alert" data-testid="review-service-error">
+          Couldn&rsquo;t reach the review service ({initError}). Check your connection and try again.
+        </p>
+      )}
 
       {mode === "signup" && (
         <>
