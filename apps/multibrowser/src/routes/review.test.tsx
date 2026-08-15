@@ -199,17 +199,31 @@ describe("tradition review workspace (/review/$traditionId)", () => {
     expect(stored(drafts, "sunni-islam").sampleIds).toEqual(["JLS-001", "JLS-002", "JLS-003"]); // unchanged
   });
 
-  it("submits a private immutable snapshot, and keeps GitHub publishing opt-in", async () => {
+  it("submits a private immutable snapshot (confirmed, non-empty), and keeps GitHub publishing opt-in", async () => {
+    const h = harness(traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderApp("/review/sunni-islam");
+    // Answer at least one check so there's something to submit (empty submissions are blocked).
+    const sourceCheck = await screen.findByTestId("review-check-source");
+    await userEvent.click(within(sourceCheck).getByRole("button", { name: /looks right/i }));
+
+    const submit = await screen.findByTestId("review-submit");
+    expect(within(submit).getByTestId("review-publish-optional")).toBeInTheDocument(); // publish is opt-in
+    await userEvent.click(within(submit).getByTestId("review-submit-private"));
+    await waitFor(() => expect(within(submit).getByTestId("review-submitted")).toBeInTheDocument());
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(h.submissions).toHaveLength(1);
+    expect(h.submissions[0]!.publishedIssueUrl).toBeNull(); // private by default
+    confirmSpy.mockRestore();
+  });
+
+  it("blocks submitting an empty review", async () => {
     const h = harness(traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
     renderApp("/review/sunni-islam");
     const submit = await screen.findByTestId("review-submit");
-    // Private submission is the PRIMARY action; GitHub publish is behind an opt-in disclosure.
-    const btn = within(submit).getByTestId("review-submit-private");
-    expect(within(submit).getByTestId("review-publish-optional")).toBeInTheDocument();
-    await userEvent.click(btn);
-    await waitFor(() => expect(within(submit).getByTestId("review-submitted")).toBeInTheDocument());
-    expect(h.submissions).toHaveLength(1);
-    expect(h.submissions[0]!.publishedIssueUrl).toBeNull(); // private by default
+    await userEvent.click(within(submit).getByTestId("review-submit-private")); // nothing reviewed yet
+    await waitFor(() => expect(within(submit).getByRole("alert")).toHaveTextContent(/nothing to submit/i));
+    expect(h.submissions).toHaveLength(0);
   });
 
   it("reshuffle draws a seeded sample and records the seed", async () => {

@@ -195,6 +195,13 @@ describe('review submissions (immutable)', () => {
     expect(rows[0].publishedIssueUrl).toBe('https://github.com/x/y/issues/1');
   });
 
+  it('rejects a non-GitHub publishedIssueUrl', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    const res = await submit(app, jar, 'sunni-islam', { review: sampleState(), publishedIssueUrl: 'https://evil.example/x' });
+    expect(res.status).toBe(400);
+  });
+
   it('isolates submissions per reviewer', async () => {
     const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
     const jarA = await signedIn(app, 'a@example.com');

@@ -125,7 +125,9 @@ export function buildReviewReport(ctx: ReportContext): string {
     .filter(
       (sid) =>
         !sampleSet.has(sid) &&
-        SCENARIO_CHECKS.some((key) => scenarioChecksOf(t, sid)[key].status !== "unreviewed"),
+        // Match the per-check rendering: notes/suggestion count as commentary even without a verdict,
+        // so a notes-only out-of-sample review isn't silently dropped from this section.
+        SCENARIO_CHECKS.some((key) => isAnswered(scenarioChecksOf(t, sid)[key])),
     )
     .sort();
   if (extras.length > 0) {

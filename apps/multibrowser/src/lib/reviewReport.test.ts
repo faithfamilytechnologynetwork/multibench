@@ -199,6 +199,17 @@ describe("submission URLs", () => {
     expect(sampleSection).not.toContain("JLS-099");
   });
 
+  it("includes NOTES-ONLY out-of-sample commentary (no verdict clicked)", () => {
+    let s = withSample(emptyState(), "sunni-islam", ["JLS-001"], "");
+    // Notes typed on an out-of-sample scenario, but no verdict button clicked (status stays unreviewed).
+    s = withScenarioCheck(s, "sunni-islam", "JLS-077", "scoring", { notes: "the exception is mishandled" });
+    const report = buildReviewReport({ state: s, traditionId: "sunni-islam", displayName: "Sunni Islam", sha: null, runId: null, repo: REPO, now: new Date("2026-08-15T12:00:00Z") });
+    expect(report).toContain("## 4. Beyond the assigned sample");
+    const beyondIdx = report.indexOf("## 4. Beyond the assigned sample");
+    expect(report.indexOf("JLS-077", beyondIdx)).toBeGreaterThan(beyondIdx);
+    expect(report).toContain("the exception is mishandled");
+  });
+
   it("omits the beyond-sample section when there is no out-of-sample review", () => {
     const s = withSample(emptyState(), "sunni-islam", ["JLS-001"], "");
     const report = buildReviewReport({ state: s, traditionId: "sunni-islam", displayName: "Sunni Islam", sha: null, runId: null, repo: REPO, now: new Date("2026-08-15T12:00:00Z") });

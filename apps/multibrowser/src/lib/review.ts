@@ -739,6 +739,11 @@ export interface ReviewProgress {
   beyondSample: number;
 }
 
+/** A check counts as "answered" if it carries a verdict OR any notes/suggestion (matches the report). */
+export function isCheckAnswered(c: CheckReview): boolean {
+  return c.status !== "unreviewed" || c.notes.trim() !== "" || c.suggestion.trim() !== "";
+}
+
 export function traditionProgress(t: TraditionReview | undefined): ReviewProgress {
   if (!t) return { done: 0, total: 0, flagged: 0, beyondSample: 0 };
   const checks: CheckReview[] = [t.source, t.guide];
@@ -749,7 +754,7 @@ export function traditionProgress(t: TraditionReview | undefined): ReviewProgres
   const answered = checks.filter((c) => c.status !== "unreviewed");
   const sample = new Set(t.sampleIds);
   const beyondSample = Object.entries(t.scenarios).filter(
-    ([sid, sc]) => !sample.has(sid) && SCENARIO_CHECKS.some((k) => sc[k].status !== "unreviewed"),
+    ([sid, sc]) => !sample.has(sid) && SCENARIO_CHECKS.some((k) => isCheckAnswered(sc[k])),
   ).length;
   return {
     done: answered.length,

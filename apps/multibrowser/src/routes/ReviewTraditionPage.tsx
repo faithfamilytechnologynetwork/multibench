@@ -14,6 +14,7 @@ import {
   evenSample,
   flushReviewSaves,
   parseReviewState,
+  peekReviewState,
   prefetchDrafts,
   replaceReviewState,
   scenarioChecksOf,
@@ -313,41 +314,55 @@ function ReviewTraditionPageInner() {
         </div>
       </section>
 
-      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runsQ.data?.defaultRunId ?? null} />
+      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runsQ.data?.defaultRunId ?? null} loaded={loaded} />
     </div>
   );
 }
 
 /** The explicit hand-off: submit PRIVATELY to the reviewer's account (immutable snapshot), then
  * optionally publish to a public GitHub issue; plus copy/download the report and back up / restore. */
-function SubmitPanel({ traditionId, displayName, sha, runId }: {
-  traditionId: string; displayName: string; sha: string | null; runId: string | null;
+function SubmitPanel({ traditionId, displayName, sha, runId, loaded }: {
+  traditionId: string; displayName: string; sha: string | null; runId: string | null; loaded: boolean;
 }) {
   const review = useReviewState();
   const [copied, setCopied] = useState<null | "report" | "failed">(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importNote, setImportNote] = useState<string | null>(null);
   const [submissions, setSubmissions] = useState<SubmissionMeta[]>([]);
+  const [submissionsError, setSubmissionsError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [publishUrl, setPublishUrl] = useState("");
 
   useEffect(() => {
     let alive = true;
     void listSubmissions(traditionId)
       .then((s) => alive && setSubmissions(s))
-      .catch(() => {});
+      .catch((e) => alive && setSubmissionsError(e instanceof Error ? e.message : "couldn't load submissions"));
     return () => {
       alive = false;
     };
   }, [traditionId]);
 
-  const submitPrivately = async () => {
+  // Submit a PRIVATE immutable snapshot. `publishedIssueUrl` is set only when the reviewer opted to
+  // also publish. Carries corpus/run provenance so the frozen record says what was reviewed.
+  const submit = async (publishedIssueUrl?: string) => {
+    if (!loaded) return; // button is disabled until the draft loads; guard anyway
+    await flushReviewSaves(); // persist the latest edits, then read the freshest state
+    const t = peekReviewState().traditions[traditionId] ?? emptyTradition();
+    const progress = traditionProgress(t);
+    if (progress.done === 0 && progress.beyondSample === 0) {
+      setSubmitError("Nothing to submit yet — review at least one check first.");
+      return;
+    }
+    if (!window.confirm("Submit this review? A permanent, unchangeable snapshot is saved to your account.")) return;
     setSubmitting(true);
     setSubmitError(null);
     try {
-      await flushReviewSaves(); // persist the latest edits before freezing the snapshot
-      const meta = await submitReview(traditionId, review.traditions[traditionId] ?? emptyTradition());
+      const snapshot = { review: t, provenance: { traditionId, sha, runId } };
+      const meta = await submitReview(traditionId, snapshot, publishedIssueUrl);
       setSubmissions((prev) => [meta, ...prev]);
+      setPublishUrl("");
     } catch (e) {
       setSubmitError(e instanceof Error ? e.message : "submit failed");
     } finally {
@@ -392,7 +407,7 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
         can still keep editing your draft and submit again later.
       </p>
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <button type="button" onClick={() => void submitPrivately()} disabled={submitting}
+        <button type="button" onClick={() => void submit()} disabled={submitting || !loaded}
           data-testid="review-submit-private"
           className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90 disabled:opacity-60">
           <ClipboardCheck size={14} aria-hidden /> {submitting ? "Submitting…" : "Submit review (private)"}
@@ -407,6 +422,9 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
         </button>
       </div>
       {submitError && <p className="text-xs text-danger" role="alert">Couldn&rsquo;t submit: {submitError}</p>}
+      {submissionsError && (
+        <p className="text-xs text-warning" role="status">Couldn&rsquo;t load your submission history ({submissionsError}).</p>
+      )}
       {submissions.length > 0 && (
         <p className="text-xs text-success" data-testid="review-submitted">
           Submitted privately{submissions[0] ? ` · ${new Date(submissions[0].submittedAt).toLocaleString()}` : ""}
@@ -442,6 +460,23 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
             into the issue body.
           </p>
         )}
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <label className="flex flex-1 items-center gap-2 text-default-500">
+            Opened it? Paste the issue URL to record it with your submission:
+            <input
+              type="url"
+              value={publishUrl}
+              onChange={(e) => setPublishUrl(e.target.value)}
+              placeholder="https://github.com/…/issues/123"
+              className="min-w-0 flex-1 rounded border border-default-200 bg-background px-2 py-1 text-default-800"
+            />
+          </label>
+          <button type="button" disabled={submitting || !loaded || !publishUrl.trim()}
+            onClick={() => void submit(publishUrl.trim())} data-testid="review-submit-published"
+            className="rounded border border-default-200 px-2 py-1 text-default-700 hover:border-default-300 disabled:opacity-60">
+            Submit as published
+          </button>
+        </div>
       </details>
       <div className="flex flex-wrap items-center gap-3 border-t border-default-200 pt-3 text-xs text-default-500">
         <button type="button"

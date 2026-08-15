@@ -116,6 +116,10 @@ export function reviewRoutes(db: AppDb): Hono<AppEnv> {
       typeof body.publishedIssueUrl === 'string' && body.publishedIssueUrl.length > 0
         ? body.publishedIssueUrl
         : null;
+    // If they opted to publish, the recorded link must be a real GitHub URL (it's rendered as a link).
+    if (publishedIssueUrl !== null && !/^https:\/\/github\.com\//.test(publishedIssueUrl)) {
+      return c.json({ error: 'publishedIssueUrl must be a https://github.com/ URL' }, 400);
+    }
     const inserted = await db
       .insert(submissions)
       .values({ reviewerId, traditionId, review: body.review, publishedIssueUrl })
