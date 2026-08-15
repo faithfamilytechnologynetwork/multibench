@@ -208,3 +208,15 @@ no preflight) bypassed it; c.req.json() parses regardless → session-fixation r
 FIX: compare MIME essence exactly (split ';'[0]==='application/json'). +regression test. Minors: password
 length cap 1024 (unbounded argon2 DoS), email format check. Build green, **29/29**. Redeployed (2f4fd80f),
 verifying essence fix live. Committed. Iter3 rebuttal written. → re-signal for iter4.
+
+## Phase 2 APPROVED (codex+claude both APPROVE, iter5). PR 1 OPENED.
+5 review iterations (all codex findings legit): iter1 (pglite-in-prod, pool error, cors test), iter2
+(login/logout CSRF), iter3 (MIME-essence bypass — my regression), iter4 (committed invite code → rotated+redacted).
+iter5 both APPROVE.
+**PR #97** opened (base main, head builder/spir-92) = Phases 1+2 (apps/api infra + review schema + auth).
+Recorded via porch done --pr 97. Live: https://multibench-api-production.up.railway.app. 29/29 tests.
+PR body carries the Ben-override note (Waleed owns model, final) per claude's ask.
+
+## OPEN SEQUENCING Q (raised to architect): porch auto-advanced to phase_3 (= PR 2 work) but PR 1 not merged.
+Per plan PR-per-tier: PR2 = Phases 3+4. Need architect direction: (a) pause phase_3 until PR 1 merges then
+branch PR 2 from main, or (b) stack PR 2 branch on PR 1. PAUSING phase_3 pending their call + PR 1 review.
