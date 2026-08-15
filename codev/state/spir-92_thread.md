@@ -310,3 +310,13 @@ check-types clean; api 34 + multibrowser 364 green. Committed. Rebuttal written.
 - Browser Safari+Chrome cross-site cookie check DEFERRED to PR-2 completion gate (architect's framing;
   can't drive browsers headlessly; topology implemented correctly).
 +tests. check-types clean; api 37 + mb 367 green. Committed. Rebuttal written. → re-signal iter3.
+
+## Phase 3 consult iter3: codex + claude BOTH REQUEST_CHANGES (HIGH). Blocker fixed + others; 2 defended.
+BLOCKER (both): reviewer-switch/401 left prev reviewer's drafts in memory → cross-account leak. FIX:
+resetReviewStore in handleAuthError + on reviewer-id change in login/signup. +test.
+Fixed: per-tradition op serialization (enqueue) so save/delete don't race (+test); CSRF-403 refresh;
+logout flush; replaceReviewState import-delete symmetry; PUT bodyLimit 512KB (+413 test); idle/wording nits.
+DEFENDED (plan semantics): codex#1 whole-draft last-write-wins IS the plan's "reconciled not lost"
+(claude concurs); codex#2 edit-before-load is SAFE via the iter-2 adopt-fix (server-wins+notice, no loss).
+Browser Safari/Chrome check stays PR-2 gate (both agree not a phase_3 blocker).
+check-types clean; api 38 + mb 369 green. Committed. Rebuttal written. → re-signal iter4.
