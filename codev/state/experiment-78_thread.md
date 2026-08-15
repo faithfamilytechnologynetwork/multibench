@@ -185,21 +185,27 @@ thread, open PR `Refs #78`. Tripwires still: banding <$350, total <$425.
 - Porch advanced hypothesis→design→execute→analyze; **experiment-complete gate REQUESTED — PENDING
   HUMAN APPROVAL.** Will NOT self-approve. Notified architect (PR ready + gate ready).
 
-## NEXT (waiting on human)
+## DONE — merged, verified, protocol complete (2026-08-13)
 
-Wait for the human to approve the `experiment-complete` gate (via architect message → I run
-`porch approve 78 experiment-complete`, unless routed to the human directly). Then, on PR merge:
-`porch done 78 --merged 79` and enter verify. Nothing else to do until approval.
+- Waleed approved the experiment-complete gate. **PR #79 merged with a MERGE COMMIT** (2c4b08a; never
+  squash). Recorded in porch: `--pr 79 --branch builder/experiment-78` then `--merged 79`.
+- Porch advanced analyze → PROTOCOL COMPLETE → verified (terminal; "already verified — nothing to do").
+- **Verify PASSED:** merge 2c4b08a is an ancestor of origin/main; all deliverables present on main
+  (notes.md, analyze.py, summary_78.json, figures, thread); raw sittings/judgments correctly absent
+  (gitignored); summary on main intact (24,912 judgments, 519 scenarios, headline diff −0.0157
+  CI[−0.0257,−0.0061]).
+- Final spend $376.16 / $425 ceiling. Notified architect. **Project 78 COMPLETE.**
 
-At collect completion: (1) verify 0 failures / fill gaps by resumable re-run; (2) PROJECT remaining
-banding, confirm <\$350 cumulative + <\$425 total, then judge the remaining 5 traditions (judaism, RC,
-secular-sage, sunni-islam, taoism); (3) reconcile EXACT total token-sum banding + Modal wall-clock serve
-BEFORE analysis; (4) build analyze.py (2 arms, per-tradition CIs, slope_A1−slope_B, per-trad L0 lift,
-normative contrast, stated-B vs #76 unstated-B); (5) run pre-registered estimands → notes.md Full-run
-Results; (6) commit + PR `Refs #78`. Live tripwire during collect: Modal \$80 (serve). Pace safe.
+## Porch/thread reconciliation (2026-08-15)
 
-Reported reconciled actuals + projection to architect. Per binding sequence, NOT starting the 519 run
-without explicit go. On release: full collect (arms A1,B; all 519; concurrency ~16; resumable) → judge
-all 7 traditions → analyze.py (build it: 2 arms, per-tradition CIs, slope_A1−slope_B, per-trad L0 lift,
-normative contrast, stated-B vs #76 unstated-B) → notes.md Full-run Results → PR `Refs #78`. Watch the
-$80 Modal tripwire during serve.
+Architect flagged a mismatch: `origin/main`'s status.yaml still read **analyze** while this worktree
+read **verified**. Root cause — PR #79 was merged BEFORE the post-merge porch closure ran, so the three
+closure commits (record PR → mark merged → protocol-complete, i.e. status.yaml analyze→verified) plus
+the final thread commit landed on `builder/experiment-78` **only** and never reached `main`. Nothing was
+genuinely open: the experiment is complete and verified on main (merge 2c4b08a; deliverables present;
+raw data gitignored). Fixes applied:
+- (a) Removed the stale orphaned mid-flight paragraphs that an earlier Edit left detached below the DONE
+  section (leftover "at collect completion…" and "NOT starting the 519 run without explicit go…" text —
+  long superseded by the completed run).
+- (b) Landing the four stranded closure commits on `main` via a small `chore(porch)` PR so porch
+  reflects reality (main status.yaml → verified). Then standing down.
