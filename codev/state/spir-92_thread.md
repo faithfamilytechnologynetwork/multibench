@@ -112,6 +112,18 @@ Committed `[Spec 92][Phase: implement] feat: apps/api service scaffold`.
 - ALLOWED_ORIGINS not set on service yet (no cross-origin caller until Phase 2/3 SPA integration).
 Reported all to architect. All Phase-1 deliverables met. Signaling PHASE_COMPLETE → per-phase consult (codex+claude).
 
+## Phase 1 consult iter1 (2026-08-15): codex + claude BOTH REQUEST_CHANGES (HIGH) — accepted all
+3 blocking, all fixed:
+- **pglite in PROD import graph** (codex): db.ts imported @electric-sql/pglite (devDep) → prod-only
+  install would crash. Moved adapter to test-only `src/testing/pglite.ts`; db.ts = node-postgres only.
+- **pg.Pool no 'error' listener** (claude): idle-client error crashes always-on process. Added pool.on('error').
+- **CORS negative test passed for `*`** (claude): changed to assert toBeNull(). Added OPTIONS preflight test.
+Minors fixed: startup allow-list log, PORT NaN guard, removed unused @/* tsconfig path, documented
+drizzle.config `?? ''` (generate needs no URL). Deferred: Database.close() → Phase 2.
+Build green, **7/7 tests** (was 6). **REDEPLOYED** — new deploy d767a5e0 Online, boot log shows new
+CORS line, /api/health 200 {ok,db:up}: fixed prod code live & clean without pglite.
+Committed fix. Rebuttal written. → porch done to re-verify.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
