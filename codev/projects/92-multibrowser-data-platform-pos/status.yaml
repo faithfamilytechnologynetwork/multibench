@@ -1,0 +1,150 @@
+id: '92'
+title: multibrowser-data-platform-pos
+protocol: spir
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: API service scaffold (Hono + Drizzle + Postgres, PGlite rig, Railway, topology)
+    status: complete
+  - id: phase_2
+    title: Review schema + email/password auth (after Ben sign-off) — opens PR 1
+    status: complete
+  - id: phase_3
+    title: Review draft persistence swap (localStorage→API, sync→async, conflict-safe)
+    status: in_progress
+  - id: phase_4
+    title: Review private immutable submission — opens PR 2
+    status: pending
+  - id: phase_5
+    title: 'DEFERRED: serving schema + ingest/drift infra + /api/version + fingerprint URLs'
+    status: pending
+  - id: phase_6
+    title: 'DEFERRED: results tier ingest (committed-tree-bound)'
+    status: pending
+  - id: phase_7
+    title: 'DEFERRED: results API + SPA swap + provenance display — opens PR 3'
+    status: pending
+  - id: phase_8
+    title: 'DEFERRED: raw tier ingest + retention pruning'
+    status: pending
+  - id: phase_9
+    title: 'DEFERRED: raw API + SPA swap, retire baked bundle — opens PR 4'
+    status: pending
+  - id: phase_10
+    title: 'DEFERRED: corpus tier ingest'
+    status: pending
+  - id: phase_11
+    title: 'DEFERRED: corpus API + SPA swap, delete github.ts (zero GitHub reads) — opens PR 5'
+    status: pending
+  - id: phase_12
+    title: 'DEFERRED: review assignment machinery'
+    status: pending
+  - id: phase_13
+    title: 'DEFERRED: review aggregation + coordinator dashboards — opens PR 6'
+    status: pending
+current_plan_phase: phase_3
+gates:
+  spec-approval:
+    status: approved
+    requested_at: '2026-08-14T16:54:27.551Z'
+    approved_at: '2026-08-14T18:32:45.715Z'
+  plan-approval:
+    status: approved
+    requested_at: '2026-08-14T18:43:59.672Z'
+    approved_at: '2026-08-15T12:19:36.125Z'
+  pr:
+    status: pending
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: true
+history:
+  - iteration: 1
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_1-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_1-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter1-claude.txt
+  - iteration: 2
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter2-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter2-claude.txt
+  - iteration: 3
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter3-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter3-claude.txt
+  - iteration: 4
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter4-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter4-claude.txt
+  - iteration: 5
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter5-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_2-iter5-claude.txt
+started_at: '2026-08-14T05:11:39.030Z'
+updated_at: '2026-08-15T19:33:27.092Z'
+force_advanced:
+  phase: phase_2
+  iteration: 3
+  max_iterations: 3
+  rebuttal_file: 92-phase_2-iter3-rebuttals.md
+  at: '2026-08-15T19:23:34.672Z'
+  note: >-
+    Superseded — iterations continued past the force-advance and phase_2 reached codex+claude
+    APPROVE at iteration 5 (see consult_history iter4/iter5, appended 2026-08-15 by architect
+    direction to reconcile the record). This block records the historical force-advance event only.
+pr_history:
+  - phase: implement
+    pr_number: 97
+    branch: builder/spir-92
+    created_at: '2026-08-15T19:33:27.091Z'
