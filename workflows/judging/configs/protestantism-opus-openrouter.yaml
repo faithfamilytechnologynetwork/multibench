@@ -1,0 +1,30 @@
+# ProtestantBench #89 — Opus BACKFILL via OpenRouter (Waleed 2026-08-14).
+#
+# Finishes the 9720 pending Opus cells LIVE (no batch — ~2x batch cost explicitly accepted) on the
+# OPENROUTER key only. Do NOT touch the FPL or CEFE Anthropic keys.
+#
+# Model: anthropic/claude-opus-4.8 — routes to provider=Anthropic on OpenRouter (verified via probe),
+# i.e. the SAME underlying Claude Opus 4.8 as the direct `claude-opus-4-8` used for the 8280 harvested
+# verdicts (the export already aliases anthropic/claude-opus-4.8 -> claude-opus-4-8, so re-export
+# unifies both key-paths under one judge id). NOT the `-fast` or `:batch` variants.
+#
+# Recording note: verdicts are recorded under judge id `anthropic/claude-opus-4.8`; they coexist with
+# the FPL `claude-opus-4-8` rows in judgments.jsonl and are deduped at export by later-ts (backfill
+# wins on the ~242 overlapping cells). This config is fed a PENDING-SITTINGS SUBSET, not the full
+# grid, so it judges only the pending cells (+242 redundant re-judges), never re-running Gemini.
+#
+# Single-judge panel → no cross-judge re-judge pass. thinking + max_tokens 8000 match the FPL verdicts.
+
+subjects:
+  - {model: openai/gpt-5.6-terra, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: anthropic/claude-sonnet-5, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: qwen/qwen3-235b-a22b-2507, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: thinkingmachines/inkling, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+
+judges:
+  - {model: anthropic/claude-opus-4.8, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, max_tokens: 8000}
+
+framings: [unstated, stated, guided]
+# Higher concurrency for the live backfill throughput (OpenRouter paid key; retries:2 absorbs 429s).
+concurrency: 16

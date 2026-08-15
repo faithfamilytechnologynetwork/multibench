@@ -39,8 +39,8 @@ transcripts/verdicts).
 
 ## Open questions (resolved during the run)
 
-- Opus coverage shape (full grid vs validation sample) — resolved to **full-grid intent, batched**;
-  in practice landed at **46 % validation as a contiguous scenario block** (PRO-001…050 zero,
-  PRO-057…100 ~full — a batch-boundary artifact, NOT a representative sample), due to a funding-key
-  credit exhaustion then an Anthropic org usage cap on the corrected key. Backfill planned.
+- Opus coverage shape (full grid vs validation sample) — resolved to **full grid**. It shipped
+  partial first (46 %, a contiguous scenario block from a funding-key credit exhaustion + an org
+  usage cap on the corrected key), then was **backfilled live via OpenRouter to 18000/18000 = 100 %**
+  under one model (Opus 4.8). Opus remains badge-only (never re-ranks).
 - Integration shape — resolved to **new run-id, protestantism-only**.

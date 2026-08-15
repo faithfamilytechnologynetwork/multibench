@@ -3,37 +3,44 @@
 ## Outcome
 
 Published `20260813-protestantism` — score tier (`results/`) + raw tier (`results-raw/`), same
-fingerprint, `20260803` untouched. **Gemini (ranking judge): full grid, 18000/18000 = 100 %.**
-**Opus (badge-only validation): 8280/18000 ≈ 46 %, but as a CONTIGUOUS SCENARIO BLOCK, not a
-sample** — PRO-001…050 have **zero** Opus verdicts, PRO-051…056 ramp up partially, PRO-057…100 are
-~full (a batch-boundary artifact; see Deviations). The 9720 remaining Opus cells (almost all of
-PRO-001…056) are staged/resumable for backfill (see below).
+fingerprint, `20260803` untouched. **Both judges are complete full grids: Gemini (ranking) and Opus
+(badge-only validation) each 18000/18000 = 100 %.**
+
+This shipped in two passes: first a **partial** dataset (Gemini 100 %, Opus 46 % — a contiguous
+scenario block from a batch-boundary credit failure; see Deviations) merged via PR #93, then the
+**Opus backfill** completing the grid to 100 %. The partial-coverage narrative below is retained as
+the record of what happened; the final published dataset is full-grid.
 
 ## Verification evidence
 
 - Tradition validator-clean (100 scenarios, `judge-guidance.md` per scenario).
 - Collection 9000/9000 sittings, 0 failed. Gemini judging 18000/18000, 0 failed.
-- Canonical `report.json` (usage-computed, `fully_priced: true`): **total $752.27** —
-  collection $226.02 · Gemini judge $248.52 · Opus judge $277.74.
-- Both exported manifests stamp the **same** `fingerprint` (`sha256:a0989a65…e3ed`). NOTE:
-  `counts.coverage` reports coverage only per *framing* (Gemini 3000/3000, Opus ~1375-1381) — which
-  is even on the framing axis and so **masks the per-scenario hole** (PRO-001…050 = 0 Opus). Scenario
-  coverage from `judgments.jsonl`: Opus zero for PRO-001…050, partial for PRO-051…056 (16/40/66/68/
-  81/127 of 180), ~full (179-180) for PRO-057…100. Gemini full for all.
-- Score tier 26 KB (well under the 8 MB/run, 1 MB/shard ceilings); raw tier 100 gz shards, 30 MB.
+- **Final coverage (after backfill): unique Opus cells 18000/18000 = 100 %, Gemini 18000/18000 =
+  100 %.** The re-exported manifest `counts.coverage` reports 3000/3000 for both judges in every
+  framing. (Interim partial: Opus 8280/18000 = 46 % as a contiguous scenario block — see Deviations.)
+- Both re-exported manifests stamp the **same** `fingerprint` (`sha256:33e62ad6…ced12`; the earlier
+  partial export was `sha256:a0989a65…e3ed`).
+- Score tier ~25 KB (well under the 8 MB/run, 1 MB/shard ceilings); raw tier 100 gz shards, ~31 MB.
 - `uv --project workflows/analysis run pytest workflows/analysis` → 233 passed, 6 skipped
-  (incl. the new Gemini-slug normalization test).
+  (incl. the Gemini-slug normalization test; the Opus OpenRouter-slug alias + its test already
+  existed).
 
-## Spend — per key
+## Spend — per key (final, actual billed)
 
 | Key | Billed for | USD |
 |---|---|---|
 | OpenRouter (`OPENROUTER_API_KEY`) | 5 subjects + Gemini judge | $474.54 |
-| Anthropic plain (`ANTHROPIC_API_KEY`, sk-ant-…F…) | Opus (harvested, batch-priced) + probe | $277.74 |
+| OpenRouter | Opus backfill (live, all 10937 calls incl. 975 re-judge) + $3.34 smoke | $641.21 |
+| Anthropic plain (`ANTHROPIC_API_KEY`, sk-ant-…F…) | Opus first pass (harvested, batch-priced) + probe | $277.74 |
 | Anthropic judge (`ANTHROPIC_JUDGE_API_KEY`, sk-ant-…u…, CEFE) | blocked (org cap) — probes only | ~$0 |
-| **Total** | | **$752.27** |
+| **Total actual spend** | | **≈ $1393** |
 
-Under the $1150 ceiling; the $900 alert line was never crossed.
+Budget history: the original run held under the **$1150 ceiling** at $752.27 (partial, $900 alert
+never crossed). The Opus backfill was separately authorized at ~2× batch cost with an **$800 backfill
+budget** — actual backfill spend **$637.87** (all live calls), well under; per-cell $0.051–0.054.
+The canonical `report.json` total reads **$1305.85** because it dedups the re-judge overlay to
+final-verdict cost (Opus backfill $553.58 there vs $637.87 actually billed — the ~$84 gap is the 975
+superseded re-judge calls, real spend not reflected in final-verdict cost).
 
 ## Deviations from the original design
 
@@ -58,12 +65,26 @@ The design intent (architect go) was **Opus full grid, batched** (~$1030). What 
    axis); the integration reviewer caught the scenario-axis hole. Docs corrected here and in the
    README/PR.
 
-## Backfill plan (deferred completion)
+## Backfill (COMPLETED — live via OpenRouter)
 
-The 9720 pending Opus cells (9696 FPL-errored + 24 unparseable) complete on the CEFE judge key once
-its org monthly cap lifts (**2026-09-01**), or sooner if that org's Anthropic API tier is raised.
-Everything is staged and resumable: re-run `batch-judge submit`/`collect` for the pending Opus cells
-under the judge key, then re-export in place (same `--run-id`, byte-stable shards, new fingerprint).
+Rather than wait for the Sept-1 CEFE-key unblock, Waleed authorized finishing the 9720 pending Opus
+cells **live via OpenRouter** (`anthropic/claude-opus-4.8`, which routes to `provider: Anthropic` —
+verified by probe as the same Opus 4.8), accepting the ~2× live-vs-batch cost. Do not touch the FPL
+or CEFE keys (OpenRouter-only wrapper, Anthropic keys explicitly unset).
+
+Mechanics that made it precise + cheap:
+- Fed a **pending-*sitting* subset** (4981 sittings), not whole scenarios: the live `judge` scores
+  whole sittings and resumability keys on the raw judge id, so whole-scenario judging would re-judge
+  4140 already-done cells (~$928, over budget). The sitting subset judged 9962 cells (9720 pending +
+  242 unavoidable redundant, deduped at export by later-ts).
+- Smoke-gated (~50 cells, $0.0668/cell ≤ $0.075 gate; projected $665 < $800).
+- Full backfill: 9962 base cells + a standard disagreement **re-judge pass** (975 v2 overrides on
+  Opus↔Gemini ≥2-level disagreements). One cell failed on a JSON truncation and was retried → **Opus
+  18000/18000**. Actual spend **$637.87**.
+- Re-exported the **same run-id in place** (`analysis export` + `export-raw`); the export already
+  aliased `anthropic/claude-opus-4.8` → `claude-opus-4-8`, unifying the batch + live key-paths into
+  one full-grid Opus judge. New fingerprint; partial export superseded.
+
 Raw run data under `tmp/judging-runs/89-full/` (gitignored) must be **archived before any cleanup**,
 never deleted.
 
@@ -79,6 +100,13 @@ never deleted.
   OpenRouter-slug judge run needs the alias (now added, like the Opus slug and every subject).
 - **Split live-Gemini from batched-Opus** to parallelize, but gate `batch-judge collect` on the live
   judge finishing — both write `judgments.jsonl`.
+- **`report.json` cost ≠ actual spend when a re-judge pass runs.** `report.json` dedups the v2
+  overlay to *final-verdict* cost, so the superseded re-judge calls (real money) don't show. Track
+  actual billed spend from all rows (base + v2) against a budget/ceiling, and reconcile the two.
+- **Two key-paths, one judge at export.** Completing a judge across two providers (Anthropic batch +
+  OpenRouter live) is fine because the export normalizes the id aliases and dedups the overlap by
+  timestamp — verify the model is the *same underlying version* (OpenRouter `provider: Anthropic`
+  confirmed it) before mixing paths.
 - **Check coverage on EVERY axis, not one.** A partial run's coverage looked uniform on the framing
   axis and I reported it as an even sample; the real gap was a contiguous *scenario* block (a
   batch-order artifact). When a batch fails partway, the survivors cluster by whatever the batch was
