@@ -8,5 +8,9 @@ export default defineConfig({
   schema: './src/schema/index.ts',
   out: './drizzle',
   dialect: 'postgresql',
+  // `?? ''` is intentional, not a silent fallback: `drizzle-kit generate` (how migrations are
+  // authored — Phase 2/5) needs no live connection, so it must not fail when DATABASE_URL is unset.
+  // The commands that DO connect (`migrate`/`push`) fail loudly on an empty URL — and `push` is
+  // banned by the baked decision anyway.
   dbCredentials: { url: process.env.DATABASE_URL ?? '' },
 });

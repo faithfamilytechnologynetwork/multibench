@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createApp } from '../app';
-import { pgliteDatabase } from '../db';
 import type { Database } from '../db';
+import { pgliteDatabase } from '../testing/pglite';
 
 describe('GET /api/health', () => {
   it('returns 200 ok when the database responds (PGlite)', async () => {

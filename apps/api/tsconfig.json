@@ -17,10 +17,7 @@
     "moduleDetection": "force",
     "verbatimModuleSyntax": true,
     "skipLibCheck": true,
-    "noEmit": true,
-
-    "baseUrl": ".",
-    "paths": { "@/*": ["src/*"] }
+    "noEmit": true
   },
   "include": ["src", "vitest.config.ts", "drizzle.config.ts"]
 }

@@ -11,7 +11,19 @@ if (!databaseUrl) {
 }
 
 const allowedOrigins = parseAllowedOrigins(process.env.ALLOWED_ORIGINS);
+// Log the parsed allow-list at startup: an empty list is the correct default (never a wildcard),
+// but it also produces opaque browser CORS failures, so surfacing it saves real debugging time.
+console.log(
+  allowedOrigins.length > 0
+    ? `CORS allow-list: ${allowedOrigins.join(', ')}`
+    : 'CORS allow-list is EMPTY — no cross-site origin is allowed (set ALLOWED_ORIGINS).',
+);
+
 const port = Number(process.env.PORT ?? 8080);
+if (!Number.isFinite(port)) {
+  console.error(`PORT is not a valid number: ${process.env.PORT}`);
+  process.exit(1);
+}
 
 const app = createApp(nodePgDatabase(databaseUrl), { allowedOrigins });
 

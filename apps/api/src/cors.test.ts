@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { createApp } from './app';
 import { parseAllowedOrigins } from './cors';
-import { pgliteDatabase } from './db';
+import { pgliteDatabase } from './testing/pglite';
 
 describe('parseAllowedOrigins', () => {
   it('splits, trims, and drops empty entries', () => {
@@ -29,11 +29,26 @@ describe('CORS (credentialed cross-site)', () => {
     expect(res.headers.get('access-control-allow-credentials')).toBe('true');
   });
 
-  it('does not echo an unlisted origin', async () => {
+  it('sends no allow-origin for an unlisted origin (never a wildcard with credentials)', async () => {
     const app = createApp(pgliteDatabase(), { allowedOrigins });
     const res = await app.request('/api/health', {
       headers: { Origin: 'https://evil.app' },
     });
-    expect(res.headers.get('access-control-allow-origin')).not.toBe('https://evil.app');
+    // Assert null, not `!== evil`: a `*` header would pass the weaker check yet is exactly the
+    // wildcard-with-credentials hazard the allow-list guards against.
+    expect(res.headers.get('access-control-allow-origin')).toBeNull();
+  });
+
+  it('handles a credentialed preflight (OPTIONS) from an allow-listed origin', async () => {
+    const app = createApp(pgliteDatabase(), { allowedOrigins });
+    const res = await app.request('/api/health', {
+      method: 'OPTIONS',
+      headers: {
+        Origin: 'https://multibrowser.app',
+        'Access-Control-Request-Method': 'POST',
+      },
+    });
+    expect(res.headers.get('access-control-allow-origin')).toBe('https://multibrowser.app');
+    expect(res.headers.get('access-control-allow-credentials')).toBe('true');
   });
 });
