@@ -288,3 +288,13 @@ Did NOT run phase_3 consult yet (SPA half unbuilt).
 Committed. **REMAINING for PR 2 completion**: real-browser Safari+Chrome cross-site cookie verification
 (deploy SPA w/ VITE_API_BASE → login→draft-save in both; if 3rd-party-cookie blocked → custom-domain vs
 proxy decision to Waleed). Then phase_3 consult → phase_4 (submission) → open PR 2.
+
+## Phase 3 consult iter1: codex + claude BOTH REQUEST_CHANGES (HIGH) — accepted all, fixed.
+Data-safety: (1) failed-load could overwrite saved draft → ensureTraditionLoaded returns success,
+persistTradition loads-before-save (holds on load-fail); (2) failed saves now retry (SAVE_RETRY_MS +
+flush drains dirty + pagehide/nav flush); (3) API-down no longer hangs → initReview catches → signed-out
++ notice. Deliverables: (4) out-of-sample UI — "+N beyond sample" rendered + "Review one beyond your
+sample" picker that navigates w/o touching sampleIds; (5) VITE_API_BASE added to .env.example; (6) cleared
+sticky reconciled banner, fixed stale localStorage comments, removed dead REVIEW_STORAGE_KEY.
++tests (store: no-overwrite, retry, fail-visible; pages: +N display, affordance nav, service-down notice).
+check-types clean; api 34 + multibrowser 364 green. Committed. Rebuttal written. → re-signal for iter2.
