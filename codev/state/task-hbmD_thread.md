@@ -231,3 +231,37 @@ This is the alert Waleed asked for — will surface prominently at the smoke che
   - **WIND-DOWN. DO NOT clean up tmp/judging-runs/89-full** (archive-before-cleanup; needed for the
     Sept-1 backfill). Backfill recipe: probe CEFE key → `batch-judge submit`/`collect` the 9720
     pending Opus cells (JUDGE-key wrapper tmp/run-judging-judgekey.sh) → re-export same run-id.
+
+- 2026-08-14 **BACKFILL UNBLOCKED EARLY (Waleed): finish 9720 pending Opus LIVE via OPENROUTER**
+  (no batch, ~2x cost accepted). Do NOT touch FPL/CEFE keys. Deltas handled:
+  - Model: **anthropic/claude-opus-4.8** — OpenRouter probe returned `provider: Anthropic` (genuine
+    Opus 4.8, same as direct claude-opus-4-8; already aliased in export _JUDGE_VARIANTS + test →
+    item (2) pre-satisfied, no code change). NOT the `-fast`/`:batch` variants.
+  - Resumability keys on RAW judge id → to judge ONLY pending (not re-run Gemini or the 8280 FPL
+    opus), fed a **pending-SITTINGS subset** (4981 sittings = tmp/judging-runs/89-backfill/
+    pending-sittings.jsonl): 9962 cells = 9720 useful + **242 redundant** (cells whose sitting's
+    other scope was FPL-done; re-judged under the slug id because resumability can't match across the
+    alias — dedup happens only at EXPORT by later-ts, backfill wins). Redundant is NOT load-bearing
+    (~$16); scope-level skip isn't exposed by the CLI → not worth a code change (answering architect).
+  - **SMOKE (50 cells, separate dir) PASSED:** per-cell $0.0668 ≤ $0.075 gate; full projection $665
+    < $800 hard-stop. No prompt caching on live path (full input/cell); thinking active.
+  - Config `protestantism-opus-openrouter.yaml` (opus-only, thinking, max_tokens 8000, concurrency
+    16). OpenRouter-ONLY wrapper `tmp/run-judging-openrouter.sh` (Anthropic/CEFE keys UNSET).
+  - **FULL BACKFILL RUNNING** (PID 51132) → appends anthropic/claude-opus-4.8 rows to
+    89-full/judgments.jsonl. Watchers: monitor (+$100 milestones) + Bash completion. Tripwires:
+    report at each +$100; hard-stop if projection >$800.
+  - NEXT after completion: verify 18000/18000 Opus; rebuild export root; re-export SAME run-id
+    (results + results-raw); update README/spec/review partial→FULL; PR (Refs #89), no merge.
+
+- 2026-08-15 **BACKFILL COMPLETE → Opus 18000/18000 (100%).** Milestones reported +$100..+$400
+  (per-cell $0.051–0.054). Backfill: 9961 base cells (1 JSON-truncation failure retried→judged) +
+  standard disagreement **re-judge pass (975 v2 overrides)**. Actual backfill spend **$637.87** (all
+  10937 calls); report.json final-verdict cost $553.58 (dedups v2; ~$84 gap = superseded re-judges).
+  - **RE-EXPORTED same run-id in place:** results + results-raw, new fingerprint
+    **sha256:33e62ad6…ced12** (both match), Opus 18000 + Gemini 18000. Export root rebuilt WITH
+    judgments_v2.jsonl. Opus slug alias already existed → NO code change this round.
+  - Docs flipped partial→FULL (README, spec, review + backfill section/lessons).
+  - **FINAL TOTAL actual spend ≈ $1393** (OpenRouter $1115.75 + FPL Anthropic $277.74 + CEFE ~$0);
+    report.json total $1305.85.
+  - NEXT: judging+analysis tests; commit (explicit paths); PR (Refs #89), NO merge.
+  - tmp/judging-runs/89-full + 89-backfill* protected (do not delete).
