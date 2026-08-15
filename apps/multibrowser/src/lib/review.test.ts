@@ -109,7 +109,7 @@ describe("state updaters", () => {
 
 describe("traditionProgress", () => {
   it("is empty for an unopened tradition", () => {
-    expect(traditionProgress(undefined)).toEqual({ done: 0, total: 0, flagged: 0 });
+    expect(traditionProgress(undefined)).toEqual({ done: 0, total: 0, flagged: 0, beyondSample: 0 });
   });
 
   it("counts source + guide + four checks per sampled scenario; flags counted separately", () => {
@@ -126,7 +126,7 @@ describe("traditionProgress", () => {
   it("an unsampled scenario's stray checks don't count toward the sample's progress", () => {
     let s = withSample(emptyState(), "t", ["S-1"], "");
     s = withScenarioCheck(s, "t", "S-99", "scenario", { status: "approved" });
-    expect(traditionProgress(s.traditions.t)).toEqual({ done: 0, total: 6, flagged: 0 });
+    expect(traditionProgress(s.traditions.t)).toEqual({ done: 0, total: 6, flagged: 0, beyondSample: 1 });
   });
 
   it("scenarioChecks default shape covers all four keys", () => {
