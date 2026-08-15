@@ -1,9 +1,48 @@
 id: '92'
 title: multibrowser-data-platform-pos
 protocol: spir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: API service scaffold (Hono + Drizzle + Postgres, PGlite rig, Railway, topology)
+    status: in_progress
+  - id: phase_2
+    title: Review schema + email/password auth (after Ben sign-off) — opens PR 1
+    status: pending
+  - id: phase_3
+    title: Review draft persistence swap (localStorage→API, sync→async, conflict-safe)
+    status: pending
+  - id: phase_4
+    title: Review private immutable submission — opens PR 2
+    status: pending
+  - id: phase_5
+    title: 'DEFERRED: serving schema + ingest/drift infra + /api/version + fingerprint URLs'
+    status: pending
+  - id: phase_6
+    title: 'DEFERRED: results tier ingest (committed-tree-bound)'
+    status: pending
+  - id: phase_7
+    title: 'DEFERRED: results API + SPA swap + provenance display — opens PR 3'
+    status: pending
+  - id: phase_8
+    title: 'DEFERRED: raw tier ingest + retention pruning'
+    status: pending
+  - id: phase_9
+    title: 'DEFERRED: raw API + SPA swap, retire baked bundle — opens PR 4'
+    status: pending
+  - id: phase_10
+    title: 'DEFERRED: corpus tier ingest'
+    status: pending
+  - id: phase_11
+    title: 'DEFERRED: corpus API + SPA swap, delete github.ts (zero GitHub reads) — opens PR 5'
+    status: pending
+  - id: phase_12
+    title: 'DEFERRED: review assignment machinery'
+    status: pending
+  - id: phase_13
+    title: 'DEFERRED: review aggregation + coordinator dashboards — opens PR 6'
+    status: pending
+current_plan_phase: phase_1
 gates:
   spec-approval:
     status: approved
@@ -18,7 +57,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-08-14T05:11:39.030Z'
-updated_at: '2026-08-15T12:19:36.125Z'
+updated_at: '2026-08-15T12:19:40.946Z'
