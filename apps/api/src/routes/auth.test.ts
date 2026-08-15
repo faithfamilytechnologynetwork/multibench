@@ -110,15 +110,42 @@ describe('login / me / logout', () => {
     expect(me.status).toBe(200);
     expect(((await me.json()) as any).reviewer.email).toBe('reviewer@example.com');
 
-    // Logout revokes the session (delete row) → /me now 401 with the same cookie.
+    // Logout revokes the session (delete row) → /me now 401 with the same cookie. Logout is
+    // CSRF-checked, so the token must accompany it.
     const logout = await app.request('/api/auth/logout', {
       method: 'POST',
-      headers: { Cookie: cookieHeader(jar) },
+      headers: { Cookie: cookieHeader(jar), [CSRF_HEADER]: jar[CSRF_COOKIE] ?? '' },
     });
     expect(logout.status).toBe(200);
     expect(
       (await app.request('/api/auth/me', { headers: { Cookie: cookieHeader(jar) } })).status,
     ).toBe(401);
+  });
+});
+
+describe('cross-site request rejection (login/logout CSRF)', () => {
+  it('rejects a login sent as a simple (non-JSON) request — the cross-site fixation payload', async () => {
+    const app = await makeApp();
+    await signup(app);
+    // A cross-site attacker can only send a "simple" request without a CORS preflight; a text/plain
+    // body is exactly that. Requiring application/json forces a preflight (CORS-gated), so this is
+    // rejected at the contract level.
+    const res = await app.request('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ email: 'reviewer@example.com', password: 'a-good-password' }),
+    });
+    expect(res.status).toBe(415);
+  });
+
+  it('rejects a logout without the CSRF token (forced-logout)', async () => {
+    const app = await makeApp();
+    const jar = readCookies(await signup(app));
+    const res = await app.request('/api/auth/logout', {
+      method: 'POST',
+      headers: { Cookie: cookieHeader(jar) }, // no X-CSRF-Token
+    });
+    expect(res.status).toBe(403);
   });
 });
 

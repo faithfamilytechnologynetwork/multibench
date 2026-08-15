@@ -9,6 +9,37 @@ import { SESSION_COOKIE, CSRF_COOKIE, CSRF_HEADER } from '../auth/cookies';
 export type AppEnv = { Variables: { reviewerId: string } };
 
 /**
+ * Enforce an `application/json` request body. This closes cross-site **login/signup CSRF** (session
+ * fixation): a malicious origin can only send a "simple" request (which we reject here) or an
+ * `application/json` one — and `application/json` is non-simple, so the browser sends a CORS preflight
+ * first, which our allow-list denies for unlisted origins. So only an allow-listed origin (the real
+ * SPA) can post credentials. No pre-auth token round-trip needed.
+ */
+export function requireJsonRequest(): MiddlewareHandler {
+  return async (c, next) => {
+    const contentType = (c.req.header('content-type') ?? '').toLowerCase();
+    if (!contentType.includes('application/json')) {
+      return c.json({ error: 'content-type must be application/json' }, 415);
+    }
+    await next();
+  };
+}
+
+/**
+ * Double-submit CSRF check for a state-changing request that is not behind `requireAuth` (e.g.
+ * logout): the `X-CSRF-Token` header must match the `mb_csrf` cookie. A cross-site attacker can
+ * neither read our cookie nor set our header, so a forced logout is rejected.
+ */
+export function requireCsrf(): MiddlewareHandler {
+  return async (c, next) => {
+    const headerToken = c.req.header(CSRF_HEADER);
+    const cookieToken = getCookie(c, CSRF_COOKIE);
+    if (!verifyCsrfToken(headerToken, cookieToken)) return c.json({ error: 'csrf' }, 403);
+    await next();
+  };
+}
+
+/**
  * Gate a route on a valid session and enforce double-submit CSRF for state-changing methods. Reads
  * the httpOnly session cookie, resolves the reviewer, and rejects with 401 when absent/expired. For
  * non-GET/HEAD, the CSRF header must match the CSRF cookie (403 otherwise) — the session cookie is

@@ -15,7 +15,7 @@ import {
   csrfCookieOptions,
   clearAuthCookies,
 } from '../auth/cookies';
-import { requireAuth } from '../middleware/auth';
+import { requireAuth, requireJsonRequest, requireCsrf } from '../middleware/auth';
 import type { AppEnv } from '../middleware/auth';
 
 export interface AuthConfig {
@@ -43,7 +43,7 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
     return csrfToken;
   }
 
-  route.post('/signup', async (c) => {
+  route.post('/signup', requireJsonRequest(), async (c) => {
     const body = await c.req.json().catch(() => null);
     if (
       !body ||
@@ -80,7 +80,7 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
     return c.json({ reviewer, csrfToken }, 201);
   });
 
-  route.post('/login', async (c) => {
+  route.post('/login', requireJsonRequest(), async (c) => {
     const body = await c.req.json().catch(() => null);
     if (!body || typeof body.email !== 'string' || typeof body.password !== 'string') {
       return c.json({ error: 'invalid body' }, 400);
@@ -112,9 +112,10 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
     return c.json({ csrfToken });
   });
 
-  // Logout clears the current session by its own cookie token. Not behind requireAuth so it always
-  // clears cookies (even for an already-expired session); a CSRF-forced logout is benign.
-  route.post('/logout', async (c) => {
+  // Logout: CSRF-checked (blocks cross-site forced logout) but not behind requireAuth, so it still
+  // clears cookies for an already-expired session (the csrf cookie co-expires with the session, so a
+  // valid double-submit is still possible while the cookies exist).
+  route.post('/logout', requireCsrf(), async (c) => {
     const token = getCookie(c, SESSION_COOKIE);
     if (token) await deleteSession(db, token);
     clearAuthCookies(c, config.secureCookies);
