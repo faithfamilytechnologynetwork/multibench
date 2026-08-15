@@ -135,6 +135,17 @@ Checked #85: no data-model sign-off from Ben (only Waleed's 2026-08-14 scope-upd
 Notified architect to coordinate Ben's sign-off. NOT writing the migration until then.
 (Note: /compact advisable before phase_2 per porch's phase-boundary reminder.)
 
+## Phase 2 partial — architect approved option (c): schema-INDEPENDENT primitives only. DONE + PARKED.
+Built (no tables/migration/sessions/routes): `src/auth/password.ts` (argon2id via @node-rs/argon2,
+default variant pinned by a `$argon2id$` test), `src/auth/constantTime.ts` (sha256-digest timingSafeEqual),
+`src/auth/inviteCode.ts` (fail-closed REVIEW_INVITE_CODE gate), `src/auth/csrf.ts` (double-submit token
+gen/verify). +7 tests. Build green, dispatcher 18/18 green. Committed.
+Note: @node-rs/argon2 `Algorithm` is an ambient const enum → can't import under verbatimModuleSyntax;
+dropped the explicit option, rely on argon2id default, guarded by the `$argon2id$` assertion.
+**PARKED**: that exhausts the schema-independent scope. Rest of Phase 2 (reviewers/sessions/reviews/
+submissions tables + migration + session persistence + auth routes) stays blocked on Ben's #85 sign-off.
+Did NOT signal PHASE_COMPLETE (phase_2 not complete). Awaiting architect relay of Ben's sign-off / model.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
