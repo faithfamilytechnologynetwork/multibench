@@ -298,3 +298,15 @@ sample" picker that navigates w/o touching sampleIds; (5) VITE_API_BASE added to
 sticky reconciled banner, fixed stale localStorage comments, removed dead REVIEW_STORAGE_KEY.
 +tests (store: no-overwrite, retry, fail-visible; pages: +N display, affordance nav, service-down notice).
 check-types clean; api 34 + multibrowser 364 green. Committed. Rebuttal written. → re-signal for iter2.
+
+## Phase 3 consult iter2: codex + claude BOTH REQUEST_CHANGES (HIGH) — accepted all, fixed.
+- Failed-load overwrite hole (remaining): edits during a failed load sat on blank base → overwrote saved
+  draft on recovery. FIX: ensureTraditionLoaded adopts server draft on first success if a local entry
+  exists (blip edit discarded + reconciled); save-success no longer clears reconciled. +delayed-success race test.
+- Start-over didn't persist → added DELETE /api/review/:tid; store reference-diffs removals → persistDelete.
+- 401 mid-session → handleAuthError flips auth 'out' (re-prompt sign-in).
+- Index "not started" for cross-device drafts → GET /api/review list + prefetchDrafts on sign-in.
+- load-vs-save error message (errorKind); array-state guard (400).
+- Browser Safari+Chrome cross-site cookie check DEFERRED to PR-2 completion gate (architect's framing;
+  can't drive browsers headlessly; topology implemented correctly).
++tests. check-types clean; api 37 + mb 367 green. Committed. Rebuttal written. → re-signal iter3.
