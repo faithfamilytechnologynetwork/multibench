@@ -146,6 +146,22 @@ dropped the explicit option, rely on argon2id default, guarded by the `$argon2id
 submissions tables + migration + session persistence + auth routes) stays blocked on Ben's #85 sign-off.
 Did NOT signal PHASE_COMPLETE (phase_2 not complete). Awaiting architect relay of Ben's sign-off / model.
 
+## Phase 2 UNBLOCKED (Waleed owns model, final, 2026-08-15) — BUILT + LIVE-VERIFIED.
+Drizzle schema (4 tables: reviewers/sessions/reviews(drafts,version)/submissions(immutable)) matching
+Waleed's model exactly. Migration generated → reviewed → applied (drizzle 0000_review_store.sql).
+Auth on the parked primitives: signup (invite-gated, fail-closed), login, logout, /me, DELETE /account.
+Sessions = server-side rows (token hash stored; revoke=delete). Cookies httpOnly Secure SameSite=None.
+CSRF double-submit on authed mutations. FK ON DELETE CASCADE. AppDb type unifies node-pg/pglite.
+**Migration apply**: internal Railway host unreachable locally (no public proxy) → runtime migrator
+`src/migrate.ts` + railway.json `preDeployCommand: pnpm migrate` (drizzle-orm programmatic migrator,
+runtime dep; applies committed reviewed SQL inside Railway; idempotent; NOT db:push).
+Tests 23/23 (PGlite runs the REAL migrations). Build green.
+**LIVE smoke** (redeploy 59d5706a): /me 404→401 (new deploy+migration ok), signup 201, /me 200,
+DELETE /account 200 (cascade) — DB left clean. Set REVIEW_INVITE_CODE=mbrev-4bca00da72 on the service
+(reported to Waleed to keep/rotate).
+Committed schema+auth+migrate-infra. Plan updated with Waleed's out-of-sample requirement (PR 2 phases).
+→ signal phase_2 PHASE_COMPLETE. PR 1 (Phases 1+2) opens after phase_2 verification approves.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
