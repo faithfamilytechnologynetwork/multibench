@@ -162,6 +162,18 @@ DELETE /account 200 (cascade) — DB left clean. Set REVIEW_INVITE_CODE=mbrev-4b
 Committed schema+auth+migrate-infra. Plan updated with Waleed's out-of-sample requirement (PR 2 phases).
 → signal phase_2 PHASE_COMPLETE. PR 1 (Phases 1+2) opens after phase_2 verification approves.
 
+## Phase 2 consult iter1 (2026-08-15): codex + claude BOTH REQUEST_CHANGES (HIGH) — accepted all.
+- **CSRF unusable cross-site** (both, load-bearing): SPA on diff origin can't read mb_csrf cookie
+  (up.railway.app = public suffix). FIX: return csrfToken in signup/login body + GET /api/auth/csrf;
+  cookie stays the compare half. Tests assert body==cookie.
+- **deleteCookie dropped Secure/SameSite=None** (claude) → cross-site clear rejected. FIX: clearAuthCookies helper.
+- **No two-reviewer isolation test** (both, plan criterion). ADDED.
+- Minors: stale README blockquote → Phase 2; signup race → onConflictDoNothing (409, race-safe);
+  expired-session pruning documented (deferred).
+- Claude ask: PR 1 description must carry the Ben-override (Waleed owns model, final). WILL DO in PR1 desc.
+Build green, **25/25** tests. Redeployed (eff3ac07) for the CSRF body contract; verifying /csrf live.
+Committed fixes. Rebuttal written. Architect approved preDeployCommand migrator as standard (documented in README).
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
