@@ -17,6 +17,7 @@ test_cmd_for() {
   case "$1" in
     apps/tradition_validator) echo "uv --project apps/tradition_validator run pytest" ;;
     apps/multibrowser)        echo "pnpm -C apps/multibrowser test" ;;
+    apps/api)                 echo "pnpm -C apps/api test" ;;
     workflows/judging)        echo "uv --project workflows/judging run pytest workflows/judging" ;;
     workflows/analysis)       echo "uv --project workflows/analysis run pytest workflows/analysis" ;;
     *)                        echo "" ;;
