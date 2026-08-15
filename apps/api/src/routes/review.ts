@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { bodyLimit } from 'hono/body-limit';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, desc, eq, sql } from 'drizzle-orm';
 import type { AppDb } from '../db';
-import { reviews } from '../schema';
+import { reviews, submissions } from '../schema';
 import { requireAuth } from '../middleware/auth';
 import type { AppEnv } from '../middleware/auth';
 
@@ -95,6 +95,49 @@ export function reviewRoutes(db: AppDb): Hono<AppEnv> {
       return c.json({ error: 'conflict', ...(await currentDraft(db, reviewerId, traditionId)) }, 409);
     }
     return c.json({ version: updated[0]!.version });
+  });
+
+  // Submit a review: freeze a snapshot into the immutable `submissions` table. There is NO update or
+  // delete path — immutability is by construction (insert-only). Private by default; `publishedIssueUrl`
+  // is set only if the reviewer explicitly opted to also publish to a public GitHub issue.
+  route.post('/:traditionId/submit', bodyLimit({ maxSize: 512 * 1024 }), async (c) => {
+    const reviewerId = c.get('reviewerId');
+    const traditionId = c.req.param('traditionId');
+    const body = await c.req.json().catch(() => null);
+    if (
+      !body ||
+      typeof body.review !== 'object' ||
+      body.review === null ||
+      Array.isArray(body.review)
+    ) {
+      return c.json({ error: 'invalid body' }, 400);
+    }
+    const publishedIssueUrl =
+      typeof body.publishedIssueUrl === 'string' && body.publishedIssueUrl.length > 0
+        ? body.publishedIssueUrl
+        : null;
+    const inserted = await db
+      .insert(submissions)
+      .values({ reviewerId, traditionId, review: body.review, publishedIssueUrl })
+      .returning({ id: submissions.id, submittedAt: submissions.submittedAt });
+    return c.json({ submission: inserted[0] }, 201);
+  });
+
+  // List this reviewer's submissions for a tradition (newest first) — metadata only, so the UI can
+  // show "submitted at …" and whether it was published.
+  route.get('/:traditionId/submissions', async (c) => {
+    const reviewerId = c.get('reviewerId');
+    const traditionId = c.req.param('traditionId');
+    const rows = await db
+      .select({
+        id: submissions.id,
+        submittedAt: submissions.submittedAt,
+        publishedIssueUrl: submissions.publishedIssueUrl,
+      })
+      .from(submissions)
+      .where(and(eq(submissions.reviewerId, reviewerId), eq(submissions.traditionId, traditionId)))
+      .orderBy(desc(submissions.submittedAt));
+    return c.json({ submissions: rows });
   });
 
   // Discard this reviewer's draft for a tradition ("start over"). Idempotent — deleting a

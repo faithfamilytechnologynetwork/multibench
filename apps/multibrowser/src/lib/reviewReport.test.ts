@@ -178,6 +178,33 @@ describe("submission URLs", () => {
     expect(blankIssueUrl(REPO, "t")).toContain("labels=tradition-review");
   });
 
+  it("lists out-of-sample reviews in their own section (Beyond the assigned sample)", () => {
+    let s = withSample(emptyState(), "sunni-islam", ["JLS-001", "JLS-002"], "");
+    // A review of a scenario NOT in the required sample.
+    s = withScenarioCheck(s, "sunni-islam", "JLS-099", "scenario", { status: "approved", notes: "extra look" });
+    const report = buildReviewReport({
+      state: s,
+      traditionId: "sunni-islam",
+      displayName: "Sunni Islam",
+      sha: "cafebabe",
+      runId: null,
+      repo: REPO,
+      now: new Date("2026-08-15T12:00:00Z"),
+    });
+    expect(report).toContain("## 4. Beyond the assigned sample");
+    // The out-of-sample scenario appears AFTER the beyond-sample heading, not in the sample section.
+    const beyondIdx = report.indexOf("## 4. Beyond the assigned sample");
+    expect(report.indexOf("JLS-099", beyondIdx)).toBeGreaterThan(beyondIdx);
+    const sampleSection = report.slice(report.indexOf("## 3. Scenarios"), beyondIdx);
+    expect(sampleSection).not.toContain("JLS-099");
+  });
+
+  it("omits the beyond-sample section when there is no out-of-sample review", () => {
+    const s = withSample(emptyState(), "sunni-islam", ["JLS-001"], "");
+    const report = buildReviewReport({ state: s, traditionId: "sunni-islam", displayName: "Sunni Islam", sha: null, runId: null, repo: REPO, now: new Date("2026-08-15T12:00:00Z") });
+    expect(report).not.toContain("Beyond the assigned sample");
+  });
+
   it("issueTitle includes the reviewer when known", () => {
     expect(issueTitle("Sunni Islam", "A. Reviewer")).toBe("Tradition review: Sunni Islam — A. Reviewer");
     expect(issueTitle("Sunni Islam", "  ")).toBe("Tradition review: Sunni Islam");

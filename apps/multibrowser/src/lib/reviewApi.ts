@@ -114,6 +114,39 @@ export async function deleteDraft(traditionId: string): Promise<void> {
   if (!res.ok) throw new ReviewApiError(res.status, "delete failed");
 }
 
+export interface SubmissionMeta {
+  id: string;
+  submittedAt: string;
+  publishedIssueUrl: string | null;
+}
+
+/**
+ * Submit a review — a PRIVATE, immutable snapshot into the reviewer's account. `publishedIssueUrl` is
+ * passed only if the reviewer also chose to publish to a public GitHub issue (opt-in).
+ */
+export async function submitReview(
+  traditionId: string,
+  review: unknown,
+  publishedIssueUrl?: string,
+): Promise<SubmissionMeta> {
+  const res = await call(`/api/review/${encodeURIComponent(traditionId)}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ review, publishedIssueUrl }),
+  });
+  const json = await readJson(res);
+  if (!res.ok) throw new ReviewApiError(res.status, json?.error ?? "submit failed");
+  return json.submission;
+}
+
+/** This reviewer's submissions for a tradition (newest first, metadata only). */
+export async function listSubmissions(traditionId: string): Promise<SubmissionMeta[]> {
+  const res = await call(`/api/review/${encodeURIComponent(traditionId)}/submissions`);
+  if (res.status === 401) throw new ReviewApiError(401, "unauthorized");
+  const json = await readJson(res);
+  if (!res.ok) throw new ReviewApiError(res.status, json?.error ?? "list submissions failed");
+  return json?.submissions ?? [];
+}
+
 /** Load a tradition's draft. Absent → {state: null, version: 0}. */
 export async function getDraft(traditionId: string): Promise<DraftEnvelope> {
   const res = await call(`/api/review/${encodeURIComponent(traditionId)}`);

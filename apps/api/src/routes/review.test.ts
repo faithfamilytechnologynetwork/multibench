@@ -149,3 +149,58 @@ describe('review drafts', () => {
     expect(res.status).toBe(413);
   });
 });
+
+describe('review submissions (immutable)', () => {
+  const submit = (app: Hono, jar: Record<string, string>, tid: string, body: unknown) =>
+    app.request(`/api/review/${tid}/submit`, { method: 'POST', headers: authed(jar, json), body: JSON.stringify(body) });
+
+  it('requires auth + CSRF to submit', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    // unauthenticated
+    expect(
+      (await app.request('/api/review/sunni-islam/submit', { method: 'POST', headers: json, body: '{}' })).status,
+    ).toBe(401);
+    // authed but no CSRF header
+    const jar = await signedIn(app);
+    const noCsrf = await app.request('/api/review/sunni-islam/submit', {
+      method: 'POST',
+      headers: { Cookie: cookieHeader(jar), ...json },
+      body: JSON.stringify({ review: sampleState() }),
+    });
+    expect(noCsrf.status).toBe(403);
+  });
+
+  it('creates a private immutable snapshot; a second submit adds a new one', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    const first = await submit(app, jar, 'sunni-islam', { review: sampleState('v1') });
+    expect(first.status).toBe(201);
+    const meta = ((await first.json()) as any).submission;
+    expect(meta.id).toBeTruthy();
+    expect(meta.submittedAt).toBeTruthy();
+
+    // Submit again (the draft evolved) → a SEPARATE immutable row (no update path).
+    await submit(app, jar, 'sunni-islam', { review: sampleState('v2') });
+    const list = await app.request('/api/review/sunni-islam/submissions', { headers: { Cookie: cookieHeader(jar) } });
+    const rows = ((await list.json()) as any).submissions;
+    expect(rows).toHaveLength(2);
+    expect(rows.every((r: any) => r.publishedIssueUrl === null)).toBe(true); // private by default
+  });
+
+  it('records publishedIssueUrl only when the reviewer opted to publish', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    await submit(app, jar, 'sunni-islam', { review: sampleState(), publishedIssueUrl: 'https://github.com/x/y/issues/1' });
+    const rows = ((await (await app.request('/api/review/sunni-islam/submissions', { headers: { Cookie: cookieHeader(jar) } })).json()) as any).submissions;
+    expect(rows[0].publishedIssueUrl).toBe('https://github.com/x/y/issues/1');
+  });
+
+  it('isolates submissions per reviewer', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jarA = await signedIn(app, 'a@example.com');
+    const jarB = await signedIn(app, 'b@example.com');
+    await submit(app, jarA, 'sunni-islam', { review: sampleState('A') });
+    const bList = await app.request('/api/review/sunni-islam/submissions', { headers: { Cookie: cookieHeader(jarB) } });
+    expect(((await bList.json()) as any).submissions).toHaveLength(0);
+  });
+});

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
+import { ChevronRight, ClipboardCheck, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
 import { useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
 import { FILE, REF, REPO } from "../lib/constants";
@@ -9,6 +9,7 @@ import {
   REVIEW_SAMPLE_SIZE,
   SCENARIO_CHECKS,
   SCENARIO_CHECK_LABELS,
+  emptyTradition,
   ensureTraditionLoaded,
   evenSample,
   flushReviewSaves,
@@ -25,6 +26,7 @@ import {
   withoutTradition,
 } from "../lib/review";
 import { blankIssueUrl, buildReviewReport, editFileUrl, issueTitle, prefilledIssueUrl } from "../lib/reviewReport";
+import { listSubmissions, submitReview, type SubmissionMeta } from "../lib/reviewApi";
 import { ReviewAuthGate, ReviewSaveStatus } from "../components/ReviewAuthGate";
 import { ReviewCheckControl, CheckStatusDot } from "../components/ReviewCheckControl";
 import { ReviewProgressBar } from "../components/ReviewProgress";
@@ -316,8 +318,8 @@ function ReviewTraditionPageInner() {
   );
 }
 
-/** The explicit hand-off: copy / download the Markdown report, open a prefilled GitHub issue
- * (the durable, aggregatable intake channel), or back up / restore the raw JSON. */
+/** The explicit hand-off: submit PRIVATELY to the reviewer's account (immutable snapshot), then
+ * optionally publish to a public GitHub issue; plus copy/download the report and back up / restore. */
 function SubmitPanel({ traditionId, displayName, sha, runId }: {
   traditionId: string; displayName: string; sha: string | null; runId: string | null;
 }) {
@@ -325,6 +327,33 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
   const [copied, setCopied] = useState<null | "report" | "failed">(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importNote, setImportNote] = useState<string | null>(null);
+  const [submissions, setSubmissions] = useState<SubmissionMeta[]>([]);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    void listSubmissions(traditionId)
+      .then((s) => alive && setSubmissions(s))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [traditionId]);
+
+  const submitPrivately = async () => {
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      await flushReviewSaves(); // persist the latest edits before freezing the snapshot
+      const meta = await submitReview(traditionId, review.traditions[traditionId] ?? emptyTradition());
+      setSubmissions((prev) => [meta, ...prev]);
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "submit failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const report = buildReviewReport({ state: review, traditionId, displayName, sha, runId, repo: REPO });
   const title = issueTitle(displayName, review.reviewer.name);
@@ -358,24 +387,16 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
     <section className="flex flex-col gap-3 rounded-lg border border-accent/30 bg-surface-secondary p-4" data-testid="review-submit">
       <h2 className="text-lg font-semibold">Submit your review</h2>
       <p className="text-sm text-default-600">
-        Your intake becomes a Markdown report (reviewer, verdicts, notes, and suggested revisions,
-        linked to the exact files you reviewed). The preferred route is a GitHub issue — it lands
-        directly with the maintainers and keeps every review in one queryable place. No GitHub account?
-        Download the report and send it however you like.
+        Submitting saves a <strong>private, permanent snapshot</strong> of this review to your account —
+        it stays private (only you and the maintainers see it) and can&rsquo;t be changed afterward. You
+        can still keep editing your draft and submit again later.
       </p>
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        {issueUrl ? (
-          <a href={issueUrl} target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90">
-            <ExternalLink size={14} aria-hidden /> Open a prefilled GitHub issue
-          </a>
-        ) : (
-          <a href={blankIssueUrl(REPO, title)} target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90"
-            title="The report is too long to prefill — copy it, then paste into the issue body.">
-            <ExternalLink size={14} aria-hidden /> Open a GitHub issue (copy the report first)
-          </a>
-        )}
+        <button type="button" onClick={() => void submitPrivately()} disabled={submitting}
+          data-testid="review-submit-private"
+          className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90 disabled:opacity-60">
+          <ClipboardCheck size={14} aria-hidden /> {submitting ? "Submitting…" : "Submit review (private)"}
+        </button>
         <button type="button" onClick={copy}
           className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300">
           <Copy size={14} aria-hidden /> {copied === "report" ? "Copied!" : copied === "failed" ? "Copy failed — use Download" : "Copy report"}
@@ -385,12 +406,43 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
           <Download size={14} aria-hidden /> Download report (.md)
         </button>
       </div>
-      {!issueUrl && (
-        <p className="text-xs text-warning">
-          This report is too long to prefill into a GitHub issue URL — use “Copy report”, then paste it
-          into the issue body.
+      {submitError && <p className="text-xs text-danger" role="alert">Couldn&rsquo;t submit: {submitError}</p>}
+      {submissions.length > 0 && (
+        <p className="text-xs text-success" data-testid="review-submitted">
+          Submitted privately{submissions[0] ? ` · ${new Date(submissions[0].submittedAt).toLocaleString()}` : ""}
+          {submissions.length > 1 ? ` (${submissions.length} submissions)` : ""}.
         </p>
       )}
+
+      <details className="text-sm text-default-600" data-testid="review-publish-optional">
+        <summary className="cursor-pointer text-default-500 hover:text-default-700">
+          Optional: also publish to a public GitHub issue
+        </summary>
+        <p className="mt-2 text-xs text-default-500">
+          This makes your review — including your name and contact — <strong>public</strong>. Only do
+          this if you&rsquo;re comfortable sharing it openly.
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          {issueUrl ? (
+            <a href={issueUrl} target="_blank" rel="noreferrer"
+              className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300">
+              <ExternalLink size={14} aria-hidden /> Open a prefilled GitHub issue
+            </a>
+          ) : (
+            <a href={blankIssueUrl(REPO, title)} target="_blank" rel="noreferrer"
+              className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300"
+              title="The report is too long to prefill — copy it, then paste into the issue body.">
+              <ExternalLink size={14} aria-hidden /> Open a GitHub issue (copy the report first)
+            </a>
+          )}
+        </div>
+        {!issueUrl && (
+          <p className="mt-1 text-xs text-warning">
+            This report is too long to prefill into a GitHub issue URL — use “Copy report”, then paste it
+            into the issue body.
+          </p>
+        )}
+      </details>
       <div className="flex flex-wrap items-center gap-3 border-t border-default-200 pt-3 text-xs text-default-500">
         <button type="button"
           onClick={() => download("multibench-review-backup.json", JSON.stringify(review, null, 2), "application/json")}

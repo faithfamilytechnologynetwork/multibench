@@ -21,6 +21,7 @@ type Draft = { state: unknown; version: number };
 function harness(files: ReturnType<typeof traditionFiles>) {
   const gh = fakeFetch(REPO, SHA, files);
   const drafts = new Map<string, Draft>();
+  const submissions: Array<{ traditionId: string; id: string; submittedAt: string; publishedIssueUrl: string | null }> = [];
   const reviewer = { id: "r1", email: "rev@example.com", name: "Imam Test", background: "" };
   const json = (o: unknown, s = 200) =>
     new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json" } });
@@ -34,6 +35,19 @@ function harness(files: ReturnType<typeof traditionFiles>) {
     if (path === "/api/auth/me") return json({ reviewer });
     if (path === "/api/review") {
       return json({ drafts: [...drafts.entries()].map(([traditionId, d]) => ({ traditionId, ...d })) });
+    }
+    const submitMatch = path.match(/^\/api\/review\/([^/]+)\/submit$/);
+    if (submitMatch && method === "POST") {
+      const tid = decodeURIComponent(submitMatch[1]!);
+      const b = JSON.parse(String(init?.body ?? "{}"));
+      const meta = { id: `sub-${submissions.length + 1}`, submittedAt: "2026-08-15T12:00:00Z", publishedIssueUrl: b.publishedIssueUrl ?? null };
+      submissions.push({ traditionId: tid, ...meta });
+      return json({ submission: meta }, 201);
+    }
+    const listMatch = path.match(/^\/api\/review\/([^/]+)\/submissions$/);
+    if (listMatch && method === "GET") {
+      const tid = decodeURIComponent(listMatch[1]!);
+      return json({ submissions: submissions.filter((s) => s.traditionId === tid) });
     }
     if (path.startsWith("/api/review/")) {
       const tid = decodeURIComponent(path.slice("/api/review/".length));
@@ -58,7 +72,7 @@ function harness(files: ReturnType<typeof traditionFiles>) {
   }) as typeof fetch;
 
   vi.stubGlobal("fetch", impl);
-  return { drafts, reviewer };
+  return { drafts, submissions, reviewer };
 }
 
 /** The persisted draft for a tradition, read back through the tolerant loader (after a flush). */
@@ -183,6 +197,19 @@ describe("tradition review workspace (/review/$traditionId)", () => {
     expect(await screen.findByTestId("out-of-sample-note")).toBeInTheDocument();
     await flushReviewSaves();
     expect(stored(drafts, "sunni-islam").sampleIds).toEqual(["JLS-001", "JLS-002", "JLS-003"]); // unchanged
+  });
+
+  it("submits a private immutable snapshot, and keeps GitHub publishing opt-in", async () => {
+    const h = harness(traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
+    renderApp("/review/sunni-islam");
+    const submit = await screen.findByTestId("review-submit");
+    // Private submission is the PRIMARY action; GitHub publish is behind an opt-in disclosure.
+    const btn = within(submit).getByTestId("review-submit-private");
+    expect(within(submit).getByTestId("review-publish-optional")).toBeInTheDocument();
+    await userEvent.click(btn);
+    await waitFor(() => expect(within(submit).getByTestId("review-submitted")).toBeInTheDocument());
+    expect(h.submissions).toHaveLength(1);
+    expect(h.submissions[0]!.publishedIssueUrl).toBeNull(); // private by default
   });
 
   it("reshuffle draws a seeded sample and records the seed", async () => {
