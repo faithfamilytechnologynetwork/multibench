@@ -88,6 +88,20 @@ Direction: **REVIEW-FIRST bare-minimum**; serving tiers DEFERRED (kept in plan, 
 - Addressed architect inline Q: Hono≠Drizzle (framework vs ORM); recommend Hono, Express as boring fallback — flagged for their confirm.
 Committed & resubmitting at plan gate. Architect reviews, Waleed approves.
 
+## PLAN APPROVED by Waleed (2026-08-15). Hono confirmed, REVIEW_INVITE_CODE kept. → IMPLEMENT.
+
+## Phase 1 (implement) — API service scaffold — CODE DONE, provisioning gated
+Built apps/api: Hono + Drizzle + node-postgres (prod) / PGlite (tests), tsx runtime, `build`=tsc typecheck.
+Files: package.json (engines.node>=20), tsconfig, vitest.config, drizzle.config (schema/index.ts empty —
+tables come Phase 2/5), .env.example (DATABASE_URL/ALLOWED_ORIGINS/PORT), railway.json (NIXPACKS,
+healthcheck /api/health), README. src: db.ts (Database iface, ping via drizzle select 1), cors.ts
+(allow-list parser), app.ts (createApp(db,opts), hono/cors credentialed allow-list), routes/health.ts
+(200/503), server.ts (fail-fast on missing DATABASE_URL). Tests: health (PGlite 200 + 503) + cors (6 total).
+Registered apps/api in .codev/checks/test.sh. Dispatcher runs it → 6/6 green. Build/typecheck green.
+Committed `[Spec 92][Phase: implement] feat: apps/api service scaffold`.
+**HOLDING PHASE_COMPLETE**: last deliverable = Railway provisioning, gated on architect cost-OK
+(Waleed bound: bring review-only envelope BEFORE provisioning). Sent envelope, awaiting go-ahead.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
