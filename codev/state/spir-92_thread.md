@@ -174,6 +174,14 @@ Committed schema+auth+migrate-infra. Plan updated with Waleed's out-of-sample re
 Build green, **25/25** tests. Redeployed (eff3ac07) for the CSRF body contract; verifying /csrf live.
 Committed fixes. Rebuttal written. Architect approved preDeployCommand migrator as standard (documented in README).
 
+## Phase 2 consult iter2: claude APPROVE, codex REQUEST_CHANGES (login/logout CSRF). Split — fixed codex's.
+Codex (HIGH): login/signup CSRF (simple cross-site request → session fixation) + logout CSRF (forced logout).
+Legit CSRF-class gap (addendum KEPT CSRF). Took codex's offered "preflight-only contract" (cheapest, no
+SPA round-trip): requireJsonRequest() → signup/login reject non-application/json (415, forces CORS
+preflight → allow-list gates cross-site); requireCsrf() on logout (403 without token). +2 tests
+(login text/plain→415, logout no-csrf→403). Build green, **27/27**. Redeployed (b94e13cb), verifying live.
+Committed. Iter2 rebuttal written. → re-signal PHASE_COMPLETE for iter3 review.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
