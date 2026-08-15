@@ -75,6 +75,19 @@ Claude verified vs worktree; both surfaced real implementability gaps. Revised 9
 Committed `[Spec 92] Plan with multi-agent review`. Rebuttal written. → porch done, expect plan-approval gate.
 Flagged to raise w/ architect: porch pr-gate × multi-PR before Phase 3 opens PR1.
 
+## PLAN RE-CUT (architect/Waleed, 2026-08-15) — still AT gate, revised in place (no rollback)
+Direction: **REVIEW-FIRST bare-minimum**; serving tiers DEFERRED (kept in plan, later PRs). Re-cut 11→**13 phases, 6 PRs**:
+- PR1 = infra scaffold + review schema + auth; PR2 = persistence swap + submission.
+- PR3 results, PR4 raw, PR5 corpus (deferred serving, all iter-1 fixes retained); PR6 review assignment+dashboards (deferred).
+- **Phase 1 slimmed** to bare service scaffold: Hono+Drizzle+node-postgres, PGlite rig, Railway+PG, CORS/cross-site-cookie, engines.node>=20. CUT serving tables/ingest/drift-guard/version/fingerprint-URLs → moved intact to Phase 5.
+- **AUTH SIMPLIFIED** (test tool, ~5 users): email+password (argon2id), NO magic-link, NO mail/ at all,
+  httpOnly Secure SameSite=None revocable cookies, CSRF, per-reviewer isolation, invite-code gate (REVIEW_INVITE_CODE, flagged for Waleed veto).
+- **Addendum**: dropped verified backup/restore + restore-check (Railway managed backups + 1 README line);
+  account-deletion trivial/SQL one-liner; skipped enumeration/rate-limit hardening. Kept only cheap hygiene.
+- Ben #85 gate STANDS (schema migration only after his sign-off). Cost gate = review-only tiny envelope, brought to architect before provisioning.
+- Addressed architect inline Q: Hono≠Drizzle (framework vs ORM); recommend Hono, Express as boring fallback — flagged for their confirm.
+Committed & resubmitting at plan gate. Architect reviews, Waleed approves.
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
