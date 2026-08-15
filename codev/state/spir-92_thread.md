@@ -157,7 +157,7 @@ CSRF double-submit on authed mutations. FK ON DELETE CASCADE. AppDb type unifies
 runtime dep; applies committed reviewed SQL inside Railway; idempotent; NOT db:push).
 Tests 23/23 (PGlite runs the REAL migrations). Build green.
 **LIVE smoke** (redeploy 59d5706a): /me 404→401 (new deploy+migration ok), signup 201, /me 200,
-DELETE /account 200 (cascade) — DB left clean. Set REVIEW_INVITE_CODE=mbrev-4bca00da72 on the service
+DELETE /account 200 (cascade) — DB left clean. Set REVIEW_INVITE_CODE on the service (value in Railway env only — not recorded here)
 (reported to Waleed to keep/rotate).
 Committed schema+auth+migrate-infra. Plan updated with Waleed's out-of-sample requirement (PR 2 phases).
 → signal phase_2 PHASE_COMPLETE. PR 1 (Phases 1+2) opens after phase_2 verification approves.
