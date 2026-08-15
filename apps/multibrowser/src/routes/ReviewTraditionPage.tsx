@@ -9,6 +9,7 @@ import {
   REVIEW_SAMPLE_SIZE,
   SCENARIO_CHECKS,
   SCENARIO_CHECK_LABELS,
+  ensureTraditionLoaded,
   evenSample,
   parseReviewState,
   replaceReviewState,
@@ -22,6 +23,7 @@ import {
   withoutTradition,
 } from "../lib/review";
 import { blankIssueUrl, buildReviewReport, editFileUrl, issueTitle, prefilledIssueUrl } from "../lib/reviewReport";
+import { ReviewAuthGate, ReviewSaveStatus } from "../components/ReviewAuthGate";
 import { ReviewCheckControl, CheckStatusDot } from "../components/ReviewCheckControl";
 import { ReviewProgressBar } from "../components/ReviewProgress";
 import { Collapsible } from "../components/Collapsible";
@@ -38,6 +40,14 @@ const route = getRouteApi("/review/$traditionId");
 // keystroke; SUBMISSION is explicit (GitHub issue / download / copy) — see lib/review.ts.
 
 export function ReviewTraditionPage() {
+  return (
+    <ReviewAuthGate>
+      <ReviewTraditionPageInner />
+    </ReviewAuthGate>
+  );
+}
+
+function ReviewTraditionPageInner() {
   const { traditionId } = route.useParams();
   const shaQ = useLatestSha();
   const sha = shaQ.data;
@@ -47,15 +57,29 @@ export function ReviewTraditionPage() {
   const review = useReviewState();
   const mine = review.traditions[traditionId];
 
-  // Materialize the assignment once per tradition (deterministic even spread). Never re-drawn
-  // automatically afterwards — the sample must not shift under a reviewer mid-review.
+  // Load this reviewer's saved draft for the tradition before deciding whether to draw a fresh
+  // sample — otherwise the auto-draw below would race the async load and clobber a saved assignment.
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    setLoaded(false);
+    let alive = true;
+    void ensureTraditionLoaded(traditionId).finally(() => {
+      if (alive) setLoaded(true);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [traditionId]);
+
+  // Materialize the assignment once per tradition (deterministic even spread) ONLY after the draft
+  // has loaded and none exists. Never re-drawn automatically — the sample must not shift mid-review.
   const scenarioIds = tradition?.scenarioIds ?? [];
   useEffect(() => {
-    if (!mine && scenarioIds.length > 0) {
+    if (loaded && !mine && scenarioIds.length > 0) {
       updateReviewState((s) => withSample(s, traditionId, evenSample(scenarioIds), ""));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mine === undefined, scenarioIds.length > 0, traditionId]);
+  }, [loaded, mine === undefined, scenarioIds.length > 0, traditionId]);
 
   const declaredTax = useMemo(() => taxonomyValues(tradition?.manifest?.taxonomies ?? {}), [tradition]);
   const sampleIds = useMemo(() => mine?.sampleIds ?? [], [mine]);
@@ -101,9 +125,10 @@ export function ReviewTraditionPage() {
           <h1 className="text-2xl font-semibold">Reviewing: {displayName}</h1>
           <ReviewProgressBar progress={progress} />
         </div>
+        <ReviewSaveStatus />
         <p className="text-sm text-default-600">
-          Work top to bottom. Your answers save in this browser as you type; when you&rsquo;re done,
-          submit from the panel at the bottom.{" "}
+          Work top to bottom. Your answers save privately to your account as you type (and sync across
+          your devices); when you&rsquo;re done, submit from the panel at the bottom.{" "}
           <Link to="/t/$traditionId" params={{ traditionId }} className="text-primary hover:underline">
             Browse this tradition normally →
           </Link>

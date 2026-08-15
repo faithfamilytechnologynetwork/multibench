@@ -354,12 +354,21 @@ function reviewerInfoFrom(r: Reviewer): ReviewerInfo {
   return { name: r.name, contact: r.email, background: r.background ?? "" };
 }
 
-/** Establish the session (call once on entering /review): loads the reviewer + a CSRF token. */
+let initInFlight = false;
+
+/** Establish the session (call on entering /review): loads the reviewer + a CSRF token. Idempotent —
+ * concurrent/duplicate calls are coalesced; a reset re-arms it. */
 export async function initReview(): Promise<void> {
-  await fetchCsrf();
-  const reviewer = await apiMe();
-  current = { ...current, reviewer: reviewer ? reviewerInfoFrom(reviewer) : current.reviewer };
-  setStatus({ auth: reviewer ? "in" : "out", reviewer });
+  if (initInFlight || status.auth !== "unknown") return;
+  initInFlight = true;
+  try {
+    await fetchCsrf();
+    const reviewer = await apiMe();
+    current = { ...current, reviewer: reviewer ? reviewerInfoFrom(reviewer) : current.reviewer };
+    setStatus({ auth: reviewer ? "in" : "out", reviewer });
+  } finally {
+    initInFlight = false;
+  }
 }
 
 export async function loginReview(email: string, password: string): Promise<void> {

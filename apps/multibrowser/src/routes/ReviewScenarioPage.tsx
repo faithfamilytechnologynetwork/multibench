@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { getRouteApi, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLatestSha, useScenario, useScenarioRaw, useTradition } from "../lib/queries";
@@ -8,6 +8,7 @@ import { parseRawSelection, rawSelectionToSearch, type RawSearchRecord, type Raw
 import type { RawCatalog } from "../lib/rawModel";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import {
+  ensureTraditionLoaded,
   scenarioChecksOf,
   updateReviewState,
   useReviewState,
@@ -15,6 +16,7 @@ import {
   type ScenarioCheckKey,
 } from "../lib/review";
 import { editFileUrl, scenarioCheckFile } from "../lib/reviewReport";
+import { ReviewAuthGate, ReviewSaveStatus } from "../components/ReviewAuthGate";
 import { ReviewCheckControl } from "../components/ReviewCheckControl";
 import { RawComparison } from "../components/RawComparison";
 import { Markdown } from "../components/Markdown";
@@ -31,7 +33,18 @@ const route = getRouteApi("/review/$traditionId/$scenarioId");
 // (d) the six pressure points. Prev/next walks the reviewer's assigned sample.
 
 export function ReviewScenarioPage() {
+  return (
+    <ReviewAuthGate>
+      <ReviewScenarioPageInner />
+    </ReviewAuthGate>
+  );
+}
+
+function ReviewScenarioPageInner() {
   const { traditionId, scenarioId } = route.useParams();
+  useEffect(() => {
+    void ensureTraditionLoaded(traditionId);
+  }, [traditionId]);
   const shaQ = useLatestSha();
   const sha = shaQ.data;
   const tradQ = useTradition(sha, traditionId);
@@ -101,6 +114,13 @@ export function ReviewScenarioPage() {
             </div>
           )}
         </nav>
+        {pos < 0 && (
+          <p className="text-xs text-warning" data-testid="out-of-sample-note">
+            This scenario is <strong>beyond your assigned sample</strong> — your review of it is
+            recorded and reported separately, and doesn&rsquo;t change your sample-completion count.
+          </p>
+        )}
+        <ReviewSaveStatus />
         <h1 className="text-xl font-semibold">
           <span className="font-mono">{scenarioId}</span>
           {scenario.meta?.locusLabel && <span className="font-normal text-default-700"> — {scenario.meta.locusLabel}</span>}
