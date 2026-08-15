@@ -314,7 +314,7 @@ async function persistTradition(tid: string): Promise<void> {
     if (!ok) {
       dirty.add(tid);
       scheduleRetry(tid);
-      if (dirty.size === 0) setStatus({ saving: false });
+      if (dirty.size === 0 && pendingDeletes.size === 0) setStatus({ saving: false });
       return;
     }
   }
@@ -354,7 +354,7 @@ async function persistTradition(tid: string): Promise<void> {
     scheduleRetry(tid);
     setStatus({ error: e instanceof Error ? e.message : "save failed", errorKind: "save" });
   } finally {
-    if (dirty.size === 0) setStatus({ saving: false });
+    if (dirty.size === 0 && pendingDeletes.size === 0) setStatus({ saving: false });
   }
 }
 
@@ -411,6 +411,7 @@ export function updateReviewState(fn: (s: ReviewState) => ReviewState): void {
 
 async function persistDelete(tid: string): Promise<void> {
   dirty.delete(tid);
+  pendingDeletes.delete(tid); // in progress — cleared now; re-added only if it fails (like `dirty`)
   try {
     await deleteDraft(tid);
     versions.delete(tid);
@@ -495,14 +496,21 @@ export async function prefetchDrafts(): Promise<void> {
   try {
     const drafts = await listDrafts();
     let next = current;
+    let reconciledTid: string | null = null;
     for (const d of drafts) {
       versions.set(d.traditionId, d.version);
       loadState.set(d.traditionId, "ok");
-      if (next.traditions[d.traditionId] === undefined && d.state !== null) {
+      if (d.state !== null) {
+        // Same adopt rule as ensureTraditionLoaded: if a local entry already exists it was authored on
+        // a blank base (a load blip) and would overwrite this saved draft, so adopt the server copy and
+        // flag reconciled. Marking loadState "ok" without adopting would reopen the overwrite hole.
+        const hadLocal = next.traditions[d.traditionId] !== undefined;
         next = { ...next, traditions: { ...next.traditions, [d.traditionId]: parseTraditionReview(d.state) } };
+        if (hadLocal) reconciledTid = d.traditionId;
       }
     }
     current = next;
+    if (reconciledTid) setStatus({ reconciled: reconciledTid });
     emit();
   } catch (e) {
     prefetched = false; // allow a retry

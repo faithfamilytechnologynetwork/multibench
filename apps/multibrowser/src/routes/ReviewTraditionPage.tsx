@@ -13,6 +13,7 @@ import {
   evenSample,
   flushReviewSaves,
   parseReviewState,
+  prefetchDrafts,
   replaceReviewState,
   scenarioChecksOf,
   seededSample,
@@ -70,6 +71,9 @@ function ReviewTraditionPageInner() {
     void ensureTraditionLoaded(traditionId).then((ok) => {
       if (alive && ok) setLoaded(true);
     });
+    // Load the reviewer's other drafts too, so "Back up all my reviews" is complete even on a
+    // direct load of this page (idempotent — a no-op if the landing page already prefetched).
+    void prefetchDrafts();
     return () => {
       alive = false;
       void flushReviewSaves(); // persist any debounced edits when leaving the page

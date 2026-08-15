@@ -7,6 +7,7 @@ import {
   peekReviewState,
   peekReviewStatus,
   peekVersion,
+  prefetchDrafts,
   resetReviewStore,
   updateReviewState,
   withSample,
@@ -304,6 +305,80 @@ describe("review store — async persistence", () => {
     expect(ops).toEqual(["del", "put"]); // delete ran first, then the fresh save
     expect(server.get("t")?.version).toBe(1); // a fresh draft exists server-side
     expect((server.get("t")?.state as any).sampleIds).toEqual(["S-1"]);
+  });
+
+  it("clears pendingDeletes on success so a later flush can't delete a recreated draft", async () => {
+    const server = new Map<string, Draft>([["t", { state: { source: { status: "approved" } }, version: 3 }]]);
+    const ops: string[] = [];
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") return json(server.get("t") ?? { state: null, version: 0 });
+      if (method === "DELETE") {
+        ops.push("del");
+        server.delete("t");
+        return json({ ok: true });
+      }
+      if (method === "PUT") {
+        ops.push("put");
+        const b = JSON.parse(String(init?.body ?? "{}"));
+        const cv = server.get("t")?.version ?? 0;
+        if (b.version === cv) {
+          server.set("t", { state: b.state, version: cv + 1 });
+          return json({ version: cv + 1 });
+        }
+        return json({ error: "conflict", state: server.get("t")?.state ?? null, version: cv }, 409);
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    await ensureTraditionLoaded("t");
+    updateReviewState((s) => withoutTradition(s, "t")); // start over → delete
+    await flushReviewSaves();
+    expect(peekReviewStatus().saving).toBe(false); // not stuck "saving"
+
+    // Recreate the tradition, then flush AGAIN — the stale pendingDeletes must NOT re-delete it.
+    updateReviewState((s) => withSample(s, "t", ["S-1"], ""));
+    await flushReviewSaves();
+    expect(ops).toEqual(["del", "put"]); // exactly one delete, then the recreate's save — no second del
+    expect(server.get("t")?.state).toBeTruthy();
+  });
+
+  it("prefetchDrafts adopts the server draft when a blank-based local entry exists", async () => {
+    const server = { source: { status: "approved", notes: "SERVER" }, sampleIds: ["S-9"], scenarios: {} };
+    const puts: number[] = [];
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    let getFails = true;
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (path === "/api/review") return json({ drafts: [{ traditionId: "t", state: server, version: 9 }] });
+      if (method === "GET") {
+        if (getFails) {
+          getFails = false;
+          throw new Error("blip");
+        }
+        return json({ state: server, version: 9 });
+      }
+      if (method === "PUT") {
+        puts.push(JSON.parse(String(init?.body ?? "{}")).version);
+        return json({ version: 10 });
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    // Failed load, then an edit on a blank base.
+    expect(await ensureTraditionLoaded("t")).toBe(false);
+    updateReviewState((s) => withScenarioCheck(s, "t", "S-1", "scenario", { status: "flagged" }));
+    // Prefetch (from visiting /review) must ADOPT the server draft, not just mark it loaded.
+    await prefetchDrafts();
+    expect(peekReviewState().traditions.t?.source.status).toBe("approved");
+    expect(peekReviewState().traditions.t?.sampleIds).toEqual(["S-9"]);
+    expect(peekReviewState().traditions.t?.scenarios["S-1"]).toBeUndefined(); // blip edit discarded
+    expect(peekReviewStatus().reconciled).toBe("t");
   });
 
   it("loads an existing draft from the API tolerantly", async () => {

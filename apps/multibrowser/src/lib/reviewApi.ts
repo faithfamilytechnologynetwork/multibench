@@ -53,11 +53,12 @@ export async function fetchCsrf(): Promise<void> {
   if (res.ok) csrfToken = (await readJson(res))?.csrfToken ?? null;
 }
 
-/** The signed-in reviewer, or null if there is no valid session. */
+/** The signed-in reviewer, or null if there is no valid session. Throws on a 5xx (service error). */
 export async function me(): Promise<Reviewer | null> {
   const res = await call("/api/auth/me");
   if (res.status === 200) return (await readJson(res))?.reviewer ?? null;
-  return null;
+  if (res.status >= 500) throw new ReviewApiError(res.status, "review service error");
+  return null; // 401 / not signed in
 }
 
 async function authPost(path: string, body: unknown): Promise<Reviewer> {
