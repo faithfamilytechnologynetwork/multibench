@@ -257,3 +257,19 @@ Mechanism identified for whoever has access: serviceInstanceUpdate source.repo=f
 rootDirectory=apps/api, branch=main. Recommend: dashboard connect (handles App auth + rootDir + branch safely),
 OR keep current `railway up` + preDeployCommand (works). Meanwhile deploys are manual `railway up` from apps/api.
 Proceeding to phase_3 (SPA work; wiring is not a prerequisite).
+
+## Phase 3 (PR 2) — IN PROGRESS on builder/spir-92-pr2 (off origin/main).
+DONE (API half, committed): apps/api/src/routes/review.ts — GET/PUT /api/review/:traditionId, per-tradition
+draft (state JSONB = TraditionReview verbatim, stored opaquely), **optimistic-concurrency version**:
+version 0 = insert (→1); >0 updates only if it matches, else **409 + current {state,version}** to reconcile.
+requireAuth on all (CSRF on PUT). Mounted /api/review. Tests: auth-401, create+read, version-inc, stale→409,
+CSRF-403, per-reviewer isolation. 34/34 green. Committed.
+Note: zod `scenarios: z.record(z.string(),…)` ALREADY accepts any scenario id, and traditionProgress ALREADY
+counts only sampleIds — so out-of-sample is largely structural; remaining is UI (affordance + "+N beyond sample").
+
+REMAINING (SPA half): lib/review.ts sync→async swap (per-tradition API load/save, optimistic + version
+reconcile, keep tolerant zod loader); reviewApi.ts client (credentialed fetch + CSRF header to VITE_API_BASE);
+review route components (async load + auth gate + out-of-sample affordance + progress display); SPA tests +
+fakeApi. Then phase_3 consult. **PR-2 completion gate: real-browser Safari+Chrome cross-site cookie check**
+(up.railway.app public-suffix → 3rd-party-cookie block risk) — surface early to architect if it fails.
+Did NOT run phase_3 consult yet (SPA half unbuilt).
