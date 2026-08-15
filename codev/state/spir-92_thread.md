@@ -332,3 +332,13 @@ DEFENDED (for architect PR-2 CMAP): codex#2 whole-draft last-write-wins loses th
 this is the plan's "reconciled not lost = LWW for active device" (claude concurs it matches plan). A field-merge
 is out of scope for a ~5-user tool — architect to adjudicate at the PR gate if desired.
 api 38 + mb 371 green, types clean. Committed. → PHASE 3 DONE. Proceeding to phase_4 (submission).
+
+## Phase 4 (implement) — private immutable submission — BUILT.
+API: POST /api/review/:tid/submit (insert-only into submissions, immutable — no update/delete path),
+GET /api/review/:tid/submissions (list, newest first); auth+CSRF+bodyLimit; publishedIssueUrl null by
+default (set only if reviewer opts to publish). SPA: SubmitPanel reworked — "Submit review (private)"
+is PRIMARY (flush→submitReview→"Submitted privately · time"); GitHub-issue publish moved behind an
+opt-in <details> ("also publish to a public GitHub issue" — makes it public, existing prefilled link).
+Report: added "## 4. Beyond the assigned sample" out-of-sample commentary section (Waleed's req).
+Tests: API submit/list/immutability/publish/isolation (42); report out-of-sample section; page submit-private.
+api 42 + mb 374 green, types clean. Committed. → signal phase_4 complete → consult. PR 2 opens after approval.
