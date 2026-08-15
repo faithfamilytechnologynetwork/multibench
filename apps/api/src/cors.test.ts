@@ -1,7 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { createApp } from './app';
 import { parseAllowedOrigins } from './cors';
-import { pgliteDatabase } from './testing/pglite';
+import { createTestDb } from './testing/pglite';
+
+const auth = { inviteCode: 'test-invite', secureCookies: false };
 
 describe('parseAllowedOrigins', () => {
   it('splits, trims, and drops empty entries', () => {
@@ -21,7 +23,7 @@ describe('CORS (credentialed cross-site)', () => {
   const allowedOrigins = ['https://multibrowser.app'];
 
   it('echoes an allow-listed origin with credentials enabled', async () => {
-    const app = createApp(pgliteDatabase(), { allowedOrigins });
+    const app = createApp(await createTestDb(), { allowedOrigins, auth });
     const res = await app.request('/api/health', {
       headers: { Origin: 'https://multibrowser.app' },
     });
@@ -30,7 +32,7 @@ describe('CORS (credentialed cross-site)', () => {
   });
 
   it('sends no allow-origin for an unlisted origin (never a wildcard with credentials)', async () => {
-    const app = createApp(pgliteDatabase(), { allowedOrigins });
+    const app = createApp(await createTestDb(), { allowedOrigins, auth });
     const res = await app.request('/api/health', {
       headers: { Origin: 'https://evil.app' },
     });
@@ -40,7 +42,7 @@ describe('CORS (credentialed cross-site)', () => {
   });
 
   it('handles a credentialed preflight (OPTIONS) from an allow-listed origin', async () => {
-    const app = createApp(pgliteDatabase(), { allowedOrigins });
+    const app = createApp(await createTestDb(), { allowedOrigins, auth });
     const res = await app.request('/api/health', {
       method: 'OPTIONS',
       headers: {

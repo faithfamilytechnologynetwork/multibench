@@ -19,13 +19,23 @@ console.log(
     : 'CORS allow-list is EMPTY — no cross-site origin is allowed (set ALLOWED_ORIGINS).',
 );
 
+const inviteCode = process.env.REVIEW_INVITE_CODE;
+if (!inviteCode) {
+  // Fail-closed, not fatal: the service still serves reads/login, but signup is closed until the
+  // shared invite code is set. Surface it so it isn't a silent mystery.
+  console.log('REVIEW_INVITE_CODE is unset — signup is CLOSED until it is configured.');
+}
+
 const port = Number(process.env.PORT ?? 8080);
 if (!Number.isFinite(port)) {
   console.error(`PORT is not a valid number: ${process.env.PORT}`);
   process.exit(1);
 }
 
-const app = createApp(nodePgDatabase(databaseUrl), { allowedOrigins });
+const app = createApp(nodePgDatabase(databaseUrl), {
+  allowedOrigins,
+  auth: { inviteCode, secureCookies: true },
+});
 
 serve({ fetch: app.fetch, port }, (info) => {
   console.log(`api listening on :${info.port}`);

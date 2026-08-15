@@ -38,6 +38,17 @@ session cookie). Never use `*` with credentials.
 
 - `GET /api/health` — 200 `{status:"ok"}` when Postgres responds, 503 otherwise (drives the Railway
   health check).
+- `POST /api/auth/signup` — email + password, gated by the shared `REVIEW_INVITE_CODE`. Sets an
+  httpOnly session cookie + a CSRF cookie.
+- `POST /api/auth/login` · `POST /api/auth/logout` · `GET /api/auth/me`.
+- `DELETE /api/account` — deletes the reviewer (cascades to sessions/drafts/submissions). Authenticated
+  + CSRF.
+
+**Auth model** (Waleed, 2026-08-15, test-tool scale): email + password (argon2id), **no magic-link, no
+email**. Sessions are server-side rows (revocation = row delete); cookies are httpOnly + `Secure` +
+`SameSite=None` (SPA and API are cross-site). CSRF is double-submit (`mb_csrf` cookie echoed in the
+`X-CSRF-Token` header) for state-changing authed requests. Signup is gated by one shared
+`REVIEW_INVITE_CODE` (fail-closed if unset). No email-enumeration / rate-limit hardening at this scale.
 
 ## Data durability
 
