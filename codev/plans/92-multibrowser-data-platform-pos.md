@@ -193,6 +193,14 @@ Swap `lib/review.ts` persistence from the **synchronous** localStorage store to 
 sync→async conversion with optimistic updates and cross-device conflict handling — behind Spec 83's
 zod-tolerant loader. (Persistence seam only; submission is Phase 4.)
 
+**Added requirement — out-of-sample review (Waleed, 2026-08-15):** the review `state.scenarios` map
+must accept **ANY** scenario id, not only `sampleIds` (`sampleIds` is *required*, not *allowed*).
+Update the SPA `TraditionReview` zod shape + persistence accordingly, and add **(a)** an affordance to
+open a non-sampled scenario in review mode (same 4 checks) and **(b)** progress semantics —
+**completion counts the required sample only**; extras show separately as "+N beyond sample". The
+report's out-of-sample commentary section lands with submission (Phase 4). Backend needs no change:
+the Phase-2 `reviews.state` JSONB already stores this verbatim.
+
 #### Files to Create / Modify
 - `apps/multibrowser/src/lib/review.ts` (async persistence; optimistic update + reconcile; keep the
   tolerant zod loader; `version`-based conflict resolution replacing the `storage`-event sync),
@@ -224,6 +232,9 @@ resume; concurrent edit → version conflict resolved.
 #### Objective
 Add **private, immutable submission** (opt-in publish-to-issue) — completing the bare-minimum review
 slice. **Opens PR 2.** (Assignment machinery is deferred to Phase 12.)
+
+**Out-of-sample (Waleed, 2026-08-15):** the generated report lists **out-of-sample commentary in its
+own section**, distinct from the required-sample reviews.
 
 #### Files to Create / Modify
 - `apps/api/src/routes/review.ts` (submit → immutable snapshot), route tests
