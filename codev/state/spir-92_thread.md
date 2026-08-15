@@ -102,6 +102,16 @@ Committed `[Spec 92][Phase: implement] feat: apps/api service scaffold`.
 **HOLDING PHASE_COMPLETE**: last deliverable = Railway provisioning, gated on architect cost-OK
 (Waleed bound: bring review-only envelope BEFORE provisioning). Sent envelope, awaiting go-ahead.
 
+## COST GATE APPROVED (architect, $40/mo ceiling, smallest footprint). PROVISIONED & VERIFIED:
+- Railway workspace Haadi, DEDICATED project **multibench-api** (id 5154c67b) — isolated for clean cost reconcile.
+- API service **multibench-api** (id 5d25f594): no replicas, default region (US West/lax1), no reserved sizing.
+  Public URL: https://multibench-api-production.up.railway.app
+- **Postgres** managed template (postgres-ssl:18), US West, usage-based volume. DATABASE_URL via ${{Postgres.DATABASE_URL}}.
+- **/api/health VERIFIED on public URL → 200 {"status":"ok","db":"up"}** (live Postgres round-trip). CORS creds present.
+- Deploy = `railway up` (Nixpacks). Follow-up (non-blocker): wire GitHub auto-deploy source at/after PR1 merge.
+- ALLOWED_ORIGINS not set on service yet (no cross-origin caller until Phase 2/3 SPA integration).
+Reported all to architect. All Phase-1 deliverables met. Signaling PHASE_COMPLETE → per-phase consult (codex+claude).
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
