@@ -320,3 +320,15 @@ DEFENDED (plan semantics): codex#1 whole-draft last-write-wins IS the plan's "re
 (claude concurs); codex#2 edit-before-load is SAFE via the iter-2 adopt-fix (server-wins+notice, no loss).
 Browser Safari/Chrome check stays PR-2 gate (both agree not a phase_3 blocker).
 check-types clean; api 38 + mb 369 green. Committed. Rebuttal written. → re-signal iter4.
+
+## Phase 3 consult iter4: codex REQUEST_CHANGES, claude COMMENT → porch FORCE-ADVANCED phase_3 ✓ (max iters).
+Both caught real residual bugs (ship in PR 2) — FIXED as polish before PR 2:
+- persistDelete didn't clear pendingDeletes on success → sticky saving + later flush re-deletes recreated
+  draft. FIX + test (delete→recreate→2nd flush = one del).
+- prefetchDrafts marked loadState ok without adopting → reopened narrow overwrite hole. FIX: adopt+reconciled + test.
+- me() 5xx now throws → service-error notice (not sign-in form). Tradition page prefetches → "back up all" complete.
+  saving flag checks pendingDeletes.
+DEFENDED (for architect PR-2 CMAP): codex#2 whole-draft last-write-wins loses the OTHER device's disjoint edit;
+this is the plan's "reconciled not lost = LWW for active device" (claude concurs it matches plan). A field-merge
+is out of scope for a ~5-user tool — architect to adjudicate at the PR gate if desired.
+api 38 + mb 371 green, types clean. Committed. → PHASE 3 DONE. Proceeding to phase_4 (submission).
