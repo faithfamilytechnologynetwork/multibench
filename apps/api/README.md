@@ -55,6 +55,25 @@ email**. Sessions are server-side rows (revocation = row delete); cookies are ht
 The review store is authoritative (not rebuildable from git). At this test-tool scale, **Railway's
 managed-Postgres built-in backups suffice** — there is no custom backup/restore tooling.
 
+## Migrations
+
+Schema changes follow **generate → review → apply**, and Drizzle is the single schema authority:
+
+1. Edit `src/schema/*`, then `pnpm exec drizzle-kit generate --name <change>` to emit a new
+   `drizzle/NNNN_*.sql`.
+2. **Review the generated SQL in the PR** — that PR review is the human gate on schema changes.
+3. **Apply**: Railway's `preDeployCommand` (`railway.json`) runs `pnpm migrate` (a small runtime
+   migrator, `src/migrate.ts`, using drizzle-orm's programmatic migrator over the committed `drizzle/`
+   files) **inside Railway on each deploy**, before the new version goes live. It applies only the
+   committed, reviewed SQL — it is **not `db:push`** (which diffs the live schema) — and is idempotent
+   (drizzle records applied migrations, so re-runs are no-ops). A failed migration fails the deploy.
+   This mechanism is chosen because the managed Postgres has no public proxy, so migrations can't be
+   applied from a developer's machine.
+
+**Fallback**: if a deploy-time migration ever needs to be decoupled (e.g. a large or risky change
+applied out of band), drop `preDeployCommand` for that release and apply the reviewed SQL manually via
+`psql` against the database, then deploy. `db:push` is never used against live data.
+
 ## Deployment
 
 Railway (NIXPACKS), `engines.node >= 20`. **Provisioning of the Railway service + Postgres is gated
