@@ -1,18 +1,19 @@
 import { Hono } from 'hono';
 import type { Context } from 'hono';
 import { eq } from 'drizzle-orm';
-import { setCookie, getCookie, deleteCookie } from 'hono/cookie';
+import { setCookie, getCookie } from 'hono/cookie';
 import type { AppDb } from '../db';
 import { reviewers } from '../schema';
 import { hashPassword, verifyPassword } from '../auth/password';
 import { checkInviteCode } from '../auth/inviteCode';
 import { generateCsrfToken } from '../auth/csrf';
-import { createSession, deleteSession } from '../auth/session';
+import { createSession, deleteSession, SESSION_TTL_MS } from '../auth/session';
 import {
   SESSION_COOKIE,
   CSRF_COOKIE,
   sessionCookieOptions,
   csrfCookieOptions,
+  clearAuthCookies,
 } from '../auth/cookies';
 import { requireAuth } from '../middleware/auth';
 import type { AppEnv } from '../middleware/auth';
@@ -30,15 +31,16 @@ const MIN_PASSWORD_LENGTH = 8;
 export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
   const route = new Hono<AppEnv>();
 
-  async function startSession(c: Context, reviewerId: string): Promise<void> {
+  // Returns the CSRF token so the caller can hand it to the client in the RESPONSE BODY. The SPA runs
+  // on a different origin than the API and cannot read the `mb_csrf` cookie via JS (up.railway.app is
+  // a public suffix, so no shared Domain), so the token is delivered in the body; the cookie remains
+  // the server-side comparison half of the double-submit.
+  async function startSession(c: Context, reviewerId: string): Promise<string> {
     const { token, expiresAt } = await createSession(db, reviewerId);
     setCookie(c, SESSION_COOKIE, token, sessionCookieOptions(expiresAt, config.secureCookies));
-    setCookie(
-      c,
-      CSRF_COOKIE,
-      generateCsrfToken(),
-      csrfCookieOptions(expiresAt, config.secureCookies),
-    );
+    const csrfToken = generateCsrfToken();
+    setCookie(c, CSRF_COOKIE, csrfToken, csrfCookieOptions(expiresAt, config.secureCookies));
+    return csrfToken;
   }
 
   route.post('/signup', async (c) => {
@@ -58,14 +60,10 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
     if (!email || body.password.length < MIN_PASSWORD_LENGTH) {
       return c.json({ error: 'email required and password must be at least 8 characters' }, 400);
     }
-    const existing = await db
-      .select({ id: reviewers.id })
-      .from(reviewers)
-      .where(eq(reviewers.email, email))
-      .limit(1);
-    if (existing.length > 0) return c.json({ error: 'email already registered' }, 409);
-
     const passwordHash = await hashPassword(body.password);
+    // Insert with onConflictDoNothing on the unique email, then treat an empty result as "taken".
+    // This is race-safe (no check-then-insert window) and returns 409 instead of a raw unique-violation
+    // 500 when two signups collide.
     const inserted = await db
       .insert(reviewers)
       .values({
@@ -74,10 +72,12 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
         name: body.name,
         background: typeof body.background === 'string' ? body.background : null,
       })
+      .onConflictDoNothing({ target: reviewers.email })
       .returning({ id: reviewers.id, email: reviewers.email, name: reviewers.name });
+    if (inserted.length === 0) return c.json({ error: 'email already registered' }, 409);
     const reviewer = inserted[0]!;
-    await startSession(c, reviewer.id);
-    return c.json({ reviewer }, 201);
+    const csrfToken = await startSession(c, reviewer.id);
+    return c.json({ reviewer, csrfToken }, 201);
   });
 
   route.post('/login', async (c) => {
@@ -91,8 +91,25 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
     if (!reviewer || !(await verifyPassword(reviewer.passwordHash, body.password))) {
       return c.json({ error: 'invalid credentials' }, 401);
     }
-    await startSession(c, reviewer.id);
-    return c.json({ reviewer: { id: reviewer.id, email: reviewer.email, name: reviewer.name } });
+    const csrfToken = await startSession(c, reviewer.id);
+    return c.json({
+      reviewer: { id: reviewer.id, email: reviewer.email, name: reviewer.name },
+      csrfToken,
+    });
+  });
+
+  // Hand the SPA a CSRF token (and ensure the paired cookie exists). Lets a reloaded page — which
+  // still has the httpOnly session + csrf cookies but lost the in-memory token — recover the token to
+  // echo in the X-CSRF-Token header. Unauthenticated: the token is not a secret; double-submit relies
+  // on the attacker being unable to read our cookie or set our header cross-site.
+  route.get('/csrf', (c) => {
+    let csrfToken = getCookie(c, CSRF_COOKIE);
+    if (!csrfToken) {
+      csrfToken = generateCsrfToken();
+      const expiresAt = new Date(new Date().getTime() + SESSION_TTL_MS);
+      setCookie(c, CSRF_COOKIE, csrfToken, csrfCookieOptions(expiresAt, config.secureCookies));
+    }
+    return c.json({ csrfToken });
   });
 
   // Logout clears the current session by its own cookie token. Not behind requireAuth so it always
@@ -100,8 +117,7 @@ export function authRoutes(db: AppDb, config: AuthConfig): Hono<AppEnv> {
   route.post('/logout', async (c) => {
     const token = getCookie(c, SESSION_COOKIE);
     if (token) await deleteSession(db, token);
-    deleteCookie(c, SESSION_COOKIE, { path: '/' });
-    deleteCookie(c, CSRF_COOKIE, { path: '/' });
+    clearAuthCookies(c, config.secureCookies);
     return c.json({ ok: true });
   });
 

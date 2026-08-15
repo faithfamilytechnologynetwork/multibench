@@ -4,10 +4,9 @@ A thin Postgres-backed service that will serve the multibrowser SPA's data (corp
 and host the read-write **review** backend. Per Spec 92. **Git stays the source of truth**; the
 serving tiers are a rebuildable cache, the review store is authoritative operational data.
 
-> **Status: Phase 1 — bare scaffold.** No serving tables, no ingest, no review tables, no
-> `/api/version` yet. This phase stands up the service shape (Hono + Drizzle + Postgres), the PGlite
-> test rig, the CORS/cross-site-cookie topology, and Railway config. Later phases add the review
-> slice (Phase 2+) and the deferred serving tiers (Phase 5+).
+> **Status: Phase 2 — review store + auth.** The service hosts the review store (reviewers, sessions,
+> reviews/drafts, submissions) and email/password auth (below). No serving tables, no ingest, no
+> `/api/version` yet — the deferred serving tiers arrive in Phase 5+.
 
 ## Stack
 
@@ -47,8 +46,13 @@ session cookie). Never use `*` with credentials.
 **Auth model** (Waleed, 2026-08-15, test-tool scale): email + password (argon2id), **no magic-link, no
 email**. Sessions are server-side rows (revocation = row delete); cookies are httpOnly + `Secure` +
 `SameSite=None` (SPA and API are cross-site). CSRF is double-submit (`mb_csrf` cookie echoed in the
-`X-CSRF-Token` header) for state-changing authed requests. Signup is gated by one shared
-`REVIEW_INVITE_CODE` (fail-closed if unset). No email-enumeration / rate-limit hardening at this scale.
+`X-CSRF-Token` header) for state-changing authed requests. Because the SPA is on a different origin
+and cannot read the API-origin `mb_csrf` cookie via JS, the CSRF token is also returned in the
+signup/login response body and via `GET /api/auth/csrf`; the client holds it in memory and echoes it in
+the header. Signup is gated by one shared `REVIEW_INVITE_CODE` (fail-closed if unset). No
+email-enumeration / rate-limit hardening at this scale. Expired session rows are not actively pruned
+(they are rejected on use by the `expires_at` check); at this scale that's fine — add a periodic prune
+if the `sessions` table ever grows.
 
 ## Data durability
 

@@ -52,6 +52,19 @@ describe('signup (invite-gated)', () => {
     const jar = readCookies(res);
     expect(jar[SESSION_COOKIE]).toBeTruthy();
     expect(jar[CSRF_COOKIE]).toBeTruthy();
+    // The CSRF token is also returned in the BODY so the cross-site SPA (which cannot read the
+    // API-origin cookie via JS) can hold it in memory and echo it in the X-CSRF-Token header.
+    expect(body.csrfToken).toBe(jar[CSRF_COOKIE]);
+  });
+
+  it('exposes a csrf token via GET /api/auth/csrf', async () => {
+    const app = await makeApp();
+    const res = await app.request('/api/auth/csrf');
+    expect(res.status).toBe(200);
+    const jar = readCookies(res);
+    const csrfToken = ((await res.json()) as any).csrfToken;
+    expect(csrfToken).toBeTruthy();
+    expect(csrfToken).toBe(jar[CSRF_COOKIE]); // body token matches the paired cookie
   });
 
   it('rejects a wrong or missing invite code (fail-closed)', async () => {
@@ -106,6 +119,38 @@ describe('login / me / logout', () => {
     expect(
       (await app.request('/api/auth/me', { headers: { Cookie: cookieHeader(jar) } })).status,
     ).toBe(401);
+  });
+});
+
+describe('reviewer isolation', () => {
+  it('keeps each reviewer to their own record, and deleting one leaves the other intact', async () => {
+    const app = await makeApp();
+    const jarA = readCookies(await signup(app, { email: 'a@example.com' }));
+    const jarB = readCookies(await signup(app, { email: 'b@example.com' }));
+
+    // Each session resolves to its own reviewer.
+    const meA = (await (
+      await app.request('/api/auth/me', { headers: { Cookie: cookieHeader(jarA) } })
+    ).json()) as any;
+    const meB = (await (
+      await app.request('/api/auth/me', { headers: { Cookie: cookieHeader(jarB) } })
+    ).json()) as any;
+    expect(meA.reviewer.email).toBe('a@example.com');
+    expect(meB.reviewer.email).toBe('b@example.com');
+    expect(meA.reviewer.id).not.toBe(meB.reviewer.id);
+
+    // A deletes A's own account (CSRF). B is untouched: still authenticated and able to log in.
+    const delA = await app.request('/api/account', {
+      method: 'DELETE',
+      headers: { Cookie: cookieHeader(jarA), [CSRF_HEADER]: jarA[CSRF_COOKIE] ?? '' },
+    });
+    expect(delA.status).toBe(200);
+    expect(
+      (await app.request('/api/auth/me', { headers: { Cookie: cookieHeader(jarA) } })).status,
+    ).toBe(401);
+    expect(
+      (await app.request('/api/auth/me', { headers: { Cookie: cookieHeader(jarB) } })).status,
+    ).toBe(200);
   });
 });
 

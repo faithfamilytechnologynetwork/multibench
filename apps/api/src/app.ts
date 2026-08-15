@@ -34,7 +34,7 @@ export function createApp(db: AppDb, opts: AppOptions): Hono {
 
   app.route('/api/health', healthRoute(db));
   app.route('/api/auth', authRoutes(db, opts.auth));
-  app.route('/api/account', accountRoutes(db));
+  app.route('/api/account', accountRoutes(db, { secureCookies: opts.auth.secureCookies }));
 
   return app;
 }
