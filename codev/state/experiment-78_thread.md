@@ -196,15 +196,16 @@ thread, open PR `Refs #78`. Tripwires still: banding <$350, total <$425.
   CI[−0.0257,−0.0061]).
 - Final spend $376.16 / $425 ceiling. Notified architect. **Project 78 COMPLETE.**
 
-At collect completion: (1) verify 0 failures / fill gaps by resumable re-run; (2) PROJECT remaining
-banding, confirm <\$350 cumulative + <\$425 total, then judge the remaining 5 traditions (judaism, RC,
-secular-sage, sunni-islam, taoism); (3) reconcile EXACT total token-sum banding + Modal wall-clock serve
-BEFORE analysis; (4) build analyze.py (2 arms, per-tradition CIs, slope_A1−slope_B, per-trad L0 lift,
-normative contrast, stated-B vs #76 unstated-B); (5) run pre-registered estimands → notes.md Full-run
-Results; (6) commit + PR `Refs #78`. Live tripwire during collect: Modal \$80 (serve). Pace safe.
+## Porch/thread reconciliation (2026-08-15)
 
-Reported reconciled actuals + projection to architect. Per binding sequence, NOT starting the 519 run
-without explicit go. On release: full collect (arms A1,B; all 519; concurrency ~16; resumable) → judge
-all 7 traditions → analyze.py (build it: 2 arms, per-tradition CIs, slope_A1−slope_B, per-trad L0 lift,
-normative contrast, stated-B vs #76 unstated-B) → notes.md Full-run Results → PR `Refs #78`. Watch the
-$80 Modal tripwire during serve.
+Architect flagged a mismatch: `origin/main`'s status.yaml still read **analyze** while this worktree
+read **verified**. Root cause — PR #79 was merged BEFORE the post-merge porch closure ran, so the three
+closure commits (record PR → mark merged → protocol-complete, i.e. status.yaml analyze→verified) plus
+the final thread commit landed on `builder/experiment-78` **only** and never reached `main`. Nothing was
+genuinely open: the experiment is complete and verified on main (merge 2c4b08a; deliverables present;
+raw data gitignored). Fixes applied:
+- (a) Removed the stale orphaned mid-flight paragraphs that an earlier Edit left detached below the DONE
+  section (leftover "at collect completion…" and "NOT starting the 519 run without explicit go…" text —
+  long superseded by the completed run).
+- (b) Landing the four stranded closure commits on `main` via a small `chore(porch)` PR so porch
+  reflects reality (main status.yaml → verified). Then standing down.
