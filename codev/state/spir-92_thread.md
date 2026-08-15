@@ -245,3 +245,15 @@ SPA swap is called done. If blocked → decide custom-domains (same-site) vs sam
 
 ## POST-MERGE follow-ups (tracked, not blocking): add apps/api job to validate.yml CI; MAINTAIN refresh
 of arch-critical/arch.md (neither knows apps/api exists); keep test-tool deviations visible.
+
+## PR #97 MERGED (Waleed's word, merge commit 276865f). apps/api confirmed on origin/main.
+Recorded porch done --merged 97. Daily Postgres backups active.
+
+## GitHub auto-deploy wiring follow-up — BLOCKED (surfaced to architect, not forced):
+Railway API returns "Not Authorized" for service/repoTrigger ops with my personal accessToken (volume/backup
+ops worked, service-source ops don't). Connecting the Railway GitHub App to the repo is a dashboard OAuth
+action regardless. Rewiring a live prod service source blind = risk to the shipped review backend. NOT forcing it.
+Mechanism identified for whoever has access: serviceInstanceUpdate source.repo=faithfamilytechnologynetwork/multibench,
+rootDirectory=apps/api, branch=main. Recommend: dashboard connect (handles App auth + rootDir + branch safely),
+OR keep current `railway up` + preDeployCommand (works). Meanwhile deploys are manual `railway up` from apps/api.
+Proceeding to phase_3 (SPA work; wiring is not a prerequisite).
