@@ -32,9 +32,16 @@ function harness(files: ReturnType<typeof traditionFiles>) {
     const method = init?.method ?? "GET";
     if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
     if (path === "/api/auth/me") return json({ reviewer });
+    if (path === "/api/review") {
+      return json({ drafts: [...drafts.entries()].map(([traditionId, d]) => ({ traditionId, ...d })) });
+    }
     if (path.startsWith("/api/review/")) {
       const tid = decodeURIComponent(path.slice("/api/review/".length));
       if (method === "GET") return json(drafts.get(tid) ?? { state: null, version: 0 });
+      if (method === "DELETE") {
+        drafts.delete(tid);
+        return json({ ok: true });
+      }
       if (method === "PUT") {
         const b = JSON.parse(String(init?.body ?? "{}"));
         const cur = drafts.get(tid);
@@ -78,6 +85,23 @@ describe("review landing (/review)", () => {
     expect(await screen.findAllByTestId("review-tradition-card")).toHaveLength(1);
     // signed-in badge replaces the old in-app identity form
     expect(screen.getByTestId("reviewer-badge")).toHaveTextContent(/Imam Test/);
+  });
+
+  it("shows real progress on the landing page for a draft started on another device (prefetch)", async () => {
+    const { drafts } = harness(traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
+    // A draft already exists server-side (from another device) with one answered check.
+    seedDraft(drafts, "sunni-islam", {
+      sampleSeed: "",
+      sampleIds: ["JLS-001", "JLS-002"],
+      source: { status: "approved", notes: "", suggestion: "" },
+      guide: { status: "unreviewed", notes: "", suggestion: "" },
+      scenarios: {},
+    });
+    renderApp("/review");
+    const card = await screen.findByTestId("review-tradition-card");
+    // Prefetch loads it → the card shows a progress bar, not "not started".
+    await waitFor(() => expect(within(card).getByTestId("review-progress")).toBeInTheDocument());
+    expect(within(card).queryByText(/not started/i)).not.toBeInTheDocument();
   });
 
   it("fails visibly with a notice when the review service is unreachable", async () => {

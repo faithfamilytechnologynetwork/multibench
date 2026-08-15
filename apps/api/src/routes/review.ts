@@ -31,6 +31,17 @@ export function reviewRoutes(db: AppDb): Hono<AppEnv> {
   const route = new Hono<AppEnv>();
   route.use('*', requireAuth(db));
 
+  // List all of this reviewer's drafts (so the landing page can show real cross-device progress
+  // without opening each tradition). Returns [{traditionId, state, version}].
+  route.get('/', async (c) => {
+    const reviewerId = c.get('reviewerId');
+    const rows = await db
+      .select({ traditionId: reviews.traditionId, state: reviews.state, version: reviews.version })
+      .from(reviews)
+      .where(eq(reviews.reviewerId, reviewerId));
+    return c.json({ drafts: rows });
+  });
+
   // Load this reviewer's draft for a tradition. Absent → {state: null, version: 0}.
   route.get('/:traditionId', async (c) => {
     const draft = await currentDraft(db, c.get('reviewerId'), c.req.param('traditionId'));
@@ -48,7 +59,8 @@ export function reviewRoutes(db: AppDb): Hono<AppEnv> {
       typeof body !== 'object' ||
       typeof body.version !== 'number' ||
       typeof body.state !== 'object' ||
-      body.state === null
+      body.state === null ||
+      Array.isArray(body.state)
     ) {
       return c.json({ error: 'invalid body' }, 400);
     }
@@ -81,6 +93,17 @@ export function reviewRoutes(db: AppDb): Hono<AppEnv> {
       return c.json({ error: 'conflict', ...(await currentDraft(db, reviewerId, traditionId)) }, 409);
     }
     return c.json({ version: updated[0]!.version });
+  });
+
+  // Discard this reviewer's draft for a tradition ("start over"). Idempotent — deleting a
+  // non-existent draft is a no-op 200.
+  route.delete('/:traditionId', async (c) => {
+    const reviewerId = c.get('reviewerId');
+    const traditionId = c.req.param('traditionId');
+    await db
+      .delete(reviews)
+      .where(and(eq(reviews.reviewerId, reviewerId), eq(reviews.traditionId, traditionId)));
+    return c.json({ ok: true });
   });
 
   return route;

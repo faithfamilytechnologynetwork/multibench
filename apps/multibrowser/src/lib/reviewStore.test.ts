@@ -11,6 +11,7 @@ import {
   updateReviewState,
   withScenarioCheck,
   withTraditionCheck,
+  withoutTradition,
 } from "./review";
 
 type Draft = { state: unknown; version: number };
@@ -180,6 +181,69 @@ describe("review store — async persistence", () => {
     const st = peekReviewStatus();
     expect(st.auth).toBe("out");
     expect(st.error).toBeTruthy();
+  });
+
+  it("adopts the server draft (not the blip edit) when a load fails then recovers", async () => {
+    // GET fails once (blip), the reviewer edits during the failure, then GET recovers with the real
+    // saved draft. The pre-load edit sat on a blank base, so the server draft must win (+ reconciled),
+    // never overwriting the saved work.
+    let getFails = true;
+    const server = { source: { status: "approved", notes: "SERVER" }, sampleIds: ["S-9"], scenarios: {} };
+    const puts: Array<{ version: number }> = [];
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") {
+        if (getFails) {
+          getFails = false;
+          throw new Error("blip");
+        }
+        return json({ state: server, version: 7 });
+      }
+      if (method === "PUT") {
+        puts.push({ version: JSON.parse(String(init?.body ?? "{}")).version });
+        return json({ version: 8 });
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    // First load fails.
+    expect(await ensureTraditionLoaded("t")).toBe(false);
+    // Reviewer edits during the outage → local blank base + a flagged check.
+    updateReviewState((s) => withScenarioCheck(s, "t", "S-1", "scenario", { status: "flagged" }));
+    await flushReviewSaves();
+
+    // The server draft was adopted (its sampleIds/source), the blip edit discarded, reconciled flagged.
+    expect(peekReviewState().traditions.t?.source.status).toBe("approved");
+    expect(peekReviewState().traditions.t?.sampleIds).toEqual(["S-9"]);
+    expect(peekReviewState().traditions.t?.scenarios["S-1"]).toBeUndefined();
+    expect(peekReviewStatus().reconciled).toBe("t");
+  });
+
+  it("start over deletes the server draft", async () => {
+    const server = new Map<string, Draft>([["t", { state: { source: { status: "approved" } }, version: 2 }]]);
+    let deleted = false;
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (method === "GET") return json(server.get("t") ?? { state: null, version: 0 });
+      if (method === "DELETE") {
+        deleted = true;
+        server.delete("t");
+        return json({ ok: true });
+      }
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    await ensureTraditionLoaded("t");
+    updateReviewState((s) => withoutTradition(s, "t")); // "start over"
+    await flushReviewSaves();
+    expect(deleted).toBe(true);
+    expect(server.has("t")).toBe(false);
   });
 
   it("loads an existing draft from the API tolerantly", async () => {

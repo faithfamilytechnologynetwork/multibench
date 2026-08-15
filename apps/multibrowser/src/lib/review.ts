@@ -13,12 +13,15 @@
 import { useSyncExternalStore } from "react";
 import { z } from "zod";
 import {
+  deleteDraft,
   fetchCsrf,
   getDraft,
+  listDrafts,
   login as apiLogin,
   logout as apiLogout,
   me as apiMe,
   putDraft,
+  ReviewApiError,
   setReviewFetch,
   signup as apiSignup,
   type Reviewer,
@@ -174,10 +177,22 @@ export interface ReviewStatus {
   reviewer: Reviewer | null;
   /** Tradition ids with an in-flight or pending save. */
   saving: boolean;
-  /** Last save error message (network / server), cleared on the next successful save. */
+  /** Last error message (network / server), cleared on the next success. */
   error: string | null;
+  /** Whether the last error was loading a draft or saving one (drives the message). */
+  errorKind: "load" | "save" | null;
   /** A tradition that was reconciled from another device since the last render (id → true). */
   reconciled: string | null;
+}
+
+/** A 401 means the session expired mid-work — flip to signed-out so the gate re-prompts sign-in. */
+function handleAuthError(e: unknown): boolean {
+  if (e instanceof ReviewApiError && e.status === 401) {
+    status = { auth: "out", reviewer: null, saving: false, error: "your session expired — sign in again", errorKind: null, reconciled: null };
+    emit();
+    return true;
+  }
+  return false;
 }
 
 /** How long a failed save waits before retrying. */
@@ -186,11 +201,12 @@ export const SAVE_RETRY_MS = 3000;
 type LoadState = "loading" | "ok" | "error";
 
 let current: ReviewState = emptyState();
-let status: ReviewStatus = { auth: "unknown", reviewer: null, saving: false, error: null, reconciled: null };
+let status: ReviewStatus = { auth: "unknown", reviewer: null, saving: false, error: null, errorKind: null, reconciled: null };
 const versions = new Map<string, number>();
 const loadState = new Map<string, LoadState>();
 const loadPromises = new Map<string, Promise<boolean>>();
 const dirty = new Set<string>();
+const pendingDeletes = new Set<string>();
 const timers = new Map<string, ReturnType<typeof setTimeout>>();
 const retryTimers = new Map<string, ReturnType<typeof setTimeout>>();
 const inflight = new Map<string, Promise<void>>();
@@ -255,7 +271,12 @@ function scheduleRetry(tid: string): void {
     tid,
     setTimeout(() => {
       retryTimers.delete(tid);
-      if (dirty.has(tid)) runSave(tid);
+      if (pendingDeletes.has(tid)) {
+        const p = persistDelete(tid).finally(() => inflight.delete(tid));
+        inflight.set(tid, p);
+      } else if (dirty.has(tid)) {
+        runSave(tid);
+      }
     }, SAVE_RETRY_MS),
   );
 }
@@ -301,17 +322,20 @@ async function persistTradition(tid: string): Promise<void> {
         // Still conflicting (a third write raced): adopt the server draft (server-wins) + notice.
         versions.set(tid, retry.conflict.version);
         current = { ...current, traditions: { ...current.traditions, [tid]: parseTraditionReview(retry.conflict.state) } };
-        setStatus({ reconciled: tid, error: null });
+        setStatus({ reconciled: tid, error: null, errorKind: null });
         return;
       }
     }
     versions.set(tid, result.version);
-    setStatus({ error: null, reconciled: null });
+    // Clear only error state — NOT `reconciled`: a reconcile notice (from this save's conflict, or a
+    // load-adopt that just ran) must survive the follow-up save and stay until the reviewer's next edit.
+    setStatus({ error: null, errorKind: null });
   } catch (e) {
+    if (handleAuthError(e)) return;
     // Keep the optimistic state, leave the tradition dirty, and schedule a real retry.
     dirty.add(tid);
     scheduleRetry(tid);
-    setStatus({ error: e instanceof Error ? e.message : "save failed" });
+    setStatus({ error: e instanceof Error ? e.message : "save failed", errorKind: "save" });
   } finally {
     if (dirty.size === 0) setStatus({ saving: false });
   }
@@ -338,9 +362,13 @@ export async function flushReviewSaves(): Promise<void> {
     timers.delete(tid);
     dirty.add(tid);
   }
+  for (const tid of [...pendingDeletes]) {
+    const p = persistDelete(tid).finally(() => inflight.delete(tid));
+    inflight.set(tid, p);
+  }
   for (const tid of [...dirty]) runSave(tid);
   await Promise.all([...inflight.values()]);
-  if (dirty.size === 0) setStatus({ saving: false });
+  if (dirty.size === 0 && pendingDeletes.size === 0) setStatus({ saving: false });
 }
 
 /**
@@ -354,9 +382,47 @@ export function updateReviewState(fn: (s: ReviewState) => ReviewState): void {
   if (status.reconciled !== null) status = { ...status, reconciled: null }; // a fresh edit clears the notice
   const ids = new Set([...Object.keys(prev.traditions), ...Object.keys(current.traditions)]);
   for (const tid of ids) {
-    if (current.traditions[tid] !== prev.traditions[tid]) scheduleSave(tid);
+    const before = prev.traditions[tid];
+    const after = current.traditions[tid];
+    if (after === before) continue;
+    if (after === undefined) scheduleDelete(tid); // "start over" — discard the server draft too
+    else scheduleSave(tid);
   }
   emit();
+}
+
+// --- delete ("start over") ---
+
+async function persistDelete(tid: string): Promise<void> {
+  dirty.delete(tid);
+  try {
+    await deleteDraft(tid);
+    versions.delete(tid);
+    loadState.delete(tid);
+    setStatus({ error: null, errorKind: null });
+  } catch (e) {
+    if (handleAuthError(e)) return;
+    // A failed delete leaves the server draft; retry so "start over" actually sticks.
+    pendingDeletes.add(tid);
+    scheduleRetry(tid);
+    setStatus({ error: e instanceof Error ? e.message : "delete failed", errorKind: "save" });
+  } finally {
+    if (dirty.size === 0 && pendingDeletes.size === 0) setStatus({ saving: false });
+  }
+}
+
+function scheduleDelete(tid: string): void {
+  pendingDeletes.add(tid);
+  // A delete supersedes any queued save for the same tradition.
+  dirty.delete(tid);
+  const timer = timers.get(tid);
+  if (timer) {
+    clearTimeout(timer);
+    timers.delete(tid);
+  }
+  setStatus({ saving: true });
+  const p = persistDelete(tid).finally(() => inflight.delete(tid));
+  inflight.set(tid, p);
 }
 
 /**
@@ -373,17 +439,26 @@ export function ensureTraditionLoaded(tid: string): Promise<boolean> {
     try {
       const draft = await getDraft(tid);
       versions.set(tid, draft.version);
-      // Only adopt the server state if the reviewer hasn't already started editing locally.
-      if (draft.state !== null && current.traditions[tid] === undefined) {
+      if (draft.state !== null) {
+        // Adopt the server draft on the FIRST successful load. If a local entry already exists, the
+        // reviewer edited before this load succeeded (e.g. during a load blip) — that entry sits on a
+        // BLANK base and would overwrite the saved server draft, so adopt the server copy and flag it
+        // reconciled. Once loadState is "ok" this branch never runs again, so genuine post-load edits
+        // are never clobbered.
+        const hadLocal = current.traditions[tid] !== undefined;
         current = { ...current, traditions: { ...current.traditions, [tid]: parseTraditionReview(draft.state) } };
+        setStatus(hadLocal ? { reconciled: tid, error: null, errorKind: null } : { error: null, errorKind: null });
+      } else {
+        // Server has no draft — keep any local work (nothing to lose).
+        setStatus({ error: null, errorKind: null });
       }
       loadState.set(tid, "ok");
-      setStatus({ error: null });
       emit();
       return true;
     } catch (e) {
+      if (handleAuthError(e)) return false;
       loadState.set(tid, "error");
-      setStatus({ error: e instanceof Error ? e.message : "load failed" });
+      setStatus({ error: e instanceof Error ? e.message : "load failed", errorKind: "load" });
       return false;
     } finally {
       loadPromises.delete(tid);
@@ -391,6 +466,35 @@ export function ensureTraditionLoaded(tid: string): Promise<boolean> {
   })();
   loadPromises.set(tid, p);
   return p;
+}
+
+let prefetched = false;
+
+/**
+ * Load ALL of the reviewer's drafts at once (one list call) so the landing page shows real
+ * cross-device progress without opening each tradition. Idempotent per session.
+ */
+export async function prefetchDrafts(): Promise<void> {
+  if (prefetched) return;
+  prefetched = true;
+  try {
+    const drafts = await listDrafts();
+    let next = current;
+    for (const d of drafts) {
+      versions.set(d.traditionId, d.version);
+      loadState.set(d.traditionId, "ok");
+      if (next.traditions[d.traditionId] === undefined && d.state !== null) {
+        next = { ...next, traditions: { ...next.traditions, [d.traditionId]: parseTraditionReview(d.state) } };
+      }
+    }
+    current = next;
+    emit();
+  } catch (e) {
+    prefetched = false; // allow a retry
+    if (!handleAuthError(e)) {
+      setStatus({ error: e instanceof Error ? e.message : "couldn't load your drafts", errorKind: "load" });
+    }
+  }
 }
 
 /** Replace the whole state (JSON import). Marks every tradition dirty so it saves. */
@@ -406,11 +510,13 @@ export function replaceReviewState(next: ReviewState): void {
 /** Test/reset seam: drop the in-memory store (does not touch the server). */
 export function resetReviewStore(): void {
   current = emptyState();
-  status = { auth: "unknown", reviewer: null, saving: false, error: null, reconciled: null };
+  status = { auth: "unknown", reviewer: null, saving: false, error: null, errorKind: null, reconciled: null };
   versions.clear();
   loadState.clear();
   loadPromises.clear();
   dirty.clear();
+  pendingDeletes.clear();
+  prefetched = false;
   for (const t of timers.values()) clearTimeout(t);
   timers.clear();
   for (const t of retryTimers.values()) clearTimeout(t);

@@ -54,9 +54,13 @@ export function ReviewerBadge() {
 export function ReviewSaveStatus() {
   const status = useReviewStatus();
   if (status.error) {
+    const msg =
+      status.errorKind === "load"
+        ? `Couldn't load your saved draft (${status.error}) — retrying.`
+        : `Couldn't save your last change (${status.error}). It stays on this device and will retry.`;
     return (
       <p className="text-xs text-danger" role="status" data-testid="review-save-status">
-        Couldn&rsquo;t save your last change ({status.error}). It stays on this device and will retry.
+        {msg}
       </p>
     );
   }

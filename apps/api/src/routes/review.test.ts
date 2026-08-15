@@ -103,4 +103,37 @@ describe('review drafts', () => {
     const bGet = await app.request('/api/review/sunni-islam', { headers: { Cookie: cookieHeader(jarB) } });
     expect(((await bGet.json()) as any).version).toBe(0);
   });
+
+  it('lists all of the reviewer\'s drafts', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    await put(app, jar, 'sunni-islam', { state: sampleState('a'), version: 0 });
+    await put(app, jar, 'roman-catholic', { state: sampleState('b'), version: 0 });
+    const res = await app.request('/api/review', { headers: { Cookie: cookieHeader(jar) } });
+    const body = (await res.json()) as any;
+    expect(body.drafts.map((d: any) => d.traditionId).sort()).toEqual(['roman-catholic', 'sunni-islam']);
+  });
+
+  it('deletes a draft (start over), idempotently', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    await put(app, jar, 'sunni-islam', { state: sampleState('x'), version: 0 });
+    const del = await app.request('/api/review/sunni-islam', { method: 'DELETE', headers: authed(jar) });
+    expect(del.status).toBe(200);
+    const gone = await app.request('/api/review/sunni-islam', { headers: { Cookie: cookieHeader(jar) } });
+    expect(((await gone.json()) as any).version).toBe(0); // discarded
+    // Deleting again is still a no-op 200.
+    expect((await app.request('/api/review/sunni-islam', { method: 'DELETE', headers: authed(jar) })).status).toBe(200);
+  });
+
+  it('rejects an array state (only objects are valid drafts)', async () => {
+    const app = createApp(await createTestDb(), { allowedOrigins: [], auth });
+    const jar = await signedIn(app);
+    const res = await app.request('/api/review/sunni-islam', {
+      method: 'PUT',
+      headers: authed(jar, json),
+      body: JSON.stringify({ state: [1, 2, 3], version: 0 }),
+    });
+    expect(res.status).toBe(400);
+  });
 });

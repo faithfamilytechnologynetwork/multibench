@@ -1,10 +1,17 @@
+import { useEffect } from "react";
 import { Card } from "@heroui/react";
 import { Link } from "@tanstack/react-router";
 import { ClipboardCheck } from "lucide-react";
 import { useLatestSha, useTraditions } from "../lib/queries";
 import { REF, REPO } from "../lib/constants";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
-import { REVIEW_SAMPLE_SIZE, traditionProgress, useReviewState } from "../lib/review";
+import {
+  prefetchDrafts,
+  REVIEW_SAMPLE_SIZE,
+  traditionProgress,
+  useReviewState,
+  useReviewStatus,
+} from "../lib/review";
 import { ReviewAuthGate, ReviewerBadge } from "../components/ReviewAuthGate";
 import { ReviewProgressBar } from "../components/ReviewProgress";
 import { RateLimitBanner } from "../components/RateLimitBanner";
@@ -20,6 +27,13 @@ export function ReviewIndexPage() {
   const traditionsQ = useTraditions(shaQ.data);
   const traditions = traditionsQ.data;
   const review = useReviewState();
+  const authStatus = useReviewStatus();
+
+  // Once signed in, load ALL drafts at once so this page shows real cross-device progress (not
+  // "not started") for traditions the reviewer already worked on from another device.
+  useEffect(() => {
+    if (authStatus.auth === "in") void prefetchDrafts();
+  }, [authStatus.auth]);
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(traditionsQ.error);
   const otherError = !rl && (shaQ.error || traditionsQ.error);

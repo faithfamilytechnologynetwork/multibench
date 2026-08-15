@@ -93,6 +93,26 @@ export interface DraftEnvelope {
   version: number;
 }
 
+/** All of the reviewer's drafts (for the landing page's cross-device progress). */
+export async function listDrafts(): Promise<Array<{ traditionId: string } & DraftEnvelope>> {
+  const res = await call("/api/review");
+  if (res.status === 401) throw new ReviewApiError(401, "unauthorized");
+  const json = await readJson(res);
+  if (!res.ok) throw new ReviewApiError(res.status, json?.error ?? "list failed");
+  return (json?.drafts ?? []).map((d: any) => ({
+    traditionId: d.traditionId,
+    state: d.state ?? null,
+    version: d.version ?? 0,
+  }));
+}
+
+/** Discard a tradition's draft ("start over"). Idempotent. */
+export async function deleteDraft(traditionId: string): Promise<void> {
+  const res = await call(`/api/review/${encodeURIComponent(traditionId)}`, { method: "DELETE" });
+  if (res.status === 401) throw new ReviewApiError(401, "unauthorized");
+  if (!res.ok) throw new ReviewApiError(res.status, "delete failed");
+}
+
 /** Load a tradition's draft. Absent → {state: null, version: 0}. */
 export async function getDraft(traditionId: string): Promise<DraftEnvelope> {
   const res = await call(`/api/review/${encodeURIComponent(traditionId)}`);
