@@ -124,6 +124,17 @@ Build green, **7/7 tests** (was 6). **REDEPLOYED** — new deploy d767a5e0 Onlin
 CORS line, /api/health 200 {ok,db:up}: fixed prod code live & clean without pglite.
 Committed fix. Rebuttal written. → porch done to re-verify.
 
+## Phase 1 consult iter2 (2026-08-15): codex APPROVE + claude APPROVE. **PHASE 1 COMPLETE** (porch ✓).
+Live: https://multibench-api-production.up.railway.app/api/health → 200 {ok,db:up}. PR not opened yet
+(PR 1 = Phases 1–2 together per plan).
+
+## Phase 2 — BLOCKED on Ben's #85 sign-off (baked precondition)
+Porch advanced to phase_2 (Review schema + email/password auth — opens PR 1). Plan + architect bind:
+**review-schema migration is written ONLY AFTER Ben (@benolio) signs off on the #85 data model.**
+Checked #85: no data-model sign-off from Ben (only Waleed's 2026-08-14 scope-update comment). → HOLDING.
+Notified architect to coordinate Ben's sign-off. NOT writing the migration until then.
+(Note: /compact advisable before phase_2 per porch's phase-boundary reminder.)
+
 ## What this is
 Move multibrowser off runtime GitHub-reading onto a **Postgres serving layer + thin API**
 (new `apps/` member). Git stays source of truth; DB is a rebuildable serving cache. Four tiers:
