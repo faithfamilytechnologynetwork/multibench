@@ -220,3 +220,9 @@ PR body carries the Ben-override note (Waleed owns model, final) per claude's as
 ## OPEN SEQUENCING Q (raised to architect): porch auto-advanced to phase_3 (= PR 2 work) but PR 1 not merged.
 Per plan PR-per-tier: PR2 = Phases 3+4. Need architect direction: (a) pause phase_3 until PR 1 merges then
 branch PR 2 from main, or (b) stack PR 2 branch on PR 1. PAUSING phase_3 pending their call + PR 1 review.
+
+## Sequencing DECIDED (architect): (a) — pause phase_3 until PR 1 merges, then branch PR 2 from origin/main.
+Non-stacked = house style. Architect doing PR #97 integration review now. PAUSED.
+Next actions when unblocked: if PR review requests changes → fix on builder/spir-92; when PR 1 MERGES →
+`git fetch origin main && git checkout -b <pr2-branch> origin/main`, resume phase_3 (persistence swap +
+out-of-sample requirement), phase_4 (submission) → PR 2.
