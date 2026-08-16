@@ -79,22 +79,22 @@ the remaining four PRs are the deferred serving tiers and the deferred review co
     {"id": "phase_2", "title": "Review schema + email/password auth (after Ben sign-off) — opens PR 1"},
     {"id": "phase_3", "title": "Review draft persistence swap (localStorage→API, sync→async, conflict-safe)"},
     {"id": "phase_4", "title": "Review private immutable submission — opens PR 2"},
-    {"id": "phase_5", "title": "DEFERRED: serving schema + ingest/drift infra + /api/version + fingerprint URLs"},
-    {"id": "phase_6", "title": "DEFERRED: results tier ingest (committed-tree-bound)"},
-    {"id": "phase_7", "title": "DEFERRED: results API + SPA swap + provenance display — opens PR 3"},
-    {"id": "phase_8", "title": "DEFERRED: raw tier ingest + retention pruning"},
-    {"id": "phase_9", "title": "DEFERRED: raw API + SPA swap, retire baked bundle — opens PR 4"},
-    {"id": "phase_10", "title": "DEFERRED: corpus tier ingest"},
-    {"id": "phase_11", "title": "DEFERRED: corpus API + SPA swap, delete github.ts (zero GitHub reads) — opens PR 5"},
-    {"id": "phase_12", "title": "DEFERRED: review assignment machinery"},
-    {"id": "phase_13", "title": "DEFERRED: review aggregation + coordinator dashboards — opens PR 6"}
+    {"id": "phase_5", "title": "Topology consolidation: one public origin + same-origin proxy, private API — opens PR 3"},
+    {"id": "phase_6", "title": "PARKED: review assignment machinery"},
+    {"id": "phase_7", "title": "PARKED: review aggregation + coordinator dashboards"}
   ]
 }
 ```
 
+**Scope (Waleed, 2026-08-16):** Spec 92 is the **review system only**. The serving-tier migration
+(former phases 5–11: serving schema/ingest/drift/version/fingerprint URLs, results/raw/corpus tiers,
+`github.ts` deletion) is **OUT OF SCOPE** and removed — its engineering notes are preserved in the
+[Appendix: Future spec material](#appendix-future-spec-material--not-this-project). The review-coordination
+tail (assignment + dashboards, phases 6–7) stays in the plan but **PARKED** until Waleed calls for it.
+
 **PR boundaries**: PR 1 = Phases 1–2 (infra + schema + auth); PR 2 = Phases 3–4 (persistence +
-submission); PR 3 = Phases 5–7 (results); PR 4 = Phases 8–9 (raw); PR 5 = Phases 10–11 (corpus); PR 6
-= Phases 12–13 (review coordination). Each PR branches from the integration branch
+submission); **PR 3 = Phase 5 (topology consolidation)**; the parked coordination phases (6–7) get
+their own PR(s) if/when Waleed unparks them. Each PR branches from the integration branch
 (`git fetch origin main && git checkout -b <branch> origin/main`), recorded with
 `porch done 92 --pr <N> --branch <name>` and `--merged <N>`.
 
@@ -254,6 +254,133 @@ own section**, distinct from the required-sample reviews.
 Unit: immutability guard. Integration: submit → private snapshot; opt-in publish path.
 
 ---
+
+## Phase 5: Topology consolidation — one public origin, private API — opens PR 3
+
+**Dependencies**: Phase 4 (review slice live)
+
+#### Objective
+Collapse the review system onto a **single public origin** (Waleed, 2026-08-16 — the end-state
+topology). Everything lives in the ONE `multibrowser` Railway project: the **multibrowser** service
+(SPA + a small edge server) is the only browser-facing origin and **reverse-proxies `/api/*` over
+Railway's private network** to a **new `multibench-api` service with no public domain**, backed by a
+**new managed Postgres** in the same project. This makes the session cookie **first-party** (no
+third-party-cookie blocking) and takes the API **off the public internet**.
+
+#### Files to Create / Modify
+- `apps/multibrowser/server/index.mjs` — Hono + `@hono/node-server` edge server: static SPA with an
+  `index.html` history fallback, `/api/*` forwarded to `API_ORIGIN` (private), **Set-Cookie passed
+  through verbatim** (session + CSRF stay distinct), streamed bodies.
+- `apps/multibrowser/package.json` — `start` → `node server/index.mjs`; add `hono` + `@hono/node-server`;
+  **drop `serve`**. `apps/multibrowser/.env.example` — `VITE_API_BASE` **empty** (same-origin); document
+  the runtime `API_ORIGIN`.
+- `apps/multibrowser/src/deploy.test.ts` — edge-server smoke: SPA fallback **and** `/api/*` proxy with
+  both Set-Cookie headers surviving.
+- `apps/api/README.md` — one-origin / private-API deploy runbook.
+- **Infra (operational, not code):** a new Postgres + a new `multibench-api` service **inside the
+  `multibrowser` project** (the committed migrations recreate the schema via `preDeployCommand`; the DB
+  starts empty — verified no non-test rows before consolidating). The old `multibench-api` project is
+  left standing for a separate, explicit teardown step (Waleed's call).
+
+#### Deliverables
+- [ ] One public origin; API private-only (no domain); `/api/*` proxied over the private network;
+      `VITE_API_BASE` empty. Edge server + tests; runbook updated. **PR 3 opened.**
+
+#### Acceptance Criteria
+- [ ] Login + draft save + submit work end-to-end through the one origin; the browser never contacts the
+      API host directly, and the API host is not reachable from the public internet.
+- [ ] Build and tests passing.
+
+#### Follow-up cleanup (noted, not blocking)
+- Now that the browser is strictly first-party, simplify the session cookie `SameSite=None → Lax` and
+  shrink CORS. Deferred to keep this PR focused — the current attrs work first-party unchanged.
+
+#### End-state note
+This retires the former "move serving later" item — there is no separate serving-tier topology to move
+to. Full one-container consolidation (SPA + API in a single service) and a custom domain are a possible
+**future** topology decision, out of THIS project's scope.
+
+---
+
+## PARKED — review coordination (unparked on Waleed's call)
+
+### Phase 6: PARKED — review assignment machinery
+
+**Dependencies**: Phase 4 (submission), Phase 2 (schema/auth)
+
+#### Objective
+Add **assignment** with defined status transitions (assigned → in-progress → submitted) and an explicit
+"complete" definition. (Deferred from the bare-minimum slice.)
+
+#### Files to Create / Modify
+- `apps/api/src/schema/review.ts` (assignments table; migration), `src/routes/review.ts` (assignment
+  CRUD + transitions), route tests
+- `apps/multibrowser/src/` assignment view components + tests
+
+#### Deliverables
+- [ ] Assignment lifecycle with enforced transitions + a "complete" definition; tests for this phase
+
+#### Acceptance Criteria
+- [ ] Transition state machine enforced; assignment reflects reviewer progress
+- [ ] Build and tests passing
+
+#### Test Plan
+Unit: transition state machine. Integration: assignment lifecycle end-to-end.
+
+---
+
+### Phase 7: PARKED — review aggregation + coordinator dashboards
+
+**Dependencies**: Phase 6
+
+#### Objective
+Add **aggregation / dashboard** views (per-tradition completion, coordinator aggregates) and ship the
+review coordination features. **Opens PR 6.**
+
+#### Files to Create / Modify
+- `apps/api/src/routes/review.ts` (aggregation endpoints; coordinator-scoped), route tests
+- `apps/multibrowser/src/` review dashboard/aggregation components + tests
+
+#### Deliverables
+- [ ] Aggregation/dashboard reflects submitted reviews; coordinator sees aggregates without authoring
+      another's review; tests for this phase; opened as its own PR when Waleed unparks it
+
+#### Acceptance Criteria
+- [ ] `pnpm -C apps/multibrowser test` + `pnpm -C apps/api test` green; aggregation correctness test passes
+- [ ] Build and tests passing
+
+#### Test Plan
+Unit: aggregation math; coordinator scoping. Integration: submit → aggregation view. Manual: dashboard
+on deployed SPA.
+
+## Risks and Mitigation
+
+| Risk | Probability | Impact | Mitigation |
+|------|-------------|--------|------------|
+| Ben's #85 sign-off delays Phase 2 (schema is gated on it) | Medium | Medium | Phase 1 (scaffold) has no schema dependency and proceeds meanwhile; escalate the sign-off early. |
+| Cross-site cookie blocked by a real browser (Safari/Chrome 3p-cookie policy) | High | High | **Resolved by Phase 5**: one public origin + same-origin `/api/*` proxy makes the cookie first-party; the API has no public domain. |
+| Same-origin proxy mishandles Set-Cookie (folds session + CSRF into one) | Medium | High | Edge server passes Set-Cookie through verbatim via `getSetCookie()`; a deploy-smoke test asserts both cookies survive distinctly. |
+| Invite-code gate is too weak / unwanted | Low | Low | It is one shared env var, flagged for Waleed's veto; trivially removable. |
+| Losing authoritative review data (not rebuildable from git) | Low | Medium | Railway managed-Postgres built-in backups (test-tool scale; no custom restore tooling per the addendum). |
+| Multi-PR-per-project friction with porch's gate model | Medium | Medium | Sequential-PR recipe + `porch done --pr/--merged`; confirm the `pr`-gate × multi-PR mechanics with the architect before Phase 2 opens PR 1. |
+
+## Documentation Updates
+
+- `apps/api/README.md` — service, DB access, migration discipline (`drizzle-kit generate` → review →
+  apply; never `db:push`), auth (email+password, invite-code, sessions, CSRF), a one-line
+  Railway-managed-backups note, and the **one-origin / private-API deploy runbook** (Phase 5).
+- `apps/multibrowser/.env.example` — `VITE_API_BASE` empty (same-origin) + the runtime `API_ORIGIN`
+  proxy target (Phase 5).
+- `codev/resources/arch-critical.md` — replace the review-topology fact with the one-project /
+  same-origin-proxy / private-API shape (via MAINTAIN, after Phase 5 merges).
+
+## Appendix: Future spec material — NOT this project
+
+> **Out of scope for Spec 92** (Waleed, 2026-08-16). The serving-tier migration below was the
+> original core of this project; it is **removed from the active plan** and preserved here only as
+> engineering notes. It assumes the *old* separate-origin topology and would need **re-derivation**
+> against the one-project / private-API topology (Phase 5) before any of it is picked up. Do not treat
+> these as committed phases.
 
 ## DEFERRED — serving tiers (kept in plan, shipped in later PRs, same project)
 
@@ -491,80 +618,3 @@ Unit: corpus fetchers → API; retry analogue; runtime-host guard (allows review
 Integration: corpus over `fakeApi`; full drop-and-rebuild. Manual: full browse, API-only backend.
 
 ---
-
-## DEFERRED — review coordination (last PR)
-
-### Phase 12: DEFERRED — review assignment machinery
-
-**Dependencies**: Phase 4 (submission), Phase 2 (schema/auth)
-
-#### Objective
-Add **assignment** with defined status transitions (assigned → in-progress → submitted) and an explicit
-"complete" definition. (Deferred from the bare-minimum slice.)
-
-#### Files to Create / Modify
-- `apps/api/src/schema/review.ts` (assignments table; migration), `src/routes/review.ts` (assignment
-  CRUD + transitions), route tests
-- `apps/multibrowser/src/` assignment view components + tests
-
-#### Deliverables
-- [ ] Assignment lifecycle with enforced transitions + a "complete" definition; tests for this phase
-
-#### Acceptance Criteria
-- [ ] Transition state machine enforced; assignment reflects reviewer progress
-- [ ] Build and tests passing
-
-#### Test Plan
-Unit: transition state machine. Integration: assignment lifecycle end-to-end.
-
----
-
-### Phase 13: DEFERRED — review aggregation + coordinator dashboards — opens PR 6
-
-**Dependencies**: Phase 12
-
-#### Objective
-Add **aggregation / dashboard** views (per-tradition completion, coordinator aggregates) and ship the
-review coordination features. **Opens PR 6.**
-
-#### Files to Create / Modify
-- `apps/api/src/routes/review.ts` (aggregation endpoints; coordinator-scoped), route tests
-- `apps/multibrowser/src/` review dashboard/aggregation components + tests
-
-#### Deliverables
-- [ ] Aggregation/dashboard reflects submitted reviews; coordinator sees aggregates without authoring
-      another's review; tests for this phase; **PR 6 opened** with Phases 12–13
-
-#### Acceptance Criteria
-- [ ] `pnpm -C apps/multibrowser test` + `pnpm -C apps/api test` green; aggregation correctness test passes
-- [ ] Build and tests passing
-
-#### Test Plan
-Unit: aggregation math; coordinator scoping. Integration: submit → aggregation view. Manual: dashboard
-on deployed SPA.
-
-## Risks and Mitigation
-
-| Risk | Probability | Impact | Mitigation |
-|------|-------------|--------|------------|
-| Ben's #85 sign-off delays Phase 2 (schema is gated on it) | Medium | Medium | Phase 1 (scaffold) has no schema dependency and proceeds meanwhile; escalate the sign-off early. |
-| Cross-site cookie/CORS misconfig between separate Railway origins | Medium | High | `SameSite=None; Secure` + explicit allowed-origin (not wildcard) + credentialed requests; tested in Phase 1/2. |
-| Invite-code gate is too weak / unwanted | Low | Low | It is one shared env var, flagged for Waleed's veto; trivially removable. |
-| Losing authoritative review data (not rebuildable from git) | Low | Medium | Railway managed-Postgres built-in backups (test-tool scale; no custom restore tooling per the addendum). |
-| Deferred serving phases drift from these decisions before they run | Medium | Medium | Decisions retained verbatim in Phases 5–11; iter-1 review fixes preserved. |
-| Deleting `github.ts` breaks unlisted dependents (Phase 11) | Medium | High | Phase 11 lists all: `rateLimit.ts`, `queryClient.ts`, `test/fakeRepo.ts`, github test files, 9 `useLatestSha` sites incl. `RootLayout`. |
-| Unsafe immutable caching on stable URLs (serving tiers) | Medium | High | Fingerprint-qualified content URLs + `immutable`; `/api/version` `no-store` (Phase 5). |
-| Multi-PR-per-project friction with porch's gate model | Medium | Medium | Sequential-PR recipe + `porch done --pr/--merged`; confirm the `pr`-gate × multi-PR mechanics with the architect before Phase 2 opens PR 1. |
-| Cost overrun once serving tiers land | Medium | Medium | Review-only envelope now; re-estimate storage/egress before PR 3 (raw shards, retention). |
-
-## Documentation Updates
-
-- `apps/api/README.md` — service, DB access, migration discipline (`drizzle-kit generate` → review →
-  apply; never `db:push`), auth (email+password, invite-code, sessions, CSRF), a one-line
-  Railway-managed-backups note, CORS/cookie topology. Serving-tier docs (ingest, version, content-URL)
-  added when Phase 5+ lands.
-- `results/README.md`, `results-raw/README.md`, `traditions/README.md` — updated as those tiers cut
-  over (Phases 7, 9, 11).
-- `codev/resources/arch-critical.md` / `lessons-critical.md` — serving-layer fact + retire the two raw
-  dual-source lessons when Phase 9 lands (via MAINTAIN).
-- `apps/multibrowser/.env.example` — `VITE_API_BASE` (review client Phase 3; replaces GitHub knobs by Phase 11).

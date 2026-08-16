@@ -30,8 +30,9 @@ serving tiers are a rebuildable cache, the review store is authoritative operati
 
 Copy `.env.example` → `.env`. Unlike the multibrowser SPA, this service **holds secrets**
 (`DATABASE_URL`); they live in the Railway environment, never in the SPA. `ALLOWED_ORIGINS` is the
-CORS allow-list for credentialed cross-site requests (the SPA origin must be listed for the Phase-2
-session cookie). Never use `*` with credentials.
+CORS allow-list for credentialed requests; it lists the one SPA origin. (Since 2026-08-16 the browser
+reaches this API only through the SPA's same-origin proxy, so CORS is no longer load-bearing — kept
+for defense-in-depth and a possible future direct caller. Never use `*` with credentials.)
 
 ## Endpoints
 
@@ -86,24 +87,48 @@ applied out of band), drop `preDeployCommand` for that release and apply the rev
 Railway (NIXPACKS), `engines.node >= 20`. **Provisioning of the Railway service + Postgres is gated
 on an architect-confirmed cost envelope** (Spec 92 constraint) and is done deliberately, not from CI.
 
-### Deploy ordering (API ↔ SPA) — do it in this order
+### Topology (2026-08-16): one public origin, private API
 
-`/review` is in the SPA's root nav. It only works when the SPA was **built** with `VITE_API_BASE`
-pointing at the API origin (Vite bakes `VITE_*` at build time, not runtime) **and** the API's
-`ALLOWED_ORIGINS` includes the SPA origin (the cross-site session cookie is refused otherwise).
-Deploy the two out of order and `/review` ships as a dead nav item. The correct sequence:
+Both services live in the **`multibrowser` Railway project**. The **multibrowser** service is the
+ONLY browser-facing origin; its edge server (`apps/multibrowser/server/index.mjs`) reverse-proxies
+`/api/*` to **this** API over Railway's **private network**. The API service has **no public domain**
+— it is unreachable from the internet. Consequences:
 
-1. **Set `ALLOWED_ORIGINS` on the API** to include the SPA origin (comma-separated; exact scheme+host,
-   no `*` with credentials). Set on the `multibench-api` Railway service env.
-2. **Deploy the API** so the new allow-list is live *before* any SPA that depends on it.
-3. **Build the SPA with `VITE_API_BASE`** set to the API origin (baked into the bundle at build time).
-4. **`railway up`** the SPA (the multibrowser static site). The nav item is now backed by a reachable,
-   CORS-approved API.
+- The session cookie is **first-party** (browser ↔ one origin), so third-party-cookie blocking never
+  applies. `VITE_API_BASE` is therefore **empty** (same-origin `/api/...`).
+- `ALLOWED_ORIGINS` is still set to the SPA origin and cookies keep `SameSite=None; Secure` **for now**
+  — they work first-party unchanged. Simplifying `SameSite=None → Lax` and shrinking CORS to nothing
+  is a safe follow-up cleanup, deliberately deferred to keep this change focused.
 
-Reverse of teardown: retire the SPA build (or unset `VITE_API_BASE`) before removing the API origin
-from `ALLOWED_ORIGINS`, so a live SPA is never pointed at an API that will refuse its cookie.
+### Services & variables (in the `multibrowser` project)
 
-**Post-deploy completion gate:** verify the cross-site session cookie in a **real Safari and Chrome**
-(SameSite=None + Secure + third-party-cookie handling can't be exercised headlessly). If third-party
-cookie blocking bites, the fix is a shared parent domain (API and SPA as subdomains) or a same-origin
-API proxy — a topology decision, not a code change.
+| Service | Public domain | Key vars |
+|---|---|---|
+| `multibrowser` (edge + SPA) | **yes** (the one origin) | `API_ORIGIN=http://multibench-api.railway.internal:8080`; `VITE_API_BASE` **unset** |
+| `multibench-api` (this) | **no** (private only) | `DATABASE_URL=${{Postgres.DATABASE_URL}}`, `REVIEW_INVITE_CODE`, `ALLOWED_ORIGINS=<SPA origin>`, `PORT=8080` |
+| `Postgres` | no | managed template |
+
+`PORT=8080` is pinned on the API so the edge server's private target
+(`multibench-api.railway.internal:8080`) is deterministic.
+
+### Deploy ordering — do it in this order
+
+1. **Provision** (once): a managed `Postgres` + an empty `multibench-api` service **inside the
+   `multibrowser` project**. Set the API vars above. Do **not** create a public domain for the API
+   (`railway domain` with no subcommand *creates* one — use `railway domain list`).
+2. **Deploy the API** (`railway up` from `apps/api`, targeting the `multibench-api` service). Its
+   `preDeployCommand` migrates the fresh DB. Confirm `railway logs` shows `api listening on :8080` and
+   the 4 tables exist.
+3. **Deploy the edge/SPA** (`railway up` from `apps/multibrowser`, targeting the `multibrowser`
+   service). The build bakes an empty `VITE_API_BASE` (same-origin); the edge server forwards `/api/*`
+   to the private API. No ordering hazard remains — the SPA calls its own origin.
+
+> **`railway up` links per-directory.** The CLI resolves the target project from the working
+> directory's saved link, **not** a global one. Before deploying, `cd` into the app dir and
+> `railway link -p multibrowser -e production -s <service>`, or a stale link silently deploys to the
+> wrong project. Pass `-s <service>` to `railway up` to pin the service.
+
+**Post-deploy completion gate:** verify **login + draft save + submit** through the one public origin
+in a **real Safari and Chrome**, and confirm the API host is **not** reachable from the public
+internet (it has no domain). First-party cookies need no third-party-cookie exception, but a real
+browser is still the final check.
