@@ -342,3 +342,14 @@ opt-in <details> ("also publish to a public GitHub issue" — makes it public, e
 Report: added "## 4. Beyond the assigned sample" out-of-sample commentary section (Waleed's req).
 Tests: API submit/list/immutability/publish/isolation (42); report out-of-sample section; page submit-private.
 api 42 + mb 374 green, types clean. Committed. → signal phase_4 complete → consult. PR 2 opens after approval.
+
+### Phase 4 iter-1 consult — both REQUEST_CHANGES (HIGH), all accepted, FIXED.
+Convergent core: (1) notes-only out-of-sample commentary dropped from report — extras filter gated
+on status!="unreviewed" but rendering uses isAnswered(); fixed to isAnswered() + beyondSample uses
+isCheckAnswered(); notes-only regression test. (2) submit could freeze empty/stale draft pre-load —
+gated buttons on `loaded`, read peekReviewState() AFTER flush, empty-review guard. (3) no provenance
+in snapshot — now {review, provenance:{traditionId,sha,runId}} (opaque JSONB, no schema change).
+(4) publishedIssueUrl dead+unvalidated — capture input + "Submit as published" button; server rejects
+non-github.com with 400. (5) listSubmissions .catch swallowed — now submissionsError notice.
+(6) no confirm before permanent record — window.confirm added.
+types api 0 mb 0; dispatcher api 43 + mb 376 passed. Rebuttal written, committed. → re-signal complete → iter-2 consult.
