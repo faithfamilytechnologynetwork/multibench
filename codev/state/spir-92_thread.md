@@ -353,3 +353,14 @@ in snapshot — now {review, provenance:{traditionId,sha,runId}} (opaque JSONB, 
 non-github.com with 400. (5) listSubmissions .catch swallowed — now submissionsError notice.
 (6) no confirm before permanent record — window.confirm added.
 types api 0 mb 0; dispatcher api 43 + mb 376 passed. Rebuttal written, committed. → re-signal complete → iter-2 consult.
+
+### Phase 4 iter-2 consult — codex REQUEST_CHANGES (1 blocking), claude COMMENT (all iter-1 fixes verified).
+Convergent blocking (codex) / non-blocking (claude): notes-only IN-SAMPLE review was blocked from
+submit — empty-guard used verdict-count `done` while beyondSample uses isCheckAnswered. FIX: added
+content-based `contentful` to ReviewProgress (isCheckAnswered over required sample; `done` stays
+verdict-only for the bar); guard now contentful===0 && beyondSample===0. +unit +page notes-only tests.
+Claude non-blocking, both taken: (a) harness discarded submitted body → now captures full POST body,
+assert frozen.review.source.status + frozen.provenance{traditionId,sha} (envelope nests under review →
+body.review.review.*). (b) publish-path confirm now distinct (spells out public). Kept {review,provenance}
+envelope (opaque JSONB, no consumer till phase 12; test pins shape). types clean; mb 378 passed. Committed 8a724ca.
+Rebuttal (all accepted) written. → re-signal complete → iter-3 consult.
