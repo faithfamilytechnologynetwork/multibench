@@ -439,3 +439,11 @@ useScenarioRaw (the verdict embed) + ReviewTraditionPage SubmitPanel (report/pro
 ResultsPage explorer keeps defaultRunId (global default is correct there). +3 unit tests
 (buddhism-under-protestantism-default regression, null-when-none, skip broken-manifest). types clean;
 mb 383 passing. Small PR Refs #94, architect direct review, Waleed merge word → deploy → re-park.
+
+### Bugfix #94 MERGED (merge commit 1c978ff) + deployed + verified. Re-parked.
+Deployed from apps/multibrowser; new bundle index-BKd-soMW.js live (fix baked in), /api/health 200, /review 200.
+Verified against LIVE results data (the SPA's source): run 20260803 lists [buddhism, eastern-christianity,
+judaism, roman-catholicism, secular-sage, sunni-islam, taoism]; run 20260813-protestantism lists [protestantism]
+only. So runIdForTradition → buddhism resolves to 20260803 (record run, no red error), protestantism to
+20260813-protestantism (own run) — exactly the expected outcome. In-browser visual render is Waleed's real-browser
+check. Closing #94 is the architect's. Project 92 RE-PARKED: phases 1-5 done, 6-7 dormant.
