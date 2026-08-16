@@ -107,6 +107,9 @@ describe("review store — async persistence", () => {
     expect(api.store.get("t")?.version).toBe(3);
     // The active device's edit survived the reconcile.
     expect((api.store.get("t")?.state as any).scenarios["S-1"].scenario.status).toBe("flagged");
+    // LWW is the design, but it must not be silent: even the SUCCESSFUL single retry (which overwrote
+    // the other device's draft) raises the reconcile notice, not only the double-conflict server-wins path.
+    expect(peekReviewStatus().reconciled).toBe("t");
   });
 
   it("does NOT overwrite a saved server draft when the initial load fails", async () => {
@@ -379,6 +382,43 @@ describe("review store — async persistence", () => {
     expect(peekReviewState().traditions.t?.sampleIds).toEqual(["S-9"]);
     expect(peekReviewState().traditions.t?.scenarios["S-1"]).toBeUndefined(); // blip edit discarded
     expect(peekReviewStatus().reconciled).toBe("t");
+  });
+
+  it("prefetchDrafts SKIPS a tradition already loaded via its own GET (no clobber of post-load edits)", async () => {
+    // The race: a tradition's GET resolves first (loadState "ok"), the reviewer edits, then the slower
+    // LIST resolves. It must not re-adopt the server copy over the edit, nor overwrite the live version.
+    const server = { source: { status: "approved", notes: "SERVER" }, sampleIds: ["S-1"], scenarios: {} };
+    const json = (o: unknown, s = 200) => new Response(JSON.stringify(o), { status: s });
+    let releaseList!: () => void;
+    const listGate = new Promise<void>((r) => (releaseList = r));
+    setReviewFetch((async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = new URL(String(input), "http://x").pathname;
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (path === "/api/review") {
+        await listGate; // the LIST lands AFTER the fast GET + the reviewer's edit
+        return json({ drafts: [{ traditionId: "t", state: server, version: 5 }] });
+      }
+      if (method === "GET") return json({ state: server, version: 5 }); // fast per-tradition load
+      if (method === "PUT") return json({ version: 6 });
+      return json({}, 404);
+    }) as unknown as typeof fetch);
+
+    // 1) The tradition loads via its own GET → loadState "ok", version 5.
+    expect(await ensureTraditionLoaded("t")).toBe(true);
+    expect(peekVersion("t")).toBe(5);
+    // 2) The prefetch is in flight but parked on the list gate.
+    const pf = prefetchDrafts();
+    // 3) The reviewer makes a genuine post-load edit.
+    updateReviewState((s) => withTraditionCheck(s, "t", "source", { status: "flagged", notes: "MY EDIT" }));
+    // 4) Now the slow LIST resolves — it must skip "t" entirely.
+    releaseList();
+    await pf;
+
+    expect(peekReviewState().traditions.t?.source.notes).toBe("MY EDIT"); // edit preserved, not clobbered
+    expect(peekReviewState().traditions.t?.source.status).toBe("flagged");
+    expect(peekVersion("t")).toBe(5); // version NOT overwritten by the LIST
+    expect(peekReviewStatus().reconciled).toBeNull(); // and no spurious "reconciled" notice
   });
 
   it("loads an existing draft from the API tolerantly", async () => {

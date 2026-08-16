@@ -85,3 +85,25 @@ applied out of band), drop `preDeployCommand` for that release and apply the rev
 
 Railway (NIXPACKS), `engines.node >= 20`. **Provisioning of the Railway service + Postgres is gated
 on an architect-confirmed cost envelope** (Spec 92 constraint) and is done deliberately, not from CI.
+
+### Deploy ordering (API ↔ SPA) — do it in this order
+
+`/review` is in the SPA's root nav. It only works when the SPA was **built** with `VITE_API_BASE`
+pointing at the API origin (Vite bakes `VITE_*` at build time, not runtime) **and** the API's
+`ALLOWED_ORIGINS` includes the SPA origin (the cross-site session cookie is refused otherwise).
+Deploy the two out of order and `/review` ships as a dead nav item. The correct sequence:
+
+1. **Set `ALLOWED_ORIGINS` on the API** to include the SPA origin (comma-separated; exact scheme+host,
+   no `*` with credentials). Set on the `multibench-api` Railway service env.
+2. **Deploy the API** so the new allow-list is live *before* any SPA that depends on it.
+3. **Build the SPA with `VITE_API_BASE`** set to the API origin (baked into the bundle at build time).
+4. **`railway up`** the SPA (the multibrowser static site). The nav item is now backed by a reachable,
+   CORS-approved API.
+
+Reverse of teardown: retire the SPA build (or unset `VITE_API_BASE`) before removing the API origin
+from `ALLOWED_ORIGINS`, so a live SPA is never pointed at an API that will refuse its cookie.
+
+**Post-deploy completion gate:** verify the cross-site session cookie in a **real Safari and Chrome**
+(SameSite=None + Secure + third-party-cookie handling can't be exercised headlessly). If third-party
+cookie blocking bites, the fix is a shared parent domain (API and SPA as subdomains) or a same-origin
+API proxy — a topology decision, not a code change.

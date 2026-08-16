@@ -167,6 +167,7 @@ function ReviewTraditionPageInner() {
           onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "source", patch))}
           editUrl={editFileUrl(REPO, REF, `${base}/${FILE.source}`)}
           testId="review-check-source"
+          disabled={!loaded}
         />
       </section>
 
@@ -188,6 +189,7 @@ function ReviewTraditionPageInner() {
           onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "guide", patch))}
           editUrl={editFileUrl(REPO, REF, `${base}/${FILE.guide}`)}
           testId="review-check-guide"
+          disabled={!loaded}
         />
       </section>
 
@@ -228,7 +230,7 @@ function ReviewTraditionPageInner() {
                   type="button"
                   aria-label={`Remove ${sid} from your sample`}
                   title="Remove from your sample"
-                  disabled={sampleIds.length <= 1}
+                  disabled={!loaded || sampleIds.length <= 1}
                   onClick={() =>
                     updateReviewState((s) =>
                       withSample(s, traditionId, sampleIds.filter((x) => x !== sid), mine?.sampleSeed ?? ""))}
@@ -252,6 +254,7 @@ function ReviewTraditionPageInner() {
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <button
             type="button"
+            disabled={!loaded}
             onClick={() => {
               // Reshuffle draws a new sample; checks on scenarios that fall out become unreachable
               // and drop from the report. Confirm before discarding completed work — mirroring
@@ -267,7 +270,7 @@ function ReviewTraditionPageInner() {
               const seed = Math.random().toString(36).slice(2, 8);
               updateReviewState((s) => withSample(s, traditionId, seededSample(scenarioIds, REVIEW_SAMPLE_SIZE, seed), seed));
             }}
-            className="flex items-center gap-1 rounded border border-default-200 px-3 py-1 text-default-600 hover:border-default-300"
+            className="flex items-center gap-1 rounded border border-default-200 px-3 py-1 text-default-600 hover:border-default-300 disabled:opacity-40"
           >
             <Shuffle size={14} aria-hidden /> Reshuffle sample
           </button>
@@ -277,13 +280,14 @@ function ReviewTraditionPageInner() {
               <select
                 value=""
                 aria-label="Add a specific scenario"
+                disabled={!loaded}
                 onChange={(e) => {
                   const sid = e.target.value;
                   if (!sid) return;
                   const next = [...sampleIds, sid].sort((a, b) => scenarioIds.indexOf(a) - scenarioIds.indexOf(b));
                   updateReviewState((s) => withSample(s, traditionId, next, mine?.sampleSeed ?? ""));
                 }}
-                className="rounded border border-default-200 px-2 py-1 text-sm text-default-800"
+                className="rounded border border-default-200 px-2 py-1 text-sm text-default-800 disabled:opacity-40"
               >
                 <option value="">choose…</option>
                 {unsampled.map((id) => <option key={id} value={id}>{id}</option>)}
@@ -491,11 +495,14 @@ function SubmitPanel({ traditionId, displayName, sha, runId, loaded }: {
           className="flex items-center gap-1 hover:text-default-700">
           <Download size={12} aria-hidden /> Back up all my reviews (JSON)
         </button>
-        <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1 hover:text-default-700">
+        {/* Restore overwrites the whole review; gate it until the server draft has loaded, or a
+            restore-onto-blank-base would be clobbered when the load resolves (same hazard as editing). */}
+        <button type="button" disabled={!loaded} onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-1 hover:text-default-700 disabled:opacity-40">
           <Upload size={12} aria-hidden /> Restore from backup
         </button>
         <input ref={fileRef} type="file" accept="application/json,.json" className="hidden"
-          aria-label="Restore review backup"
+          aria-label="Restore review backup" disabled={!loaded}
           onChange={(e) => void onImport(e.target.files?.[0])} />
         <button type="button"
           onClick={() => {

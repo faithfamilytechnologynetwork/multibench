@@ -246,6 +246,42 @@ describe("tradition review workspace (/review/$traditionId)", () => {
     confirmSpy.mockRestore();
   });
 
+  it("disables review inputs until the saved draft finishes loading", async () => {
+    // Gate the per-tradition draft GET so we can observe the pre-load window. Inputs must be inert
+    // until loadState is "ok" — an edit on the blank base would be discarded when the draft is adopted.
+    const gh = fakeFetch(REPO, SHA, traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
+    const reviewer = { id: "r1", email: "rev@example.com", name: "Imam Test", background: "" };
+    const json = (o: unknown, s = 200) =>
+      new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json" } });
+    let releaseGet!: () => void;
+    const getGate = new Promise<void>((r) => (releaseGet = r));
+    const impl = (async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> => {
+      const path = new URL(String(input), "http://x").pathname;
+      if (!path.startsWith("/api/")) return gh(input as never, init);
+      const method = init?.method ?? "GET";
+      if (path === "/api/auth/csrf") return json({ csrfToken: "t" });
+      if (path === "/api/auth/me") return json({ reviewer });
+      if (path === "/api/review") return json({ drafts: [] });
+      if (method === "GET") {
+        await getGate; // hold the draft load
+        return json({ state: null, version: 0 });
+      }
+      return json({ ok: true });
+    }) as typeof fetch;
+    vi.stubGlobal("fetch", impl);
+    renderApp("/review/sunni-islam");
+
+    const sourceCheck = await screen.findByTestId("review-check-source");
+    // Draft still loading → the verdict button and notes are disabled.
+    expect(within(sourceCheck).getByRole("button", { name: /looks right/i })).toBeDisabled();
+    expect(within(sourceCheck).getByRole("textbox", { name: /notes/i })).toBeDisabled();
+
+    releaseGet(); // load resolves → loadState "ok"
+    await waitFor(() =>
+      expect(within(sourceCheck).getByRole("button", { name: /looks right/i })).toBeEnabled(),
+    );
+  });
+
   it("blocks submitting an empty review", async () => {
     const h = harness(traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
     renderApp("/review/sunni-islam");

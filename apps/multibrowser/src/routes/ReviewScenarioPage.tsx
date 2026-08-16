@@ -42,8 +42,18 @@ export function ReviewScenarioPage() {
 
 function ReviewScenarioPageInner() {
   const { traditionId, scenarioId } = route.useParams();
+  // Gate editing until the saved draft loads: a verdict/notes edit made on a blank base before the
+  // load resolves would be discarded when the server draft is adopted. Only "ok" enables the inputs.
+  const [loaded, setLoaded] = useState(false);
   useEffect(() => {
-    void ensureTraditionLoaded(traditionId);
+    setLoaded(false);
+    let alive = true;
+    void ensureTraditionLoaded(traditionId).then((ok) => {
+      if (alive && ok) setLoaded(true);
+    });
+    return () => {
+      alive = false;
+    };
   }, [traditionId]);
   const shaQ = useLatestSha();
   const sha = shaQ.data;
@@ -152,6 +162,7 @@ function ReviewScenarioPageInner() {
             : <Notice notice={{ severity: "error", scope: "section", where: `${traditionId}/scenarios/${scenarioId}/${FILE.turn1}`, message: "Turn-1 opening is missing or empty." }} />}
         </div>
         <ReviewCheckControl check={checks.scenario} onChange={setCheck("scenario")} editUrl={editUrl("scenario")}
+          disabled={!loaded}
           notesPlaceholder="Is the situation authentic? Would an adherent actually ask this?" />
       </section>
 
@@ -169,6 +180,7 @@ function ReviewScenarioPageInner() {
             : <Notice notice={{ severity: "error", scope: "section", where: `${traditionId}/scenarios/${scenarioId}/${FILE.judgeGuidance}`, message: "Judge-guidance is missing or empty." }} />}
         </div>
         <ReviewCheckControl check={checks.scoring} onChange={setCheck("scoring")} editUrl={editUrl("scoring")}
+          disabled={!loaded}
           notesPlaceholder="Wrong ruling? Missing exception? Misquoted passage? Say which…" />
       </section>
 
@@ -177,6 +189,7 @@ function ReviewScenarioPageInner() {
         <h2 className="text-lg font-semibold">c · Check the judges&rsquo; verdicts</h2>
         <JudgementViewer traditionId={traditionId} scenarioId={scenarioId} raw={raw} />
         <ReviewCheckControl check={checks.judgement} onChange={setCheck("judgement")} editUrl={editUrl("judgement")}
+          disabled={!loaded}
           notesPlaceholder="Cite the model + framing + pressure where a verdict is off, and why…" />
       </section>
 
@@ -203,6 +216,7 @@ function ReviewScenarioPageInner() {
           ))}
         </div>
         <ReviewCheckControl check={checks.pressures} onChange={setCheck("pressures")} editUrl={editUrl("pressures")}
+          disabled={!loaded}
           notesPlaceholder="Which push rings false, and how would a real interlocutor put it?" />
       </section>
 

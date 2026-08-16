@@ -7,7 +7,6 @@ import {
   parseReviewState,
   seededSample,
   traditionProgress,
-  withReviewer,
   withSample,
   withScenarioCheck,
   withTraditionCheck,
@@ -66,7 +65,8 @@ describe("parseReviewState (tolerant persistence)", () => {
 
   it("round-trips a real state", () => {
     let s: ReviewState = emptyState();
-    s = withReviewer(s, { name: "Imam Test", contact: "t@example.com", background: "scholar" });
+    // Reviewer identity comes from the account in production; seed it directly for the round-trip.
+    s = { ...s, reviewer: { name: "Imam Test", contact: "t@example.com", background: "scholar" } };
     s = withSample(s, "sunni-islam", ["JLS-001", "JLS-002"], "seed1");
     s = withTraditionCheck(s, "sunni-islam", "guide", { status: "approved", notes: "sound" });
     s = withScenarioCheck(s, "sunni-islam", "JLS-001", "scoring", {

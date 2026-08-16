@@ -13,7 +13,6 @@ import {
 import {
   REVIEW_SAMPLE_SIZE,
   emptyState,
-  withReviewer,
   withSample,
   withScenarioCheck,
   withTraditionCheck,
@@ -24,7 +23,8 @@ const REPO = "owner/repo";
 
 function sampleState(): ReviewState {
   let s = emptyState();
-  s = withReviewer(s, { name: "Rev. Example", contact: "rev@example.com", background: "pastor, 20 years" });
+  // Reviewer identity comes from the account in production; seed it directly for the report fixture.
+  s = { ...s, reviewer: { name: "Rev. Example", contact: "rev@example.com", background: "pastor, 20 years" } };
   s = withSample(s, "sunni-islam", ["JLS-001", "JLS-050"], "seed42");
   s = withTraditionCheck(s, "sunni-islam", "source", { status: "approved", notes: "right choice of text" });
   s = withTraditionCheck(s, "sunni-islam", "guide", { status: "flagged", suggestion: "Add the exit-ramp principle" });

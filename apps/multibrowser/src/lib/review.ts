@@ -332,6 +332,9 @@ async function persistTradition(tid: string): Promise<void> {
       const retry = await putDraft(tid, current.traditions[tid] ?? t2, version);
       if (retry.ok) {
         result = retry;
+        // LWW: we just overwrote another device's draft. That is the adjudicated design — but it must
+        // not be silent. Surface the reconcile notice (survives the error-clear below; cleared on next edit).
+        setStatus({ reconciled: tid, error: null, errorKind: null });
       } else {
         // Still conflicting (a third write raced): adopt the server draft (server-wins) + notice.
         versions.set(tid, retry.conflict.version);
@@ -498,6 +501,10 @@ export async function prefetchDrafts(): Promise<void> {
     let next = current;
     let reconciledTid: string | null = null;
     for (const d of drafts) {
+      // A tradition already loaded via its own GET is owned by that live path: the reviewer may have
+      // edited since. Re-adopting the LIST copy (or even just overwriting `version`) would clobber
+      // those post-load edits when the slower LIST resolves after a fast GET. Skip it entirely.
+      if (loadState.get(d.traditionId) === "ok") continue;
       versions.set(d.traditionId, d.version);
       loadState.set(d.traditionId, "ok");
       if (d.state !== null) {
@@ -616,10 +623,6 @@ export async function logoutReview(): Promise<void> {
 
 function traditionOf(s: ReviewState, tid: string): TraditionReview {
   return s.traditions[tid] ?? emptyTradition();
-}
-
-export function withReviewer(s: ReviewState, patch: Partial<ReviewerInfo>): ReviewState {
-  return { ...s, reviewer: { ...s.reviewer, ...patch } };
 }
 
 /** Set a tradition's assigned sample (initial draw, reshuffle, add/remove). */
