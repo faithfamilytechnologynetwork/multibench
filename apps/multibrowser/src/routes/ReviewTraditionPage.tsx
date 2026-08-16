@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ClipboardCheck, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
-import { useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
+import { runIdForTradition, useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
 import { FILE, REF, REPO } from "../lib/constants";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -318,7 +318,7 @@ function ReviewTraditionPageInner() {
         </div>
       </section>
 
-      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runsQ.data?.defaultRunId ?? null} loaded={loaded} />
+      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runIdForTradition(runsQ.data?.runs ?? [], traditionId)} loaded={loaded} />
     </div>
   );
 }
