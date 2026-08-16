@@ -15,9 +15,12 @@ plan_phases:
   - id: phase_4
     title: Review private immutable submission — opens PR 2
     status: complete
+  # phase_5 completed via merged PR #101 (direct architect review, no per-phase consult — same
+  # out-of-loop path as PRs #97/#99; Waleed gave the merge word 2026-08-16). Live-verified end-to-end
+  # through the one public origin. PARKED here: phases 6-7 are dormant until Waleed unparks them.
   - id: phase_5
     title: Topology consolidation — one public origin, private API — opens PR 3
-    status: in_progress
+    status: complete
   - id: phase_6
     title: 'PARKED: review assignment machinery'
     status: pending
@@ -174,7 +177,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_4-iter2-claude.txt
 started_at: '2026-08-14T05:11:39.030Z'
-updated_at: '2026-08-16T03:38:13.565Z'
+updated_at: '2026-08-16T04:57:19.150Z'
 force_advanced:
   phase: phase_3
   iteration: 3
@@ -194,3 +197,5 @@ pr_history:
     pr_number: 101
     branch: builder/spir-92-proxy
     created_at: '2026-08-16T03:38:13.564Z'
+    merged: true
+    merged_at: '2026-08-16T04:57:19.150Z'
