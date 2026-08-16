@@ -351,11 +351,18 @@ function SubmitPanel({ traditionId, displayName, sha, runId, loaded }: {
     await flushReviewSaves(); // persist the latest edits, then read the freshest state
     const t = peekReviewState().traditions[traditionId] ?? emptyTradition();
     const progress = traditionProgress(t);
-    if (progress.done === 0 && progress.beyondSample === 0) {
+    // "Empty" = no content anywhere: no verdict AND no notes/suggestion, in-sample or beyond. Use the
+    // content-based `contentful` (not `done`, which counts only verdicts) so a notes-only review — which
+    // the report DOES render — can still be submitted.
+    if (progress.contentful === 0 && progress.beyondSample === 0) {
       setSubmitError("Nothing to submit yet — review at least one check first.");
       return;
     }
-    if (!window.confirm("Submit this review? A permanent, unchangeable snapshot is saved to your account.")) return;
+    const publishing = !!publishedIssueUrl;
+    const confirmMsg = publishing
+      ? "Submit AND record a public GitHub issue link? A permanent, unchangeable snapshot is saved, and this marks the review as published (your name and contact become public)."
+      : "Submit this review? A permanent, unchangeable snapshot is saved privately to your account.";
+    if (!window.confirm(confirmMsg)) return;
     setSubmitting(true);
     setSubmitError(null);
     try {

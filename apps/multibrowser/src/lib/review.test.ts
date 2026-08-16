@@ -109,7 +109,7 @@ describe("state updaters", () => {
 
 describe("traditionProgress", () => {
   it("is empty for an unopened tradition", () => {
-    expect(traditionProgress(undefined)).toEqual({ done: 0, total: 0, flagged: 0, beyondSample: 0 });
+    expect(traditionProgress(undefined)).toEqual({ done: 0, contentful: 0, total: 0, flagged: 0, beyondSample: 0 });
   });
 
   it("counts source + guide + four checks per sampled scenario; flags counted separately", () => {
@@ -123,10 +123,18 @@ describe("traditionProgress", () => {
     expect(p.flagged).toBe(1);
   });
 
+  it("counts notes-only checks as `contentful` (not `done`), so a review with no verdict isn't 'empty'", () => {
+    let s = withSample(emptyState(), "t", ["S-1"], "");
+    s = withTraditionCheck(s, "t", "source", { notes: "wrong base text" }); // notes, no verdict
+    const p = traditionProgress(s.traditions.t);
+    expect(p.done).toBe(0); // completion bar counts only verdicts
+    expect(p.contentful).toBe(1); // but there IS content to submit
+  });
+
   it("an unsampled scenario's stray checks don't count toward the sample's progress", () => {
     let s = withSample(emptyState(), "t", ["S-1"], "");
     s = withScenarioCheck(s, "t", "S-99", "scenario", { status: "approved" });
-    expect(traditionProgress(s.traditions.t)).toEqual({ done: 0, total: 6, flagged: 0, beyondSample: 1 });
+    expect(traditionProgress(s.traditions.t)).toEqual({ done: 0, contentful: 0, total: 6, flagged: 0, beyondSample: 1 });
   });
 
   it("scenarioChecks default shape covers all four keys", () => {

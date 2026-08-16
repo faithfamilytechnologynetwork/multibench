@@ -731,6 +731,12 @@ export function seededSample(ids: string[], n: number, seed: string): string[] {
 export interface ReviewProgress {
   /** Checks answered (any non-"unreviewed" status) within the REQUIRED sample. */
   done: number;
+  /**
+   * Required-sample checks carrying ANY content — a verdict OR notes/suggestion (matches what the
+   * report renders). `done` counts only verdicts (for the completion bar); `contentful` also counts
+   * notes-only checks, so a notes-only review is recognized as real content, not "empty".
+   */
+  contentful: number;
   /** Total answerable checks in the required sample: source + guide + 4 per sampled scenario. */
   total: number;
   /** How many answered checks (required sample) are flagged "needs changes". */
@@ -745,7 +751,7 @@ export function isCheckAnswered(c: CheckReview): boolean {
 }
 
 export function traditionProgress(t: TraditionReview | undefined): ReviewProgress {
-  if (!t) return { done: 0, total: 0, flagged: 0, beyondSample: 0 };
+  if (!t) return { done: 0, contentful: 0, total: 0, flagged: 0, beyondSample: 0 };
   const checks: CheckReview[] = [t.source, t.guide];
   for (const sid of t.sampleIds) {
     const sc = t.scenarios[sid] ?? emptyScenarioChecks();
@@ -758,6 +764,7 @@ export function traditionProgress(t: TraditionReview | undefined): ReviewProgres
   ).length;
   return {
     done: answered.length,
+    contentful: checks.filter(isCheckAnswered).length,
     total: checks.length,
     flagged: answered.filter((c) => c.status === "flagged").length,
     beyondSample,

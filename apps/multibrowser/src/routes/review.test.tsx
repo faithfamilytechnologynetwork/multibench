@@ -21,7 +21,13 @@ type Draft = { state: unknown; version: number };
 function harness(files: ReturnType<typeof traditionFiles>) {
   const gh = fakeFetch(REPO, SHA, files);
   const drafts = new Map<string, Draft>();
-  const submissions: Array<{ traditionId: string; id: string; submittedAt: string; publishedIssueUrl: string | null }> = [];
+  const submissions: Array<{
+    traditionId: string;
+    id: string;
+    submittedAt: string;
+    publishedIssueUrl: string | null;
+    body: any; // the full submitted payload {review, provenance} — so tests can guard answers + provenance
+  }> = [];
   const reviewer = { id: "r1", email: "rev@example.com", name: "Imam Test", background: "" };
   const json = (o: unknown, s = 200) =>
     new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json" } });
@@ -41,7 +47,7 @@ function harness(files: ReturnType<typeof traditionFiles>) {
       const tid = decodeURIComponent(submitMatch[1]!);
       const b = JSON.parse(String(init?.body ?? "{}"));
       const meta = { id: `sub-${submissions.length + 1}`, submittedAt: "2026-08-15T12:00:00Z", publishedIssueUrl: b.publishedIssueUrl ?? null };
-      submissions.push({ traditionId: tid, ...meta });
+      submissions.push({ traditionId: tid, ...meta, body: b });
       return json({ submission: meta }, 201);
     }
     const listMatch = path.match(/^\/api\/review\/([^/]+)\/submissions$/);
@@ -214,6 +220,29 @@ describe("tradition review workspace (/review/$traditionId)", () => {
     expect(confirmSpy).toHaveBeenCalled();
     expect(h.submissions).toHaveLength(1);
     expect(h.submissions[0]!.publishedIssueUrl).toBeNull(); // private by default
+    // The frozen snapshot carries the reviewer's ACTUAL answers, not emptyTradition() — and provenance.
+    // The immutable record is the envelope {review, provenance}; the HTTP layer nests it under `review`.
+    const frozen = h.submissions[0]!.body.review;
+    expect(frozen.review.source.status).toBe("approved");
+    expect(frozen.provenance).toMatchObject({ traditionId: "sunni-islam", sha: SHA });
+    confirmSpy.mockRestore();
+  });
+
+  it("submits a notes-only in-sample review (no verdict clicked)", async () => {
+    // Regression: the empty-guard once used verdict-count `done`, which blocked a review that had
+    // only typed notes (and no verdict) — even though those notes render in the report. Content, not
+    // verdicts, decides whether there's something to submit.
+    const h = harness(traditionFiles("sunni-islam", ["JLS-001", "JLS-002"]));
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    renderApp("/review/sunni-islam");
+    const sourceCheck = await screen.findByTestId("review-check-source");
+    await userEvent.type(within(sourceCheck).getByRole("textbox", { name: /notes/i }), "wrong base text");
+
+    const submit = await screen.findByTestId("review-submit");
+    await userEvent.click(within(submit).getByTestId("review-submit-private"));
+    await waitFor(() => expect(within(submit).getByTestId("review-submitted")).toBeInTheDocument());
+    expect(h.submissions).toHaveLength(1);
+    expect(h.submissions[0]!.body.review.review.source.notes).toBe("wrong base text");
     confirmSpy.mockRestore();
   });
 
