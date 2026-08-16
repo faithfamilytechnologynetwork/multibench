@@ -364,3 +364,13 @@ assert frozen.review.source.status + frozen.provenance{traditionId,sha} (envelop
 body.review.review.*). (b) publish-path confirm now distinct (spells out public). Kept {review,provenance}
 envelope (opaque JSONB, no consumer till phase 12; test pins shape). types clean; mb 378 passed. Committed 8a724ca.
 Rebuttal (all accepted) written. → re-signal complete → iter-3 consult.
+
+### Phase 4 APPROVED (iter-3: codex APPROVE, claude APPROVE) → PR 2 opened.
+Both unanimous approve at iter-3. Porch committed phase_4 and auto-advanced to phase_5.
+Opened **PR #99** (Phases 3+4: review draft persistence + private immutable submission), branched fresh
+from main (non-stacked). Recorded via `porch done 92 --pr 99 --branch builder/spir-92-pr2`.
+PR body carries the last-write-wins design decision (for the integration CMAP) + the outstanding
+real-browser Safari/Chrome cross-site cookie completion gate (needs deploy + ALLOWED_ORIGINS).
+**PARKED:** phase_5+ (serving schema + ingest/results/raw/corpus tiers, phases 5-13) are DEFERRED —
+plan says "scheduled when the architect greenlights the serving migration." NOT implementing phase_5.
+Awaiting: (1) PR #99 review/merge, (2) architect greenlight for the serving migration.
