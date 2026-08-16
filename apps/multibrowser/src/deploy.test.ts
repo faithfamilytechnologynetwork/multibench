@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { execSync, spawn } from "node:child_process";
 import { createServer } from "node:net";
+import { createServer as createHttpServer } from "node:http";
 
 /**
  * Acquire a free ephemeral port (OS-assigned via bind 0) to run the smoke server on. A FIXED
@@ -122,21 +123,36 @@ describe("build / deploy invariants", () => {
     expect(readFileSync(".gitignore", "utf8")).toMatch(/public\/data-raw\//);
   });
 
-  it("the start command uses serve -s dist (SPA fallback) with serve as a RUNTIME dep", () => {
+  it("the start command runs the same-origin edge server (proxy + SPA fallback) with its deps present", () => {
     const pkg = JSON.parse(readFileSync("package.json", "utf8")) as {
       scripts: Record<string, string>;
       dependencies: Record<string, string>;
     };
-    expect(pkg.scripts.start).toMatch(/serve\s+-s\s+dist/);
-    expect(pkg.dependencies.serve).toBeDefined();
+    // The edge server (server/index.mjs) reverse-proxies /api/* AND serves the SPA — it replaced the
+    // old `serve -s dist` static host so the API can live private-only behind one public origin.
+    expect(pkg.scripts.start).toBe("node server/index.mjs");
+    expect(pkg.dependencies.hono).toBeDefined();
+    expect(pkg.dependencies["@hono/node-server"]).toBeDefined();
+    expect(pkg.dependencies.serve, "serve is retired — the edge server replaces it").toBeUndefined();
+    expect(existsSync("server/index.mjs")).toBe(true);
   });
 
-  it("REAL smoke: the static server returns index.html for a nested deep link (SPA fallback)", async () => {
+  it("REAL smoke: the edge server serves the SPA fallback AND proxies /api/* with Set-Cookie verbatim", async () => {
+    // A stand-in upstream API: echoes the path/method and sets TWO cookies (session + CSRF), the exact
+    // shape login returns — so we prove BOTH survive the proxy distinctly, the classic folding bug.
+    const upstream = createHttpServer((req, res) => {
+      res.setHeader("content-type", "application/json");
+      res.setHeader("set-cookie", ["mb_session=s3ss; HttpOnly; Path=/", "mb_csrf=c5rf; Path=/"]);
+      res.end(JSON.stringify({ ok: true, method: req.method, path: req.url }));
+    });
+    const apiPort = await getFreePort();
+    await new Promise<void>((r) => upstream.listen(apiPort, "127.0.0.1", r));
+
     const port = await getFreePort(); // ephemeral — safe under concurrent builders
-    // Run the actual `start` command (serve -s dist) on a test port. `detached` makes the child
-    // a process-group leader so we can reap the whole tree (serve is a grandchild of pnpm).
+    // Run the ACTUAL `start` command (the edge server) with the proxy target pointed at our stub.
+    // `detached` makes the child a process-group leader so we can reap the whole tree.
     const server = spawn("pnpm", ["start"], {
-      env: { ...process.env, PORT: String(port) },
+      env: { ...process.env, PORT: String(port), API_ORIGIN: `http://127.0.0.1:${apiPort}` },
       stdio: "ignore",
       detached: true,
     });
@@ -151,21 +167,31 @@ describe("build / deploy invariants", () => {
         }
         if (!ready) await new Promise((res) => setTimeout(res, 250));
       }
-      expect(ready, "static server did not start").toBe(true);
+      expect(ready, "edge server did not start").toBe(true);
 
       // A nested route that is NOT a real file must fall back to index.html (the SPA shell).
       const deep = await fetch(`http://localhost:${port}/t/sunni-islam/JLS-001`);
       expect(deep.status).toBe(200);
       expect(await deep.text()).toContain('id="root"');
+
+      // /api/* is reverse-proxied to the upstream, and BOTH Set-Cookie headers pass through verbatim.
+      const api = await fetch(`http://localhost:${port}/api/anything?x=1`, { redirect: "manual" });
+      expect(api.status).toBe(200);
+      const body = (await api.json()) as { ok: boolean; path: string };
+      expect(body.ok).toBe(true);
+      expect(body.path).toBe("/api/anything?x=1"); // path + query forwarded intact
+      const cookies = api.headers.getSetCookie();
+      expect(cookies).toHaveLength(2); // session AND csrf survive distinctly (no folding)
+      expect(cookies.some((c) => c.startsWith("mb_session="))).toBe(true);
+      expect(cookies.some((c) => c.startsWith("mb_csrf="))).toBe(true);
     } finally {
-      // Kill the whole process GROUP so the `serve` grandchild dies with the pnpm wrapper
-      // (killing only the wrapper is exactly what leaked the zombie serve before).
       try {
         if (server.pid) process.kill(-server.pid, "SIGTERM");
       } catch {
         /* group may already be gone */
       }
       server.kill();
+      upstream.close();
     }
   }, 60_000);
 });

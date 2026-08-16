@@ -389,3 +389,34 @@ Awaiting: (1) PR #99 review/merge, (2) architect greenlight for the serving migr
 5. Deleted dead `withReviewer` export (never persisted — identity comes from the account); tests seed reviewer directly.
 Open product Q (Waleed, NOT me): localStorage `multibench.review.v1` migration — do NOT build an importer unless relayed.
 types clean; dispatcher mb 380 passed. Committed e39fe42, pushed. Architect re-verifies directly (no re-CMAP).
+
+### Topology consolidation (Waleed final) — ONE public origin, private API. PR 3 branch: builder/spir-92-proxy.
+Supersedes the cross-site deploy (which failed the real-browser 3p-cookie premise). Sequence executed:
+- GATE: old multibench-api DB row counts all 0 (reviewers/reviews/submissions/sessions) → no data to migrate, no pg_dump.
+- Provisioned INSIDE the `multibrowser` Railway project: new Postgres + new `multibench-api` service (private).
+  Vars: DATABASE_URL=${{Postgres.DATABASE_URL}}, ALLOWED_ORIGINS=<SPA origin>, REVIEW_INVITE_CODE (copied,
+  not echoed), PORT=8080 (deterministic internal target). Deployed apps/api → preDeployCommand migrated:
+  4 tables (reviewers/reviews/sessions/submissions) confirmed. `api listening on :8080`.
+- SCAR: `railway domain` (no subcommand) CREATES a domain — I accidentally made one, deleted it. API now
+  private-only (no domains). Also: `railway up` links PER-DIRECTORY — apps/api had a stale link to the OLD
+  project and my first API deploy landed there; fixed by `cd apps/api && railway link ...` then `-s`. Documented in README.
+- Code (PR 3): apps/multibrowser/server/index.mjs (Hono edge: SPA + /api/* reverse-proxy to
+  http://multibench-api.railway.internal:8080, Set-Cookie verbatim via getSetCookie); start=node server/index.mjs;
+  drop serve, add hono/@hono/node-server; VITE_API_BASE unset (same-origin); API_ORIGIN runtime var; deploy smoke
+  test (SPA fallback + proxy + dual Set-Cookie). Kept SameSite=None+Secure+ALLOWED_ORIGINS (work first-party;
+  Lax/CORS-shrink noted as follow-up). types clean; mb 380 passing.
+- SCOPE (Waleed): #92 = review system ONLY. Serving tiers (old 5-11) REMOVED from plan → moved to
+  "Appendix: Future spec material — NOT this project". Plan phases JSON now: 1-4 done, 5=topology, 6-7=PARKED
+  coordination. Spec got a dated 2026-08-16 scope note. **porch status.yaml still has the old 13-phase list —
+  syncing it needs `porch rollback 92 plan` + a plan-approval gate (Waleed's); FLAGGING, not doing unilaterally.**
+- Old multibench-api project LEFT STANDING (teardown is a separate explicit step for Waleed).
+Deploying edge build now → will verify login/draft/submit through the one origin + API not public, then open PR 3.
+
+### PR #101 opened (Phase 5 topology) + LIVE-VERIFIED through the one origin.
+Edge deploy landed on multibrowser svc; new bundle index-B-Kk4nZF.js (VITE_API_BASE baked empty).
+E2E through https://multibrowser-production.up.railway.app: /api/health→{ok,db:up} via proxy; full
+csrf→signup(201, both Set-Cookie verbatim)→me→draft(v1)→submit(201)→account delete(200); DB back to 0.
+New API service: no public domain (private-only). Issue #100 cross-linked in plan appendix + spec.
+status.yaml hand-edited (architect-authorized) to 7-phase rescope, in sync with plan JSON; porch parses clean.
+Recorded porch done --pr 101. Awaiting architect direct re-verify + Waleed merge word. Old multibench-api
+project still standing (separate teardown). Real-browser Safari/Chrome check still Waleed's final gate.

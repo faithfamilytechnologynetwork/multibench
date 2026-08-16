@@ -24,6 +24,18 @@ out of the spec — those belong in codev/plans/92-*.md.
 > The Problem Statement, the invariants (git as source of truth, aggregation stays in Python, explicit
 > reviewed migrations / never `db:push`), and the serving-tier design are **unchanged**.
 
+> **Amendment — 2026-08-16 (Waleed, final; scope).** Spec 92 is the **review system only**. The
+> **serving-tier migration is OUT OF SCOPE and removed**: the corpus, score-results, and raw-transcript
+> tiers keep reading git/GitHub at runtime (no Postgres serving layer, no ingest/drift/version/
+> fingerprint-URL work, no `github.ts` deletion). Everything review-related is in scope — the shipped
+> auth + draft-persistence + immutable-submission slice, the **one-origin / same-origin-proxy / private-API
+> topology consolidation**, and the **parked** review-coordination tail (assignment + coordinator
+> dashboards), which stays specified but dormant until Waleed calls for it. The removed serving-tier
+> design is preserved as an appendix in the plan and tracked in
+> **[GitHub issue #100](https://github.com/faithfamilytechnologynetwork/multibench/issues/100)** for
+> possible future re-derivation. Where the title and body below say "corpus, results, raw" serving
+> tiers, treat that as future/out-of-scope material (see #100).
+
 ## Problem Statement
 
 `apps/multibrowser` serves every data tier — corpus, score results, raw transcripts — by reading

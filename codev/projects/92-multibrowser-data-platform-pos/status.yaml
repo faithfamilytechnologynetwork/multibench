@@ -16,31 +16,13 @@ plan_phases:
     title: Review private immutable submission — opens PR 2
     status: complete
   - id: phase_5
-    title: 'DEFERRED: serving schema + ingest/drift infra + /api/version + fingerprint URLs'
+    title: Topology consolidation — one public origin, private API — opens PR 3
     status: in_progress
   - id: phase_6
-    title: 'DEFERRED: results tier ingest (committed-tree-bound)'
+    title: 'PARKED: review assignment machinery'
     status: pending
   - id: phase_7
-    title: 'DEFERRED: results API + SPA swap + provenance display — opens PR 3'
-    status: pending
-  - id: phase_8
-    title: 'DEFERRED: raw tier ingest + retention pruning'
-    status: pending
-  - id: phase_9
-    title: 'DEFERRED: raw API + SPA swap, retire baked bundle — opens PR 4'
-    status: pending
-  - id: phase_10
-    title: 'DEFERRED: corpus tier ingest'
-    status: pending
-  - id: phase_11
-    title: 'DEFERRED: corpus API + SPA swap, delete github.ts (zero GitHub reads) — opens PR 5'
-    status: pending
-  - id: phase_12
-    title: 'DEFERRED: review assignment machinery'
-    status: pending
-  - id: phase_13
-    title: 'DEFERRED: review aggregation + coordinator dashboards — opens PR 6'
+    title: 'PARKED: review aggregation + coordinator dashboards'
     status: pending
 current_plan_phase: phase_5
 gates:
@@ -192,7 +174,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_4-iter2-claude.txt
 started_at: '2026-08-14T05:11:39.030Z'
-updated_at: '2026-08-16T02:41:29.470Z'
+updated_at: '2026-08-16T03:38:13.565Z'
 force_advanced:
   phase: phase_3
   iteration: 3
@@ -208,3 +190,7 @@ pr_history:
     pr_number: 99
     branch: builder/spir-92-pr2
     created_at: '2026-08-16T02:41:29.469Z'
+  - phase: implement
+    pr_number: 101
+    branch: builder/spir-92-proxy
+    created_at: '2026-08-16T03:38:13.564Z'
