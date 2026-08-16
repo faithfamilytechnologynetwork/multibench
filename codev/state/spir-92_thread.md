@@ -411,3 +411,12 @@ Supersedes the cross-site deploy (which failed the real-browser 3p-cookie premis
   syncing it needs `porch rollback 92 plan` + a plan-approval gate (Waleed's); FLAGGING, not doing unilaterally.**
 - Old multibench-api project LEFT STANDING (teardown is a separate explicit step for Waleed).
 Deploying edge build now → will verify login/draft/submit through the one origin + API not public, then open PR 3.
+
+### PR #101 opened (Phase 5 topology) + LIVE-VERIFIED through the one origin.
+Edge deploy landed on multibrowser svc; new bundle index-B-Kk4nZF.js (VITE_API_BASE baked empty).
+E2E through https://multibrowser-production.up.railway.app: /api/health→{ok,db:up} via proxy; full
+csrf→signup(201, both Set-Cookie verbatim)→me→draft(v1)→submit(201)→account delete(200); DB back to 0.
+New API service: no public domain (private-only). Issue #100 cross-linked in plan appendix + spec.
+status.yaml hand-edited (architect-authorized) to 7-phase rescope, in sync with plan JSON; porch parses clean.
+Recorded porch done --pr 101. Awaiting architect direct re-verify + Waleed merge word. Old multibench-api
+project still standing (separate teardown). Real-browser Safari/Chrome check still Waleed's final gate.
