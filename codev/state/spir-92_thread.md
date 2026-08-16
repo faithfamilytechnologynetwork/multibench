@@ -420,3 +420,11 @@ New API service: no public domain (private-only). Issue #100 cross-linked in pla
 status.yaml hand-edited (architect-authorized) to 7-phase rescope, in sync with plan JSON; porch parses clean.
 Recorded porch done --pr 101. Awaiting architect direct re-verify + Waleed merge word. Old multibench-api
 project still standing (separate teardown). Real-browser Safari/Chrome check still Waleed's final gate.
+
+### PR #101 MERGED (merge commit 4110259) → redeployed merged state, re-verified, phase_5 complete + PARKED.
+Files confirmed on origin/main (edge server, serve gone, hono in, plan/spec/status rescoped). Recorded
+porch done --merged 101. Redeployed multibrowser from merged state (Deploy complete); re-verified live:
+/api/health {ok,db:up} via proxy, /review 200, full e2e signup(201)→me→draft(v1)→submit→account-delete(200).
+OLD multibench-api project DB row counts (for Waleed's teardown decision): reviewers=0, sessions=0,
+reviews=0, submissions=0 — EMPTY, teardown data-safe. Teardown itself waits on Waleed (separate step).
+Phases 6-7 (review coordination) PARKED. Waleed's Safari/Chrome login check is the final gate.
