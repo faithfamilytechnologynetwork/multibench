@@ -428,3 +428,14 @@ porch done --merged 101. Redeployed multibrowser from merged state (Deploy compl
 OLD multibench-api project DB row counts (for Waleed's teardown decision): reviewers=0, sessions=0,
 reviews=0, submissions=0 — EMPTY, teardown data-safe. Teardown itself waits on Waleed (separate step).
 Phases 6-7 (review coordination) PARKED. Waleed's Safari/Chrome login check is the final gate.
+
+### Unpark: bugfix #94 (per-tradition run resolution) — branch builder/spir-92-bugfix-94.
+Root cause: review page used the GLOBALLY-newest defaultRunId (now protestantism-only 20260813), so
+reviewing buddhism asked the protestantism manifest for buddhism/BUD-001 → red "no item in this run";
+and SubmitPanel stamped the wrong runId into reports. Fix: new pure `runIdForTradition(runs, tid)` =
+newest valid run whose manifest CONTAINS the tradition (null → hide embed with a "no scored run for
+this tradition" note, and report stamps "(none published)"). Applied to BOTH call sites: queries.ts
+useScenarioRaw (the verdict embed) + ReviewTraditionPage SubmitPanel (report/provenance runId).
+ResultsPage explorer keeps defaultRunId (global default is correct there). +3 unit tests
+(buddhism-under-protestantism-default regression, null-when-none, skip broken-manifest). types clean;
+mb 383 passing. Small PR Refs #94, architect direct review, Waleed merge word → deploy → re-park.

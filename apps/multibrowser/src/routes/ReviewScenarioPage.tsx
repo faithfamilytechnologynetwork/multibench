@@ -255,8 +255,8 @@ function JudgementViewer({ traditionId, scenarioId, raw }: {
   if (!raw.runId) {
     return (
       <p className="text-sm italic text-default-400" data-testid="review-no-run">
-        No judging results are published yet — there are no verdicts to check for this scenario. You can
-        still review the other three checks.
+        No scored run includes this tradition yet — there are no verdicts to check here. You can still
+        review the other three checks.
       </p>
     );
   }

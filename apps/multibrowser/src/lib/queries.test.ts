@@ -8,6 +8,8 @@ import {
   loadTradition,
   loadScenario,
   loadScenarioMeta,
+  runIdForTradition,
+  type ResultsRun,
 } from "./queries";
 import { REPO } from "./constants";
 import { buildTree, fakeFetch, traditionFiles } from "../test/fakeRepo";
@@ -93,5 +95,39 @@ describe("loaders (real QueryClient + stubbed fetch)", () => {
     const t = await loadTradition(newQc(), SHA, "sunni-islam");
     expect(t!.scenarioIds.sort()).toEqual(["JLS-001", "JLS-002"]);
     expect(t!.notices.some((n) => /missing|derived from folders/i.test(n.message))).toBe(true);
+  });
+});
+
+describe("runIdForTradition (#94 — resolve the run per-tradition, not the global newest)", () => {
+  const run = (id: string, generatedAt: string, traditions: string[]): ResultsRun => ({
+    id,
+    notices: [],
+    // Only the fields runIdForTradition reads; cast to the full manifest shape for the test.
+    manifest: { generatedAt, traditions: traditions.map((t) => ({ id: t })) } as ResultsRun["manifest"],
+  });
+
+  // The live bug: the globally-newest run scores ONLY protestantism, but a reviewer opens buddhism.
+  const runs = [
+    run("20260701", "2026-07-01T00:00:00Z", ["buddhism", "sunni-islam"]),
+    run("20260813", "2026-08-13T00:00:00Z", ["protestantism"]), // newest overall, buddhism-less
+    run("20260805", "2026-08-05T00:00:00Z", ["buddhism", "protestantism"]),
+  ];
+
+  it("picks the newest run that ACTUALLY scores the tradition, not the newest overall", () => {
+    // buddhism: newest run scoring it is 20260805 — NOT the newer protestantism-only 20260813.
+    expect(runIdForTradition(runs, "buddhism")).toBe("20260805");
+    // protestantism: here the newest-overall run does score it.
+    expect(runIdForTradition(runs, "protestantism")).toBe("20260813");
+  });
+
+  it("returns null when no published run scores the tradition (embed hides, report stamps none)", () => {
+    expect(runIdForTradition(runs, "judaism")).toBeNull();
+    expect(runIdForTradition([], "buddhism")).toBeNull();
+  });
+
+  it("skips runs whose manifest failed to load", () => {
+    const withBroken: ResultsRun[] = [...runs, { id: "20260901", notices: [], manifest: null }];
+    // The broken (manifest:null) newest-id run is ignored; buddhism still resolves to 20260805.
+    expect(runIdForTradition(withBroken, "buddhism")).toBe("20260805");
   });
 });
