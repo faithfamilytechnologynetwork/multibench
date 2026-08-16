@@ -174,7 +174,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_4-iter2-claude.txt
 started_at: '2026-08-14T05:11:39.030Z'
-updated_at: '2026-08-16T03:38:13.565Z'
+updated_at: '2026-08-16T04:57:19.150Z'
 force_advanced:
   phase: phase_3
   iteration: 3
@@ -194,3 +194,5 @@ pr_history:
     pr_number: 101
     branch: builder/spir-92-proxy
     created_at: '2026-08-16T03:38:13.564Z'
+    merged: true
+    merged_at: '2026-08-16T04:57:19.150Z'
