@@ -2,6 +2,11 @@ id: '92'
 title: multibrowser-data-platform-pos
 protocol: spir
 phase: implement
+# Phase list re-scoped 2026-08-16, ARCHITECT-AUTHORIZED hand-edit under Waleed's rescope (Spec 92 =
+# review system only; serving-tier phases removed → GitHub issue #100). Kept exactly in sync with the
+# plan's machine-readable phases JSON. Completed phases 1-4 retained intact with their consult history
+# below. Same precedent as the phase_2 iter4/5 record fix. Porch only re-extracts phases at
+# plan->implement, so this truthful edit is the sanctioned mechanism for a mid-implement rescope.
 plan_phases:
   - id: phase_1
     title: API service scaffold (Hono + Drizzle + Postgres, PGlite rig, Railway, topology)
@@ -16,31 +21,13 @@ plan_phases:
     title: Review private immutable submission — opens PR 2
     status: complete
   - id: phase_5
-    title: 'DEFERRED: serving schema + ingest/drift infra + /api/version + fingerprint URLs'
+    title: Topology consolidation — one public origin, private API — opens PR 3
     status: in_progress
   - id: phase_6
-    title: 'DEFERRED: results tier ingest (committed-tree-bound)'
+    title: 'PARKED: review assignment machinery'
     status: pending
   - id: phase_7
-    title: 'DEFERRED: results API + SPA swap + provenance display — opens PR 3'
-    status: pending
-  - id: phase_8
-    title: 'DEFERRED: raw tier ingest + retention pruning'
-    status: pending
-  - id: phase_9
-    title: 'DEFERRED: raw API + SPA swap, retire baked bundle — opens PR 4'
-    status: pending
-  - id: phase_10
-    title: 'DEFERRED: corpus tier ingest'
-    status: pending
-  - id: phase_11
-    title: 'DEFERRED: corpus API + SPA swap, delete github.ts (zero GitHub reads) — opens PR 5'
-    status: pending
-  - id: phase_12
-    title: 'DEFERRED: review assignment machinery'
-    status: pending
-  - id: phase_13
-    title: 'DEFERRED: review aggregation + coordinator dashboards — opens PR 6'
+    title: 'PARKED: review aggregation + coordinator dashboards'
     status: pending
 current_plan_phase: phase_5
 gates:

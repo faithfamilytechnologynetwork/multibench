@@ -31,8 +31,10 @@ out of the spec — those belong in codev/plans/92-*.md.
 > auth + draft-persistence + immutable-submission slice, the **one-origin / same-origin-proxy / private-API
 > topology consolidation**, and the **parked** review-coordination tail (assignment + coordinator
 > dashboards), which stays specified but dormant until Waleed calls for it. The removed serving-tier
-> design is preserved as an appendix in the plan for possible future re-derivation. Where the title and
-> body below say "corpus, results, raw" serving tiers, treat that as future/out-of-scope material.
+> design is preserved as an appendix in the plan and tracked in
+> **[GitHub issue #100](https://github.com/faithfamilytechnologynetwork/multibench/issues/100)** for
+> possible future re-derivation. Where the title and body below say "corpus, results, raw" serving
+> tiers, treat that as future/out-of-scope material (see #100).
 
 ## Problem Statement
 

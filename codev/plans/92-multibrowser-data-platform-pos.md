@@ -376,11 +376,12 @@ on deployed SPA.
 
 ## Appendix: Future spec material — NOT this project
 
-> **Out of scope for Spec 92** (Waleed, 2026-08-16). The serving-tier migration below was the
-> original core of this project; it is **removed from the active plan** and preserved here only as
-> engineering notes. It assumes the *old* separate-origin topology and would need **re-derivation**
-> against the one-project / private-API topology (Phase 5) before any of it is picked up. Do not treat
-> these as committed phases.
+> **Out of scope for Spec 92** (Waleed, 2026-08-16), tracked separately in
+> **[GitHub issue #100](https://github.com/faithfamilytechnologynetwork/multibench/issues/100)**. The
+> serving-tier migration below was the original core of this project; it is **removed from the active
+> plan** and preserved here only as engineering notes. It assumes the *old* separate-origin topology and
+> would need **re-derivation** against the one-project / private-API topology (Phase 5) before any of it
+> is picked up. Do not treat these as committed phases — pick the work up from issue #100.
 
 ## DEFERRED — serving tiers (kept in plan, shipped in later PRs, same project)
 
