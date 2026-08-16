@@ -2,11 +2,6 @@ id: '92'
 title: multibrowser-data-platform-pos
 protocol: spir
 phase: implement
-# Phase list re-scoped 2026-08-16, ARCHITECT-AUTHORIZED hand-edit under Waleed's rescope (Spec 92 =
-# review system only; serving-tier phases removed → GitHub issue #100). Kept exactly in sync with the
-# plan's machine-readable phases JSON. Completed phases 1-4 retained intact with their consult history
-# below. Same precedent as the phase_2 iter4/5 record fix. Porch only re-extracts phases at
-# plan->implement, so this truthful edit is the sanctioned mechanism for a mid-implement rescope.
 plan_phases:
   - id: phase_1
     title: API service scaffold (Hono + Drizzle + Postgres, PGlite rig, Railway, topology)
@@ -179,7 +174,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-92/codev/projects/92-multibrowser-data-platform-pos/92-phase_4-iter2-claude.txt
 started_at: '2026-08-14T05:11:39.030Z'
-updated_at: '2026-08-16T02:41:29.470Z'
+updated_at: '2026-08-16T03:38:13.565Z'
 force_advanced:
   phase: phase_3
   iteration: 3
@@ -195,3 +190,7 @@ pr_history:
     pr_number: 99
     branch: builder/spir-92-pr2
     created_at: '2026-08-16T02:41:29.469Z'
+  - phase: implement
+    pr_number: 101
+    branch: builder/spir-92-proxy
+    created_at: '2026-08-16T03:38:13.564Z'
