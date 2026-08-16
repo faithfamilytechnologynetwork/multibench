@@ -245,3 +245,147 @@ SPA swap is called done. If blocked → decide custom-domains (same-site) vs sam
 
 ## POST-MERGE follow-ups (tracked, not blocking): add apps/api job to validate.yml CI; MAINTAIN refresh
 of arch-critical/arch.md (neither knows apps/api exists); keep test-tool deviations visible.
+
+## PR #97 MERGED (Waleed's word, merge commit 276865f). apps/api confirmed on origin/main.
+Recorded porch done --merged 97. Daily Postgres backups active.
+
+## GitHub auto-deploy wiring follow-up — BLOCKED (surfaced to architect, not forced):
+Railway API returns "Not Authorized" for service/repoTrigger ops with my personal accessToken (volume/backup
+ops worked, service-source ops don't). Connecting the Railway GitHub App to the repo is a dashboard OAuth
+action regardless. Rewiring a live prod service source blind = risk to the shipped review backend. NOT forcing it.
+Mechanism identified for whoever has access: serviceInstanceUpdate source.repo=faithfamilytechnologynetwork/multibench,
+rootDirectory=apps/api, branch=main. Recommend: dashboard connect (handles App auth + rootDir + branch safely),
+OR keep current `railway up` + preDeployCommand (works). Meanwhile deploys are manual `railway up` from apps/api.
+Proceeding to phase_3 (SPA work; wiring is not a prerequisite).
+
+## Phase 3 (PR 2) — IN PROGRESS on builder/spir-92-pr2 (off origin/main).
+DONE (API half, committed): apps/api/src/routes/review.ts — GET/PUT /api/review/:traditionId, per-tradition
+draft (state JSONB = TraditionReview verbatim, stored opaquely), **optimistic-concurrency version**:
+version 0 = insert (→1); >0 updates only if it matches, else **409 + current {state,version}** to reconcile.
+requireAuth on all (CSRF on PUT). Mounted /api/review. Tests: auth-401, create+read, version-inc, stale→409,
+CSRF-403, per-reviewer isolation. 34/34 green. Committed.
+Note: zod `scenarios: z.record(z.string(),…)` ALREADY accepts any scenario id, and traditionProgress ALREADY
+counts only sampleIds — so out-of-sample is largely structural; remaining is UI (affordance + "+N beyond sample").
+
+REMAINING (SPA half): lib/review.ts sync→async swap (per-tradition API load/save, optimistic + version
+reconcile, keep tolerant zod loader); reviewApi.ts client (credentialed fetch + CSRF header to VITE_API_BASE);
+review route components (async load + auth gate + out-of-sample affordance + progress display); SPA tests +
+fakeApi. Then phase_3 consult. **PR-2 completion gate: real-browser Safari+Chrome cross-site cookie check**
+(up.railway.app public-suffix → 3rd-party-cookie block risk) — surface early to architect if it fails.
+Did NOT run phase_3 consult yet (SPA half unbuilt).
+
+## Phase 3 SPA half — DONE (2026-08-15). Dispatcher green: apps/api 34 + apps/multibrowser 359.
+- reviewApi.ts: credentialed+CSRF client (fetch injectable for tests) — auth + draft get/put.
+- review.ts: async API-backed store, SAME public API (useReviewState/updateReviewState/pure updaters).
+  Optimistic in-memory + debounced per-tradition save via reference-diff; version conflict reconcile
+  (last-write-wins, edit preserved; server-wins fallback + notice). Auth (initReview/login/signup/logout).
+  out-of-sample: scenarios accepts any id (already), progress counts sample only + beyondSample "+N".
+- ReviewAuthGate.tsx: gate (spinner/login-signup/children) + ReviewerBadge + ReviewSaveStatus + auth form.
+- Pages wired: ReviewIndexPage (gate + badge, identity form removed), ReviewTraditionPage (gate + inner,
+  loaded-gated auto-draw, save status), ReviewScenarioPage (gate + ensureTraditionLoaded, out-of-sample note).
+- Tests: reviewStore.test.ts (4: optimistic/version/reconcile/load), review.test.ts (15), review.test.tsx
+  rewritten (10, combined GitHub+API fake, pre-auth, flush-then-assert). 0 type errors.
+Committed. **REMAINING for PR 2 completion**: real-browser Safari+Chrome cross-site cookie verification
+(deploy SPA w/ VITE_API_BASE → login→draft-save in both; if 3rd-party-cookie blocked → custom-domain vs
+proxy decision to Waleed). Then phase_3 consult → phase_4 (submission) → open PR 2.
+
+## Phase 3 consult iter1: codex + claude BOTH REQUEST_CHANGES (HIGH) — accepted all, fixed.
+Data-safety: (1) failed-load could overwrite saved draft → ensureTraditionLoaded returns success,
+persistTradition loads-before-save (holds on load-fail); (2) failed saves now retry (SAVE_RETRY_MS +
+flush drains dirty + pagehide/nav flush); (3) API-down no longer hangs → initReview catches → signed-out
++ notice. Deliverables: (4) out-of-sample UI — "+N beyond sample" rendered + "Review one beyond your
+sample" picker that navigates w/o touching sampleIds; (5) VITE_API_BASE added to .env.example; (6) cleared
+sticky reconciled banner, fixed stale localStorage comments, removed dead REVIEW_STORAGE_KEY.
++tests (store: no-overwrite, retry, fail-visible; pages: +N display, affordance nav, service-down notice).
+check-types clean; api 34 + multibrowser 364 green. Committed. Rebuttal written. → re-signal for iter2.
+
+## Phase 3 consult iter2: codex + claude BOTH REQUEST_CHANGES (HIGH) — accepted all, fixed.
+- Failed-load overwrite hole (remaining): edits during a failed load sat on blank base → overwrote saved
+  draft on recovery. FIX: ensureTraditionLoaded adopts server draft on first success if a local entry
+  exists (blip edit discarded + reconciled); save-success no longer clears reconciled. +delayed-success race test.
+- Start-over didn't persist → added DELETE /api/review/:tid; store reference-diffs removals → persistDelete.
+- 401 mid-session → handleAuthError flips auth 'out' (re-prompt sign-in).
+- Index "not started" for cross-device drafts → GET /api/review list + prefetchDrafts on sign-in.
+- load-vs-save error message (errorKind); array-state guard (400).
+- Browser Safari+Chrome cross-site cookie check DEFERRED to PR-2 completion gate (architect's framing;
+  can't drive browsers headlessly; topology implemented correctly).
++tests. check-types clean; api 37 + mb 367 green. Committed. Rebuttal written. → re-signal iter3.
+
+## Phase 3 consult iter3: codex + claude BOTH REQUEST_CHANGES (HIGH). Blocker fixed + others; 2 defended.
+BLOCKER (both): reviewer-switch/401 left prev reviewer's drafts in memory → cross-account leak. FIX:
+resetReviewStore in handleAuthError + on reviewer-id change in login/signup. +test.
+Fixed: per-tradition op serialization (enqueue) so save/delete don't race (+test); CSRF-403 refresh;
+logout flush; replaceReviewState import-delete symmetry; PUT bodyLimit 512KB (+413 test); idle/wording nits.
+DEFENDED (plan semantics): codex#1 whole-draft last-write-wins IS the plan's "reconciled not lost"
+(claude concurs); codex#2 edit-before-load is SAFE via the iter-2 adopt-fix (server-wins+notice, no loss).
+Browser Safari/Chrome check stays PR-2 gate (both agree not a phase_3 blocker).
+check-types clean; api 38 + mb 369 green. Committed. Rebuttal written. → re-signal iter4.
+
+## Phase 3 consult iter4: codex REQUEST_CHANGES, claude COMMENT → porch FORCE-ADVANCED phase_3 ✓ (max iters).
+Both caught real residual bugs (ship in PR 2) — FIXED as polish before PR 2:
+- persistDelete didn't clear pendingDeletes on success → sticky saving + later flush re-deletes recreated
+  draft. FIX + test (delete→recreate→2nd flush = one del).
+- prefetchDrafts marked loadState ok without adopting → reopened narrow overwrite hole. FIX: adopt+reconciled + test.
+- me() 5xx now throws → service-error notice (not sign-in form). Tradition page prefetches → "back up all" complete.
+  saving flag checks pendingDeletes.
+DEFENDED (for architect PR-2 CMAP): codex#2 whole-draft last-write-wins loses the OTHER device's disjoint edit;
+this is the plan's "reconciled not lost = LWW for active device" (claude concurs it matches plan). A field-merge
+is out of scope for a ~5-user tool — architect to adjudicate at the PR gate if desired.
+api 38 + mb 371 green, types clean. Committed. → PHASE 3 DONE. Proceeding to phase_4 (submission).
+
+## Phase 4 (implement) — private immutable submission — BUILT.
+API: POST /api/review/:tid/submit (insert-only into submissions, immutable — no update/delete path),
+GET /api/review/:tid/submissions (list, newest first); auth+CSRF+bodyLimit; publishedIssueUrl null by
+default (set only if reviewer opts to publish). SPA: SubmitPanel reworked — "Submit review (private)"
+is PRIMARY (flush→submitReview→"Submitted privately · time"); GitHub-issue publish moved behind an
+opt-in <details> ("also publish to a public GitHub issue" — makes it public, existing prefilled link).
+Report: added "## 4. Beyond the assigned sample" out-of-sample commentary section (Waleed's req).
+Tests: API submit/list/immutability/publish/isolation (42); report out-of-sample section; page submit-private.
+api 42 + mb 374 green, types clean. Committed. → signal phase_4 complete → consult. PR 2 opens after approval.
+
+### Phase 4 iter-1 consult — both REQUEST_CHANGES (HIGH), all accepted, FIXED.
+Convergent core: (1) notes-only out-of-sample commentary dropped from report — extras filter gated
+on status!="unreviewed" but rendering uses isAnswered(); fixed to isAnswered() + beyondSample uses
+isCheckAnswered(); notes-only regression test. (2) submit could freeze empty/stale draft pre-load —
+gated buttons on `loaded`, read peekReviewState() AFTER flush, empty-review guard. (3) no provenance
+in snapshot — now {review, provenance:{traditionId,sha,runId}} (opaque JSONB, no schema change).
+(4) publishedIssueUrl dead+unvalidated — capture input + "Submit as published" button; server rejects
+non-github.com with 400. (5) listSubmissions .catch swallowed — now submissionsError notice.
+(6) no confirm before permanent record — window.confirm added.
+types api 0 mb 0; dispatcher api 43 + mb 376 passed. Rebuttal written, committed. → re-signal complete → iter-2 consult.
+
+### Phase 4 iter-2 consult — codex REQUEST_CHANGES (1 blocking), claude COMMENT (all iter-1 fixes verified).
+Convergent blocking (codex) / non-blocking (claude): notes-only IN-SAMPLE review was blocked from
+submit — empty-guard used verdict-count `done` while beyondSample uses isCheckAnswered. FIX: added
+content-based `contentful` to ReviewProgress (isCheckAnswered over required sample; `done` stays
+verdict-only for the bar); guard now contentful===0 && beyondSample===0. +unit +page notes-only tests.
+Claude non-blocking, both taken: (a) harness discarded submitted body → now captures full POST body,
+assert frozen.review.source.status + frozen.provenance{traditionId,sha} (envelope nests under review →
+body.review.review.*). (b) publish-path confirm now distinct (spells out public). Kept {review,provenance}
+envelope (opaque JSONB, no consumer till phase 12; test pins shape). types clean; mb 378 passed. Committed 8a724ca.
+Rebuttal (all accepted) written. → re-signal complete → iter-3 consult.
+
+### Phase 4 APPROVED (iter-3: codex APPROVE, claude APPROVE) → PR 2 opened.
+Both unanimous approve at iter-3. Porch committed phase_4 and auto-advanced to phase_5.
+Opened **PR #99** (Phases 3+4: review draft persistence + private immutable submission), branched fresh
+from main (non-stacked). Recorded via `porch done 92 --pr 99 --branch builder/spir-92-pr2`.
+PR body carries the last-write-wins design decision (for the integration CMAP) + the outstanding
+real-browser Safari/Chrome cross-site cookie completion gate (needs deploy + ALLOWED_ORIGINS).
+**PARKED:** phase_5+ (serving schema + ingest/results/raw/corpus tiers, phases 5-13) are DEFERRED —
+plan says "scheduled when the architect greenlights the serving migration." NOT implementing phase_5.
+Awaiting: (1) PR #99 review/merge, (2) architect greenlight for the serving migration.
+
+### PR #99 integration review — 5 pre-merge fixes (architect-relayed, all applied).
+3-way CMAP: gemini APPROVE / codex REQUEST_CHANGES / claude COMMENT. Architect adjudicated LWW STANDS
+(design is correct; only the *silence* was wrong). Applied all 5:
+1. prefetchDrafts now SKIPS any tradition whose loadState==="ok" (both adopt AND version overwrite) —
+   closes the verified clobber race (fast GET → edit → slow LIST re-adopts). +deterministic gated-LIST test.
+2. Gate editing until loadState==="ok": ReviewCheckControl gained a `disabled` prop; both review pages pass
+   `!loaded` (ReviewScenarioPage had NO gate before — added loaded state); restore-from-backup + sample-mutating
+   buttons (remove/reshuffle/add) also gated. +page test (inputs disabled until draft load resolves).
+3. Reconcile notice now set on the SUCCESSFUL single 409-retry too (was only double-conflict path). +assertion.
+4. Deploy-ordering runbook in apps/api/README.md (ALLOWED_ORIGINS→deploy API→build SPA w/ VITE_API_BASE→railway up)
+   + the post-deploy real-browser cookie gate.
+5. Deleted dead `withReviewer` export (never persisted — identity comes from the account); tests seed reviewer directly.
+Open product Q (Waleed, NOT me): localStorage `multibench.review.v1` migration — do NOT build an importer unless relayed.
+types clean; dispatcher mb 380 passed. Committed e39fe42, pushed. Architect re-verifies directly (no re-CMAP).

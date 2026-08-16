@@ -13,7 +13,6 @@ import {
 import {
   REVIEW_SAMPLE_SIZE,
   emptyState,
-  withReviewer,
   withSample,
   withScenarioCheck,
   withTraditionCheck,
@@ -24,7 +23,8 @@ const REPO = "owner/repo";
 
 function sampleState(): ReviewState {
   let s = emptyState();
-  s = withReviewer(s, { name: "Rev. Example", contact: "rev@example.com", background: "pastor, 20 years" });
+  // Reviewer identity comes from the account in production; seed it directly for the report fixture.
+  s = { ...s, reviewer: { name: "Rev. Example", contact: "rev@example.com", background: "pastor, 20 years" } };
   s = withSample(s, "sunni-islam", ["JLS-001", "JLS-050"], "seed42");
   s = withTraditionCheck(s, "sunni-islam", "source", { status: "approved", notes: "right choice of text" });
   s = withTraditionCheck(s, "sunni-islam", "guide", { status: "flagged", suggestion: "Add the exit-ramp principle" });
@@ -176,6 +176,44 @@ describe("submission URLs", () => {
     expect(REVIEW_ISSUE_LABEL).toBe("tradition-review");
     expect(prefilledIssueUrl(REPO, "t", "body")).toContain("labels=tradition-review");
     expect(blankIssueUrl(REPO, "t")).toContain("labels=tradition-review");
+  });
+
+  it("lists out-of-sample reviews in their own section (Beyond the assigned sample)", () => {
+    let s = withSample(emptyState(), "sunni-islam", ["JLS-001", "JLS-002"], "");
+    // A review of a scenario NOT in the required sample.
+    s = withScenarioCheck(s, "sunni-islam", "JLS-099", "scenario", { status: "approved", notes: "extra look" });
+    const report = buildReviewReport({
+      state: s,
+      traditionId: "sunni-islam",
+      displayName: "Sunni Islam",
+      sha: "cafebabe",
+      runId: null,
+      repo: REPO,
+      now: new Date("2026-08-15T12:00:00Z"),
+    });
+    expect(report).toContain("## 4. Beyond the assigned sample");
+    // The out-of-sample scenario appears AFTER the beyond-sample heading, not in the sample section.
+    const beyondIdx = report.indexOf("## 4. Beyond the assigned sample");
+    expect(report.indexOf("JLS-099", beyondIdx)).toBeGreaterThan(beyondIdx);
+    const sampleSection = report.slice(report.indexOf("## 3. Scenarios"), beyondIdx);
+    expect(sampleSection).not.toContain("JLS-099");
+  });
+
+  it("includes NOTES-ONLY out-of-sample commentary (no verdict clicked)", () => {
+    let s = withSample(emptyState(), "sunni-islam", ["JLS-001"], "");
+    // Notes typed on an out-of-sample scenario, but no verdict button clicked (status stays unreviewed).
+    s = withScenarioCheck(s, "sunni-islam", "JLS-077", "scoring", { notes: "the exception is mishandled" });
+    const report = buildReviewReport({ state: s, traditionId: "sunni-islam", displayName: "Sunni Islam", sha: null, runId: null, repo: REPO, now: new Date("2026-08-15T12:00:00Z") });
+    expect(report).toContain("## 4. Beyond the assigned sample");
+    const beyondIdx = report.indexOf("## 4. Beyond the assigned sample");
+    expect(report.indexOf("JLS-077", beyondIdx)).toBeGreaterThan(beyondIdx);
+    expect(report).toContain("the exception is mishandled");
+  });
+
+  it("omits the beyond-sample section when there is no out-of-sample review", () => {
+    const s = withSample(emptyState(), "sunni-islam", ["JLS-001"], "");
+    const report = buildReviewReport({ state: s, traditionId: "sunni-islam", displayName: "Sunni Islam", sha: null, runId: null, repo: REPO, now: new Date("2026-08-15T12:00:00Z") });
+    expect(report).not.toContain("Beyond the assigned sample");
   });
 
   it("issueTitle includes the reviewer when known", () => {

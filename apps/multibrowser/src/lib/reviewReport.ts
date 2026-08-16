@@ -117,6 +117,39 @@ export function buildReviewReport(ctx: ReportContext): string {
       out.push("");
     }
   }
+
+  // ## 4 — out-of-sample commentary (Waleed): scenarios the reviewer reviewed BEYOND the required
+  // sample get their own section, kept distinct from the assigned-sample reviews above.
+  const sampleSet = new Set(t.sampleIds);
+  const extras = Object.keys(t.scenarios)
+    .filter(
+      (sid) =>
+        !sampleSet.has(sid) &&
+        // Match the per-check rendering: notes/suggestion count as commentary even without a verdict,
+        // so a notes-only out-of-sample review isn't silently dropped from this section.
+        SCENARIO_CHECKS.some((key) => isAnswered(scenarioChecksOf(t, sid)[key])),
+    )
+    .sort();
+  if (extras.length > 0) {
+    out.push("");
+    out.push("## 4. Beyond the assigned sample");
+    out.push("");
+    out.push("_Outside the required sample — the reviewer chose to comment on these as well._");
+    for (const sid of extras) {
+      const checks = scenarioChecksOf(t, sid);
+      const sections = SCENARIO_CHECKS.map((key) =>
+        checkSection(`**${SCENARIO_CHECK_LABELS[key]}**`, checks[key], scenarioCheckFile(traditionId, sid, key), repo, sha),
+      ).filter((s): s is string => s !== null);
+      out.push("");
+      out.push(`### ${sid}`);
+      out.push("");
+      for (const s of sections) {
+        out.push(s);
+        out.push("");
+      }
+    }
+  }
+
   out.push("---");
   out.push("_Submitted from the MultiBrowser review workflow (`/review`)._ ");
   return out.join("\n");

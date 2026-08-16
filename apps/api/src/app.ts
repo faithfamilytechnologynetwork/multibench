@@ -5,6 +5,7 @@ import { healthRoute } from './routes/health';
 import { authRoutes } from './routes/auth';
 import type { AuthConfig } from './routes/auth';
 import { accountRoutes } from './routes/account';
+import { reviewRoutes } from './routes/review';
 
 export interface AppOptions {
   /** Browser origins allowed to make credentialed cross-site requests. */
@@ -35,6 +36,7 @@ export function createApp(db: AppDb, opts: AppOptions): Hono {
   app.route('/api/health', healthRoute(db));
   app.route('/api/auth', authRoutes(db, opts.auth));
   app.route('/api/account', accountRoutes(db, { secureCookies: opts.auth.secureCookies }));
+  app.route('/api/review', reviewRoutes(db));
 
   return app;
 }

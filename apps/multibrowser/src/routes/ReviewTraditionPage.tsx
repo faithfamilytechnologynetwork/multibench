@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { getRouteApi, Link } from "@tanstack/react-router";
-import { ChevronRight, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
+import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
+import { ChevronRight, ClipboardCheck, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
 import { useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
 import { FILE, REF, REPO } from "../lib/constants";
@@ -9,8 +9,13 @@ import {
   REVIEW_SAMPLE_SIZE,
   SCENARIO_CHECKS,
   SCENARIO_CHECK_LABELS,
+  emptyTradition,
+  ensureTraditionLoaded,
   evenSample,
+  flushReviewSaves,
   parseReviewState,
+  peekReviewState,
+  prefetchDrafts,
   replaceReviewState,
   scenarioChecksOf,
   seededSample,
@@ -22,6 +27,8 @@ import {
   withoutTradition,
 } from "../lib/review";
 import { blankIssueUrl, buildReviewReport, editFileUrl, issueTitle, prefilledIssueUrl } from "../lib/reviewReport";
+import { listSubmissions, submitReview, type SubmissionMeta } from "../lib/reviewApi";
+import { ReviewAuthGate, ReviewSaveStatus } from "../components/ReviewAuthGate";
 import { ReviewCheckControl, CheckStatusDot } from "../components/ReviewCheckControl";
 import { ReviewProgressBar } from "../components/ReviewProgress";
 import { Collapsible } from "../components/Collapsible";
@@ -34,11 +41,20 @@ import { NotFound } from "./NotFound";
 const route = getRouteApi("/review/$traditionId");
 
 // One tradition's review workspace: step 1 (the canonical source) and step 2 (the guide) inline,
-// step 3 as the assigned scenario sample, then the submit panel. Intake persists locally on every
-// keystroke; SUBMISSION is explicit (GitHub issue / download / copy) — see lib/review.ts.
+// step 3 as the assigned scenario sample, then the submit panel. Intake persists to the reviewer's
+// account (debounced, optimistic) as they work; SUBMISSION is explicit — see lib/review.ts.
 
 export function ReviewTraditionPage() {
+  return (
+    <ReviewAuthGate>
+      <ReviewTraditionPageInner />
+    </ReviewAuthGate>
+  );
+}
+
+function ReviewTraditionPageInner() {
   const { traditionId } = route.useParams();
+  const navigate = useNavigate();
   const shaQ = useLatestSha();
   const sha = shaQ.data;
   const tradQ = useTradition(sha, traditionId);
@@ -47,15 +63,35 @@ export function ReviewTraditionPage() {
   const review = useReviewState();
   const mine = review.traditions[traditionId];
 
-  // Materialize the assignment once per tradition (deterministic even spread). Never re-drawn
-  // automatically afterwards — the sample must not shift under a reviewer mid-review.
+  // Load this reviewer's saved draft for the tradition before deciding whether to draw a fresh
+  // sample — otherwise the auto-draw below would race the async load and clobber a saved assignment.
+  const [loaded, setLoaded] = useState(false);
+  useEffect(() => {
+    setLoaded(false);
+    let alive = true;
+    // Only mark loaded on SUCCESS — a failed load must not let the auto-draw below run, or a blank
+    // freshly-drawn sample could overwrite the reviewer's saved server draft.
+    void ensureTraditionLoaded(traditionId).then((ok) => {
+      if (alive && ok) setLoaded(true);
+    });
+    // Load the reviewer's other drafts too, so "Back up all my reviews" is complete even on a
+    // direct load of this page (idempotent — a no-op if the landing page already prefetched).
+    void prefetchDrafts();
+    return () => {
+      alive = false;
+      void flushReviewSaves(); // persist any debounced edits when leaving the page
+    };
+  }, [traditionId]);
+
+  // Materialize the assignment once per tradition (deterministic even spread) ONLY after the draft
+  // has loaded and none exists. Never re-drawn automatically — the sample must not shift mid-review.
   const scenarioIds = tradition?.scenarioIds ?? [];
   useEffect(() => {
-    if (!mine && scenarioIds.length > 0) {
+    if (loaded && !mine && scenarioIds.length > 0) {
       updateReviewState((s) => withSample(s, traditionId, evenSample(scenarioIds), ""));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mine === undefined, scenarioIds.length > 0, traditionId]);
+  }, [loaded, mine === undefined, scenarioIds.length > 0, traditionId]);
 
   const declaredTax = useMemo(() => taxonomyValues(tradition?.manifest?.taxonomies ?? {}), [tradition]);
   const sampleIds = useMemo(() => mine?.sampleIds ?? [], [mine]);
@@ -101,9 +137,10 @@ export function ReviewTraditionPage() {
           <h1 className="text-2xl font-semibold">Reviewing: {displayName}</h1>
           <ReviewProgressBar progress={progress} />
         </div>
+        <ReviewSaveStatus />
         <p className="text-sm text-default-600">
-          Work top to bottom. Your answers save in this browser as you type; when you&rsquo;re done,
-          submit from the panel at the bottom.{" "}
+          Work top to bottom. Your answers save privately to your account as you type (and sync across
+          your devices); when you&rsquo;re done, submit from the panel at the bottom.{" "}
           <Link to="/t/$traditionId" params={{ traditionId }} className="text-primary hover:underline">
             Browse this tradition normally →
           </Link>
@@ -130,6 +167,7 @@ export function ReviewTraditionPage() {
           onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "source", patch))}
           editUrl={editFileUrl(REPO, REF, `${base}/${FILE.source}`)}
           testId="review-check-source"
+          disabled={!loaded}
         />
       </section>
 
@@ -151,6 +189,7 @@ export function ReviewTraditionPage() {
           onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "guide", patch))}
           editUrl={editFileUrl(REPO, REF, `${base}/${FILE.guide}`)}
           testId="review-check-guide"
+          disabled={!loaded}
         />
       </section>
 
@@ -191,7 +230,7 @@ export function ReviewTraditionPage() {
                   type="button"
                   aria-label={`Remove ${sid} from your sample`}
                   title="Remove from your sample"
-                  disabled={sampleIds.length <= 1}
+                  disabled={!loaded || sampleIds.length <= 1}
                   onClick={() =>
                     updateReviewState((s) =>
                       withSample(s, traditionId, sampleIds.filter((x) => x !== sid), mine?.sampleSeed ?? ""))}
@@ -215,6 +254,7 @@ export function ReviewTraditionPage() {
         <div className="flex flex-wrap items-center gap-3 text-sm">
           <button
             type="button"
+            disabled={!loaded}
             onClick={() => {
               // Reshuffle draws a new sample; checks on scenarios that fall out become unreachable
               // and drop from the report. Confirm before discarding completed work — mirroring
@@ -230,7 +270,7 @@ export function ReviewTraditionPage() {
               const seed = Math.random().toString(36).slice(2, 8);
               updateReviewState((s) => withSample(s, traditionId, seededSample(scenarioIds, REVIEW_SAMPLE_SIZE, seed), seed));
             }}
-            className="flex items-center gap-1 rounded border border-default-200 px-3 py-1 text-default-600 hover:border-default-300"
+            className="flex items-center gap-1 rounded border border-default-200 px-3 py-1 text-default-600 hover:border-default-300 disabled:opacity-40"
           >
             <Shuffle size={14} aria-hidden /> Reshuffle sample
           </button>
@@ -240,11 +280,33 @@ export function ReviewTraditionPage() {
               <select
                 value=""
                 aria-label="Add a specific scenario"
+                disabled={!loaded}
                 onChange={(e) => {
                   const sid = e.target.value;
                   if (!sid) return;
                   const next = [...sampleIds, sid].sort((a, b) => scenarioIds.indexOf(a) - scenarioIds.indexOf(b));
                   updateReviewState((s) => withSample(s, traditionId, next, mine?.sampleSeed ?? ""));
+                }}
+                className="rounded border border-default-200 px-2 py-1 text-sm text-default-800 disabled:opacity-40"
+              >
+                <option value="">choose…</option>
+                {unsampled.map((id) => <option key={id} value={id}>{id}</option>)}
+              </select>
+            </label>
+          )}
+          {unsampled.length > 0 && (
+            <label className="flex items-center gap-1 text-xs font-medium text-default-500">
+              <ExternalLink size={14} aria-hidden /> Review one beyond your sample
+              <select
+                value=""
+                aria-label="Review a scenario beyond your sample"
+                data-testid="review-beyond-sample-picker"
+                onChange={(e) => {
+                  const sid = e.target.value;
+                  if (!sid) return;
+                  // Open it for review WITHOUT adding to sampleIds — it stays out-of-sample (extra),
+                  // so it doesn't change the required-completion count.
+                  void navigate({ to: "/review/$traditionId/$scenarioId", params: { traditionId, scenarioId: sid } });
                 }}
                 className="rounded border border-default-200 px-2 py-1 text-sm text-default-800"
               >
@@ -256,20 +318,68 @@ export function ReviewTraditionPage() {
         </div>
       </section>
 
-      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runsQ.data?.defaultRunId ?? null} />
+      <SubmitPanel traditionId={traditionId} displayName={displayName} sha={sha ?? null} runId={runsQ.data?.defaultRunId ?? null} loaded={loaded} />
     </div>
   );
 }
 
-/** The explicit hand-off: copy / download the Markdown report, open a prefilled GitHub issue
- * (the durable, aggregatable intake channel), or back up / restore the raw JSON. */
-function SubmitPanel({ traditionId, displayName, sha, runId }: {
-  traditionId: string; displayName: string; sha: string | null; runId: string | null;
+/** The explicit hand-off: submit PRIVATELY to the reviewer's account (immutable snapshot), then
+ * optionally publish to a public GitHub issue; plus copy/download the report and back up / restore. */
+function SubmitPanel({ traditionId, displayName, sha, runId, loaded }: {
+  traditionId: string; displayName: string; sha: string | null; runId: string | null; loaded: boolean;
 }) {
   const review = useReviewState();
   const [copied, setCopied] = useState<null | "report" | "failed">(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const [importNote, setImportNote] = useState<string | null>(null);
+  const [submissions, setSubmissions] = useState<SubmissionMeta[]>([]);
+  const [submissionsError, setSubmissionsError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [publishUrl, setPublishUrl] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    void listSubmissions(traditionId)
+      .then((s) => alive && setSubmissions(s))
+      .catch((e) => alive && setSubmissionsError(e instanceof Error ? e.message : "couldn't load submissions"));
+    return () => {
+      alive = false;
+    };
+  }, [traditionId]);
+
+  // Submit a PRIVATE immutable snapshot. `publishedIssueUrl` is set only when the reviewer opted to
+  // also publish. Carries corpus/run provenance so the frozen record says what was reviewed.
+  const submit = async (publishedIssueUrl?: string) => {
+    if (!loaded) return; // button is disabled until the draft loads; guard anyway
+    await flushReviewSaves(); // persist the latest edits, then read the freshest state
+    const t = peekReviewState().traditions[traditionId] ?? emptyTradition();
+    const progress = traditionProgress(t);
+    // "Empty" = no content anywhere: no verdict AND no notes/suggestion, in-sample or beyond. Use the
+    // content-based `contentful` (not `done`, which counts only verdicts) so a notes-only review — which
+    // the report DOES render — can still be submitted.
+    if (progress.contentful === 0 && progress.beyondSample === 0) {
+      setSubmitError("Nothing to submit yet — review at least one check first.");
+      return;
+    }
+    const publishing = !!publishedIssueUrl;
+    const confirmMsg = publishing
+      ? "Submit AND record a public GitHub issue link? A permanent, unchangeable snapshot is saved, and this marks the review as published (your name and contact become public)."
+      : "Submit this review? A permanent, unchangeable snapshot is saved privately to your account.";
+    if (!window.confirm(confirmMsg)) return;
+    setSubmitting(true);
+    setSubmitError(null);
+    try {
+      const snapshot = { review: t, provenance: { traditionId, sha, runId } };
+      const meta = await submitReview(traditionId, snapshot, publishedIssueUrl);
+      setSubmissions((prev) => [meta, ...prev]);
+      setPublishUrl("");
+    } catch (e) {
+      setSubmitError(e instanceof Error ? e.message : "submit failed");
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const report = buildReviewReport({ state: review, traditionId, displayName, sha, runId, repo: REPO });
   const title = issueTitle(displayName, review.reviewer.name);
@@ -303,24 +413,16 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
     <section className="flex flex-col gap-3 rounded-lg border border-accent/30 bg-surface-secondary p-4" data-testid="review-submit">
       <h2 className="text-lg font-semibold">Submit your review</h2>
       <p className="text-sm text-default-600">
-        Your intake becomes a Markdown report (reviewer, verdicts, notes, and suggested revisions,
-        linked to the exact files you reviewed). The preferred route is a GitHub issue — it lands
-        directly with the maintainers and keeps every review in one queryable place. No GitHub account?
-        Download the report and send it however you like.
+        Submitting saves a <strong>private, permanent snapshot</strong> of this review to your account —
+        it stays private (only you and the maintainers see it) and can&rsquo;t be changed afterward. You
+        can still keep editing your draft and submit again later.
       </p>
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        {issueUrl ? (
-          <a href={issueUrl} target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90">
-            <ExternalLink size={14} aria-hidden /> Open a prefilled GitHub issue
-          </a>
-        ) : (
-          <a href={blankIssueUrl(REPO, title)} target="_blank" rel="noreferrer"
-            className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90"
-            title="The report is too long to prefill — copy it, then paste into the issue body.">
-            <ExternalLink size={14} aria-hidden /> Open a GitHub issue (copy the report first)
-          </a>
-        )}
+        <button type="button" onClick={() => void submit()} disabled={submitting || !loaded}
+          data-testid="review-submit-private"
+          className="flex items-center gap-1.5 rounded bg-accent px-3 py-1.5 text-accent-foreground hover:opacity-90 disabled:opacity-60">
+          <ClipboardCheck size={14} aria-hidden /> {submitting ? "Submitting…" : "Submit review (private)"}
+        </button>
         <button type="button" onClick={copy}
           className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300">
           <Copy size={14} aria-hidden /> {copied === "report" ? "Copied!" : copied === "failed" ? "Copy failed — use Download" : "Copy report"}
@@ -330,23 +432,77 @@ function SubmitPanel({ traditionId, displayName, sha, runId }: {
           <Download size={14} aria-hidden /> Download report (.md)
         </button>
       </div>
-      {!issueUrl && (
-        <p className="text-xs text-warning">
-          This report is too long to prefill into a GitHub issue URL — use “Copy report”, then paste it
-          into the issue body.
+      {submitError && <p className="text-xs text-danger" role="alert">Couldn&rsquo;t submit: {submitError}</p>}
+      {submissionsError && (
+        <p className="text-xs text-warning" role="status">Couldn&rsquo;t load your submission history ({submissionsError}).</p>
+      )}
+      {submissions.length > 0 && (
+        <p className="text-xs text-success" data-testid="review-submitted">
+          Submitted privately{submissions[0] ? ` · ${new Date(submissions[0].submittedAt).toLocaleString()}` : ""}
+          {submissions.length > 1 ? ` (${submissions.length} submissions)` : ""}.
         </p>
       )}
+
+      <details className="text-sm text-default-600" data-testid="review-publish-optional">
+        <summary className="cursor-pointer text-default-500 hover:text-default-700">
+          Optional: also publish to a public GitHub issue
+        </summary>
+        <p className="mt-2 text-xs text-default-500">
+          This makes your review — including your name and contact — <strong>public</strong>. Only do
+          this if you&rsquo;re comfortable sharing it openly.
+        </p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          {issueUrl ? (
+            <a href={issueUrl} target="_blank" rel="noreferrer"
+              className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300">
+              <ExternalLink size={14} aria-hidden /> Open a prefilled GitHub issue
+            </a>
+          ) : (
+            <a href={blankIssueUrl(REPO, title)} target="_blank" rel="noreferrer"
+              className="flex items-center gap-1.5 rounded border border-default-200 px-3 py-1.5 text-default-700 hover:border-default-300"
+              title="The report is too long to prefill — copy it, then paste into the issue body.">
+              <ExternalLink size={14} aria-hidden /> Open a GitHub issue (copy the report first)
+            </a>
+          )}
+        </div>
+        {!issueUrl && (
+          <p className="mt-1 text-xs text-warning">
+            This report is too long to prefill into a GitHub issue URL — use “Copy report”, then paste it
+            into the issue body.
+          </p>
+        )}
+        <div className="mt-2 flex flex-wrap items-center gap-2 text-xs">
+          <label className="flex flex-1 items-center gap-2 text-default-500">
+            Opened it? Paste the issue URL to record it with your submission:
+            <input
+              type="url"
+              value={publishUrl}
+              onChange={(e) => setPublishUrl(e.target.value)}
+              placeholder="https://github.com/…/issues/123"
+              className="min-w-0 flex-1 rounded border border-default-200 bg-background px-2 py-1 text-default-800"
+            />
+          </label>
+          <button type="button" disabled={submitting || !loaded || !publishUrl.trim()}
+            onClick={() => void submit(publishUrl.trim())} data-testid="review-submit-published"
+            className="rounded border border-default-200 px-2 py-1 text-default-700 hover:border-default-300 disabled:opacity-60">
+            Submit as published
+          </button>
+        </div>
+      </details>
       <div className="flex flex-wrap items-center gap-3 border-t border-default-200 pt-3 text-xs text-default-500">
         <button type="button"
           onClick={() => download("multibench-review-backup.json", JSON.stringify(review, null, 2), "application/json")}
           className="flex items-center gap-1 hover:text-default-700">
           <Download size={12} aria-hidden /> Back up all my reviews (JSON)
         </button>
-        <button type="button" onClick={() => fileRef.current?.click()} className="flex items-center gap-1 hover:text-default-700">
+        {/* Restore overwrites the whole review; gate it until the server draft has loaded, or a
+            restore-onto-blank-base would be clobbered when the load resolves (same hazard as editing). */}
+        <button type="button" disabled={!loaded} onClick={() => fileRef.current?.click()}
+          className="flex items-center gap-1 hover:text-default-700 disabled:opacity-40">
           <Upload size={12} aria-hidden /> Restore from backup
         </button>
         <input ref={fileRef} type="file" accept="application/json,.json" className="hidden"
-          aria-label="Restore review backup"
+          aria-label="Restore review backup" disabled={!loaded}
           onChange={(e) => void onImport(e.target.files?.[0])} />
         <button type="button"
           onClick={() => {

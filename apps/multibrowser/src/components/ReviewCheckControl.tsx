@@ -17,6 +17,7 @@ export function ReviewCheckControl({
   editUrl,
   notesPlaceholder = "What did you find? Cite chapter/verse where helpful…",
   testId,
+  disabled = false,
 }: {
   check: CheckReview;
   onChange: (patch: Partial<CheckReview>) => void;
@@ -24,6 +25,9 @@ export function ReviewCheckControl({
   editUrl?: string | null;
   notesPlaceholder?: string;
   testId?: string;
+  /** While the saved draft is still loading (or its load failed), inputs are inert — an edit on a
+   * blank base would be discarded when the server draft is adopted. Gate until the load succeeds. */
+  disabled?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-2 rounded-lg border border-default-200 bg-surface-secondary p-3" data-testid={testId}>
@@ -36,6 +40,7 @@ export function ReviewCheckControl({
               key={o.value}
               type="button"
               aria-pressed={active}
+              disabled={disabled}
               // Click again to un-answer (back to "unreviewed") — a reviewer can retract.
               onClick={() => onChange({ status: active ? "unreviewed" : o.value })}
               className={
@@ -70,7 +75,8 @@ export function ReviewCheckControl({
           onChange={(e) => onChange({ notes: e.target.value })}
           placeholder={notesPlaceholder}
           rows={2}
-          className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800"
+          disabled={disabled}
+          className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800 disabled:opacity-50"
         />
       </label>
       <label className="flex flex-col gap-1 text-xs font-medium text-default-500">
@@ -80,7 +86,8 @@ export function ReviewCheckControl({
           onChange={(e) => onChange({ suggestion: e.target.value })}
           placeholder="If you'd word it differently, put your version here…"
           rows={2}
-          className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800"
+          disabled={disabled}
+          className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800 disabled:opacity-50"
         />
       </label>
     </div>

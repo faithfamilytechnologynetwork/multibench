@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Card } from "@heroui/react";
 import { Link } from "@tanstack/react-router";
 import { ClipboardCheck } from "lucide-react";
@@ -5,34 +6,44 @@ import { useLatestSha, useTraditions } from "../lib/queries";
 import { REF, REPO } from "../lib/constants";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import {
+  prefetchDrafts,
   REVIEW_SAMPLE_SIZE,
   traditionProgress,
-  updateReviewState,
   useReviewState,
-  withReviewer,
+  useReviewStatus,
 } from "../lib/review";
+import { ReviewAuthGate, ReviewerBadge } from "../components/ReviewAuthGate";
 import { ReviewProgressBar } from "../components/ReviewProgress";
 import { RateLimitBanner } from "../components/RateLimitBanner";
 import { CenteredSpinner } from "../components/Loading";
 import { Notice } from "../components/Notice";
 
 // The reviewer workspace's front door: says WHAT an expert reviewer is asked to do (the three
-// steps), captures who they are, and routes them into a tradition. Everything they type is kept
-// in this browser (localStorage) until they explicitly submit from the tradition page.
+// steps) and routes them into a tradition. Behind the auth gate — reviewer identity is the
+// authenticated account, and drafts persist to the API (see lib/review.ts), not localStorage.
 
 export function ReviewIndexPage() {
   const shaQ = useLatestSha();
   const traditionsQ = useTraditions(shaQ.data);
   const traditions = traditionsQ.data;
   const review = useReviewState();
+  const authStatus = useReviewStatus();
+
+  // Once signed in, load ALL drafts at once so this page shows real cross-device progress (not
+  // "not started") for traditions the reviewer already worked on from another device.
+  useEffect(() => {
+    if (authStatus.auth === "in") void prefetchDrafts();
+  }, [authStatus.auth]);
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(traditionsQ.error);
   const otherError = !rl && (shaQ.error || traditionsQ.error);
   const loadingFirst = !traditions && !rl && !otherError;
 
   return (
+    <ReviewAuthGate>
     <div className="flex flex-col gap-6" data-testid="review-index">
       {rl && <RateLimitBanner error={rl} />}
+      <ReviewerBadge />
 
       <header className="max-w-3xl">
         <h1 className="flex items-center gap-2 text-2xl font-semibold">
@@ -106,47 +117,6 @@ export function ReviewIndexPage() {
         </li>
       </ol>
 
-      <section className="max-w-3xl rounded-lg border border-default-200 bg-surface-secondary p-4">
-        <h2 className="font-semibold">Who is reviewing?</h2>
-        <p className="mt-1 text-sm text-default-500">
-          Included in the report you submit. Everything you type stays in this browser until you submit
-          — nothing is sent anywhere as you work.
-        </p>
-        <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3" data-testid="reviewer-form">
-          <label className="flex flex-col gap-1 text-xs font-medium text-default-500">
-            Name
-            <input
-              type="text"
-              value={review.reviewer.name}
-              onChange={(e) => updateReviewState((s) => withReviewer(s, { name: e.target.value }))}
-              className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800"
-            />
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-medium text-default-500">
-            Contact (email / GitHub)
-            <input
-              type="text"
-              value={review.reviewer.contact}
-              onChange={(e) => updateReviewState((s) => withReviewer(s, { contact: e.target.value }))}
-              className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800"
-            />
-            <span className="font-normal text-default-400">
-              Submitted issues are public — a GitHub handle is safer to share here than an email.
-            </span>
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-medium text-default-500">
-            Background (your standing to review)
-            <input
-              type="text"
-              value={review.reviewer.background}
-              onChange={(e) => updateReviewState((s) => withReviewer(s, { background: e.target.value }))}
-              placeholder="e.g. parish priest, 15 years"
-              className="rounded border border-default-200 bg-background px-2 py-1 text-sm text-default-800"
-            />
-          </label>
-        </div>
-      </section>
-
       <section className="flex flex-col gap-3">
         <h2 className="text-lg font-semibold">Pick a tradition to review</h2>
 
@@ -200,5 +170,6 @@ export function ReviewIndexPage() {
         )}
       </section>
     </div>
+    </ReviewAuthGate>
   );
 }
