@@ -374,3 +374,18 @@ real-browser Safari/Chrome cross-site cookie completion gate (needs deploy + ALL
 **PARKED:** phase_5+ (serving schema + ingest/results/raw/corpus tiers, phases 5-13) are DEFERRED —
 plan says "scheduled when the architect greenlights the serving migration." NOT implementing phase_5.
 Awaiting: (1) PR #99 review/merge, (2) architect greenlight for the serving migration.
+
+### PR #99 integration review — 5 pre-merge fixes (architect-relayed, all applied).
+3-way CMAP: gemini APPROVE / codex REQUEST_CHANGES / claude COMMENT. Architect adjudicated LWW STANDS
+(design is correct; only the *silence* was wrong). Applied all 5:
+1. prefetchDrafts now SKIPS any tradition whose loadState==="ok" (both adopt AND version overwrite) —
+   closes the verified clobber race (fast GET → edit → slow LIST re-adopts). +deterministic gated-LIST test.
+2. Gate editing until loadState==="ok": ReviewCheckControl gained a `disabled` prop; both review pages pass
+   `!loaded` (ReviewScenarioPage had NO gate before — added loaded state); restore-from-backup + sample-mutating
+   buttons (remove/reshuffle/add) also gated. +page test (inputs disabled until draft load resolves).
+3. Reconcile notice now set on the SUCCESSFUL single 409-retry too (was only double-conflict path). +assertion.
+4. Deploy-ordering runbook in apps/api/README.md (ALLOWED_ORIGINS→deploy API→build SPA w/ VITE_API_BASE→railway up)
+   + the post-deploy real-browser cookie gate.
+5. Deleted dead `withReviewer` export (never persisted — identity comes from the account); tests seed reviewer directly.
+Open product Q (Waleed, NOT me): localStorage `multibench.review.v1` migration — do NOT build an importer unless relayed.
+types clean; dispatcher mb 380 passed. Committed e39fe42, pushed. Architect re-verifies directly (no re-CMAP).
