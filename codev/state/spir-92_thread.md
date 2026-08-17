@@ -471,3 +471,11 @@ tables scroll. Verified default rehype-sanitize (GitHub schema) ALREADY permits 
 →<br>, strikethrough, and sanitize still strips script/img. Same component serves corpus prose — scenario/
 tradition tests still green (trusted md, GFM safe). types clean; mb 387 passing. Small PR, direct review,
 Waleed merge → deploy → re-park.
+
+### PR #106 MERGED + deployed + verified. RE-PARKED.
+Merged (needed 503 retries — GitHub API was flaky). Deployed from apps/multibrowser; new bundle
+index-lTG0JnOy.js live (differs from #105's eUc0kgou), /api/health + /review 200. The BUD-041 raw shard
+the review embed renders carries 11 table-bearing messages → they now render as real scrollable tables
+(remark-gfm) instead of collapsed pipe-text; single-\n verse/blessings break (remark-breaks). Fixed
+Markdown code is unit-tested (table→<table>, <br>, sanitize strips script) and in the live bundle; the
+in-browser visual is the real-browser check. Project 92 RE-PARKED: review system live; phases 6-7 dormant.
