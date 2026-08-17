@@ -3,7 +3,7 @@ import { getRouteApi, Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useLatestSha, useScenario, useScenarioRaw, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
-import { FILE, PRESSURES, PRESSURE_GLOSSES, REF, REPO } from "../lib/constants";
+import { FILE, PRESSURES, PRESSURE_GLOSSES } from "../lib/constants";
 import { parseRawSelection, rawSelectionToSearch, type RawSearchRecord, type RawSelection } from "../lib/rawSelection";
 import type { RawCatalog } from "../lib/rawModel";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
@@ -15,7 +15,6 @@ import {
   withScenarioCheck,
   type ScenarioCheckKey,
 } from "../lib/review";
-import { editFileUrl, scenarioCheckFile } from "../lib/reviewReport";
 import { ReviewAuthGate, ReviewSaveStatus } from "../components/ReviewAuthGate";
 import { ReviewCheckControl } from "../components/ReviewCheckControl";
 import { RawComparison } from "../components/RawComparison";
@@ -95,7 +94,6 @@ function ReviewScenarioPageInner() {
 
   const setCheck = (key: ScenarioCheckKey) => (patch: Parameters<typeof withScenarioCheck>[4]) =>
     updateReviewState((s) => withScenarioCheck(s, traditionId, scenarioId, key, patch));
-  const editUrl = (key: ScenarioCheckKey) => editFileUrl(REPO, REF, scenarioCheckFile(traditionId, scenarioId, key));
 
   return (
     <div className="flex flex-col gap-6" data-testid="review-scenario-page">
@@ -161,7 +159,7 @@ function ReviewScenarioPageInner() {
             ? <Markdown>{scenario.turn1}</Markdown>
             : <Notice notice={{ severity: "error", scope: "section", where: `${traditionId}/scenarios/${scenarioId}/${FILE.turn1}`, message: "Turn-1 opening is missing or empty." }} />}
         </div>
-        <ReviewCheckControl check={checks.scenario} onChange={setCheck("scenario")} editUrl={editUrl("scenario")}
+        <ReviewCheckControl check={checks.scenario} onChange={setCheck("scenario")}
           disabled={!loaded}
           notesPlaceholder="Is the situation authentic? Would an adherent actually ask this?" />
       </section>
@@ -179,7 +177,7 @@ function ReviewScenarioPageInner() {
             ? <Markdown>{scenario.judgeGuidance}</Markdown>
             : <Notice notice={{ severity: "error", scope: "section", where: `${traditionId}/scenarios/${scenarioId}/${FILE.judgeGuidance}`, message: "Judge-guidance is missing or empty." }} />}
         </div>
-        <ReviewCheckControl check={checks.scoring} onChange={setCheck("scoring")} editUrl={editUrl("scoring")}
+        <ReviewCheckControl check={checks.scoring} onChange={setCheck("scoring")}
           disabled={!loaded}
           notesPlaceholder="Wrong ruling? Missing exception? Misquoted passage? Say which…" />
       </section>
@@ -188,7 +186,7 @@ function ReviewScenarioPageInner() {
       <section className="flex flex-col gap-2" data-testid="review-check-judgement">
         <h2 className="text-lg font-semibold">c · Check the judges&rsquo; verdicts</h2>
         <JudgementViewer traditionId={traditionId} scenarioId={scenarioId} raw={raw} />
-        <ReviewCheckControl check={checks.judgement} onChange={setCheck("judgement")} editUrl={editUrl("judgement")}
+        <ReviewCheckControl check={checks.judgement} onChange={setCheck("judgement")}
           disabled={!loaded}
           notesPlaceholder="Cite the model + framing + pressure where a verdict is off, and why…" />
       </section>
@@ -215,7 +213,7 @@ function ReviewScenarioPageInner() {
             </div>
           ))}
         </div>
-        <ReviewCheckControl check={checks.pressures} onChange={setCheck("pressures")} editUrl={editUrl("pressures")}
+        <ReviewCheckControl check={checks.pressures} onChange={setCheck("pressures")}
           disabled={!loaded}
           notesPlaceholder="Which push rings false, and how would a real interlocutor put it?" />
       </section>

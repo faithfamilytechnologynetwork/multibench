@@ -5,7 +5,6 @@ import {
   blankIssueUrl,
   blobUrl,
   buildReviewReport,
-  editFileUrl,
   issueTitle,
   prefilledIssueUrl,
   scenarioCheckFile,
@@ -221,10 +220,7 @@ describe("submission URLs", () => {
     expect(issueTitle("Sunni Islam", "  ")).toBe("Tradition review: Sunni Islam");
   });
 
-  it("edit links target a writable ref; blob links pin the reviewed snapshot", () => {
-    expect(editFileUrl(REPO, "main", "traditions/t/guide.md")).toBe(
-      `https://github.com/${REPO}/edit/main/traditions/t/guide.md`,
-    );
+  it("blob links pin the reviewed snapshot", () => {
     expect(blobUrl(REPO, "cafebabe", "traditions/t/guide.md")).toBe(
       `https://github.com/${REPO}/blob/cafebabe/traditions/t/guide.md`,
     );

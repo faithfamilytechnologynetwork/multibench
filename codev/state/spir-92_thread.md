@@ -447,3 +447,12 @@ judaism, roman-catholicism, secular-sage, sunni-islam, taoism]; run 20260813-pro
 only. So runIdForTradition → buddhism resolves to 20260803 (record run, no red error), protestantism to
 20260813-protestantism (own run) — exactly the expected outcome. In-browser visual render is Waleed's real-browser
 check. Closing #94 is the architect's. Project 92 RE-PARKED: phases 1-5 done, 6-7 dormant.
+
+### Unpark: remove 'propose an edit on GitHub' from review page (Waleed) — branch builder/spir-92-remove-propose-edit.
+Removed the pencil link + editUrl prop from ReviewCheckControl; dropped editUrl plumbing from both review
+pages (ReviewScenarioPage editUrl helper + 4 props; ReviewTraditionPage source/guide props) and the now-dead
+editFileUrl() from reviewReport.ts (+ its test). scenarioCheckFile/blobUrl kept (the report still uses/tests
+them). Reviewer proposes changes via Notes + Suggested revision (both flow into the report). Publish path
+untouched — it opens a prefilled GitHub ISSUE and the report uses blob (read) links, no propose-edit link.
+Trimmed newly-unused imports (REF/REPO in scenario page, REF in tradition page). types clean; mb 383 passing.
+Small PR, architect direct review, Waleed merge → deploy → re-park.
