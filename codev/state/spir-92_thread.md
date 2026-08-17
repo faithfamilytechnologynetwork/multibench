@@ -456,3 +456,18 @@ them). Reviewer proposes changes via Notes + Suggested revision (both flow into 
 untouched — it opens a prefilled GitHub ISSUE and the report uses blob (read) links, no propose-edit link.
 Trimmed newly-unused imports (REF/REPO in scenario page, REF in tradition page). types clean; mb 383 passing.
 Small PR, architect direct review, Waleed merge → deploy → re-park.
+
+### Unpark: transcript markdown formatting (Waleed) — branch builder/spir-92-markdown-gfm.
+Markdown.tsx ran react-markdown with ONLY rehypeSanitize → GFM tables in model transcripts collapsed to
+pipe-text. Fix: remarkPlugins=[remarkGfm, remarkBreaks] (rehypeSanitize still runs after, on hast).
+Line-break DECISION derived from real raw-tier data (sampled 13 shards of results-raw/20260803, 4680
+messages): 47 messages carry real GFM tables (e.g. buddhism/BUD-041 — Domain/Standard, Harm/Atonement,
+Precept/Breach); paragraphs use \n\n and hard breaks use CommonMark "  \n" (both already render), BUT
+genuine bare single-\n line-by-line breaks exist (buddhism/BUD-001 closing blessing "May your partner
+heal.\nMay your heart stay soft.") and models don't hard-wrap paragraphs → remark-breaks is near-zero-risk
+and preserves transcript fidelity, so ADDED. Tables wrapped in overflow-x-auto (components.table) so wide
+tables scroll. Verified default rehype-sanitize (GitHub schema) ALREADY permits table/thead/tbody/tr/th/td
+— no schema extension needed (table test renders <table>). Tests: table→<table>, overflow wrapper, single-\n
+→<br>, strikethrough, and sanitize still strips script/img. Same component serves corpus prose — scenario/
+tradition tests still green (trusted md, GFM safe). types clean; mb 387 passing. Small PR, direct review,
+Waleed merge → deploy → re-park.
