@@ -1,10 +1,10 @@
-import { Check, TriangleAlert, Pencil } from "lucide-react";
+import { Check, TriangleAlert } from "lucide-react";
 import type { CheckReview, CheckStatus } from "../lib/review";
 
 // The one intake widget of the review workflow: a two-way verdict (looks right / needs changes),
 // free-text notes, and a "suggested revision" box that flows verbatim into the submitted report.
-// Optionally links GitHub's web editor for the file under review (forks automatically for
-// reviewers without push access — a real PR path for concrete fixes).
+// Notes + Suggested revision are the reviewer's way to propose changes; concrete edits ride along
+// in the submitted report, not a per-check GitHub link.
 
 const STATUS_OPTIONS: { value: Exclude<CheckStatus, "unreviewed">; label: string }[] = [
   { value: "approved", label: "Looks right" },
@@ -14,15 +14,12 @@ const STATUS_OPTIONS: { value: Exclude<CheckStatus, "unreviewed">; label: string
 export function ReviewCheckControl({
   check,
   onChange,
-  editUrl,
   notesPlaceholder = "What did you find? Cite chapter/verse where helpful…",
   testId,
   disabled = false,
 }: {
   check: CheckReview;
   onChange: (patch: Partial<CheckReview>) => void;
-  /** GitHub web-editor URL for the file under review (null/undefined → no link). */
-  editUrl?: string | null;
   notesPlaceholder?: string;
   testId?: string;
   /** While the saved draft is still loading (or its load failed), inputs are inert — an edit on a
@@ -57,16 +54,6 @@ export function ReviewCheckControl({
             </button>
           );
         })}
-        {editUrl && (
-          <a
-            href={editUrl}
-            target="_blank"
-            rel="noreferrer"
-            className="ml-auto flex items-center gap-1 text-xs text-primary hover:underline"
-          >
-            <Pencil size={12} aria-hidden /> propose an edit on GitHub
-          </a>
-        )}
       </div>
       <label className="flex flex-col gap-1 text-xs font-medium text-default-500">
         Notes

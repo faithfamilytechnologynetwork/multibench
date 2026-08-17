@@ -199,14 +199,6 @@ export function issueTitle(displayName: string, reviewerName: string): string {
   return `Tradition review: ${displayName}${who}`;
 }
 
-/**
- * GitHub's web editor for a corpus file (branch ref, NOT a SHA — editing needs a writable ref;
- * GitHub forks automatically for reviewers without push access, yielding a real PR path).
- */
-export function editFileUrl(repo: string, ref: string, path: string): string {
-  return `https://github.com/${repo}/edit/${ref}/${path}`;
-}
-
 /** A pinned read link to the exact reviewed snapshot of a file. */
 export function blobUrl(repo: string, shaOrRef: string, path: string): string {
   return `https://github.com/${repo}/blob/${shaOrRef}/${path}`;

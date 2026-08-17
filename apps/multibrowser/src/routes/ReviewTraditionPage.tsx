@@ -3,7 +3,7 @@ import { getRouteApi, Link, useNavigate } from "@tanstack/react-router";
 import { ChevronRight, ClipboardCheck, Copy, Download, ExternalLink, Plus, RotateCcw, Shuffle, Trash2, Upload } from "lucide-react";
 import { runIdForTradition, useLatestSha, useResultsRuns, useScenarioMetas, useTradition } from "../lib/queries";
 import { taxonomyValues } from "../lib/model";
-import { FILE, REF, REPO } from "../lib/constants";
+import { FILE, REPO } from "../lib/constants";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import {
   REVIEW_SAMPLE_SIZE,
@@ -26,7 +26,7 @@ import {
   withTraditionCheck,
   withoutTradition,
 } from "../lib/review";
-import { blankIssueUrl, buildReviewReport, editFileUrl, issueTitle, prefilledIssueUrl } from "../lib/reviewReport";
+import { blankIssueUrl, buildReviewReport, issueTitle, prefilledIssueUrl } from "../lib/reviewReport";
 import { listSubmissions, submitReview, type SubmissionMeta } from "../lib/reviewApi";
 import { ReviewAuthGate, ReviewSaveStatus } from "../components/ReviewAuthGate";
 import { ReviewCheckControl, CheckStatusDot } from "../components/ReviewCheckControl";
@@ -165,7 +165,6 @@ function ReviewTraditionPageInner() {
         <ReviewCheckControl
           check={mine?.source ?? { status: "unreviewed", notes: "", suggestion: "" }}
           onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "source", patch))}
-          editUrl={editFileUrl(REPO, REF, `${base}/${FILE.source}`)}
           testId="review-check-source"
           disabled={!loaded}
         />
@@ -187,7 +186,6 @@ function ReviewTraditionPageInner() {
         <ReviewCheckControl
           check={mine?.guide ?? { status: "unreviewed", notes: "", suggestion: "" }}
           onChange={(patch) => updateReviewState((s) => withTraditionCheck(s, traditionId, "guide", patch))}
-          editUrl={editFileUrl(REPO, REF, `${base}/${FILE.guide}`)}
           testId="review-check-guide"
           disabled={!loaded}
         />
