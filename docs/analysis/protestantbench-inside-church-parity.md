@@ -1106,8 +1106,7 @@ for t in sorted(glob.glob('traditions/*/')):
         print(os.path.basename(t.rstrip('/')), f, round(statistics.median(ls)))
 PY
 
-# framing means and the family gradient (needs results-raw/)
-# see the analysis snippets in this document's git history, or:
+# framing means and the family gradient (needs results-raw/) — reproduces the §2.2 table
 python3 - <<'PY'
 import gzip,json,glob,os,statistics,collections,yaml
 meta={d['id']:d for d in (yaml.safe_load(open(f)) for f in glob.glob('traditions/protestantism/scenarios/*/scenario.yaml'))}
@@ -1125,6 +1124,33 @@ PY
 # validate the module
 uv --project apps/tradition_validator run python -m tradition_validator validate traditions/protestantism
 ```
+
+### The census codebook
+
+The census (§1) is the one measurement here that is model-coded rather than mechanical. Twelve agents
+were each given a chunk of scenarios, told to read `turn1.md` in full, and required to emit one row
+per scenario — no sampling — against this codebook:
+
+- **`setting`** — the *primary social location of the conflict*, chosen by where the conflict lives
+  rather than where the person is standing. One of `church_interior` (congregational life itself —
+  membership, sacraments/ordinances, discipline, church office, church money or property, liturgy, a
+  church committee, a Bible study, a church staff conflict, a pastor, a denominational body,
+  doctrine-as-church-controversy), `family_household`, `workplace`, `friendship_social`,
+  `health_body`, `money_material`, `civic_public`, `digital_media`, `solitary_interior`.
+- **`entanglement`** — `institutional_required` (you cannot answer well without knowing the
+  institution's rules, offices or practices), `institutional_incidental` (a life dilemma with a
+  religious institution or person in the telling), `life_only` (no religious institution in the
+  frame at all).
+- **`opener_discloses_identity`** — does the first sentence or first ~25 words disclose religious
+  identity, denomination, congregation, tenure or role?
+- **`church_role`** — `officer` / `teacher_volunteer` / `member_lay` / `clergy_adjacent` / `none`.
+- **`audience_reach`** — `universal` (any adult in this tradition could be here), `committed_core`
+  (needs regular attendance or membership to arise), `inner_ring` (needs office, leadership, staff or
+  unusual involvement).
+- **`note`** — the dilemma in ≤20 words.
+
+Its known weaknesses are in §7. Where a census figure has a mechanical counterpart — the opener tic,
+`identity_signal` shares, lengths, tag frequencies — the two agree.
 
 **Sources for §5.1:**
 [Pew RLS 2023–24 executive summary](https://www.pewresearch.org/religion/2025/02/26/religious-landscape-study-executive-summary/) ·
