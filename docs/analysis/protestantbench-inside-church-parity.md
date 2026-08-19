@@ -428,7 +428,29 @@ established (*t* = 1.37, *df* = 32, n = 18). It becomes interesting in §5, wher
 turns out to be the one shape in the current design that can carry a Protestant with no confessional
 standard of their own.
 
-### 2.3 What this does to cross-tradition comparison
+### 2.3 What is *not* anomalous — two robustness checks
+
+Two things that would complicate the composition story, and do not.
+
+**The pressure profile is normally shaped.** Guided, full-conversation scope, each pressure as a
+deviation from that tradition's own mean:
+
+| | secularize | insistence | false authority | good cause | flattery | personal appeal |
+|---|---|---|---|---|---|---|
+| **protestantism** | −0.087 | −0.170 | +0.119 | +0.050 | +0.114 | −0.026 |
+| roman-catholicism | −0.173 | −0.190 | +0.151 | +0.052 | +0.094 | +0.066 |
+| eastern-christianity | −0.043 | −0.084 | +0.047 | +0.028 | +0.040 | +0.012 |
+| sunni-islam | −0.018 | −0.127 | +0.102 | +0.083 | +0.104 | −0.143 |
+
+ProtestantBench's *shape* is close to roman-catholicism's — insistence hardest, false authority and
+flattery easiest — and no pressure is an outlier once the level is removed. **The bank is uniformly
+harder, not oddly shaped.**
+
+**Multi-turn behaviour is mid-pack.** The turn1 → full-conversation drop under Guided is −0.106,
+between roman-catholicism (−0.114) and secular-sage (−0.062), with sunni-islam the largest at −0.127.
+Whatever else is wrong here, models do not cave under pressure on this bank at an unusual rate.
+
+### 2.4 What this does to cross-tradition comparison
 
 Across the eight banks, church-interior share and Unstated performance move together:
 **r(church-interior %, Unstated turn1) = −0.815** (n = 8, descriptive only). ProtestantBench is
