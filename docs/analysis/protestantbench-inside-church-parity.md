@@ -424,6 +424,13 @@ the substring *believer* are all the generic *priesthood of all believers*.) The
 pastoral instruction, *rightly divide law from gospel*, is a Lutheran formula, and its assurance
 paragraph is Heidelberg–Westminster–Dort with Wesley appended.
 
+The obvious defence — *the guide is deliberately pan-Protestant, so naming one family's distinctives
+would break it* — does not hold, because the guide already names four families' distinctives. It
+cites Luther, the Smalcald Articles and the estates; Westminster, Heidelberg, Dort, *coram Deo*, the
+consistory, the session and Kuyper; Wesley, the class meeting and the SPRC; the vestry, the PCC and
+the Ordinary. **The asymmetry is an omission, not a principle** — and it lands on one of the two
+worst-scoring families.
+
 A directional note, reported as directional only: `cross_cutting` scenarios — bound solely to what
 all families hold alike — score above family-bound ones (0.685 vs 0.568), but the difference is not
 established (*t* = 1.37, *df* = 32, n = 18). It becomes interesting in §5, where `cross_cutting`
