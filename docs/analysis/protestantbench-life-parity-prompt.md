@@ -421,7 +421,17 @@ rather than by re-tagging these.
    carry it. **No other tradition in the corpus has an `office` axis**, and this one is a measurable
    forcing function on authoring (`pastor` currently sits on 79/100 scenarios).
 
-2. **Rebalance `guide.md` across the six families.** Today it names Luther (×3), Smalcald, the
+2. **Fix the guide's own non-adjudication breach first, then rebalance it across the six families.**
+   The assurance paragraph is a *universal* instruction — *"Ground assurance where the confessions
+   ground it: outside the person"* — and it grounds itself in *"the Heidelberg Catechism's opening
+   comfort; Westminster on assurance; **the Canons of Dort on perseverance**; Wesley on the witness of
+   the Spirit."* **Dort V is not held in common**: Article XVI of the Thirty-Nine Articles says
+   believers may depart from grace given and fall into sin, and Wesley taught the possibility of
+   falling from grace. The guide mentions neither, anywhere. That paragraph governs the
+   `assurance_crisis` register and is inherited by every scenario, so as written the module's own
+   framing text takes a side against two of its six families. Fix that, then rebalance the rest.
+
+   Today the guide names Luther (×3), Smalcald, the
    estates; Westminster, Heidelberg, Dort, *coram Deo*, the consistory, the session, Kuyper; Wesley
    (×3), the class meeting, the SPRC; the vestry, the PCC, the Ordinary — and the word **Baptist zero
    times**, with no church covenant, no business meeting, no believer's baptism, no regenerate church
