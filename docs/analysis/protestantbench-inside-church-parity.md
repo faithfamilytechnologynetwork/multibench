@@ -807,12 +807,32 @@ specified the tilt in the first place.
 | `intrinsic` | 66 (66%) | **42 (33%)** | still the second-highest intrinsic share in the corpus |
 | **total** | 100 | **126** | between roman-catholicism (76) and sunni-islam (140) |
 
-Reached by **re-authoring 24** existing scenarios (16 → `clean`, 8 → `leaky`) and **authoring 26 new
-ones** (18 `clean`, 8 `leaky`). Nothing is deleted; ids are append-only (`PRO-101`…`PRO-126`).
+Reached in three moves, because the `identity_signal` targets and the *who these people are* targets
+are not the same job (§4.2):
 
-Alongside: `church_interior` staging ≤ **20%** (from 39%), `inner_ring` ≤ **12%** (from 17%),
-`life_only` ≥ **35%** (from 11%), people holding a church role ≤ **20%** (from 40%), credentialed
+| move | n | what changes |
+|---|---|---|
+| **Signal re-authoring** | **34** existing `intrinsic` scenarios re-staged in ordinary life | 24 become `clean`, 10 become `leaky` |
+| **Standing re-authoring** (Rule A′) | **8** further existing `intrinsic` scenarios | stay `intrinsic` — the confessional question is untouched — but move out of the church interior and lose the church role |
+| **New authoring** | **26** new scenarios, `PRO-101`…`PRO-126` | 10 `intrinsic` **with no church role**, 10 `clean`, 6 `leaky` |
+
+Which lands: `clean` 8+24+10 = **42**; `leaky` 26+10+6 = **42**; `intrinsic` 66−34+10 = **42**.
+Sixty-eight of the 126 folders are touched. Nothing is deleted, and ids are append-only.
+
+The middle row is the one that does the work the census asked for: **18 of the 42 surviving
+`intrinsic` scenarios end with no church role**, against **0 of 66** today.
+
+Alongside: `church_interior` staging **20–25 of 126** (16–20%, from 39%) — a floor as well as a
+ceiling, because ecclesial competence is part of the construct; `inner_ring` ≤ **12%** (from 17%);
+`life_only` ≥ **35%** (from 11%); people holding a church role ≤ **20%** (from 40%); credentialed
 openers ≤ **5%** (from 31%).
+
+**Choose the 42 re-authored scenarios to land inside that church-interior band, not below it.** The
+ones to keep are the ones only this bank can stage: PRO-087 and PRO-096, and the spiritual-abuse and
+fiduciary cluster — PRO-059 (a deacon wanting to quietly reassign an accused children's teacher),
+PRO-078 (a pastor's repeated closed-door probing), PRO-014 (an elder asked to bury another elder's
+embezzlement) and PRO-043 (a volunteer bookkeeper pressed to divert a restricted legacy). Those
+dynamics exist only inside a church, and no other tradition module covers them as well.
 
 **Family balance after the pass:** lutheran 16 · presbyterian 16 · reformed 16 · methodist 17 ·
 baptist 17 · anglican 16 · cross_cutting 28. Anglican gains most in relative terms (12 → 16) because

@@ -132,18 +132,31 @@ give. If a new scenario would score +0.9 from every subject model, it is not car
 | `intrinsic` | 66 | **42 (33%)** |
 | **total** | 100 | **126** |
 
-Reached by **re-authoring 24** existing scenarios (16 → `clean`, 8 → `leaky`) and **authoring 26 new**
-(18 `clean`, 8 `leaky`). Nothing is deleted; ids are append-only (`PRO-101` … `PRO-126`).
+Reached in **three moves**, because the signal targets and the *who these people are* targets are not
+the same job:
+
+| move | n | what changes |
+|---|---|---|
+| **Signal re-authoring** | **34** existing `intrinsic` scenarios, re-staged in ordinary life | 24 → `clean`, 10 → `leaky` |
+| **Standing re-authoring** (Rule A′) | **8** further existing `intrinsic` scenarios | stay `intrinsic` — the confessional question is untouched — but move out of the church interior and lose the church role |
+| **New authoring** | **26** new, `PRO-101` … `PRO-126` | **10 `intrinsic` with no church role**, 10 `clean`, 6 `leaky` |
+
+Check the arithmetic yourself before you start: `clean` 8+24+10 = 42; `leaky` 26+10+6 = 42;
+`intrinsic` 66−34+10 = 42. Sixty-eight of the 126 folders are touched. Nothing is deleted; ids are
+append-only.
+
+**18 of the 42 surviving `intrinsic` scenarios must end with no church role** — against 0 of 66
+today. That is the middle row plus the ten new ones, and it is the target that most needs watching.
 
 Alongside, on the whole refined bank:
 
 | axis | target |
 |---|---|
-| conflict staged in church interior | **≤ 20%** (from 39%) |
+| conflict staged in church interior | **20–25 of 126 (16–20%)**, from 39% — a **floor as well as a ceiling** |
 | `inner_ring` audience reach | **≤ 12%** (from 17%) |
 | `life_only` entanglement | **≥ 35%** (from 11%) |
 | person holds a church role | **≤ 20%** (from 40%) |
-| `intrinsic` scenarios whose person holds **no** church role | **≥ 15 of 42** (from **0 of 66** — see Rule A′) |
+| `intrinsic` scenarios whose person holds **no** church role | **18 of 42** (from **0 of 66** — see Rule A′) |
 | first sentence carries a church credential | **≤ 5%** (from 31%) |
 | turn1 median | **~130 words** (from 173) |
 | `pressures.md` median | **~400 words** (from 578) |
@@ -242,9 +255,11 @@ more common Protestant than a Methodist on the SPRC.
 
 ## 5. What to re-author, and how
 
-Score every scenario against Rules A and B. Re-author the 24 that fail hardest — the ones whose
-dilemma cannot exist outside a church role. The census identified seventeen; verify the list
-yourself and choose the remaining seven:
+Score every scenario against Rules A, A′ and B. Forty-two existing scenarios change: **34** move off
+`intrinsic` into ordinary life, and **8** stay `intrinsic` while losing the church setting and the
+church role. Choose the 42 so the bank lands inside the 20–25 church-interior band of §3 — not below
+it. Start from the seventeen the census flagged as `inner_ring` and work outward through the
+church-interior set; verify every id yourself before touching it:
 
 PRO-003, PRO-014, PRO-024, PRO-026, PRO-033, PRO-043, PRO-045, PRO-059, PRO-071, PRO-074, PRO-075,
 PRO-089, PRO-092, PRO-094, PRO-100 — plus a further selection from the church-interior set
@@ -253,9 +268,26 @@ PRO-060, PRO-061, PRO-063, PRO-066, PRO-070, PRO-078, PRO-090, PRO-091, PRO-093,
 
 **Keep untouched:** PRO-087 (an ordination candidate who cannot affirm the catechism's
 second-commandment answer and is being coached to hide it) and PRO-096 (a bivocational Baptist pastor
-whose finance deacons tie his salary review to dropping an Amos series). These are among the best
-scenarios in the corpus. Ecclesial competence is part of the construct; keep a designed inner-ring
-tranche of about a dozen. It is 45% of the bank that is the problem, not the category.
+whose finance deacons tie his salary review to dropping an Amos series) — among the best scenarios in
+the corpus. Keep the spiritual-abuse and fiduciary cluster too: PRO-059 (a deacon wanting to quietly
+reassign an accused children's teacher), PRO-078 (a pastor's repeated closed-door probing for sexual
+detail), PRO-014 (an elder asked to bury another elder's embezzlement) and PRO-043 (a volunteer
+bookkeeper pressed to divert a restricted legacy). **Those dynamics exist only inside a church and no
+other tradition module covers them as well** — they are the reason the church-interior target in §3 is a
+band with a floor and not just a ceiling. Ecclesial competence is part of the construct; it is 39% of
+the bank that is the problem, not the category.
+
+**Which move for which scenario.** Ask: *is the confessional question here worth keeping?*
+
+- **If yes** — assurance, the Table, baptism, discipline, the Lord's Day, entire sanctification, the
+  covenant — it goes in the **standing re-authoring** set: keep the doctrine and the `intrinsic` tag,
+  move the person out of the office and out of the building. PRO-013 (a Sunday-school teacher
+  demanding a diagnostic checklist of true conversion) is the same scenario, and a better one, if the
+  man has not taught anything in years.
+- **If no** — the dilemma is a generic governance, personnel or procedure problem wearing church
+  clothes — it goes in the **signal re-authoring** set and becomes `clean` or `leaky`. PRO-092 (a
+  church employee asked to write a reference omitting a manager's expenses fraud) is an employment
+  reference problem; PRO-003 is a grievance-campaign problem.
 
 For each scenario you re-author:
 
