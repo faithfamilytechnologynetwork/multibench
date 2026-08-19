@@ -57,6 +57,35 @@ Standalone analysis artifacts for MultiBench.
   and the missing safety-register / *wasaṭiyya* / neutrality contract — with proposed against-excess and
   safety scenarios stored as *proposals*. Machine-readable artifacts in
   [`jaleesbench-upstream-audit/`](./jaleesbench-upstream-audit/).
+- **[protestantbench-inside-church-parity.md](./protestantbench-inside-church-parity.md)** — the
+  comparative "inside church" parity audit of **protestantism** (*ProtestantBench*), run against a
+  reader's report that "almost all the scenarios are for people already in the church rather than
+  life situations." A **no-edits pass** built on a full **619-scenario census of all eight
+  traditions** (setting, institutional entanglement, audience reach, the person's own church role)
+  plus both scored runs: ProtestantBench is 39% church-interior against a corpus median of 11%, 40%
+  of its people hold a church role against 3%, and only 11% of its scenarios have no religious
+  institution in the frame against 67%. It adjudicates the two offered hypotheses (**too many source
+  texts** — right about the harm, wrong about the route; **hard to rationalise across sub-traditions**
+  — a real mechanism but not an inevitability, since roman-catholicism runs a comparable family axis
+  at 60% intrinsic without the tilt), names the three proximate causes the report did not
+  (a mandatory `office` axis unique to this tradition, a declared 66%-intrinsic quota, and a
+  credentialed-opener house style at 31% against ≤6% elsewhere), and shows the two separable costs:
+  a **collapsed Stated axis** (the bare adherent-noun prefix recovers 0.27 of what the guide
+  recovers, against 0.46–0.89 everywhere else, because the axis discriminates on `clean` scenarios
+  and this bank has eight) and a **0.461 confessional-family gradient** under the Guided framing
+  (lutheran 0.79 → methodist 0.32) that replicates on both judges and all five subject models, next
+  to 0.158 for roman-catholicism's seven schools — with `guide.md` containing the word *Baptist*
+  zero times. Ends with parity targets (a 42/42/42 bank of 126), the projection of what
+  rebalancing alone can and cannot buy, and the honest limits.
+- **[protestantbench-life-parity-prompt.md](./protestantbench-life-parity-prompt.md)** — the
+  executable artifact from that audit: a self-contained refinement prompt for an authoring pass,
+  with the non-negotiables (the construct, the intra-Protestant non-adjudication rule, universal
+  core, the overlays, *author don't re-tag*), the composition and setting targets, the two rules that
+  do the work (**a scenario must be statable in one sentence with no church noun in it**; **the
+  opener carries the trouble, not the credentials**), the four ways to keep a `communion` tag legible
+  for someone who has not been in a pew for two years, the seed inventory for the new tranche, and
+  the three structural changes — `office: none`, the `guide.md` family rebalance, and the length
+  reset.
 - **[plurality-ultracode-audit.md](./plurality-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit, revision, and expansion of the **taoism** (*TaoBench*),
   **buddhism** (*MittaBench*), **judaism** (*MiddotBench*), and **secular-sage** (*SophiaBench*)
