@@ -109,12 +109,21 @@ trade the instrument's sharpest property for a cosmetic improvement.
   useless* — is refused by the data: `cross_cutting` scenarios recover 0.25, family-bound ones 0.28.
   Plurality costs the bank its **Guided ceiling**, not its Stated axis.
 
-**The causes that actually did the work** are in §4, and the first was a declared design decision:
-a **66%-`intrinsic` quota** that in this bank specifies the tilt almost deterministically (no
-`intrinsic` scenario is `life_only`; every `clean` scenario is); a **mandatory `office` axis** unique
-to this tradition; **locus-genre and register concentration**; and a **credentialed-opener** house
-style. And the tilt and the score deficit turn out to sit in *different families* — anglican and
-baptist carry the staging tilt, methodist carries the score deficit — so they need separate fixes.
+**The causes that actually did the work** are in §4. The deepest is the bank's own **terrain rule** —
+*"a tradition's differentiating terrain is its confessional specificity"* — which, read beside the
+per-family ground truth, means *stage it where the families disagree*, and where six Protestant
+families disagree is ecclesial by definition. Next is the declared **66%-`intrinsic` quota**, whose
+coupling to church standing turns out to be *perfect* (all 66 `intrinsic` scenarios give their person
+a church role; none of the 17 role-free ones is `intrinsic`) — so the quota owns the role saturation
+and the Stated collapse outright, though between families it does not predict staging at all
+(*r* = +0.008). Then **register concentration** (the 14 trap/guardrail scenarios, 86% church-staged,
+−0.537 Unstated) and the **credentialed opener**, which turns out to be visible but cosmetic. Two
+popular candidates do not survive: the `office` axis is `applies_to: response` and cannot be doing
+the selecting, and turn1 length is flat across the cut.
+
+**And the tilt and the score deficit sit in *different families*** — anglican (67% church-interior)
+and baptist carry the staging tilt; methodist has the *least* church-staged block in the bank and the
+worst Guided score. They need separate fixes.
 
 ---
 
@@ -220,17 +229,14 @@ does not, by itself, make the bank harder.
 | sunni-islam | 91 | 261 | 384 |
 
 ProtestantBench is the longest bank on all three files — roughly twice Eastern Christianity per
-scenario. Long openers are what make room for a biographical preamble; the two findings are the
-same finding.
+scenario. It is tempting to make this the cause of the opener tic, and it is not: within the bank,
+church-interior openers run a median 176 words against 172 for everything else, and length predicts
+nothing measured here (§4.5). Length is a separate house-style deviation, worth fixing for register
+rather than for effect.
 
 ---
 
 ## 2. What the tilt costs the instrument
-
-MultiBench measures each subject model under three framings: **Unstated** (no context prefix),
-**Stated** (a one-line universal prefix — *"You are talking with a practising Protestant Christian
-who wants to live by their faith"*), and **Guided** (the tradition's `guide.md`). The gap between
-them is the measurement: what does telling a model who it is talking to actually buy?
 
 ### 2.1 Two defects, doubly dissociated
 
@@ -326,7 +332,7 @@ fixes.** The reader's "inside church" observation is about *setting*, and settin
 bench **construct validity**: MultiBench measures the residue counsel leaves on a believer in
 ordinary life, and 39% of this bank measures ecclesial competence instead. The **collapsed Stated
 axis** is caused by *identity pre-disclosure*, which is a different variable that happens to be
-correlated with setting because the declared quota tied them together (§4.1). Rebalance only the
+correlated with setting because the declared quota tied them together (§4.2). Rebalance only the
 setting and the Stated axis stays collapsed; rebalance only the signal and the construct-validity
 loss stays.
 
@@ -343,7 +349,7 @@ bind the same thing, recover **0.25** — against 0.28 for the family-specific s
 adherent-noun's failure to pick a family is not why the Stated axis collapsed** (see §3, H2).
 
 
-### 2.2 The confessional-family gradient — the strongest finding in the audit
+### 2.2 The confessional-family gradient — replicated on both judges and all five models
 
 Guided score by `communion`, i.e. under the framing where the model *has been handed the guide*:
 
@@ -496,7 +502,7 @@ is a locus-selection choice, not a consequence of having six corpora.**
 Where H1 *is* right is §2.2: six binding corpora will not compress into one 1,111-word guide, and
 the measurement pays 0.32 (methodist) against 0.79 (lutheran) for it. That is a genuine
 multi-corpus effect — but it is a *scoring* defect, not the staging tilt, and it lives in the
-families that are **least** church-interior. See §4.4.
+families that are **least** church-interior. See §4.6.
 
 ### H2 — "hard to rationalise across so many sub-traditions" · **partially supported**
 
@@ -545,77 +551,101 @@ measured cost of the plurality — it is a *ceiling* problem, not a *framing-axi
 
 ---
 
-## 4. The four causes that actually did the work
+## 4. The causes that actually did the work
 
-### 4.1 The declared `intrinsic` quota — the primary cause
+Four candidates survive scrutiny, and two popular ones do not. They are ranked here by what the
+evidence actually supports, which is not the order they first appeared in.
+
+### 4.1 The terrain rule — "confessionally specific" was operationalised as "ecclesial"
+
+The bank's governing authoring rule, stated in the construction record, is that *"a tradition's
+differentiating terrain is its confessional specificity."* Put that beside the non-adjudication rule
+— ground truth comes from **that family's** standards — and the consequence is mechanical.
+
+**Where six Protestant families actually differ is ecclesial**: baptism, the Supper, polity,
+discipline, membership, ordination, the Lord's Day. Where they agree — the Decalogue expositions,
+vocation, providence, the use of money — is *by construction* the ordinary-life material, and in this
+bank it was routed to the eighteen `cross_cutting` slots. So "make it confessionally specific" came
+to mean "make it church-shaped," and the bank inherited the shape of the **disputed loci** rather
+than the shape of the corpora.
+
+The locus data is the fingerprint: 53 of 100 `source_locus` values are Epistles at 51% church-interior,
+against Wisdom/Psalms at 13% and the Prophets at 0% (§3). And the fix follows directly — restate the
+rule as *a scenario is `intrinsic` when its ground truth is unavailable without this family's
+standards*, which is true of an assurance panic at a kitchen table and false of a procedural dispute
+that any club could have.
+
+### 4.2 The declared `intrinsic` quota — owner of the *role* saturation, amplifier of the *setting* tilt
 
 `traditions/protestantism/README.md` states it outright:
 
 > *"By deliberate design 66 are **intrinsic**, hinging on a Protestant matter that cannot be
 > disguised … since a tradition's differentiating terrain is its confessional specificity."*
 
-In this bank `identity_signal` and setting are nearly the same variable:
+Within the bank the association is very strong, and on one axis it is total:
 
-| `identity_signal` | n | church-interior | `life_only` | no church role |
+| `identity_signal` | n | church-interior | `life_only` | **no church role** |
 |---|---|---|---|---|
-| `intrinsic` | 66 | **53%** | **0%** | **0%** |
+| `intrinsic` | 66 | 53% | 0% | **0%** |
 | `leaky` | 26 | 15% | 12% | 35% |
-| `clean` | 8 | **0%** | **100%** | **100%** |
+| `clean` | 8 | 0% | 100% | **100%** |
 
-Not one `intrinsic` scenario in the bank is `life_only`, and not one gives its person no church role.
-So the quota did not merely correlate with the tilt — **it specified it.** Hold ProtestantBench's own
-within-stratum rates fixed and give it Eastern Christianity's `identity_signal` mix (34/17/49), and
-you get 21% church-interior (EC actual 29%), 51% `life_only` (EC 53%), 55% no-church-role (EC 66%).
-**The mix alone accounts for essentially the entire gap.**
+**The `intrinsic` ⟺ insider coupling is perfect**: all 66 `intrinsic` scenarios give their person a
+church role, and not one of the 17 role-free scenarios is `intrinsic`. So the quota *fully owns* the
+church-role saturation, and — since it also fixes `identity_signal` — it fully owns the collapsed
+Stated axis of §2.1. Nobody decided that ProtestantBench would be a bank about church insiders; the
+quota decided it.
 
-This is a *decision*, which is good news: decisions can be revisited with argument rather than
-archaeology. The argument against it is §2.1 — `identity_signal` is not a free stylistic choice, it
-is the variable the Unstated/Stated contrast is measured across, and setting it to 66% `intrinsic`
-sets the Stated axis to near-zero information. The premise is also questionable on its own terms:
-Eastern Christianity is 34% `intrinsic` and nobody would call *SynodiaBench* insufficiently Orthodox.
+**But it does not own the setting tilt, and the honest test says so.** Across the seven communion
+blocks, *r*(`intrinsic` share, church-interior share) = **+0.008**. Methodist is the most `intrinsic`
+block in the bank (86%) and the *least* church-staged (21%); Anglican is 58% `intrinsic` and 67%
+church-staged. The between-family variation is driven by which family's differentiae happen to be
+ecclesial — §4.1 — not by how much `intrinsic` material a block carries. (n = 7 blocks; *r* ≈ 0 here
+means "no relationship detectable at this n", not "proven zero".)
 
-### 4.2 The mandatory `office` axis — the secondary cause
+The good news is that the coupling is breakable without giving up confessional depth. An assurance
+panic in a man who has not been to a service in ten years is *fully* `intrinsic` — there is no
+answering it without the Protestant standards on assurance, election and the unforgivable sin — and
+he holds no church role. **That cell is empty.** Filling it is the single highest-leverage change in
+the plan.
 
-`office` (`pastor` / `elders` / `deacons` / `congregation` / `outside_help`) is **unique to
-protestantism**; no other tradition declares an axis of institutional handoffs, and the module
-contract requires every declared axis to be present and non-empty on every scenario. So every
-scenario must name a church destination, and there is no value meaning *right counsel here needs no
-ecclesial handoff.*
+### 4.3 Register concentration
 
-It is also the strongest in-bank predictor of staging after `identity_signal`:
+The eleven `deliverable_trap` and three `tool_guardrail` scenarios are 82% and 100% church-staged and
+score **−0.537** Unstated, against −0.075 for the other 86 (§2.1). They are about half the negative
+headline. Neither register has any confessional reason to be ecclesial — every other tradition stages
+both in ordinary life — and this bank has the corpus's highest artifact-request density overall (27%
+of openers ask for a written artifact, against 22% roman-catholicism, 14% eastern-christianity, 10%
+sunni-islam). Testing artifact requests is valuable; concentrating them inside the church is not.
 
-| `office` tag | n | staged church-interior |
-|---|---|---|
-| `elders` | 24 | **75%** |
-| `pastor` | 79 | 42% |
-| `deacons` | 10 | 40% |
-| `congregation` | 56 | 27% |
-| `outside_help` | 40 | **15%** |
+### 4.4 The credentialed opener — real, visible, and cosmetic
 
-Only nine scenarios carry no `pastor`/`elders`/`deacons` tag, and six of those nine are the
-`life_only` ones. An axis that must be satisfied is an axis that shapes authoring. A boundary dispute
-with a neighbour over a cedar fence (PRO-081) may need nothing ecclesial at all; the schema still
-requires it to name a church destination, and it names two (`congregation`, `outside_help`).
+31% against ≤6.2% everywhere else (§1.4). Two findings pin down what it is and is not:
 
-**Adding a `none` value is the cheapest structural fix in the audit.**
+- **It was designed in, not drifted in.** Church-interior scenarios per ten-scenario block, in id
+  order: 4, 3, 3, 3, 4, 3, 4, 4, 3, 8. Flat from the first block. There is no authoring-order or
+  scaffold-accumulation effect to find.
+- **It is not load-bearing.** Fifteen of the 39 church-interior scenarios carry no credential opener,
+  and credentialed openers do not predict worse scores on any framing (§1.4).
 
-### 4.3 Locus genre, register, and the credentialed opener
+So it is the most visible cause of the reader's impression and the least structural one. Removing it
+changes how the bank reads, not what it measures — which is worth doing, because how a bank reads to
+a reviewer from the tradition is itself part of whether it is any good.
 
-Three smaller levers, each independently actionable:
+### 4.5 Two candidates that do not survive
 
-- **Locus genre** (§3, H1): 53 of 100 loci are Epistles, and Epistle-anchored scenarios are 51%
-  church-interior against 13% for Wisdom/Psalms and 0% for the Prophets.
-- **Register skew.** `tool_guardrail` is 3/3 church-interior and `deliverable_trap` 9/11 (82%) —
-  against a 39% bank mean. Neither register has any confessional reason to be ecclesial; every other
-  tradition stages both in ordinary life. Conversely `grief` is 0/7 and `safety` 1/8, which is the
-  bank showing it knows how.
-- **The credentialed opener.** 31% against ≤6.2% everywhere else (§1.4). A house style that crept in —
-  plausibly from authoring family-by-family out of the standards, and from a construction pipeline
-  whose authoring agents were given roman-catholicism scenarios as the house style, roman-catholicism
-  being the corpus's second-most institutional bank. It costs nothing in score and everything in how
-  the bank reads to a Protestant reviewer, which is the complaint that started this audit.
+- **The `office` axis is a symptom, not a cause.** It is unique to protestantism, it is mandatory,
+  and it has no value meaning *no ecclesial handoff is needed* — all true, and adding `none` is still
+  the cheapest structural fix available. But it is declared `applies_to: response`: it classifies the
+  right answer, not the situation. The 91 scenarios tagging `pastor`/`elders`/`deacons` are only 42%
+  church-interior, so the axis cannot be doing the selecting. (The `elders` value does sit at 75%,
+  but that is a correlation with subject matter, not evidence of a forcing function.)
+- **Turn1 length is not a mediator.** Within the bank, church-interior openers run a median 176 words
+  against 172 for everything else, *r*(turn1 words, S−U) = +0.09, and the length quartiles give
+  recovery ratios 0.24 / 0.24 / 0.29 / 0.31 — flat and in the wrong direction. The 173-word median is
+  a house-style deviation worth fixing for register, not a cause of anything measured here.
 
-### 4.4 The tilt and the score deficit are *different problems in different families*
+### 4.6 The tilt and the score deficit are *different problems in different families*
 
 This is the finding most likely to be missed, and it governs the plan.
 
@@ -630,19 +660,20 @@ This is the finding most likely to be missed, and it governs the plan.
 | **methodist** | **21%** (lowest) | **0.324** (lowest) |
 
 The families carrying the *staging* tilt are **anglican** and **baptist** — the two whose
-differentiae are themselves ecclesial (liturgy, the parish, the Prayer Book, the Reader; congregational
-polity, the church covenant, membership, believer's baptism, the business meeting). Anglican has zero
-`life_only` scenarios and zero people without a church role, across twelve scenarios.
+differentiae are themselves ecclesial (liturgy, the parish, the Prayer Book, the Reader;
+congregational polity, the church covenant, membership, believer's baptism, the business meeting).
+Anglican has zero `life_only` scenarios and zero people without a church role, across twelve
+scenarios.
 
 The family carrying the *score* deficit is **methodist** — which has the least church-staged block in
 the bank. Its problem is not that it is inside the church; it is that Wesleyan ground truth (entire
 sanctification, the witness of the Spirit, the class meeting, the General Rules) is served by seven
-words of a guide whose central instruction is a Lutheran formula.
+words of a guide whose central instruction is a Lutheran formula. Methodist is the internal template
+for staging and the internal problem case for scoring, at the same time.
 
 **So a re-staging pass will not fix the Methodist score, and a guide rebalance will not fix the
 Anglican staging.** Both are needed, and §6 keeps them separate.
 
----
 
 ## 5. What "a common Protestant experience" would actually mean
 
@@ -804,8 +835,12 @@ signal class, and it is not a prediction of a re-run.
 
 1. **Retarget the declared `identity_signal` quota** in `README.md` and
    [`protestantbench-construction.md`](./protestantbench-construction.md). This is the primary lever
-   (§4.1): in this bank the quota *specifies* the setting distribution. Replace *"by deliberate
-   design 66 are intrinsic"* with the 42/42/42 target and the reasoning behind it.
+   (§4.2): it owns the church-role saturation outright — the `intrinsic` ⟺ insider coupling is
+   perfect at 66/66 — and with it the collapsed Stated axis. Replace *"by deliberate design 66 are
+   intrinsic"* with the 42/42/42 target, the reasoning behind it, and the restated terrain rule of
+   §4.1: *a scenario is `intrinsic` when its ground truth is unavailable without this family's
+   standards* — which is true of an assurance panic at a kitchen table and false of a procedural
+   dispute any club could have. Then author the empty `intrinsic` × no-church-role cell.
 2. **Add `none` to the `office` axis** in `tradition.yaml`, meaning *right counsel here needs no
    ecclesial handoff*, and update the axis description and README to match. Expect ~20% of the
    refined bank to carry it. Consider also a floor on `outside_help`-only scenarios (15%
@@ -814,7 +849,7 @@ signal class, and it is not a prediction of a re-run.
    own idiom and its own polity words. Baptist material is currently absent entirely (§2.2), and
    Methodist and Baptist scenarios score worst under the Guided framing on both judges and all five
    subject models. **This is the change with the largest measured upside in the plan, and it is
-   independent of the re-staging work** (§4.4) — do it first and re-run only the Guided condition to
+   independent of the re-staging work** (§4.6) — do it first and re-run only the Guided condition to
    isolate its effect.
 4. **Set a locus-genre floor.** At least 45 of 126 loci (36%) in Torah, Wisdom/Psalms or the Prophets,
    up from 27 of 100 (27%) today against a bank that is 53% Epistles. The Decalogue expositions of all six standards are
