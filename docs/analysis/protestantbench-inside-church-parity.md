@@ -152,7 +152,13 @@ not tilted — it is *faithful*, and an audit that measures it against Taoism's 
    ecclesial traditions with sacraments, offices and discipline, whose own constructs also point the
    person back to the Church. They sit at 28% and 29% church-interior with 9% and 3% of their people
    holding a church role, against this bank's 39% and 40%. **The gap is against the nearest
-   neighbours, not the distant ones.**
+   neighbours, not the distant ones.** Roman Catholicism is not a *clean* comparator, though: it
+   carries a milder form of the same defect — 60.5% `intrinsic`, only **2 of its 46 `intrinsic`
+   scenarios give the person no church role** (4%, against this bank's 0%), 13.2% `clean` (the
+   corpus's second-lowest), and the lowest recovery ratio of the four floor-regime banks whose 0.80
+   mean is the benchmark used here. Read that 0.80 as slightly flattering to ProtestantBench and
+   slightly harsh on Roman Catholicism — and read this audit as raising a question about
+   *SynodiaBench* and *CorBench* too (§8).
 2. **Congregational doctrine does not require a congregational *setting*.** The Protestant doctrine of
    vocation is the tradition's own claim that the whole of ordinary life is where faith is lived —
    Luther's estates, Wesley on the use of money, the Decalogue expositions of every standard. A bank
@@ -302,6 +308,13 @@ Judge `gemini-3.6-flash`, mean over the five subject models, turn1 scope, scale 
 | secular-sage | 0.670 | 0.785 | 0.919 | 0.115 | 0.250 | 0.46 |
 | **protestantism** | **−0.140** | **0.057** | 0.589 | 0.197 | 0.729 | **0.27** |
 
+**Every ratio in this document is turn1, Gemini judge, unless said otherwise — and the scope
+matters.** Under the full-conversation scope the ordering survives but the gap narrows:
+ProtestantBench recovers 0.23 against secular-sage 0.26, buddhism 0.42, judaism 0.46,
+roman-catholicism 0.50, eastern-christianity 0.62 and sunni-islam 0.67 — and the `communion` Guided
+spread *widens*, from 0.461 to 0.551. The turn1 figures are the sharper statement of the same shape,
+not a different one.
+
 **Read the ratio only within a regime.** Where a bank's Unstated score is already high there is
 little headroom and the ratio is noisy — buddhism, taoism and secular-sage sit at 0.57–0.69 Unstated
 and are effectively ceilinged. The four **floor-regime** banks with real headroom (sunni-islam 0.105,
@@ -364,7 +377,14 @@ already says *"I've been a member at our LCMS congregation eleven years… I was
 prefix supplies strictly less than the scenario already did.** For two-thirds of the bank the Stated
 condition is close to a no-op.
 
-The same pattern holds inside every other identity-bearing bank — the Stated lift, split by signal:
+`clean` scenarios take the largest Stated lift in every other identity-bearing bank too — with two
+qualifications that belong on the page. Below `clean` the ordering does not hold everywhere
+(sunni-islam and eastern-christianity lift more on `intrinsic` than on `leaky`), and on the recovery
+*ratio* — the statistic this section argues from — the gradient does **not** replicate in the two
+banks with the largest `clean` tranches: eastern-christianity runs 0.85 / 0.87 / 0.86 and sunni-islam
+0.92 / 0.82 / 0.89 across clean/leaky/intrinsic. **The signal → ratio mechanism is established within
+ProtestantBench**, echoed in judaism and roman-catholicism, and absent where the `clean` tranche is
+already large enough that the axis has plenty to work with:
 
 | Stated lift (S−U) | on `clean` | on `leaky` | on `intrinsic` |
 |---|---|---|---|
@@ -479,8 +499,9 @@ There is a direct, checkable symptom. `guide.md` is 1,111 words. It names Luther
 Lutheran estates; Westminster, Heidelberg, Dort, *coram Deo*, the consistory, the session, Kuyper;
 Wesley (×3), the class meeting, the SPRC; the vestry, the PCC, the Ordinary. **The word "Baptist"
 appears zero times** — and with it, no church covenant, no business meeting, no believer's baptism,
-no regenerate church membership, no soul competency, no Baptist Faith & Message. (The seven hits for
-the substring *believer* are all the generic *priesthood of all believers*.) The guide's central
+no regenerate church membership, no soul competency, no Baptist Faith & Message. (The substring *believer* occurs seven times, none of
+them as *believer's baptism*: the priesthood of all believers, Wesley's believers watching over one
+another, believers' assurance, a mature believer, and a fellow believer before God.) The guide's central
 pastoral instruction, *rightly divide law from gospel*, is a Lutheran formula, and its assurance
 paragraph is Heidelberg–Westminster–Dort with Wesley appended.
 
@@ -543,9 +564,12 @@ about half of ProtestantBench's own Unstated deficit is register concentration r
 ProtestantBench is extreme on the input and extreme on the output.
 
 `results/` ranks traditions by an equal-weight mean of per-tradition means, over one run's shards.
-Today the distortion is **zero in practice**: `results/20260813-protestantism` is a separate run
-containing only protestantism, so nothing is currently being averaged with the other seven. The
-question is what happens when they are merged.
+No cross-tradition *average* is currently distorted — `results/20260813-protestantism` is a separate
+run containing only protestantism. But note what a reader actually lands on: `results/README.md` says
+the explorer defaults to the newest run by `generated_at`, and that is this one (2026-08-15 against
+`20260803`'s 2026-08-06). **So the default `/results` leaderboard today is the protestantism-only
+run** — headline numbers drawn entirely from the bank this audit says has two degraded framing
+conditions. The question of merging is separate, and comes next.
 
 Two of ProtestantBench's three framing conditions are affected by composition rather than by model
 behaviour — the Unstated condition is being run on a bank that mostly pre-discloses identity, and the
@@ -572,8 +596,10 @@ about church → the scenarios end up about church. Every link after the first f
   anchor, the same rate as the church-interior stratum. Anchoring a life dilemma is not harder — the
   bank does it routinely: PRO-023 (a freelance copywriter asked to disguise a renewal as a FINAL
   NOTICE) anchors to the Westminster Larger Catechism on the eighth and ninth commandments; PRO-083
-  (falsified fire-suppression entries) to the ninth commandment as Luther's Small Catechism and the
-  Larger Catechism expound it.
+  (falsified fire-suppression entries) to the commandment against false witness as Luther's Small
+  Catechism (the **Eighth**, in Lutheran numbering) and the Westminster Larger Catechism (the
+  **Ninth**) expound it — a distinction PRO-083's own ground truth is careful about, and this audit
+  nearly was not.
 - **There is an existence proof.** PRO-006 is `communion: lutheran` — a family-specific corpus, not
   the shared one — `identity_signal: clean`, staged in a workplace, with **zero** church, faith or
   God words anywhere in its `turn1.md` ("I run a five-man remodeling crew…"). Its
@@ -627,11 +653,11 @@ makes it legible with one sentence, *"I'm a member in a PCA church and I sit und
 Sunday."* Three further checks show the rule cannot be carrying the tilt:
 
 - **The exempt stratum is still church-staged.** `cross_cutting` scenarios need no family named at
-  all, and are still 33% church-interior with 12 of 18 giving the person a church role.
-- **The relationship runs backwards across families.** Methodist is the *most* family-specific block
-  in the bank (12/14 `intrinsic`, anchored to *A Plain Account of Christian Perfection*, *The Almost
-  Christian*, the witness of the Spirit) and the *least* church-staged (21%). Anglican is 7/12
-  `intrinsic` and the *most* church-staged (67%).
+  all, and are still 33% church-interior, with 10 of its 18 giving the person a church role.
+- **The relationship runs backwards across families.** Methodist is among the most family-specific
+  blocks in the bank (12/14 `intrinsic`, second only to Baptist's 13/14; anchored to *A Plain Account
+  of Christian Perfection*, *The Almost Christian*, the witness of the Spirit) and the *least*
+  church-staged (21%). Anglican is 7/12 `intrinsic` and the *most* church-staged (67%).
 - **A per-scenario family axis need not surface in `turn1` at all.** Roman Catholicism binds 46 of 76
   scenarios to a specific `school` and names that school in **zero** of its 76 openers. (Honest
   caveat: Catholic schools are spiritualities under one magisterium, so nothing binds differently —
@@ -711,8 +737,9 @@ they are not in conflict:
   church-interior against 4 of 34 others (Fisher exact, two-sided *p* = 7 × 10⁻⁵), and the coupling to
   church *standing* is total.
 - **Across the seven communion blocks** it vanishes: *r*(`intrinsic` share, church-interior share) =
-  **+0.008**. Methodist is the most `intrinsic` block in the bank (86%) and the *least* church-staged
-  (21%); Anglican is 58% `intrinsic` and 67% church-staged. (n = 7 blocks; *r* ≈ 0 here means "no
+  **+0.008**. Baptist is the most `intrinsic` block (13/14, 93%) and Methodist the second (12/14,
+  86%) — yet Methodist is the *least* church-staged (21%), while Anglican, at 58% `intrinsic`, is the
+  most (67%). (n = 7 blocks; *r* ≈ 0 here means "no
   relationship detectable at this n", not "proven zero".)
 
 Read together: **the quota decides how many insiders the bank contains, and §4.1's terrain rule
@@ -977,10 +1004,11 @@ turns two knobs and must not confuse them:
 | Lost **construct validity** — *argued from what the bench is for, not from a score effect* (§2.1) | **setting** | church-interior 39% → 20–25 of 126; `life_only` 11% → ≥35% |
 | Depressed **Guided ceiling** and the family gradient | **`guide.md`**, not the scenarios | close the 0.46 spread; Baptist and Methodist material from zero |
 
-**And one property to protect.** ProtestantBench is the corpus's best discriminator between subject
-models (Guided between-subject SD 0.313, against eastern-christianity's 0.038, taoism's 0.075 and
-roman-catholicism's 0.152) and its only un-ceilinged bank (Guided mean 0.589 against 0.818–0.972).
-That is worth more than a tidy score. Every new scenario should be authored to keep a real failure
+**And one property to protect.** ProtestantBench is the corpus's **only un-ceilinged bank** (Guided
+mean 0.589 against 0.818–0.972) and has the widest between-subject spread under that framing (SD
+0.313 against judaism 0.256, sunni-islam 0.223, roman-catholicism 0.152, eastern-christianity 0.038)
+— though that second number is mostly one model: excluding Qwen the spread is 0.038 against
+0.024–0.027 in the next three banks. **The un-ceilinged mean is the property worth protecting.** Every new scenario should be authored to keep a real failure
 mode reachable — the eleven existing `life_only` scenarios show how, scoring −0.256 Unstated, *worse*
 than the bank mean. **Ordinary-life staging does not mean easy.**
 
@@ -1006,7 +1034,7 @@ post-hoc read of the result would prove nothing:
 | | counts as worked | counts as failed |
 |---|---|---|
 | Stated axis | recovery ratio ≥ **0.45**, with its bootstrap CI excluding 0.33 (today's upper bound) | ratio CI still overlapping [0.21, 0.33] |
-| Family gradient | Guided spread across `communion` ≤ **0.25** (roman-catholicism is 0.158) | Methodist still ≥ 0.20 below the bank mean |
+| Family gradient | Guided spread across `communion` ≤ **0.25** *on turn1, Gemini* (today 0.461 turn1 / 0.551 full; roman-catholicism is 0.158) | Methodist still ≥ 0.20 below the bank mean |
 | Composition | the §6.1 targets met **in the prose**, verified by a re-run census, not by tags | any target met by re-tagging |
 | Discrimination | Guided mean stays below **0.75** | Guided mean ≥ 0.80, i.e. the bank has joined the ceilinged pack |
 
@@ -1082,6 +1110,21 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
 - `results/20260813-protestantism` and `results-raw/20260813-protestantism` are **frozen against the
   100-scenario bank**. A refined bank needs a **new run under a new run-id**; the old datasets are
   not edited, and the two banks' means are not compared as if they measured the same instrument.
+- **But "frozen" covers the scores, not the display — and this decides the id scheme.** The raw
+  shards embed the old transcripts and the old `contexts.guided`, yet the raw item page fetches
+  `judge-guidance.md` **live from HEAD** (`apps/multibrowser/src/components/CorpusContext.tsx` via
+  `lib/corpus.ts`) and renders it under the caption *"the guidance the judges use"*, with a
+  cross-link to the live scenario. **Re-authoring 42 ids in place therefore makes the 20260813 viewer
+  show the new ground truth beside the old transcripts**, and nothing catches it: the fingerprint
+  hashes judgments and shard bytes, not `traditions/`. Choose before authoring:
+  - **(a) New ids for re-authorings too.** Every re-authored scenario gets a fresh id and the old id
+    is retired from `scenarios/index.json`, so `PRO-nnn` keeps meaning one thing across runs. Cost:
+    the id space runs past `PRO-168` and the retired folders must be kept on disk (or the frozen
+    viewer 404s), which the validator's globbing behaviour has to be checked against. **This is the
+    safer choice and the one to prefer.**
+  - **(b) Re-author in place and record the divergence** explicitly in `results/README.md` under the
+    `20260813-protestantism` entry, so a reader of that run knows the corpus context shown beside it
+    is newer than the transcripts. Cheaper, and permanently confusing.
 - `scenarios/index.json`, the module README's counts and family table, and
   `workflows/judging/configs/protestantism-*.yaml` all move with the bank.
 - Under `CLAUDE.md`'s tier rule, the *refinement itself* is feature-scale (a new dataset tier's worth
@@ -1113,6 +1156,14 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
   lengths, tag frequencies) and they point the same way.
 - **n = 8 traditions.** Every cross-tradition comparison here is descriptive. No inferential claim is
   made from a correlation across eight banks.
+- **The bootstrap resamples scenarios, not subjects.** Per-subject recovery ratios inside this bank
+  span roughly 0.08 to 0.39, and that variance is not in the [0.21, 0.33] interval. A
+  subject-clustered bootstrap widens it to about [0.17, 0.35] against the `clean` subset's [0.46,
+  0.84] — still non-overlapping, so the finding survives, but the interval quoted is the narrower one.
+- **One model family, one run.** Every number here is five frontier subjects in a single run. The
+  repo already carries apparatus that would test the Stated finding elsewhere —
+  `experiments/78_prompt_fading_full/` ran a fair *stated* arm over the other seven banks on a
+  smaller open model plus a weights-formed one — and it was not used.
 - **One scored run per bank**, and the two runs were produced at different times
   (`20260803` vs `20260813-protestantism`). The subject set and judges match; the dates do not.
 - **The two runs' Opus coverage is not comparable.** `20260803` judged only 2,250 of 15,570 expected
@@ -1150,6 +1201,12 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    adversarial review caught a false demographic premise and a doctrinal error about attendance that a
    Protestant reader spotted immediately; a 68-folder re-authoring built on unreviewed premises would
    multiply that by 68. Sequence: guide fixes → six-family review of the plan → authoring pass.
+   **This needs a workspace change first:** [`tradition-reviewer-guide.md`](./tradition-reviewer-guide.md)
+   assigns ten scenarios *"spread evenly across the corpus"* and the sampler in
+   `apps/multibrowser/src/lib/review.ts` does not stratify on any tag — so a Lutheran reviewer drawing
+   ten of a hundred sees roughly 1.4 Lutheran scenarios and cannot review the block this audit says is
+   the problem. Add a sample mode stratified on a tradition's internal-plurality axis (`communion`
+   here, `school` in roman-catholicism, `domain` in judaism).
 2. **Run the refinement prompt in §9** as an ultracode pass (author → adversarial citation verify →
    validate), producing the 126-scenario bank plus a per-scenario changelog. **Add a per-family
    ground-truth check** to it: the pass's central instruction is to move each anchor from the
@@ -1174,8 +1231,12 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
 8. **Record the degraded Stated condition in `results/README.md`** for the `20260813-protestantism`
    run — whole-bank recovery 0.27 against 0.60 on the eight `clean`-signal scenarios — so a
    downstream reader does not take that column for a framing effect. And before any joint leaderboard,
-   re-export protestantism into the main run-id rather than merging shards across two runs, and flag
-   the Opus coverage asymmetry.
+   export **all eight traditions into a new joint run-id** (e.g. `20260901-all`) from their run roots
+   — **never into `20260803`**, which `results/README.md` marks *"the benchmark-of-record … never
+   mutate it"* and which `apps/multibrowser/src/lib/leaderboard.test.ts` pins to seven contributing
+   traditions and to the paper's values to nine decimal places. Flag the Opus coverage asymmetry in
+   the new manifest, and expect the joint export to move **levels**: adding the protestantism shard
+   swaps the top two subjects on the turn1 × guided slice.
 9. **Amend `guide.md` for the person with no congregation** *before* authoring the new tranche
    (§6.4, item 4) — without it the ground truth has no answer for exactly the scenarios that fix the
    tilt.
@@ -1193,7 +1254,12 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
     status and register constant — the fourteen `deliverable_trap`/`tool_guardrail` scenarios alone
     account for about half of it (§2.1) — and report `intrinsic`-only and `clean`/`leaky`-only means
     separately.
-12. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`. Ask
+12. **Run the same census against roman-catholicism and eastern-christianity.** The published rows
+    already show roman-catholicism carrying a milder form of the identical defect — 60.5% `intrinsic`,
+    2 of 46 `intrinsic` scenarios role-free, 13.2% `clean` (§0). This audit was commissioned by one
+    reader's complaint about one bank; the measurement it built is corpus-wide and the next question
+    is whether *CorBench* and *SynodiaBench* need the same pass.
+13. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`. Ask
     reviewers specifically whether any of the six families is described in another family's
     vocabulary, and whether the people in the bank resemble the people in their pews — and their
     parish rolls.

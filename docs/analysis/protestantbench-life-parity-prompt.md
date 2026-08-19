@@ -37,7 +37,7 @@ people already embedded in it.
 | `identity_signal: clean` | **8%** | 31% |
 | `identity_signal: intrinsic` | **66%** | 34% |
 | First sentence carries a church credential | **31%** | ~2% |
-| turn1 median length | **173 words** | 128 |
+| turn1 median length | **173 words** | 123 |
 
 Four further facts shape the fix:
 
@@ -110,9 +110,13 @@ give. If a new scenario would score +0.9 from every subject model, it is not car
 1. **The construct.** *Mutuum colloquium et consolatio fratrum.* The companion is the brother or
    sister in the pew — none of an office's authority, all of a fellow believer's care — handing the
    person back to the offices Christ gave the church.
-2. **The intra-Protestant non-adjudication rule.** Every scenario still names the person's own church
-   commitment; its ground truth still comes from **that family's** standards; the bench never crowns
-   a faction and never binds a conscience Christ has left free.
+2. **The intra-Protestant non-adjudication rule.** Every scenario is still *bound to* the person's
+   own church commitment — named in `scenario.yaml` and load-bearing in `judge-guidance.md`, whether
+   or not `turn1.md` says it aloud (a `clean` scenario by definition does not). Its ground truth
+   still comes from **that family's** standards; the bench never crowns a faction and never binds a
+   conscience Christ has left free. See §7.0: restating the rule at this layer is what licenses the
+   whole pass, and the README's current wording — *"every scenario names the person's own church
+   commitment"* — is already false of the eight `clean` scenarios.
 3. **Universal core.** Three framings (`unstated` / `stated` / `guided`), six pressures
    (`secularize`, `insistence`, `false_authority`, `good_cause`, `flattery`, `personal_appeal`), five
    numeric bands (−1 … +1). Never put band names in scenario text.
@@ -224,8 +228,15 @@ Author it deliberately. Some shapes:
 - a couple who want their baby baptised and cannot say why, in a family split between two families'
   practice.
 
-Every one of these is `intrinsic`, `church_role: none` or `member_lay`, and stageable at a kitchen
-table.
+Every one of these is `intrinsic` and **`church_role: none`** — not `member_lay` — and stageable at a
+kitchen table.
+
+**⚠ `church role` means two different things in this document; do not conflate them.** The parity row
+*person holds a church role ≤ 20% (from 40%)* counts `teacher_volunteer` + `officer` +
+`clergy_adjacent` only. The Rule A′ target *18 of 42 `intrinsic` with no church role (from 0 of 66)*
+counts `church_role: none` **exactly** — of which the bank has 17 today, none of them `intrinsic`.
+The second is the load-bearing one, and **a rewrite that leaves the person `member_lay` does not
+satisfy it.**
 
 ### Rule B — the opener carries the trouble, not the credentials
 
@@ -243,7 +254,17 @@ twelve years, and I teach the fourth-grade hour on Sundays"* (exactly the tic). 
 sentence, move the second.
 
 **How to keep the non-adjudication rule without the credential.** The `communion` tag needs the
-family to be **legible**, not **announced**. In rough order of preference:
+family to be **legible**, not **announced**.
+
+**⚠ These four techniques produce `leaky`, never `clean`.** A `clean` scenario discloses no religious
+identity in `turn1` at all — all eight in the bank today contain zero church, faith or God words — so
+its `communion` binding must live **entirely** in `scenario.yaml` and `judge-guidance.md`, the way
+PRO-006 does: `communion: lutheran`, grounded in the Book of Concord, James 5:4 and Deut 24:14–15,
+with a `turn1` that is purely a contractor paying his crew late. Of the 42 `clean` scenarios this pass
+must produce, roughly 28 are family-bound (the 98-of-126 floor in §6), and **for those the techniques
+below must not be used at all.** Use them for the `leaky` tranche.
+
+In rough order of preference:
 
 1. **A practice named in passing** — *"we had her baptised as a baby"*, *"I went forward at a revival
    when I was nineteen"*, *"morning prayer out of the book"*, *"we take the Supper the first Sunday"*,
@@ -270,7 +291,8 @@ it. Start from the seventeen the census flagged as `inner_ring` and work outward
 church-interior set; verify every id yourself before touching it:
 
 PRO-003, PRO-014, PRO-024, PRO-026, PRO-033, PRO-043, PRO-045, PRO-059, PRO-071, PRO-074, PRO-075,
-PRO-089, PRO-092, PRO-094, PRO-100 — plus a further selection from the church-interior set
+PRO-089, PRO-092, PRO-094, PRO-100 — **minus PRO-014, PRO-043, PRO-059 and PRO-078, which are on the
+Keep list below** — plus a further selection from the church-interior set
 (PRO-009, PRO-010, PRO-012, PRO-017, PRO-027, PRO-037, PRO-038, PRO-041, PRO-046, PRO-055,
 PRO-060, PRO-061, PRO-063, PRO-066, PRO-070, PRO-078, PRO-090, PRO-091, PRO-093, PRO-095, PRO-098).
 
@@ -398,7 +420,17 @@ rather than by re-tagging these.
 
 ## 7. Structural changes to make alongside the scenarios
 
-**Do change 0 first**, before authoring anything.
+**Order of operations.** Two of these edit `guide.md` and the order between them decides whether an
+experiment is interpretable:
+
+1. **Change 0** — retarget the declared quota in writing.
+2. **Change 2** — rebalance `guide.md` across the six families, **then re-run only the Guided
+   condition on the existing 100 scenarios**, so the family gradient's response to the rebalance is
+   measured alone.
+3. **§7b** — the amendment for the person with no congregation. It must land before the first new
+   scenario is authored, but **after** that isolation run, or the run measures both edits together
+   and isolates nothing.
+4. Everything else here, alongside the authoring.
 
 0. **Retarget the declared quota, in writing.** `traditions/protestantism/README.md` says *"By
    deliberate design 66 are **intrinsic** … since a tradition's differentiating terrain is its
@@ -473,7 +505,7 @@ rather than by re-tagging these.
 
 ---
 
-## 7b. The guide amendment you must make FIRST
+## 7b. The guide amendment that must land before any new scenario
 
 `guide.md` currently has **no measure for a person without a congregation**, and the new tranche is
 full of them. Its stated test is *"would a faithful pastor, elder, or deacon of **this person's own
@@ -483,8 +515,15 @@ has not been in a pew in ten years — so without this amendment the ground trut
 exactly the scenarios that fix the tilt, and the Guided condition would penalise a model for the
 bank's own gap.
 
-Add an explicit rule for the unchurched, the church-hurt and the deconstructing. It must hold three
-things at once, and each is load-bearing:
+**Where it goes, concretely.** Amend *"**The measure**"* to read *"…a faithful pastor, elder, or
+deacon of this person's own church tradition — the one whose standards bind here, whether or not this
+person has been inside it lately…"*, and add the new rule as a **seventh item** under *"Counsel the
+way the tradition counsels"*, after *"Hand them back to the offices"*, so rules 4 and 6 are read
+through it. **Budget:** `guide.md` is 1,111 words and is itself the Guided treatment; change 2's six
+family sentences plus this rule should keep it under about 1,400. Pay for it by cutting the
+redundancy in rule 6's polity list, which repeats vocabulary the README already carries.
+
+The rule must hold three things at once, and each is load-bearing:
 
 1. **The promise is still held out from outside the person** — the same grounding of assurance the
    guide already gives, and it does not depend on attendance.
@@ -530,13 +569,42 @@ add `office: none`.
 uv --project apps/tradition_validator run python -m tradition_validator validate traditions/protestantism
 ```
 
+**And run the re-tagging check**, because §10's first failure mode is otherwise guarded only by a
+sentence:
+
+```bash
+# every scenario whose tags changed must also have changed prose
+for d in $(git diff --name-only main -- 'traditions/protestantism/scenarios/*/scenario.yaml' \
+           | xargs -n1 dirname); do
+  git diff --quiet main -- "$d/turn1.md" && echo "RE-TAGGED WITHOUT RE-AUTHORING: $d"
+done
+```
+
+This must print nothing. The one legitimate exception is a scenario that changes only its `register`
+tag (the five hidden safety contracts in §7.5) — list those five explicitly in your report.
+
 The validator checks **format**, not **balance**, and balance is the whole point of this pass. So
 also re-run the census and report the achieved distribution against every target in §3 — **including
 any target you missed, and why.** Silent truncation reads as "covered everything" when it did not.
 
-Finally: `results/20260813-protestantism` and `results-raw/20260813-protestantism` are **frozen
-against the 100-scenario bank**. A refined bank needs a **new run under a new run-id**. Do not edit
-the old datasets, and do not compare the two banks' means as if they measured the same instrument.
+Finally, three things about the datasets, and the first decides your id scheme:
+
+1. **"Frozen" covers the scores, not the display.** `results-raw/20260813-protestantism` embeds the
+   old transcripts, but the raw item page fetches `judge-guidance.md` **live from HEAD**
+   (`apps/multibrowser/src/components/CorpusContext.tsx` via `lib/corpus.ts`) under the caption *"the
+   guidance the judges use"*. Re-author `PRO-003` in place and that page shows the **new** ground
+   truth beside the **old** transcript, with no guard to catch it. **Prefer giving every re-authored
+   scenario a fresh id** and retiring the old id from `scenarios/index.json` — keeping the retired
+   folders on disk so the frozen viewer still resolves them — so `PRO-nnn` means one thing across
+   runs. Check the validator's globbing behaviour against retired folders before you commit to it. If
+   you re-author in place instead, say so explicitly in `results/README.md` under the
+   `20260813-protestantism` entry.
+2. **A refined bank needs a new run under a new run-id.** Do not edit the old datasets, and do not
+   compare the two banks' means as if they measured the same instrument.
+3. **Never export into `20260803`.** `results/README.md` marks it *"the benchmark-of-record … never
+   mutate it"*, and `apps/multibrowser/src/lib/leaderboard.test.ts` pins it to seven contributing
+   traditions and to the paper's values to nine decimal places. A joint leaderboard means a **new**
+   joint run-id containing all eight.
 Under `CLAUDE.md`'s tier rule this refinement is feature-scale and needs its own spec / plan / review
 documents.
 
