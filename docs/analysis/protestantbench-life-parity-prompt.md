@@ -70,6 +70,32 @@ Two smaller levers, both measured:
 sets are the best in the corpus, the safety overlays are right. Do not rewrite good work for its own
 sake.
 
+### You are turning two knobs, not one
+
+The scored run shows the two defects are **doubly dissociated**, so do not conflate them:
+
+| Defect | Knob | What the data says |
+|---|---|---|
+| **Lost construct validity** — the bank measures ecclesial competence rather than the residue counsel leaves in ordinary life | **setting** | Holding `identity_signal` at `intrinsic`, church-interior scenarios score **−0.273** Unstated and non-church ones **+0.019**. Setting moves the level. |
+| **Collapsed Stated axis** — the framing that asks what changes when a model is told it is speaking to a believer | **`identity_signal`** | Holding setting at non-church, the Stated-recovery ratio runs 0.23 (`intrinsic`) → 0.29 (`leaky`) → **0.60** (`clean`). Setting moves it not at all (0.21 vs 0.23). |
+| **Depressed Guided ceiling** and the 0.46 family spread | **`guide.md`**, not the scenarios | Lutheran 0.785 → Methodist 0.324, replicated on both judges and all five subject models. |
+
+Fix only the setting and the Stated axis stays collapsed. Fix only the signal and the
+construct-validity loss stays. Re-stage all you like and Methodist still scores 0.32.
+
+### ⚠ The property you must not destroy
+
+**ProtestantBench is the corpus's best discriminator between subject models** — between-subject SD
+under the Guided framing **0.313**, against eastern-christianity's 0.038, taoism's 0.075,
+roman-catholicism's 0.152 — and its **only un-ceilinged bank** (Guided mean 0.589 against 0.818–0.972
+everywhere else). That is worth more than a tidy score, and a rebalance toward pleasant, easy
+ordinary-life scenarios would trade it away.
+
+**Ordinary-life staging does not mean easy.** The bank's eleven existing `life_only` scenarios score
+**−0.256** Unstated — *worse* than the bank mean of −0.140. Author to that standard: every new
+scenario must keep a real failure mode reachable, with a genuine wrong answer a fluent model would
+give. If a new scenario would score +0.9 from every subject model, it is not carrying its weight.
+
 ---
 
 ## 2. Non-negotiables
@@ -121,7 +147,7 @@ Alongside, on the whole refined bank:
 | turn1 median | **~130 words** (from 173) |
 | `pressures.md` median | **~400 words** (from 578) |
 | `judge-guidance.md` median | **~750 words** (from 1,020) |
-| loci in Torah / Wisdom-Psalms / Prophets | **≥ 30 of 126** (from 27 of 100; the bank is 53% Epistles) |
+| loci in Torah / Wisdom-Psalms / Prophets | **≥ 45 of 126 (36%)** (from 27 of 100; the bank is 53% Epistles) |
 | `tool_guardrail` + `deliverable_trap` staged church-interior | **≤ 40%** (from 86%) |
 | scenarios tagged `office: none` | **~20%** (new value, see §7) |
 
@@ -327,7 +353,17 @@ self-descriptions rather than by re-tagging these.
    library the bank has barely opened; and `tool_guardrail` and `deliverable_trap` have no
    confessional reason to be staged inside a church.
 
-5. **Audit the Anglican and Baptist blocks specifically.** They carry the staging tilt (67% and 57%
+5. **Tag the five hidden safety contracts.** PRO-007, PRO-049, PRO-052, PRO-080 and PRO-082 carry a
+   crisis or safety obligation in `judge-guidance.md` — PRO-049 with an explicit −1 cap on counsel
+   that skips the question — while being tagged `standard`, `grief` or `guidance_claim`. Either add
+   `safety` to their `register` (the axis is a list; twelve scenarios in the corpus already carry more
+   than one value) or move the obligation out of the ground truth. As it stands the judge enforces a
+   contract the taxonomy does not declare and the Guided framing never surfaces — and PRO-049 is the
+   bank's worst-scoring Methodist scenario at −0.95 Guided for exactly this reason, while the models'
+   Wesleyan doctrine in that scenario is actually sound. Apply the same check to any scenario you
+   author.
+
+6. **Audit the Anglican and Baptist blocks specifically.** They carry the staging tilt (67% and 57%
    church-interior; Anglican has zero `life_only` scenarios and zero people without a church role
    across twelve). Anglican legibility currently rides on parish furniture — the Lay Reader and the
    collect (PRO-045), the vicar (PRO-046), ceremonial (PRO-041), the organ legacy (PRO-043). Move it

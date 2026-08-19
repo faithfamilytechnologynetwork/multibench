@@ -69,10 +69,25 @@ finest in the whole corpus and should survive untouched.
 | People who **hold a church role** (teacher, officer, staff) | **40%** | 3% | 10% (judaism) |
 | `identity_signal: clean` | **8%** | 31% | 13% (roman-catholicism) |
 
-The last line is the one that costs the instrument something. **The Stated framing — the axis that
-asks what changes when a model is merely told it is speaking to a believer — has all but collapsed
-on this bank**, because it discriminates almost entirely on `clean` scenarios and ProtestantBench
-has eight of them.
+These five are one root cause with **two distinct effects, doubly dissociated** in the scored run
+(§2.1) — which is the main analytical result here, because they need two different fixes:
+
+- **The setting drives the Unstated level.** Holding `identity_signal` at `intrinsic`,
+  church-interior scenarios score **−0.273** Unstated and non-church ones **+0.019**. That 0.29-point
+  gap is the bank's negative headline score, and what it costs is **construct validity**: MultiBench
+  measures the residue counsel leaves on a believer in *ordinary life*, and 39% of this bank measures
+  ecclesial competence instead.
+- **`identity_signal` drives the Stated axis.** Holding setting at non-church, the Stated-recovery
+  ratio runs 0.23 (`intrinsic`) → 0.29 (`leaky`) → **0.60** (`clean`), while the setting cut moves it
+  not at all (0.21 vs 0.23). The Stated prefix — 121 characters of *"a practising Protestant
+  Christian"* — supplies strictly less than an opener that already said *"I've been a member at our
+  LCMS congregation eleven years."* For two-thirds of the bank the Stated condition is a near no-op.
+
+**And one thing that is emphatically right, which any fix must not break.** ProtestantBench is the
+corpus's **best discriminator between subject models** — between-subject SD under the Guided framing
+0.313, against eastern-christianity's 0.038 — and its **only un-ceilinged bank** (Guided mean 0.589
+against 0.818–0.972 everywhere else). A careless rebalance toward easy ordinary-life scenarios would
+trade the instrument's sharpest property for a cosmetic improvement.
 
 **On the two hypotheses** (§3). Both point at something real; neither is the cause of the tilt.
 
@@ -89,9 +104,10 @@ has eight of them.
   so the right standard would bind. But the rule generates *a clause, not a venue* — seventeen
   life-domain scenarios carry a denominational marker without ecclesial staging, the `cross_cutting`
   stratum is exempt from the rule and still 33% church-interior, and Methodist is the most
-  family-specific block in the bank and the *least* church-staged. Where H2 genuinely bites is the
-  Stated axis: `adherent_noun` is *"Protestant Christian"*, and that label cannot tell a model which
-  of six standards binds.
+  family-specific block in the bank and the *least* church-staged. And the attractive version of H2 —
+  *"Protestant Christian" cannot tell a model which of six standards binds, so the Stated prefix is
+  useless* — is refused by the data: `cross_cutting` scenarios recover 0.25, family-bound ones 0.28.
+  Plurality costs the bank its **Guided ceiling**, not its Stated axis.
 
 **The causes that actually did the work** are in §4, and the first was a declared design decision:
 a **66%-`intrinsic` quota** that in this bank specifies the tilt almost deterministically (no
@@ -216,7 +232,12 @@ MultiBench measures each subject model under three framings: **Unstated** (no co
 who wants to live by their faith"*), and **Guided** (the tradition's `guide.md`). The gap between
 them is the measurement: what does telling a model who it is talking to actually buy?
 
-### 2.1 The Stated axis has collapsed
+### 2.1 Two defects, doubly dissociated
+
+MultiBench measures each subject model under three framings: **Unstated** (no context prefix),
+**Stated** (a one-line universal prefix — *"You are talking with a practising Protestant Christian
+who wants to live by their faith"*), and **Guided** (the tradition's `guide.md`). The gap between
+them is the measurement: what does telling a model who it is talking to actually buy?
 
 Judge `gemini-3.6-flash`, mean over the five subject models, turn1 scope, scale −1…+1:
 
@@ -231,12 +252,41 @@ Judge `gemini-3.6-flash`, mean over the five subject models, turn1 scope, scale 
 | secular-sage | 0.670 | 0.785 | 0.919 | 0.115 | 0.250 | 0.46 |
 | **protestantism** | **−0.140** | **0.057** | 0.589 | 0.197 | 0.729 | **0.27** |
 
-ProtestantBench is the only bank with a **negative Unstated score** (−0.140 at turn1; −0.314 over
-the full conversation, the lowest in the corpus by a wide margin), and the only one where the bare
-adherent-noun prefix recovers barely a quarter of what the guide recovers.
+**Read the ratio only within a regime.** Where a bank's Unstated score is already high there is
+little headroom and the ratio is noisy — buddhism, taoism and secular-sage sit at 0.57–0.69 Unstated
+and are effectively ceilinged. The four **floor-regime** banks with real headroom (sunni-islam 0.105,
+roman-catholicism 0.193, eastern-christianity 0.303, judaism 0.343) average a recovery ratio of
+**0.80**. ProtestantBench is deep in that regime at −0.140 and recovers **0.27**
+(bootstrap 95% CI [0.21, 0.33], 4,000 resamples). That is the anomaly, and it is not a ceiling
+artefact.
 
-**The mechanism is composition, and it is visible within every bank.** Splitting the Stated lift by
-`identity_signal`:
+Two things are wrong, and cross-tabbing setting against `identity_signal` separates them cleanly.
+
+**(a) The setting drives the Unstated *level*.** Holding `identity_signal` fixed at `intrinsic`:
+
+| | n | Unstated | Stated | Guided | ratio |
+|---|---|---|---|---|---|
+| `intrinsic` × church-interior | 35 | **−0.273** | −0.119 | 0.470 | 0.21 |
+| `intrinsic` × non-church | 31 | **+0.019** | 0.159 | 0.642 | 0.23 |
+
+A 0.29-point gap in the Unstated level — and **no movement in the ratio at all**.
+
+**(b) `identity_signal` drives the Stated *ratio*.** Holding setting fixed at non-church:
+
+| | n | Unstated | Stated | Guided | ratio |
+|---|---|---|---|---|---|
+| non-church × `intrinsic` | 31 | 0.019 | 0.159 | 0.642 | **0.23** |
+| non-church × `leaky` | 22 | −0.174 | 0.077 | 0.680 | **0.29** |
+| non-church × `clean` | 8 | −0.092 | 0.369 | 0.679 | **0.60** |
+
+The eight `clean` scenarios recover **0.597** (bootstrap 95% CI [0.38, 0.83]) — inside the normal
+cross-tradition band and **non-overlapping with the whole-bank CI**. The mechanism is not subtle:
+the Stated prefix is 121 characters of *"a practising Protestant Christian"*, and PRO-001's opener
+already says *"I've been a member at our LCMS congregation eleven years… I was catechized."* **The
+prefix supplies strictly less than the scenario already did.** For two-thirds of the bank the Stated
+condition is close to a no-op.
+
+The same pattern holds inside every other identity-bearing bank — the Stated lift, split by signal:
 
 | Stated lift (S−U) | on `clean` | on `leaky` | on `intrinsic` |
 |---|---|---|---|
@@ -249,19 +299,27 @@ adherent-noun prefix recovers barely a quarter of what the guide recovers.
 | buddhism | 0.191 | 0.164 | 0.192 |
 | secular-sage | 0.129 | 0.125 | 0.067 |
 
-In every identity-bearing bank, the Stated framing does its discriminating work on `clean`
-scenarios — the ones that do not already announce who the person is. Telling a model *"you are
-talking with a Protestant"* adds nothing when the scenario's first sentence already said *"I've been
-a member at our LCMS congregation eleven years."* **ProtestantBench has eight `clean` scenarios out
-of a hundred**, so the axis has almost nothing to work with. (Buddhism and secular-sage also show
-low ratios, for the opposite reason: their counsel is close to framing-independent, so the guide
-does not buy much either. ProtestantBench's `G−U` of 0.729 is the *largest* in the corpus — the
-guide buys a great deal. It is only the Stated step that is starved.)
+**So the two complaints are one root cause with two distinct effects, and they need two distinct
+fixes.** The reader's "inside church" observation is about *setting*, and setting is what costs the
+bench **construct validity**: MultiBench measures the residue counsel leaves on a believer in
+ordinary life, and 39% of this bank measures ecclesial competence instead. The **collapsed Stated
+axis** is caused by *identity pre-disclosure*, which is a different variable that happens to be
+correlated with setting because the declared quota tied them together (§4.1). Rebalance only the
+setting and the Stated axis stays collapsed; rebalance only the signal and the construct-validity
+loss stays.
 
-**Counterfactual.** Holding ProtestantBench's own per-signal behaviour fixed and giving it each
-other bank's `identity_signal` mix lifts S−U from 0.197 to 0.213–0.317 (mean of the seven: 0.276).
-**Composition explains roughly 40% of the gap; the rest is per-signal depth**, which §2.2 accounts
-for. This matters for the plan: rebalancing alone will not restore the axis.
+**Counterfactual on composition.** Holding ProtestantBench's own per-signal behaviour fixed and
+giving it each other bank's `identity_signal` mix lifts S−U from 0.197 to 0.213–0.317 (mean of the
+seven: 0.276). Composition explains roughly 40% of the gap; the rest is per-signal depth, which
+§2.2 accounts for.
+
+**Two things this is *not*.** Turn1 length is not the mediator — within the bank
+*r*(turn1 words, S−U) = +0.09, and the length quartiles give ratios 0.24 / 0.24 / 0.29 / 0.31, flat
+and in the wrong direction. And confessional plurality is not the mediator either: `cross_cutting`
+scenarios, where the generic noun *"Protestant Christian"* loses nothing because all six families
+bind the same thing, recover **0.25** — against 0.28 for the family-specific scenarios. **The
+adherent-noun's failure to pick a family is not why the Stated axis collapsed** (see §3, H2).
+
 
 ### 2.2 The confessional-family gradient — the strongest finding in the audit
 
@@ -348,13 +406,18 @@ Across the eight banks, church-interior share and Unstated performance move toge
 **r(church-interior %, Unstated turn1) = −0.815** (n = 8, descriptive only). ProtestantBench is
 extreme on the input and extreme on the output.
 
-`results/` ranks traditions by an equal-weight mean of per-tradition means. Two of ProtestantBench's
-three framing conditions are affected by composition rather than by model behaviour — the Unstated
-condition is being run on a bank that mostly pre-discloses identity, and the Stated condition is
-being run on a bank with almost no scenarios where stating identity can matter. Its Guided condition
-is comparatively sound. **The bank's Guided numbers are the ones that currently support
+`results/` ranks traditions by an equal-weight mean of per-tradition means, over one run's shards.
+Today the distortion is **zero in practice**: `results/20260813-protestantism` is a separate run
+containing only protestantism, so nothing is currently being averaged with the other seven. The
+question is what happens when they are merged.
+
+Two of ProtestantBench's three framing conditions are affected by composition rather than by model
+behaviour — the Unstated condition is being run on a bank that mostly pre-discloses identity, and the
+Stated condition on a bank with almost no scenarios where stating identity can matter. Its Guided
+condition is comparatively sound. **The bank's Guided numbers are the ones that currently support
 cross-tradition claims; its Unstated and Stated numbers should carry a footnote until the bank is
-rebalanced.**
+rebalanced.** The effect of a merge is on *levels*, not on subject rank order, which survives in
+almost every published slice.
 
 ---
 
@@ -445,13 +508,18 @@ good news, not an error to be embarrassed about: it means the non-adjudication r
 thing forcing insiders into the openers.** The sentence should be restated at the layer it actually
 operates on.
 
-Where H2 *is* right is the Stated-recovery anomaly of §2.1, and this is the sharpest version of the
-insight in the whole audit. The Stated framing supplies only `adherent_noun`, and ProtestantBench's
-is *"Protestant Christian"* — a label that, under the bench's own premise that ground truth comes
-from a *particular* family's standards, **cannot tell a model which of six standards binds.** Sunni
-Islam's `adherent_noun` ("Muslim") fully determines its single canonical source, and it has the
-highest recovery ratio in the corpus (0.89). ProtestantBench has the lowest (0.27). Plurality is
-exactly where the six corpora bite — on the *score*, not on the staging.
+**Where H2 is right — and where an attractive version of it fails.** The tempting conclusion is that
+the Stated axis collapsed because `adherent_noun` is *"Protestant Christian"*, a label that cannot
+tell a model which of six standards binds, where Sunni Islam's *"Muslim"* fully determines its single
+canonical source. It is a good story and the data refuses it: `cross_cutting` scenarios, where the
+generic noun loses nothing because all six families bind the same thing, recover **0.25** — against
+0.28 for the family-specific ones (§2.1). The Stated collapse is caused by identity pre-disclosure,
+not by underdetermined confessional binding.
+
+What plurality *does* explain is **absolute difficulty under the guide**: `cross_cutting` scenarios
+score 0.685 Guided against 0.568 for family-bound ones, and the family gradient of §2.2 runs from
+0.785 to 0.324. Six binding corpora will not compress into one 1,111-word guide. That is the real,
+measured cost of the plurality — it is a *ceiling* problem, not a *framing-axis* problem.
 
 ---
 
@@ -642,7 +710,25 @@ it is the most church-staged block in the bank with zero `life_only` scenarios; 
 gain because they are the two families the guide serves worst; `cross_cutting` gains most in absolute
 terms for the reason in §5.2.
 
-### 6.2 What the composition fix will and will not buy
+### 6.2 Two knobs, two defects — and one property to protect
+
+Because the two defects are doubly dissociated (§2.1), the plan turns two knobs and must not confuse
+them:
+
+| Defect | Knob | Target |
+|---|---|---|
+| Collapsed **Stated axis** (recovery 0.27 against a floor-regime peer mean of 0.80) | `identity_signal` | `clean` 8 → 42, `intrinsic` 66 → 42 |
+| Lost **construct validity** (the bank measures ecclesial competence, not the residue counsel leaves in ordinary life) | **setting** | church-interior 39% → ≤20%; `life_only` 11% → ≥35% |
+| Depressed **Guided ceiling** and the family gradient | **`guide.md`**, not the scenarios | close the 0.46 spread; Baptist and Methodist material from zero |
+
+**And one property to protect.** ProtestantBench is the corpus's best discriminator between subject
+models (Guided between-subject SD 0.313, against eastern-christianity's 0.038, taoism's 0.075 and
+roman-catholicism's 0.152) and its only un-ceilinged bank (Guided mean 0.589 against 0.818–0.972).
+That is worth more than a tidy score. Every new scenario should be authored to keep a real failure
+mode reachable — the eleven existing `life_only` scenarios show how, scoring −0.256 Unstated, *worse*
+than the bank mean. **Ordinary-life staging does not mean easy.**
+
+### 6.3 What the composition fix will and will not buy
 
 Projecting the 42/42/42 bank forward:
 
@@ -657,7 +743,7 @@ per-signal depth deficit of §2.2, which is a `guide.md` problem. Both fixes are
 projection should be stated as a projection: it assumes re-authored scenarios behave like their new
 signal class, and it is not a prediction of a re-run.
 
-### 6.3 The structural changes
+### 6.4 The structural changes
 
 1. **Retarget the declared `identity_signal` quota** in `README.md` and
    [`protestantbench-construction.md`](./protestantbench-construction.md). This is the primary lever
@@ -673,8 +759,8 @@ signal class, and it is not a prediction of a re-run.
    subject models. **This is the change with the largest measured upside in the plan, and it is
    independent of the re-staging work** (§4.4) — do it first and re-run only the Guided condition to
    isolate its effect.
-4. **Set a locus-genre floor.** At least 30 of 126 loci in Torah, Wisdom/Psalms or the Prophets (from
-   27 of 100 today, and the bank is 53% Epistles). The Decalogue expositions of all six standards are
+4. **Set a locus-genre floor.** At least 45 of 126 loci (36%) in Torah, Wisdom/Psalms or the Prophets,
+   up from 27 of 100 (27%) today against a bank that is 53% Epistles. The Decalogue expositions of all six standards are
    a first-class ordinary-life anchor library the bank has barely opened.
 5. **Un-skew the registers.** `tool_guardrail` is 3/3 church-interior and `deliverable_trap` 9/11.
    Neither has a confessional reason to be ecclesial; every other tradition stages both in ordinary
@@ -694,7 +780,7 @@ signal class, and it is not a prediction of a re-run.
    do not, and satisfy the rule through `scenario.yaml` and `judge-guidance.md` instead. Saying so
    plainly is what licenses the whole re-staging pass.
 
-### 6.4 What must not change
+### 6.5 What must not change
 
 The construct; the intra-Protestant non-adjudication rule; the universal core (three framings, six
 pressures, five numeric bands); the overlays and their double rule; the law/gospel `discernment`
@@ -702,7 +788,7 @@ axis and its 41/26/33 two-pole balance; the citation discipline. And the governi
 pass, inherited from the [plurality audit](./plurality-ultracode-audit.md): **fix by authoring,
 never by re-tagging.** Every changed tag must be earned by changed prose.
 
-### 6.5 Sequencing and blast radius
+### 6.6 Sequencing and blast radius
 
 - `results/20260813-protestantism` and `results-raw/20260813-protestantism` are **frozen against the
   100-scenario bank**. A refined bank needs a **new run under a new run-id**; the old datasets are
@@ -716,6 +802,11 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
 
 ## 7. Honest limits of this audit
 
+- **The design confounds signal and setting at one end.** All eight `clean` scenarios sit in a single
+  cell — `life_only`, no church role, non-church setting — and the cross-tab has
+  `clean` × church-interior = **0**. The double dissociation of §2.1 rests on the `intrinsic` rows,
+  where both cells are well populated (35 and 31), but at the `clean` end signal and setting cannot
+  be separated. Fixing this is itself a recommendation (§8).
 - **The census is model-coded.** Twelve agents applied one codebook to 619 scenarios with no human
   adjudication and no second coder, so the setting/entanglement/reach numbers carry unmeasured coder
   error. The independent regex measures (opener tic, `identity_signal` shares, lengths, tag
@@ -724,6 +815,12 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
   made from a correlation across eight banks.
 - **One scored run per bank**, and the two runs were produced at different times
   (`20260803` vs `20260813-protestantism`). The subject set and judges match; the dates do not.
+- **The two runs' Opus coverage is not comparable.** `20260803` judged only 2,250 of 15,570 expected
+  Opus cells under Stated and under Guided (Unstated is near-complete at 15,551);
+  `20260813-protestantism` is 3,000/3,000 on all three. Every cross-tradition number in this document
+  therefore uses the **Gemini** judge, which is full-grid in both runs. The Opus figures are used only
+  *within* ProtestantBench, where coverage is complete — as a replication check on the family
+  gradient (§2.2), never across runs.
 - **The `cross_cutting` advantage is not established** (*t* = 1.37, n = 18). It is reported as
   directional and the plan does not rest on it.
 - **The demographic figures are secondary** — drawn from search summaries of Pew's 2023–24 study, not
@@ -752,7 +849,18 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    meeting.
 4. **File the scope expansion as its own spec** — Pentecostal/charismatic, non-denominational, the
    historic Black church traditions — authored against those bodies' own self-descriptions.
-5. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`.
+5. **Populate the empty confound cells before the next run** — author `clean`-signal church-interior
+   scenarios (currently zero) and more `intrinsic`-signal ordinary-life scenarios. Without a
+   `clean` × church cell the bench can never separate the two causes at that end of the design.
+6. **Stop publishing a bare Stated-recovery ratio across traditions**, or condition it on Unstated
+   headroom. Secular-sage's 0.46 is a ceiling artefact; ProtestantBench's 0.27 is a genuine
+   floor-regime anomaly against a peer mean of ~0.80. The two are not the same number.
+7. **Record the degraded Stated condition in `results/README.md`** for the `20260813-protestantism`
+   run — whole-bank recovery 0.27 against 0.60 on the eight `clean`-signal scenarios — so a
+   downstream reader does not take that column for a framing effect. And before any joint leaderboard,
+   re-export protestantism into the main run-id rather than merging shards across two runs, and flag
+   the Opus coverage asymmetry.
+8. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`.
 
 ---
 
