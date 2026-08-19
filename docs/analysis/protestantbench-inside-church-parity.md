@@ -1034,15 +1034,15 @@ Its shape:
 
 | § | What it does |
 |---|---|
-| 1 | The defect in eight measured lines, plus the two facts that make the fix cheap (only 21/100 ground truths are ecclesial; `guide.md` has zero Baptist content) |
+| 1 | The defect in eight measured lines; the four facts that shape the fix (re-staging is cheap — only 21/100 ground truths are ecclesial; `identity_signal` is nearly the same variable as setting; the tilt and the score deficit sit in different families; `guide.md` has zero Baptist content); **the two knobs**; and the discrimination property that must not be destroyed |
 | 2 | Seven non-negotiables — the construct, the non-adjudication rule, universal core, the overlays, the discernment poles, *author don't re-tag*, citation discipline |
-| 3 | The 42/42/42 targets, the seven bank-level parity targets, the family balance |
+| 3 | The 42/42/42 composition targets reached in **three moves** (34 signal re-authorings, 8 standing re-authorings, 26 new), eleven bank-level parity targets — including church-interior as a **band** with a floor — and the family balance |
 | 4 | **Rule A** (a scenario must be statable in one sentence with no church noun in it), **Rule A′** (break the `intrinsic` ⟺ insider coupling — currently perfect at 66/66 — by authoring the empty `intrinsic` × no-church-role cell), and **Rule B** (the opener carries the trouble, not the credentials), with the four ways to keep a `communion` tag legible without an insider |
-| 5 | Which 24 to re-author and the four-step recipe, including *move the anchor from the ecclesial article to the moral corpus of the same standards* — and which two to keep untouched |
+| 5 | Which 42 to re-author, the rule for choosing which of the two moves each gets, the four-step recipe (including *move the anchor from the ecclesial article to the moral corpus of the same standards*), and the ecclesial scenarios that must survive |
 | 6 | The seed inventory for the 26 new scenarios, weighted to the domains the census says are thinnest, and the instruction that **most of the new people must not be weekly attenders** |
 | 7 | The structural changes, led by retargeting the declared quota in writing: `office: none`, the `guide.md` family rebalance, the locus-genre floor, the register un-skew, the length reset, the five hidden safety contracts — plus **§7b, the `guide.md` amendment for the person with no congregation, which must land before any of the new scenarios** |
 | 8–9 | Deliverable format, the validator command, and the rule that the validator checks format while this pass is about balance |
-| 10 | Six failure modes, led by re-tagging and by moralising about attendance |
+| 10 | Six failure modes, led by re-tagging, genericising, and moralising about attendance |
 
 ---
 
