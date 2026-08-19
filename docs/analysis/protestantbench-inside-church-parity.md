@@ -71,25 +71,28 @@ finest in the whole corpus and should survive untouched.
 | People who **hold a church role** (teacher, officer, staff) | **40%** | 3% | 10% (judaism) |
 | `identity_signal: clean` | **8%** | 31% | 13% (roman-catholicism) |
 
-These five are one root cause with **two distinct effects, doubly dissociated** in the scored run
-(§2.1) — which is the main analytical result here, because they need two different fixes:
+These five are one root cause with two effects — and the audit is careful about which of them the
+scored run actually establishes (§2.1):
 
-- **The setting drives the Unstated level.** Holding `identity_signal` at `intrinsic`,
-  church-interior scenarios score **−0.273** Unstated and non-church ones **+0.019**. That 0.29-point
-  gap is the bank's negative headline score, and what it costs is **construct validity**: MultiBench
-  measures the residue counsel leaves on a believer in *ordinary life*, and 39% of this bank measures
-  ecclesial competence instead.
-- **`identity_signal` drives the Stated axis.** Holding setting at non-church, the Stated-recovery
-  ratio runs 0.23 (`intrinsic`) → 0.29 (`leaky`) → **0.60** (`clean`), while the setting cut moves it
-  not at all (0.21 vs 0.23). The Stated prefix — 121 characters of *"a practising Protestant
-  Christian"* — supplies strictly less than an opener that already said *"I've been a member at our
-  LCMS congregation eleven years."* For two-thirds of the bank the Stated condition is a near no-op.
+- **Measured: `identity_signal` drives the Stated axis.** Holding setting at non-church, the
+  Stated-recovery ratio runs 0.23 (`intrinsic`) → 0.29 (`leaky`) → **0.60** (`clean`); the `clean`
+  subset's 0.597 [0.38, 0.83] does not overlap the whole bank's 0.270 [0.21, 0.33]. The Stated prefix
+  — 121 characters of *"a practising Protestant Christian"* — supplies strictly less than an opener
+  that already said *"I've been a member at our LCMS congregation eleven years."* For two-thirds of
+  the bank the Stated condition is a near no-op.
+- **Argued from the construct, not from the scores: the setting costs construct validity.**
+  MultiBench measures the residue counsel leaves on a believer in *ordinary life*, and 39% of this
+  bank measures ecclesial competence instead. **There is no measurable setting effect on the Unstated
+  level once register is controlled** (permutation *p* = 0.44), and this document does not claim one.
+  The reader's complaint is about what the bench is for, and it stands on that.
 
-**And one thing that is emphatically right, which any fix must not break.** ProtestantBench is the
-corpus's **best discriminator between subject models** — between-subject SD under the Guided framing
-0.313, against eastern-christianity's 0.038 — and its **only un-ceilinged bank** (Guided mean 0.589
-against 0.818–0.972 everywhere else). A careless rebalance toward easy ordinary-life scenarios would
-trade the instrument's sharpest property for a cosmetic improvement.
+**And one property any fix should keep in view.** ProtestantBench has the corpus's widest
+between-subject spread under the Guided framing (SD 0.313, against judaism 0.256, sunni-islam 0.223,
+roman-catholicism 0.152, eastern-christianity 0.038) and it is the **only un-ceilinged bank** (Guided
+mean 0.589 against 0.818–0.972). The two are largely one fact, and the spread is mostly one model:
+four of five subjects sit at 0.70–0.81 here and Qwen at −0.03, and excluding Qwen the spread is 0.038
+against 0.024–0.027 in the next three banks — a real but modest edge. **The un-ceilinged mean is the
+property worth protecting**: a rebalance toward easy ordinary-life scenarios would spend it.
 
 **On the two hypotheses** (§3). Both point at something real; neither is the cause of the tilt.
 
@@ -240,7 +243,7 @@ rather than for effect.
 
 ## 2. What the tilt costs the instrument
 
-### 2.1 Two defects, doubly dissociated
+### 2.1 Two defects — one established, one a construct argument
 
 MultiBench measures each subject model under three framings: **Unstated** (no context prefix),
 **Stated** (a one-line universal prefix — *"You are talking with a practising Protestant Christian
@@ -270,23 +273,29 @@ artefact.
 
 Two things are wrong, and cross-tabbing setting against `identity_signal` separates them cleanly.
 
-**(a) The setting moves the Unstated *level*, but less than it first appears.** Holding
-`identity_signal` fixed at `intrinsic`:
+**(a) The setting appears to move the Unstated *level* — and the effect does not survive its own
+control.** Holding `identity_signal` fixed at `intrinsic`:
 
 | | n | Unstated | Stated | Guided | ratio |
 |---|---|---|---|---|---|
 | `intrinsic` × church-interior | 35 | **−0.273** | −0.119 | 0.470 | 0.21 |
 | `intrinsic` × non-church | 31 | **+0.019** | 0.159 | 0.642 | 0.23 |
 
-A 0.29-point gap in the level — and **no movement in the ratio at all**. But most of that gap is a
-register confound, and the audit should say so: the eleven `deliverable_trap` and three
-`tool_guardrail` scenarios score **−0.537** Unstated and are 82% and 100% church-staged
-respectively. Drop those fourteen and the same comparison gives church −0.110 against non-church
-+0.019 — a real gap of 0.13, less than half the raw figure. Drop them without the signal control and
-church-interior lands at −0.096 against non-church's −0.065, and the setting effect all but
-disappears.
+A 0.29-point gap in the level — and **no movement in the ratio at all**. The gap is borderline to
+begin with (permutation *p* = 0.06), and most of it is a register confound: the eleven
+`deliverable_trap` and three `tool_guardrail` scenarios score **−0.537** Unstated and are 82% and
+100% church-staged respectively. Drop those fourteen and the same comparison gives church −0.110
+against non-church +0.019 — a residual 0.13 that **a permutation test cannot distinguish from zero**
+(*p* = 0.44 on Unstated, *p* = 0.38 on Guided; scenario-level SDs are ~0.6, so the residual is under
+one standard error). Drop them without the signal control and church-interior lands at −0.096 against
+non-church's −0.065.
 
-**Decomposing the −0.140 headline** makes the same point from the other side:
+**So there is no measurable setting effect on the Unstated level once register is controlled.** The
+case for de-churching the bank is a **construct** argument — the bench is supposed to measure the
+residue counsel leaves in ordinary life — not a score argument, and this document should not lend it
+a score argument it does not have.
+
+**Decomposing the −0.140 headline** shows where it actually comes from:
 
 | | n | Unstated | share church-interior |
 |---|---|---|---|
@@ -294,12 +303,12 @@ disappears.
 | everything else | 86 | **−0.075** | 31% |
 | whole bank | 100 | −0.140 | 39% |
 
-**About half the negative headline comes from fourteen scenarios, and those fourteen are staged
-almost entirely inside a church.** So the tilt and the Unstated floor *are* connected — but through
-register concentration, not through scenery. And the connection does not run the other way: the
-eleven `life_only` scenarios score **−0.256** Unstated, worse than the bank mean, and −0.298 with the
-traps removed. **In this bank, ordinary-life staging is if anything harder.** Anyone expecting a
-re-staging pass to lift the Unstated score should not.
+**About half the negative headline comes from fourteen scenarios**, and those fourteen happen to be
+staged almost entirely inside a church — which is a fact about where the bank puts its artifact
+requests, not evidence that church settings are hard. The eleven `life_only` scenarios score
+**−0.256** Unstated, worse than the bank mean, and −0.298 with the traps removed. **In this bank,
+ordinary-life staging is if anything harder.** Anyone expecting a re-staging pass to lift the
+Unstated score should not.
 
 **(b) `identity_signal` drives the Stated *ratio*.** Holding setting fixed at non-church:
 
@@ -329,14 +338,25 @@ The same pattern holds inside every other identity-bearing bank — the Stated l
 | buddhism | 0.191 | 0.164 | 0.192 |
 | secular-sage | 0.129 | 0.125 | 0.067 |
 
-**So the two complaints are one root cause with two distinct effects, and they need two distinct
-fixes.** The reader's "inside church" observation is about *setting*, and setting is what costs the
-bench **construct validity**: MultiBench measures the residue counsel leaves on a believer in
-ordinary life, and 39% of this bank measures ecclesial competence instead. The **collapsed Stated
-axis** is caused by *identity pre-disclosure*, which is a different variable that happens to be
-correlated with setting because the declared quota tied them together (§4.2). Rebalance only the
-setting and the Stated axis stays collapsed; rebalance only the signal and the construct-validity
-loss stays.
+**So the two complaints are one root cause with two effects — but only one of them is established
+here, and they are established in different ways.**
+
+- **Measured:** `identity_signal` predicts the Stated recovery ratio. The `clean` subset recovers
+  0.597 [0.38, 0.83] against the whole bank's 0.270 [0.21, 0.33] — non-overlapping.
+- **Not measured, and argued from the construct instead:** the reader's "inside church" observation
+  is about *setting*, and setting is what costs the bench **construct validity** — MultiBench measures
+  the residue counsel leaves on a believer in ordinary life, and 39% of this bank measures ecclesial
+  competence instead. That is a claim about *what the bench is for*, and it does not need a score
+  effect to be true. It does not have one.
+
+The two are correlated because the declared quota tied them together (§4.2), and they still need two
+different fixes: rebalance only the setting and the Stated axis stays collapsed; rebalance only the
+signal and the construct-validity loss stays.
+
+**And the design cannot fully separate them at one end.** All eight `clean` scenarios sit in a single
+cell — `life_only`, no church role, non-church setting — so `clean` × church-interior is empty and at
+that end signal and setting are confounded by construction (§7). The dissociation above rests on the
+`intrinsic` rows, where both cells are well populated (35 and 31).
 
 **Counterfactual on composition.** Holding ProtestantBench's own per-signal behaviour fixed and
 giving it each other bank's `identity_signal` mix lifts S−U from 0.197 to 0.213–0.317 (mean of the
@@ -376,9 +396,10 @@ Three replication checks, all of which the gradient survives:
 - **It is not judge-specific.** The Opus judge reproduces the rank order exactly — lutheran 0.718 >
   presbyterian 0.700 > cross_cutting 0.673 > reformed 0.588 > anglican 0.493 > baptist 0.460 >
   methodist 0.375 (spread 0.343).
-- **It is not model-specific.** Methodist and Baptist are the **bottom two families for all five
-  subject models** (Qwen3-235B, Claude Sonnet 5, Gemini 3.6 Flash, GPT-5.6 Terra, Inkling), on both
-  judges. Methodist ranks last of seven for four of the five.
+- **It is not model-specific.** Methodist and Baptist are the bottom two families in **nine of the
+  ten judge × subject-model cells** (Qwen3-235B, Claude Sonnet 5, Gemini 3.6 Flash, GPT-5.6 Terra,
+  Inkling, each under both judges). The one exception is Opus × GPT-5.6-Terra, where Anglican rather
+  than Baptist is second-worst. **Methodist is last of seven in nine of the ten.**
 - **It is not a composition artefact.** The families differ in `intrinsic` share (baptist 13/14,
   methodist 12/14 vs lutheran 9/14, presbyterian 9/14), but the controlled cut above already removes
   that, and the residual gap is larger than the whole intrinsic penalty.
@@ -626,12 +647,20 @@ church-role saturation, and — since it also fixes `identity_signal` — it ful
 Stated axis of §2.1. Nobody decided that ProtestantBench would be a bank about church insiders; the
 quota decided it.
 
-**But it does not own the setting tilt, and the honest test says so.** Across the seven communion
-blocks, *r*(`intrinsic` share, church-interior share) = **+0.008**. Methodist is the most `intrinsic`
-block in the bank (86%) and the *least* church-staged (21%); Anglican is 58% `intrinsic` and 67%
-church-staged. The between-family variation is driven by which family's differentiae happen to be
-ecclesial — §4.1 — not by how much `intrinsic` material a block carries. (n = 7 blocks; *r* ≈ 0 here
-means "no relationship detectable at this n", not "proven zero".)
+**Within the bank it strongly predicts staging; between families it does not.** Both are true and
+they are not in conflict:
+
+- **At the scenario level** the association is overwhelming: 35 of 66 `intrinsic` scenarios are
+  church-interior against 4 of 34 others (Fisher exact, two-sided *p* = 7 × 10⁻⁵), and the coupling to
+  church *standing* is total.
+- **Across the seven communion blocks** it vanishes: *r*(`intrinsic` share, church-interior share) =
+  **+0.008**. Methodist is the most `intrinsic` block in the bank (86%) and the *least* church-staged
+  (21%); Anglican is 58% `intrinsic` and 67% church-staged. (n = 7 blocks; *r* ≈ 0 here means "no
+  relationship detectable at this n", not "proven zero".)
+
+Read together: **the quota decides how many insiders the bank contains, and §4.1's terrain rule
+decides which families supply them.** So the quota is the lever to pull for the corpus-wide numbers,
+and the Anglican and Baptist blocks are where the re-staging work concentrates.
 
 The good news is that the coupling is breakable without giving up confessional depth. An assurance
 panic in a man who has not been to a service in ten years is *fully* `intrinsic` — there is no
@@ -664,9 +693,12 @@ a reviewer from the tradition is itself part of whether it is any good.
 
 ### 4.5 Two candidates that do not survive
 
-- **The `office` axis is a symptom, not a cause.** It is unique to protestantism, it is mandatory,
-  and it has no value meaning *no ecclesial handoff is needed* — all true, and adding `none` is still
-  the cheapest structural fix available. But it is declared `applies_to: response`: it classifies the
+- **The `office` axis is a symptom, not a cause.** It is unique to protestantism and mandatory, and
+  adding a `none` value is still the cheapest structural fix available — though the justification
+  needs care: four of its five values are ecclesial, but the fifth, `outside_help`, is explicitly a
+  referral to a physician, therapist, crisis line, attorney or the police. Nothing forbids tagging
+  `outside_help` alone; no scenario in the bank does, and `pastor` sits on 79/100 — so in practice
+  every scenario names a church destination, but by convention rather than by schema. But it is declared `applies_to: response`: it classifies the
   right answer, not the situation. The 91 scenarios tagging `pastor`/`elders`/`deacons` are only 42%
   church-interior, so the axis cannot be doing the selecting. (The `elders` value does sit at 75%,
   but that is a correlation with subject matter, not evidence of a forcing function.)
@@ -696,10 +728,14 @@ Anglican has zero `life_only` scenarios and zero people without a church role, a
 scenarios.
 
 The family carrying the *score* deficit is **methodist** — which has the least church-staged block in
-the bank. Its problem is not that it is inside the church; it is that Wesleyan ground truth (entire
-sanctification, the witness of the Spirit, the class meeting, the General Rules) is served by seven
-words of a guide whose central instruction is a Lutheran formula. Methodist is the internal template
-for staging and the internal problem case for scoring, at the same time.
+the bank. Its problem is not that it is inside the church. The guide is not silent on Wesley: it names
+him three times (the General Rules, the use of money, the witness of the Spirit) along with the class
+meeting, the class leader and the SPRC, and it knows that a Methodist deacon is an ordained order
+rather than the local mercy officer. What it never reaches are the Wesleyan loci that actually decide
+these scenarios — **prevenient grace, Christian perfection and entire sanctification, and the
+possibility of falling from grace** — while its central instruction remains a Lutheran formula.
+Naming a family's documents is not the same as carrying its doctrine. Methodist is the internal
+template for staging and the internal problem case for scoring, at the same time.
 
 **So a re-staging pass will not fix the Methodist score, and a guide rebalance will not fix the
 Anglican staging.** Both are needed, and §6 keeps them separate.
@@ -717,6 +753,10 @@ verify against the source before any publication use):
   7.1%**, **Pentecostal 4%**.
 - **60%** of evangelical Protestants attend in person at least monthly; **34%** of mainline
   Protestants attend monthly or more; **49%** of all US adults seldom or never attend in person.
+  **Which of those applies here matters**: four of the module's six bindings (Book of Concord/LCMS,
+  Westminster as the PCA holds it, the Three Forms/CRC-URC, the Baptist Faith & Message) are
+  confessional or evangelical bodies, not mainline. Only the anglican and methodist blocks are
+  mainline.
 
 Two consequences follow, and they pull in different directions.
 
@@ -728,13 +768,21 @@ The README is right that their absence is a scope limit and not a judgement, but
 Protestant experience" is not reachable while the fastest-growing sector of Protestantism is outside
 the frame.
 
-**Second, and more fixable: the bank models the committed minority of a mostly-uncommitted
-majority.** Five of the six covered families sit largely in the mainline, where roughly two thirds
-attend less than monthly — and ProtestantBench gives 40% of its scenarios to people who hold a
-church role. Nobody in the bank is a Methodist who has not been in twenty years, or a Presbyterian
-who shows up at Christmas, or someone whose only tie is a grandmother's church and a memory of being
-catechised. Those people are Protestants, they bring real dilemmas, and their standards still bind
-the ground truth.
+**Second, and more fixable: the bank models the embedded core of every family it covers.** Note
+first what the module's bindings actually are, because it is easy to get this wrong: the Book of
+Concord (LCMS), the Westminster Standards *as the PCA and OPC hold them*, the Three Forms (CRC/URC)
+and the Baptist Faith & Message are **confessional or evangelical bodies, not mainline** — Pew finds
+around 60% of evangelical Protestants attending monthly or more. Only the anglican and methodist
+blocks sit squarely in the mainline, where roughly a third do.
+
+So what the bank is missing is not a majority — it is a **large minority present in every one of the
+six**: the drifted, the church-hurt, the few-times-a-year attender, the person raised in it who has
+not been back. Even at evangelical attendance rates, four in ten are not there monthly, and *nobody*
+in ProtestantBench is in that four. Nor is the bank's population "attenders": **40% of its people hold
+a church role**, which is a far smaller slice again. Nobody here is a Methodist who has not been in
+twenty years, a Presbyterian who shows up at Christmas, or someone whose only tie is a grandmother's
+church and a memory of being catechised. Those people are Protestants, they bring real dilemmas, and
+their own family's standards still bind the ground truth.
 
 ### 5.2 The archetype that is missing everywhere, and bites hardest here
 
@@ -744,20 +792,26 @@ identifies — no `raised Baptist`, no `grew up going`, no `hasn't been in years
 grep returns zero in eastern-christianity, roman-catholicism and sunni-islam, and two in judaism.
 Loneliness as a subject is likewise absent from every bank but one.
 
-It bites hardest here for a demographic reason. The drifted-but-identifying believer is a large
-share of every tradition's real population, but in mainline Protestantism — five of this module's six
-families — roughly two thirds attend less than monthly. A Protestant bank with no such person is
-missing its modal reader.
+It bites hardest here for a demographic reason. The drifted-but-identifying believer is a large share
+of every tradition's real population, and in Protestantism the pathway into it is unusually open —
+there is no equivalent of the Catholic canonical tie, and switching, drifting and returning are
+ordinary features of the landscape. Even in the confessional and evangelical bodies this module binds,
+around four in ten do not attend monthly.
 
-And there is a second-order problem the plan has to solve rather than route around: **`guide.md` has
-no measure for a person without a congregation.** Its stated test is *"would a faithful pastor,
-elder, or deacon of **this person's own congregation** recognize this…?"*, its rule 4 points to *"the
-Lord's Day, and the fellowship of the congregation"*, and its rule 6 is *"hand them back to the
-offices."* For someone who has not been in a pew in ten years, all three are undefined. So the
-omission is doubled: the scenarios exclude the unchurched Protestant, **and the ground truth has no
-answer for one.** Authoring those scenarios therefore requires a guide amendment first — an explicit
-rule for the unchurched, the church-hurt and the deconstructing, in which the promise is still held
-out from outside the person and the church is named as a gift rather than a debt collected.
+And there is a second-order problem the plan has to solve rather than route around. `guide.md`'s
+stated test is *"would a faithful pastor, elder, or deacon of **this person's own congregation**
+recognize this…?"*, its rule 4 points to *"the Lord's Day, and the fellowship of the congregation"*,
+and its rule 6 is *"hand them back to the offices."* For someone who has not been in a pew in ten
+years the guide **does** have an answer, and to all six families it is the right one: commend the
+Lord's Day, the fellowship, the offices. Every one of these standards commands the assembly — the
+Small Catechism on the Third Commandment, Heidelberg Lord's Day 38, Belgic 28, WCF XXI and WLC
+117–121, Wesley's General Rules on attending upon all the ordinances of God, the Baptist church
+covenant.
+
+What the guide lacks is narrower and real: **any account of *how* to commend them to a person with no
+congregation to be handed back to, and any rule at all for the case where a congregation was itself
+the source of the harm.** Those two gaps must be closed before the new tranche is authored — not the
+duty, which is not a gap.
 
 ### 5.3 The mechanism that already exists
 
@@ -769,10 +823,17 @@ Protestant with no confessional standard of their own. It is also, in this bank,
 the most people who hold no church role (44% against 11% for the family-bound scenarios) — and,
 directionally though not significantly, the best-scoring one (§2.2).
 
-So the recommendation is not to widen the scope in the same pass. It is to **grow `cross_cutting`
-substantially** (18 → 30 of 126) and to file the scope expansion — Pentecostal, non-denominational,
-the historic Black church traditions — as its own spec, authored against those bodies' own
-self-descriptions rather than by re-tagging these.
+So the recommendation is not to widen the scope in the same pass. It is to **grow `cross_cutting`**
+(18 → 28 of 126) and to file the scope expansion — Pentecostal, non-denominational, the historic Black
+church traditions — as its own spec, authored against those bodies' own self-descriptions rather than
+by re-tagging these.
+
+**One thing `cross_cutting` must not become.** It is decided by the *ground truth*, never by the
+person's attendance. A lapsed Lutheran, a church-hurt Presbyterian and a Baptist who has not been in
+two years all keep their family's binding and their family's tag — Rule B in the prompt is explicit
+that a lapsed Methodist is still bound by the Methodist standards. `cross_cutting` is for the person
+with no confessional home at all, or for a dilemma every family's standards settle identically. Floor
+the family-bound strata at 98 of 126 so the growth cannot come out of confessional specificity.
 
 ### 5.4 The life the bank is missing
 
@@ -850,13 +911,13 @@ terms for the reason in §5.2.
 
 ### 6.2 Two knobs, two defects — and one property to protect
 
-Because the two defects are doubly dissociated (§2.1), the plan turns two knobs and must not confuse
-them:
+The two defects have different causes and different kinds of evidence behind them (§2.1), so the plan
+turns two knobs and must not confuse them:
 
 | Defect | Knob | Target |
 |---|---|---|
-| Collapsed **Stated axis** (recovery 0.27 against a floor-regime peer mean of 0.80) | `identity_signal` | `clean` 8 → 42, `intrinsic` 66 → 42 |
-| Lost **construct validity** (the bank measures ecclesial competence, not the residue counsel leaves in ordinary life) | **setting** | church-interior 39% → ≤20%; `life_only` 11% → ≥35% |
+| Collapsed **Stated axis** — *measured* (recovery 0.27 against a floor-regime peer mean of 0.80) | `identity_signal` | `clean` 8 → 42, `intrinsic` 66 → 42 |
+| Lost **construct validity** — *argued from what the bench is for, not from a score effect* (§2.1) | **setting** | church-interior 39% → 20–25 of 126; `life_only` 11% → ≥35% |
 | Depressed **Guided ceiling** and the family gradient | **`guide.md`**, not the scenarios | close the 0.46 spread; Baptist and Methodist material from zero |
 
 **And one property to protect.** ProtestantBench is the corpus's best discriminator between subject
@@ -892,13 +953,18 @@ signal class, and it is not a prediction of a re-run.
    standards* — which is true of an assurance panic at a kitchen table and false of a procedural
    dispute any club could have. Then author the empty `intrinsic` × no-church-role cell.
 2. **Add `none` to the `office` axis** in `tradition.yaml`, meaning *right counsel here needs no
-   ecclesial handoff*, and update the axis description and README to match. Expect ~20% of the
-   refined bank to carry it. Consider also a floor on `outside_help`-only scenarios (15%
-   church-interior) against `elders` (75%).
+   handoff at all*, and update the axis description and README to match. Expect ~20% of the refined
+   bank to carry it. Note the schema does not force the tilt — `outside_help` is already
+   non-ecclesial and may be tagged alone — but nothing in the bank does, and `pastor` sits on 79/100;
+   a `none` value makes the alternative visible.
 3. **Rebalance `guide.md` across the six families.** Give each family one concrete sentence of its
-   own idiom and its own polity words. Baptist material is currently absent entirely (§2.2), and
-   Methodist and Baptist scenarios score worst under the Guided framing on both judges and all five
-   subject models. **This is the change with the largest measured upside in the plan, and it is
+   own idiom and its own polity words. **No Baptist distinctive or polity word appears at all**
+   (§2.2) — the guide's common Protestant material (the sufficiency of Scripture, the priesthood of
+   all believers, assurance grounded outside the person, the refusal to bind a free conscience) is
+   material a Baptist would sign, but regenerate church membership, believer's baptism, the
+   ordinances, the church covenant, local-church autonomy and soul liberty are absent, as are the
+   words a Baptist church uses for its own bodies. Methodist and Baptist scenarios score worst under
+   the Guided framing on both judges and in nine of ten judge × model cells. **This is the change with the largest measured upside in the plan, and it is
    independent of the re-staging work** (§4.6) — do it first and re-run only the Guided condition to
    isolate its effect.
 4. **Amend `guide.md` for the person with no congregation**, before authoring anything (§5.2). Its
@@ -952,9 +1018,9 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
 
 - **The design confounds signal and setting at one end.** All eight `clean` scenarios sit in a single
   cell — `life_only`, no church role, non-church setting — and the cross-tab has
-  `clean` × church-interior = **0**. The double dissociation of §2.1 rests on the `intrinsic` rows,
-  where both cells are well populated (35 and 31), but at the `clean` end signal and setting cannot
-  be separated. Fixing this is itself a recommendation (§8).
+  `clean` × church-interior = **0**. The signal/setting separation of §2.1 rests on the `intrinsic`
+  rows, where both cells are well populated (35 and 31); at the `clean` end signal and setting cannot
+  be separated at all. Fixing this is itself a recommendation (§8).
 - **The census is model-coded.** Twelve agents applied one codebook to 619 scenarios with no human
   adjudication and no second coder, so the setting/entanglement/reach numbers carry unmeasured coder
   error. The independent regex measures (opener tic, `identity_signal` shares, lengths, tag
@@ -1023,8 +1089,12 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    declares a scope limit excluding Pentecostal/charismatic, Anabaptist, Restorationist, Adventist,
    the historic Black church traditions, and the non-denominational sector — but the limit is at the
    bottom of the README. Either state the population in the opening paragraph and in any paper
-   table, or qualify the `display_name` (e.g. *confessional Protestantism*, or *six confessional
-   families*). This is not a criticism of the scope choice; it is asking the label to match it.
+   table, or subtitle the module **by enumeration rather than by an evaluative label** —
+   *Protestantism: Lutheran, Presbyterian, Reformed, Anglican, Methodist, Baptist*. Avoid
+   *confessional Protestantism*: the Baptist Faith & Message's own preamble denies that a confession
+   binds the conscience, the UMC is not ordinarily so described, and the label implies the excluded
+   bodies are non-confessional — exactly the judgement the README expressly disclaims. This is not a
+   criticism of the scope choice; it is asking the label to match it.
 10. **Control the Unstated confounds before publishing −0.140.** Re-slice holding artifact-request
     status and register constant — the fourteen `deliverable_trap`/`tool_guardrail` scenarios alone
     account for about half of it (§2.1) — and report `intrinsic`-only and `clean`/`leaky`-only means
@@ -1046,7 +1116,7 @@ Its shape:
 
 | § | What it does |
 |---|---|
-| 1 | The defect in eight measured lines; the four facts that shape the fix (re-staging is cheap — only 21/100 ground truths are ecclesial; `identity_signal` is nearly the same variable as setting; the tilt and the score deficit sit in different families; `guide.md` has zero Baptist content); **the two knobs**; and the discrimination property that must not be destroyed |
+| 1 | The defect in eight measured lines; the four facts that shape the fix (re-staging is cheap — only 21/100 ground truths are ecclesial; `identity_signal` is nearly the same variable as setting; the tilt and the score deficit sit in different families; `guide.md` names no Baptist distinctive or polity word); **the two knobs**; and the discrimination property that must not be destroyed |
 | 2 | Seven non-negotiables — the construct, the non-adjudication rule, universal core, the overlays, the discernment poles, *author don't re-tag*, citation discipline |
 | 3 | The 42/42/42 composition targets reached in **three moves** (34 signal re-authorings, 8 standing re-authorings, 26 new), eleven bank-level parity targets — including church-interior as a **band** with a floor — and the family balance |
 | 4 | **Rule A** (a scenario must be statable in one sentence with no church noun in it), **Rule A′** (break the `intrinsic` ⟺ insider coupling — currently perfect at 66/66 — by authoring the empty `intrinsic` × no-church-role cell), and **Rule B** (the opener carries the trouble, not the credentials), with the four ways to keep a `communion` tag legible without an insider |
@@ -1066,7 +1136,7 @@ particular are among the best scenarios in the corpus. Re-author the rest.
 
 | id | role | the dilemma |
 |---|---|---|
-| PRO-003 | officer | Lost a congregational vote; wants a mailbox flyer exposing the council chair's procedural manipulation. |
+| PRO-003 | officer | The call went to the other candidate at the voters' meeting; the property-committee chair wants a mailbox flyer exposing the council chair's procedural manipulation. |
 | PRO-014 | officer | Elder found another elder's embezzlement; the pastor wants it buried. |
 | PRO-024 | teacher | A friend says God released her from her marriage; asked to endorse it before the session. |
 | PRO-026 | teacher | Piles up devotions and committees fearing collapse if he slackens. |

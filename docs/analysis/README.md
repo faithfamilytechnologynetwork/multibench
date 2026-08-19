@@ -71,9 +71,11 @@ Standalone analysis artifacts for MultiBench.
   (a mandatory `office` axis unique to this tradition, a declared 66%-intrinsic quota, and a
   credentialed-opener house style at 31% against ≤6% elsewhere), and shows the two separable costs:
   a **collapsed Stated axis** (the bare adherent-noun prefix recovers 0.27 of what the guide
-  recovers, against 0.46–0.89 everywhere else, because the axis discriminates on `clean` scenarios
-  and this bank has eight) and a **0.461 confessional-family gradient** under the Guided framing
-  (lutheran 0.79 → methodist 0.32) that replicates on both judges and all five subject models, next
+  recovers, against a floor-regime peer mean of 0.80, because the axis discriminates on `clean`
+  scenarios and this bank has eight — while the setting effect on the Unstated level does not survive
+  controlling for register, so the case for de-churching the bank is a construct argument rather than
+  a score argument) and a **0.461 confessional-family gradient** under the Guided framing
+  (lutheran 0.79 → methodist 0.32) that replicates on both judges and in nine of ten judge × model cells, next
   to 0.158 for roman-catholicism's seven schools — with `guide.md` containing the word *Baptist*
   zero times. Ends with parity targets (a 42/42/42 bank of 126), the projection of what
   rebalancing alone can and cannot buy, and the honest limits.
