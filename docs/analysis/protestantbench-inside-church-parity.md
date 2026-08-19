@@ -425,10 +425,8 @@ pastoral instruction, *rightly divide law from gospel*, is a Lutheran formula, a
 paragraph is Heidelberg–Westminster–Dort with Wesley appended.
 
 The obvious defence — *the guide is deliberately pan-Protestant, so naming one family's distinctives
-would break it* — does not hold, because the guide already names four families' distinctives. It
-cites Luther, the Smalcald Articles and the estates; Westminster, Heidelberg, Dort, *coram Deo*, the
-consistory, the session and Kuyper; Wesley, the class meeting and the SPRC; the vestry, the PCC and
-the Ordinary. **The asymmetry is an omission, not a principle** — and it lands on one of the two
+would break it* — does not hold: the sentence above is a list of four families' distinctives, already
+in the guide. **The asymmetry is an omission, not a principle**, and it lands on one of the two
 worst-scoring families.
 
 A directional note, reported as directional only: `cross_cutting` scenarios — bound solely to what
@@ -462,8 +460,9 @@ Whatever else is wrong here, models do not cave under pressure on this bank at a
 ### 2.4 What this does to cross-tradition comparison
 
 Across the eight banks, church-interior share and Unstated performance move together:
-**r(church-interior %, Unstated turn1) = −0.815** (n = 8, descriptive only). ProtestantBench is
-extreme on the input and extreme on the output.
+**r(church-interior %, Unstated turn1) = −0.815** (n = 8, descriptive only, and read alongside §2.1 —
+about half of ProtestantBench's own Unstated deficit is register concentration rather than setting).
+ProtestantBench is extreme on the input and extreme on the output.
 
 `results/` ranks traditions by an equal-weight mean of per-tradition means, over one run's shards.
 Today the distortion is **zero in practice**: `results/20260813-protestantism` is a separate run
