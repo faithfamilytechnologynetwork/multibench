@@ -38,11 +38,13 @@ Two chained workflows, staying in the loop between them:
 2. **Diagnose** — five independent lenses on the census plus the scored runs: one per offered
    hypothesis, one hunting rival explanations, one on measurement and comparability, one on who
    Protestants actually are.
-3. **Design → judge → critique** — three rival refinement strategies authored independently
-   (additive-only, re-author-heavy, hybrid+structural), scored by three judge lenses (Protestant
-   pastoral realism as a six-family panel; measurement; operational usability), then the surviving
-   plan put to four adversarial critics — including one whose whole brief was to **refute** the
-   audit.
+3. **Critique** — five adversarial lenses on the finished documents rather than on a plan: one whose
+   whole brief was to **refute** this audit (including the strongest form of the argument that an
+   ecclesial bank is the *correct* instantiation of a congregational tradition), a six-family
+   Protestant reader panel, a repo-governance/blast-radius lens, an executor's-eye usability pass on
+   the prompt, and a completeness critic. A rival-strategy generation phase was started and stopped
+   in favour of this — the diagnosis lenses had already supplied the strategic options, and critique
+   of the actual artifact was worth more than critique of a plan.
 
 Alongside the agents, every number in §§1–4 was computed directly from the repo and is reproducible
 from the commands in [Appendix C](#appendix-c--reproduction).
@@ -893,23 +895,29 @@ signal class, and it is not a prediction of a re-run.
    subject models. **This is the change with the largest measured upside in the plan, and it is
    independent of the re-staging work** (§4.6) — do it first and re-run only the Guided condition to
    isolate its effect.
-4. **Set a locus-genre floor.** At least 45 of 126 loci (36%) in Torah, Wisdom/Psalms or the Prophets,
-   up from 27 of 100 (27%) today against a bank that is 53% Epistles. The Decalogue expositions of all six standards are
-   a first-class ordinary-life anchor library the bank has barely opened.
-5. **Un-skew the registers.** `tool_guardrail` is 3/3 church-interior and `deliverable_trap` 9/11.
+4. **Amend `guide.md` for the person with no congregation**, before authoring anything (§5.2). Its
+   measure — *"would a faithful pastor, elder, or deacon of **this person's own congregation**
+   recognize this…?"* — is undefined for someone who has not been in a pew in a decade, and so are
+   rule 4 (*"the fellowship of the congregation"*) and rule 6 (*"hand them back to the offices"*).
+   Without this, the ground truth has no answer for exactly the scenarios that fix the tilt.
+5. **Set a locus-genre floor.** At least 45 of 126 loci (36%) in Torah, Wisdom/Psalms or the
+   Prophets, up from 27 of 100 (27%) today against a bank that is 53% Epistles. The Decalogue
+   expositions of all six standards are a first-class ordinary-life anchor library the bank has
+   barely opened.
+6. **Un-skew the registers.** `tool_guardrail` is 3/3 church-interior and `deliverable_trap` 9/11.
    Neither has a confessional reason to be ecclesial; every other tradition stages both in ordinary
    life.
-6. **Bring lengths back to the corpus register**: `turn1` ~130 words (from 173), `pressures.md` ~400
+7. **Bring lengths back to the corpus register**: `turn1` ~130 words (from 173), `pressures.md` ~400
    (from 578), `judge-guidance.md` ~750 (from 1,020). Not brevity for its own sake — the corpus
    register is a person typing at eleven at night, and 173 words with a biographical preamble reads
    as a case study.
-7. **Tag the five hidden safety contracts.** PRO-007, PRO-049, PRO-052, PRO-080 and PRO-082 carry a
+8. **Tag the five hidden safety contracts.** PRO-007, PRO-049, PRO-052, PRO-080 and PRO-082 carry a
    crisis or safety obligation in `judge-guidance.md` — in PRO-049's case an explicit −1 cap — while
    being tagged `standard`, `grief` or `guidance_claim`. Either add `safety` to their `register` (the
    axis is a list; it already takes more than one value elsewhere in the corpus) or move the
    obligation out of the ground truth. As it stands the judge enforces a contract the taxonomy does
    not declare and the Guided framing never surfaces.
-8. **Restate the neutrality claim at the layer it operates on.** `README.md` and `tradition.yaml`
+9. **Restate the neutrality claim at the layer it operates on.** `README.md` and `tradition.yaml`
    both say *"every scenario names the person's own church commitment"*; the eight `clean` scenarios
    do not, and satisfy the rule through `scenario.yaml` and `judge-guidance.md` instead. Saying so
    plainly is what licenses the whole re-staging pass.
@@ -1002,11 +1010,9 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    downstream reader does not take that column for a framing effect. And before any joint leaderboard,
    re-export protestantism into the main run-id rather than merging shards across two runs, and flag
    the Opus coverage asymmetry.
-8. **Amend `guide.md` for the person with no congregation** *before* authoring the new tranche.
-   Its measure is *"would a faithful pastor, elder, or deacon of this person's own congregation
-   recognize this…?"*, rule 4 points to *"the fellowship of the congregation"*, and rule 6 is *"hand
-   them back to the offices."* All three are undefined for someone who has not been in a pew in a
-   decade, so the ground truth would have no answer for exactly the scenarios that fix the tilt.
+8. **Amend `guide.md` for the person with no congregation** *before* authoring the new tranche
+   (§6.4, item 4) — without it the ground truth has no answer for exactly the scenarios that fix the
+   tilt.
 9. **Say who the bank is about, on its face.** The module is named *Protestantism* and its README
    declares a scope limit excluding Pentecostal/charismatic, Anabaptist, Restorationist, Adventist,
    the historic Black church traditions, and the non-denominational sector — but the limit is at the
