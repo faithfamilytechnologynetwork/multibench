@@ -132,6 +132,45 @@ worst Guided score. They need separate fixes.
 
 ---
 
+## 0. The strongest case against this audit
+
+Before the measurements, the objection they have to survive — stated as strongly as it can be, because
+a critic briefed to make it could not be dismissed.
+
+*ProtestantBench is not misaligned with its construct; it is the only bank aligned with its
+construct.* The construct is **the mutual conversation and consolation of the *brethren***, and the
+guide's own measure is whether *"a faithful pastor, elder, or deacon of this person's own
+congregation"* would recognise the counsel. Protestant doctrine of the Christian life is
+congregational in a way Buddhist or Taoist practice is not: the marks of the church, the ordinary
+means of grace, membership, discipline, the offices. On this reading a bank at 39% church-interior is
+not tilted — it is *faithful*, and an audit that measures it against Taoism's 0% and secular-sage's
+0% is importing a register from traditions that have no congregation to be inside of.
+
+**Three things answer it, and one of them concedes.**
+
+1. **The comparison that matters is not Taoism.** It is Roman Catholicism and Eastern Christianity —
+   ecclesial traditions with sacraments, offices and discipline, whose own constructs also point the
+   person back to the Church. They sit at 28% and 29% church-interior with 9% and 3% of their people
+   holding a church role, against this bank's 39% and 40%. **The gap is against the nearest
+   neighbours, not the distant ones.**
+2. **Congregational doctrine does not require a congregational *setting*.** The Protestant doctrine of
+   vocation is the tradition's own claim that the whole of ordinary life is where faith is lived —
+   Luther's estates, Wesley on the use of money, the Decalogue expositions of every standard. A bank
+   that stages the tradition mostly inside the building is under-using the tradition's own
+   theology of everywhere else. The guide says exactly this in its rule 2: *"never advise a piety
+   that tramples the duties God actually gave them."*
+3. **The concession.** The objection is right that an ecclesial tranche is *required*, and this audit
+   accepts it in the plan: the church-interior target in §6.1 is a **band with a floor** (20–25 of
+   126), and the scenarios that only this bank can stage — a deacon deciding whether to report an
+   allegation, a pastor's closed-door probing, an elder asked to bury an embezzlement — are marked to
+   survive untouched. What is not defensible is 39% with 40% office-holders and **eight** `clean`
+   scenarios out of a hundred.
+
+What the objection cannot rescue is the measurement finding of §2.1, which is about `identity_signal`
+rather than setting and does not depend on any view of what Protestant life is like.
+
+---
+
 ## 1. The complaint, measured
 
 ### 1.1 Where the conflict lives — the setting census
@@ -449,6 +488,24 @@ The obvious defence — *the guide is deliberately pan-Protestant, so naming one
 would break it* — does not hold: the sentence above is a list of four families' distinctives, already
 in the guide. **The asymmetry is an omission, not a principle**, and it lands on one of the two
 worst-scoring families.
+
+**And one thing this audit went looking for the guide's Baptist gap and found instead.** The
+assurance paragraph is a *universal* instruction — *"Ground assurance where the confessions ground
+it: outside the person"* — and it grounds that instruction in *"the Heidelberg Catechism's opening
+comfort; Westminster on assurance; **the Canons of Dort on perseverance**; Wesley on the witness of
+the Spirit."* Dort V is not held in common. **Article XVI of the Thirty-Nine Articles says the
+opposite** — that after receiving the Holy Ghost we may depart from grace given and fall into sin —
+and **Wesley taught the possibility of falling from grace** as a matter of course. The guide contains
+zero mentions of falling from grace or apostasy. So the module's own universal framing text takes a
+side in one of the six families' live disputes, in the very paragraph that governs the
+`assurance_crisis` register, and does so against two of the six. That is a breach of the
+intra-Protestant non-adjudication rule *in the guide*, which the scenario-level `communion` machinery
+was built to prevent — and neither the module README nor the construction record notices it. (The
+headline formulation *"outside the person"* has the same shape, more mildly: it is a Reformed and
+Lutheran way of putting it, and Wesley locates assurance in the Spirit's direct inward witness *with*
+our spirit. The guide half-acknowledges this by naming the witness; the instruction above it does
+not.) **Fix this in the same pass as the family rebalance** — it is the same defect, and it is
+larger than a missing word.
 
 A directional note, reported as directional only: `cross_cutting` scenarios — bound solely to what
 all families hold alike — score above family-bound ones (0.685 vs 0.568), but the difference is not
@@ -942,6 +999,24 @@ per-signal depth deficit of §2.2, which is a `guide.md` problem. Both fixes are
 projection should be stated as a projection: it assumes re-authored scenarios behave like their new
 signal class, and it is not a prediction of a re-run.
 
+**A falsifiable success criterion, so the re-run can settle it.** Pre-register these before the
+refined bank is scored, because the projected 0.37 and today's 0.27 have overlapping intervals and a
+post-hoc read of the result would prove nothing:
+
+| | counts as worked | counts as failed |
+|---|---|---|
+| Stated axis | recovery ratio ≥ **0.45**, with its bootstrap CI excluding 0.33 (today's upper bound) | ratio CI still overlapping [0.21, 0.33] |
+| Family gradient | Guided spread across `communion` ≤ **0.25** (roman-catholicism is 0.158) | Methodist still ≥ 0.20 below the bank mean |
+| Composition | the §6.1 targets met **in the prose**, verified by a re-run census, not by tags | any target met by re-tagging |
+| Discrimination | Guided mean stays below **0.75** | Guided mean ≥ 0.80, i.e. the bank has joined the ceilinged pack |
+
+The last row is the one to watch, and it is in tension with the others by design: the same projection
+that raises the Stated axis also raises the Guided mean toward the ceiling that currently makes this
+bank the corpus's only un-ceilinged one (§6.2). **If the refined bank comes back at 0.85 Guided with a
+healthy Stated axis, the pass will have bought comparability with the loss of the sharpest instrument
+in the corpus** — and the right response then is to author difficulty back in deliberately, not to
+celebrate the number.
+
 ### 6.4 The structural changes
 
 1. **Retarget the declared `identity_signal` quota** in `README.md` and
@@ -1021,10 +1096,21 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
   `clean` × church-interior = **0**. The signal/setting separation of §2.1 rests on the `intrinsic`
   rows, where both cells are well populated (35 and 31); at the `clean` end signal and setting cannot
   be separated at all. Fixing this is itself a recommendation (§8).
-- **The census is model-coded.** Twelve agents applied one codebook to 619 scenarios with no human
-  adjudication and no second coder, so the setting/entanglement/reach numbers carry unmeasured coder
-  error. The independent regex measures (opener tic, `identity_signal` shares, lengths, tag
-  frequencies) do not, and they point the same way.
+- **The census is model-coded, with no reliability estimate.** Twelve agents applied one codebook to
+  619 scenarios in a single pass — no second coder, no adjudication, no agreement statistic — and it
+  carries four of the five rows in the headline table. The 619 rows are published at
+  [`data/protestantbench-census.csv`](./data/protestantbench-census.csv) so the coding can be
+  disputed row by row; the right next step is a second independent coding of a stratified 60-scenario
+  sample with a reported agreement figure on `setting` and `audience_reach`.
+- **`church_interior` may over-capture.** The codebook makes it an eleven-trigger category with no
+  priority rule against `family_household` or `money_material`, so a scenario like PRO-020 (a
+  building-campaign pledge against a reverse mortgage) can land in it on the church-money trigger
+  while the conflict is arguably financial. A sensitivity analysis under a stricter rule — *the
+  church must be a party to the dispute, not merely its subject* — has not been run. Note the
+  direction of the risk: it would shrink 39%, not the 40% church-role or 11% `life_only` figures,
+  which use no such trigger list.
+- **The independent regex measures carry none of this** (opener tic, `identity_signal` shares,
+  lengths, tag frequencies) and they point the same way.
 - **n = 8 traditions.** Every cross-tradition comparison here is descriptive. No inferential claim is
   made from a correlation across eight banks.
 - **One scored run per bank**, and the two runs were produced at different times
@@ -1060,32 +1146,40 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    populated by. It need not be: an assurance panic in a man who has not been to a service in ten
    years is fully `intrinsic` — no Protestant standards, no answer — with no church role at all.
    **Author that cell.** It is currently empty.
-1. **Run the refinement prompt in §9** as an ultracode pass (author → adversarial citation verify →
-   validate), producing the 126-scenario bank plus a per-scenario changelog.
-2. **Rebalance `guide.md` first**, and re-run *only* the Guided condition on the existing 100
+1. **Put the six-family scholar review *before* the authoring pass, not after it.** This audit's own
+   adversarial review caught a false demographic premise and a doctrinal error about attendance that a
+   Protestant reader spotted immediately; a 68-folder re-authoring built on unreviewed premises would
+   multiply that by 68. Sequence: guide fixes → six-family review of the plan → authoring pass.
+2. **Run the refinement prompt in §9** as an ultracode pass (author → adversarial citation verify →
+   validate), producing the 126-scenario bank plus a per-scenario changelog. **Add a per-family
+   ground-truth check** to it: the pass's central instruction is to move each anchor from the
+   ecclesial article to the moral corpus of the *same* standards, and that is exactly where a
+   re-author can drift into another family's theology while the validator and the census both stay
+   green.
+3. **Rebalance `guide.md` first**, and re-run *only* the Guided condition on the existing 100
    scenarios. That isolates the guide's effect on the family gradient from the composition change,
    and it is cheap.
-3. **Read the transcripts, not only the scores**, for the Methodist and Baptist failures. Scores say
+4. **Read the transcripts, not only the scores**, for the Methodist and Baptist failures. Scores say
    the families are underserved; only the transcripts say *how* — whether models mis-name the polity,
    import Reformed assurance into a Wesleyan question, or miss entire sanctification and the class
    meeting.
-4. **File the scope expansion as its own spec** — Pentecostal/charismatic, non-denominational, the
+5. **File the scope expansion as its own spec** — Pentecostal/charismatic, non-denominational, the
    historic Black church traditions — authored against those bodies' own self-descriptions.
-5. **Populate the empty confound cells before the next run** — author `clean`-signal church-interior
+6. **Populate the empty confound cells before the next run** — author `clean`-signal church-interior
    scenarios (currently zero) and more `intrinsic`-signal ordinary-life scenarios. Without a
    `clean` × church cell the bench can never separate the two causes at that end of the design.
-6. **Stop publishing a bare Stated-recovery ratio across traditions**, or condition it on Unstated
+7. **Stop publishing a bare Stated-recovery ratio across traditions**, or condition it on Unstated
    headroom. Secular-sage's 0.46 is a ceiling artefact; ProtestantBench's 0.27 is a genuine
    floor-regime anomaly against a peer mean of ~0.80. The two are not the same number.
-7. **Record the degraded Stated condition in `results/README.md`** for the `20260813-protestantism`
+8. **Record the degraded Stated condition in `results/README.md`** for the `20260813-protestantism`
    run — whole-bank recovery 0.27 against 0.60 on the eight `clean`-signal scenarios — so a
    downstream reader does not take that column for a framing effect. And before any joint leaderboard,
    re-export protestantism into the main run-id rather than merging shards across two runs, and flag
    the Opus coverage asymmetry.
-8. **Amend `guide.md` for the person with no congregation** *before* authoring the new tranche
+9. **Amend `guide.md` for the person with no congregation** *before* authoring the new tranche
    (§6.4, item 4) — without it the ground truth has no answer for exactly the scenarios that fix the
    tilt.
-9. **Say who the bank is about, on its face.** The module is named *Protestantism* and its README
+10. **Say who the bank is about, on its face.** The module is named *Protestantism* and its README
    declares a scope limit excluding Pentecostal/charismatic, Anabaptist, Restorationist, Adventist,
    the historic Black church traditions, and the non-denominational sector — but the limit is at the
    bottom of the README. Either state the population in the opening paragraph and in any paper
@@ -1095,11 +1189,11 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    binds the conscience, the UMC is not ordinarily so described, and the label implies the excluded
    bodies are non-confessional — exactly the judgement the README expressly disclaims. This is not a
    criticism of the scope choice; it is asking the label to match it.
-10. **Control the Unstated confounds before publishing −0.140.** Re-slice holding artifact-request
+11. **Control the Unstated confounds before publishing −0.140.** Re-slice holding artifact-request
     status and register constant — the fourteen `deliverable_trap`/`tool_guardrail` scenarios alone
     account for about half of it (§2.1) — and report `intrinsic`-only and `clean`/`leaky`-only means
     separately.
-11. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`. Ask
+12. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`. Ask
     reviewers specifically whether any of the six families is described in another family's
     vocabulary, and whether the people in the bank resemble the people in their pews — and their
     parish rolls.
