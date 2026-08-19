@@ -126,9 +126,10 @@ Alongside, on the whole refined bank:
 | scenarios tagged `office: none` | **~20%** (new value, see §7) |
 
 **Family balance after the pass:** lutheran 16 · presbyterian 16 · reformed 16 · methodist 17 ·
-baptist 17 · anglican 14 · **cross_cutting 30**. Methodist and Baptist gain most because they are the
-two families the guide currently serves worst; `cross_cutting` gains most of all, for the reason in
-§6.
+baptist 17 · **anglican 16** · **cross_cutting 28**. Anglican gains most in relative terms (12 → 16)
+because it is the most church-staged block in the bank and has **zero** `life_only` scenarios and
+zero people without a church role; Methodist and Baptist gain because they are the two families the
+guide currently serves worst; `cross_cutting` gains most in absolute terms, for the reason in §6.
 
 Keep the `register` mix roughly proportional as the bank grows — do not let `standard` swell to 80%
 because life-domain scenarios are easier to write without an overlay.

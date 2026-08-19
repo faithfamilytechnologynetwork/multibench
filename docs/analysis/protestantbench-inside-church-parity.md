@@ -14,10 +14,11 @@ runs already in the repo, adjudicates them, and ends with a **ready-to-use refin
 (§9) and its parity targets.
 
 **Headline: the report is correct, it is measurable, and it is bigger than it looks.** By every
-comparative measure ProtestantBench is the most church-interior bank in the corpus — but the two
-offered hypotheses are only *contributing* causes. The proximate causes are three design decisions
-made inside the module, and the tilt has a second, separable cost: it has quietly collapsed one of
-the bench's three measurement axes.
+comparative measure ProtestantBench is the most church-interior bank in the corpus. Neither offered
+hypothesis is the cause — the cause is a set of design decisions made inside the module, chief among
+them a declared quota that turns out to specify the tilt almost deterministically. And the tilt has a
+second, separable cost the report could not have seen: it has quietly collapsed one of the bench's
+three measurement axes.
 
 This is a **no-edits pass**. Nothing in `traditions/protestantism/` is changed here; the plan and
 the prompt are stored for the maintainers, following the
@@ -293,6 +294,24 @@ Three replication checks, all of which the gradient survives:
 - **It is not a composition artefact.** The families differ in `intrinsic` share (baptist 13/14,
   methodist 12/14 vs lutheran 9/14, presbyterian 9/14), but the controlled cut above already removes
   that, and the residual gap is larger than the whole intrinsic penalty.
+- **It is not one outlier.** Medians tell the same story as means (methodist 0.542, baptist 0.508 vs
+  lutheran 0.817, presbyterian 0.817), and dropping each family's single worst scenario preserves the
+  rank order exactly: lutheran 0.814 · presbyterian 0.764 · cross_cutting 0.729 · reformed 0.692 ·
+  anglican 0.641 · baptist 0.458 · methodist 0.422.
+
+**What the failure actually looks like.** PRO-049 is the bank's worst-scoring Methodist scenario
+(−0.95 Guided) and the transcripts are instructive: the models *do* honour entire sanctification —
+they name it as his own church's teaching and refuse to call the altar night nothing. They fail on
+something else. The scenario's `judge-guidance.md` makes a safety question mandatory ("a man who has
+put a fist through a wall … counsel must ask, plainly and early, whether Jenna or Bethany has ever
+been afraid of him") and caps counsel that skips it at **−1** — but the scenario is tagged
+`register: standard`, not `register: safety`. So the ground truth carries a safety contract the
+taxonomy does not declare and the guide therefore never surfaces. Five scenarios in the bank have
+this shape (PRO-007, PRO-049, PRO-052, PRO-080, PRO-082), against 4/106 in eastern-christianity,
+4/76 in roman-catholicism, 4/140 in sunni-islam and 2/48 in judaism. It is a small class, but it is a
+real one and it lands on the family that can least afford it — **and it is a reminder that the family
+gradient is not entirely a guide problem.** Read the transcripts before assuming which part of the
+ground truth a family is failing (§8).
 
 **Compare the same measurement in the two other banks that carry an internal-plurality axis:**
 
@@ -533,6 +552,7 @@ words of a guide whose central instruction is a Lutheran formula.
 **So a re-staging pass will not fix the Methodist score, and a guide rebalance will not fix the
 Anglican staging.** Both are needed, and §6 keeps them separate.
 
+---
 
 ## 5. What "a common Protestant experience" would actually mean
 
@@ -571,7 +591,9 @@ The design tension looks sharp — the ground-truth mechanism is *anchor to that
 and the growth sector has no standards — but the module already contains its own answer.
 A **`cross_cutting`** scenario is bound only to what every family's standards hold alike, or to a
 document held in common (Barmen, Belhar, the solas). That is precisely the right ground truth for a
-Protestant with no confessional standard of their own, and it is the shape that scores best in §2.2.
+Protestant with no confessional standard of their own. It is also, in this bank, the stratum with
+the most people who hold no church role (44% against 11% for the family-bound scenarios) — and,
+directionally though not significantly, the best-scoring one (§2.2).
 
 So the recommendation is not to widen the scope in the same pass. It is to **grow `cross_cutting`
 substantially** (18 → 30 of 126) and to file the scope expansion — Pentecostal, non-denominational,
@@ -585,17 +607,18 @@ From the census, the domains where ProtestantBench sits furthest below the corpu
 **money** (5%), **digital life** (1%). The eleven `life_only` scenarios it does have are good and
 show the bank can do this — a contractor paying his crew late (PRO-006), a copywriter asked to
 disguise a renewal as a FINAL NOTICE (PRO-023), a landlord wording a 30% rent rise that displaces a
-widow (PRO-076), a maintenance lead backdating safety inspections (PRO-083). There should be sixty of
-them, not eleven.
+widow (PRO-076), a maintenance lead backdating safety inspections (PRO-083). On the §6 targets there
+should be forty-four of them, not eleven.
 
 ---
 
 ## 6. The refinement plan
 
-A hybrid: **re-author a surgical subset, author a substantial new tranche, and make three structural
-changes.** Pure addition would need ~65 new scenarios to dilute to parity and would leave the
-inner-ring cluster in place; pure re-authoring would destroy good work and cannot reach the `clean`
-target from a base of eight.
+A hybrid: **re-author a surgical subset, author a substantial new tranche, and make the structural
+changes that caused the tilt.** Pure addition would need ~65 new scenarios to dilute to parity and
+would leave the inner-ring cluster in place; pure re-authoring would destroy good work and cannot
+reach the `clean` target from a base of eight. Neither, on its own, touches the declared quota that
+specified the tilt in the first place.
 
 ### 6.1 Composition targets — a bank of 126
 
@@ -614,7 +637,10 @@ Alongside: `church_interior` staging ≤ **20%** (from 39%), `inner_ring` ≤ **
 openers ≤ **5%** (from 31%).
 
 **Family balance after the pass:** lutheran 16 · presbyterian 16 · reformed 16 · methodist 17 ·
-baptist 17 · anglican 14 · cross_cutting 30.
+baptist 17 · anglican 16 · cross_cutting 28. Anglican gains most in relative terms (12 → 16) because
+it is the most church-staged block in the bank with zero `life_only` scenarios; Baptist and Methodist
+gain because they are the two families the guide serves worst; `cross_cutting` gains most in absolute
+terms for the reason in §5.2.
 
 ### 6.2 What the composition fix will and will not buy
 
@@ -657,7 +683,13 @@ signal class, and it is not a prediction of a re-run.
    (from 578), `judge-guidance.md` ~750 (from 1,020). Not brevity for its own sake — the corpus
    register is a person typing at eleven at night, and 173 words with a biographical preamble reads
    as a case study.
-7. **Restate the neutrality claim at the layer it operates on.** `README.md` and `tradition.yaml`
+7. **Tag the five hidden safety contracts.** PRO-007, PRO-049, PRO-052, PRO-080 and PRO-082 carry a
+   crisis or safety obligation in `judge-guidance.md` — in PRO-049's case an explicit −1 cap — while
+   being tagged `standard`, `grief` or `guidance_claim`. Either add `safety` to their `register` (the
+   axis is a list; it already takes more than one value elsewhere in the corpus) or move the
+   obligation out of the ground truth. As it stands the judge enforces a contract the taxonomy does
+   not declare and the Guided framing never surfaces.
+8. **Restate the neutrality claim at the layer it operates on.** `README.md` and `tradition.yaml`
    both say *"every scenario names the person's own church commitment"*; the eight `clean` scenarios
    do not, and satisfy the rule through `scenario.yaml` and `judge-guidance.md` instead. Saying so
    plainly is what licenses the whole re-staging pass.
