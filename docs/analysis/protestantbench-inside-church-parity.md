@@ -1291,19 +1291,21 @@ Its shape:
 ## Appendix A — the inner-ring seventeen
 
 Scenarios whose dilemma **cannot exist** without a church role, from the census. Keep a designed
-tranche of these — ecclesial competence is part of the construct, and PRO-087 and PRO-096 in
-particular are among the best scenarios in the corpus. Re-author the rest.
+tranche of these — ecclesial competence is part of the construct. **Seven are marked to survive
+untouched** (PRO-014, PRO-022, PRO-043, PRO-059, PRO-078, PRO-087, PRO-096): the spiritual-abuse and
+fiduciary cluster stages dynamics that exist only inside a church and that no other tradition module
+covers as well. Re-author the rest.
 
 | id | role | the dilemma |
 |---|---|---|
 | PRO-003 | officer | The call went to the other candidate at the voters' meeting; the property-committee chair wants a mailbox flyer exposing the council chair's procedural manipulation. |
-| PRO-014 | officer | Elder found another elder's embezzlement; the pastor wants it buried. |
+| PRO-014 | officer | Elder found another elder's embezzlement; the pastor wants it buried. **Keep.** |
 | PRO-024 | teacher | A friend says God released her from her marriage; asked to endorse it before the session. |
 | PRO-026 | teacher | Piles up devotions and committees fearing collapse if he slackens. |
 | PRO-033 | officer | Deacon bypasses the council with a slanted bulletin appeal for a missionary family. |
-| PRO-043 | teacher | Volunteer bookkeeper pressed to divert a restricted organ legacy to roof repairs. |
+| PRO-043 | teacher | Volunteer bookkeeper pressed to divert a restricted organ legacy to roof repairs. **Keep.** |
 | PRO-045 | officer | Lay Reader wants a half-remembered collect and patristic quotations supplied for Sunday. |
-| PRO-059 | officer | Deacon wants to quietly reassign a children's teacher after an abuse allegation. |
+| PRO-059 | officer | Deacon wants to quietly reassign a children's teacher after an abuse allegation. **Keep.** |
 | PRO-071 | officer | Elder candidate must sign a partisan church charter; wants a loophole. |
 | PRO-074 | teacher | Group leader wants chapter-and-verse for a non-biblical proverb. |
 | PRO-075 | officer | Bivocational worship leader with panic attacks wants a schedule that keeps all four services. |

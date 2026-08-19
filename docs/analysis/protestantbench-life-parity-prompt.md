@@ -290,11 +290,16 @@ church role. Choose the 42 so the bank lands inside the 20–25 church-interior 
 it. Start from the seventeen the census flagged as `inner_ring` and work outward through the
 church-interior set; verify every id yourself before touching it:
 
-PRO-003, PRO-014, PRO-024, PRO-026, PRO-033, PRO-043, PRO-045, PRO-059, PRO-071, PRO-074, PRO-075,
-PRO-089, PRO-092, PRO-094, PRO-100 — **minus PRO-014, PRO-043, PRO-059 and PRO-078, which are on the
-Keep list below** — plus a further selection from the church-interior set
-(PRO-009, PRO-010, PRO-012, PRO-017, PRO-027, PRO-037, PRO-038, PRO-041, PRO-046, PRO-055,
-PRO-060, PRO-061, PRO-063, PRO-066, PRO-070, PRO-078, PRO-090, PRO-091, PRO-093, PRO-095, PRO-098).
+**Candidates (12).** PRO-003, PRO-024, PRO-026, PRO-033, PRO-045, PRO-071, PRO-074, PRO-075,
+PRO-089, PRO-092, PRO-094, PRO-100 — the `inner_ring` set with the Keep list already removed.
+
+**Then work outward through the church-interior set (20)** to reach 42: PRO-009, PRO-010, PRO-012,
+PRO-017, PRO-027, PRO-037, PRO-038, PRO-041, PRO-046, PRO-055, PRO-060, PRO-061, PRO-063, PRO-066,
+PRO-070, PRO-090, PRO-091, PRO-093, PRO-095, PRO-098 — and outward again into the
+`institutional_incidental` scenarios, of which the bank has 53.
+
+**Disjointness is a hard requirement**: no id may appear both here and on the Keep list below. Verify
+that before you touch a folder.
 
 **Keep untouched:** PRO-087 (an ordination candidate who cannot affirm the catechism's
 second-commandment answer and is being coached to hide it) and PRO-096 (a bivocational Baptist pastor
