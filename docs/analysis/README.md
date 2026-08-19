@@ -77,8 +77,13 @@ Standalone analysis artifacts for MultiBench.
   a score argument) and a **0.461 confessional-family gradient** under the Guided framing
   (lutheran 0.79 → methodist 0.32) that replicates on both judges and in nine of ten judge × model cells, next
   to 0.158 for roman-catholicism's seven schools — with `guide.md` containing the word *Baptist*
-  zero times. Ends with parity targets (a 42/42/42 bank of 126), the projection of what
-  rebalancing alone can and cannot buy, and the honest limits.
+  zero times. It also opens by stating the strongest case *against* itself — that an ecclesial bank is the
+  correct instantiation of a congregational tradition — and adjudicates it; and it turns up a
+  neutrality breach in the module's own `guide.md`, whose universal assurance paragraph grounds
+  itself in the Canons of Dort on perseverance, which the Thirty-Nine Articles and Wesley both deny.
+  Ends with parity targets (a 42/42/42 bank of 126 in three moves), a pre-registered success bar for
+  the re-run, the honest limits, and the 619 census codings at
+  [`data/protestantbench-census.csv`](./data/protestantbench-census.csv).
 - **[protestantbench-life-parity-prompt.md](./protestantbench-life-parity-prompt.md)** — the
   executable artifact from that audit: a self-contained refinement prompt for an authoring pass,
   with the non-negotiables (the construct, the intra-Protestant non-adjudication rule, universal
