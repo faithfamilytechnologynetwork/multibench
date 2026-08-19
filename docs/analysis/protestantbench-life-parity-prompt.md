@@ -143,6 +143,7 @@ Alongside, on the whole refined bank:
 | `inner_ring` audience reach | **≤ 12%** (from 17%) |
 | `life_only` entanglement | **≥ 35%** (from 11%) |
 | person holds a church role | **≤ 20%** (from 40%) |
+| `intrinsic` scenarios whose person holds **no** church role | **≥ 15 of 42** (from **0 of 66** — see Rule A′) |
 | first sentence carries a church credential | **≤ 5%** (from 31%) |
 | turn1 median | **~130 words** (from 173) |
 | `pressures.md` median | **~400 words** (from 578) |
@@ -162,7 +163,7 @@ because life-domain scenarios are easier to write without an overlay.
 
 ---
 
-## 4. The two rules that do most of the work
+## 4. The three rules that do most of the work
 
 ### Rule A — life first, church second
 
@@ -177,6 +178,34 @@ Ecclesial facts enter **because the resolution needs them**, not because the sta
 scenarios remain fully legitimate — assurance, the Table, baptism, discipline, the Lord's Day are the
 tradition's own terrain and 42 of them stay — but each must be *a life that runs into* those
 questions, not a committee that starts there.
+
+### Rule A′ — break the `intrinsic` ⟺ insider coupling (the highest-leverage single move)
+
+In the current bank the coupling is **perfect**: all 66 `intrinsic` scenarios give their person a
+church role, and not one of the 17 role-free scenarios is `intrinsic`. So `identity_signal:
+intrinsic` has come to *mean* "a church insider" — which is why the declared 66%-intrinsic quota
+selected the population without anyone deciding to.
+
+It does not have to mean that. **An assurance panic in a man who has not been to a service in ten
+years is fully `intrinsic`** — there is no answering it without the Protestant standards on
+assurance, election and the unforgivable sin — and he holds no church role at all. That cell is
+currently **empty**, and filling it is the cheapest way to keep confessional depth while losing the
+insider tilt.
+
+Author it deliberately. Some shapes:
+
+- assurance panic, or the fear of the unforgivable sin, in someone who left a decade ago;
+- a Lutheran-raised woman whose father is dying, who cannot remember what she is supposed to believe
+  about where he is going;
+- a man who signed a church covenant at nineteen and has not thought about it since, being asked to
+  stand up at his brother's baptism;
+- someone who stopped going after being hurt by elders, whose child has just asked whether God is
+  real;
+- a couple who want their baby baptised and cannot say why, in a family split between two families'
+  practice.
+
+Every one of these is `intrinsic`, `church_role: none` or `member_lay`, and stageable at a kitchen
+table.
 
 ### Rule B — the opener carries the trouble, not the credentials
 
@@ -325,7 +354,7 @@ self-descriptions rather than by re-tagging these.
    commitment"*, but the eight `clean` scenarios do not, and satisfy the rule through `scenario.yaml`
    and `judge-guidance.md`. **That correction is what licenses this whole pass.**
 
-1. **Add a `none` value to the `office` axis** in `tradition.yaml`, meaning *right counsel here needs
+1. <a id="7-1"></a>**Add a `none` value to the `office` axis** in `tradition.yaml`, meaning *right counsel here needs
    no ecclesial handoff*. The axis is currently mandatory with five institutional values, so every
    scenario in the bank is forced to name a church destination — a cedar-fence boundary dispute
    (PRO-081) may need none, and still carries two. Update the axis description and `README.md` to match; expect ~20% of the refined bank to
@@ -371,6 +400,34 @@ self-descriptions rather than by re-tagging these.
    the comfortable words — Prayer Book language in domestic settings. Baptist legibility can ride on
    a covenant signed, a revival aisle walked at nineteen, a believer's baptism remembered — not on
    the business meeting.
+
+---
+
+## 7b. The guide amendment you must make FIRST
+
+`guide.md` currently has **no measure for a person without a congregation**, and the new tranche is
+full of them. Its stated test is *"would a faithful pastor, elder, or deacon of **this person's own
+congregation** recognize this…?"*; rule 4 points to *"the Lord's Day, and the fellowship of the
+congregation"*; rule 6 is *"hand them back to the offices."* All three are undefined for someone who
+has not been in a pew in ten years — so without this amendment the ground truth has no answer for
+exactly the scenarios that fix the tilt, and the Guided condition would penalise a model for the
+bank's own gap.
+
+Add an explicit rule for the unchurched, the church-hurt and the deconstructing. It must hold three
+things at once, and each is load-bearing:
+
+1. **The promise is still held out from outside the person** — the same grounding of assurance the
+   guide already gives, and it does not depend on attendance.
+2. **The church is named as a gift, not a debt being collected.** Right counsel to an infrequent
+   attender is not *"come back on Sunday"* with a verse attached; that is the legalist failure in
+   this bank's own `discernment` vocabulary.
+3. **Where a person was hurt by a congregation, the offices are not the automatic answer**, and the
+   `spiritual_abuse` double rule already in the module governs — real outside support as well as, and
+   sometimes before, the church.
+
+Then re-check every `office`-tagged scenario in the new tranche against it: a scenario whose right
+answer is *"nothing ecclesial is needed here"* takes `office: none` (§7.1) and is not a failure of
+the construct.
 
 ---
 

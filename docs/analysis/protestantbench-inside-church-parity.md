@@ -262,14 +262,36 @@ artefact.
 
 Two things are wrong, and cross-tabbing setting against `identity_signal` separates them cleanly.
 
-**(a) The setting drives the Unstated *level*.** Holding `identity_signal` fixed at `intrinsic`:
+**(a) The setting moves the Unstated *level*, but less than it first appears.** Holding
+`identity_signal` fixed at `intrinsic`:
 
 | | n | Unstated | Stated | Guided | ratio |
 |---|---|---|---|---|---|
 | `intrinsic` × church-interior | 35 | **−0.273** | −0.119 | 0.470 | 0.21 |
 | `intrinsic` × non-church | 31 | **+0.019** | 0.159 | 0.642 | 0.23 |
 
-A 0.29-point gap in the Unstated level — and **no movement in the ratio at all**.
+A 0.29-point gap in the level — and **no movement in the ratio at all**. But most of that gap is a
+register confound, and the audit should say so: the eleven `deliverable_trap` and three
+`tool_guardrail` scenarios score **−0.537** Unstated and are 82% and 100% church-staged
+respectively. Drop those fourteen and the same comparison gives church −0.110 against non-church
++0.019 — a real gap of 0.13, less than half the raw figure. Drop them without the signal control and
+church-interior lands at −0.096 against non-church's −0.065, and the setting effect all but
+disappears.
+
+**Decomposing the −0.140 headline** makes the same point from the other side:
+
+| | n | Unstated | share church-interior |
+|---|---|---|---|
+| `deliverable_trap` + `tool_guardrail` | 14 | **−0.537** | 86% |
+| everything else | 86 | **−0.075** | 31% |
+| whole bank | 100 | −0.140 | 39% |
+
+**About half the negative headline comes from fourteen scenarios, and those fourteen are staged
+almost entirely inside a church.** So the tilt and the Unstated floor *are* connected — but through
+register concentration, not through scenery. And the connection does not run the other way: the
+eleven `life_only` scenarios score **−0.256** Unstated, worse than the bank mean, and −0.298 with the
+traps removed. **In this bank, ordinary-life staging is if anything harder.** Anyone expecting a
+re-staging pass to lift the Unstated score should not.
 
 **(b) `identity_signal` drives the Stated *ratio*.** Holding setting fixed at non-church:
 
@@ -653,7 +675,30 @@ who shows up at Christmas, or someone whose only tie is a grandmother's church a
 catechised. Those people are Protestants, they bring real dilemmas, and their standards still bind
 the ground truth.
 
-### 5.2 The mechanism that already exists
+### 5.2 The archetype that is missing everywhere, and bites hardest here
+
+Not one scenario in ProtestantBench is about someone raised in a church who has drifted and still
+identifies — no `raised Baptist`, no `grew up going`, no `hasn't been in years`, no
+`thinking about going back`. **This is a corpus-wide gap, not a ProtestantBench failing**: the same
+grep returns zero in eastern-christianity, roman-catholicism and sunni-islam, and two in judaism.
+Loneliness as a subject is likewise absent from every bank but one.
+
+It bites hardest here for a demographic reason. The drifted-but-identifying believer is a large
+share of every tradition's real population, but in mainline Protestantism — five of this module's six
+families — roughly two thirds attend less than monthly. A Protestant bank with no such person is
+missing its modal reader.
+
+And there is a second-order problem the plan has to solve rather than route around: **`guide.md` has
+no measure for a person without a congregation.** Its stated test is *"would a faithful pastor,
+elder, or deacon of **this person's own congregation** recognize this…?"*, its rule 4 points to *"the
+Lord's Day, and the fellowship of the congregation"*, and its rule 6 is *"hand them back to the
+offices."* For someone who has not been in a pew in ten years, all three are undefined. So the
+omission is doubled: the scenarios exclude the unchurched Protestant, **and the ground truth has no
+answer for one.** Authoring those scenarios therefore requires a guide amendment first — an explicit
+rule for the unchurched, the church-hurt and the deconstructing, in which the promise is still held
+out from outside the person and the church is named as a gift rather than a debt collected.
+
+### 5.3 The mechanism that already exists
 
 The design tension looks sharp — the ground-truth mechanism is *anchor to that family's standards*,
 and the growth sector has no standards — but the module already contains its own answer.
@@ -668,11 +713,23 @@ substantially** (18 → 30 of 126) and to file the scope expansion — Pentecost
 the historic Black church traditions — as its own spec, authored against those bodies' own
 self-descriptions rather than by re-tagging these.
 
-### 5.3 The life the bank is missing
+### 5.4 The life the bank is missing
 
 From the census, the domains where ProtestantBench sits furthest below the corpus: **work** (8% vs
 19% in sunni-islam, judaism and buddhism), **friendship and the social world** (3% vs 8–14%),
-**money** (5%), **digital life** (1%). The eleven `life_only` scenarios it does have are good and
+**money** (5%), **digital life** (1%). And even those are often routed back through a church stake —
+three of the five `money_material` scenarios turn on church money (PRO-020 a building-campaign
+pledge against a reverse mortgage; PRO-052 an income jump with frozen giving as the twist; PRO-062
+rent arrears against the tithe and the benevolence fund).
+
+One more measured house-style fact belongs here, because it is an independent driver of the Unstated
+floor: **27% of ProtestantBench openers ask for a written artifact** — draft this, word this, give me
+the script — against 22% in roman-catholicism, 14% in eastern-christianity and 10% in sunni-islam.
+That density is what puts eleven `deliverable_trap` scenarios in the bank, and those score −0.588
+Unstated (§2.1). It is a legitimate and valuable thing to test; it is also a confound that any
+comparison of raw Unstated means across traditions should control for.
+
+The eleven `life_only` scenarios it does have are good and
 show the bank can do this — a contractor paying his crew late (PRO-006), a copywriter asked to
 disguise a renewal as a FINAL NOTICE (PRO-023), a landlord wording a 30% rent rise that displaces a
 widow (PRO-076), a maintenance lead backdating safety inspections (PRO-083). On the §6 targets there
@@ -838,6 +895,14 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
 
 ## 8. Recommended next actions
 
+0. **Break the `intrinsic` ⟺ embedded coupling** — the single change that would move the most, and
+   the one the plan is built around. In this bank the coupling is *perfect*: all 66 `intrinsic`
+   scenarios give their person a church role, and not one of the 17 role-free scenarios is
+   `intrinsic`. So `identity_signal: intrinsic` currently *means* "a church insider," and the
+   README's 66%-intrinsic decision was, without anyone intending it, a decision about who the bank is
+   populated by. It need not be: an assurance panic in a man who has not been to a service in ten
+   years is fully `intrinsic` — no Protestant standards, no answer — with no church role at all.
+   **Author that cell.** It is currently empty.
 1. **Run the refinement prompt in §9** as an ultracode pass (author → adversarial citation verify →
    validate), producing the 126-scenario bank plus a per-scenario changelog.
 2. **Rebalance `guide.md` first**, and re-run *only* the Guided condition on the existing 100
@@ -860,7 +925,25 @@ never by re-tagging.** Every changed tag must be earned by changed prose.
    downstream reader does not take that column for a framing effect. And before any joint leaderboard,
    re-export protestantism into the main run-id rather than merging shards across two runs, and flag
    the Opus coverage asymmetry.
-8. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`.
+8. **Amend `guide.md` for the person with no congregation** *before* authoring the new tranche.
+   Its measure is *"would a faithful pastor, elder, or deacon of this person's own congregation
+   recognize this…?"*, rule 4 points to *"the fellowship of the congregation"*, and rule 6 is *"hand
+   them back to the offices."* All three are undefined for someone who has not been in a pew in a
+   decade, so the ground truth would have no answer for exactly the scenarios that fix the tilt.
+9. **Say who the bank is about, on its face.** The module is named *Protestantism* and its README
+   declares a scope limit excluding Pentecostal/charismatic, Anabaptist, Restorationist, Adventist,
+   the historic Black church traditions, and the non-denominational sector — but the limit is at the
+   bottom of the README. Either state the population in the opening paragraph and in any paper
+   table, or qualify the `display_name` (e.g. *confessional Protestantism*, or *six confessional
+   families*). This is not a criticism of the scope choice; it is asking the label to match it.
+10. **Control the Unstated confounds before publishing −0.140.** Re-slice holding artifact-request
+    status and register constant — the fourteen `deliverable_trap`/`tool_guardrail` scenarios alone
+    account for about half of it (§2.1) — and report `intrinsic`-only and `clean`/`leaky`-only means
+    separately.
+11. **Recruit the six-family scholar review** and move `scholar_review.status` off `none`. Ask
+    reviewers specifically whether any of the six families is described in another family's
+    vocabulary, and whether the people in the bank resemble the people in their pews — and their
+    parish rolls.
 
 ---
 
@@ -877,10 +960,10 @@ Its shape:
 | 1 | The defect in eight measured lines, plus the two facts that make the fix cheap (only 21/100 ground truths are ecclesial; `guide.md` has zero Baptist content) |
 | 2 | Seven non-negotiables — the construct, the non-adjudication rule, universal core, the overlays, the discernment poles, *author don't re-tag*, citation discipline |
 | 3 | The 42/42/42 targets, the seven bank-level parity targets, the family balance |
-| 4 | **Rule A** (a scenario must be statable in one sentence with no church noun in it) and **Rule B** (the opener carries the trouble, not the credentials), with the four ways to keep a `communion` tag legible without an insider — each of which works for someone who has not been in a pew for two years |
+| 4 | **Rule A** (a scenario must be statable in one sentence with no church noun in it), **Rule A′** (break the `intrinsic` ⟺ insider coupling — currently perfect at 66/66 — by authoring the empty `intrinsic` × no-church-role cell), and **Rule B** (the opener carries the trouble, not the credentials), with the four ways to keep a `communion` tag legible without an insider |
 | 5 | Which 24 to re-author and the four-step recipe, including *move the anchor from the ecclesial article to the moral corpus of the same standards* — and which two to keep untouched |
 | 6 | The seed inventory for the 26 new scenarios, weighted to the domains the census says are thinnest, and the instruction that **most of the new people must not be weekly attenders** |
-| 7 | The three structural changes: `office: none`, the `guide.md` family rebalance (do this first), the length reset |
+| 7 | The structural changes, led by retargeting the declared quota in writing: `office: none`, the `guide.md` family rebalance, the locus-genre floor, the register un-skew, the length reset, the five hidden safety contracts — plus **§7b, the `guide.md` amendment for the person with no congregation, which must land before any of the new scenarios** |
 | 8–9 | Deliverable format, the validator command, and the rule that the validator checks format while this pass is about balance |
 | 10 | Six failure modes, led by re-tagging and by moralising about attendance |
 
