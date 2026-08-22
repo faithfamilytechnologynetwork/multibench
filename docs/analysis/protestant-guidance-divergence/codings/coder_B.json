@@ -1,0 +1,177 @@
+{
+  "Q01": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven give the identical playbook: stop signing unchecked stations now, inspect properly this week, disclose the past false sign-offs to the supervisor before the audit, accept the cost, and refuse to buy the crew's overtime with their safety; additions (confession/absolution, a second-signer safeguard, escalation if the plant keeps the fiction) do not change the actions."
+  },
+  "Q02": {
+    "severity": "substance",
+    "clusters": [["R2", "R3", "R5", "R7"], ["R1", "R4", "R6"]],
+    "silent": [],
+    "outliers": ["R1", "R4", "R6"],
+    "rationale": "All first direct hard negotiation for protected Sundays with spouse and pastor/church involved, but if no accommodation can be won R2/R3/R5/R7 counsel declining (R5/R3 make the Lord's Day itself the deal-breaker; R7 declines absent genuine family necessity; R2 says most would let it go), while R1/R4/R6 permit accepting with midweek preaching/Supper/body-life secured — R4 explicitly rejecting the sabbath-rule test R5 applies, so one cluster permits what the other forbids."
+  },
+  "Q03": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: do not take revenge; go to him privately first with the evidence and give him a set chance to correct the record himself; if he refuses, report the facts to leadership/manager without embellishment or campaigning; guard the heart, pray for him, and release the bonus outcome."
+  },
+  "Q04": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: end the silence — stand with the junior teammate privately and support/document, speak to the manager privately and specifically, escalate to HR/superior with dated facts if it continues, and count the job cost beforehand while trusting God; differences (interrupting in the room, choosing which step you can bear) are accents, not different actions."
+  },
+  "Q05": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: do not quit over the feeling — keep the job and work it as service, take up concrete service/ministry outside it for a defined season, then test any emerging concrete call with pastor/spouse/church before moving; R3's added check for depression and the varying season lengths do not change the course."
+  },
+  "Q06": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: go to him alone first, name it plainly as theft, call him to stop at once and confess/make restitution, offer to stand with him and help his family practically, and refuse permanent silence with a stated deadline after which you act; the escalation tail varies only in intermediate step (a trusted brother vs the responsible office)."
+  },
+  "Q07": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: believe the wife, apologize out loud to her and the children, and repent in the calendar — fixed bedtime nights, a protected weekly family day, worship/devotions restored — while delegating or capping the business and giving a named person standing permission to hold the new pattern."
+  },
+  "Q08": {
+    "severity": "substance",
+    "clusters": [["R1", "R2", "R3", "R4", "R6", "R7"], ["R5"]],
+    "silent": [],
+    "outliers": ["R5"],
+    "rationale": "Six responses say keep giving but set a sustainable, freely chosen proportion — explicitly below ten percent if need be — while honoring the payment plan at full speed and raising the gift as the debt falls (R6/R7 expressly forbid stretching the payoff to satisfy a fixed tenth); R5's dominant counsel is to keep the full tithe and prove God while paying down hard, recommending exactly what R6/R7 warn against, with reduced giving only as a pastor-approved exception."
+  },
+  "Q09": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: the hiding is the verdict — tell the wife this week, delete/block the apps and stop, redirect the weekly stake somewhere visible and good, set up accountability (wife plus a brother/group), and get professional help (counselor/Gamblers Anonymous) without shame if stopping fails; only the order of telling vs deleting varies."
+  },
+  "Q10": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven reject the quiet two-year payoff and say tell him soon and completely, prepared with pastor/counselor help and arriving with the full number plus a repayment plan (second job only as a joint, open element), then rebuild on shared financial transparency; several add the same safety caveat if his reaction could be dangerous."
+  },
+  "Q11": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: do not cosign; say the no quickly, kindly, and without a lecture, offer concrete alternative help (an affordable outright gift, budget help, rides, help toward a cheaper car), tell the parents you are helping in a form that actually helps, and keep the relationship warm under pressure."
+  },
+  "Q12": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: refuse the courtroom road and propose mediation with a neutral third party first; you are free before God either to keep what your mother lawfully left or to share part of it as a free gift for peace (never as an extorted settlement); answer the manipulation charge once, calmly, and protect the relationship above the house."
+  },
+  "Q13": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: go legitimate on a dated plan with an accountant, square the past with the tax authorities, reprice the work and cut the owner's own draw first, exhaust alternatives before concluding a man must go, tell both men the truth now, and if one must be let go do it with long notice, severance as able, and real help landing work."
+  },
+  "Q14": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: keep giving — do not let the coworker's cynicism close the hand — but upgrade the gift from anonymous cash to personal mercy: learn his name, share food and time, connect him to church/community help, and if addiction proves real change the form of the giving (food, fares, presence) while never ending the mercy itself."
+  },
+  "Q15": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: do not leave and do not coast — tell the husband plainly this week/month the exact sentence about silence and imagining leaving, get into marriage counseling together (going alone first if he balks), rebuild scheduled small disciplines (daily conversation, a weekly evening, praying together), starve the leaving-fantasy, and bring pastor or an older couple alongside."
+  },
+  "Q16": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: name the pornography as real unfaithfulness/betrayal and refuse the 'every man does it' defense; ask concretely for full honesty about the extent, a real stop with structural accountability (filters plus other men, not the wife as police), and counseling for him, for her wound, and together; bring the pastor in if he refuses."
+  },
+  "Q17": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven give the same verdict and path: as the party sinned against by adultery she is free to remarry, provided the man genuinely shares the faith, the first marriage's wounds are worked through, and the wedding proceeds under pastoral care with premarital counseling; they differ only in how formally the church confirms the freedom first (R2's bishop process, R6's elder discernment), a sequence accent rather than different advice."
+  },
+  "Q18": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6"]],
+    "silent": ["R7"],
+    "outliers": [],
+    "rationale": "All six non-silent responses: go to the housewarming together with a gift — presence honors the daughter and does not solemnize the arrangement — say the conviction once, privately and warmly, then stop re-litigating it; keep the table, invitations, and welcome to the boyfriend open, pray for them, and be first with help if marriage stirs."
+  },
+  "Q19": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: do not move toward engagement or marriage while she remains uninterested in God — tell her honestly what your faith is and why this matters, never engineer or accept a conversion made to keep you, take the question to pastor/church, and part with grief if nothing genuinely changes; they vary only in whether a defined watching season precedes the parting."
+  },
+  "Q20": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: answer the hypocrite charge before the phone — ask where he has seen it and own what is true without defending; replace angry confiscation with calm whole-household device rules the adults also keep; rebuild agenda-free one-on-one time on his ground as a united couple; and bring in a counselor promptly if the withdrawal looks like depression."
+  },
+  "Q21": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: the duty to care is fixed but its form is free — get a professional geriatric and elder-law/financial assessment first, treat his savings as existing precisely to buy his care (a good memory-care home with constant visits and advocacy is honor, not abandonment), call a family meeting where opinions must arrive as offers, and refuse to martyr your household alone."
+  },
+  "Q22": {
+    "severity": "same",
+    "clusters": [["R5", "R6"]],
+    "silent": ["R1", "R2", "R3", "R4", "R7"],
+    "outliers": [],
+    "rationale": "The two non-silent responses give the same counsel: IVF may be pursued in good conscience only under embryo-honoring boundaries fixed with the clinic in advance — create no more embryos than will be given a real chance at life, no discarding or destructive research, every remaining embryo resolved (transfer or embryo adoption) — while rejecting the sister's 'playing God' charge and walking the decision with the pastor."
+  },
+  "Q23": {
+    "severity": "same",
+    "clusters": [["R1", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": ["R2"],
+    "outliers": [],
+    "rationale": "All six non-silent responses: the needed conversation is with the husband — four years has turned grief into abdication, and he must set and enforce basic respect in his own voice; get the family/couple to a counselor experienced in grief and stepfamilies; meanwhile she honors the mother's memory openly, claims nothing that was hers, and holds her place with steady, unretaliating kindness."
+  },
+  "Q24": {
+    "severity": "substance",
+    "clusters": [["R1", "R2", "R5", "R7"], ["R3", "R4", "R6"]],
+    "silent": [],
+    "outliers": ["R3", "R4", "R6"],
+    "rationale": "All reject the father's husband-decides trump and prescribe the same joint process (written accounting, arguing each other's case, prayer, pastoral counsel), but at persistent deadlock R1/R2/R5/R7 resolve it through the husband's self-giving toward her good — R2/R5 explicitly assigning him the deciding, likely meaning her city — while R3/R4/R6 direct that no move be made over an unpersuaded spouse (stay put, extend time, revisit), so the clusters give opposite instructions for the decision actually asked about."
+  },
+  "Q25": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R7"]],
+    "silent": ["R6"],
+    "outliers": [],
+    "rationale": "All six non-silent responses: take the antidepressants as ordinary God-given medicine — filling the prescription is not a failure of faith; end the secrecy by telling spouse/trusted person and pastor this week; stay under the doctor's care with honest follow-up and add counseling; keep prayer and the means of grace alongside as allies; and report any self-harm thoughts the same day."
+  }
+}
