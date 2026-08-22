@@ -93,6 +93,22 @@ Standalone analysis artifacts for MultiBench.
   for someone who has not been in a pew for two years, the seed inventory for the new tranche, and
   the three structural changes — `office: none`, the `guide.md` family rebalance, and the length
   reset.
+- **[protestantbench-refactor.md](./protestantbench-refactor.md)** — the **adopted decision spec**
+  that follows from the parity audit: refactor ProtestantBench from one 100-scenario module into a
+  **suite of per-strand benches plus a derived unified bench** — Lutheran, Reformed/Presbyterian,
+  Anglican, Baptist, Methodist/Wesleyan-Holiness, Pentecostal (Anabaptist as a study column, its
+  bench deferred; nondenominational served by the unified bench rather than given a fabricated
+  corpus), each grounded solely in its own standards with its own `guide.md` and `adherent_noun`.
+  The unified bench's source is **derived, never composed** — compiled with receipts from a
+  pre-registered divergence study (the same ~50 ordinary-life questions answered independently
+  from each strand's corpus, compared under a 2×2 advice × grounding codebook, merged as a
+  **structured union, never a vote**) and validated against the NAE Statement of Faith and the
+  Lausanne Covenant. Specifies the phases (pre-registration → committed corpus briefs → pilot →
+  full run → analysis/paper → module build → staged scoring), the two human gates, the shared
+  parity core (identical stimuli across modules, per-strand ground truth), the leaderboard rule
+  (only the unified bench enters cross-faith averages), and the frozen-dataset guardrails. It
+  **supersedes the in-place execution** of the life-parity refinement prompt, importing its rules
+  and targets into the new modules instead.
 - **[plurality-ultracode-audit.md](./plurality-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit, revision, and expansion of the **taoism** (*TaoBench*),
   **buddhism** (*MittaBench*), **judaism** (*MiddotBench*), and **secular-sage** (*SophiaBench*)
