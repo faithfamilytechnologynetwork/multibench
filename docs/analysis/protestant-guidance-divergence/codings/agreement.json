@@ -1,0 +1,15 @@
+{
+  "n_questions": 50,
+  "severity_exact_match": 46,
+  "severity_match_rate": 0.92,
+  "partition_exact_match": 44,
+  "partition_match_rate": 0.88,
+  "adjudicated_questions": [
+    "Q06",
+    "Q24",
+    "Q28",
+    "Q37",
+    "Q44",
+    "Q45"
+  ]
+}
