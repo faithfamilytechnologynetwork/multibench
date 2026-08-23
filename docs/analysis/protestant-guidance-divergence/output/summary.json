@@ -1,0 +1,55 @@
+{
+  "n_questions": 50,
+  "severity_counts": {
+    "same": 39,
+    "substance": 8,
+    "emphasis": 3
+  },
+  "D_substantive_divergence_share": 0.16,
+  "substance_questions": [
+    "Q02",
+    "Q08",
+    "Q24",
+    "Q26",
+    "Q28",
+    "Q37",
+    "Q38",
+    "Q39"
+  ],
+  "substance_by_domain": {
+    "work": 1,
+    "money": 1,
+    "family": 1,
+    "body_mind": 2,
+    "civic": 3
+  },
+  "concentrated_by_domain_rule": true,
+  "outlier_counts_by_strand": {
+    "pentecostal": 5,
+    "lutheran": 2,
+    "anabaptist": 4,
+    "anglican": 4,
+    "baptist": 1,
+    "reformed-presbyterian": 1
+  },
+  "top_outlier_strand": "pentecostal",
+  "top_outlier_share_of_outliers": 0.2941,
+  "silence_counts_by_strand": {
+    "pentecostal": 11,
+    "anglican": 6,
+    "methodist-wesleyan": 3,
+    "anabaptist": 5,
+    "lutheran": 3,
+    "reformed-presbyterian": 4,
+    "baptist": 2
+  },
+  "advice_x_grounding": {
+    "emphasis|parallel": 1,
+    "emphasis|shared": 2,
+    "same|divergent": 4,
+    "same|parallel": 5,
+    "same|shared": 30,
+    "substance|divergent": 7,
+    "substance|shared": 1
+  }
+}

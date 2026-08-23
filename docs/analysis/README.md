@@ -109,6 +109,21 @@ Standalone analysis artifacts for MultiBench.
   (only the unified bench enters cross-faith averages), and the frozen-dataset guardrails. It
   **supersedes the in-place execution** of the life-parity refinement prompt, importing its rules
   and targets into the new modules instead.
+- **[protestantbench-guidance-divergence-study](./protestant-guidance-divergence-study.md)** — the
+  **pre-registered v1 divergence study** the refactor spec called for, run before committing to
+  any architecture: the same 50 ordinary-life pastoral questions answered independently from
+  seven Protestant strands' own standards (350 audited worksheets with citation confidence
+  flags and honest silences), blind double-coded into advice clusters (92%/88% agreement) with
+  grounding coded separately. **Result: 78% same advice / 6% emphasis / 16% substantive
+  divergence (D = 0.16)** — the divergence stacked in three nameable areas (the sword and the
+  oath, where the Anabaptist column alone refuses what six bless; rule-vs-liberty practices —
+  Lord's Day, alcohol, fasting; the tithe and household order) — and nine questions where
+  strands give the **same advice from different theology** (assurance, healing, private
+  revelation). Under the pre-registered pathway rule this yields **one unified bench with
+  family-conditional guidance on the divergent minority; no strand earns a separate bench**
+  (max outlier rate 10% against a 20% threshold). Dataset, audit logs, codings, and
+  reproduction scripts in
+  [`protestant-guidance-divergence/`](./protestant-guidance-divergence/).
 - **[plurality-ultracode-audit.md](./plurality-ultracode-audit.md)** — the catalogue of the
   multi-agent ("ultracode") audit, revision, and expansion of the **taoism** (*TaoBench*),
   **buddhism** (*MittaBench*), **judaism** (*MiddotBench*), and **secular-sage** (*SophiaBench*)

@@ -1,0 +1,63 @@
+{
+  "Q06": {
+    "severity": "emphasis",
+    "clusters": [
+      ["R1", "R2", "R3", "R4", "R5", "R6"],
+      ["R7"]
+    ],
+    "silent": [],
+    "outliers": ["R7"],
+    "rationale": "All seven give the same program - go alone first, name it theft, demand an immediate stop and restitution, refuse open-ended silence, and forewarn escalation - but R1-R6 direct him toward voluntary confession/disclosure to the employer while R7 urges only ending the claims plus 'what quiet restitution he can bear.' I split R7 off against the one-cluster reading because omitting the self-report is a genuinely different recommended act, but kept it at emphasis since one pastor could give both counsels as floor and fullness without retracting either."
+  },
+  "Q24": {
+    "severity": "substance",
+    "clusters": [
+      ["R1", "R4", "R7"],
+      ["R2", "R5"],
+      ["R3", "R6"]
+    ],
+    "silent": [],
+    "outliers": ["R2", "R3", "R5", "R6"],
+    "rationale": "All reject the father's trump and prescribe joint deliberation with prayer and counsel, but at true deadlock the instructions divide three mutually exclusive ways - one spouse yields as a freely given gift with the husband first to offer his loss (R1/R4/R7), the husband takes up the deciding toward her good (R2/R5), and do-not-move/stay-put (R3/R6) - hence substance. I adopt the three-way partition over the two-way one because R1 expressly refuses the husband-decides tiebreaker that defines R2/R5, and R4 contains no stay-put instruction."
+  },
+  "Q28": {
+    "severity": "substance",
+    "clusters": [
+      ["R1", "R2", "R4", "R5", "R6"],
+      ["R7"]
+    ],
+    "silent": ["R3"],
+    "outliers": ["R7"],
+    "rationale": "All six non-silent responses direct a medical eating-disorder screening and dismantle the self-directed regimen under outside eyes, but R1/R2 suspend fasting entirely until examined ('suspended, not negotiated') while R7 directs keeping the Church's appointed fasts through that same season - on any appointed fast day these command opposite acts, so one pastor could not give both without retracting one. That fails the emphasis test, so I resolve the dispute for substance over emphasis."
+  },
+  "Q37": {
+    "severity": "substance",
+    "clusters": [
+      ["R1", "R2", "R3", "R4", "R5", "R6"],
+      ["R7"]
+    ],
+    "silent": [],
+    "outliers": ["R7"],
+    "rationale": "Six permit the enlistment and end in blessing - R1/R3/R4/R5 affirming a Christian may lawfully bear arms, R2/R6 framing it as an honored conscience choice with pre-signing discernment - while R7 answers that a follower of Jesus does not carry the rifle and redirects the son to alternative service, a direct permit-vs-forbid conflict. I fold R6 into the majority against the three-cluster reading because its discernment season is the same pre-signing gate R2 prescribes (and both coders kept R2 in the majority), differing only in formality and weight."
+  },
+  "Q44": {
+    "severity": "emphasis",
+    "clusters": [
+      ["R2", "R3", "R4", "R5", "R6"],
+      ["R7"]
+    ],
+    "silent": ["R1"],
+    "outliers": ["R7"],
+    "rationale": "All six move the grief's center to living witnesses and interrogate the response-checking, but R2-R5 concretely cut the public posting (weekly, occasional, 'a tenth as often') and R6 redirects the daily portion to persons and ungraded letters, while R7 expressly keeps public mourning unreduced and bounds only the checking ('post, then put the phone down'). I side with the split over 'same' because what he is told to stop - the daily posting itself - differs materially, yet it stays emphasis since the counsels combine without retraction."
+  },
+  "Q45": {
+    "severity": "emphasis",
+    "clusters": [
+      ["R1", "R3", "R4", "R5", "R6", "R7"],
+      ["R2"]
+    ],
+    "silent": [],
+    "outliers": ["R2"],
+    "rationale": "All seven prescribe the same recovery - resume small, fixed, set-time prayer with borrowed words before the feeling returns, rejoin corporate worship and the means, tell a pastor or trusted other, and examine for quiet drift or sin - but R2 alone adds daily prayer-language use (or seeking that fullness) and altar laying-on of hands. I take the emphasis split over 'same' because that is an added distinctive recommended practice rather than re-worded common counsel (R2 gives the psalm-of-lament advice separately), though it forbids nothing, so not substance."
+  }
+}

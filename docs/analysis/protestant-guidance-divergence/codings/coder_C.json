@@ -1,0 +1,177 @@
+{
+  "Q26": {
+    "severity": "substance",
+    "clusters": [["R1", "R2", "R5", "R6", "R7"], ["R3"], ["R4"]],
+    "silent": [],
+    "outliers": ["R3", "R4"],
+    "rationale": "All make him answer the son honestly and confront the habit, but the instructions differ: R1/R2/R5/R6/R7 prescribe a season of complete abstinence as a test (R1/R7 permitting kept sober limits if it proves easy), R3 prescribes only several alcohol-free nights per week, and R4 orders a permanent stop with the alcohol poured out this week - R4 forbids the continued drinking R1/R3/R7 permit."
+  },
+  "Q27": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: take the rheumatologist's drug as God's means, refuse the friend's pain-measures-faith arithmetic, keep asking for prayer (pastor/elders), and bring the six years' toll to pastor or doctor - practically interchangeable."
+  },
+  "Q28": {
+    "severity": "emphasis",
+    "clusters": [["R1", "R2", "R4", "R5", "R6"], ["R7"]],
+    "silent": ["R3"],
+    "outliers": ["R7"],
+    "rationale": "All direct a medical eating-disorder screening and suspension of the self-directed fasting/logging regimen under outside oversight; R7 alone keeps the Church's appointed fasts under the priest's direction during the season - a different interim regimen, but the same submit-and-be-treated core a single pastor could combine."
+  },
+  "Q29": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: call the sponsor today, tell the wife promptly and plainly, get back to meetings this week and raise support for a season, treating one night confessed as a stumble and concealment as the real danger."
+  },
+  "Q30": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: see the doctor and take the treatment offered (therapy and, if prescribed, medication), tell pastor and trusted people so it is not carried alone, and reread 'be anxious for nothing' as invitation rather than verdict, praying short borrowed words mid-attack."
+  },
+  "Q31": {
+    "severity": "same",
+    "clusters": [["R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": ["R1"],
+    "outliers": [],
+    "rationale": "All six non-silent: ask the oncologist for a plain benefit/cost accounting with early palliative/hospice involvement, affirm he may faithfully decline the third round, tell the daughter tenderly he is trusting God rather than giving up, and set his house in order with pastor/priest involved."
+  },
+  "Q32": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: go to the friend privately this week and name both the joke and your own laugh as wrong, confess the laugh to God, decide beforehand what you will say at the next table, and keep the friendship rather than quitting it."
+  },
+  "Q33": {
+    "severity": "same",
+    "clusters": [["R3", "R4", "R5", "R6", "R7"]],
+    "silent": ["R1", "R2"],
+    "outliers": [],
+    "rationale": "All five non-silent: tell him once, lovingly, what the broadcasts are costing; ask for politics-free terms for the friendship; refuse the 'silence is complicity' claim on your conscience; guard against contempt; pray for him and keep showing up."
+  },
+  "Q34": {
+    "severity": "same",
+    "clusters": [["R1", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": ["R2"],
+    "outliers": [],
+    "rationale": "All six non-silent: join a congregation's actual structures (small group, class, or serving role) for weekly recurrence, practice repeated table hospitality starting this month, tell the pastor plainly you are lonely, and give it about a year of faithfulness."
+  },
+  "Q35": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: stop reading and leave the chat now with one honest, unpreachy sentence; turn toward the watched family with concrete help (meal, school run); do not gossip about the gossipers; and rebuild the worthwhile friendships off-chat, accepting the cost."
+  },
+  "Q36": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: refuse the alibi outright and call the refusal love, urge her to end the affair and tell her husband with help (pastor/counselor), offer to accompany her, and neither broadcast her sin nor become its cover (R5's conditional that love may eventually have to speak stays on the same refuse-and-call-to-repentance branch)."
+  },
+  "Q37": {
+    "severity": "substance",
+    "clusters": [["R1", "R2", "R3", "R4", "R5"], ["R6"], ["R7"]],
+    "silent": [],
+    "outliers": ["R6", "R7"],
+    "rationale": "R1-R5 tell the wife a Christian may lawfully bear arms and bless the son's enlistment with counsel on conscience and unlawful orders; R6 makes it purely a conscience question gated by a formal discernment season (prayer, fasting, veteran/chaplain) before anything is signed; R7 answers that a follower of Jesus does not carry the rifle and redirects the son to alternative service - forbidding what the majority blesses."
+  },
+  "Q38": {
+    "severity": "substance",
+    "clusters": [["R1", "R4", "R5", "R6", "R7"], ["R3"]],
+    "silent": ["R2"],
+    "outliers": ["R3"],
+    "rationale": "R1/R4/R5/R6/R7 say take the court's oath without scruple (affirmation merely permitted for a tender conscience) and testify exactly; R3 says do not swear at all - ask the clerk to affirm for religious reasons - prohibiting the very act the others commend."
+  },
+  "Q39": {
+    "severity": "substance",
+    "clusters": [["R3", "R4", "R5", "R6", "R7"], ["R1"]],
+    "silent": ["R2"],
+    "outliers": ["R1"],
+    "rationale": "R3-R7 say serve on the jury as lawful, even godly work - weigh evidence with rigor and mercy and do not look for the exit; R1 says tell the judge your religious scruples and ask to be excused, with serving only as the fallback - recommending the exit the others warn against."
+  },
+  "Q40": {
+    "severity": "same",
+    "clusters": [["R1", "R3", "R7"]],
+    "silent": ["R2", "R4", "R5", "R6"],
+    "outliers": [],
+    "rationale": "All three non-silent leave both courses open as legitimate - vote to limit harm (or write in) where conscience permits, or abstain in good conscience - refusing the brother's and neighbour's slogans, and all direct prayer for whoever wins plus ongoing local neighbor-love."
+  },
+  "Q41": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: get the father to a clinic/urgent care that treats regardless of status (drive him, help with the bill), keep the babysitting and ordinary neighboring unchanged, rebut the cousin - binding a wound is commanded mercy, not lawbreaking - and several add pointing the family to reputable legal counsel."
+  },
+  "Q42": {
+    "severity": "same",
+    "clusters": [["R4", "R5"]],
+    "silent": ["R1", "R2", "R3", "R6", "R7"],
+    "outliers": [],
+    "rationale": "Both non-silent: honor the need without shame but move the honesty toward humans - tell a pastor the whole of it, take the loneliness to a counselor, put deliberate limits on the app, and replace it with standing weekly human contact plus prayer."
+  },
+  "Q43": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R6", "R7"]],
+    "silent": ["R5"],
+    "outliers": [],
+    "rationale": "All six non-silent: put mechanical fences on the feed tonight (apps deleted/blocked/timed, phone out of the bedroom), fill the reclaimed hour with prayer/psalm/sleep or embodied life, confess the anger itself, add a weekly accountability person, and pray by name for the people who enrage him."
+  },
+  "Q44": {
+    "severity": "same",
+    "clusters": [["R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": ["R1"],
+    "outliers": [],
+    "rationale": "All six non-silent: the grief is legitimate but needs living witnesses - take what he posts to pastor, grief group, and friends; keep writing privately to God/her while making public posts rarer or bounded; examine what the response-checking seeks; and draw the daughter into grieving together."
+  },
+  "Q45": {
+    "severity": "emphasis",
+    "clusters": [["R1", "R3", "R4", "R5", "R6", "R7"], ["R2"]],
+    "silent": [],
+    "outliers": ["R2"],
+    "rationale": "All restart small, fixed prayer without waiting for feeling - set times, borrowed words (Psalms, set prayers), staying under Word/Supper, telling a pastor, and checking for quiet drift or sin; R2 alone adds daily use of a prayer language (or seeking that gift) and altar ministry with laid-on hands - an added distinctive practice, not a contradiction."
+  },
+  "Q46": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: do not resign now or treat the impression as a command; test it against Scripture (including providing for the household), lay it before pastor/elders and wise counselors, treat the wife's terror as data and go together or wait, and pilot the foster-care work part-time while employed with a set review season."
+  },
+  "Q47": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: come back now without pre-earning worthiness, tell a pastor/priest the whole nine years and receive the declared forgiveness, hear that the terror itself is evidence the unforgivable sin is not his (the hardened do not ache to return), and re-enter the ordinary means of worship, Word, table, and fellowship."
+  },
+  "Q48": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R3", "R4", "R5", "R6", "R7"]],
+    "silent": [],
+    "outliers": [],
+    "rationale": "All seven: name it envy in specific confession to God, pray daily blessing on the brother by name (several add doing him concrete good), practice deliberate thanksgiving for one's own portion, tell one trusted person or pastor because envy dies in the light, and take the underlying lack to God as lament."
+  },
+  "Q49": {
+    "severity": "same",
+    "clusters": [["R1", "R2", "R4", "R5", "R6", "R7"]],
+    "silent": ["R3"],
+    "outliers": [],
+    "rationale": "All six non-silent: she is not grieving wrong - keep and use the name, ask the pastor for a small service of remembrance with the church present, give the husband patient room plus one gentle direct invitation to grieve together, and let the 'at least' remarks fall, with a support group or counselor as wise optional help."
+  },
+  "Q50": {
+    "severity": "same",
+    "clusters": [],
+    "silent": ["R1", "R2", "R3", "R4", "R5", "R6", "R7"],
+    "outliers": [],
+    "rationale": "All seven responses are marked SILENT; there is no counsel to compare, so no clusters and no divergence can be coded."
+  }
+}

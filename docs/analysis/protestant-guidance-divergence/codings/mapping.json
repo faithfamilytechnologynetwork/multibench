@@ -1,0 +1,452 @@
+{
+  "Q01": {
+    "R1": "baptist",
+    "R2": "anglican",
+    "R3": "pentecostal",
+    "R4": "anabaptist",
+    "R5": "reformed-presbyterian",
+    "R6": "lutheran",
+    "R7": "methodist-wesleyan"
+  },
+  "Q02": {
+    "R1": "pentecostal",
+    "R2": "baptist",
+    "R3": "methodist-wesleyan",
+    "R4": "lutheran",
+    "R5": "reformed-presbyterian",
+    "R6": "anabaptist",
+    "R7": "anglican"
+  },
+  "Q03": {
+    "R1": "methodist-wesleyan",
+    "R2": "pentecostal",
+    "R3": "anabaptist",
+    "R4": "reformed-presbyterian",
+    "R5": "lutheran",
+    "R6": "baptist",
+    "R7": "anglican"
+  },
+  "Q04": {
+    "R1": "pentecostal",
+    "R2": "baptist",
+    "R3": "reformed-presbyterian",
+    "R4": "anabaptist",
+    "R5": "methodist-wesleyan",
+    "R6": "anglican",
+    "R7": "lutheran"
+  },
+  "Q05": {
+    "R1": "baptist",
+    "R2": "pentecostal",
+    "R3": "anabaptist",
+    "R4": "reformed-presbyterian",
+    "R5": "lutheran",
+    "R6": "methodist-wesleyan",
+    "R7": "anglican"
+  },
+  "Q06": {
+    "R1": "pentecostal",
+    "R2": "lutheran",
+    "R3": "baptist",
+    "R4": "reformed-presbyterian",
+    "R5": "anabaptist",
+    "R6": "methodist-wesleyan",
+    "R7": "anglican"
+  },
+  "Q07": {
+    "R1": "anglican",
+    "R2": "pentecostal",
+    "R3": "reformed-presbyterian",
+    "R4": "anabaptist",
+    "R5": "baptist",
+    "R6": "lutheran",
+    "R7": "methodist-wesleyan"
+  },
+  "Q08": {
+    "R1": "baptist",
+    "R2": "lutheran",
+    "R3": "methodist-wesleyan",
+    "R4": "anabaptist",
+    "R5": "pentecostal",
+    "R6": "anglican",
+    "R7": "reformed-presbyterian"
+  },
+  "Q09": {
+    "R1": "lutheran",
+    "R2": "anabaptist",
+    "R3": "pentecostal",
+    "R4": "baptist",
+    "R5": "anglican",
+    "R6": "reformed-presbyterian",
+    "R7": "methodist-wesleyan"
+  },
+  "Q10": {
+    "R1": "baptist",
+    "R2": "pentecostal",
+    "R3": "reformed-presbyterian",
+    "R4": "lutheran",
+    "R5": "anabaptist",
+    "R6": "methodist-wesleyan",
+    "R7": "anglican"
+  },
+  "Q11": {
+    "R1": "reformed-presbyterian",
+    "R2": "lutheran",
+    "R3": "anabaptist",
+    "R4": "anglican",
+    "R5": "baptist",
+    "R6": "methodist-wesleyan",
+    "R7": "pentecostal"
+  },
+  "Q12": {
+    "R1": "anglican",
+    "R2": "reformed-presbyterian",
+    "R3": "baptist",
+    "R4": "methodist-wesleyan",
+    "R5": "lutheran",
+    "R6": "pentecostal",
+    "R7": "anabaptist"
+  },
+  "Q13": {
+    "R1": "reformed-presbyterian",
+    "R2": "methodist-wesleyan",
+    "R3": "lutheran",
+    "R4": "anabaptist",
+    "R5": "baptist",
+    "R6": "pentecostal",
+    "R7": "anglican"
+  },
+  "Q14": {
+    "R1": "baptist",
+    "R2": "pentecostal",
+    "R3": "lutheran",
+    "R4": "anabaptist",
+    "R5": "reformed-presbyterian",
+    "R6": "methodist-wesleyan",
+    "R7": "anglican"
+  },
+  "Q15": {
+    "R1": "lutheran",
+    "R2": "reformed-presbyterian",
+    "R3": "pentecostal",
+    "R4": "anglican",
+    "R5": "methodist-wesleyan",
+    "R6": "baptist",
+    "R7": "anabaptist"
+  },
+  "Q16": {
+    "R1": "lutheran",
+    "R2": "baptist",
+    "R3": "methodist-wesleyan",
+    "R4": "reformed-presbyterian",
+    "R5": "anabaptist",
+    "R6": "pentecostal",
+    "R7": "anglican"
+  },
+  "Q17": {
+    "R1": "baptist",
+    "R2": "anglican",
+    "R3": "reformed-presbyterian",
+    "R4": "lutheran",
+    "R5": "pentecostal",
+    "R6": "anabaptist",
+    "R7": "methodist-wesleyan"
+  },
+  "Q18": {
+    "R1": "methodist-wesleyan",
+    "R2": "lutheran",
+    "R3": "reformed-presbyterian",
+    "R4": "baptist",
+    "R5": "anglican",
+    "R6": "anabaptist",
+    "R7": "pentecostal"
+  },
+  "Q19": {
+    "R1": "lutheran",
+    "R2": "methodist-wesleyan",
+    "R3": "pentecostal",
+    "R4": "reformed-presbyterian",
+    "R5": "baptist",
+    "R6": "anglican",
+    "R7": "anabaptist"
+  },
+  "Q20": {
+    "R1": "anabaptist",
+    "R2": "reformed-presbyterian",
+    "R3": "anglican",
+    "R4": "lutheran",
+    "R5": "baptist",
+    "R6": "methodist-wesleyan",
+    "R7": "pentecostal"
+  },
+  "Q21": {
+    "R1": "pentecostal",
+    "R2": "anglican",
+    "R3": "anabaptist",
+    "R4": "lutheran",
+    "R5": "methodist-wesleyan",
+    "R6": "baptist",
+    "R7": "reformed-presbyterian"
+  },
+  "Q22": {
+    "R1": "anglican",
+    "R2": "methodist-wesleyan",
+    "R3": "anabaptist",
+    "R4": "lutheran",
+    "R5": "pentecostal",
+    "R6": "baptist",
+    "R7": "reformed-presbyterian"
+  },
+  "Q23": {
+    "R1": "anglican",
+    "R2": "pentecostal",
+    "R3": "baptist",
+    "R4": "methodist-wesleyan",
+    "R5": "anabaptist",
+    "R6": "lutheran",
+    "R7": "reformed-presbyterian"
+  },
+  "Q24": {
+    "R1": "methodist-wesleyan",
+    "R2": "anglican",
+    "R3": "pentecostal",
+    "R4": "anabaptist",
+    "R5": "baptist",
+    "R6": "reformed-presbyterian",
+    "R7": "lutheran"
+  },
+  "Q25": {
+    "R1": "lutheran",
+    "R2": "baptist",
+    "R3": "pentecostal",
+    "R4": "reformed-presbyterian",
+    "R5": "anglican",
+    "R6": "anabaptist",
+    "R7": "methodist-wesleyan"
+  },
+  "Q26": {
+    "R1": "lutheran",
+    "R2": "baptist",
+    "R3": "anglican",
+    "R4": "pentecostal",
+    "R5": "methodist-wesleyan",
+    "R6": "anabaptist",
+    "R7": "reformed-presbyterian"
+  },
+  "Q27": {
+    "R1": "anglican",
+    "R2": "methodist-wesleyan",
+    "R3": "pentecostal",
+    "R4": "reformed-presbyterian",
+    "R5": "anabaptist",
+    "R6": "baptist",
+    "R7": "lutheran"
+  },
+  "Q28": {
+    "R1": "lutheran",
+    "R2": "methodist-wesleyan",
+    "R3": "pentecostal",
+    "R4": "baptist",
+    "R5": "reformed-presbyterian",
+    "R6": "anabaptist",
+    "R7": "anglican"
+  },
+  "Q29": {
+    "R1": "anabaptist",
+    "R2": "anglican",
+    "R3": "methodist-wesleyan",
+    "R4": "pentecostal",
+    "R5": "lutheran",
+    "R6": "baptist",
+    "R7": "reformed-presbyterian"
+  },
+  "Q30": {
+    "R1": "anabaptist",
+    "R2": "pentecostal",
+    "R3": "lutheran",
+    "R4": "baptist",
+    "R5": "methodist-wesleyan",
+    "R6": "reformed-presbyterian",
+    "R7": "anglican"
+  },
+  "Q31": {
+    "R1": "anabaptist",
+    "R2": "methodist-wesleyan",
+    "R3": "pentecostal",
+    "R4": "anglican",
+    "R5": "baptist",
+    "R6": "lutheran",
+    "R7": "reformed-presbyterian"
+  },
+  "Q32": {
+    "R1": "baptist",
+    "R2": "anabaptist",
+    "R3": "anglican",
+    "R4": "pentecostal",
+    "R5": "lutheran",
+    "R6": "methodist-wesleyan",
+    "R7": "reformed-presbyterian"
+  },
+  "Q33": {
+    "R1": "baptist",
+    "R2": "pentecostal",
+    "R3": "lutheran",
+    "R4": "anabaptist",
+    "R5": "anglican",
+    "R6": "reformed-presbyterian",
+    "R7": "methodist-wesleyan"
+  },
+  "Q34": {
+    "R1": "lutheran",
+    "R2": "anglican",
+    "R3": "reformed-presbyterian",
+    "R4": "baptist",
+    "R5": "pentecostal",
+    "R6": "anabaptist",
+    "R7": "methodist-wesleyan"
+  },
+  "Q35": {
+    "R1": "baptist",
+    "R2": "reformed-presbyterian",
+    "R3": "anabaptist",
+    "R4": "lutheran",
+    "R5": "anglican",
+    "R6": "pentecostal",
+    "R7": "methodist-wesleyan"
+  },
+  "Q36": {
+    "R1": "pentecostal",
+    "R2": "methodist-wesleyan",
+    "R3": "lutheran",
+    "R4": "anglican",
+    "R5": "anabaptist",
+    "R6": "baptist",
+    "R7": "reformed-presbyterian"
+  },
+  "Q37": {
+    "R1": "reformed-presbyterian",
+    "R2": "methodist-wesleyan",
+    "R3": "anglican",
+    "R4": "lutheran",
+    "R5": "baptist",
+    "R6": "pentecostal",
+    "R7": "anabaptist"
+  },
+  "Q38": {
+    "R1": "reformed-presbyterian",
+    "R2": "pentecostal",
+    "R3": "anabaptist",
+    "R4": "anglican",
+    "R5": "lutheran",
+    "R6": "baptist",
+    "R7": "methodist-wesleyan"
+  },
+  "Q39": {
+    "R1": "anabaptist",
+    "R2": "pentecostal",
+    "R3": "lutheran",
+    "R4": "reformed-presbyterian",
+    "R5": "methodist-wesleyan",
+    "R6": "anglican",
+    "R7": "baptist"
+  },
+  "Q40": {
+    "R1": "methodist-wesleyan",
+    "R2": "pentecostal",
+    "R3": "anabaptist",
+    "R4": "lutheran",
+    "R5": "reformed-presbyterian",
+    "R6": "anglican",
+    "R7": "baptist"
+  },
+  "Q41": {
+    "R1": "pentecostal",
+    "R2": "lutheran",
+    "R3": "anabaptist",
+    "R4": "anglican",
+    "R5": "baptist",
+    "R6": "methodist-wesleyan",
+    "R7": "reformed-presbyterian"
+  },
+  "Q42": {
+    "R1": "pentecostal",
+    "R2": "anabaptist",
+    "R3": "methodist-wesleyan",
+    "R4": "baptist",
+    "R5": "lutheran",
+    "R6": "anglican",
+    "R7": "reformed-presbyterian"
+  },
+  "Q43": {
+    "R1": "reformed-presbyterian",
+    "R2": "methodist-wesleyan",
+    "R3": "baptist",
+    "R4": "anglican",
+    "R5": "pentecostal",
+    "R6": "anabaptist",
+    "R7": "lutheran"
+  },
+  "Q44": {
+    "R1": "pentecostal",
+    "R2": "methodist-wesleyan",
+    "R3": "baptist",
+    "R4": "reformed-presbyterian",
+    "R5": "anglican",
+    "R6": "anabaptist",
+    "R7": "lutheran"
+  },
+  "Q45": {
+    "R1": "baptist",
+    "R2": "pentecostal",
+    "R3": "methodist-wesleyan",
+    "R4": "reformed-presbyterian",
+    "R5": "lutheran",
+    "R6": "anabaptist",
+    "R7": "anglican"
+  },
+  "Q46": {
+    "R1": "pentecostal",
+    "R2": "anabaptist",
+    "R3": "anglican",
+    "R4": "baptist",
+    "R5": "methodist-wesleyan",
+    "R6": "lutheran",
+    "R7": "reformed-presbyterian"
+  },
+  "Q47": {
+    "R1": "reformed-presbyterian",
+    "R2": "baptist",
+    "R3": "methodist-wesleyan",
+    "R4": "lutheran",
+    "R5": "anabaptist",
+    "R6": "anglican",
+    "R7": "pentecostal"
+  },
+  "Q48": {
+    "R1": "anglican",
+    "R2": "pentecostal",
+    "R3": "methodist-wesleyan",
+    "R4": "reformed-presbyterian",
+    "R5": "anabaptist",
+    "R6": "baptist",
+    "R7": "lutheran"
+  },
+  "Q49": {
+    "R1": "reformed-presbyterian",
+    "R2": "baptist",
+    "R3": "anglican",
+    "R4": "anabaptist",
+    "R5": "lutheran",
+    "R6": "methodist-wesleyan",
+    "R7": "pentecostal"
+  },
+  "Q50": {
+    "R1": "methodist-wesleyan",
+    "R2": "reformed-presbyterian",
+    "R3": "lutheran",
+    "R4": "baptist",
+    "R5": "anglican",
+    "R6": "pentecostal",
+    "R7": "anabaptist"
+  }
+}
