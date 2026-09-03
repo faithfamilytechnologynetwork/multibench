@@ -142,7 +142,10 @@ Spec 55) — one row per subject:
 ## Published runs
 
 - **`20260803`** — the benchmark-of-record (7 traditions / 519 scenarios), the paper's snapshot.
-  Guarded by the paper-reconciliation test; **never mutate it**.
+  The **Gemini (ranking) values never change** — guarded by the paper-reconciliation test, and
+  byte-identical across re-exports. A **validation layer may be extended in place** (e.g. #110 grew
+  the Opus layer to the full grid): re-run the export, which re-stamps the shared `fingerprint`
+  across both tiers and bumps `generated_at`, and record a dated revision note here.
 - **`20260813-protestantism`** — the ProtestantBench round (issue #89): the `protestantism`
   tradition (100 scenarios) over the same 5-subject roster, framings, and pressures as the record
   run. **Both judges are complete full grids: Gemini (ranking judge) 18000/18000 = 100 %, and Opus

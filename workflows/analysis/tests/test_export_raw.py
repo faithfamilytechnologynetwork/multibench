@@ -22,6 +22,8 @@ import pytest
 from analysis.aggregate import breakdown_mean, cell_scores
 from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.export_raw import (
+    RawCorpus,
+    RawTraditionExport,
     SCHEMA_VERSION,
     build_catalog,
     build_raw_corpus,
@@ -490,6 +492,17 @@ def test_raw_catalog_rejects_multiple_rankable_judges(monkeypatch):
     with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
         _catalog_doc([], [], ["claude-opus-4-8", "gemini-3.6-flash"], "fp", "cfp", cov,
                      strict_judged={"gemini-3.6-flash": 30, "claude-opus-4-8": 30}, strict_expected=30)
+
+
+def test_build_catalog_rejects_differing_subject_rosters():
+    corpus = RawCorpus(
+        per_tradition={
+            "buddhism": RawTraditionExport("buddhism", [], ("claude-sonnet-5", "gemini-3.6-flash")),
+            "taoism": RawTraditionExport("taoism", [], ("claude-sonnet-5", "gpt-5.6-terra")),
+        },
+        subjects=[], judges=[], resolved=[])
+    with pytest.raises(AnalysisInputError, match="differing subject rosters"):
+        build_catalog(corpus)
 
 
 def test_raw_catalog_rejects_strictly_incomplete_rankable():

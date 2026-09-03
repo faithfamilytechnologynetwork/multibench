@@ -29,6 +29,8 @@ from analysis.export_results import (
     MAX_SHARD_BYTES,
     SCHEMA_VERSION,
     RawTradition,
+    TraditionExport,
+    assert_uniform_subject_roster,
     build_corpus_export,
     build_manifest,
     build_tradition_export,
@@ -524,6 +526,28 @@ def test_v2_override_respects_source_priority():
     # A v2 at the winner's own priority DOES override (a full-grid correction of a full-grid base).
     full_v2 = RawTradition(tradition=_TRAD, base=[row(0.9)], v2=[row(0.7)], report=None)
     assert resolve_judgments([sample, full_v2], priorities=[0, 1])[0]["score"] == 0.7
+
+
+def _min_export(tradition, subjects):
+    return TraditionExport(tradition=tradition, n_scenarios=1, judges=[], n_judgments={},
+                           means={}, steadfastness={}, fingerprint_lines=[], subjects=subjects)
+
+
+def test_assert_uniform_subject_roster():
+    roster = ("claude-sonnet-5", "gemini-3.6-flash")
+    assert assert_uniform_subject_roster([roster, roster, roster]) == roster
+    with pytest.raises(AnalysisInputError, match="differing subject rosters"):
+        assert_uniform_subject_roster([roster, ("claude-sonnet-5",)])
+
+
+def test_build_manifest_rejects_traditions_with_differing_subject_rosters():
+    # Two traditions declaring different subject rosters must fail fast — the grid must be uniform.
+    exports = {
+        "buddhism": _min_export("buddhism", ("claude-sonnet-5", "gemini-3.6-flash")),
+        "taoism": _min_export("taoism", ("claude-sonnet-5", "gpt-5.6-terra")),
+    }
+    with pytest.raises(AnalysisInputError, match="differing subject rosters"):
+        build_manifest(exports, run_id="r", generated_at="t")
 
 
 def test_coverage_denominator_uses_declared_subject_universe(tmp_path):

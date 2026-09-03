@@ -45,6 +45,7 @@ from analysis.export_results import (
     _REPORT,
     _read_rows,
     _scenario_universe,
+    assert_uniform_subject_roster,
     coverage_counts_from_judged,
     earns_full_grid,
     judge_coverage,
@@ -760,6 +761,7 @@ def build_catalog(corpus: RawCorpus) -> dict:
     # denominator's subject count is the report-DECLARED universe, not observed rows.
     judged: dict[tuple[str, str], int] = {}
     accumulate_full_scope_judged(judged, corpus.resolved)
+    assert_uniform_subject_roster(e.subjects for e in corpus.per_tradition.values())
     total_scenarios = sum(len(e.scenarios) for e in corpus.per_tradition.values())
     n_subjects = len({s for e in corpus.per_tradition.values() for s in e.subjects})
     coverage = coverage_counts_from_judged(judged, set(corpus.judges), total_scenarios, n_subjects)
@@ -808,6 +810,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     judged_full: dict[tuple[str, str], int] = {}  # per (judge, framing) full-scope coverage counter
     strict_judged: dict[str, int] = {}   # per-judge ALL-scope cell count (strict completeness)
     subjects_all: set[str] = set()       # the run's subject universe (limit-independent denominator)
+    rosters: list[tuple[str, ...]] = []  # each tradition's declared roster (must be uniform)
     total_scenarios = 0                  # full-grid scenario count (limit-independent)
     n_scenarios = 0
 
@@ -822,6 +825,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         for r in resolved:
             strict_judged[r["judge"]] = strict_judged.get(r["judge"], 0) + 1
         subjects_all.update(export.subjects)
+        rosters.append(export.subjects)
         judges_present.update(r["judge"] for r in resolved)
         total_scenarios += len(export.scenarios)
         written_here: set[str] = set()
@@ -843,6 +847,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         fp_lines.extend(fingerprint_line(r) for r in written_rows)
         accumulate_cell_scores(written_rows, cells)  # for presets (numbers only)
 
+    assert_uniform_subject_roster(rosters)  # one uniform subject grid across traditions
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
     coverage = coverage_counts_from_judged(
         judged_full, set(judges_present), total_scenarios, len(subjects_all))

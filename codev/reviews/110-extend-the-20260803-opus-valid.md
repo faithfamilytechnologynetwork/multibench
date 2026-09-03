@@ -130,6 +130,30 @@ Dispositions:
   artifacts (a standard re-run reverts them) — its dual-judge section should defer to
   `docs/analysis/110-dualjudge-fullgrid-figs.py`.
 
+## PR-review required changes (architect, 2026-09-03)
+
+The architect required three changes before releasing the merge (all applied); the "untouched
+`20260813-protestantism`" constraint was explicitly lifted for (1):
+
+1. **Migrated both `20260813-protestantism` manifests** (score + raw) to the new contract — Opus
+   `{full_grid:true, rankable:false, coverage:1.0}` (its grid is genuinely complete, 3000/3000 all
+   framings), Gemini `{full_grid:true, rankable:true, coverage:1.0}`. Its judging roots are not in
+   `tmp/`, so the manifests were hand-edited to **exactly** match the exporter's output (same
+   sorted-keys/compact serialization; diff confined to `judges[]`; `fingerprint`/`counts`/shards
+   untouched), so a future re-export is byte-compatible. A **legacy-shape fixture** is retained for
+   the SPA's pre-#110 fallback: `leaderboard.test.ts`'s inline manifest (no `rankable`) + the
+   `results.data.test.ts` "manifest WITHOUT rankable/coverage still parses" test.
+2. **Fail-fast on non-uniform subject rosters** (`assert_uniform_subject_roster`, both exporters):
+   traditions declaring differing subject sets now raise `AnalysisInputError`. Tests: the helper
+   unit test, a score `build_manifest` integration, and a raw `build_catalog` integration. (Closes
+   the "uniform subject universe" latent item below.)
+3. **`results/README.md` "never mutate it"** corrected to the real rule: the **Gemini (ranking)
+   values never change** (reconciliation-guarded, byte-identical), but a **validation layer may be
+   extended in place** — re-run the export, which re-stamps the shared `fingerprint` and bumps
+   `generated_at`, plus a dated revision note.
+- **Optional (applied):** `RawComparison.tsx` now shows a **"validation"** role badge for a
+  non-ranking judge (distinct from the coverage "sample" badge), via `isRankingJudge`.
+
 ## Latent items (non-blocking, for a future change)
 
 - **Coverage judge-set asymmetry.** `_coverage_from_exports` derives its judge set from `scope=full,
@@ -138,8 +162,9 @@ Dispositions:
   from the score `counts.coverage` map. Unreachable on real data (every judge here has full-scope
   cells); a shared derivation would close it.
 - **Uniform subject universe.** `_coverage_from_exports` (and the strict `_assert_full_grid`, now
-  pinned to `exp.subjects`) assume every tradition declares the same subject roster. Correct for
-  this programme; latent if a partial-subject tradition is ever added.
+  pinned to `exp.subjects`) assume every tradition declares the same subject roster. This is now
+  **enforced** — both exporters fail fast (`assert_uniform_subject_roster`) on a differing roster
+  (PR-review change 2 above), so it can no longer skew coverage silently.
 
 ## Flaky tests
 

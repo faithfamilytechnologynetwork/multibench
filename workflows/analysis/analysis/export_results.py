@@ -573,6 +573,20 @@ def serialize_tradition(exp: TraditionExport) -> dict:
 Coverage = dict[str, dict[str, dict[str, int]]]  # judge -> framing -> {n_judged, n_expected}
 
 
+def assert_uniform_subject_roster(rosters) -> tuple[str, ...]:
+    """Fail-fast unless every tradition declares the SAME subject roster; return that roster.
+
+    The coverage denominator and the strict full-grid walk both assume one uniform subject grid
+    across traditions (a run is a single subject set judged over every tradition). A tradition
+    declaring a different roster would silently skew coverage/`full_grid`, so reject it loudly.
+    """
+    uniq = {tuple(r) for r in rosters}
+    if len(uniq) > 1:
+        raise AnalysisInputError(
+            f"traditions declare differing subject rosters {sorted(uniq)} — the grid must be uniform")
+    return next(iter(uniq)) if uniq else ()
+
+
 def coverage_counts_from_judged(judged: dict[tuple[str, str], int], judges: set[str],
                                 total_scenarios: int, n_subjects: int) -> Coverage:
     """Build the coverage table from per-(judge, framing) judged counts + the grid size.
@@ -663,6 +677,7 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
                    generated_at: str) -> dict:
     """The run-level manifest (subjects, judges, framings, pressures, scopes, counts)."""
     all_judges = sorted({j for exp in exports.values() for j in exp.judges})
+    assert_uniform_subject_roster(exp.subjects for exp in exports.values())  # one uniform grid
     for model in all_judges:  # validate UI metadata first, so an unknown judge is the reported error
         if model not in JUDGE_UI:  # fail-fast — a normalized judge is always known here
             raise AnalysisInputError(f"no UI metadata for judge {model!r}")
