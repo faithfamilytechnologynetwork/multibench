@@ -140,3 +140,17 @@ Protocol: ASPIR (strict mode, porch-driven).
   said `accumulate_coverage`) and kept `_assert_full_grid` (plan said `assert_strict_full_grid`) —
   substance matches; noted for plan readers.
 - Next: iter2 rebuttal, commit, porch done → iteration 3 re-verify.
+
+### phase_1 iteration 3 review — CONCEDED codex, claude APPROVE
+- codex RC'd 3rd time (raw tier: exactly-one-rankable + strict both-scope). claude APPROVE (re-exported
+  real 3-root → byte-identical shards/fingerprint/counts; 253/0 guardians pass).
+- CONCEDED: my genericity objection was weak (AFB bypasses _catalog_doc → it's MB-specific). Now
+  `_catalog_doc` requires exactly-one rankable + STRICT both-scope completeness (pooled ALL-scope
+  count == scenarios×subjects×6×3×2; valid because resolved rows are unique-per-cell & in-grid).
+  strict_judged accumulated in write_dataset/build_catalog. Tests: accept/zero/multiple/strict-incomplete.
+  --limit test now gemini(complete,rankable)+opus(partial). 248/254.
+- claude cheap notes done: _assert_full_grid → exp.subjects (declared universe, consistent w/ coverage);
+  module docstring fixed; plan Phase 4 "79"→per-framing/scope residual + full-scope caveat.
+- REVIEW-DOC TODOs: judge-set asymmetry (score full/all vs raw all-resolved; unreachable turn1-only);
+  --limit raw now O(full corpus); raw rankable now strictly gated (updated from earlier "advisory" note).
+- Next: commit, porch done → iteration 4 (expect unanimity).

@@ -534,8 +534,14 @@ def accumulate_full_scope_judged(judged: dict[tuple[str, str], int], resolved: l
             judged[key] = judged.get(key, 0) + 1
 
 
+def _strict_grid_size(total_scenarios: int, n_subjects: int) -> int:
+    """The complete both-scope grid: scenarios × subjects × pressures × framings × scopes."""
+    return total_scenarios * n_subjects * len(PRESSURES) * len(FRAMINGS) * len(SCOPES)
+
+
 def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str],
                  fingerprint: str, content_fingerprint: str, coverage: Coverage,
+                 strict_judged: dict[str, int], strict_expected: int,
                  presets: list[dict] | None = None) -> dict:
     """The generic run catalog (manifest) from lightweight pieces — no transcripts held.
 
@@ -563,20 +569,22 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
             "rankable": ui["rankable"],
             "coverage": round(judge_coverage(coverage, model), 6),
         })
-    # Ranking-integrity guards for the raw catalog. `rankable` here is advisory (it only picks the
-    # raw viewer's DEFAULT judge — the leaderboard ranks off the score manifest), and a catalog may
-    # legitimately have ZERO rankable judges (a validation-only or AFB-style single-judge tier), so
-    # zero is allowed. But two rankable judges is an ambiguous default, and a rankable judge that
-    # did not even earn the tolerant full_grid badge is a data error — reject both.
+    # Ranking-integrity guards — the MultiBench raw catalog carries the same ranking invariant as
+    # the score manifest (this builder is MB-specific; the AFB tier bypasses it via RawTierWriter).
+    # EXACTLY ONE rankable judge, and that judge must be STRICTLY complete across the WHOLE both-scope
+    # grid (not merely the tolerant full-scope badge) — so a rankable judge missing turn1 or stray
+    # cells can never be published. Strict completeness is a pooled count: resolved rows are unique
+    # per cell and confined to the declared grid, so judged == grid ⟺ every cell covered.
     rankable_models = [m for m in judge_models if JUDGE_UI.get(m, {}).get("rankable")]
-    if len(rankable_models) > 1:
+    if len(rankable_models) != 1:
         raise AnalysisInputError(
-            f"raw catalog has multiple rankable judges {rankable_models} — ambiguous default judge")
-    for model in rankable_models:
-        if not earns_full_grid(coverage, model):
-            raise AnalysisInputError(
-                f"raw catalog rankable judge {model!r} has not earned full_grid "
-                f"(coverage {round(judge_coverage(coverage, model), 6)}) — refusing to mark it rankable")
+            f"raw catalog needs exactly one rankable judge, found {rankable_models} "
+            f"among {list(judge_models)}")
+    ranker = rankable_models[0]
+    if strict_judged.get(ranker, 0) != strict_expected:
+        raise AnalysisInputError(
+            f"raw catalog rankable judge {ranker!r} is not strictly complete "
+            f"({strict_judged.get(ranker, 0)}/{strict_expected} cells) — cannot mark it rankable")
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -755,6 +763,9 @@ def build_catalog(corpus: RawCorpus) -> dict:
     total_scenarios = sum(len(e.scenarios) for e in corpus.per_tradition.values())
     n_subjects = len({s for e in corpus.per_tradition.values() for s in e.subjects})
     coverage = coverage_counts_from_judged(judged, set(corpus.judges), total_scenarios, n_subjects)
+    strict_judged: dict[str, int] = {}
+    for r in corpus.resolved:
+        strict_judged[r["judge"]] = strict_judged.get(r["judge"], 0) + 1
     # Content fingerprint over the same canonical shard bytes the writer would emit (order-independent).
     content_lines = [
         content_fingerprint_line(_shard_path(s.group, s.scenario_id), json_bytes(build_shard(s)))
@@ -762,7 +773,8 @@ def build_catalog(corpus: RawCorpus) -> dict:
     ]
     return _catalog_doc(items, corpus.subjects, corpus.judges,
                         source_fingerprint(corpus.resolved), combine_fingerprint(content_lines),
-                        coverage, compute_presets(cells))
+                        coverage, strict_judged, _strict_grid_size(total_scenarios, n_subjects),
+                        compute_presets(cells))
 
 
 # ── Deterministic streaming writer ─────────────────────────────────────────────────
@@ -794,6 +806,7 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     fp_lines: list[str] = []             # small serialized lines, not full resolved dicts
     cells: dict[PresetCell, dict[str, float]] = {}  # per-cell judge scores (numbers only) for presets
     judged_full: dict[tuple[str, str], int] = {}  # per (judge, framing) full-scope coverage counter
+    strict_judged: dict[str, int] = {}   # per-judge ALL-scope cell count (strict completeness)
     subjects_all: set[str] = set()       # the run's subject universe (limit-independent denominator)
     total_scenarios = 0                  # full-grid scenario count (limit-independent)
     n_scenarios = 0
@@ -806,6 +819,8 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         # truncated by --limit — so a limited dev fixture still reports true judge coverage. The
         # subject count is the report-DECLARED universe (not observed rows).
         accumulate_full_scope_judged(judged_full, resolved)
+        for r in resolved:
+            strict_judged[r["judge"]] = strict_judged.get(r["judge"], 0) + 1
         subjects_all.update(export.subjects)
         judges_present.update(r["judge"] for r in resolved)
         total_scenarios += len(export.scenarios)
@@ -833,5 +848,6 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         judged_full, set(judges_present), total_scenarios, len(subjects_all))
     catalog = _catalog_doc(items, subjects, sorted(judges_present),
                            combine_fingerprint(fp_lines), writer.content_fingerprint,
-                           coverage, compute_presets(cells))
+                           coverage, strict_judged, _strict_grid_size(total_scenarios, len(subjects_all)),
+                           compute_presets(cells))
     return writer.write(catalog, max_shard_bytes=MAX_SHARD_BYTES, max_total_bytes=MAX_TOTAL_BYTES)

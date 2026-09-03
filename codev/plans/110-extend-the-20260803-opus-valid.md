@@ -321,8 +321,12 @@ main checkout keeps their internal `tmp/…` and `../multibench-papers/…` rela
       within ±0.5; identical 5-model order under both judges in all framings).
 - [ ] Markdown summary: Opus judgments 42,711 → exact new total; programme total (exact); Opus
       spend +$1,220 **usage-computed** (exact from data); the agreement r/bias/within-±0.5 and
-      model-order statements; a line noting the 79 gaps are **judge-side** (refusals/parse), not
-      collection gaps.
+      model-order statements; the exact Opus residual **computed per framing and per scope** from
+      the merged export (architect's direct count 39 = 13 stated/guided + 26 unstated; do **not**
+      assert "79"), noting it is **judge-side** (empty judge response → `json.loads('')` fails
+      after 3 retries; refusal vs. max_tokens not distinguishable in current logs — cite **#116**),
+      not a collection gap. NB the earned `full_grid` coverage fraction is **full-scope only**
+      (÷46,710) — don't present it as coverage of the 93,420 two-scope grid.
 
 #### Acceptance Criteria
 

@@ -18,8 +18,9 @@ Gemini (a full grid), the SPA's only cross-tradition statistic is an equal-weigh
 of these per-tradition means — which reconciles with the paper's ``subj_overall`` by
 construction (see the parity self-check in the tests).
 
-Phase 1 (this module) is the pure transform: no dataset is written to disk here — the
-writer, manifest, and CLI live in Phase 2.
+This module owns the whole score tier: the pure transform (normalize → resolve → aggregate) plus
+the manifest builder and the committed-dataset writer (``build_manifest`` / ``write_dataset`` /
+``export_dataset``). The Typer CLI wrapper lives in :mod:`analysis.cli`.
 """
 
 from __future__ import annotations
@@ -644,7 +645,7 @@ def _assert_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> 
     per specific pressure (n_judged == n_scenarios) across every subject/framing/scope, per tradition.
     """
     for tradition, exp in exports.items():
-        for subject in CANONICAL_SUBJECTS:
+        for subject in exp.subjects:  # the report-declared grid (matches the coverage denominator)
             for framing in FRAMINGS:
                 for scope in SCOPES:
                     for pressure in PRESSURES:
