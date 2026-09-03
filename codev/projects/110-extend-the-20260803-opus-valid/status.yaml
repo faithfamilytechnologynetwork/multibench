@@ -11,18 +11,18 @@ plan_phases:
     status: complete
   - id: phase_3
     title: Re-export results/ and results-raw/ for 20260803 in place
-    status: in_progress
+    status: complete
   - id: phase_4
     title: Dual-judge paper artifacts + numbers summary
-    status: pending
-current_plan_phase: phase_3
+    status: in_progress
+current_plan_phase: phase_4
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -97,7 +97,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_3-iter1-claude.txt
 started_at: '2026-09-03T15:21:04.706Z'
-updated_at: '2026-09-03T17:28:20.497Z'
+updated_at: '2026-09-03T17:34:14.997Z'
 force_advanced:
   phase: phase_1
   iteration: 3
@@ -111,3 +111,5 @@ context_refreshes:
   - boundary: plan-phase:phase_3
     at: '2026-09-03T17:16:06.067Z'
     acknowledged_at: '2026-09-03T17:21:14.999Z'
+  - boundary: plan-phase:phase_4
+    at: '2026-09-03T17:34:14.997Z'
