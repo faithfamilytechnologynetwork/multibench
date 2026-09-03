@@ -5,24 +5,24 @@ phase: implement
 plan_phases:
   - id: phase_1
     title: Earn full_grid + rankable + coverage in both exporters
-    status: in_progress
+    status: complete
   - id: phase_2
     title: 'SPA: rank by rankable, keep fullGrid for sample captions'
-    status: pending
+    status: in_progress
   - id: phase_3
     title: Re-export results/ and results-raw/ for 20260803 in place
     status: pending
   - id: phase_4
     title: Dual-judge paper artifacts + numbers summary
     status: pending
-current_plan_phase: phase_1
+current_plan_phase: phase_2
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -61,10 +61,13 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter3-claude.txt
 started_at: '2026-09-03T15:21:04.706Z'
-updated_at: '2026-09-03T16:50:48.222Z'
+updated_at: '2026-09-03T16:50:50.315Z'
 force_advanced:
   phase: phase_1
   iteration: 3
   max_iterations: 3
   rebuttal_file: 110-phase_1-iter3-rebuttals.md
   at: '2026-09-03T16:50:48.222Z'
+context_refreshes:
+  - boundary: plan-phase:phase_2
+    at: '2026-09-03T16:50:50.315Z'
