@@ -1,7 +1,7 @@
 id: '110'
 title: extend-the-20260803-opus-valid
 protocol: aspir
-phase: implement
+phase: review
 plan_phases:
   - id: phase_1
     title: Earn full_grid + rankable + coverage in both exporters
@@ -14,15 +14,15 @@ plan_phases:
     status: complete
   - id: phase_4
     title: Dual-judge paper artifacts + numbers summary
-    status: in_progress
-current_plan_phase: phase_4
+    status: complete
+current_plan_phase: null
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -121,7 +121,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_4-iter2-claude.txt
 started_at: '2026-09-03T15:21:04.706Z'
-updated_at: '2026-09-03T18:08:39.251Z'
+updated_at: '2026-09-03T18:12:45.815Z'
 force_advanced:
   phase: phase_1
   iteration: 3
@@ -138,3 +138,5 @@ context_refreshes:
   - boundary: plan-phase:phase_4
     at: '2026-09-03T17:34:14.997Z'
     acknowledged_at: '2026-09-03T17:44:57.681Z'
+  - boundary: enter:review
+    at: '2026-09-03T18:12:45.815Z'
