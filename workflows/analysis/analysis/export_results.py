@@ -74,12 +74,23 @@ _JUDGE_ALIAS: dict[str, str] = {
 }
 _JUDGE_ALIAS.update({canon: canon for canon in _JUDGE_VARIANTS})
 
-# Short UI keys the SPA uses in deep-links / the judge selector, and whether the judge
-# is a full-grid ranking judge (Gemini) or a validation layer (Opus).
+# Short UI keys the SPA uses in deep-links / the judge selector, and whether the judge is
+# **rankable** — the leaderboard ranks on the single rankable judge (Gemini). `rankable` is a
+# STATIC property of the judge's ROLE and is deliberately decoupled from `full_grid` (#96): a
+# validation judge that reaches full-grid coverage earns the `full_grid` *badge* but must NEVER
+# become rankable. `full_grid` itself is no longer stored here — it is EARNED per run from actual
+# coverage (see `earns_full_grid`); this dict carries only the stable key + ranking role.
 JUDGE_UI: dict[str, dict] = {
-    "gemini-3.6-flash": {"key": "gemini", "full_grid": True},
-    "claude-opus-4-8": {"key": "opus", "full_grid": False},
+    "gemini-3.6-flash": {"key": "gemini", "rankable": True},
+    "claude-opus-4-8": {"key": "opus", "rankable": False},
 }
+
+# A judge earns the `full_grid` badge when it covered every framing at full-grid scale. Coverage
+# is never a clean 100% (judges persistently refuse / emit unparseable verdicts on a few cells),
+# so the badge is TOLERANT: all three framings present with per-framing coverage >= this floor.
+# It cleanly separates a designed sub-sample (~0.14) from a full-grid layer (~0.999). Ranking
+# eligibility stays strict — a `rankable` judge must be strictly complete (`_assert_full_grid`).
+FULL_GRID_MIN_COVERAGE = 0.95
 
 
 def normalize_subject(subject: str) -> str:
@@ -239,12 +250,18 @@ def _canon_row(row: dict, key: tuple) -> dict:
     return out
 
 
-def resolve_judgments(raws: list[RawTradition]) -> list[dict]:
+def resolve_judgments(raws: list[RawTradition],
+                      priorities: list[int] | None = None) -> list[dict]:
     """Normalize, overlay v2, and dedup one tradition's rows across run roots.
 
     Winner rules:
-    * **Base** rows: for a normalized identity present under both Opus aliases (the real
-      cross-alias collision), the later ``ts`` wins — the architect-specified dedup.
+    * **Base** rows: the winner for a normalized identity is chosen by ``(priority, ts)`` —
+      a higher-``priority`` source wins outright, ties broken by later ``ts``. ``priorities`` is
+      parallel to ``raws`` (one per run root); the default (all 0) reduces to the original
+      later-``ts`` rule, so every run whose caller does not set priorities is byte-identical.
+      Root-order priority lets a full-grid layer deterministically outrank a sample layer for
+      the SAME judge across roots, while a WITHIN-root cross-alias collision (e.g. the two Opus
+      aliases in one file — equal priority) still resolves by the architect-specified later-``ts``.
     * **v2** rows: a ``judgments_v2.jsonl`` row always overrides the base for its identity,
       and among v2 rows for one identity the **last in file order** wins — matching the
       canonical loader's last-wins (independent of ``ts``, which may be missing/non-
@@ -253,18 +270,23 @@ def resolve_judgments(raws: list[RawTradition]) -> list[dict]:
     **never adds a vote** (the loader's invariant, preserved after normalization).
     Returns rows with ``subject``/``judge`` rewritten to their canonical ids.
     """
-    base_rows = [r for t in raws for r in t.base]
+    if priorities is None:
+        priorities = [0] * len(raws)
+    if len(priorities) != len(raws):
+        raise AnalysisInputError(
+            f"priorities length {len(priorities)} != raws length {len(raws)}")
+    base_rows = [(prio, r) for prio, t in zip(priorities, raws) for r in t.base]
     v2_rows = [r for t in raws for r in t.v2]  # preserves per-file line order
     winners: dict[tuple, dict] = {}  # normalized id → winning (canonical) row
 
-    # Base: later-ts wins on a cross-alias collision.
-    base_ts: dict[tuple, str] = {}
-    for row in base_rows:
+    # Base: higher (priority, ts) wins; ">=" keeps last-in-iteration on an exact tie.
+    best: dict[tuple, tuple[int, str]] = {}
+    for prio, row in base_rows:
         key = _normalized_id(row)
-        ts = str(row.get("ts", ""))
-        if key not in winners or ts >= base_ts[key]:
+        cand = (prio, str(row.get("ts", "")))
+        if key not in winners or cand >= best[key]:
             winners[key] = _canon_row(row, key)
-            base_ts[key] = ts
+            best[key] = cand
     base_keys = set(winners)
 
     # v2: file-order last-wins, always overriding base (loader parity).
@@ -374,9 +396,10 @@ def _scenario_universe(raws: list[RawTradition], tradition: str) -> list[str]:
     return sorted(universe)
 
 
-def build_tradition_export(tradition: str, raws: list[RawTradition]) -> TraditionExport:
+def build_tradition_export(tradition: str, raws: list[RawTradition],
+                           priorities: list[int] | None = None) -> TraditionExport:
     """Aggregate one tradition's merged rows into slice tables + steadfastness."""
-    judgments = resolve_judgments(raws)
+    judgments = resolve_judgments(raws, priorities)
     universe = set(_scenario_universe(raws, tradition))
     n_scenarios = len(universe)
 
@@ -429,13 +452,21 @@ def build_tradition_export(tradition: str, raws: list[RawTradition]) -> Traditio
 
 
 def build_corpus_export(roots: list[str | Path]) -> dict[str, TraditionExport]:
-    """Read all run roots and build per-tradition exports (keyed by tradition)."""
+    """Read all run roots and build per-tradition exports (keyed by tradition).
+
+    A row's dedup priority is its **run-root position** (later root wins ties): the resolved
+    ``raws``/``priorities`` for a tradition preserve the ``roots`` order, so passing a full-grid
+    layer AFTER a sample layer makes the full-grid verdict win any same-judge overlap while a
+    tradition absent from an earlier root keeps its relative (still-higher) position.
+    """
     per_root = [read_run_root(r) for r in roots]
     traditions = sorted({t for root in per_root for t in root})
     out: dict[str, TraditionExport] = {}
     for tradition in traditions:
-        raws = [root[tradition] for root in per_root if tradition in root]
-        out[tradition] = build_tradition_export(tradition, raws)
+        present = [(i, root[tradition]) for i, root in enumerate(per_root) if tradition in root]
+        raws = [rt for _i, rt in present]
+        priorities = [i for i, _rt in present]
+        out[tradition] = build_tradition_export(tradition, raws, priorities)
     return out
 
 
@@ -501,30 +532,83 @@ def serialize_tradition(exp: TraditionExport) -> dict:
     }
 
 
-def _coverage_summary(exports: dict[str, TraditionExport]) -> dict:
-    """Per (judge, framing) coverage pooled over traditions+subjects at scope=full,
-    pressure=all — a headline honesty signal (Gemini full-grid; Opus stated/guided sample).
+# ── Coverage contract (single source for counts.coverage, the earned full_grid badge, and the
+# per-judge coverage fraction — so the three can never disagree) ────────────────────────────────
+# Coverage is keyed per (judge, framing) at scope=full, pressure=all — the same slicing the
+# manifest already displayed. ``n_expected`` is pinned to the FULL grid (total scenarios ×
+# subjects × pressures) for EVERY framing, so a framing a judge never touched reads honestly as
+# 0/full rather than being silently omitted. The raw tier (export_raw) computes the identical
+# shape from resolved rows via ``coverage_counts_from_judged`` — the tiers agree by construction.
 
-    NOTE: this is a *summary* only. The SPA must badge each view from the per-slice
-    ``n_judged/n_expected`` in the shards, not from this roll-up (Opus *unstated* is full
-    while stated/guided is a sample — a single per-judge flag would misrepresent that).
+Coverage = dict[str, dict[str, dict[str, int]]]  # judge -> framing -> {n_judged, n_expected}
+
+
+def coverage_counts_from_judged(judged: dict[tuple[str, str], int], judges: set[str],
+                                total_scenarios: int, n_subjects: int) -> Coverage:
+    """Build the coverage table from per-(judge, framing) judged counts + the grid size.
+
+    ``judged[(judge, framing)]`` is the number of judged full-scope cells (pooled over subjects,
+    scenarios, pressures). ``n_expected`` per framing is the full grid ``total_scenarios ×
+    n_subjects × |pressures|``, where ``n_subjects`` is the run's actual subject universe (the
+    distinct subjects that appear across all judges — 5 on the real run, fewer on small fixtures),
+    so the denominator matches the grid the run actually spans. Every framing is present for every
+    listed judge (an untouched framing reads honestly as 0/full).
     """
-    cov: dict[str, dict[str, dict[str, int]]] = {}
+    ne = total_scenarios * n_subjects * len(PRESSURES)
+    return {
+        judge: {fr: {"n_judged": judged.get((judge, fr), 0), "n_expected": ne} for fr in FRAMINGS}
+        for judge in sorted(judges)
+    }
+
+
+def _coverage_from_exports(exports: dict[str, TraditionExport]) -> Coverage:
+    """Score-tier coverage: judged full-scope cells summed from the slice tables."""
+    total_scenarios = sum(exp.n_scenarios for exp in exports.values())
+    judged: dict[tuple[str, str], int] = {}
+    judges: set[str] = set()
+    subjects: set[str] = set()
     for exp in exports.values():
-        for (judge, _subject, framing, scope, pressure), sl in exp.means.items():
-            if scope != "full" or pressure != PRESSURE_ALL:
-                continue
-            cell = cov.setdefault(judge, {}).setdefault(framing, {"n_judged": 0, "n_expected": 0})
-            cell["n_judged"] += sl.n_judged
-            cell["n_expected"] += sl.n_expected
-    return cov
+        for (judge, subject, framing, scope, pressure), sl in exp.means.items():
+            subjects.add(subject)
+            if scope == "full" and pressure == PRESSURE_ALL:
+                judged[(judge, framing)] = judged.get((judge, framing), 0) + sl.n_judged
+                judges.add(judge)
+    return coverage_counts_from_judged(judged, judges, total_scenarios, len(subjects))
+
+
+def earns_full_grid(coverage: Coverage, judge: str,
+                    threshold: float = FULL_GRID_MIN_COVERAGE) -> bool:
+    """True iff *judge* covered ALL three framings with per-framing coverage >= *threshold*.
+
+    The tolerant `full_grid` badge (#96): a judge earns it from real coverage, not static config.
+    A designed sub-sample (one framing ~0.14) fails; a full-grid layer (~0.999) passes.
+    """
+    framings = coverage.get(judge)
+    if not framings:
+        return False
+    for framing in FRAMINGS:
+        cell = framings.get(framing)
+        if not cell or cell["n_expected"] == 0:
+            return False
+        if cell["n_judged"] / cell["n_expected"] < threshold:
+            return False
+    return True
+
+
+def judge_coverage(coverage: Coverage, judge: str) -> float:
+    """The judge's overall coverage fraction (pooled n_judged / n_expected across framings)."""
+    framings = coverage.get(judge, {})
+    n_judged = sum(c["n_judged"] for c in framings.values())
+    n_expected = sum(c["n_expected"] for c in framings.values())
+    return n_judged / n_expected if n_expected else 0.0
 
 
 def _assert_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> None:
     """Fail-fast unless *judge_model* covered the COMPLETE grid — every tradition × subject ×
-    framing × scope × pressure. The UI trusts ``full_grid: true`` to rank on this judge, so the
-    flag must be earned at export time, not asserted statically. Coverage is checked per specific
-    pressure (n_judged == n_scenarios) across every subject/framing/scope, for every tradition.
+    framing × scope × pressure. This is the STRICT gate for a **rankable** judge (Gemini): the
+    leaderboard ranks on it, so its grid must have no gaps. (The tolerant `full_grid` *badge* for
+    validation judges is a separate, earned signal — see ``earns_full_grid``.) Coverage is checked
+    per specific pressure (n_judged == n_scenarios) across every subject/framing/scope, per tradition.
     """
     for tradition, exp in exports.items():
         for subject in CANONICAL_SUBJECTS:
@@ -545,19 +629,28 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
                    generated_at: str) -> dict:
     """The run-level manifest (subjects, judges, framings, pressures, scopes, counts)."""
     all_judges = sorted({j for exp in exports.values() for j in exp.judges})
+    coverage = _coverage_from_exports(exports)
+    rankable = [m for m in all_judges if JUDGE_UI.get(m, {}).get("rankable")]
+    if len(rankable) != 1:  # the leaderboard ranks on exactly one judge (Gemini)
+        raise AnalysisInputError(
+            f"exactly one rankable judge required, found {rankable} among {all_judges}")
     judges_meta = []
     for model in all_judges:
         if model not in JUDGE_UI:  # fail-fast — a normalized judge is always known here
             raise AnalysisInputError(f"no UI metadata for judge {model!r}")
         ui = JUDGE_UI[model]
-        if ui["full_grid"]:
-            _assert_full_grid(exports, model)  # earn the flag, don't assert it statically
+        if ui["rankable"]:
+            # A rankable judge MUST be strictly complete — ranking cannot rest on a gappy grid.
+            _assert_full_grid(exports, model)
         aliases = sorted({model, *_JUDGE_VARIANTS.get(model, ())})
         judges_meta.append({
             "key": ui["key"], "model": model, "aliases": aliases,
-            # full_grid = guaranteed full across ALL framings (Gemini yes; Opus no —
-            # its stated/guided layer is a sample). Per-view sampling is read per-slice.
-            "full_grid": ui["full_grid"],
+            # full_grid = the EARNED coverage badge (tolerant; #96). rankable = the STATIC ranking
+            # role (Gemini only). coverage = the actual pooled fraction for display/citation.
+            # Earning full_grid never makes a judge rankable.
+            "full_grid": earns_full_grid(coverage, model),
+            "rankable": ui["rankable"],
+            "coverage": round(judge_coverage(coverage, model), 6),
         })
     counts: dict[str, int] = {}
     for exp in exports.values():
@@ -584,7 +677,7 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
             {"id": t, "n_scenarios": exports[t].n_scenarios, "shard": f"{t}.json"}
             for t in sorted(exports)
         ],
-        "counts": {"judgments": counts, "coverage": _coverage_summary(exports)},
+        "counts": {"judgments": counts, "coverage": coverage},
     }
 
 
