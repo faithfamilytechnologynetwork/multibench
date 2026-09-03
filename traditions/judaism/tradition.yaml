@@ -16,8 +16,9 @@ maintainers:
 - name: MultiBench maintainers
   contact: github.com/faithfamilytechnologynetwork/multibench
 scholar_review:
-  status: none
-  reviewers: []
+  status: in_progress
+  reviewers:
+  - Daniel Slate
 taxonomies:
   middot:
     description: The disordered middah the scenario stages — the yetzer-ha-ra movement at work,
