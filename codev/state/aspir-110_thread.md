@@ -89,4 +89,23 @@ Protocol: ASPIR (strict mode, porch-driven).
   raw↔score cross-tier agreement). Updated manifest/catalog shape assertions + regenerated the
   frozen raw_writer golden manifest hash (0fa6ff03…). Full suite: 241 passed, 6 skipped.
   Reconciliation (Gemini) green — no committed results/ data touched (AC2).
-- Next: commit codev artifacts + phase_1 code, run dispatcher, PHASE_COMPLETE.
+- Committed codev artifacts + phase_1 code; dispatcher green; PHASE_COMPLETE.
+
+### phase_1 iteration-1 review (codex REQUEST_CHANGES / claude APPROVE) — all addressed
+- codex #1 (REAL BUG): v2 override bypassed priority. The sample root HAS 20 v2 rows overlapping
+  fullgrid → sample corrections would beat fullgrid. FIXED: v2 now respects (prio); a v2 applies
+  only if prio >= winner prio; equal-prio last-wins preserved. + test.
+- codex #3: raw --limit coverage truncated by the outer break. FIXED: removed outer break, coverage
+  over all traditions' full resolved rows. + 2-tradition limit test.
+- codex #4: coverage denominator used OBSERVED subjects → a wholly-absent subject could spuriously
+  earn full_grid. FIXED: pin to report-DECLARED subjects both tiers (TraditionExport.subjects +
+  RawTraditionExport.subjects). Real numbers unchanged (all 5 declared). + missing-subject test.
+- codex #2 (raw rankable fail-fasts): REBUTTED — would break AFB single-judge + --limit; raw isn't
+  the ranking authority (score manifest is); advisory only. Review-doc note instead.
+- claude: 6 real-data guardians SKIP in worktree (green-by-skip). FIXED: wired `tmp->../../tmp`
+  symlink, re-ran → 250 passed 0 skipped (reconciliation genuinely verified). Symlink removed
+  (never commit it; .gitignore `tmp/` doesn't match the symlink). Phase 3 must re-create it for SC2/SC4.
+- cosmetic: unknown-judge check before rankable-count. README stale shapes → Phase 3.
+- REVIEW-DOC TODO: note raw catalog's `rankable` is advisory (not gated); score manifest is the
+  ranking authority.
+- Next: commit fixes, porch rebuttal + re-verify (iteration 2).

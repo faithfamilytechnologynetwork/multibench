@@ -276,28 +276,34 @@ def resolve_judgments(raws: list[RawTradition],
         raise AnalysisInputError(
             f"priorities length {len(priorities)} != raws length {len(raws)}")
     base_rows = [(prio, r) for prio, t in zip(priorities, raws) for r in t.base]
-    v2_rows = [r for t in raws for r in t.v2]  # preserves per-file line order
+    v2_rows = [(prio, r) for prio, t in zip(priorities, raws) for r in t.v2]  # per-file line order
     winners: dict[tuple, dict] = {}  # normalized id → winning (canonical) row
 
     # Base: higher (priority, ts) wins; ">=" keeps last-in-iteration on an exact tie.
-    best: dict[tuple, tuple[int, str]] = {}
+    best: dict[tuple, int] = {}  # winning priority per identity (v2 must respect it)
+    best_pt: dict[tuple, tuple[int, str]] = {}
     for prio, row in base_rows:
         key = _normalized_id(row)
         cand = (prio, str(row.get("ts", "")))
-        if key not in winners or cand >= best[key]:
+        if key not in winners or cand >= best_pt[key]:
             winners[key] = _canon_row(row, key)
-            best[key] = cand
+            best_pt[key] = cand
+            best[key] = prio
     base_keys = set(winners)
 
-    # v2: file-order last-wins, always overriding base (loader parity).
-    for row in v2_rows:
+    # v2 overrides base, but MUST respect source priority: a lower-priority v2 (e.g. a sample
+    # correction) never displaces a higher-priority verdict (the full-grid layer). Among v2 at
+    # the winner's priority, file-order last-wins (loader parity).
+    for prio, row in v2_rows:
         key = _normalized_id(row)
         if key not in base_keys:
             raise AnalysisInputError(
                 f"v2 override {dict(zip(_NORM_FIELDS, key))} references no base judgment "
                 f"(v2 overrides only — it never adds a vote)"
             )
-        winners[key] = _canon_row(row, key)  # later v2 line overrides earlier
+        if prio >= best[key]:
+            winners[key] = _canon_row(row, key)  # later same-or-higher-priority v2 overrides
+            best[key] = prio
     return list(winners.values())
 
 
@@ -338,6 +344,10 @@ class TraditionExport:
     # rows the aggregates were built from, without holding every judgment dict live. Required
     # (no default) so a manifest can never be stamped with a silently-empty fingerprint.
     fingerprint_lines: list[str]
+    # the report-DECLARED subject universe (normalized), pinned to the full-grid grid like
+    # n_scenarios — the coverage denominator uses this (not observed subjects), so a wholly
+    # unjudged subject reads as a coverage gap rather than shrinking the denominator.
+    subjects: tuple[str, ...]
 
 
 def _count_cells(cs: dict[Cell, float], subject: str, framing: str, scope: str,
@@ -396,11 +406,29 @@ def _scenario_universe(raws: list[RawTradition], tradition: str) -> list[str]:
     return sorted(universe)
 
 
+def _subject_universe(raws: list[RawTradition], tradition: str) -> tuple[str, ...]:
+    """The report-declared subject set (normalized), pinned to the full-grid grid like scenarios.
+
+    Using the DECLARED universe (not observed rows) as the coverage denominator keeps the badge
+    honest: a judge that never scored a whole subject reads as a gap, not ~full coverage.
+    """
+    for r in raws:
+        if r.report is not None:
+            declared = r.report.get("subjects") or []
+            if not declared:
+                raise AnalysisInputError(
+                    f"{tradition}: report.json declares no subjects — cannot pin the subject grid")
+            return tuple(sorted({normalize_subject(s) for s in declared}))
+    raise AnalysisInputError(
+        f"{tradition}: no run root provides report.json — cannot pin the subject universe")
+
+
 def build_tradition_export(tradition: str, raws: list[RawTradition],
                            priorities: list[int] | None = None) -> TraditionExport:
     """Aggregate one tradition's merged rows into slice tables + steadfastness."""
     judgments = resolve_judgments(raws, priorities)
     universe = set(_scenario_universe(raws, tradition))
+    subjects = _subject_universe(raws, tradition)
     n_scenarios = len(universe)
 
     # Every judged scenario must be within the full-grid universe (else the universe is
@@ -448,6 +476,7 @@ def build_tradition_export(tradition: str, raws: list[RawTradition],
         means=means,
         steadfastness=steadfast,
         fingerprint_lines=[fingerprint_line(r) for r in judgments],
+        subjects=subjects,
     )
 
 
@@ -562,14 +591,18 @@ def coverage_counts_from_judged(judged: dict[tuple[str, str], int], judges: set[
 
 
 def _coverage_from_exports(exports: dict[str, TraditionExport]) -> Coverage:
-    """Score-tier coverage: judged full-scope cells summed from the slice tables."""
+    """Score-tier coverage: judged full-scope cells summed from the slice tables.
+
+    The denominator's subject count is the report-DECLARED universe (``exp.subjects``), so a
+    wholly-unjudged subject is an honest coverage gap, not a shrunk denominator.
+    """
     total_scenarios = sum(exp.n_scenarios for exp in exports.values())
+    subjects: set[str] = set()
     judged: dict[tuple[str, str], int] = {}
     judges: set[str] = set()
-    subjects: set[str] = set()
     for exp in exports.values():
-        for (judge, subject, framing, scope, pressure), sl in exp.means.items():
-            subjects.add(subject)
+        subjects.update(exp.subjects)
+        for (judge, _subject, framing, scope, pressure), sl in exp.means.items():
             if scope == "full" and pressure == PRESSURE_ALL:
                 judged[(judge, framing)] = judged.get((judge, framing), 0) + sl.n_judged
                 judges.add(judge)
@@ -629,15 +662,16 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
                    generated_at: str) -> dict:
     """The run-level manifest (subjects, judges, framings, pressures, scopes, counts)."""
     all_judges = sorted({j for exp in exports.values() for j in exp.judges})
+    for model in all_judges:  # validate UI metadata first, so an unknown judge is the reported error
+        if model not in JUDGE_UI:  # fail-fast — a normalized judge is always known here
+            raise AnalysisInputError(f"no UI metadata for judge {model!r}")
     coverage = _coverage_from_exports(exports)
-    rankable = [m for m in all_judges if JUDGE_UI.get(m, {}).get("rankable")]
+    rankable = [m for m in all_judges if JUDGE_UI[m]["rankable"]]
     if len(rankable) != 1:  # the leaderboard ranks on exactly one judge (Gemini)
         raise AnalysisInputError(
             f"exactly one rankable judge required, found {rankable} among {all_judges}")
     judges_meta = []
     for model in all_judges:
-        if model not in JUDGE_UI:  # fail-fast — a normalized judge is always known here
-            raise AnalysisInputError(f"no UI metadata for judge {model!r}")
         ui = JUDGE_UI[model]
         if ui["rankable"]:
             # A rankable judge MUST be strictly complete — ranking cannot rest on a gappy grid.

@@ -415,11 +415,13 @@ def test_judge_coverage_is_pooled_fraction():
     assert judge_coverage(cov, "absent-judge") == 0.0
 
 
-def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None):
+def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None,
+                          opus_skip_subjects: tuple = ()):
     """A COMPLETE Gemini grid + a (by default COMPLETE) Opus grid over 2 scenarios.
 
-    ``opus_drop`` optionally omits one Opus (subject, framing, scope, pressure, scenario) cell so
-    the Opus layer is a hair short of strict-complete (still >= the tolerant floor).
+    ``opus_drop`` optionally omits one Opus (subject, framing, scope, pressure, scenario) cell;
+    ``opus_skip_subjects`` omits whole subjects from the Opus layer (to test the DECLARED-universe
+    coverage denominator: Gemini's report still declares all 5 subjects).
     """
     scenarios = ["T-1", "T-2"]
     for judge, sub in (("gemini-run", "gemini-3.6-flash"), ("opus-run", "claude-opus-4-8")):
@@ -427,6 +429,8 @@ def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None):
         d.mkdir(parents=True)
         rows, i = [], 0
         for subj in CANONICAL_SUBJECTS:
+            if judge == "opus-run" and subj in opus_skip_subjects:
+                continue
             for fr in FRAMINGS:
                 for scope in SCOPES:
                     for pr in PRESSURES:
@@ -505,6 +509,36 @@ def test_dedup_priority_beats_ts_but_ts_still_breaks_equal_priority():
     assert won_eq[0]["score"] == 0.1
     # Default (no priorities) is byte-compatible with the old later-ts behaviour.
     assert resolve_judgments([sample, full_grid])[0]["score"] == 0.1
+
+
+def test_v2_override_respects_source_priority():
+    def row(score):
+        return _row("claude-sonnet-5", "T-1", "secularize", "stated", "full",
+                    "claude-opus-4-8", score, "t")
+    # A lower-priority sample v2 correction must NOT override the higher-priority full-grid base.
+    sample = RawTradition(tradition=_TRAD, base=[row(0.1)], v2=[row(0.2)], report=None)
+    full_grid = RawTradition(tradition=_TRAD, base=[row(0.9)], v2=[], report=None)
+    assert resolve_judgments([sample, full_grid], priorities=[0, 1])[0]["score"] == 0.9
+    # At equal priority, the loader's v2 last-wins is preserved (the correction applies).
+    assert resolve_judgments([sample], priorities=[0])[0]["score"] == 0.2
+    # A v2 at the winner's own priority DOES override (a full-grid correction of a full-grid base).
+    full_v2 = RawTradition(tradition=_TRAD, base=[row(0.9)], v2=[row(0.7)], report=None)
+    assert resolve_judgments([sample, full_v2], priorities=[0, 1])[0]["score"] == 0.7
+
+
+def test_coverage_denominator_uses_declared_subject_universe(tmp_path):
+    # Opus judges only 4 of the 5 DECLARED subjects (Gemini's report declares all 5). The
+    # denominator must be the declared 5, so Opus reads as a coverage gap (0.8), NOT a spurious
+    # full grid from a shrunk 4-subject denominator.
+    root = _write_two_full_grids(tmp_path, opus_skip_subjects=("Qwen/Qwen3-235B-A22B-Instruct-2507",))
+    m = build_manifest(build_corpus_export([root / "gemini-run", root / "opus-run"]),
+                       run_id="r", generated_at="t")
+    by_model = {j["model"]: j for j in m["judges"]}
+    assert by_model["claude-opus-4-8"]["full_grid"] is False        # 4/5 subjects → not full grid
+    assert by_model["claude-opus-4-8"]["coverage"] == round(4 / 5, 6)
+    # counts.coverage denominator is the full declared grid (5 subjects), not the observed 4.
+    cov = m["counts"]["coverage"]["claude-opus-4-8"]["unstated"]
+    assert cov["n_expected"] == 2 * len(CANONICAL_SUBJECTS) * len(PRESSURES)  # 2×5×6 = 60
 
 
 def test_shard_written_to_disk_matches_serialize(tmp_path):

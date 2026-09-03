@@ -230,6 +230,7 @@ class RawTraditionExport:
 
     tradition: str
     scenarios: list[RawScenario]
+    subjects: tuple[str, ...] = ()  # report-declared subject universe (coverage denominator)
 
 
 @dataclass(frozen=True)
@@ -423,7 +424,8 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
         _build_scenario(sc, tradition, sittings_by_scenario[sc], verdicts_by_cell)
         for sc in sorted(sitting_scenarios)
     ]
-    return RawTraditionExport(tradition=tradition, scenarios=scenarios)
+    return RawTraditionExport(tradition=tradition, scenarios=scenarios,
+                              subjects=tuple(sorted(expected_subjects)))
 
 
 def _report_subjects(raws: list[RawTradition]) -> set[str]:
@@ -732,11 +734,12 @@ def build_catalog(corpus: RawCorpus) -> dict:
     items = [_item_ref(s) for export in corpus.per_tradition.values() for s in export.scenarios]
     cells: dict[PresetCell, dict[str, float]] = {}
     accumulate_cell_scores(corpus.resolved, cells)
-    # Coverage over the whole corpus's resolved rows (same slicing as the score tier).
+    # Coverage over the whole corpus's resolved rows (same slicing as the score tier); the
+    # denominator's subject count is the report-DECLARED universe, not observed rows.
     judged: dict[tuple[str, str], int] = {}
     accumulate_full_scope_judged(judged, corpus.resolved)
     total_scenarios = sum(len(e.scenarios) for e in corpus.per_tradition.values())
-    n_subjects = len({r["subject"] for r in corpus.resolved})
+    n_subjects = len({s for e in corpus.per_tradition.values() for s in e.subjects})
     coverage = coverage_counts_from_judged(judged, set(corpus.judges), total_scenarios, n_subjects)
     # Content fingerprint over the same canonical shard bytes the writer would emit (order-independent).
     content_lines = [
@@ -785,8 +788,12 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
         _require_safe_segment(tradition, "tradition")
         # Coverage over the FULL resolved rows of this tradition (limit-independent), before the
         # shard-write limit truncates anything.
+        # Coverage/judges are accumulated over the FULL resolved rows of EVERY tradition — never
+        # truncated by --limit — so a limited dev fixture still reports true judge coverage. The
+        # subject count is the report-DECLARED universe (not observed rows).
         accumulate_full_scope_judged(judged_full, resolved)
-        subjects_all.update(r["subject"] for r in resolved)
+        subjects_all.update(export.subjects)
+        judges_present.update(r["judge"] for r in resolved)
         total_scenarios += len(export.scenarios)
         written_here: set[str] = set()
         for scenario in export.scenarios:
@@ -799,15 +806,13 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
             items.append(_item_ref(scenario))
             written_here.add(scenario.scenario_id)
             n_scenarios += 1
-        # Fingerprint + judges over exactly the WRITTEN scenarios of this tradition (for a full
-        # export that is every row → matches the results/ tier; for a --limit fixture, the
-        # written subset). The full `resolved` dicts are freed as the loop moves on.
+        # Fingerprint over exactly the WRITTEN scenarios of this tradition (for a full export that
+        # is every row → matches the results/ tier; for a --limit fixture, the written subset).
+        # The full `resolved` dicts are freed as the loop moves on. NOTE: no outer break — later
+        # traditions still contribute coverage even once the shard limit is reached.
         written_rows = [r for r in resolved if r["scenario_id"] in written_here]
         fp_lines.extend(fingerprint_line(r) for r in written_rows)
-        judges_present.update(r["judge"] for r in written_rows)
         accumulate_cell_scores(written_rows, cells)  # for presets (numbers only)
-        if limit is not None and n_scenarios >= limit:
-            break
 
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
     coverage = coverage_counts_from_judged(

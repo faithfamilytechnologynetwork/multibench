@@ -413,6 +413,46 @@ def test_raw_and_score_tiers_emit_identical_earned_full_grid_and_coverage(tmp_pa
     assert score == catalog  # the two tiers agree, per judge, by construction
 
 
+def _mini_tradition(root: Path, trad: str, scenario: str, subject: str, judged_framings):
+    """One tradition dir: FULL sittings grid + verdicts for `judged_framings` only."""
+    d = root / trad
+    d.mkdir(parents=True)
+    base, sittings = [], []
+    for fr in FRAMINGS:
+        for pr in PRESSURES:
+            sittings.append({"subject": subject, "tradition": trad, "scenario_id": scenario,
+                             "pressure": pr, "framing": fr, "context_prefix": None,
+                             "model": subject, "ts": "t", "turns": list(_TURNS)})
+            if fr in judged_framings:
+                for scope in ("turn1", "full"):
+                    base.append({"subject": subject, "tradition": trad, "scenario_id": scenario,
+                                 "pressure": pr, "framing": fr, "judge": "gemini-3.6-flash",
+                                 "scope": scope, "score": 0.5, "ts": "t",
+                                 "direction": "held the line"})
+    (d / "judgments.jsonl").write_text("".join(json.dumps(r) + "\n" for r in base), encoding="utf-8")
+    (d / "sittings.jsonl").write_text("".join(json.dumps(r) + "\n" for r in sittings), encoding="utf-8")
+    (d / "report.json").write_text(json.dumps(
+        {"tradition": trad, "subjects": [subject], "judges": ["gemini-3.6-flash"],
+         "by_scenario": {scenario: {}}}), encoding="utf-8")
+
+
+def test_limit_coverage_counts_all_traditions(tmp_path):
+    """A --limit export writes fewer shards but coverage still spans ALL traditions (no outer
+    break): the second tradition's missing 'guided' verdicts pull gemini below full-grid even
+    though only the first tradition's shard is written."""
+    from analysis.export_raw import write_dataset
+    root = tmp_path / "run"
+    _mini_tradition(root, "buddhism", "BUD-001", "gpt-5.6-terra", FRAMINGS)  # complete
+    _mini_tradition(root, "taoism", "TAO-001", "gpt-5.6-terra", ("unstated", "stated"))  # no guided
+    write_dataset([root], tmp_path / "out", "r", limit=1)  # only the first scenario's shard
+    manifest = json.loads((tmp_path / "out" / "r" / "manifest.json").read_text())
+    shards = list((tmp_path / "out" / "r").rglob("*.json.gz"))
+    assert len(shards) == 1  # the limit really did cap shard writing
+    gem = next(j for j in manifest["judges"] if j["key"] == "gemini")
+    assert gem["fullGrid"] is False  # taoism's missing 'guided' verdicts counted despite the limit
+    assert gem["coverage"] < 1.0
+
+
 # ── Agreement with the score tier + field allowlist ─────────────────────────────────
 
 
