@@ -55,31 +55,78 @@ fraction — consistently across `export_results.py` (score manifest) and `expor
 catalog), which share `JUDGE_UI`. Delivers the corrected metadata contract with **no** change to
 committed datasets or the SPA yet.
 
+#### The shared coverage contract (resolves the reviewers' raw-tier mechanism gap)
+
+The score tier has `dict[str, TraditionExport]` with per-cell counts; the raw tier **streams**
+(`iter_tradition_raw` yields a `RawTraditionExport` with no coverage aggregates and frees the
+resolved rows per tradition). So the shared helper cannot take an `exports` dict. Instead, define
+the coverage contract at the **resolved-rows** level, computed with the **exact same slicing
+`_coverage_summary` already uses — `scope=="full"`, `pressure==PRESSURE_ALL`, pooled over
+subjects+traditions, per (judge, framing)** — so the earned badge, the displayed `coverage`
+fraction, and the manifest's existing `counts.coverage` are one number, never two disagreeing ones:
+
+- `accumulate_coverage(counts, resolved_rows, universe)` — folds one tradition's resolved rows
+  (using `_scenario_universe` for the denominator) into a running
+  `dict[(judge, framing), {n_judged, n_expected}]`. Streaming-safe (tiny counters; per-tradition
+  rows freed as before).
+- `earns_full_grid(counts, judge, threshold=FULL_GRID_MIN_COVERAGE)` — true iff **all three
+  framings** present with per-framing `n_judged/n_expected ≥ threshold`.
+- `judge_coverage(counts, judge)` — pooled `Σ n_judged / Σ n_expected` (the displayed fraction).
+
+Score tier feeds `accumulate_coverage` from its exports (or reuses `_coverage_summary`'s output,
+which is the same shape); raw tier feeds it incrementally in the write loop. Both exporters
+resolve judgments through the identical loaders, so the counts — hence the earned badge and
+fraction — match by construction.
+
+**`--limit` rule:** the raw tier accumulates coverage from the **full resolved rows** (the 3rd
+`iter_tradition_raw` yield), **not** the written shard subset, so a `--limit` dev fixture reports
+true judge coverage and Gemini stays `fullGrid:true`/`rankable:true` in the fixture catalogs
+(no fixture-semantics flip). `export_afb.py` is **out of scope**: it builds its catalog directly
+via `RawTierWriter` (does **not** call `_catalog_doc`) with a single Terra judge that is complete
+by construction; its hardcoded `fullGrid:true` stays, and adding optional `rankable`/`coverage`
+to the schema leaves its fixture valid.
+
+#### Dedup precedence (resolves "full-grid must win over the sample")
+
+`resolve_judgments` currently breaks a same-identity collision by **later `ts`** (the architect's
+cross-alias rule for the ~1,800 sunni cells). Relying on `ts` to make full-grid outrank the sample
+is not guaranteed. Add an explicit **source priority**: thread a per-root priority (root order)
+so the winner is chosen by `(priority, ts)` — higher-priority root wins, ties broken by later `ts`
+(the existing cross-alias rule is preserved at equal priority). Default priority 0 keeps every
+other run's output byte-identical. Place the full-grid Opus root **last** (highest priority) so it
+outranks the sample; the sample survives only where full-grid has no verdict (the gap-fill). Phase
+3 verifies **every** overlapping identity resolves to the full-grid verdict, not just one cell.
+
 #### Files to Create / Modify
 
 - `workflows/analysis/analysis/export_results.py` — split `JUDGE_UI` to `{key, rankable}`; add
-  `FULL_GRID_MIN_COVERAGE = 0.95`, `coverage_ratio(...)`/`judge_coverage(...)` and
-  `earns_full_grid(...)`; refactor the strict walk to `assert_strict_full_grid(...)` (reused for
-  rankable judges); `build_manifest` emits per judge `{key, model, aliases, full_grid (earned),
-  rankable (static), coverage (fraction)}`; assert exactly one rankable judge; rankable ⇒ strict
-  complete or fail-fast; fix stale docstring/comment (L504-511, L558-559).
-- `workflows/analysis/analysis/export_raw.py` — source the catalog judges' `fullGrid`/`rankable`/
-  `coverage` from a **shared** earned helper (no static `full_grid` key read at L534); keep
-  `JUDGE_UI[...]["key"]`.
-- Extract the shared coverage/earn/rankable logic to a single home (e.g. a small helper block in
-  `export_results.py`) imported by `export_raw.py`, so the two tiers cannot disagree.
+  `FULL_GRID_MIN_COVERAGE = 0.95` and the shared `accumulate_coverage`/`earns_full_grid`/
+  `judge_coverage` helpers (pinned to `_coverage_summary`'s slicing); keep `assert_strict_full_grid`
+  (the existing strict all-cells walk) for **rankable** judges; add the `(priority, ts)` precedence
+  to `resolve_judgments` (backward-compatible default); `build_manifest` emits per judge
+  `{key, model, aliases, full_grid (earned), rankable (static), coverage (fraction)}`; assert
+  exactly one rankable judge; rankable ⇒ `assert_strict_full_grid` or fail-fast; fix stale
+  docstring/comment (L504-511, L558-559).
+- `workflows/analysis/analysis/export_raw.py` — accumulate coverage in the `write_dataset` loop
+  via the shared helper; thread earned `full_grid`/`rankable`/`coverage` into `_catalog_doc`
+  (new judge-metadata argument); keep `JUDGE_UI[...]["key"]`; carry the same `(priority, ts)`
+  precedence.
 - `workflows/analysis/tests/test_export_results.py`, `test_export_raw.py`, `test_export_afb.py` —
-  update the catalog/manifest shape assertions; add the new coverage/rankable tests.
+  update the catalog/manifest shape assertions; add the new coverage/rankable/precedence tests.
 
 #### Deliverables
 
 - [ ] `full_grid` earned via the tolerant predicate; `rankable` static; `coverage` fraction present.
 - [ ] `export_raw.py` catalog carries the same earned `full_grid`/`rankable`/`coverage`.
 - [ ] Stale "Opus stated/guided sample" docstring/comment corrected.
+- [ ] `resolve_judgments` gains `(priority, ts)` precedence (backward-compatible default 0).
 - [ ] Tests: (a) 14.5%-sample framing does NOT earn `full_grid`; 99.9% state DOES (both sides of
       threshold); (b) `rankable` static & coverage-independent (earning `full_grid` never makes a
       judge rankable); (c) rankable + strict-incomplete ⇒ fail-fast; (d) 0 or >1 rankable ⇒
-      fail-fast; (e) `coverage` == actual `n_judged/n_expected`.
+      fail-fast; (e) `coverage` == pooled `n_judged/n_expected` at `_coverage_summary`'s slicing,
+      and equals what `counts.coverage` implies; (f) on a sample↔full-grid identity collision the
+      higher-priority (full-grid) verdict wins regardless of `ts`; (g) raw + score tiers emit
+      identical earned `full_grid`/`coverage` for the same roots.
 
 #### Acceptance Criteria
 
@@ -122,14 +169,31 @@ Opus.
   off `rankable`; `fullGrid` framing for "scores every transcript" stays coverage-only.
 - `apps/multibrowser/src/components/RawComparison.tsx` (`:31`) — sample caption keeps `fullGrid`;
   reword if needed.
-- Tests/fixtures: `leaderboard.test.ts`, `results.data.test.ts`, `fakeRepo.ts`, `rawData.test.ts`
-  and any snapshot fixtures — add `rankable`/`coverage`; new assertions per SC6.
+- **Critical test-mapper fix (reviewer HIGH):** `apps/multibrowser/src/lib/leaderboard.test.ts:126`
+  `loadCommitted()` maps the real committed manifest through an **explicit field list**
+  (`{key, model, aliases, full_grid→fullGrid}`) and **drops `rankable`**. After Phase 3 the real
+  `results/20260803` manifest carries Opus `{full_grid:true, rankable:false}`; with `rankable`
+  stripped, `rankingJudgeModel`'s fallback `find(j=>j.fullGrid)` selects **Opus** (sorted first) —
+  inside the very sealed-launch parity test that pins Gemini (SC4). **Carrying `rankable`
+  (and `coverage`) through `loadCommitted()` is a named Phase 2 deliverable**, and must land
+  before Phase 3 or SC4 cannot be green.
+- Full test/fixture list (each reads `fullGrid`/judge metadata and needs `rankable`/`coverage`):
+  `leaderboard.test.ts`, `results.data.test.ts`, `results.test.tsx`, `fakeRepo.ts`,
+  `rawData.test.ts`, `rawSelection.test.ts` (`:15` "fullGrid judge preferred over opus" → becomes
+  a `rankable` assertion), `rawFixture.ts`, `rawResults.test.tsx`, `rawRun.test.tsx`,
+  `RawComparison.test.tsx` — add `rankable`/`coverage`; assertions per SC6.
+- **#50 invariant vitest:** add a leaderboard/drill-down test with a **non-rankable,
+  full_grid-earned, sub-100%-coverage** judge (mirrors Opus at 99.88%) to confirm the
+  `nContributing` / earned-full_grid invariant documented at `ResultsPage.tsx:497-501` still holds
+  when coverage is earned-but-not-strict (not just a review-doc note).
 
 #### Deliverables
 
 - [ ] Optional `rankable`/`coverage` in both schemas; ranking-proxy sites use `rankable`.
+- [ ] `loadCommitted()` carries `rankable`/`coverage` through (so SC4 stays green post-Phase-3).
 - [ ] Legacy manifest (no `rankable`) still ranks Gemini via fallback.
 - [ ] Selector labels Opus `(validation)`, Gemini `(ranking)`; `coverage` shown when present.
+- [ ] #50 invariant vitest passes with a non-rankable, earned-full_grid, sub-100% judge.
 
 #### Acceptance Criteria
 
@@ -197,14 +261,22 @@ uv --project workflows/analysis run python -m analysis export-raw \
 
 #### Test Plan
 
-- **Gemini byte-identity (scripted):** for each tradition, extract the `means`/`steadfastness`
-  Gemini sub-tree from `git show HEAD:results/20260803/<t>.json` and from the re-exported file,
-  re-serialize both with the canonical dumper, assert equal; assert the manifest diff touches only
-  Opus judge entries, `judges[]`, `counts`, `fingerprint`, `generated_at`.
+- **Gemini byte-identity — one-time migration gate (scripted):** for each tradition, extract the
+  `means`/`steadfastness` Gemini sub-tree from `git show HEAD:results/20260803/<t>.json` and from
+  the re-exported file, re-serialize both with the canonical dumper, assert equal; assert the
+  manifest diff touches only Opus judge entries, `judges[]`, `counts`, `fingerprint`,
+  `generated_at`. This is inherently a **pre-vs-post migration** check (the "pre" state ceases to
+  exist after merge), so it runs during Phase 3 rather than living as a permanent test — a
+  deviation from spec SC2's "add a pytest" wording, made explicit here.
+- **Durable Gemini guardian (post-merge):** `test_committed_dataset_reconciles_with_paper`
+  (+ sealed-launch parity) already pins every Gemini slice mean to the paper `stats_bundle` values
+  committed in `leaderboard.test.ts` — it stays green iff Gemini bytes are stable, so it is the
+  permanent guarantee SC2 asks for. (Spec SC2 wording updated to reflect migration-gate +
+  reconciliation-guardian.)
 - **Fingerprint parity:** compare the two manifests' `fingerprint`.
-- **Dedup/overlap:** confirm on a known overlapping cell the retained verdict is the full-grid one
-  (later `ts`); if `ts` ordering is not guaranteed, make full-grid preference explicit in
-  `resolve_judgments` root order and re-verify (note in review).
+- **Dedup/overlap — exhaustive:** enumerate **every** identity present in both the sample and the
+  full-grid Opus roots and assert the merged winner is the full-grid verdict (the `(priority, ts)`
+  precedence from Phase 1), not just one cell.
 - Regression: reconciliation test green.
 
 ### Phase 4: Dual-judge paper artifacts + numbers summary
@@ -216,11 +288,30 @@ uv --project workflows/analysis run python -m analysis export-raw \
 Regenerate the dual-judge paper artifacts from the new data and deliver the markdown numbers
 summary for the paper.
 
+#### Paper regeneration mechanics (resolves the reviewers' "scripts read the frozen bundle" gap)
+
+The generators currently read the **old** Opus roots and a **frozen** `stats_bundle.json`, so
+running them as-is reproduces the old statistics. Phase 4 must therefore:
+1. **Read the generators first** to identify their exact inputs (which Opus roots / which stats
+   bundle / whether they compute agreement from judging runs directly).
+2. **Recompute the agreement inputs from the merged four-root data** using the **same dedup**
+   (`(priority, ts)` precedence) as the export, so the paper's agreement bundle reflects the
+   full-grid Opus layer — either by regenerating the upstream `stats_bundle.json` from the new
+   roots or by pointing the generators at the new root. Do not hand-edit numbers.
+3. Regenerate `tab:djtier`, `fig:dualjudge`, and the agreement stats from that recomputed input.
+
+**Paths (run from the MAIN checkout, not the worktree):** the generators and their `tmp/` inputs
+and the sibling papers repo resolve relative to the main checkout
+`/Users/mwk/Development/faithfamilytechnologynetwork/multibench`. From **this worktree** the papers
+repo is `../../../multibench-papers` (not `../multibench-papers`); running the generators from the
+main checkout keeps their internal `tmp/…` and `../multibench-papers/…` relative paths correct.
+
 #### Files to Create / Modify
 
-- `../multibench-papers/figures/fig_dual_judge.pdf`, `../multibench-papers/tables/` (dual-judge
-  table `tab:djtier` + agreement stats) — regenerated via `../../tmp/paper_figs_multibench.py` /
-  `paper_figs_additions.py`. **Not committed** in the papers repo (architect wires them).
+- `/Users/mwk/Development/faithfamilytechnologynetwork/multibench-papers/figures/fig_dual_judge.pdf`
+  and `.../multibench-papers/tables/` (dual-judge table `tab:djtier` + agreement stats) —
+  regenerated via the main-checkout `tmp/paper_figs_multibench.py` / `paper_figs_additions.py`.
+  **Not committed** in the papers repo (architect wires them).
 - A committed in-repo markdown summary (e.g. `docs/analysis/110-dual-judge-fullgrid-summary.md`).
 
 #### Deliverables
@@ -254,9 +345,14 @@ artifacts live outside the repo).
 | Backward-compat break on untouched `20260813-protestantism` | Med | High | `rankable`/`coverage` optional in zod; ranking fallback; that dataset untouched. |
 | Silent Gemini drift on re-export | Low | High | Scripted Gemini byte-identity check + reconciliation test. |
 | Tier fingerprint divergence | Low | Med | Re-export both tiers from the identical four-root set; assert equality. |
-| Overlap dedup keeps sample instead of full-grid | Low | Med | Verify `ts` ordering; make full-grid preference explicit if not guaranteed; note in review. |
+| Overlap dedup keeps sample instead of full-grid | Med | Med | Explicit `(priority, ts)` source precedence in `resolve_judgments` (full-grid root last/highest); Phase 3 verifies **every** overlapping identity, not one cell. |
+| Real-manifest test mapper flips ranking to Opus at Phase 3 | Med | High | `loadCommitted()` carries `rankable` through (named Phase 2 deliverable, lands before Phase 3). |
+| Raw-tier "shared helper" has no data in the streaming path | Med | High | Coverage contract defined at the **resolved-rows** level (`accumulate_coverage`), fed incrementally in the raw write loop; both tiers use identical loaders → counts match. |
+| `--limit` fixtures flip Gemini `fullGrid:false` | Med | Med | Raw coverage computed over **full resolved rows**, not the written subset; fixtures unaffected. |
+| Two disagreeing coverage numbers in one manifest | Med | Med | `coverage` + earned-`full_grid` pinned to `_coverage_summary`'s (scope=full, pressure=all) slicing — same number as `counts.coverage`. |
 | Raw-tier ~121 MB rewrite + stale Railway baked bundle | High | Low/Med | Stated consequence; re-bake owner confirmed with architect at PR time; `resolveRawSource` fails safe to GitHub. |
-| `#50` nContributing invariant strained at ~99.9% Opus | Low | Med | Verify leaderboard/drill-down behaviour; note interaction in review. |
+| `#50` nContributing invariant strained at ~99.9% Opus | Low | Med | Phase 2 vitest with a non-rankable earned-full_grid sub-100% judge; also noted in review. |
+| Paper scripts reproduce old stats from the frozen bundle | Med | High | Phase 4 recomputes the agreement inputs from the merged four-root data (same dedup) before regenerating table/figure; run from the main checkout so paths resolve. |
 
 ## Documentation Updates
 

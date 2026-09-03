@@ -1,16 +1,28 @@
 id: '110'
 title: extend-the-20260803-opus-valid
 protocol: aspir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: Earn full_grid + rankable + coverage in both exporters
+    status: in_progress
+  - id: phase_2
+    title: 'SPA: rank by rankable, keep fullGrid for sample captions'
+    status: pending
+  - id: phase_3
+    title: Re-export results/ and results-raw/ for 20260803 in place
+    status: pending
+  - id: phase_4
+    title: Dual-judge paper artifacts + numbers summary
+    status: pending
+current_plan_phase: phase_1
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-09-03T15:21:04.706Z'
-updated_at: '2026-09-03T15:43:55.570Z'
+updated_at: '2026-09-03T15:53:25.730Z'
