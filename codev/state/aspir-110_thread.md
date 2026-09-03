@@ -285,3 +285,15 @@ Protocol: ASPIR (strict mode, porch-driven).
 - **pr GATE reached — WAITING FOR HUMAN APPROVAL.** Ran `porch gate 110`. Do NOT run `porch approve 110 pr`
   until the architect explicitly approves. Architect notified (PR ready + correction). After approval:
   porch approve 110 pr → merge (merge commit, not squash) → porch done --merged 117 → verify phase.
+
+### Architect PR review — 3 REQUIRED changes before merge (NOT approval), all DONE + pushed
+- (1) Migrated BOTH 20260813-protestantism manifests to the new contract (roots not in tmp → hand-edited
+  to match exporter serialization; diff = judges[] only). Opus full_grid:true/rankable:false/coverage:1.0
+  (complete 3000/3000), Gemini rankable:true/coverage:1.0. ("untouched 20260813" constraint LIFTED by
+  architect for this.) Legacy-shape fixture kept (leaderboard inline manifest + results.data strip-test).
+- (2) assert_uniform_subject_roster → fail-fast AnalysisInputError on differing rosters, BOTH exporters;
+  +3 tests (helper/score/raw). Closes the uniform-subject latent item.
+- (3) results/README.md 'never mutate it' → Gemini never changes; validation extends in place + fingerprint + dated note.
+- Optional: RawComparison 'validation' role badge for non-ranking judges (isRankingJudge).
+- Re-ran: vitest 394, pytest 251/6-skip, tsc clean. Pushed (899a57ca). Architect notified.
+- **STILL at pr GATE — awaiting architect merge release. Do NOT porch approve myself.**
