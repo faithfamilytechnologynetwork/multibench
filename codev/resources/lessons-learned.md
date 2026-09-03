@@ -142,3 +142,23 @@ pattern, gotcha, or constraint.
   out with a misleading (node-version/PORT) cause. A spawned-server test must spawn `detached` and
   reap the process **group** (`process.kill(-pid, …)`) in `finally`, and pre-flight that the port is
   free with a diagnostic that names the leaked-serve cause.
+
+## Metadata contracts & paper deliverables (#110)
+- **A tier that publishes a metadata flag should validate it to the same bar as the authority that
+  consumes it.** #96 split the earned `full_grid` coverage badge from the static `rankable` ranking
+  role; the score manifest is the ranking authority, but the raw catalog *also* publishes
+  `rankable`, so it must enforce the same invariant (exactly-one strictly-complete rankable) rather
+  than trusting the score tier — a reviewer was right that "the raw catalog is advisory" is too
+  weak once it carries the flag. (Scar: I rebutted this once on a "genericity" premise that was
+  wrong — `_catalog_doc` is MB-specific because AFB bypasses it — costing an iteration. Verify a
+  reviewer's premise against the code before rebutting.)
+- **Derived numbers must be computed exact from data AND reconciled to the *consumer's* convention.**
+  The dual-judge matched-cell count (93,385), the residual (35, not the 79/39 estimates), the route
+  bridge (2,597), the programme total (191,202), and the Opus spend ($1,313.29 incremental /
+  $2,381.98 total, only correct once the sample's `judgments_v2.jsonl` re-judges are summed) each
+  differed from a pre-run estimate; the programme total only reconciles under the paper's published
+  convention (Gemini + Opus-incl-route-bridge + router pilot).
+- **A paper-figure deliverable must match the paper's LaTeX shape and conventions, not just the
+  numbers** — column count (the 6-col tier×framing `tab:djtier`), explicit `+`/U+2212 signs, and
+  full labels — and its generator must be **persisted/committed** (an ephemeral scratch script is
+  not reproducible; a standard re-run of the old generator silently reverts the artifacts).

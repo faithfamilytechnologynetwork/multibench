@@ -110,8 +110,8 @@ Line numbers are for `multibench-paper.tex` at the time of writing.
   re-run would **revert** the dual-judge artifacts. Its dual-judge table/figure/asserts should be
   removed or pointed at `docs/analysis/110-dualjudge-fullgrid-figs.py`, the canonical generator for
   the dual-judge artifacts after #110. (`refresh_dualjudge_stats.py` still refreshes the other,
-  non-full-grid `dual_judge` sub-keys; this script only adds `dual_judge.full_grid` and keeps the
-  original bundle `.bak` on the first run.)
+  non-full-grid `dual_judge` sub-keys; this script only adds `dual_judge.full_grid` and snapshots
+  the bundle to `.bak` on its first run.)
 
 ## Provenance
 

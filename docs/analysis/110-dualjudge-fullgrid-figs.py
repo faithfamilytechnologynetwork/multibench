@@ -61,7 +61,9 @@ FLAB = {"unstated": "Unstated", "stated": "Stated", "guided": "Guided"}
 SLAB = {"claude-sonnet-5": "Sonnet 5", "thinkingmachines/Inkling": "Inkling",
         "gpt-5.6-terra": "GPT-5.6", "gemini-3.6-flash": "Gemini 3.6",
         "Qwen/Qwen3-235B-A22B-Instruct-2507": "Qwen3-235B"}
-PRICE = (5.00, 25.00)  # claude-opus-4-8 $/M in,out (workflows/judging/judging/report.py)
+# claude-opus-4-8 $/M in,out + the cache/batch multipliers below mirror
+# workflows/judging/judging/report.py::PRICES/_usage_cost (kept in sync; verified identical).
+PRICE = (5.00, 25.00)
 
 # ── resolve every cell via the canonical loaders ─────────────────────────────
 per_root = [read_run_root(r) for r in ROOTS]
@@ -156,7 +158,7 @@ print("sign-flip (Gemini +1 / Opus −1) on framing cells:", sign_flip, "%")
 # ── patch bundle ─────────────────────────────────────────────────────────────
 b = json.loads(BUNDLE.read_text())
 bak = BUNDLE.with_suffix(".json.pre-110-fullgrid.bak")
-if not bak.exists():  # idempotent — keep the ORIGINAL pre-#110 bundle, don't clobber on re-runs
+if not bak.exists():  # idempotent: snapshot the bundle as it is on the FIRST run, never clobber it
     bak.write_text(json.dumps(b, indent=1))
 b.setdefault("dual_judge", {})["full_grid"] = dual
 BUNDLE.write_text(json.dumps(b, indent=1))
