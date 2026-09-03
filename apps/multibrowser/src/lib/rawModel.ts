@@ -44,7 +44,10 @@ const CatalogSchema = z.object({
   scale: z.object({ min: z.number(), center: z.number(), max: z.number() }),
   ramp: z.array(z.string()).min(2),
   subjects: z.array(labeledId),
-  judges: z.array(z.object({ key: z.string(), label: z.string(), fullGrid: z.boolean() })),
+  judges: z.array(z.object({
+    key: z.string(), label: z.string(), fullGrid: z.boolean(),
+    rankable: z.boolean().optional(), coverage: z.number().optional(),  // #110; optional for older catalogs
+  })),
   conditionAxes: z.array(z.object({ key: z.string(), label: z.string(), values: z.array(labeledId) })),
   groupBy: z.object({ key: z.string(), label: z.string() }),
   scopes: z.array(labeledId),
@@ -97,7 +100,7 @@ const ShardSchema = z.object({
 // ---- TS-facing types ------------------------------------------------------------------------
 
 export type LabeledId = z.infer<typeof labeledId>;
-export interface RawJudge { key: string; label: string; fullGrid: boolean }
+export interface RawJudge { key: string; label: string; fullGrid: boolean; rankable?: boolean; coverage?: number }
 export interface RawItem { id: string; label: string; group: string; shard: string }
 export interface RawConditionAxis { key: string; label: string; values: LabeledId[] }
 export interface RawPresetEntry {

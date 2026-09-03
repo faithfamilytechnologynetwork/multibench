@@ -32,8 +32,16 @@ uv --project workflows/analysis run python -m analysis export \
   tmp/judging-runs/20260803-merged \
   tmp/judging-runs/20260803-unstated-opus \
   tmp/judging-runs/20260803-framings-opus-sample \
+  tmp/judging-runs/20260823-opus-fullgrid \
   --run-id 20260803 --out results
 ```
+
+The **full-grid Opus** stated+guided layer (`20260823-opus-fullgrid`, #110) is passed **last** so its
+verdicts deterministically win any overlap with the earlier `framings-opus-sample` layer (the merge
+uses a root-order source precedence; the sample now only back-fills cells the full-grid run failed).
+With it, Opus earns `full_grid: true` from real coverage (≈0.9994), while **Gemini values stay
+byte-identical** and `rankable` stays Gemini-only. From a **builder worktree** the gitignored source
+roots are reachable at `../../tmp/judging-runs/…` (the paths above are repo-root-relative).
 
 Commit **only** the `results/<run-id>/` output (never from the gitignored `tmp/judging-runs/`).
 Re-running with the same inputs is deterministic (sorted keys) — the shards are **byte-stable** and
@@ -52,7 +60,7 @@ default automatically; older runs remain reachable via the selector or their id.
 | `schema_version` | dataset schema version (currently **1**); the SPA rejects other versions with a notice |
 | `run_id`, `generated_at` | run id + ISO-8601 export timestamp |
 | `subjects` | the (normalized) subject model ids, canonical spelling |
-| `judges` | `[{key, model, aliases[], full_grid}]` — `key` is the UI short name (`gemini`/`opus`), `model` the canonical id, `full_grid` = judged every framing |
+| `judges` | `[{key, model, aliases[], full_grid, rankable, coverage}]` — `key` is the UI short name (`gemini`/`opus`), `model` the canonical id. **`full_grid`** = the **earned coverage badge** (tolerant: every framing covered at full-grid scale, per-framing ≥ 0.95 — #96), computed per run, NOT a static flag. **`rankable`** = the **static ranking role**: the leaderboard ranks on the single rankable judge (Gemini); a validation judge that reaches full coverage earns `full_grid` but stays `rankable:false` and never ranks. **`coverage`** = the judge's actual pooled coverage **fraction over the full scope** (`scope=full`, ÷ 46,710 = 519 scenarios × 5 subjects × 6 pressures × 3 framings), for display/citation. (`rankable`/`coverage` are optional — pre-#110 manifests omit them and the SPA falls back to `full_grid` then Gemini.) |
 | `framings` | `["unstated","stated","guided"]` (universal core) |
 | `pressures`, `pressure_all` | the six pressures + the `"all"` (pooled) sentinel |
 | `scopes` | `["turn1","full"]` (first-response / post-pressure) |
@@ -92,7 +100,10 @@ default automatically; older runs remain reachable via the selector or their id.
   the mean), matching the paper — not a mean of per-pressure means.
 - **`steadfastness`** = matched-cell `mean(full) − mean(turn1)` over cells present in **both** scopes.
 - **Coverage**: `n_expected` = `n_scenarios × 6` for `pressure="all"`, else `n_scenarios`. The
-  denominator is the **Gemini full grid** — so a small Opus sample reads as low coverage, honestly.
+  denominator is the report-declared full grid — so a designed sub-sample reads as low coverage,
+  honestly, while a full-grid layer with a few persistent judge-side failures reads as ~1.0. Note
+  the per-judge manifest `coverage` fraction is over the **full scope only** (÷ 46,710); it will
+  differ slightly from `counts.judgments / (2 × 46,710)`, which pools both scopes.
 
 ## Normalization (done by the exporter)
 
@@ -110,7 +121,9 @@ Source runs spell ids inconsistently; the export normalizes to a single canonica
 The `/results` leaderboard is a **dense, whole-picture-at-a-glance table** (jaleesbrowser-style,
 Spec 55) — one row per subject:
 
-- The **leaderboard ranks on Gemini only** (the full-grid judge) — the mean of per-tradition means.
+- The **leaderboard ranks on Gemini only** (the `rankable` judge) — the mean of per-tradition means.
+  Ranking is keyed off the static `rankable` flag, **not** `full_grid`: Opus is now also full-grid
+  but is a badged validation layer and never re-ranks (#96).
 - **Framing and metric are columns, not selectors.** Each row shows **First-response / Post-pressure /
   Δ (steadfastness)** on the paper's published slice (the first framing), plus one post-pressure column
   per framing (the staircase). Δ is the shard's matched-cell steadfastness, not post − initial.
@@ -119,7 +132,9 @@ Spec 55) — one row per subject:
 - Any numeric column is **sortable**; a **canonical rank** column persists while sorted.
 - A single **pressure** selector reframes the whole table (headline, framing columns, strip, rank) to
   one of the six pressures or `"all"`. The **judge selector** switches the **per-tradition drill-down**
-  to Opus **where Opus data exists** (badged `sample n/N`); it never re-ranks or recolors the board.
+  to Opus **where Opus data exists**, labelled `opus (validation)`; a validation judge that is only a
+  sub-sample is badged `sample n/N`, while a full-grid validation judge shows its coverage % instead.
+  The selector never re-ranks or recolors the board.
 - **Run, pressure, judge, column sort, and expanded subjects are all deep-linkable** in the URL.
 - Numbers reconcile with the paper's standings (`tab_standings` / `subj_overall`) to displayed
   precision.
@@ -127,7 +142,10 @@ Spec 55) — one row per subject:
 ## Published runs
 
 - **`20260803`** — the benchmark-of-record (7 traditions / 519 scenarios), the paper's snapshot.
-  Guarded by the paper-reconciliation test; **never mutate it**.
+  The **Gemini (ranking) values never change** — guarded by the paper-reconciliation test, and
+  byte-identical across re-exports. A **validation layer may be extended in place** (e.g. #110 grew
+  the Opus layer to the full grid): re-run the export, which re-stamps the shared `fingerprint`
+  across both tiers and bumps `generated_at`, and record a dated revision note here.
 - **`20260813-protestantism`** — the ProtestantBench round (issue #89): the `protestantism`
   tradition (100 scenarios) over the same 5-subject roster, framings, and pressures as the record
   run. **Both judges are complete full grids: Gemini (ranking judge) 18000/18000 = 100 %, and Opus

@@ -1,6 +1,7 @@
 import { Fragment, useState, type ReactNode } from "react";
 import { catalogScoreColor } from "../lib/rampColor";
 import { findCell, type RawCatalog, type RawCell, type RawShard } from "../lib/rawModel";
+import { isRankingJudge } from "../lib/leaderboard";
 import { Markdown } from "./Markdown";
 
 // Show a leading "+" only when the catalog's scale is SIGNED (min < 0, e.g. MultiBench −1…+1);
@@ -28,6 +29,9 @@ export function VerdictCard({ verdict, catalog }: { verdict: RawCell["verdicts"]
           {fmtScore(verdict.score, catalog.scale.min < 0)}
         </span>
         <span className="text-default-500">{judge?.label ?? verdict.judge}</span>
+        {judge && !isRankingJudge(judge) && (
+          <span className="rounded bg-default-100 px-1.5 py-0.5 text-xs text-default-600" title="validation judge — a second opinion; the leaderboard ranks on the ranking judge">validation</span>
+        )}
         {judge && !judge.fullGrid && (
           <span className="rounded bg-warning-100 px-1.5 py-0.5 text-xs text-warning-800" title="honest-sample judge — scored only a subset, not the full grid">sample</span>
         )}

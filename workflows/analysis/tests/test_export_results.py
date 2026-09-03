@@ -24,12 +24,20 @@ from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.export_results import (
     SCOPES,
     CANONICAL_SUBJECTS,
+    FULL_GRID_MIN_COVERAGE,
+    JUDGE_UI,
     MAX_SHARD_BYTES,
     SCHEMA_VERSION,
+    RawTradition,
+    TraditionExport,
+    assert_uniform_subject_roster,
     build_corpus_export,
     build_manifest,
     build_tradition_export,
+    coverage_counts_from_judged,
+    earns_full_grid,
     export_dataset,
+    judge_coverage,
     leaderboard_mean_of_means,
     normalize_judge,
     normalize_subject,
@@ -351,13 +359,16 @@ def test_manifest_has_required_fields_and_judge_consistency():
     assert m["subjects"] == list(CANONICAL_SUBJECTS)
     assert m["framings"] == ["unstated", "stated", "guided"]
     assert set(m["scopes"]) == {"turn1", "full"} and "steadfastness" in m["metrics"]
-    # judges carry key/model/aliases/full_grid; opus absorbs both aliases
+    # judges carry key/model/aliases + the EARNED full_grid, STATIC rankable, and coverage fraction;
+    # opus absorbs both aliases
     by_model = {j["model"]: j for j in m["judges"]}
     assert by_model["claude-opus-4-8"]["key"] == "opus"
-    assert by_model["claude-opus-4-8"]["full_grid"] is False
+    assert by_model["claude-opus-4-8"]["full_grid"] is False  # missing stated+guided → not earned
+    assert by_model["claude-opus-4-8"]["rankable"] is False   # static: a validation judge
     assert set(by_model["claude-opus-4-8"]["aliases"]) == {
         "claude-opus-4-8", "anthropic/claude-opus-4.8"}
-    assert by_model["gemini-3.6-flash"]["full_grid"] is True
+    assert by_model["gemini-3.6-flash"]["full_grid"] is True  # earned from complete coverage
+    assert by_model["gemini-3.6-flash"]["rankable"] is True   # static: the ranking judge
     assert "sample" not in by_model["claude-opus-4-8"]  # dropped: badge per-slice instead
     # every shard judge is declared in the manifest
     manifest_models = set(by_model)
@@ -365,14 +376,193 @@ def test_manifest_has_required_fields_and_judge_consistency():
         assert set(exp.judges) <= manifest_models
     # per-tradition entries carry n_scenarios + shard filename
     assert m["traditions"] == [{"id": "buddhism", "n_scenarios": 2, "shard": "buddhism.json"}]
-    # coverage summary (scope=full, pressure=all, pooled over 5 subjects; n_expected/subject =
-    # n_scenarios(2)×6 = 12 → 60 over 5 subjects). Gemini is full-grid (60/60); Opus covers only
-    # one subject's single cell → 1/60.
+    # coverage: n_expected per framing is the FULL grid (total_scenarios(2) × subjects(5) ×
+    # pressures(6) = 60), for EVERY framing, so an untouched framing reads honestly as 0/60.
     cov = m["counts"]["coverage"]
     assert cov["gemini-3.6-flash"]["unstated"] == {"n_judged": 60, "n_expected": 60}
-    # Opus touched only one subject here, so the roll-up sums over that present subject (1/12);
-    # on the real run Opus covers all subjects at unstated, giving ~full coverage.
-    assert cov["claude-opus-4-8"]["unstated"] == {"n_judged": 1, "n_expected": 12}
+    assert cov["claude-opus-4-8"]["unstated"] == {"n_judged": 1, "n_expected": 60}
+    assert cov["claude-opus-4-8"]["stated"] == {"n_judged": 0, "n_expected": 60}
+    assert cov["claude-opus-4-8"]["guided"] == {"n_judged": 0, "n_expected": 60}
+    # the per-judge coverage fraction reconciles with the counts.coverage roll-up
+    assert by_model["gemini-3.6-flash"]["coverage"] == 1.0
+    assert by_model["claude-opus-4-8"]["coverage"] == round(1 / 180, 6)  # 1 judged of 3×60
+
+
+# ── #96: earned full_grid + static rankable + coverage fraction + dedup precedence ──
+
+
+def _cov(judged_by_framing: dict[str, int], n_expected: int) -> dict:
+    """A one-judge ('j') coverage table with a fixed per-framing n_expected."""
+    return {"j": {fr: {"n_judged": judged_by_framing.get(fr, 0), "n_expected": n_expected}
+                  for fr in FRAMINGS}}
+
+
+def test_earns_full_grid_both_sides_of_threshold():
+    ne = 10_000
+    # ~99.9% on every framing → earns (the full-grid state)
+    assert earns_full_grid(_cov({"unstated": 9990, "stated": 9985, "guided": 9987}, ne), "j") is True
+    # a designed sample: stated+guided ~14.5% → does NOT earn even though unstated is full
+    assert earns_full_grid(_cov({"unstated": 9990, "stated": 1450, "guided": 1450}, ne), "j") is False
+    # exactly at the 0.95 floor passes; just below fails (both sides of the threshold)
+    assert earns_full_grid(_cov({fr: 9500 for fr in FRAMINGS}, ne), "j") is True
+    assert earns_full_grid(_cov({fr: 9499 for fr in FRAMINGS}, ne), "j") is False
+    # a framing the judge never touched is never full-grid, whatever the others read
+    assert earns_full_grid(_cov({"unstated": ne, "stated": ne}, ne), "j") is False
+    assert FULL_GRID_MIN_COVERAGE == 0.95
+
+
+def test_judge_coverage_is_pooled_fraction():
+    cov = _cov({"unstated": 100, "stated": 90, "guided": 80}, 100)
+    assert judge_coverage(cov, "j") == (100 + 90 + 80) / 300
+    assert judge_coverage(cov, "absent-judge") == 0.0
+
+
+def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None,
+                          opus_skip_subjects: tuple = ()):
+    """A COMPLETE Gemini grid + a (by default COMPLETE) Opus grid over 2 scenarios.
+
+    ``opus_drop`` optionally omits one Opus (subject, framing, scope, pressure, scenario) cell;
+    ``opus_skip_subjects`` omits whole subjects from the Opus layer (to test the DECLARED-universe
+    coverage denominator: Gemini's report still declares all 5 subjects).
+    """
+    scenarios = ["T-1", "T-2"]
+    for judge, sub in (("gemini-run", "gemini-3.6-flash"), ("opus-run", "claude-opus-4-8")):
+        d = root / judge / _TRAD
+        d.mkdir(parents=True)
+        rows, i = [], 0
+        for subj in CANONICAL_SUBJECTS:
+            if judge == "opus-run" and subj in opus_skip_subjects:
+                continue
+            for fr in FRAMINGS:
+                for scope in SCOPES:
+                    for pr in PRESSURES:
+                        for sc in scenarios:
+                            if judge == "opus-run" and opus_drop == (subj, fr, scope, pr, sc):
+                                continue
+                            rows.append(_row(subj, sc, pr, fr, scope, sub, 0.5, f"{judge}{i}"))
+                            i += 1
+        (d / "judgments.jsonl").write_text(
+            "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
+    # Only the Gemini run carries report.json (the full-grid transcript source).
+    (root / "gemini-run" / _TRAD / "report.json").write_text(
+        json.dumps(_report(scenarios, list(CANONICAL_SUBJECTS), ["gemini-3.6-flash"])),
+        encoding="utf-8")
+    return root
+
+
+def test_earning_full_grid_never_makes_a_validation_judge_rankable(tmp_path):
+    # Opus at a COMPLETE grid earns the full_grid badge, but rankable stays statically False.
+    exports = build_corpus_export(
+        [_write_two_full_grids(tmp_path) / "gemini-run", tmp_path / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t")
+    by_model = {j["model"]: j for j in m["judges"]}
+    assert by_model["claude-opus-4-8"]["full_grid"] is True   # earned from real coverage
+    assert by_model["claude-opus-4-8"]["rankable"] is False   # but never rankable
+    assert by_model["claude-opus-4-8"]["coverage"] == 1.0
+    assert by_model["gemini-3.6-flash"]["rankable"] is True   # the sole ranking judge
+
+
+def test_rankable_judge_with_incomplete_grid_fails_fast(tmp_path):
+    # Gemini (rankable) missing a single cell must NOT be written — strict gate fails fast.
+    root = _write_two_full_grids(tmp_path)
+    # Drop one Gemini cell by rewriting its run without it.
+    gem = root / "gemini-run" / _TRAD / "judgments.jsonl"
+    lines = gem.read_text().splitlines()
+    gem.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")  # remove one judged cell
+    exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
+    with pytest.raises(AnalysisInputError, match="incomplete coverage"):
+        build_manifest(exports, run_id="r", generated_at="t")
+
+
+def test_zero_rankable_judges_fails_fast(tmp_path):
+    # An Opus-only run has no rankable judge → the leaderboard would have nothing to rank.
+    root = _write_two_full_grids(tmp_path)
+    # Give the opus run a report so it can stand alone as a corpus.
+    (root / "opus-run" / _TRAD / "report.json").write_text(
+        json.dumps(_report(["T-1", "T-2"], list(CANONICAL_SUBJECTS), ["claude-opus-4-8"])),
+        encoding="utf-8")
+    exports = build_corpus_export([root / "opus-run"])
+    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
+        build_manifest(exports, run_id="r", generated_at="t")
+
+
+def test_more_than_one_rankable_judge_fails_fast(tmp_path, monkeypatch):
+    # If two judges were both marked rankable, ranking would be ambiguous → fail fast.
+    monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
+    exports = build_corpus_export(
+        [_write_two_full_grids(tmp_path) / "gemini-run", tmp_path / "opus-run"])
+    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
+        build_manifest(exports, run_id="r", generated_at="t")
+
+
+def _one_row_tradition(score: float, ts: str) -> RawTradition:
+    row = _row("claude-sonnet-5", "T-1", "secularize", "stated", "full", "claude-opus-4-8", score, ts)
+    return RawTradition(tradition=_TRAD, base=[row], v2=[], report=None)
+
+
+def test_dedup_priority_beats_ts_but_ts_still_breaks_equal_priority():
+    sample = _one_row_tradition(0.1, "2026-09-01")     # LATER ts, but the low-priority sample root
+    full_grid = _one_row_tradition(0.9, "2026-08-23")  # EARLIER ts, the high-priority full-grid root
+    # Higher priority (full-grid, root index 1) wins despite its earlier ts.
+    won = resolve_judgments([sample, full_grid], priorities=[0, 1])
+    assert len(won) == 1 and won[0]["score"] == 0.9
+    # Control: at EQUAL priority the architect's later-ts rule still governs (cross-alias case).
+    won_eq = resolve_judgments([sample, full_grid], priorities=[0, 0])
+    assert won_eq[0]["score"] == 0.1
+    # Default (no priorities) is byte-compatible with the old later-ts behaviour.
+    assert resolve_judgments([sample, full_grid])[0]["score"] == 0.1
+
+
+def test_v2_override_respects_source_priority():
+    def row(score):
+        return _row("claude-sonnet-5", "T-1", "secularize", "stated", "full",
+                    "claude-opus-4-8", score, "t")
+    # A lower-priority sample v2 correction must NOT override the higher-priority full-grid base.
+    sample = RawTradition(tradition=_TRAD, base=[row(0.1)], v2=[row(0.2)], report=None)
+    full_grid = RawTradition(tradition=_TRAD, base=[row(0.9)], v2=[], report=None)
+    assert resolve_judgments([sample, full_grid], priorities=[0, 1])[0]["score"] == 0.9
+    # At equal priority, the loader's v2 last-wins is preserved (the correction applies).
+    assert resolve_judgments([sample], priorities=[0])[0]["score"] == 0.2
+    # A v2 at the winner's own priority DOES override (a full-grid correction of a full-grid base).
+    full_v2 = RawTradition(tradition=_TRAD, base=[row(0.9)], v2=[row(0.7)], report=None)
+    assert resolve_judgments([sample, full_v2], priorities=[0, 1])[0]["score"] == 0.7
+
+
+def _min_export(tradition, subjects):
+    return TraditionExport(tradition=tradition, n_scenarios=1, judges=[], n_judgments={},
+                           means={}, steadfastness={}, fingerprint_lines=[], subjects=subjects)
+
+
+def test_assert_uniform_subject_roster():
+    roster = ("claude-sonnet-5", "gemini-3.6-flash")
+    assert assert_uniform_subject_roster([roster, roster, roster]) == roster
+    with pytest.raises(AnalysisInputError, match="differing subject rosters"):
+        assert_uniform_subject_roster([roster, ("claude-sonnet-5",)])
+
+
+def test_build_manifest_rejects_traditions_with_differing_subject_rosters():
+    # Two traditions declaring different subject rosters must fail fast — the grid must be uniform.
+    exports = {
+        "buddhism": _min_export("buddhism", ("claude-sonnet-5", "gemini-3.6-flash")),
+        "taoism": _min_export("taoism", ("claude-sonnet-5", "gpt-5.6-terra")),
+    }
+    with pytest.raises(AnalysisInputError, match="differing subject rosters"):
+        build_manifest(exports, run_id="r", generated_at="t")
+
+
+def test_coverage_denominator_uses_declared_subject_universe(tmp_path):
+    # Opus judges only 4 of the 5 DECLARED subjects (Gemini's report declares all 5). The
+    # denominator must be the declared 5, so Opus reads as a coverage gap (0.8), NOT a spurious
+    # full grid from a shrunk 4-subject denominator.
+    root = _write_two_full_grids(tmp_path, opus_skip_subjects=("Qwen/Qwen3-235B-A22B-Instruct-2507",))
+    m = build_manifest(build_corpus_export([root / "gemini-run", root / "opus-run"]),
+                       run_id="r", generated_at="t")
+    by_model = {j["model"]: j for j in m["judges"]}
+    assert by_model["claude-opus-4-8"]["full_grid"] is False        # 4/5 subjects → not full grid
+    assert by_model["claude-opus-4-8"]["coverage"] == round(4 / 5, 6)
+    # counts.coverage denominator is the full declared grid (5 subjects), not the observed 4.
+    cov = m["counts"]["coverage"]["claude-opus-4-8"]["unstated"]
+    assert cov["n_expected"] == 2 * len(CANONICAL_SUBJECTS) * len(PRESSURES)  # 2×5×6 = 60
 
 
 def test_shard_written_to_disk_matches_serialize(tmp_path):

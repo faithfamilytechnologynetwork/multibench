@@ -1,0 +1,151 @@
+id: '110'
+title: extend-the-20260803-opus-valid
+protocol: aspir
+phase: review
+plan_phases:
+  - id: phase_1
+    title: Earn full_grid + rankable + coverage in both exporters
+    status: complete
+  - id: phase_2
+    title: 'SPA: rank by rankable, keep fullGrid for sample captions'
+    status: complete
+  - id: phase_3
+    title: Re-export results/ and results-raw/ for 20260803 in place
+    status: complete
+  - id: phase_4
+    title: Dual-judge paper artifacts + numbers summary
+    status: complete
+current_plan_phase: null
+gates:
+  pr:
+    status: approved
+    requested_at: '2026-09-03T18:24:53.105Z'
+    approved_at: '2026-09-03T18:33:32.048Z'
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: true
+history:
+  - iteration: 1
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter1-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter1-claude.txt
+  - iteration: 2
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter2-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter2-claude.txt
+  - iteration: 3
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter3-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_1-iter3-claude.txt
+  - iteration: 1
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_2-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_2-iter1-claude.txt
+  - iteration: 2
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_2-iter2-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_2-iter2-claude.txt
+  - iteration: 1
+    plan_phase: phase_3
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: COMMENT
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_3-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_3-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_4
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_4-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_4-iter1-claude.txt
+  - iteration: 2
+    plan_phase: phase_4
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_4-iter2-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-110/codev/projects/110-extend-the-20260803-opus-valid/110-phase_4-iter2-claude.txt
+started_at: '2026-09-03T15:21:04.706Z'
+updated_at: '2026-09-03T18:33:32.050Z'
+force_advanced:
+  phase: phase_1
+  iteration: 3
+  max_iterations: 3
+  rebuttal_file: 110-phase_1-iter3-rebuttals.md
+  at: '2026-09-03T16:50:48.222Z'
+context_refreshes:
+  - boundary: plan-phase:phase_2
+    at: '2026-09-03T16:50:50.315Z'
+    acknowledged_at: '2026-09-03T16:50:57.104Z'
+  - boundary: plan-phase:phase_3
+    at: '2026-09-03T17:16:06.067Z'
+    acknowledged_at: '2026-09-03T17:21:14.999Z'
+  - boundary: plan-phase:phase_4
+    at: '2026-09-03T17:34:14.997Z'
+    acknowledged_at: '2026-09-03T17:44:57.681Z'
+  - boundary: enter:review
+    at: '2026-09-03T18:12:45.815Z'
+    acknowledged_at: '2026-09-03T18:12:54.873Z'
+pr_history:
+  - phase: review
+    pr_number: 117
+    branch: builder/aspir-110
+    created_at: '2026-09-03T18:16:21.086Z'
+pr_ready_for_human: false

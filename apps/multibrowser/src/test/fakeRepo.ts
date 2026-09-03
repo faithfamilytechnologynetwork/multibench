@@ -167,10 +167,10 @@ export function resultsFiles(
       "gpt-5.6-terra", "thinkingmachines/Inkling",
     ],
     judges: [
-      { key: "gemini", model: "gemini-3.6-flash", aliases: ["gemini-3.6-flash"], full_grid: true },
+      { key: "gemini", model: "gemini-3.6-flash", aliases: ["gemini-3.6-flash"], full_grid: true, rankable: true, coverage: 1.0 },
       {
         key: "opus", model: "claude-opus-4-8",
-        aliases: ["claude-opus-4-8", "anthropic/claude-opus-4.8"], full_grid: false,
+        aliases: ["claude-opus-4-8", "anthropic/claude-opus-4.8"], full_grid: false, rankable: false, coverage: 0.14,
       },
     ],
     framings: ["unstated", "stated", "guided"],

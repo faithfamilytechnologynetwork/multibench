@@ -66,6 +66,19 @@ function files() {
   return resultsFiles("20260803", { traditions: ["buddhism", "taoism"], shard: shardFor });
 }
 
+// The post-#110/Phase-3 shape: Opus is a FULL-GRID validation judge (rankable:false, coverage 0.999).
+// resultsFiles doesn't parameterize judges, so flip Opus in the manifest JSON in place.
+function filesFullGridOpus() {
+  const f = files();
+  const key = "results/20260803/manifest.json";
+  const m = JSON.parse(f[key]!);
+  const opus = m.judges.find((j: { key: string }) => j.key === "opus");
+  opus.full_grid = true;
+  opus.coverage = 0.999;
+  f[key] = JSON.stringify(m);
+  return f;
+}
+
 /** A counting wrapper to assert the leaderboard adds no on-budget GitHub API calls for results data. */
 function countingFetch(base: ReturnType<typeof fakeFetch>) {
   const calls: string[] = [];
@@ -390,6 +403,34 @@ describe("/results leaderboard", () => {
     expect(drillRows).toHaveLength(1);
     expect(drillRows[0]).toHaveAttribute("data-tradition", "buddhism");
     expect(within(drillRows[0]!).getByTestId("sample-badge")).toBeInTheDocument();
+  });
+
+  it("#110/#50: a FULL-GRID Opus (rankable:false) is validation, shows coverage %, no sample badge, ranking unchanged", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFullGridOpus()));
+    const { router } = renderApp("/results");
+    let rows = await screen.findAllByTestId("standings-row");
+    // Gemini still ranks (top = claude-sonnet-5 0.700) — Opus going full-grid must NOT re-rank.
+    expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.700");
+    // The selector labels Opus "(validation)" even though it is full-grid.
+    expect(within(screen.getByTestId("sel-judge")).getByText(/opus \(validation\)/)).toBeInTheDocument();
+
+    await userEvent.click(within(screen.getByTestId("sel-judge")).getByText(/opus \(validation\)/));
+    const caption = await screen.findByTestId("opus-caption");
+    expect(caption).toHaveTextContent(/full-grid coverage 99\.9%/); // the new coverage-% branch
+    expect(caption.textContent).not.toMatch(/sample/);
+    expect(router.state.location.searchStr).toContain("judge=opus");
+
+    // Ranking UNCHANGED after the switch (nContributing/order intact).
+    rows = screen.getAllByTestId("standings-row");
+    expect(rows[0]).toHaveAttribute("data-subject", "claude-sonnet-5");
+    expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.700");
+
+    // Drill-down renders buddhism (where Opus has data) with NO sample badge — Opus is full-grid.
+    await userEvent.click(within(rows[0]!).getByTestId("standings-expand"));
+    const drill = await screen.findByTestId("drilldown");
+    expect(within(drill).getByText(/buddhism/)).toBeInTheDocument();
+    expect(within(drill).queryByTestId("sample-badge")).toBeNull();
+    expect(within(drill).getByText(/opus — validation/)).toBeInTheDocument();
   });
 
   it("switching the judge to Opus leaves the heat strip (Gemini) unchanged", async () => {

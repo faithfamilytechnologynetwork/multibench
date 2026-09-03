@@ -6,6 +6,7 @@ import { taxonomyValues } from "../lib/model";
 import { FILE, PRESSURES, PRESSURE_GLOSSES } from "../lib/constants";
 import { parseRawSelection, rawSelectionToSearch, type RawSearchRecord, type RawSelection } from "../lib/rawSelection";
 import type { RawCatalog } from "../lib/rawModel";
+import { classifyJudgeRoles } from "../lib/leaderboard";
 import { asRateLimit, resetLabel } from "../lib/rateLimit";
 import {
   ensureTraditionLoaded,
@@ -262,16 +263,22 @@ function JudgementViewer({ traditionId, scenarioId, raw }: {
     return <Notices notices={raw.notices.filter((n) => n.kind !== "source")} />;
   }
 
-  const fullGrid = catalog.judges.filter((j) => j.fullGrid);
-  const sampleJudges = catalog.judges.filter((j) => !j.fullGrid);
+  // Three disjoint roles: the ranking judge (strictly complete → "every transcript"); full-grid
+  // VALIDATION judges (full-grid scale, but with residual gaps under the tolerant badge → not
+  // "every transcript"); and sample judges.
+  const { ranking: rankingJudges, fullGridValidation, sample: sampleJudges } =
+    classifyJudgeRoles(catalog.judges);
+  const withCoverage = (j: { label: string; coverage?: number }) =>
+    j.coverage != null ? `${j.label} (${(j.coverage * 100).toFixed(1)}%)` : j.label;
 
   return (
     <div className="flex flex-col gap-3" data-testid="review-judgement-viewer">
       <p className="text-sm text-default-600">
         Below: a model&rsquo;s real answers under each framing and push, with the judges&rsquo; verdicts
-        interleaved. {fullGrid.length > 0 && <><strong>{fullGrid.map((j) => j.label).join(" & ")}</strong> scores every
-        transcript (it is the ranking judge{fullGrid.length > 1 ? "s" : ""})</>}
-        {sampleJudges.length > 0 && <>; {sampleJudges.map((j) => j.label).join(" & ")} validates a sample</>}.
+        interleaved. {rankingJudges.length > 0 && <><strong>{rankingJudges.map((j) => j.label).join(" & ")}</strong> score
+        {rankingJudges.length > 1 ? "" : "s"} every transcript and rank{rankingJudges.length > 1 ? "" : "s"} the leaderboard</>}
+        {fullGridValidation.length > 0 && <>; {fullGridValidation.map(withCoverage).join(" & ")} validate{fullGridValidation.length > 1 ? "" : "s"} at full-grid scale</>}
+        {sampleJudges.length > 0 && <>; {sampleJudges.map((j) => j.label).join(" & ")} validate{sampleJudges.length > 1 ? "" : "s"} a sample</>}.
         Verdicts run <span className="font-mono">{catalog.scale.min}</span> (off the tradition&rsquo;s guidance) to{" "}
         <span className="font-mono">{catalog.scale.max}</span> (well aligned). Read a few cells: do the scores and
         rationales apply the scoring guide correctly?

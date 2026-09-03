@@ -2,8 +2,10 @@ import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  classifyJudgeRoles,
   computeLeaderboardRows,
   computeStandings,
+  isRankingJudge,
   isSortableColumn,
   type LeaderboardRow,
   rankingJudgeModel,
@@ -87,6 +89,44 @@ describe("computeStandings — mean of per-tradition means", () => {
     expect(rankingJudgeModel(manifest)).toBe("gemini-3.6-flash");
   });
 
+  it("#110: ranks by `rankable`, so a full-grid Opus never becomes the ranking judge", () => {
+    // Opus is listed FIRST and is now full-grid — but rankable:false keeps ranking on Gemini.
+    const m: ResultsManifest = {
+      ...manifest,
+      judges: [
+        { key: "opus", model: "claude-opus-4-8", aliases: ["claude-opus-4-8"], fullGrid: true, rankable: false, coverage: 0.999 },
+        { key: "gemini", model: "gemini-3.6-flash", aliases: ["gemini-3.6-flash"], fullGrid: true, rankable: true, coverage: 1.0 },
+      ],
+    };
+    expect(rankingJudgeModel(m)).toBe("gemini-3.6-flash");
+    expect(isRankingJudge(m.judges[0]!)).toBe(false); // full-grid Opus is validation, not ranking
+    expect(isRankingJudge(m.judges[1]!)).toBe(true);
+  });
+
+  it("#110: classifyJudgeRoles splits ranking / full-grid-validation / sample (review prose)", () => {
+    const roles = classifyJudgeRoles([
+      { key: "gemini", fullGrid: true, rankable: true, coverage: 1.0 },
+      { key: "opus", fullGrid: true, rankable: false, coverage: 0.999 },   // full-grid VALIDATION
+      { key: "terra", fullGrid: false, rankable: false, coverage: 0.14 },  // sample
+    ]);
+    expect(roles.ranking.map((j) => j.key)).toEqual(["gemini"]);
+    expect(roles.fullGridValidation.map((j) => j.key)).toEqual(["opus"]);  // full-grid but not ranking
+    expect(roles.sample.map((j) => j.key)).toEqual(["terra"]);
+    // legacy (no rankable): the full-grid judge is ranking, so it is NOT double-counted as validation
+    const legacy = classifyJudgeRoles([{ key: "gemini", fullGrid: true }, { key: "opus", fullGrid: false }]);
+    expect(legacy.ranking.map((j) => j.key)).toEqual(["gemini"]);
+    expect(legacy.fullGridValidation).toEqual([]);
+    expect(legacy.sample.map((j) => j.key)).toEqual(["opus"]);
+  });
+
+  it("#110: a legacy manifest without `rankable` still ranks Gemini (fullGrid fallback)", () => {
+    // `manifest` here has no `rankable` on any judge (pre-#110 shape).
+    expect(manifest.judges.every((j) => j.rankable === undefined)).toBe(true);
+    expect(rankingJudgeModel(manifest)).toBe("gemini-3.6-flash");
+    expect(isRankingJudge(manifest.judges[0]!)).toBe(true);  // gemini fullGrid → ranking
+    expect(isRankingJudge(manifest.judges[1]!)).toBe(false); // opus !fullGrid → validation
+  });
+
   it("traditionValue returns coverage for a means cell and null for a missing one", () => {
     const tv = traditionValue(shards.a, "gemini-3.6-flash", "claude-sonnet-5", "unstated", "full", "all", 12);
     expect(tv).toEqual({ tradition: "a", value: 0.6, nJudged: 2, nExpected: 2 }); // means uses cell's own nExpected
@@ -123,8 +163,8 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
     const m: ResultsManifest = {
       ...manifest,
       subjects: realManifest.subjects,
-      judges: realManifest.judges.map((j: { key: string; model: string; aliases: string[]; full_grid: boolean }) => ({
-        key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid,
+      judges: realManifest.judges.map((j: { key: string; model: string; aliases: string[]; full_grid: boolean; rankable?: boolean; coverage?: number }) => ({
+        key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid, rankable: j.rankable, coverage: j.coverage,
       })),
       pressures: realManifest.pressures,
       pressureAll: realManifest.pressure_all,

@@ -22,6 +22,8 @@ import pytest
 from analysis.aggregate import breakdown_mean, cell_scores
 from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.export_raw import (
+    RawCorpus,
+    RawTraditionExport,
     SCHEMA_VERSION,
     build_catalog,
     build_raw_corpus,
@@ -31,6 +33,9 @@ from analysis.export_raw import (
     source_fingerprint,
 )
 from analysis.export_results import (
+    JUDGE_UI,
+    build_corpus_export,
+    build_manifest,
     build_tradition_export,
     read_run_root,
     resolve_judgments,
@@ -363,12 +368,149 @@ def test_catalog_is_generic_and_declares_scale_ramp_axes_items(tmp_path):
     assert cat["ramp"][0].startswith("#") and len(cat["ramp"]) == 7  # scoreColor stops, no labels
     assert cat["subjects"] == [{"id": "gpt-5.6-terra", "label": "gpt-5.6-terra"}]
     assert {a["key"] for a in cat["conditionAxes"]} == {"framing", "pressure"}
-    assert cat["judges"] == [{"key": "gemini", "label": "gemini", "fullGrid": True}]
+    assert cat["judges"] == [
+        {"key": "gemini", "label": "gemini", "fullGrid": True, "rankable": True, "coverage": 1.0}]
     assert cat["items"] == [{
         "id": "BUD-001", "label": "BUD-001", "group": "buddhism",
         "shard": "buddhism/BUD-001.json.gz",
     }]
     assert all(isinstance(x, str) for x in cat["ramp"])  # numeric scale, no band labels
+
+
+def _judge_meta(judges, key):
+    """{key: (full_grid, coverage)} from a manifest (key='model') or catalog (key='key')."""
+    label = {"model": "full_grid", "key": "fullGrid"}[key]
+    ui_key = {"gemini-3.6-flash": "gemini", "claude-opus-4-8": "opus"}
+    out = {}
+    for j in judges:
+        name = ui_key.get(j[key], j[key])  # normalize model→ui-key so the two tiers compare
+        out[name] = (j[label], j["coverage"])
+    return out
+
+
+def test_raw_and_score_tiers_emit_identical_earned_full_grid_and_coverage(tmp_path):
+    """The raw catalog and the score manifest must agree on every judge's earned full_grid +
+    coverage (#96) — they derive from the same resolved rows, so they can never diverge."""
+    from analysis.export_results import CANONICAL_SUBJECTS
+
+    # Gemini: COMPLETE grid over all canonical subjects (so the rankable strict gate passes).
+    base, sittings = _grid(list(CANONICAL_SUBJECTS))
+    fg = _full_grid(tmp_path / "fg", base=base, sittings=sittings,
+                    subjects=list(CANONICAL_SUBJECTS), judges=["gemini-3.6-flash"])
+    # Opus: a PARTIAL validation layer — unstated only (all subjects/pressures/scopes), no report.
+    opus_base, opus_sit = [], []
+    for su in CANONICAL_SUBJECTS:
+        for pr in PRESSURES:
+            for scope in ("turn1", "full"):
+                opus_base.append(_jrow(su, "BUD-001", pr, "unstated", scope,
+                                       "claude-opus-4-8", 0.5, "o1"))
+            opus_sit.append(_srow(su, "BUD-001", pr, "unstated"))
+    opus = _write_run(tmp_path / "opus", base=opus_base, sittings=opus_sit)
+
+    score = _judge_meta(build_manifest(build_corpus_export([fg, opus]),
+                                       run_id="r", generated_at="t")["judges"], "model")
+    catalog = _judge_meta(build_catalog(build_raw_corpus([fg, opus]))["judges"], "key")
+    # Gemini earns full-grid at 1.0; Opus is unstated-only → coverage 1/3, badge NOT earned.
+    assert score["gemini"] == (True, 1.0)
+    assert score["opus"][0] is False and score["opus"][1] == round(1 / 3, 6)
+    assert score == catalog  # the two tiers agree, per judge, by construction
+
+
+def _mini_tradition(root: Path, trad: str, scenario: str, subject: str, opus_framings):
+    """One tradition dir: FULL sittings grid, Gemini judging the COMPLETE grid (the rankable
+    full-grid source) and Opus judging only `opus_framings` (a partial validation layer)."""
+    d = root / trad
+    d.mkdir(parents=True)
+    base, sittings = [], []
+    for fr in FRAMINGS:
+        for pr in PRESSURES:
+            sittings.append({"subject": subject, "tradition": trad, "scenario_id": scenario,
+                             "pressure": pr, "framing": fr, "context_prefix": None,
+                             "model": subject, "ts": "t", "turns": list(_TURNS)})
+            for scope in ("turn1", "full"):
+                base.append({"subject": subject, "tradition": trad, "scenario_id": scenario,
+                             "pressure": pr, "framing": fr, "judge": "gemini-3.6-flash",
+                             "scope": scope, "score": 0.5, "ts": "t", "direction": "held the line"})
+                if fr in opus_framings:
+                    base.append({"subject": subject, "tradition": trad, "scenario_id": scenario,
+                                 "pressure": pr, "framing": fr, "judge": "claude-opus-4-8",
+                                 "scope": scope, "score": 0.5, "ts": "t", "direction": "held the line"})
+    (d / "judgments.jsonl").write_text("".join(json.dumps(r) + "\n" for r in base), encoding="utf-8")
+    (d / "sittings.jsonl").write_text("".join(json.dumps(r) + "\n" for r in sittings), encoding="utf-8")
+    (d / "report.json").write_text(json.dumps(
+        {"tradition": trad, "subjects": [subject], "judges": ["gemini-3.6-flash"],
+         "by_scenario": {scenario: {}}}), encoding="utf-8")
+
+
+def test_limit_coverage_counts_all_traditions(tmp_path):
+    """A --limit export writes fewer shards but coverage still spans ALL traditions (no outer
+    break): the second tradition's missing 'guided' Opus verdicts pull the non-rankable Opus judge
+    below full-grid even though only the first tradition's shard is written. Gemini stays the
+    strictly-complete rankable judge throughout."""
+    from analysis.export_raw import write_dataset
+    root = tmp_path / "run"
+    _mini_tradition(root, "buddhism", "BUD-001", "gpt-5.6-terra", opus_framings=FRAMINGS)  # opus complete
+    _mini_tradition(root, "taoism", "TAO-001", "gpt-5.6-terra", opus_framings=("unstated", "stated"))
+    write_dataset([root], tmp_path / "out", "r", limit=1)  # only the first scenario's shard
+    manifest = json.loads((tmp_path / "out" / "r" / "manifest.json").read_text())
+    shards = list((tmp_path / "out" / "r").rglob("*.json.gz"))
+    assert len(shards) == 1  # the limit really did cap shard writing
+    gem = next(j for j in manifest["judges"] if j["key"] == "gemini")
+    opus = next(j for j in manifest["judges"] if j["key"] == "opus")
+    assert gem["fullGrid"] is True and gem["rankable"] is True
+    assert opus["fullGrid"] is False  # taoism's missing 'guided' verdicts counted despite the limit
+    assert opus["coverage"] < 1.0
+
+
+def _cov(judged_by_judge_framing, n_expected):
+    """coverage table: {(judge, framing): n_judged} → {judge: {framing: {n_judged, n_expected}}}."""
+    judges = {j for (j, _f) in judged_by_judge_framing}
+    return {j: {fr: {"n_judged": judged_by_judge_framing.get((j, fr), 0), "n_expected": n_expected}
+                for fr in FRAMINGS} for j in judges}
+
+
+def test_raw_catalog_accepts_exactly_one_strictly_complete_rankable():
+    from analysis.export_raw import _catalog_doc
+    cov = _cov({("gemini-3.6-flash", fr): 10 for fr in FRAMINGS}, 10)
+    cat = _catalog_doc([], [], ["gemini-3.6-flash"], "fp", "cfp", cov,
+                       strict_judged={"gemini-3.6-flash": 30}, strict_expected=30)
+    assert [(j["key"], j["rankable"]) for j in cat["judges"]] == [("gemini", True)]
+
+
+def test_raw_catalog_rejects_zero_rankable_judges():
+    from analysis.export_raw import _catalog_doc
+    cov = _cov({("claude-opus-4-8", fr): 10 for fr in FRAMINGS}, 10)  # opus only, non-rankable
+    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
+        _catalog_doc([], [], ["claude-opus-4-8"], "fp", "cfp", cov,
+                     strict_judged={"claude-opus-4-8": 30}, strict_expected=30)
+
+
+def test_raw_catalog_rejects_multiple_rankable_judges(monkeypatch):
+    from analysis.export_raw import _catalog_doc
+    monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
+    cov = _cov({(j, fr): 10 for j in ("gemini-3.6-flash", "claude-opus-4-8") for fr in FRAMINGS}, 10)
+    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
+        _catalog_doc([], [], ["claude-opus-4-8", "gemini-3.6-flash"], "fp", "cfp", cov,
+                     strict_judged={"gemini-3.6-flash": 30, "claude-opus-4-8": 30}, strict_expected=30)
+
+
+def test_build_catalog_rejects_differing_subject_rosters():
+    corpus = RawCorpus(
+        per_tradition={
+            "buddhism": RawTraditionExport("buddhism", [], ("claude-sonnet-5", "gemini-3.6-flash")),
+            "taoism": RawTraditionExport("taoism", [], ("claude-sonnet-5", "gpt-5.6-terra")),
+        },
+        subjects=[], judges=[], resolved=[])
+    with pytest.raises(AnalysisInputError, match="differing subject rosters"):
+        build_catalog(corpus)
+
+
+def test_raw_catalog_rejects_strictly_incomplete_rankable():
+    from analysis.export_raw import _catalog_doc
+    cov = _cov({("gemini-3.6-flash", fr): 10 for fr in FRAMINGS}, 10)  # tolerant badge would pass
+    with pytest.raises(AnalysisInputError, match="not strictly complete"):
+        _catalog_doc([], [], ["gemini-3.6-flash"], "fp", "cfp", cov,
+                     strict_judged={"gemini-3.6-flash": 29}, strict_expected=30)  # one turn1 cell short
 
 
 # ── Agreement with the score tier + field allowlist ─────────────────────────────────

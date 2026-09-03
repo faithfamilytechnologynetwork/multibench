@@ -58,7 +58,7 @@ AFB 0–4 explorer) uses the identical structure with different values. Nothing 
 | `scale` | numeric score domain `{min, center, max}` (MultiBench: `-1 / 0 / +1`). No band names. |
 | `ramp` | the diverging color-ramp stops (the `scoreColor` colormap), catalog-declared data. |
 | `subjects` | `[{id, label}]` — catalog-declared (the run's subjects, not a leaderboard set). |
-| `judges` | `[{key, label, fullGrid}]` — `key` is the UI short name (`gemini`/`opus`); `fullGrid=false` (Opus honest-sample) is badged by the viewer. |
+| `judges` | `[{key, label, fullGrid, rankable, coverage}]` — `key` is the UI short name (`gemini`/`opus`). `fullGrid` is the **earned** coverage badge (tolerant; #96), `rankable` the **static** ranking role (the raw viewer defaults its judge to the rankable one), `coverage` the full-scope fraction. A judge below full-grid is badged a sample by the viewer; a full-grid validation judge is not. (`rankable`/`coverage` optional for pre-#110 / non-MB catalogs.) |
 | `conditionAxes` | `[{key, label, values:[{id,label}]}]` — MultiBench ships `framing` + `pressure`; the viewer iterates these generically. |
 | `groupBy` | the item grouping axis (`{key:"tradition", label}`). |
 | `scopes` | `[{id, label}]` — `turn1` (initial) / `full` (post-pressure). |
@@ -161,8 +161,17 @@ uv --project workflows/analysis run python -m analysis export-raw \
   tmp/judging-runs/20260803-merged \
   tmp/judging-runs/20260803-unstated-opus \
   tmp/judging-runs/20260803-framings-opus-sample \
+  tmp/judging-runs/20260823-opus-fullgrid \
   --run-id 20260803 --out results-raw
 ```
+
+The **full-grid Opus** layer (`20260823-opus-fullgrid`, #110) is passed **last** (root-order
+precedence → full-grid wins any sample overlap), so both tiers stamp the same new `fingerprint` and
+the raw catalog carries the earned Opus `fullGrid: true` / `rankable: false` / `coverage`.
+**Re-exporting rewrites every gz shard (~132 MB)**, so the Railway **baked** bundle goes
+fingerprint-stale and must be re-baked (`railway up --no-gitignore`) — `resolveRawSource` fails safe
+to the committed GitHub tier meanwhile. From a builder worktree the source roots are at
+`../../tmp/judging-runs/…`.
 
 Commit **only** the `results-raw/<run-id>/` output (never from the gitignored
 `tmp/judging-runs/`). Re-running with the same inputs is **byte-stable** (sorted keys, gzip

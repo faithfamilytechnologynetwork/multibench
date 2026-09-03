@@ -12,7 +12,19 @@ describe("parseRawSelection", () => {
     expect(sel.b).toBeNull();
     expect(sel.conditions).toEqual({ framing: "unstated", pressure: "secularize" });
     expect(sel.scope).toBe("turn1");
-    expect(sel.judge).toBe("gemini"); // fullGrid judge preferred over opus
+    expect(sel.judge).toBe("gemini"); // rankable judge (Gemini) is the default, not Opus
+  });
+
+  it("#110: defaults to the rankable judge even when a validation judge is also full-grid", () => {
+    // Opus listed first and full-grid, but rankable:false → Gemini stays the default judge.
+    const c = {
+      ...catalog,
+      judges: [
+        { key: "opus", label: "opus", fullGrid: true, rankable: false, coverage: 0.999 },
+        { key: "gemini", label: "gemini", fullGrid: true, rankable: true, coverage: 1.0 },
+      ],
+    };
+    expect(parseRawSelection({}, c).judge).toBe("gemini");
   });
 
   it("honors valid values and falls back on out-of-vocab ones (fail-soft deep links)", () => {

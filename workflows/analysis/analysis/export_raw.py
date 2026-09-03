@@ -38,12 +38,17 @@ from analysis.export_results import (
     CANONICAL_SUBJECTS,
     JUDGE_UI,
     SCOPES,
+    Coverage,
     RawTradition,
     _JUDGMENTS,
     _JUDGMENTS_V2,
     _REPORT,
     _read_rows,
     _scenario_universe,
+    assert_uniform_subject_roster,
+    coverage_counts_from_judged,
+    earns_full_grid,
+    judge_coverage,
     normalize_subject,
     resolve_judgments,
 )
@@ -226,6 +231,7 @@ class RawTraditionExport:
 
     tradition: str
     scenarios: list[RawScenario]
+    subjects: tuple[str, ...] = ()  # report-declared subject universe (coverage denominator)
 
 
 @dataclass(frozen=True)
@@ -419,7 +425,8 @@ def build_tradition_raw(tradition: str, raws: list[RawTradition],
         _build_scenario(sc, tradition, sittings_by_scenario[sc], verdicts_by_cell)
         for sc in sorted(sitting_scenarios)
     ]
-    return RawTraditionExport(tradition=tradition, scenarios=scenarios)
+    return RawTraditionExport(tradition=tradition, scenarios=scenarios,
+                              subjects=tuple(sorted(expected_subjects)))
 
 
 def _report_subjects(raws: list[RawTradition]) -> set[str]:
@@ -464,7 +471,10 @@ def iter_tradition_raw(
                 f"transcript source; exactly one full-grid run is expected"
             )
         sittings = read_full_grid_sittings(fg_roots[0] / tradition / _SITTINGS, tradition)
-        resolved = resolve_judgments(raws)  # resolve once; reused for export + fingerprint
+        # Root-order dedup priority (later root wins ties), matching the score tier so a full-grid
+        # layer passed AFTER a sample layer wins any same-judge overlap.
+        priorities = list(range(len(raws)))
+        resolved = resolve_judgments(raws, priorities)  # resolve once; reused for export + fingerprint
         export = build_tradition_raw(tradition, raws, sittings, resolved)
         yield tradition, export, resolved
 
@@ -512,8 +522,27 @@ def _shard_path(tradition: str, scenario_id: str) -> str:
     return f"{tradition}/{scenario_id}.json.gz"
 
 
+def accumulate_full_scope_judged(judged: dict[tuple[str, str], int], resolved: list[dict]) -> None:
+    """Fold one tradition's resolved rows into a running per-(judge, framing) full-scope count.
+
+    Streaming-safe (tiny counters; the caller keeps freeing the per-tradition rows). Counts the
+    **full** resolved rows only — a `--limit` fixture still reports true judge coverage because
+    coverage is over the resolved judgments, not the written shard subset.
+    """
+    for row in resolved:
+        if row["scope"] == "full":
+            key = (row["judge"], row["framing"])
+            judged[key] = judged.get(key, 0) + 1
+
+
+def _strict_grid_size(total_scenarios: int, n_subjects: int) -> int:
+    """The complete both-scope grid: scenarios × subjects × pressures × framings × scopes."""
+    return total_scenarios * n_subjects * len(PRESSURES) * len(FRAMINGS) * len(SCOPES)
+
+
 def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str],
-                 fingerprint: str, content_fingerprint: str,
+                 fingerprint: str, content_fingerprint: str, coverage: Coverage,
+                 strict_judged: dict[str, int], strict_expected: int,
                  presets: list[dict] | None = None) -> dict:
     """The generic run catalog (manifest) from lightweight pieces — no transcripts held.
 
@@ -525,13 +554,38 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
     the ``results/`` score tier for cross-tier reconciliation; ``content_fingerprint`` (the
     shard byte stream — transcripts+contexts+verdicts) is raw-tier-only and drives baked-vs-GitHub
     coherence, catching transcript/context corrections the judgment fingerprint misses.
+
+    ``coverage`` is the shared coverage table (per judge, per framing) built from the SAME resolved
+    rows the score tier uses, so the raw catalog's earned ``fullGrid``/``coverage`` and the score
+    manifest's agree by construction; ``rankable`` is the static ranking role.
     """
     judges = []
     for model in judge_models:
         ui = JUDGE_UI.get(model)
         if ui is None:
             raise AnalysisInputError(f"no UI metadata for judge {model!r}")
-        judges.append({"key": ui["key"], "label": ui["key"], "fullGrid": ui["full_grid"]})
+        judges.append({
+            "key": ui["key"], "label": ui["key"],
+            "fullGrid": earns_full_grid(coverage, model),
+            "rankable": ui["rankable"],
+            "coverage": round(judge_coverage(coverage, model), 6),
+        })
+    # Ranking-integrity guards — the MultiBench raw catalog carries the same ranking invariant as
+    # the score manifest (this builder is MB-specific; the AFB tier bypasses it via RawTierWriter).
+    # EXACTLY ONE rankable judge, and that judge must be STRICTLY complete across the WHOLE both-scope
+    # grid (not merely the tolerant full-scope badge) — so a rankable judge missing turn1 or stray
+    # cells can never be published. Strict completeness is a pooled count: resolved rows are unique
+    # per cell and confined to the declared grid, so judged == grid ⟺ every cell covered.
+    rankable_models = [m for m in judge_models if JUDGE_UI.get(m, {}).get("rankable")]
+    if len(rankable_models) != 1:
+        raise AnalysisInputError(
+            f"raw catalog needs exactly one rankable judge, found {rankable_models} "
+            f"among {list(judge_models)}")
+    ranker = rankable_models[0]
+    if strict_judged.get(ranker, 0) != strict_expected:
+        raise AnalysisInputError(
+            f"raw catalog rankable judge {ranker!r} is not strictly complete "
+            f"({strict_judged.get(ranker, 0)}/{strict_expected} cells) — cannot mark it rankable")
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -703,6 +757,17 @@ def build_catalog(corpus: RawCorpus) -> dict:
     items = [_item_ref(s) for export in corpus.per_tradition.values() for s in export.scenarios]
     cells: dict[PresetCell, dict[str, float]] = {}
     accumulate_cell_scores(corpus.resolved, cells)
+    # Coverage over the whole corpus's resolved rows (same slicing as the score tier); the
+    # denominator's subject count is the report-DECLARED universe, not observed rows.
+    judged: dict[tuple[str, str], int] = {}
+    accumulate_full_scope_judged(judged, corpus.resolved)
+    assert_uniform_subject_roster(e.subjects for e in corpus.per_tradition.values())
+    total_scenarios = sum(len(e.scenarios) for e in corpus.per_tradition.values())
+    n_subjects = len({s for e in corpus.per_tradition.values() for s in e.subjects})
+    coverage = coverage_counts_from_judged(judged, set(corpus.judges), total_scenarios, n_subjects)
+    strict_judged: dict[str, int] = {}
+    for r in corpus.resolved:
+        strict_judged[r["judge"]] = strict_judged.get(r["judge"], 0) + 1
     # Content fingerprint over the same canonical shard bytes the writer would emit (order-independent).
     content_lines = [
         content_fingerprint_line(_shard_path(s.group, s.scenario_id), json_bytes(build_shard(s)))
@@ -710,6 +775,7 @@ def build_catalog(corpus: RawCorpus) -> dict:
     ]
     return _catalog_doc(items, corpus.subjects, corpus.judges,
                         source_fingerprint(corpus.resolved), combine_fingerprint(content_lines),
+                        coverage, strict_judged, _strict_grid_size(total_scenarios, n_subjects),
                         compute_presets(cells))
 
 
@@ -741,10 +807,27 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
     judges_present: set[str] = set()
     fp_lines: list[str] = []             # small serialized lines, not full resolved dicts
     cells: dict[PresetCell, dict[str, float]] = {}  # per-cell judge scores (numbers only) for presets
+    judged_full: dict[tuple[str, str], int] = {}  # per (judge, framing) full-scope coverage counter
+    strict_judged: dict[str, int] = {}   # per-judge ALL-scope cell count (strict completeness)
+    subjects_all: set[str] = set()       # the run's subject universe (limit-independent denominator)
+    rosters: list[tuple[str, ...]] = []  # each tradition's declared roster (must be uniform)
+    total_scenarios = 0                  # full-grid scenario count (limit-independent)
     n_scenarios = 0
 
     for tradition, export, resolved in iter_tradition_raw(roots):
         _require_safe_segment(tradition, "tradition")
+        # Coverage over the FULL resolved rows of this tradition (limit-independent), before the
+        # shard-write limit truncates anything.
+        # Coverage/judges are accumulated over the FULL resolved rows of EVERY tradition — never
+        # truncated by --limit — so a limited dev fixture still reports true judge coverage. The
+        # subject count is the report-DECLARED universe (not observed rows).
+        accumulate_full_scope_judged(judged_full, resolved)
+        for r in resolved:
+            strict_judged[r["judge"]] = strict_judged.get(r["judge"], 0) + 1
+        subjects_all.update(export.subjects)
+        rosters.append(export.subjects)
+        judges_present.update(r["judge"] for r in resolved)
+        total_scenarios += len(export.scenarios)
         written_here: set[str] = set()
         for scenario in export.scenarios:
             if limit is not None and n_scenarios >= limit:
@@ -756,18 +839,20 @@ def write_dataset(roots: list[str | Path], out_root: str | Path, run_id: str,
             items.append(_item_ref(scenario))
             written_here.add(scenario.scenario_id)
             n_scenarios += 1
-        # Fingerprint + judges over exactly the WRITTEN scenarios of this tradition (for a full
-        # export that is every row → matches the results/ tier; for a --limit fixture, the
-        # written subset). The full `resolved` dicts are freed as the loop moves on.
+        # Fingerprint over exactly the WRITTEN scenarios of this tradition (for a full export that
+        # is every row → matches the results/ tier; for a --limit fixture, the written subset).
+        # The full `resolved` dicts are freed as the loop moves on. NOTE: no outer break — later
+        # traditions still contribute coverage even once the shard limit is reached.
         written_rows = [r for r in resolved if r["scenario_id"] in written_here]
         fp_lines.extend(fingerprint_line(r) for r in written_rows)
-        judges_present.update(r["judge"] for r in written_rows)
         accumulate_cell_scores(written_rows, cells)  # for presets (numbers only)
-        if limit is not None and n_scenarios >= limit:
-            break
 
+    assert_uniform_subject_roster(rosters)  # one uniform subject grid across traditions
     subjects = [s for s in CANONICAL_SUBJECTS if s in subjects_present]
+    coverage = coverage_counts_from_judged(
+        judged_full, set(judges_present), total_scenarios, len(subjects_all))
     catalog = _catalog_doc(items, subjects, sorted(judges_present),
                            combine_fingerprint(fp_lines), writer.content_fingerprint,
+                           coverage, strict_judged, _strict_grid_size(total_scenarios, len(subjects_all)),
                            compute_presets(cells))
     return writer.write(catalog, max_shard_bytes=MAX_SHARD_BYTES, max_total_bytes=MAX_TOTAL_BYTES)

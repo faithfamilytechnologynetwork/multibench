@@ -88,7 +88,10 @@ export function RawRunPage() {
     );
   }
 
-  const judge = catalog.judges.find((j) => j.fullGrid)?.key ?? catalog.judges[0]?.key ?? "";
+  const judge =
+    catalog.judges.find((j) => j.rankable)?.key ??
+    catalog.judges.find((j) => j.fullGrid)?.key ??
+    catalog.judges[0]?.key ?? "";
   const a = catalog.subjects[0]?.id ?? "";
   const b = catalog.subjects[1]?.id ?? "";
   const scope = catalog.scopes[0]?.id ?? "";

@@ -58,7 +58,9 @@ export function parseRawSelection(search: RawSearchRecord, catalog: RawCatalog):
   const scope = rawScope && scopes.has(rawScope) ? rawScope : catalog.scopes[0]?.id ?? "";
 
   const rawJudge = one(search.judge);
-  const defaultJudge = (judges.find((j) => j.fullGrid) ?? judges[0])?.key ?? "";
+  // Default to the ranking judge (Gemini); fall back to a full-grid judge (pre-#110) then the first.
+  const defaultJudge =
+    (judges.find((j) => j.rankable) ?? judges.find((j) => j.fullGrid) ?? judges[0])?.key ?? "";
   const judge = rawJudge && judges.some((j) => j.key === rawJudge) ? rawJudge : defaultJudge;
 
   return { a, b, conditions, scope, judge };
