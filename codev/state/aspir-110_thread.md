@@ -254,3 +254,16 @@ Protocol: ASPIR (strict mode, porch-driven).
   reconciliation skips in-worktree (verified out-of-band), Gemini aliases +google/gemini-3.6-flash,
   Railway re-bake=architect post-merge, --limit raw O(full corpus), raw rankable strictly gated,
   badge coverage full-scope-only, RawRunPage default-judge untested-directly, spend/residual/programme deltas vs estimates.
+- phase_4 iter1: BOTH RC (agreement stats + $1,313.29 spend verified exact, but tab:djtier reshaped,
+  programme total wrong, no paper handoff, not reproducible). FIXED:
+  - tab_dualjudge_tier.tex back to the paper's 6-col tier×framing shape over the FULL grid; agreement
+    stats to a SEPARATE tab_dualjudge_agree.tex; write_rows convention (no trailing \\).
+  - route bridge CORRECTED to 2,597 (sample-root dual-alias; was 1,299 buggy). Programme total
+    137,931→191,202 = 93420 + 95982 Opus (31114 unstated + 62271 fullgrid s+g + 2597 bridge) + 1800 pilot.
+  - RETRACTED "42,711 is an estimate" — it's published (40,114 committed + 2,597 bridge).
+  - Total Opus spend $2,380.56 (unstated 772.77 + sample 294.50 + fullgrid 1313.29); incremental 1313.29.
+  - PERSISTED generator committed: docs/analysis/110-dualjudge-fullgrid-figs.py (MB_ROOT override).
+  - Paper handoff section added (tab:djtier caption, agree table wrapper, fig 2→3 panel, §2.3 0.777→0.781,
+    cost 42,711/$1,310→95,982/$2,380.56); noted paper_figs_multibench.py would revert on re-run.
+  - guided 3rd/4th tie caveat (Gemini 0.911 vs GPT 0.910); residual-cause phrasing fixed.
+- Next: commit summary+generator, porch done → phase_4 iter2.
