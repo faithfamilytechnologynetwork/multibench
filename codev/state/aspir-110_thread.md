@@ -267,3 +267,21 @@ Protocol: ASPIR (strict mode, porch-driven).
     cost 42,711/$1,310→95,982/$2,380.56); noted paper_figs_multibench.py would revert on re-run.
   - guided 3rd/4th tie caveat (Gemini 0.911 vs GPT 0.910); residual-cause phrasing fixed.
 - Next: commit summary+generator, porch done → phase_4 iter2.
+- phase_4 iter2: codex RC (spend omitted sample v2 re-judges), claude RC (.tex conventions + handoff).
+  FIXED: spend incl v2 ($2,381.98 total); tab conventions (signed/U+2212/full labels); .bak idempotent;
+  orphan rank table removed; full paper handoff; sign-flip 1.5%. iter3: BOTH APPROVE → phase_4 ✓.
+
+## Review phase + PR
+- Wrote codev/reviews/110-...md (SC verification, deviations, per-phase consult dispositions, arch/lessons
+  updates, architect handoff, latent items, flaky=none). arch-critical refined for #96; lessons-learned
+  appended (cold). e2e check passes (|| echo skipped). PR #117 created (Closes #110, #96). Recorded via
+  porch done --pr 117.
+- PR-review consult: claude APPROVE, codex RC on 2 items — BOTH FIXED:
+  (1) merged origin/main (was 11 behind; clean auto-merge of arch-critical.md; suites re-run: vitest 394,
+      pytest 248/6-skip). CLAUDE.md generated block is a tooling derivative (source arch-critical.md correct).
+  (2) review doc corrected: 2-way not 3-way; phase_1 FORCE-ADVANCED at max-iter (codex RC iter3, conceded+
+      implemented on branch), NOT unanimous; 254/254 not 250/254; + latent notes (judge-set asymmetry,
+      uniform-subject universe). Pushed. Corrected the architect (I'd wrongly said "all 4 unanimous").
+- **pr GATE reached — WAITING FOR HUMAN APPROVAL.** Ran `porch gate 110`. Do NOT run `porch approve 110 pr`
+  until the architect explicitly approves. Architect notified (PR ready + correction). After approval:
+  porch approve 110 pr → merge (merge commit, not squash) → porch done --merged 117 → verify phase.
