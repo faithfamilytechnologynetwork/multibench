@@ -70,29 +70,48 @@ route bridge + the router pilot):
   `claude-opus-4-8` $5 / $25 per M in/out; cache-write ×2, cache-read ×0.1, batch ×0.5):
   - **New full-grid stated+guided judging: $1,313.29** (62,267 records; 61,648 batch $1,253.56 +
     619 live $59.73) — the incremental cost of #110.
-  - **Total Opus validation (all layers): $2,380.56** (unstated $772.77 + sample $294.50 +
-    full-grid $1,313.29). This replaces the cost appendix's approximate ≈$1,310 line for the
-    validation layers.
+  - **Total Opus validation (all layers): $2,381.98** (unstated $772.77 + sample $295.92 —
+    including the sample's 20 `judgments_v2.jsonl` re-judgments — + full-grid $1,313.29). This
+    replaces the cost appendix's approximate ≈$1,310 line for the validation layers; the all-in
+    programme Total (`tab:cost`, currently ≈$3,700) rises to ≈$4,800.
 
 ## Paper edits the architect must wire (this pass regenerated the inputs, not the prose)
 
-- **`tab:djtier`** (`tab_dualjudge_tier.tex`): now the full stated+guided **grid**, not a sample —
-  update the caption ("matched stated+guided sample" → "full stated+guided grid") and the n-cell
-  column (now 4,470–6,479 per tier×framing). Same 6-column shape.
+Line numbers are for `multibench-paper.tex` at the time of writing.
+
+- **`tab:djtier`** (`tab_dualjudge_tier.tex`, `:1207-1222`): now the full stated+guided **grid**,
+  not a sample — update the caption (`:1209` "matched stated+guided sample" → "full stated+guided
+  grid") and the n-cell column (now 4,470–6,479). Same 6-column shape, same sign/U+2212 convention.
+- **`tab:djtier` commentary** (`:1166-1171`): the guided low-/medium-normativity deflation is still
+  ≈0.05–0.06 (−0.06 / −0.05), but the high-normativity tier now moves **−0.01 (guided) / +0.00
+  (stated)** (was +0.01 stated), and the guided high-normativity Opus mean is **+0.70 vs +0.85
+  medium** (was +0.61 vs +0.87).
+- **Sign-flip statistic** (`:1160`): "1.8% of sampled framing cells are a Gemini +1 that Opus
+  scores −1" → **1.5%** on the full framing grid.
 - **New agreement table** (`tab_dualjudge_agree.tex`): per-framing r / bias / within-±0.5 over the
   full grid — add a `\begin{tabular}{@{}lrrrr@{}}` wrapper (Slice, n, r, bias, within ±0.5).
-- **`fig_dual_judge.pdf`**: now **3 panels** (Unstated / Stated / Guided full grid). Update the
-  caption ("Left: full unstated grid. Right: stated+guided sample" → the three full-grid framings).
-- **§2.3 / App-D prose**: the sample-era "r = 0.777, bias −0.034, 94.1%, 82.1% exact" becomes the
-  full-grid stated+guided "r = 0.781, bias −0.036, 95.0%, 82.4% exact"; unstated stays 0.854.
-- **Cost appendix** (programme total + the Opus validation cost line): 137,931 → 191,202;
-  "42,711 … ≈ $1,310" → 95,982 / $2,380.56.
+- **`fig_dual_judge.pdf`** (caption `:1175-1176`): now **3 panels** (Unstated / Stated / Guided
+  full grid) — replace "Left: full unstated grid. Right: stated+guided sample."
+- **§2.3 / App-D prose**: the sample-era "r = 0.777, bias −0.034, 94.1%, 82.1% exact" (`:1156`,
+  `:618`) → full-grid stated+guided "r = 0.781, bias −0.036, 95.0%, 82.4% exact"; unstated stays
+  0.854. **Sample methodology** (`:1143-1147`, `:614-618`): "hash-stratified 75-scenario
+  stated+guided sample … all 9,000 designed judgments" no longer describes the layer — it is now
+  the full stated+guided grid (the sample is retained only as a gap-filler).
+- **Counts everywhere**: `137,931 → 191,202` (`:193`, `:378-380`, `app:cost`); "stratified sample
+  (42,711 judgments)" (`:377`) → the full-grid 95,982 (31,114 unstated + 62,271 stated+guided +
+  2,597 route bridge). All-in cost ≈$3,700 → ≈$4,800 (`:380`, `tab:cost` Total); the Opus
+  validation cost line (`:1274`) "42,711 … ≈ $1,310" → 95,982 / $2,381.98.
+- **Disclosures** (`:1238-1243`): the sample's two-route collection + the 2,597-cell route bridge
+  (r=0.949) still hold (the sample layer is retained). But wherever the Opus alias/overlap dedup is
+  described as "the later verdict / later `ts` is the one counted," it is superseded by **root-order
+  `(priority, ts)` precedence** — the full-grid layer wins any overlap regardless of `ts`.
 - **`tmp/paper_figs_multibench.py`** still reads the sample-era `framings_sample` / `framings_tier`
   bundle keys and emits the 2-panel sample figure with asserts pinned to the sample n — a standard
   re-run would **revert** the dual-judge artifacts. Its dual-judge table/figure/asserts should be
-  removed or pointed at `docs/analysis/110-dualjudge-fullgrid-figs.py`, which is the canonical
-  generator for the dual-judge artifacts after #110. (`refresh_dualjudge_stats.py` still refreshes
-  the other, non-full-grid `dual_judge` sub-keys; this script only adds `dual_judge.full_grid`.)
+  removed or pointed at `docs/analysis/110-dualjudge-fullgrid-figs.py`, the canonical generator for
+  the dual-judge artifacts after #110. (`refresh_dualjudge_stats.py` still refreshes the other,
+  non-full-grid `dual_judge` sub-keys; this script only adds `dual_judge.full_grid` and keeps the
+  original bundle `.bak` on the first run.)
 
 ## Provenance
 

@@ -52,7 +52,11 @@ ROOTS = [ROOT / "tmp/judging-runs" / r for r in
 TIERS = {"easy": ["buddhism", "taoism", "secular-sage"],
          "medium": ["eastern-christianity", "judaism"],
          "hard": ["roman-catholicism", "sunni-islam"]}
-TIER_SHORT = {"easy": "Low", "medium": "Med.", "hard": "High"}
+TIER_SHORT = {"easy": "Low", "medium": "Medium", "hard": "High"}  # full labels, matching sibling tables
+
+
+def sgn(x):  # explicit sign, U+2212 minus — the paper's table convention ("+0.66" / "−0.03")
+    return f"{x:+.2f}".replace("-", "−")
 FLAB = {"unstated": "Unstated", "stated": "Stated", "guided": "Guided"}
 SLAB = {"claude-sonnet-5": "Sonnet 5", "thinkingmachines/Inkling": "Inkling",
         "gpt-5.6-terra": "GPT-5.6", "gemini-3.6-flash": "Gemini 3.6",
@@ -115,7 +119,9 @@ programme = 93420 + opus_paper + opus_pilot   # Gemini + Opus(incl bridge) + rou
 spend = {}
 for name, root in [("unstated", ROOTS[1]), ("sample", ROOTS[2]), ("fullgrid", ROOTS[3])]:
     tok = {}
-    for p in root.glob("*/judgments.jsonl"):
+    # BOTH judgments.jsonl AND judgments_v2.jsonl — every recorded judgment was an incurred API call
+    # (the sample root carries 20 v2 re-judgments; excluding them under-reports actual spend).
+    for p in list(root.glob("*/judgments.jsonl")) + list(root.glob("*/judgments_v2.jsonl")):
         for line in p.read_text().splitlines():
             if not line.strip():
                 continue
@@ -129,6 +135,10 @@ for name, root in [("unstated", ROOTS[1]), ("sample", ROOTS[2]), ("fullgrid", RO
     spend[name] = round((full + 0.5*bat) / 1e6, 2)
 spend["total_opus"] = round(sum(spend.values()), 2)
 
+# sign-flip rate on the framing (stated+guided) cells: Gemini +1 that Opus scores −1 (paper :1160)
+fr_cells = by_fr["stated"] + by_fr["guided"]
+sign_flip = round(100 * sum(1 for c in fr_cells if gem[c] == 1.0 and opus[c] == -1.0) / len(fr_cells), 1)
+
 print("=== AGREEMENT (full grid) ===")
 for k in ("overall", "unstated", "stated", "guided", "stated_guided"):
     print(f"  {k:14s}: {dual[k]}")
@@ -141,10 +151,13 @@ print(f"  Opus committed {opus_committed} (unstated {opus_unstated} + stated/gui
 print(f"  route bridge {bridge}; Opus paper-convention {opus_paper}; router pilot {opus_pilot}")
 print(f"  PROGRAMME TOTAL (paper convention) = 93420 + {opus_paper} + {opus_pilot} = {programme}")
 print("\n=== OPUS SPEND (usage-computed) ===", spend)
+print("sign-flip (Gemini +1 / Opus −1) on framing cells:", sign_flip, "%")
 
 # ── patch bundle ─────────────────────────────────────────────────────────────
 b = json.loads(BUNDLE.read_text())
-BUNDLE.with_suffix(".json.pre-110-fullgrid.bak").write_text(json.dumps(b, indent=1))
+bak = BUNDLE.with_suffix(".json.pre-110-fullgrid.bak")
+if not bak.exists():  # idempotent — keep the ORIGINAL pre-#110 bundle, don't clobber on re-runs
+    bak.write_text(json.dumps(b, indent=1))
 b.setdefault("dual_judge", {})["full_grid"] = dual
 BUNDLE.write_text(json.dumps(b, indent=1))
 
@@ -164,12 +177,16 @@ for tier, ts in TIERS.items():
     for f in ("stated", "guided"):
         cells = [c for c in by_fr[f] if c[5] == "full" and c[1] in ts]
         o = float(np.mean([opus[c] for c in cells])); g = float(np.mean([gem[c] for c in cells]))
-        tier_rows.append(f"{TIER_SHORT[tier]} & {FLAB[f]} & {o:.2f} & {g:.2f} & {o-g:+.2f} & {len(cells):,} \\\\")
+        tier_rows.append(f"{TIER_SHORT[tier]} & {FLAB[f]} & {sgn(o)} & {sgn(g)} & {sgn(o - g)} & {len(cells):,} \\\\")
 write_rows(TABS / "tab_dualjudge_tier.tex", tier_rows)
 # NEW agreement table (a SEPARATE file — does NOT clobber tab:djtier's tier×framing shape)
+def b3(x):  # signed bias, U+2212 minus, 3dp
+    return f"{x:+.3f}".replace("-", "−")
+
+
 agree_rows = [f"Overall & {dual['overall']['n']:,} & {dual['overall']['r']:.3f} & "
-              f"{dual['overall']['bias']:+.3f} & {dual['overall']['within_half']:.1f}\\% \\\\", "\\midrule"]
-agree_rows += [f"{FLAB[f]} & {dual[f]['n']:,} & {dual[f]['r']:.3f} & {dual[f]['bias']:+.3f} & "
+              f"{b3(dual['overall']['bias'])} & {dual['overall']['within_half']:.1f}\\% \\\\", "\\midrule"]
+agree_rows += [f"{FLAB[f]} & {dual[f]['n']:,} & {dual[f]['r']:.3f} & {b3(dual[f]['bias'])} & "
                f"{dual[f]['within_half']:.1f}\\% \\\\" for f in FRAMINGS]
 write_rows(TABS / "tab_dualjudge_agree.tex", agree_rows)
 
