@@ -23,8 +23,8 @@ export const rawFixtureCatalog = {
     { id: "gpt-5.6-terra", label: "gpt-5.6-terra" },
   ],
   judges: [
-    { key: "gemini", label: "gemini", fullGrid: true },
-    { key: "opus", label: "opus", fullGrid: false },
+    { key: "gemini", label: "gemini", fullGrid: true, rankable: true, coverage: 1.0 },
+    { key: "opus", label: "opus", fullGrid: false, rankable: false, coverage: 0.14 },
   ],
   conditionAxes: [
     { key: "framing", label: "Framing", values: [{ id: "unstated", label: "Unstated" }, { id: "stated", label: "Stated" }] },

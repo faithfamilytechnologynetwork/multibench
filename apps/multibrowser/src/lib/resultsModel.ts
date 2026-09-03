@@ -77,6 +77,10 @@ const JudgeMetaSchema = z.object({
   model: z.string(),
   aliases: z.array(z.string()),
   full_grid: z.boolean(),
+  // `rankable` (the static ranking role) + `coverage` (the earned coverage fraction) are added by
+  // #110; optional so pre-#110 manifests (e.g. 20260813-protestantism) still parse.
+  rankable: z.boolean().optional(),
+  coverage: z.number().optional(),
 });
 
 // judge → framing → {n_judged, n_expected}
@@ -116,6 +120,10 @@ export interface JudgeMeta {
   model: string;
   aliases: string[];
   fullGrid: boolean;
+  /** static ranking role (Gemini only); absent on pre-#110 manifests. */
+  rankable?: boolean;
+  /** earned coverage fraction (full-scope, pooled over framings); absent on pre-#110 manifests. */
+  coverage?: number;
 }
 
 export interface ResultsRunRef {
@@ -215,7 +223,10 @@ export function parseResultsManifest(
       generatedAt: m.generated_at,
       fingerprint: m.fingerprint,
       subjects: m.subjects,
-      judges: m.judges.map((j) => ({ key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid })),
+      judges: m.judges.map((j) => ({
+        key: j.key, model: j.model, aliases: j.aliases, fullGrid: j.full_grid,
+        rankable: j.rankable, coverage: j.coverage,
+      })),
       framings: m.framings,
       pressures: m.pressures,
       pressureAll: m.pressure_all,

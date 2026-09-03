@@ -153,4 +153,28 @@ Protocol: ASPIR (strict mode, porch-driven).
   module docstring fixed; plan Phase 4 "79"→per-framing/scope residual + full-scope caveat.
 - REVIEW-DOC TODOs: judge-set asymmetry (score full/all vs raw all-resolved; unreachable turn1-only);
   --limit raw now O(full corpus); raw rankable now strictly gated (updated from earlier "advisory" note).
-- Next: commit, porch done → iteration 4 (expect unanimity).
+- phase_1 ADVANCED (porch, at max-iter 3; my iter3 concession is committed → final code is the
+  improved version; codex iter3 RC was on pre-concession code).
+
+## Implement phase_2 (SPA: rank by rankable)
+- NB: I prematurely ran `porch done` on phase_2 before implementing (porch cycled done→next). Recovery:
+  implemented phase_2 fully, committed, THEN run the pending consult so it reviews real code.
+- Changes (all backward-compatible; `?? fullGrid` fallback preserves pre-#110 manifests incl. committed
+  20260803 which has no rankable until Phase 3):
+  - resultsModel.ts + rawModel.ts: optional `rankable?`/`coverage?` in zod schema + type + map.
+  - leaderboard.ts: `rankingJudgeModel` → find(rankable) ?? find(fullGrid) ?? gemini; new `isRankingJudge`
+    helper = `rankable ?? fullGrid`.
+  - Ranking-proxy sites → rankable: ResultsPage highlightJudge + selector label + drill caption
+    (reworded, role-based; shows coverage% for full-grid validation); ReviewScenarioPage prose (split
+    coverage 'scores every transcript' from ranking 'ranks the leaderboard'); rawSelection defaultJudge;
+    RawRunPage default judge. Sample-caption sites keep `!fullGrid` (coverage): RawComparison badge,
+    ResultsPage isSample.
+  - CRITICAL fix: leaderboard.test.ts `loadCommitted()` now carries rankable/coverage (else the sealed
+    parity test would fall back to fullGrid→Opus after Phase 3 re-export).
+  - Fixtures: fakeRepo.ts + rawFixture.ts gain rankable/coverage.
+  - New tests (SC6): rankingJudgeModel by rankable (Opus-first full-grid → still Gemini); legacy fallback;
+    isRankingJudge; schema round-trip + backward-compat parse; rawSelection rankable default; #50/#110
+    full-grid-Opus-not-in-standings.
+- Verified: `tsc --noEmit` clean; vitest 393 passed (27 files). Reconciliation (committed 20260803, no
+  rankable yet) still ranks Gemini via fallback.
+- Next: commit phase_2, run pending phase_2 consult.

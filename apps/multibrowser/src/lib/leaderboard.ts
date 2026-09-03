@@ -34,9 +34,24 @@ export interface Standing {
   nContributing: number;
 }
 
-/** The judge model that ranks the leaderboard: the manifest's full-grid judge (Gemini). */
+/** The judge model that ranks the leaderboard: the manifest's `rankable` judge (Gemini).
+ *  `rankable` is the static ranking role (#110), decoupled from the earned `fullGrid` coverage
+ *  badge — a validation judge that reaches full coverage must NOT start ranking. Falls back to the
+ *  first full-grid judge for pre-#110 manifests (which have no `rankable`), then to Gemini. */
 export function rankingJudgeModel(manifest: ResultsManifest): string {
-  return manifest.judges.find((j) => j.fullGrid)?.model ?? "gemini-3.6-flash";
+  return (
+    manifest.judges.find((j) => j.rankable)?.model ??
+    manifest.judges.find((j) => j.fullGrid)?.model ??
+    "gemini-3.6-flash"
+  );
+}
+
+/** Whether a judge is THE ranking judge — its static `rankable` role (#110), falling back to the
+ *  earned `fullGrid` for pre-#110 metadata that predates `rankable`. Works for a score-manifest
+ *  `JudgeMeta` or a raw-catalog `RawJudge` (both carry `rankable?` + `fullGrid`). Distinct from
+ *  coverage: a full-grid *validation* judge (Opus, post-#110) is full-grid but NOT ranking. */
+export function isRankingJudge(judge: { rankable?: boolean; fullGrid: boolean }): boolean {
+  return judge.rankable ?? judge.fullGrid;
 }
 
 /** Resolve a UI judge key (e.g. "opus") to its model id via the manifest. */

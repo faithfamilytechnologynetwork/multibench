@@ -230,6 +230,24 @@ describe("parseResultsManifest / parseResultsShard validation (fail-soft)", () =
     expect(manifest?.coverage?.["gemini-3.6-flash"]?.unstated).toEqual({ nJudged: 10, nExpected: 10 });
   });
 
+  it("#110: round-trips the optional per-judge rankable + coverage fields", () => {
+    const text = resultsFiles("r1")["results/r1/manifest.json"]!;
+    const { manifest } = parseResultsManifest(text, "m");
+    const gem = manifest?.judges.find((j) => j.key === "gemini");
+    const opus = manifest?.judges.find((j) => j.key === "opus");
+    expect([gem?.rankable, gem?.coverage]).toEqual([true, 1.0]);
+    expect([opus?.rankable, opus?.coverage]).toEqual([false, 0.14]);
+  });
+
+  it("#110: a manifest WITHOUT rankable/coverage still parses (backward compat)", () => {
+    const m = JSON.parse(resultsFiles("r1")["results/r1/manifest.json"]!);
+    for (const j of m.judges) { delete j.rankable; delete j.coverage; }
+    const { manifest, notices } = parseResultsManifest(JSON.stringify(m), "m");
+    expect(manifest).not.toBeNull();
+    expect(notices).toEqual([]);
+    expect(manifest?.judges.find((j) => j.key === "gemini")?.rankable).toBeUndefined();
+  });
+
   it("rejects an out-of-range score in a shard cell", () => {
     const bad = JSON.stringify({
       tradition: "b", n_scenarios: 2, judges: ["gemini-3.6-flash"],

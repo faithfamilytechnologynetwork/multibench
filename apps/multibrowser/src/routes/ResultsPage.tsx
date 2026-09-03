@@ -15,6 +15,7 @@ import {
 } from "../lib/resultsSelection";
 import {
   computeLeaderboardRows,
+  isRankingJudge,
   isSortableColumn,
   judgeModelForKey,
   rankingJudgeModel,
@@ -115,9 +116,12 @@ export function ResultsPage() {
   // lands later and would fire `resolveRawSource` once with a null (cache-orphaned) fingerprint first.
   const rawFingerprint = runsQ.data?.runs.find((r) => r.id === runId)?.manifest?.fingerprint ?? null;
   const rawCatalog = useRawCatalog(runsQ.data ? shaQ.data : undefined, runId, rawFingerprint).data?.catalog ?? null;
-  // Highlights deliberately deep-link with the full-grid (ranking) judge — the canonical leaderboard
-  // judge — falling back to the first declared judge only if none is full-grid.
-  const highlightJudge = rawCatalog?.judges.find((j) => j.fullGrid)?.key ?? rawCatalog?.judges[0]?.key ?? "";
+  // Highlights deliberately deep-link with the ranking judge (Gemini) — falling back to the first
+  // full-grid judge (pre-#110 catalogs) then the first declared judge.
+  const highlightJudge =
+    rawCatalog?.judges.find((j) => j.rankable)?.key ??
+    rawCatalog?.judges.find((j) => j.fullGrid)?.key ??
+    rawCatalog?.judges[0]?.key ?? "";
 
   const rl = asRateLimit(shaQ.error) ?? asRateLimit(runsQ.error) ?? asRateLimit(runQ.error);
 
@@ -218,18 +222,24 @@ export function ResultsPage() {
               onChange={(judge) => update({ judge })}
               options={manifest.judges.map((j) => ({
                 value: j.key,
-                label: j.fullGrid ? `${j.key} (ranking)` : `${j.key} (validation)`,
+                label: isRankingJudge(j) ? `${j.key} (ranking)` : `${j.key} (validation)`,
               }))}
             />
           </div>
 
-          {!manifest.judges.find((j) => j.key === sel.judge)?.fullGrid && (
-            <p className="text-xs text-warning-700" data-testid="opus-caption">
-              Showing <span className="font-medium">{sel.judge}</span> as the validation judge in the
-              per-tradition drill-down — coverage is a sample (badged <span className="font-mono">n/N</span>).
-              The leaderboard ranking always stays on the full-grid Gemini judge.
-            </p>
-          )}
+          {(() => {
+            const jm = manifest.judges.find((j) => j.key === sel.judge);
+            if (!jm || isRankingJudge(jm)) return null;  // only for a non-ranking (validation) judge
+            return (
+              <p className="text-xs text-warning-700" data-testid="opus-caption">
+                Showing <span className="font-medium">{sel.judge}</span> as a validation judge in the
+                per-tradition drill-down{jm.fullGrid
+                  ? (jm.coverage != null ? <> — full-grid coverage {(jm.coverage * 100).toFixed(1)}%</> : <> — full grid</>)
+                  : <> — coverage is a sample (badged <span className="font-mono">n/N</span>)</>}.
+                The leaderboard ranking always stays on the ranking judge (Gemini).
+              </p>
+            );
+          })()}
 
           <Leaderboard
             manifest={manifest}
