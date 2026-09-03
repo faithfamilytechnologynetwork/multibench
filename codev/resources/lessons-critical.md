@@ -20,4 +20,6 @@ MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sec
 ## Map of lessons-learned.md (consult when…)
 - Toolchain & protocol environment (Python + porch) — consult when porch checks/consults misbehave in this Python repo.
 - Data-format design — consult when designing or extending a data or file format.
+- Testing LLM pipelines — consult when testing a provider-backed or LLM-judge pipeline.
+- Porting fidelity — consult when porting a workflow and deciding what carries over.
 - Verification discipline — consult when deciding whether something is actually "done."
