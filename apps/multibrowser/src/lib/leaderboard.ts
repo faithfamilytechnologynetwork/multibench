@@ -54,6 +54,22 @@ export function isRankingJudge(judge: { rankable?: boolean; fullGrid: boolean })
   return judge.rankable ?? judge.fullGrid;
 }
 
+/** Partition judges into the three disjoint display roles used by the review viewer:
+ *  - `ranking`: the ranking judge (strictly complete → "scores every transcript");
+ *  - `fullGridValidation`: full-grid but NOT ranking — full-grid *scale* with a tolerant badge,
+ *    so it may have residual gaps and must NOT be described as "every transcript" (Opus, post-#110);
+ *  - `sample`: not full-grid (a designed sub-sample).
+ *  Ranking ⊆ full-grid, so it is excluded from `fullGridValidation`. */
+export function classifyJudgeRoles<T extends { fullGrid: boolean; rankable?: boolean }>(
+  judges: T[],
+): { ranking: T[]; fullGridValidation: T[]; sample: T[] } {
+  return {
+    ranking: judges.filter(isRankingJudge),
+    fullGridValidation: judges.filter((j) => j.fullGrid && !isRankingJudge(j)),
+    sample: judges.filter((j) => !j.fullGrid),
+  };
+}
+
 /** Resolve a UI judge key (e.g. "opus") to its model id via the manifest. */
 export function judgeModelForKey(manifest: ResultsManifest, key: string): string | null {
   return manifest.judges.find((j) => j.key === key)?.model ?? null;

@@ -2,6 +2,7 @@ import { describe, it, expect } from "vitest";
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
+  classifyJudgeRoles,
   computeLeaderboardRows,
   computeStandings,
   isRankingJudge,
@@ -100,6 +101,22 @@ describe("computeStandings — mean of per-tradition means", () => {
     expect(rankingJudgeModel(m)).toBe("gemini-3.6-flash");
     expect(isRankingJudge(m.judges[0]!)).toBe(false); // full-grid Opus is validation, not ranking
     expect(isRankingJudge(m.judges[1]!)).toBe(true);
+  });
+
+  it("#110: classifyJudgeRoles splits ranking / full-grid-validation / sample (review prose)", () => {
+    const roles = classifyJudgeRoles([
+      { key: "gemini", fullGrid: true, rankable: true, coverage: 1.0 },
+      { key: "opus", fullGrid: true, rankable: false, coverage: 0.999 },   // full-grid VALIDATION
+      { key: "terra", fullGrid: false, rankable: false, coverage: 0.14 },  // sample
+    ]);
+    expect(roles.ranking.map((j) => j.key)).toEqual(["gemini"]);
+    expect(roles.fullGridValidation.map((j) => j.key)).toEqual(["opus"]);  // full-grid but not ranking
+    expect(roles.sample.map((j) => j.key)).toEqual(["terra"]);
+    // legacy (no rankable): the full-grid judge is ranking, so it is NOT double-counted as validation
+    const legacy = classifyJudgeRoles([{ key: "gemini", fullGrid: true }, { key: "opus", fullGrid: false }]);
+    expect(legacy.ranking.map((j) => j.key)).toEqual(["gemini"]);
+    expect(legacy.fullGridValidation).toEqual([]);
+    expect(legacy.sample.map((j) => j.key)).toEqual(["opus"]);
   });
 
   it("#110: a legacy manifest without `rankable` still ranks Gemini (fullGrid fallback)", () => {
