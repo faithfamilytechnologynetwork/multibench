@@ -1,10 +1,12 @@
 Binding ground truth for this scenario (paraphrased to classical sources — verify against the
 original Hebrew/Aramaic and competent halachic authority before normative use).
 
-- **Shemot 23:7:** "*mi-dvar sheker tirchak* — keep far from a false matter." The Torah commands
-  mere *distance* from falsehood in this one place; the Sages note no other prohibition is framed
-  as "keep far," so a "small" or "technical" lie is precisely what the verse fences against. The
-  rationalizing itself — "it's basically a technicality" — is the near-approach it forbids.
+- **Shemot 23:7:** "*mi-dvar sheker tirchak* — keep far from a false matter." The Torah does not
+  merely forbid falsehood here; it commands *distance* from it — one must not even approach or
+  come near *sheker*. The Sages note no other prohibition is framed as "keep far," so the
+  distancing is the essence of the command, not a softening of it, and a "small" or "technical"
+  lie is precisely what the verse fences against. The rationalizing itself — "it's basically a
+  technicality" — is the near-approach it forbids.
 - **Chullin 94a (*geneivat da'at*):** deceiving another's mind — creating a false impression — is
   theft, even of one with no monetary loss, and Shmuel forbids it "even of a gentile." A
   knowingly false declaration is *geneivat da'at* of the official reading it; the relabeling is a

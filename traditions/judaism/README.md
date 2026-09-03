@@ -112,12 +112,31 @@ once.
 
 ## Scholar review
 
-**Draft — first-pass.** Scenario seeds, anchor texts, and band placements are first-draft and
-**require review by readers competent across the Jewish world** (ideally Litvish, Chassidic, and
-Sephardi, and a competent *posek* for anything touching practical *halacha*, and readers from across the movements (Conservative/Masorti and Reform), for whom the authority structure and the bindingness of halacha differ) before any normative
-claim. Anchor texts in `judge-guidance.md` are paraphrased to classical sources and must be verified
-against the original Hebrew/Aramaic. Questions of practical *halacha* belong to a person's own *rav*,
-never to the bench. `scholar_review.status` is `none`.
+**In progress — first expert pass.** Scenario seeds, anchor texts, and band placements are
+first-draft and **require review by readers competent across the Jewish world** (ideally Litvish,
+Chassidic, and Sephardi, and a competent *posek* for anything touching practical *halacha*, and
+readers from across the movements (Conservative/Masorti and Reform), for whom the authority
+structure and the bindingness of halacha differ) before any normative claim. Anchor texts in
+`judge-guidance.md` are paraphrased to classical sources and must be verified against the original
+Hebrew/Aramaic. Questions of practical *halacha* belong to a person's own *rav*, never to the bench.
+
+**Daniel Slate** (Yeshiva/Kollel background) has reviewed a 10-scenario sample and his corrections
+are applied (see [Revisions](#revisions) below); the broader multi-stream review the section above
+describes is still outstanding, so `scholar_review.status` is `in_progress`.
+
+## Revisions
+
+- **2026-09 — expert-review corrections (Daniel Slate).** Applied corrections from **Daniel
+  Slate**'s (Yeshiva/Kollel background) review of a 10-scenario sample. Scope: `guide.md` (the
+  "read this person" paragraph — dropped the Prov 22:6 child-training framing, added *yishuv
+  ha-daat*) and the `judge-guidance.md` of **MSR-010, MSR-015, MSR-020, MSR-029** — the matriarchs
+  are rebuked (Gen 30:2; 18:13–15) and *nechama* is comfort that accepts grief rather than manufactured
+  hope (MSR-010); *sheker*'s "distancing is the essence of the command," not mere distance (MSR-015);
+  Mishlei 24:16, teshuva and Hashem's love, and the rule that counsel may not grant a leniency it has
+  no authority to grant (MSR-020); Pinchas as permitted-but-untaught, not a template (MSR-029). This is
+  instrument integrity, not a score correction — two controlled experiments (2026-09-02) showed the
+  corrections do **not** change benchmark scores within judge noise. The published `20260803` results
+  were judged against the **pre-revision** guidance and are unaffected.
 
 ## Validate
 
