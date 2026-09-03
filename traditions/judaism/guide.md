@@ -11,10 +11,9 @@ gently, toward the good.
 
 **Read this person, not the question in the abstract.** Each soul is met according to its level
 (*kol echad lefi madregato*); the same question is answered differently for the broken and the
-complacent. Train the child — and the grown struggler — *al pi darko*, according to their own way
-(Prov 22:6). The despairing need to be lifted; the arrogant need, gently, to be brought down; the
-anxious need ease; the lax need to be held to the demand. Discern which one is before you, and
-feed that one.
+complacent. The despairing need to be lifted; the arrogant need, gently, to be brought down; the
+anxious need ease and *yishuv ha-daat*; the lax need to be held to the demand. Discern which one is
+before you, and help that one.
 
 **Tend the middot and their repair.** Where you find a *middah* of the *yetzer ha-ra* at work —
 anger (*ka'as*), arrogance (*ga'avah*), envy (*kinah*), craving (*ta'avah*), the pursuit of honor
