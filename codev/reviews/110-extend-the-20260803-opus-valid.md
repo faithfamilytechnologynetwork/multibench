@@ -42,7 +42,8 @@ Four phases in one PR:
   HEAD vs re-export); manifest diff confined to `judges`/`counts`/`fingerprint`/`generated_at`. ✓
 - **SC3** — score & raw manifests stamp the same `fingerprint` (`sha256:4143f4a4…`). ✓
 - **SC4** — `test_committed_dataset_reconciles_with_paper` + sealed parity green against the
-  re-exported data (250/254 with launch data reachable; skips only in the bare worktree). ✓
+  re-exported data (254 pass / 0 skipped with launch data reachable; the 6 skip only in the bare
+  worktree). ✓
 - **SC5–7** — export + SPA tests (both-sides threshold, static rankable, strict/one-rankable
   fail-fast, `(priority, ts)` incl. v2, cross-tier agreement, declared-subject denominator; SPA
   ranking-by-rankable, legacy fallback, full-grid-Opus UI). Dispatcher green: `workflows/analysis`
@@ -68,8 +69,13 @@ The architect's instruction was to compute exact figures, not assert the estimat
 
 ## Consultation Feedback
 
-3-way per-phase consult was `[codex, claude]` (Gemini can't see the worktree here). Every phase
-reached unanimous APPROVE; dispositions:
+Per-phase consult is **2-way** `[codex, claude]` (Gemini can't see the worktree here, so it is
+excluded — full 3-way is used only where the diff is fed inline). Spec, plan, phase_2, phase_3, and
+phase_4 reached unanimous APPROVE. **phase_1** advanced at max-iterations (3) with **codex still
+REQUEST_CHANGES** (iter3) and claude APPROVE — not unanimous; codex's iter3 finding (the raw tier
+must enforce exactly-one strictly-complete rankable) was **conceded and implemented in that same
+iteration** and is on the branch, so the merged phase_1 code carries the requested change.
+Dispositions:
 
 - **Spec/Plan** — both REQUEST_CHANGES; addressed (rebuttals in `codev/projects/110-*/`). Surfaced
   and the architect **resolved** the load-bearing contradiction: strict `full_grid` is unachievable
@@ -123,6 +129,17 @@ reached unanimous APPROVE; dispositions:
   update, and flags that `tmp/paper_figs_multibench.py` still emits the sample-era dual-judge
   artifacts (a standard re-run reverts them) — its dual-judge section should defer to
   `docs/analysis/110-dualjudge-fullgrid-figs.py`.
+
+## Latent items (non-blocking, for a future change)
+
+- **Coverage judge-set asymmetry.** `_coverage_from_exports` derives its judge set from `scope=full,
+  pressure=all` means; `export_raw.write_dataset` derives `judges_present` from all resolved rows. A
+  hypothetical **turn1-only** judge would appear in the raw catalog (coverage 0.0) but be absent
+  from the score `counts.coverage` map. Unreachable on real data (every judge here has full-scope
+  cells); a shared derivation would close it.
+- **Uniform subject universe.** `_coverage_from_exports` (and the strict `_assert_full_grid`, now
+  pinned to `exp.subjects`) assume every tradition declares the same subject roster. Correct for
+  this programme; latent if a partial-subject tradition is ever added.
 
 ## Flaky tests
 
