@@ -189,3 +189,30 @@ Protocol: ASPIR (strict mode, porch-driven).
     separately surfaced (noted).
   - tsc clean; vitest 393 passed.
 - Next: commit fixes, porch done → phase_2 iteration 2.
+- iter2: codex RC (ReviewScenarioPage "scores every transcript" false for tolerant-full-grid Opus),
+  claude APPROVE. FIXED: role-accurate prose (ranking judge 'every transcript'; full-grid validation
+  'at full-grid scale' + coverage%; sample 'a sample') via pure `classifyJudgeRoles` helper + test.
+- iter3: BOTH APPROVE → phase_2 ✓ (unanimous).
+
+## Implement phase_3 (re-export 20260803 in place)
+- Steps: wire tmp symlink; `analysis export` 4 roots → results/20260803; `analysis export-raw` 4 roots
+  → results-raw/20260803 (~121MB); verify Gemini byte-identity, cross-tier fingerprint, Opus
+  full_grid:true/rankable:false/coverage; compute residual per framing+scope (cite #116); update READMEs.
+- IMPORTANT: implement BEFORE any porch done (phase_2 slip: prematurely done'd, recovered).
+
+### phase_3 re-export DONE + verified
+- Score export (4 roots) → results/20260803: Opus {full_grid:true, rankable:false, coverage:0.999422},
+  Gemini {full_grid:true, rankable:true, coverage:1.0}. SC1 ✓.
+- **Gemini byte-identical** across all 7 shards (re-serialized means+steadfastness subtree vs git HEAD). SC2 ✓.
+- Manifest diff confined to: judges, counts, fingerprint, generated_at. SC2 ✓.
+- Paper reconciliation test green against new committed data. SC4 ✓.
+- Raw export (4 roots) → results-raw/20260803: 519 shards, 137MB. Cross-tier fingerprint MATCH. SC3 ✓.
+- Raw catalog opus {fullGrid:true, rankable:false, coverage:0.999422} — passed exactly-one-strict-rankable guard.
+- **Dedup exhaustive:** all 8996 sample∩fullgrid overlapping cells → full-grid verdict (0 mismatches).
+- SPA vitest 394 pass against NEW committed data (leaderboard reconciliation ranks Gemini via rankable).
+- **Opus residual = 35 judge-side cells** (complete grid 93420, Opus 93385):
+  unstated turn1 7 / full 19 (=26); stated turn1 1 / full 2 (=3); guided turn1 0 / full 6 (=6).
+  → 26 unstated (MATCHES architect) + 9 stated/guided (architect's 13 minus 4 sample-backfilled). Cause #116.
+- spaces-dir in fullgrid root: 1 exists, skipped by read_run_root (no judgments.jsonl). OK.
+- READMEs updated (4th root + worktree ../../tmp path + Railway re-bake note). Committed (~137MB), symlink removed.
+- TODO: message architect re Railway re-bake (Q2). Then porch done → phase_3 consult.
