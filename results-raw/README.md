@@ -161,8 +161,17 @@ uv --project workflows/analysis run python -m analysis export-raw \
   tmp/judging-runs/20260803-merged \
   tmp/judging-runs/20260803-unstated-opus \
   tmp/judging-runs/20260803-framings-opus-sample \
+  tmp/judging-runs/20260823-opus-fullgrid \
   --run-id 20260803 --out results-raw
 ```
+
+The **full-grid Opus** layer (`20260823-opus-fullgrid`, #110) is passed **last** (root-order
+precedence → full-grid wins any sample overlap), so both tiers stamp the same new `fingerprint` and
+the raw catalog carries the earned Opus `fullGrid: true` / `rankable: false` / `coverage`.
+**Re-exporting rewrites every gz shard (~121 MB)**, so the Railway **baked** bundle goes
+fingerprint-stale and must be re-baked (`railway up --no-gitignore`) — `resolveRawSource` fails safe
+to the committed GitHub tier meanwhile. From a builder worktree the source roots are at
+`../../tmp/judging-runs/…`.
 
 Commit **only** the `results-raw/<run-id>/` output (never from the gitignored
 `tmp/judging-runs/`). Re-running with the same inputs is **byte-stable** (sorted keys, gzip
