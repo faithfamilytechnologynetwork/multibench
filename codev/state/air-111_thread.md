@@ -49,3 +49,16 @@ would be semantically wrong and break validation. So I recorded the revision via
   run pytest` from repo root, which over-collects the WHOLE repo; in this fresh worktree the
   `workflows/*` venvs aren't provisioned → `numpy` import/collection errors. Environmental,
   pre-existing, and out of scope for this AIR issue (dispatcher is global/shared — lessons say keep it).
+
+## PR + merge path (2026-09-03)
+- **PR #114** opened and **APPROVED** by the architect (files verified byte-identical to the
+  reviewed versions). Body carries the full change list, verification, the no-schema_version-bump
+  rationale, and blockers A/B described as pre-existing/out-of-scope, linked to **#112** (dispatcher
+  over-collection) and **#113** (governance-doc drift). Recorded via `porch done 111 --pr 114`.
+- porch intentionally left at PHASE=implement — not forced past the tests-check (won't bypass).
+- **Merge path (architect's plan):** a task builder (`builder-task-1aut`) is fixing #112+#113. When
+  its PR merges to main: merge main into `builder/air-111` → re-run `porch done 111` (tests-check
+  goes green) → pass the pr gate → merge #114 with a **merge commit** (not squash). If the fix PR
+  hasn't merged in ~3h, message the architect. Baseline origin/main at wait start: `d84ea3e`.
+- Waiting via a background poll (5-min cadence, ~3h cap) on issue-close / main-advance — turn ends,
+  not foreground-blocking.
