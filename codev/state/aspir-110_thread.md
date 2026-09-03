@@ -216,3 +216,41 @@ Protocol: ASPIR (strict mode, porch-driven).
 - spaces-dir in fullgrid root: 1 exists, skipped by read_run_root (no judgments.jsonl). OK.
 - READMEs updated (4th root + worktree ../../tmp path + Railway re-bake note). Committed (~137MB), symlink removed.
 - TODO: message architect re Railway re-bake (Q2). Then porch done → phase_3 consult.
+- Architect confirmed (2026-09-03): **Railway re-bake is THEIRS** — they run `railway up --no-gitignore`
+  from apps/multibrowser AFTER the PR merges (baked bundle built from main). MUST document the re-bake
+  step + the fingerprint-stale window (resolveRawSource fails safe to committed GitHub tier until
+  re-bake) in BOTH the review doc AND the PR body. Approved 35-residual/0.9994/byte-identical numbers.
+  Proceed to phase_4.
+- phase_3: iter1 codex COMMENT / claude RC (README schema tables stale). Fixed both READMEs
+  (judges shape earned/static/coverage split; ranks on rankable not full-grid; full-scope coverage
+  clarified; size ~132MB). iter2: BOTH APPROVE → phase_3 ✓ (unanimous).
+- phase_3 review-doc TODOs (non-blocking): reconciliation skips in-worktree (verified out-of-band via
+  symlink); Gemini aliases gained google/gemini-3.6-flash (phase_1 _JUDGE_VARIANTS, value-neutral);
+  Railway re-bake = architect at PR time; judges-differed preset repointed by new Opus verdicts.
+
+## Implement phase_4 (paper artifacts + numbers summary)
+- Read generators tmp/paper_figs_multibench.py + paper_figs_additions.py (inputs: old Opus roots +
+  frozen stats_bundle). Recompute agreement from merged 4-root data (same dedup); regen tab:djtier,
+  fig:dualjudge, agreement stats → ../multibench-papers/{figures,tables} (uncommitted, run from MAIN checkout).
+- Compute exact matched-cell count, programme total, Opus spend (usage-computed) from data.
+- Write markdown numbers summary (committed in-repo). Implement BEFORE porch done.
+
+### phase_4 DONE — numbers computed from the merged data
+- Dual-judge agreement (full grid, 93,385 matched cells, canonical resolve_judgments):
+  overall r=0.833 bias −0.031 within±0.5 94.0%; unstated 0.854 / stated 0.825 / guided 0.683
+  (ceiling compression); IDENTICAL 5-model order under both judges in all 3 framings. Matches the
+  pre-registered r≈0.834/0.854/0.825/0.684.
+- Opus committed judgments 40,114 → 93,385 (issue est 42,711→93,341 = raw-record/pre-sweep).
+- Programme total: record-run committed 186,805 (Gemini 93,420 + Opus 93,385); +1,299 dual-alias
+  route-bridge records = 188,104 (≈ issue's ~188,5xx); gross Opus calls 104,978.
+- **New full-grid Opus spend (usage-computed): $1,313.29** (repo cost model: opus $5/$25 per M,
+  cache_write×2, cache_read×0.1, batch×0.5; 61,648 batch $1,253.56 + 619 live $59.73). Issue est ~$1,220.
+- Residual 35 = 26 unstated (7 turn1/19 full) + 3 stated (1/2) + 6 guided (0/6); judge-side (#116).
+- Committed: docs/analysis/110-dual-judge-fullgrid-summary.md (numbers summary).
+- Regenerated (UNCOMMITTED, papers repo ../../../multibench-papers/): figures/fig_dual_judge.pdf
+  (3 full-grid framing heatmaps) + tables/tab_dualjudge_{tier,rank}.tex; patched stats_bundle
+  dual_judge.full_grid (main-checkout tmp, backup written). Via scratchpad script (canonical loaders).
+- REVIEW-DOC TODOs (for Review phase): all phase non-blocking notes — judges-differed preset repoint,
+  reconciliation skips in-worktree (verified out-of-band), Gemini aliases +google/gemini-3.6-flash,
+  Railway re-bake=architect post-merge, --limit raw O(full corpus), raw rankable strictly gated,
+  badge coverage full-scope-only, RawRunPage default-judge untested-directly, spend/residual/programme deltas vs estimates.
