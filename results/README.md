@@ -60,7 +60,7 @@ default automatically; older runs remain reachable via the selector or their id.
 | `schema_version` | dataset schema version (currently **1**); the SPA rejects other versions with a notice |
 | `run_id`, `generated_at` | run id + ISO-8601 export timestamp |
 | `subjects` | the (normalized) subject model ids, canonical spelling |
-| `judges` | `[{key, model, aliases[], full_grid}]` — `key` is the UI short name (`gemini`/`opus`), `model` the canonical id, `full_grid` = judged every framing |
+| `judges` | `[{key, model, aliases[], full_grid, rankable, coverage}]` — `key` is the UI short name (`gemini`/`opus`), `model` the canonical id. **`full_grid`** = the **earned coverage badge** (tolerant: every framing covered at full-grid scale, per-framing ≥ 0.95 — #96), computed per run, NOT a static flag. **`rankable`** = the **static ranking role**: the leaderboard ranks on the single rankable judge (Gemini); a validation judge that reaches full coverage earns `full_grid` but stays `rankable:false` and never ranks. **`coverage`** = the judge's actual pooled coverage **fraction over the full scope** (`scope=full`, ÷ 46,710 = 519 scenarios × 5 subjects × 6 pressures × 3 framings), for display/citation. (`rankable`/`coverage` are optional — pre-#110 manifests omit them and the SPA falls back to `full_grid` then Gemini.) |
 | `framings` | `["unstated","stated","guided"]` (universal core) |
 | `pressures`, `pressure_all` | the six pressures + the `"all"` (pooled) sentinel |
 | `scopes` | `["turn1","full"]` (first-response / post-pressure) |
@@ -100,7 +100,10 @@ default automatically; older runs remain reachable via the selector or their id.
   the mean), matching the paper — not a mean of per-pressure means.
 - **`steadfastness`** = matched-cell `mean(full) − mean(turn1)` over cells present in **both** scopes.
 - **Coverage**: `n_expected` = `n_scenarios × 6` for `pressure="all"`, else `n_scenarios`. The
-  denominator is the **Gemini full grid** — so a small Opus sample reads as low coverage, honestly.
+  denominator is the report-declared full grid — so a designed sub-sample reads as low coverage,
+  honestly, while a full-grid layer with a few persistent judge-side failures reads as ~1.0. Note
+  the per-judge manifest `coverage` fraction is over the **full scope only** (÷ 46,710); it will
+  differ slightly from `counts.judgments / (2 × 46,710)`, which pools both scopes.
 
 ## Normalization (done by the exporter)
 
@@ -118,7 +121,9 @@ Source runs spell ids inconsistently; the export normalizes to a single canonica
 The `/results` leaderboard is a **dense, whole-picture-at-a-glance table** (jaleesbrowser-style,
 Spec 55) — one row per subject:
 
-- The **leaderboard ranks on Gemini only** (the full-grid judge) — the mean of per-tradition means.
+- The **leaderboard ranks on Gemini only** (the `rankable` judge) — the mean of per-tradition means.
+  Ranking is keyed off the static `rankable` flag, **not** `full_grid`: Opus is now also full-grid
+  but is a badged validation layer and never re-ranks (#96).
 - **Framing and metric are columns, not selectors.** Each row shows **First-response / Post-pressure /
   Δ (steadfastness)** on the paper's published slice (the first framing), plus one post-pressure column
   per framing (the staircase). Δ is the shard's matched-cell steadfastness, not post − initial.
@@ -127,7 +132,9 @@ Spec 55) — one row per subject:
 - Any numeric column is **sortable**; a **canonical rank** column persists while sorted.
 - A single **pressure** selector reframes the whole table (headline, framing columns, strip, rank) to
   one of the six pressures or `"all"`. The **judge selector** switches the **per-tradition drill-down**
-  to Opus **where Opus data exists** (badged `sample n/N`); it never re-ranks or recolors the board.
+  to Opus **where Opus data exists**, labelled `opus (validation)`; a validation judge that is only a
+  sub-sample is badged `sample n/N`, while a full-grid validation judge shows its coverage % instead.
+  The selector never re-ranks or recolors the board.
 - **Run, pressure, judge, column sort, and expanded subjects are all deep-linkable** in the URL.
 - Numbers reconcile with the paper's standings (`tab_standings` / `subj_overall`) to displayed
   precision.
