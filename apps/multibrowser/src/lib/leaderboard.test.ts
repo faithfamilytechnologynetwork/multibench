@@ -110,20 +110,6 @@ describe("computeStandings — mean of per-tradition means", () => {
     expect(isRankingJudge(manifest.judges[1]!)).toBe(false); // opus !fullGrid → validation
   });
 
-  it("#110/#50: a full-grid Opus (rankable:false) never enters the standings", () => {
-    // Even with Opus full-grid, standings are computed on the ranking judge (Gemini) only — so the
-    // #50 'a judge covers a shard's whole grid or is excluded wholesale' invariant is unaffected.
-    const withFullGridOpus: ResultsManifest = {
-      ...manifest,
-      judges: [
-        { key: "gemini", model: "gemini-3.6-flash", aliases: ["gemini-3.6-flash"], fullGrid: true, rankable: true, coverage: 1.0 },
-        { key: "opus", model: "claude-opus-4-8", aliases: ["claude-opus-4-8"], fullGrid: true, rankable: false, coverage: 0.999 },
-      ],
-    };
-    const sel = { framing: "unstated" as const, metric: "full" as const, pressure: "all" };
-    expect(computeStandings(shards, withFullGridOpus, sel)).toEqual(computeStandings(shards, manifest, sel));
-  });
-
   it("traditionValue returns coverage for a means cell and null for a missing one", () => {
     const tv = traditionValue(shards.a, "gemini-3.6-flash", "claude-sonnet-5", "unstated", "full", "all", 12);
     expect(tv).toEqual({ tradition: "a", value: 0.6, nJudged: 2, nExpected: 2 }); // means uses cell's own nExpected

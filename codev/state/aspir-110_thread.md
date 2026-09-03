@@ -177,4 +177,15 @@ Protocol: ASPIR (strict mode, porch-driven).
     full-grid-Opus-not-in-standings.
 - Verified: `tsc --noEmit` clean; vitest 393 passed (27 files). Reconciliation (committed 20260803, no
   rankable yet) still ranks Gemini via fallback.
-- Next: commit phase_2, run pending phase_2 consult.
+- Committed phase_2; ran consult: codex APPROVE, claude REQUEST_CHANGES (3 valid gaps).
+  - #50 test was a TAUTOLOGY (computeStandings never reads opus coverage) → replaced with a real
+    results.test.tsx UI test: full-grid Opus {rankable:false, coverage:0.999} + partial shard →
+    asserts Gemini still ranks, "opus (validation)" label, coverage-% caption (not sample), no
+    sample-badge, "opus — validation" drill header.
+  - ReviewIndexPage:109 "Opus validation SAMPLE" → "validation LAYER" (goes false after Phase 3).
+  - ResultsPage drill header role word: keyed on isSample → now isRankingJudge (full-grid Opus was
+    losing "validation"). Added selJudgeMeta/drillJudgeIsRanking.
+  - Coverage surfaced in validation caption; ranking judge coverage is definitionally 1.0 → not
+    separately surfaced (noted).
+  - tsc clean; vitest 393 passed.
+- Next: commit fixes, porch done → phase_2 iteration 2.

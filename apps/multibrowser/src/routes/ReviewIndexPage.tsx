@@ -106,7 +106,7 @@ export function ReviewIndexPage() {
             </li>
             <li>
               <strong>Check the judges&rsquo; verdicts</strong> — read model answers next to the scores
-              Gemini (the ranking judge) gave them; spot-check against the Opus validation sample where
+              Gemini (the ranking judge) gave them; spot-check against the Opus validation layer where
               present. Do the verdicts apply the guidance correctly?
             </li>
             <li>

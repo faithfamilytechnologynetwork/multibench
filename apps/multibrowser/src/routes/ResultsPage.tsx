@@ -477,7 +477,9 @@ function Leaderboard({
     ? sortRows(rows, sel.sort.key, sel.sort.dir)
     : rows;
   const drillJudge = judgeModelForKey(manifest, sel.judge) ?? rankingJudgeModel(manifest);
-  const isSample = !manifest.judges.find((j) => j.key === sel.judge)?.fullGrid;
+  const selJudgeMeta = manifest.judges.find((j) => j.key === sel.judge);
+  const isSample = !selJudgeMeta?.fullGrid;  // coverage: a sub-grid sample (badged n/N)
+  const drillJudgeIsRanking = selJudgeMeta ? isRankingJudge(selJudgeMeta) : true;  // role: ranking vs validation
   const expanded = new Set(sel.expanded);
 
   const framingCols = manifest.framings.map((f) => ({ key: f, label: FRAMING_LABEL[f] ?? f }));
@@ -556,7 +558,9 @@ function Leaderboard({
                     <td colSpan={totalCols} className="pb-3">
                       <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
                         <div className="mb-1 text-xs text-default-500">
-                          Per-tradition ({isSample ? `${sel.judge} — validation sample` : `${sel.judge}`})
+                          Per-tradition ({drillJudgeIsRanking
+                            ? sel.judge
+                            : `${sel.judge} — validation${isSample ? " sample" : ""}`})
                           {drill.length === 0 && " — no data for this judge/selection"}
                         </div>
                         {drill.length > 0 && (
