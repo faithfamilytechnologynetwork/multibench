@@ -563,6 +563,20 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
             "rankable": ui["rankable"],
             "coverage": round(judge_coverage(coverage, model), 6),
         })
+    # Ranking-integrity guards for the raw catalog. `rankable` here is advisory (it only picks the
+    # raw viewer's DEFAULT judge — the leaderboard ranks off the score manifest), and a catalog may
+    # legitimately have ZERO rankable judges (a validation-only or AFB-style single-judge tier), so
+    # zero is allowed. But two rankable judges is an ambiguous default, and a rankable judge that
+    # did not even earn the tolerant full_grid badge is a data error — reject both.
+    rankable_models = [m for m in judge_models if JUDGE_UI.get(m, {}).get("rankable")]
+    if len(rankable_models) > 1:
+        raise AnalysisInputError(
+            f"raw catalog has multiple rankable judges {rankable_models} — ambiguous default judge")
+    for model in rankable_models:
+        if not earns_full_grid(coverage, model):
+            raise AnalysisInputError(
+                f"raw catalog rankable judge {model!r} has not earned full_grid "
+                f"(coverage {round(judge_coverage(coverage, model), 6)}) — refusing to mark it rankable")
 
     return {
         "schema_version": SCHEMA_VERSION,

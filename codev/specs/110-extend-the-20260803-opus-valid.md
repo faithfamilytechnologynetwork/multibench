@@ -24,9 +24,12 @@
   full-grid framings); **rankable** judges (Gemini) still require **strict 100%** to rank.
   Two architect add-ons: (1) the manifest must carry the **actual per-judge coverage fraction**
   (e.g. 0.9992) next to the badge, for SPA display + paper citation; (2) tests must assert both
-  sides of the threshold (14.5% sample does **not** earn; 99.9% does). The 79 persistent
-  failures are **judge-side** (refusals / unparseable verdicts), **not** collection gaps — to be
-  stated in the review doc.
+  sides of the threshold (14.5% sample does **not** earn; 99.9% does). The Opus residual is
+  **judge-side** (empty judge response → `json.loads('')` fails after 3 retries; refusal vs.
+  max_tokens not distinguishable in current logs — cite **#116**), **not** a collection gap. Do
+  **not** assert "79": compute the exact residual **per framing** from the merged export in Phase B
+  (architect's direct count is **39 = 13 stated/guided + 26 unstated**; the 79 double-counted
+  sample-layer overlap). Stated in the review doc.
 
 ## Problem Statement
 
@@ -262,7 +265,8 @@ Phases are git commits within one PR (builder PR strategy).
 
 ## Open Questions
 
-- **Q1 (RESOLVED 2026-09-03):** the `full_grid` definition given ~79 persistent Opus failures.
+- **Q1 (RESOLVED 2026-09-03):** the `full_grid` definition given the judge-side Opus residual
+  (exact count computed in Phase B, per framing; architect's direct count 39, not 79; cause #116).
   Architect approved tolerant earned `full_grid` (threshold 0.95, all three framings) for the
   badge + strict for `rankable`/ranking, plus a per-judge `coverage` fraction in the manifest.
   See Clarifying Questions. No longer blocking.

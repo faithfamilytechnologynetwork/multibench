@@ -31,6 +31,7 @@ from analysis.export_raw import (
     source_fingerprint,
 )
 from analysis.export_results import (
+    JUDGE_UI,
     build_corpus_export,
     build_manifest,
     build_tradition_export,
@@ -413,7 +414,8 @@ def test_raw_and_score_tiers_emit_identical_earned_full_grid_and_coverage(tmp_pa
     assert score == catalog  # the two tiers agree, per judge, by construction
 
 
-def _mini_tradition(root: Path, trad: str, scenario: str, subject: str, judged_framings):
+def _mini_tradition(root: Path, trad: str, scenario: str, subject: str, judged_framings,
+                    judge: str = "gemini-3.6-flash"):
     """One tradition dir: FULL sittings grid + verdicts for `judged_framings` only."""
     d = root / trad
     d.mkdir(parents=True)
@@ -426,31 +428,61 @@ def _mini_tradition(root: Path, trad: str, scenario: str, subject: str, judged_f
             if fr in judged_framings:
                 for scope in ("turn1", "full"):
                     base.append({"subject": subject, "tradition": trad, "scenario_id": scenario,
-                                 "pressure": pr, "framing": fr, "judge": "gemini-3.6-flash",
+                                 "pressure": pr, "framing": fr, "judge": judge,
                                  "scope": scope, "score": 0.5, "ts": "t",
                                  "direction": "held the line"})
     (d / "judgments.jsonl").write_text("".join(json.dumps(r) + "\n" for r in base), encoding="utf-8")
     (d / "sittings.jsonl").write_text("".join(json.dumps(r) + "\n" for r in sittings), encoding="utf-8")
     (d / "report.json").write_text(json.dumps(
-        {"tradition": trad, "subjects": [subject], "judges": ["gemini-3.6-flash"],
+        {"tradition": trad, "subjects": [subject], "judges": [judge],
          "by_scenario": {scenario: {}}}), encoding="utf-8")
 
 
 def test_limit_coverage_counts_all_traditions(tmp_path):
     """A --limit export writes fewer shards but coverage still spans ALL traditions (no outer
-    break): the second tradition's missing 'guided' verdicts pull gemini below full-grid even
-    though only the first tradition's shard is written."""
+    break): the second tradition's missing 'guided' verdicts pull the (non-rankable) Opus judge
+    below full-grid even though only the first tradition's shard is written."""
     from analysis.export_raw import write_dataset
     root = tmp_path / "run"
-    _mini_tradition(root, "buddhism", "BUD-001", "gpt-5.6-terra", FRAMINGS)  # complete
-    _mini_tradition(root, "taoism", "TAO-001", "gpt-5.6-terra", ("unstated", "stated"))  # no guided
+    op = "claude-opus-4-8"  # non-rankable: a partial layer is legitimate (Gemini is never partial)
+    _mini_tradition(root, "buddhism", "BUD-001", "gpt-5.6-terra", FRAMINGS, judge=op)  # complete
+    _mini_tradition(root, "taoism", "TAO-001", "gpt-5.6-terra", ("unstated", "stated"), judge=op)  # no guided
     write_dataset([root], tmp_path / "out", "r", limit=1)  # only the first scenario's shard
     manifest = json.loads((tmp_path / "out" / "r" / "manifest.json").read_text())
     shards = list((tmp_path / "out" / "r").rglob("*.json.gz"))
     assert len(shards) == 1  # the limit really did cap shard writing
-    gem = next(j for j in manifest["judges"] if j["key"] == "gemini")
-    assert gem["fullGrid"] is False  # taoism's missing 'guided' verdicts counted despite the limit
-    assert gem["coverage"] < 1.0
+    opus = next(j for j in manifest["judges"] if j["key"] == "opus")
+    assert opus["fullGrid"] is False  # taoism's missing 'guided' verdicts counted despite the limit
+    assert opus["coverage"] < 1.0
+
+
+def _cov(judged_by_judge_framing, n_expected):
+    """coverage table: {(judge, framing): n_judged} → {judge: {framing: {n_judged, n_expected}}}."""
+    judges = {j for (j, _f) in judged_by_judge_framing}
+    return {j: {fr: {"n_judged": judged_by_judge_framing.get((j, fr), 0), "n_expected": n_expected}
+                for fr in FRAMINGS} for j in judges}
+
+
+def test_raw_catalog_allows_zero_rankable_judges():
+    from analysis.export_raw import _catalog_doc
+    cov = _cov({("claude-opus-4-8", fr): 5 for fr in FRAMINGS}, 10)  # opus only, non-rankable
+    cat = _catalog_doc([], [], ["claude-opus-4-8"], "fp", "cfp", cov)
+    assert [j["key"] for j in cat["judges"]] == ["opus"]  # no rankable judge → still valid
+
+
+def test_raw_catalog_rejects_multiple_rankable_judges(monkeypatch):
+    from analysis.export_raw import _catalog_doc
+    monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
+    cov = _cov({(j, fr): 10 for j in ("gemini-3.6-flash", "claude-opus-4-8") for fr in FRAMINGS}, 10)
+    with pytest.raises(AnalysisInputError, match="multiple rankable judges"):
+        _catalog_doc([], [], ["claude-opus-4-8", "gemini-3.6-flash"], "fp", "cfp", cov)
+
+
+def test_raw_catalog_rejects_rankable_judge_below_full_grid():
+    from analysis.export_raw import _catalog_doc
+    cov = _cov({("gemini-3.6-flash", fr): 4 for fr in FRAMINGS}, 10)  # 0.4 < 0.95, but rankable
+    with pytest.raises(AnalysisInputError, match="has not earned full_grid"):
+        _catalog_doc([], [], ["gemini-3.6-flash"], "fp", "cfp", cov)
 
 
 # ── Agreement with the score tier + field allowlist ─────────────────────────────────

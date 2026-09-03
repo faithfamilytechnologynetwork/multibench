@@ -108,4 +108,35 @@ Protocol: ASPIR (strict mode, porch-driven).
 - cosmetic: unknown-judge check before rankable-count. README stale shapes → Phase 3.
 - REVIEW-DOC TODO: note raw catalog's `rankable` is advisory (not gated); score manifest is the
   ranking authority.
-- Next: commit fixes, porch rebuttal + re-verify (iteration 2).
+- Committed fixes; rebuttal written; iteration-2 consult running.
+
+### Architect correction (2026-09-03, for Phase 3/4 — do NOT assert "79")
+- Compute the EXACT Opus residual per framing from the merged four-root export. Architect's direct
+  count = **39 cells with no Opus verdict = 13 stated/guided + 26 unstated** (the "79" double-counted
+  sample-layer overlap). Report per-framing.
+- Cause: empty judge response (no text block → json.loads('') fails after 3 retries); refusal vs
+  max_tokens NOT distinguishable in current logs. Cite **#116**, don't guess which.
+- Applies to: Phase 3 residual verification + Phase 4 review doc / markdown summary.
+
+### phase_1 iteration 2 review
+- codex REQUEST_CHANGES (only raw ranking-integrity), claude APPROVE (independently verified 3-root
+  re-export byte-identical + 4-root dry run → Opus {full_grid:true, rankable:false,
+  coverage:0.999422}, Gemini unchanged → SC1 will hold).
+- FIXED codex #2 properly: my AFB rebuttal reason was WRONG (export_afb doesn't call _catalog_doc —
+  both reviewers). Added raw-catalog guards in `_catalog_doc`: >1 rankable → raise; a rankable judge
+  that hasn't earned full_grid → raise; ZERO rankable allowed (validation-only/AFB-style). Changed
+  the limit test to use opus (non-rankable; Gemini is never partial in reality). +3 tests. 247/253.
+
+### Phase 3/4 notes from claude iter2 (IMPORTANT for later phases)
+- **Badge/coverage are FULL-SCOPE ONLY** (denominator 46,710, NOT the 93,420 two-scope grid).
+  Opus coverage 0.999422 is over full-scope cells; don't present it as coverage of the 93,420 grid.
+  claude's dry run: **27 full-scope Opus gaps (unstated 19 / stated 2 / guided 6)**; architect's 39
+  includes **12 turn1 gaps the badge can't see** (39 = 27 full + 12 turn1). Phase 4 must report
+  per-framing AND per-scope, not conflate; compute exact from the merged export; cite #116 for cause.
+- **Phase 3 byte-identity script must expect** `google/gemini-3.6-flash` added to Gemini's
+  `aliases[]` on re-export (permitted under SC2's judges[] allowance). Gemini MEANS unchanged.
+- **--limit raw export is now O(full corpus)** (reads all sittings) — document in review doc.
+- Plan naming drift: impl uses `coverage_counts_from_judged`/`accumulate_full_scope_judged` (plan
+  said `accumulate_coverage`) and kept `_assert_full_grid` (plan said `assert_strict_full_grid`) —
+  substance matches; noted for plan readers.
+- Next: iter2 rebuttal, commit, porch done → iteration 3 re-verify.
