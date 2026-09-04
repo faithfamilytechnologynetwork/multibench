@@ -247,7 +247,32 @@ Re-validated --strict clean; 114/114. **Phase 3a iter2: codex APPROVE + claude A
 Phase 3a DONE.** Fixed one minor under-attribution (UNI-014 1 Cor 5:9–12 also cites Methodist → 5
 columns). **Receipt rule now guards BOTH directions**: verify per column — name every witnessing
 column, don't over-claim ("every column") OR under-claim (omit a citing column). turn1 keep ≤~130
-(pilot ran 138–151; tighten in 3b). Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+(pilot ran 138–151; tighten in 3b).
+
+## 2026-09-04 — Phase 3b (remaining 30) — plan & handling notes
+
+All 30 are "keep" consensus scenarios (no new envelopes — Q18/Q42 were the only two, both in pilot).
+3 extraction agents running (batches: Q03–14, Q15–31 subset, Q32–49 subset). Author per the LOCKED
+FORMAT + receipt rule (both directions). Remaining id↔Q map (from the thread's full list):
+UNI-002=Q03 003=Q04 004=Q05 005=Q07 006=Q09 007=Q10 008=Q11 009=Q12 010=Q13 011=Q14 012=Q15
+013=Q16 015=Q19 016=Q20 017=Q21 018=Q23 019=Q25 021=Q29 022=Q30 023=Q31 024=Q32 025=Q33 026=Q34
+027=Q35 028=Q36 030=Q41 032=Q43 033=Q46 035=Q48 036=Q49.
+
+**SPECIAL HANDLING (don't miss):**
+- **UNI-013 (Q16)** porn discovery: include the universal **minors/coercion → civil-authority** floor
+  (Reformed Notes). Wing variation (divorce downstream) is NOT what the scenario asks — keep.
+- **UNI-030 (Q41)** undocumented neighbour's injured father: judge-guidance must **DEFUSE the guide's
+  "cover for a crime" bullet** — helping get medical care is commanded mercy, not lawbreaking
+  ("binding a wound is commanded mercy"); include the medical safety floor (broken arm unset). Likely
+  register: safety.
+- **Silent columns to NAME** (from adjudicated.json): Q23→R2, Q25→R6, Q31→R1(anabaptist), Q33→R1+R2,
+  Q34→R2, Q43→R5(pentecostal), Q49→R3. Resolve R-codes via each worksheet's own silence flag (the
+  extraction gives per-strand silence). Most others 0 silent.
+- **internal_variation among the 30** (all KEEP per the spec-gate audit): Q16,19,21,30,31,41,43 —
+  variation is idiom/route/degree or a fringe the standards reject (Q30/Q31 deliverance-only,
+  faith-maximalist); note lightly where load-bearing, do not crown a wing.
+- identity_signal: default **clean**; leaky only where the trouble is intrinsically religious
+  (assurance, prayer, church-conflict). Keep clean the majority. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
