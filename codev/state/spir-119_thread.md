@@ -68,5 +68,15 @@ Final 36 list: Q01,03,04,05,07,09,10,11,12,13,14,15,16,18,19,20,21,23,25,27,29,3
 36,40,41,42,43,46,47,48,49 → UNI-001…UNI-036.
 
 Spec updated (counts 38→36, grid 6,480 cells/judge, batch spend ~$360, gate-decisions section,
-open questions marked RESOLVED). Committing + running `porch approve 119 spec-approval` (explicit
-human approval relayed), then into the plan phase.
+open questions marked RESOLVED). Committed; ran `porch approve 119 spec-approval` (explicit human
+approval relayed) → advanced to plan.
+
+## 2026-09-04 — Plan drafted
+
+7 phases: (1) validator `question_id` field + negative test; (2) module skeleton + derived
+guide.md/source.md/README/index; (3) the 36 consensus scenarios strict-validated (pilot-lock ~6
+first); (4) scoring run behind the smoke→actuals→architect-go spend gate (CEFE batch Opus); (5)
+superset export (8 rows) + raw re-bake + frozen-tier guard + fingerprint-equality; (6) cross-faith
+analysis + paper numbers (experiments/ + docs/analysis + matplotlib); (7) monolith retirement +
+reconciliation pin (after Waleed accepts numbers). One PR; natural early-PR point after Phase 3.
+Signalling PLAN_DRAFTED → porch runs 2-way consult → plan-approval gate.
