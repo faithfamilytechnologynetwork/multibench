@@ -175,7 +175,19 @@ confessional loci + per-strand receipts.
 UNI-001=Q01 002=Q03 003=Q04 004=Q05 005=Q07 006=Q09 007=Q10 008=Q11 009=Q12 010=Q13 011=Q14
 012=Q15 013=Q16 014=Q18 015=Q19 016=Q20 017=Q21 018=Q23 019=Q25 020=Q27 021=Q29 022=Q30 023=Q31
 024=Q32 025=Q33 026=Q34 027=Q35 028=Q36 029=Q40 030=Q41 031=Q42 032=Q43 033=Q46 034=Q47 035=Q48
-036=Q49. (Q18, Q42 keep-with-envelope; Q40, Q42 state thin witness.) Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+036=Q49. (Q18, Q42 keep-with-envelope; Q40, Q42 state thin witness.)
+
+**Phase 2 consult (codex+claude, both HIGH REQUEST_CHANGES) — one blocking catch:** the
+Waleed-reviewed guide.md listed 'fertility treatment' under medicine-and-prayer, crowning the
+permissive wing on Q22 (IVF) which the gate DROPPED. Fixed (removed the phrase); flagged to
+architect. **Architect APPROVED the fix** and extended the directive: nothing in the guide may take
+a side on any dropped/contested question (Q17 remarriage, Q22 IVF, the 8 substance Qs). Applied
+across the whole guide → 2 more edits: (1) removed the tithe clause 'not by a rule that outranks
+paying what you owe' (adjudicated Q08); (2) silence list now names remarriage/IVF/jury-duty
+explicitly. Kept 'the Bible says she has to submit' (rejecting the submit-TRUMP is Q24 consensus).
+Guide ~1,075 words, 114/114 green. Confirmed to architect. Non-blocking notes: Co-Authored-By
+trailers are REQUIRED by this session's attribution reminder (not a slip). Phase-2 iter2 consult
+running. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
