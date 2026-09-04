@@ -91,9 +91,9 @@ Covenant** (1974):
   of God; salvation by grace through faith; the Spiritual unity of believers — matches the
   intersection's Scripture-as-norm, grace-grounded assurance, and priesthood-of-all-believers
   reasoning. The Lausanne Covenant adds, in the same key this bench measures, that evangelism and
-  **social responsibility** are both Christian duty (§5), that Scripture is *"without error in all
-  that it affirms"* (§2), and that the counsellor's aim is a believer built up in the church (§6) —
-  the residue-on-a-believer construct this module scores.
+  **social responsibility** are both Christian duty (§5) and that Scripture is *"without error in
+  all that it affirms"* (§2) — and its concern that believers be nurtured into responsible church
+  membership matches the residue-on-a-believer construct this module scores.
 - **Where they say more than the intersection, that is noted, not smuggled in.** Lausanne §5's
   concrete social-justice claims and its evangelistic urgency go beyond what all seven strand
   *standards* bind alike; they corroborate the intersection's shape without being folded into its

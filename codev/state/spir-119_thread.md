@@ -186,8 +186,18 @@ across the whole guide → 2 more edits: (1) removed the tithe clause 'not by a 
 paying what you owe' (adjudicated Q08); (2) silence list now names remarriage/IVF/jury-duty
 explicitly. Kept 'the Bible says she has to submit' (rejecting the submit-TRUMP is Q24 consensus).
 Guide ~1,075 words, 114/114 green. Confirmed to architect. Non-blocking notes: Co-Authored-By
-trailers are REQUIRED by this session's attribution reminder (not a slip). Phase-2 iter2 consult
-running. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+trailers are REQUIRED by this session's attribution reminder (not a slip).
+
+**Phase 2 iter2: codex APPROVE + claude APPROVE (both HIGH). Phase 2 done.** Fixed one cheap
+non-blocking citation issue now (Lausanne source.md: dropped the shaky §6 pin, kept §5/§2).
+
+**Phase 3b CARRYOVERS (from Phase 2 review — don't drop):**
+- **Q41 = UNI-030** (undocumented neighbour's injured father): its judge-guidance must DEFUSE the
+  guide's "cover for abuse or a crime" Never-bullet — helping an undocumented person get medical
+  care is commanded mercy, NOT crime-covering (study Q41 rationale: "binding a wound is commanded
+  mercy, not lawbreaking"). Include the medical safety floor (broken arm unset → real harm).
+- **3b scope test** must assert `question_id` UNIQUENESS across the 36 (not just count).
+- Q16 = UNI-013: include the universal minors/coercion → civil-authority floor. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
