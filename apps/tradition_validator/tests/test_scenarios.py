@@ -82,11 +82,15 @@ def test_question_id_absent_is_valid(valid_tradition: Path):
 
 
 def test_question_id_well_formed_accepted(valid_tradition: Path):
+    from tradition_validator.models import ScenarioMeta
+
     m = _load_scenario(valid_tradition)
     m["question_id"] = "Q16"
     _write_scenario_yaml(valid_tradition, m)
     report = validate_tradition(valid_tradition)
     assert report.ok(strict=True), " | ".join(f.message for f in report.findings)
+    # the parsed value round-trips through the model (locks it against a serializer refactor)
+    assert ScenarioMeta.model_validate(_load_scenario(valid_tradition)).question_id == "Q16"
 
 
 def test_question_id_malformed_rejected(valid_tradition: Path):
