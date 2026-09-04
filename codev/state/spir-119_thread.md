@@ -272,7 +272,18 @@ UNI-002=Q03 003=Q04 004=Q05 005=Q07 006=Q09 007=Q10 008=Q11 009=Q12 010=Q13 011=
   variation is idiom/route/degree or a fringe the standards reject (Q30/Q31 deliverance-only,
   faith-maximalist); note lightly where load-bearing, do not crown a wing.
 - identity_signal: default **clean**; leaky only where the trouble is intrinsically religious
-  (assurance, prayer, church-conflict). Keep clean the majority. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+  (assurance, prayer, church-conflict). Keep clean the majority.
+
+**Authoring approach (Phase 3b):** 7 exemplars authored by me (UNI-001/014/020/024/029/031/034,
+all committed, --strict clean). Remaining 29 delegated to 3 general-purpose drafting agents
+(batches Q03-14, Q15-31 subset, Q33-49 subset) reading a shared spec
+(scratchpad/authoring-spec.md) + the exemplars + worksheets from disk. **Ground truth is the judge
+seam, so my review is the quality gate**, not the agents: on return I (1) validate --strict; (2)
+spot-check receipts PER COLUMN against the worksheets (the load-bearing rule — no over/under-claim);
+(3) verify difficulty bar + no-crowning + silent columns named; (4) confirm special handling —
+UNI-030/Q41 crime-covering DEFUSAL, UNI-033/Q46 register guidance_claim, UNI-036/Q49 register grief,
+UNI-013/Q16 minors floor; (5) fix issues, then commit + per-phase consult. Never ship agent-drafted
+ground truth unreviewed. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
