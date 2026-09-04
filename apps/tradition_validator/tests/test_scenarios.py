@@ -72,6 +72,32 @@ def test_scenario_unknown_key_rejected(valid_tradition: Path):
     assert not validate_tradition(valid_tradition).ok(strict=False)
 
 
+# --- optional question_id provenance (derived traditions, e.g. protestant-unified) ------
+
+def test_question_id_absent_is_valid(valid_tradition: Path):
+    # The seven non-derived traditions carry no question_id; absence must stay valid.
+    m = _load_scenario(valid_tradition)
+    assert "question_id" not in m
+    assert validate_tradition(valid_tradition).ok(strict=True)
+
+
+def test_question_id_well_formed_accepted(valid_tradition: Path):
+    m = _load_scenario(valid_tradition)
+    m["question_id"] = "Q16"
+    _write_scenario_yaml(valid_tradition, m)
+    report = validate_tradition(valid_tradition)
+    assert report.ok(strict=True), " | ".join(f.message for f in report.findings)
+
+
+def test_question_id_malformed_rejected(valid_tradition: Path):
+    m = _load_scenario(valid_tradition)
+    m["question_id"] = "16"  # missing the leading Q
+    _write_scenario_yaml(valid_tradition, m)
+    report = validate_tradition(valid_tradition)
+    f = find_finding(report, contains="question_id", severity="error")
+    assert f is not None and f.file.endswith("JLS-001/scenario.yaml") and f.path == "question_id"
+
+
 # --- tags vs declared taxonomy ---------------------------------------------
 
 def test_tag_value_not_in_axis(valid_tradition: Path):
