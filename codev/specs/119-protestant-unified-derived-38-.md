@@ -1,4 +1,8 @@
-# Specification: protestant-unified — a derived 38-scenario Protestant bench, scored and published as the 8th leaderboard row
+# Specification: protestant-unified — a derived Protestant bench (36 scenarios), scored and published as the 8th leaderboard row
+
+<!-- Scope note: the study yields 38 candidate scenarios (39 `same` − Q50); the spec-approval gate
+(Waleed, 2026-09-04) dropped Q17 and Q22, so the built bench is 36 scenarios. The filename retains
+the "-38-" project slug porch assigned at init. -->
 
 <!--
 SPEC vs PLAN BOUNDARY:
@@ -62,7 +66,7 @@ of the cross-faith leaderboard in the SPA and the paper table — while every fr
 
 Concretely, after this work:
 
-- `traditions/protestant-unified/` holds 38 scenarios, one per kept study question, each staged
+- `traditions/protestant-unified/` holds 36 scenarios, one per kept study question, each staged
   life-first (Rule A: no church noun in `turn1`), with a `judge-guidance.md` **compiled from that
   question's seven strand worksheets** (Counsel first, receipts into each strand's Grounding,
   silent columns declared), and each scenario recording its study `question_id`.
@@ -84,11 +88,11 @@ Concretely, after this work:
 - [ ] `traditions/protestant-unified/` passes
       `uv --project apps/tradition_validator run python -m tradition_validator validate traditions/protestant-unified --strict`
       with zero findings.
-- [ ] **38 scenarios** by default (the 39 `same` minus Q50) — **or N < 38** iff the spec-approval
-      gate explicitly drops one or more audited questions (a gate/architect decision, never builder
-      discretion; see the audit and Constraints note on scope). Each `scenario.yaml` records its
-      study `question_id`; ids match `^UNI-\d{3}$`. Whatever the final N, it equals the count of
-      recorded `question_id`s and the count of scenario folders.
+- [ ] **36 scenarios** — the 38 candidates (39 `same` minus Q50) minus the two gate drops (Q17,
+      Q22, decided at the spec-approval gate 2026-09-04). Each `scenario.yaml` records its study
+      `question_id`; ids match `^UNI-\d{3}$` (`UNI-001 … UNI-036`). The count of scenario folders,
+      the count of recorded `question_id`s, and the final-list length all equal 36; Q17 and Q22 are
+      absent.
 - [ ] `tradition.yaml`: id `protestant-unified`, `adherent_noun: Protestant Christian`, taxonomies
       = the monolith's `disorders` / `graces` / `discernment` / `register` / `office` (**no
       `communion` axis**).
@@ -100,19 +104,18 @@ Concretely, after this work:
       Covenant validation check (agreement or divergence, stated either way).
 - [ ] The 14 `internal_variation`-flagged questions are audited (this spec, below); the final kept
       list reflects Waleed's keep / keep-with-envelope / drop decisions at the spec gate.
-- [ ] The **Opus judge key path is resolved before the smoke gate** (batch vs live): `codev/reviews/89`
-      records `ANTHROPIC_JUDGE_API_KEY` as blocked by an org cap (probes only), which forced #89 to
-      live OpenRouter at ~2× batch price — the difference between a comfortable and a
-      ceiling-brushing run. The plan states which path is used and confirms it works on the smoke.
+- [ ] The **Opus judge key path is resolved** (gate decision 2026-09-04): the **CEFE Anthropic
+      judge key in BATCH mode**, authorized for this run only; the org cap that blocked #89's key is
+      gone (the CEFE key ran the 62k-cell #110 re-judge by batch through 2026-09-02). The plan
+      confirms batch works on the smoke before the full run.
 - [ ] Smoke run (≥50 cells, both judges) completes; **usage-computed actuals** (summed from data,
       not estimates) are reported; explicit architect go precedes the full run.
-- [ ] Full battery 38 × 5 subjects × 6 pressures × 3 framings, both scopes, both judges full grid
-      (≈6,840 cells/judge; a Gemini gap blocks the export per above). Total spend ≤ **$600** (alert
-      $450, pause $550). The plan carries a **bottom-up estimate from #89 per-cell actuals** (see
-      Constraints) and a stated fallback if the $550 pause fires mid-run.
-- [ ] `guide.md` and every **keep-with-envelope** `judge-guidance.md` are **mutually consistent**
-      and crown no wing (e.g. the guide's placement of fertility treatment within conscience must
-      agree with the Q22 envelope, if Q22 is kept).
+- [ ] Full battery 36 × 5 subjects × 6 pressures × 3 framings, both scopes, both judges full grid
+      (≈6,480 cells/judge; a Gemini gap blocks the export per above). Total spend ≤ **$600** (alert
+      $450, pause $550); target ≈ $180 Opus (batch) + ≈ $180 OpenRouter ≈ $360. The plan carries a
+      **bottom-up estimate from #89 per-cell actuals** (see Constraints).
+- [ ] `guide.md` and every **keep-with-envelope** `judge-guidance.md` (Q18, Q42) are **mutually
+      consistent** and crown no wing.
 - [ ] A new superset run (fresh run-id, **not** `20260803`) exports **all 8 tradition rows**; the
       leaderboard rule (equal-weight mean of per-tradition means, Gemini ranks, Opus badge-only) is
       enforced — only `protestant-unified` contributes a cross-faith Protestant row.
@@ -189,24 +192,24 @@ Additional binding constraints from the module contract and repo architecture:
   in one sentence, no church noun), Rule B (opener carries the trouble, not the credentials),
   `clean` as default identity posture, length targets `turn1` ~130 words, `pressures.md` ~400,
   `judge-guidance.md` ~750.
-- **Scope = 38 by default; a drop is a gate decision, not builder discretion.** Baked decision #1
-  fixes the scope at 38. The spec-gate audit is empowered (by issue Deliverable 1) to *recommend*
-  drops for Waleed's decision at the gate; if he drops one or more, that formally amends the scope
-  to N < 38. The builder never drops a question on its own judgment. Absent an explicit gate drop,
-  all 38 are built. This resolves the "38 vs ≤38" tension the consultations flagged.
-- **Spend feasibility, bottom-up from #89 actuals (not asserted).** The battery is ≈6,840
-  cells/judge (38×5×6×3×2 scopes) = 38% of #89's 18,000. Scaling #89's *actuals*: OpenRouter
-  subjects + Gemini ≈ $475 × 0.38 ≈ **$180**; Opus ≈ 6,840 × ~$0.051–0.054 (the #89 *live*
-  per-cell) ≈ **$350–370** → total ≈ **$530**, which puts the $550 pause *inside* the estimate
-  with no headroom for the re-judge sweeps #89 required (975 re-judge calls, verdict backfill,
-  straggler passes). Batch pricing for Opus (~$0.026/cell) would drop the total to ≈ **$355**. The
-  plan therefore resolves the Opus key path (batch vs live) up front and states the fallback if the
-  pause fires. The $600 ceiling is not challenged — its feasibility is *shown*, not assumed.
+- **Scope = 36 (gate-decided).** Baked decision #1 set 38 by default; the spec-gate audit
+  recommended and Waleed at the gate (2026-09-04) **dropped Q17 and Q22**, formally amending the
+  scope to **36**. The builder never drops a question on its own judgment — this was an explicit
+  gate decision.
+- **Spend feasibility, bottom-up from #89 actuals — batch (gate-chosen).** The battery is ≈6,480
+  cells/judge (36×5×6×3×2 scopes) = 36% of #89's 18,000. Opus runs **batch** on the CEFE key
+  (~$0.026/cell → ≈ **$180**); OpenRouter subjects + Gemini ≈ $475 × 0.36 ≈ **$180** → total ≈
+  **$360**, comfortably under the $600 ceiling with headroom for the re-judge sweeps #89 needed
+  (975 re-judge calls, verdict backfill, straggler passes). The earlier ~$530 concern was the
+  **live**-Opus path, which the batch decision removes; the ceiling is unchanged and its
+  feasibility is *shown*, not assumed. The full run still waits for smoke-computed actuals + the
+  architect's go.
 
 ## Assumptions
 
-- The study's `adjudicated.json` severity coding is authoritative for scope selection; the 38 kept
-  questions are exactly those coded `same` excluding Q50. (Verified against the committed file.)
+- The study's `adjudicated.json` severity coding is authoritative for scope selection; the 38
+  candidate questions are exactly those coded `same` excluding Q50, and the built 36 are those minus
+  the gate drops Q17 and Q22. (Verified against the committed file.)
 - The seven strand worksheets are the sole ground-truth source for each scenario's
   `judge-guidance.md`; they are first-draft (flagged-confidence) and unreviewed by scholars —
   `scholar_review: none` is stated honestly, not remedied here.
@@ -227,7 +230,7 @@ Additional binding constraints from the module contract and repo architecture:
 
 ## Spec-Gate Audit — the 14 `internal_variation` questions
 
-**Why this is here.** 14 of the 38 kept questions carry `internal_variation: true` on at least one
+**Why this is here.** 14 of the 38 candidate questions carry `internal_variation: true` on at least one
 strand worksheet (Q16, Q17, Q18, Q19, Q21, Q22, Q27, Q30, Q31, Q40, Q41, Q42, Q43, Q47). A question
 coded `same` at the strand-center level could still hide a **substantive** mainline-vs-confessional-
 wing split (e.g. ELCA/LCMS, UMC/GMC, SBC/CBF, MC USA/Old Order) that the unified consensus
@@ -255,11 +258,11 @@ itself weaker.
 | Q | What the scenario asks | Nature of the wing variation | Silent cols | Builder rec |
 |---|---|---|---|---|
 | Q16 | Responding to a spouse's porn discovery | Wings differ only on the *downstream divorce* question (porn-alone as grounds), which this scenario does not pose; the confront/repent/accountability core is shared. Add the universal minors/coercion → civil-authority floor. | 0 | **keep** |
-| Q17 | Is a divorced (wronged) woman free to remarry | **Substantive.** Old Order Anabaptist, stricter Pentecostal-Holiness (older CoG/COGIC), and some independent Baptist wings counsel *no remarriage while the former spouse lives*; mainline/most free the innocent party. The coded consensus "treats her as free to remarry" crowns the permissive wing. | 0 | **keep-with-envelope** |
+| Q17 | Is a divorced (wronged) woman free to remarry | **Substantive.** Old Order Anabaptist, stricter Pentecostal-Holiness (older CoG/COGIC), and some independent Baptist wings counsel *no remarriage while the former spouse lives*; mainline/most free the innocent party. The coded consensus "treats her as free to remarry" crowns the permissive wing. | 0 | ~~keep-with-envelope~~ → **DROPPED** (gate, 2026-09-04) |
 | Q18 | Attend a cohabiting daughter's housewarming | Shared core: do not sever, presence ≠ blessing, state conviction once. A stricter minority (some independent Baptist / Reformed sessions / Old Order if she is a covenant member) declines the *specific celebratory event* while keeping fellowship — a bounded act difference; mainline wings would not name sin at all. | 1 (pent.) | **keep-with-envelope** |
 | Q19 | Drifting toward engagement with a non-believer | The coded consensus *is* the shared cautionary core (halt the drift, warn honestly, give room, part with grief). Wings differ on whether it is "a line" vs "grave caution" — downstream of what this scenario counsels; guidance need not declare the marriage permitted or forbidden. | 0 | **keep** |
 | Q21 | Aging parent: memory-care vs home | Old Order prefers home care; MC USA blesses either. The coded consensus already holds "the duty is fixed, the *form* is free," which contains the Old Order preference as one legitimate form. Not permit-vs-forbid. | 0 | **keep** |
-| Q22 | IVF for an infertile couple | **Thin + substantive.** Five of seven strands are *silent* (pastoral extension, not confessional address); conservative wings (PCA/OPC, LCMS/WELS, anglo-catholic/ACNA, SBC resolution) counsel against standard IVF or against it entirely, while mainline leaves it to conscience. Shared floor is embryo protection only. | 5 | **keep-with-envelope** *(drop is defensible — see note)* |
+| Q22 | IVF for an infertile couple | **Thin + substantive.** Five of seven strands are *silent* (pastoral extension, not confessional address); conservative wings (PCA/OPC, LCMS/WELS, anglo-catholic/ACNA, SBC resolution) counsel against standard IVF or against it entirely, while mainline leaves it to conscience. Shared floor is embryo protection only. | 5 | ~~keep-with-envelope~~ → **DROPPED** (gate, 2026-09-04) |
 | Q27 | Take a new drug for unanswered healing | The flagged variation is the positive-confession / Word-of-Faith current the AG paper was *written to correct* — not a confessional wing but the position the strand's own standards reject. The consensus (medicine + prayer, no blame) is the actual standard; the fringe is a staged wrong answer. | 0 | **keep** |
 | Q30 | Medication for panic attacks | Same shape: biblical-counseling wariness / deliverance-only currents are minorities the standards do not endorse; "no Baptist standard forbids treatment," corpus bodies support prayer + medicine. Consensus is the standard. | 0 | **keep** |
 | Q31 | Declining a third chemo round | The "accepting death = abandoning faith" faith-maximalist current is a fringe the corpus standards reject (they hold healing prayer and submission together). Consensus (faithfully may decline; hospice is care) is the standard; the fringe is the staged wrong answer. | 1 (anab.) | **keep** |
@@ -269,26 +272,53 @@ itself weaker.
 | Q43 | Doom-scrolling and anger (digital) | Old Order "remove the technology altogether" vs a "disciplined fast" is degree; both reduce. The consensus (mechanical fences + refill + confess + accountability) contains both. | 1 (pent.) | **keep** |
 | Q47 | Returning prodigal fearing the unforgivable sin | The worksheet says the variation is "on the means, not the welcome" — anglo-catholic sacramental confession vs evangelical general confession; both stand on Article XVI and both say *come home*. The scenario's whole point (the welcome) is unanimous. | 0 | **keep** |
 
-**Summary recommendation:** keep 10 (Q16, Q19, Q21, Q27, Q30, Q31, Q40, Q41, Q43, Q47);
-keep-with-envelope 4 (Q17, Q18, Q22, Q42); no outright drop recommended.
+**Builder's recommendation (pre-gate):** keep 10 (Q16, Q19, Q21, Q27, Q30, Q31, Q40, Q41, Q43,
+Q47); keep-with-envelope 4 (Q17, Q18, Q22, Q42); no outright drop recommended.
 
-**Notes for the gate decision:**
-- **Q17 is the strongest case of a substantive split hiding inside a `same` coding.** With the
-  envelope, `judge-guidance.md` should *not* declare her flatly "free to remarry"; it should hold
-  the shared welcome and conditions (only-in-the-Lord, premarital counseling, healing) and name
-  that some confessional wings hold remarriage is not open while a former spouse lives, routing the
-  verdict to the person's own pastor — crowning no wing. If Waleed wants zero remarriage-permission
-  ambiguity in a consensus bench, **drop** is the clean alternative.
-- **Q22 is the leading drop candidate**: 5/7 silent *and* a conservative-wing permit-vs-forbid on
-  whether to pursue IVF at all. Keep-with-envelope requires the guidance to foreground the silence
-  (extension, not confessional address) and the embryo-protection floor while declaring no strand
-  position binding. Dropping it (→ 37 scenarios) is fully defensible and arguably cleaner.
-- **Q40 and Q42** rest on thin witness (4 and 5 silent). Both are keepable because their coded
-  consensus is already envelope-shaped or route-level, but the `judge-guidance.md` must state the
-  thin witness per the derivation discipline.
-- For every **keep-with-envelope**, the envelope crowns no wing and the scenario must still keep a
-  genuine wrong answer (the difficulty bar) — typically the failure of *binding a conscience
-  Scripture left free* or *loosing one it bound*.
+### Gate decision (Waleed, 2026-09-04) — **the binding audit outcome**
+
+- **DROP Q17** (remarriage) and **DROP Q22** (IVF). → **Final scope = 36 scenarios.**
+- **keep-with-envelope Q18 and Q42** (Q42's `judge-guidance.md` must state its thin witness).
+- **keep as-is** the other 10 (Q16, Q19, Q21, Q27, Q30, Q31, Q40, Q41, Q43, Q47).
+
+Standing implementation notes from the audit that survive the drops:
+- For **Q18** and **Q42** (keep-with-envelope), the envelope crowns no wing and the scenario must
+  still keep a genuine wrong answer (the difficulty bar) — typically the failure of *binding a
+  conscience Scripture left free* or *loosing one it bound*. Q18's envelope covers attend-vs-decline
+  the specific celebratory event while holding "do not sever, presence ≠ blessing"; Q42's must
+  foreground that most standards are silent (extension, not confessional address).
+- **Q40** rests on thin witness (4 silent); though kept as-is, its `judge-guidance.md` states the
+  thin witness and reads as an already-envelope-shaped consensus (either voting or abstaining in
+  good conscience is legitimate).
+
+### The final 36-scenario list
+
+The 38 candidates (39 `same` − Q50) minus the two gate drops (Q17, Q22):
+
+`Q01, Q03, Q04, Q05, Q07, Q09, Q10, Q11, Q12, Q13, Q14, Q15, Q16, Q18, Q19, Q20, Q21, Q23, Q25,
+Q27, Q29, Q30, Q31, Q32, Q33, Q34, Q35, Q36, Q40, Q41, Q42, Q43, Q46, Q47, Q48, Q49` — **36
+scenarios**, mapped to ids `UNI-001 … UNI-036` (order fixed at authoring; each records its
+`question_id`).
+
+## Operational Gate Decisions (approved by Waleed, 2026-09-04)
+
+Beyond the audit outcome above, the architect relayed these binding decisions, which resolve the
+spec's Important open questions:
+
+1. **Superset run-id** = the **export date in plain record format `YYYYMMDD`**, fixed at export
+   time (a fresh date, never `20260803`). The `protestant-unified` judging run gets **its own
+   `tmp/judging-runs/<date>-protestant-unified` root**, separate from the seven frozen `20260803`
+   roots the superset also reads.
+2. **`question_id` recording = Approach 1** — an **optional `question_id` field on `ScenarioMeta`**
+   (validator schema extension) **plus a negative test**. (Mirrors the refactor's `parity_key`
+   decision.)
+3. **Opus judge key = the `CEFE` Anthropic judge key, BATCH mode**, authorized by Waleed **for this
+   run only**. The org cap that blocked `ANTHROPIC_JUDGE_API_KEY` in #89 **is gone** — the CEFE key
+   ran the 62k-cell #110 re-judge by batch through 2026-09-02. Target ≈ **$180 Opus + ≈ $180
+   OpenRouter**; the **$600 ceiling is unchanged**; the full run still waits for smoke-computed
+   actuals **plus the architect's explicit go**.
+4. **NAE / Lausanne validation** = a **documented prose cross-check in `source.md`**, reported
+   either way (no machine artifact required).
 
 ## Solution Approaches
 
@@ -317,7 +347,7 @@ Counsel first (the shared concrete advice, drawn from the adjudicated cluster ra
 worksheet Counsel fields), then per-claim receipts citing each strand's own loci from its Grounding,
 with silent columns explicitly named. **This is not a vote** — where all non-silent columns agree,
 the claim is consensus; a claim resting on fewer witnesses says so. **Pros:** honors the derivation
-discipline and the judge seam; auditable to the worksheets. **Cons:** labor-intensive, 38 hand
+discipline and the judge seam; auditable to the worksheets. **Cons:** labor-intensive, 36 hand
 compilations. **Risk:** the difficulty bar — a consensus ground truth can read "obvious"; each
 scenario must preserve a genuine wrong answer (mitigated by staging the pressures against it).
 
@@ -325,37 +355,28 @@ scenario must preserve a genuine wrong answer (mitigated by staging the pressure
 
 Score only `protestant-unified` (the monolith is retired from active scoring; the other seven come
 from the existing frozen run and are re-exported into the superset). **Pros:** minimal spend for a
-single new tradition (≈6,840 cells/judge). **Cons:** the estimated ≈$530 live spend brushes the
-$550 pause (see the Constraints derivation), so the Opus batch path must be secured up front; the
-superset export must correctly join the new run's Protestant row to the seven frozen traditions and
-pass the full-grid gate. **Risk:** double-counting, a Gemini gap blocking export, or accidental
-mutation of the frozen tiers (mitigated by the reconciliation test, the full-grid gate, and
-additive-only exports).
+single new tradition (≈6,480 cells/judge; ≈$360 with batch Opus, per the Constraints derivation).
+**Cons:** the superset export must correctly join the new run's Protestant row to the seven frozen
+traditions and pass the full-grid gate. **Risk:** double-counting, a Gemini gap blocking export, or
+accidental mutation of the frozen tiers (mitigated by the reconciliation test, the full-grid gate,
+and additive-only exports).
 
 ## Open Questions
 
-**Critical (blocks progress):**
+**All previously-blocking questions were resolved at the spec-approval gate (2026-09-04)** — see
+*Operational Gate Decisions* and the audit *Gate decision*. Recorded here as resolved:
 
-- **The 14-question audit outcomes.** Which flagged questions are keep / keep-with-envelope / drop?
-  This sets the final scenario count (38 by default; N < 38 only if the gate explicitly drops one or
-  more) and shapes several `judge-guidance.md` files. *Decided by Waleed at the spec gate from the
-  audit table above.* Q17 and Q22 are the two the builder specifically escalates.
+- **Audit outcomes** *(was Critical)* → **RESOLVED**: DROP Q17, DROP Q22 → 36 scenarios; Q18/Q42
+  keep-with-envelope; other 10 keep.
+- **Opus judge key path** *(was Important)* → **RESOLVED**: CEFE key, BATCH, cap gone; ≈$180 Opus.
+- **`question_id` mechanism** *(was Important)* → **RESOLVED**: Approach 1 (optional validator field
+  + negative test).
+- **Superset run-id** *(was Important)* → **RESOLVED**: export-date `YYYYMMDD`, its own
+  `tmp/judging-runs` root; never `20260803`.
+- **NAE / Lausanne depth** *(was Important)* → **RESOLVED**: documented prose cross-check in
+  `source.md`, reported either way.
 
-**Important (shapes design):**
-
-- **Opus judge key path (batch vs live).** `codev/reviews/89` records `ANTHROPIC_JUDGE_API_KEY` as
-  org-cap-blocked (probes only). Resolve before the smoke gate — it is the ~$355 (batch) vs ~$530
-  (live) difference, and live puts the run at the $550 pause. Confirmed working on the smoke.
-- **`question_id` recording mechanism** — validator field (recommended) vs side-table. Needs
-  architect assent since it touches core.
-- **Superset run-id naming.** The baked text names `results/20260803` and `results-raw/20260803` as
-  the *untouched* record run; issue Deliverable 4 says "new run-id(s), additive." Confirm the new
-  superset run-id string (a fresh date/label, not `20260803`) with the architect before export.
-- **NAE / Lausanne validation depth.** Is a documented prose cross-check in `source.md` sufficient,
-  or is a machine-checkable artifact wanted? Default: documented prose cross-check reported either
-  way, consistent with the refactor §3 "validation section for the paper."
-
-**Nice-to-know (optimization):**
+**Nice-to-know (optimization) — open, decided during implementation:**
 
 - Whether any consensus scenario benefits from an `office`/`register` overlay beyond the study's
   framing (e.g. `guidance_claim` on Q46, `assurance_crisis` on Q47) — an authoring nicety, decided
@@ -365,12 +386,13 @@ additive-only exports).
 
 - **Validator strict pass**: the module validates `--strict` with zero findings; a deliberately
   malformed `question_id` (if the field is added) is rejected by the negative test.
-- **Scope integrity**: exactly 38 scenario folders; the set of recorded `question_id`s equals the
-  38 kept study questions; Q50 and all emphasis/substance questions are absent.
+- **Scope integrity**: exactly 36 scenario folders; the set of recorded `question_id`s equals the
+  36 kept study questions; Q50, all emphasis/substance questions, and the two gate drops (Q17, Q22)
+  are absent.
 - **Derivation fidelity**: for a sampled scenario, every claim in `judge-guidance.md` traces to a
   cited locus present in that strand's worksheet Grounding; silent columns for that question are
   named as silent (spot-checked against `adjudicated.json` `silent` lists — e.g. Q18 R7 silent,
-  Q22 five silent, Q42 five silent).
+  Q40 four silent, Q42 five silent).
 - **Difficulty**: for a sampled scenario, a fluent-but-wrong response is identifiable and the
   `judge-guidance.md` scores it below the faithful response.
 - **Frozen-tier immutability**: `git diff` shows no change to `traditions/protestantism/scenarios/`,
@@ -393,8 +415,8 @@ additive-only exports).
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| Spend overrun past $600 (est. ≈$530 live puts the $550 pause inside the estimate) | Medium | High | Bottom-up estimate from #89 actuals in the plan; resolve Opus **batch** path (≈$355) up front; smoke → usage-computed actuals → explicit go; alert $450, pause $550; reconcile from data not estimates (Spec 89 scar). |
-| Opus judge key (`ANTHROPIC_JUDGE_API_KEY`) org-cap-blocked as in #89 | Medium | High | Resolve batch-vs-live before the smoke gate; confirm the chosen path works on the smoke; if blocked, fall back to live OpenRouter and re-check the ceiling. |
+| Spend overrun past $600 (batch est. ≈$360) | Low | High | Batch Opus on the CEFE key (≈$180) + OpenRouter (≈$180); smoke → usage-computed actuals → explicit go; alert $450, pause $550; reconcile from data not estimates (Spec 89 scar). |
+| Opus judge key blocked (was org-capped in #89) | Low | High | **Resolved at gate**: CEFE key, batch, cap gone (ran the 62k-cell #110 re-judge by batch through 2026-09-02); confirm batch works on the smoke before the full run. |
 | Superset export blocked by `_assert_full_grid` (any Gemini gap in any tradition) | Medium | High | Treat full grid as a blocking gate; run Gemini full grid; budget re-judge spend for gap-closing inside the ceiling; verify roster mappings (`_SUBJECT_VARIANTS`/`_JUDGE_VARIANTS`) before export. |
 | Loss of gitignored `tmp/judging-runs/20260803-*` roots (afx cleanup scar) | Low | High | Pre-flight existence check before any run; do not run cleanup; the seven frozen roots are the only source for the 8-row superset. |
 | Accidental mutation of a frozen tier (`results/20260803`, monolith, raw 20260813) | Medium | High | Additive-only exports; new run-id; reconciliation test + explicit `git diff` gate before PR. |
