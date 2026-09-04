@@ -332,3 +332,18 @@ Phase 3b committed; running per-phase consult next.
   the case in the rebuttal; if architect wants a hard cap the only lever is fewer named columns (a
   fidelity trade I won't make unasked).
 --strict 0; 114/114; scores+structure intact on all 36. iter2 consult running.
+
+## 2026-09-04 — Phase 3b iter3: BOTH APPROVE (HIGH). MODULE COMPLETE.
+
+codex APPROVE + claude APPROVE (fresh 12-claim receipt audit found zero false attributions).
+protestant-unified is fully built: 36 scenarios, --strict 0 findings, receipts per-column verified,
+process/coding vocab stripped from ground truth, length at faithful floor. Phases 1/2/3a/3b DONE.
+
+Next: **Phase 4 — scoring run** (the only phase that spends). Opens toward the SMOKE CHECKPOINT
+where (per architect) they review the module in this worktree + I send usage-computed actuals per
+key + rate verification + roster-normalization result + batch-Opus confirmation, then STOP for the
+explicit go. Keys via taqwabench/.env (OpenRouter subjects+Gemini; CEFE Anthropic key BATCH for
+Opus, scoped ANTHROPIC_JUDGE_API_KEY→ANTHROPIC_API_KEY). Run roots in MAIN checkout
+../../tmp/judging-runs/<date>-protestant-unified/protestant-unified/. Configs: protestant-unified-
+run.yaml (full panel) + -gemini.yaml. Pre-flight: verify the 4 frozen roots exist by exact name
+(20260803-merged, -unstated-opus, -framings-opus-sample, 20260823-opus-fullgrid).
