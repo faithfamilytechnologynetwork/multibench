@@ -110,9 +110,10 @@ taxonomies, the pan-Protestant `guide.md`, the derived `source.md`, README, the 
 
 - `traditions/protestant-unified/tradition.yaml` — id `protestant-unified`, `display_name`,
   `adherent_noun: Protestant Christian`, `scenario_id_pattern: ^UNI-\d{3}$`,
-  `scholar_review: status: none`, taxonomies = the monolith's `disorders` / `graces` /
-  `discernment` / `register` / `office` **verbatim** (no `communion` axis); a pan-Protestant
-  `construct` (the priesthood of all believers speaking the truth in love — refactor §2).
+  `scholar_review: status: none`, a required `maintainers` block (min one entry, as every manifest
+  carries), taxonomies = the monolith's `disorders` / `graces` / `discernment` / `register` /
+  `office` **verbatim** (no `communion` axis); a pan-Protestant `construct` (the priesthood of all
+  believers speaking the truth in love — refactor §2).
   **`canonical_source` = the Holy Scriptures (66-book Protestant canon) as *norma normans*, exactly
   as the monolith declares it, with `locus_unit: book`** — the derived `source.md` is the module's
   *instrument*, but Scripture remains the cited canonical source shared by every strand.
@@ -149,8 +150,11 @@ taxonomies, the pan-Protestant `guide.md`, the derived `source.md`, README, the 
 
 - [ ] The module validates at the manifest/index level (only outstanding finding = missing scenario
       folders, resolved in Phase 3).
-- [ ] `guide.md`/`source.md`/`README.md` prose passes `test_band_names_normalized.py` (it globs
-      `traditions/**` for band-name labels — no band names in prose).
+- [ ] No band names in prose. Note `test_band_names_normalized.py` scans only the tradition
+      `README.md` (within its `## The five bands` section, if present) and `judge-guidance.md` — it
+      **does not** scan `guide.md`/`source.md`/`turn1.md`/`pressures.md` (docstring is explicit). So
+      the meaningful application is Phase 3b (the 36 `judge-guidance.md`); here, decide whether the
+      new `README.md` carries a bands section and, if so, keep it normalized.
 - [ ] This phase's **commit** touches only `traditions/protestant-unified/**` (the branch also
       carries the Phase 1 validator change, which is expected — scope the check to the Phase 2
       commit, e.g. `git show --stat HEAD`, not `origin/main...HEAD`).
@@ -250,12 +254,12 @@ is improvised against a live key.
 
 #### Files to Create / Modify
 
-- `workflows/judging/configs/protestant-unified-run.yaml` (full panel), `…-gemini.yaml`
-  (Gemini rankable), `…-opus-batch.yaml` (Opus via the CEFE key, batch) — modeled on the existing
-  `protestantism-*.yaml` configs but pointed at `traditions/protestant-unified` and its own results
-  dir. **Note the existing `protestantism-opus-openrouter.yaml` is a *live* OpenRouter path
-  ("no batch … do NOT touch the CEFE key"); the CEFE batch path here is the distinct native
-  `batch-judge submit`/`collect` mechanism, so this is a new config, not a tweak of that one.**
+- **Two configs** (the #89 shape — the third "opus-batch" config buys nothing because the key comes
+  from **env**, not config, and only adds a judge-panel-mismatch risk):
+  `workflows/judging/configs/protestant-unified-run.yaml` (the **full dual-judge panel** — the
+  batch-submit source *and* the config `report` runs under) and `…-gemini.yaml` (live Gemini),
+  modeled on `protestantism-run.yaml` / `protestantism-gemini.yaml` but pointed at
+  `traditions/protestant-unified` and its own results dir.
 - `tmp/judging-runs/<date>-protestant-unified/protestant-unified/` (gitignored) — the run root, in
   the required **per-tradition-subdir** shape, with `judgments.jsonl` (+ `judgments_v2.jsonl`),
   **`sittings.jsonl`** (the transcript anchor — `export-raw` treats a verdict without a transcript
@@ -271,12 +275,16 @@ is improvised against a live key.
       `ANTHROPIC_API_KEY` and ignore `api_key_env`, map `ANTHROPIC_JUDGE_API_KEY` (CEFE) →
       `ANTHROPIC_API_KEY` **only** for the Opus batch commands (a scoped env, not a global export),
       and never use the plain personal Anthropic/Gemini keys.
-- [ ] CLI path stated: `judging run` (subjects + Gemini live) / `batch-judge submit` +
-      **`batch-judge collect --no-fallback`** (Opus batch) / `judging report` (produce `report.json`).
-      **`--no-fallback` is required**: `collect` defaults to live-Anthropic fallback, which would
-      silently push failed batch cells through full-price live judging, breaking the batch spend
-      decision. Failed batch cells are **re-submitted as batch**, or any live top-up is explicitly
-      budgeted and architect-authorized — never silent.
+- [ ] **Config↔command pairing stated exactly** (cost-sensitive — `judging run` under the *full*
+      config would judge Opus **live**): subjects + Gemini via
+      `judging run --config …-gemini.yaml`; Opus via `batch-judge submit --config …-run.yaml` then
+      **`batch-judge collect --config …-run.yaml --no-fallback`** (CEFE key via the scoped env; the
+      full-panel config is the batch-submit source); coverage via `judging report --config
+      …-run.yaml` (the **full dual-judge** config — a mismatched config miscounts the very number the
+      Opus gate checks). **`--no-fallback` is required**: `collect` defaults to live-Anthropic
+      fallback, which would silently push failed batch cells through full-price live judging. Failed
+      batch cells are **re-submitted as batch**, or any live top-up is explicitly budgeted and
+      architect-authorized — never silent.
 - [ ] Smoke spans **all five canonical subjects** (not just ≥50 cells) on **both** judges, and
       **every subject/judge id in the smoke's judgments is asserted to normalize** (`normalize_subject`/
       `normalize_judge`, and the `assert_uniform_subject_roster` roster) **before** the architect-go —
@@ -290,7 +298,9 @@ is improvised against a live key.
       the $450 / $550 / $600 gates. **STOP** for explicit architect go before the full run.
 - [ ] Full battery 36 × 5 × 6 × 3, both scopes, both judges full grid; coverage in the manifest.
 - [ ] **Opus completeness check**: assert all **6,480** expected Opus judgments present (per-framing
-      `n_judged == n_expected`) — not merely the tolerant `full_grid` badge — before Phase 5.
+      `n_judged == n_expected`) — not merely the tolerant `full_grid` badge — computed **from the
+      `protestant-unified` run root / its shard**, not the superset manifest (whose
+      `_coverage_from_exports` pools coverage across all 555 scenarios and would mask a gap).
 
 #### Acceptance Criteria
 
@@ -339,28 +349,35 @@ byte-untouched.
       (`assert_uniform_subject_roster`, `_SUBJECT_VARIANTS`/`_JUDGE_VARIANTS`); exactly one
       Protestant cross-faith row (`protestant-unified`); monolith and strands contribute none.
 - [ ] Raw tier covers all 8 traditions; fingerprint-equality test passes.
-- [ ] Railway two-step re-bake (`rsync` → `railway up --no-gitignore --detach` from
-      `apps/multibrowser`); the **live** manifest fingerprint matches the exported tier (HTML
-      content-type on a baked path treated as "absent").
+- [ ] **Pre-merge (in this PR):** the committed tiers land and validate locally; the baked bundle is
+      staged. **The production re-bake + live verification are POST-MERGE and architect-driven**
+      (`apps/multibrowser/scripts/bake-and-deploy.sh`) — the SPA discovers manifests from the
+      **default branch** and `resolveRawSource` validates the baked copy against the *committed
+      GitHub* raw catalog, so neither can reference this commit until it is merged. The two-step
+      re-bake (`rsync` → `railway up --no-gitignore --detach` from `apps/multibrowser`) and the
+      live-manifest fingerprint check (HTML content-type on a baked path treated as "absent") run in
+      the **verify phase** after merge, not in this phase.
 - [ ] **Frozen-tier immutability against the branch base** (not plain `git diff`, which is empty
       after commits): `git diff --exit-code origin/main...HEAD -- results/20260803
-      results-raw/20260803 results-raw/20260813-protestantism traditions/protestantism
-      ':!traditions/protestantism/README.md'` is clean — the pathspec covers the **whole** monolith
-      dir (its `guide.md`/`source.md`/`tradition.yaml` are frozen too, not just `scenarios/`) and
-      excludes only the one permitted README edit (Phase 7).
+      results/20260813-protestantism results-raw/20260803 results-raw/20260813-protestantism
+      traditions/protestantism ':!traditions/protestantism/README.md'` is clean — includes the
+      monolith's **score** tier `results/20260813-protestantism/` (committed), and the pathspec
+      covers the **whole** monolith dir (its `guide.md`/`source.md`/`tradition.yaml` are frozen too,
+      not just `scenarios/`) excluding only the one permitted README edit (Phase 7).
 
 #### Acceptance Criteria
 
 - [ ] The existing paper-reconciliation test (`test_export_results.py:808`, committed-artifact
       based) still passes unchanged.
 - [ ] An intentional Gemini gap makes `_assert_full_grid` fail; the real full grid passes.
-- [ ] `/results` shows 8 rows live.
+- [ ] `/results` shows 8 rows — verified **post-merge** in the verify phase (the SPA reads the
+      default branch), not pre-merge.
 
 #### Test Plan
 
 Run both exporters; run the analysis/validator suites (per-builder dispatcher). Branch-base diff on
-the frozen paths (empty). Curl the live baked manifest, compare fingerprint. Verify the 8th row in
-the SPA.
+the frozen paths (empty). The live baked-manifest fingerprint curl and the 8th-row SPA check are
+**post-merge** (verify phase), since the SPA reads the default branch.
 
 ### Phase 6: Cross-faith analysis and paper numbers
 
