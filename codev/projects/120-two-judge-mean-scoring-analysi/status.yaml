@@ -1,0 +1,16 @@
+id: '120'
+title: two-judge-mean-scoring-analysi
+protocol: aspir
+phase: specify
+plan_phases: []
+current_plan_phase: null
+gates:
+  pr:
+    status: pending
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-09-04T23:54:27.145Z'
+updated_at: '2026-09-04T23:54:27.146Z'
