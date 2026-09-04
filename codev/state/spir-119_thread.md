@@ -315,3 +315,20 @@ All 29 delegated scenarios landed (batches A/B/C). **My review:**
   Direction/Correctives (NOT receipts) on the >1100 offenders (UNI-023/036/033/022/018/019/030/021/035).
 
 Phase 3b committed; running per-phase consult next.
+
+## 2026-09-04 — Phase 3b review fixes (iter1: claude APPROVE, codex REQUEST_CHANGES)
+
+3 items, all fixed:
+- **Receipt over-claims:** exhaustive per-column audit (subagent) → 6 false "every column" claims
+  (incl. 1 in my own exemplar UNI-024). Fixed + re-verified: UNI-024 Matt18→4 cols, Gen1/Jas3→
+  all-but-Lutheran; UNI-019 1Kings→all-but-Lutheran; UNI-022 2Tim1:7→Pentecostal-only; UNI-008 Prov
+  bundle split (only 22:26-27 universal). Lesson: my sampling missed some — receipts need EXHAUSTIVE
+  per-column verification, not spot-checks.
+- **Process-vocab leak (claude catch):** 'spec-approval gate'/'keep-with-envelope' stripped from
+  judge ground truth of UNI-014/015/031.
+- **Length:** compressed 12 files >1050w (prose only; bullets/loci/scores untouched, diff-verified).
+  Range now 747-1277. Structural finding: ~750 target unreachable — receipt bullets alone run
+  459-607w (the derived-with-receipts contract); residual length is receipts, not verbosity. Made
+  the case in the rebuttal; if architect wants a hard cap the only lever is fewer named columns (a
+  fidelity trade I won't make unasked).
+--strict 0; 114/114; scores+structure intact on all 36. iter2 consult running.
