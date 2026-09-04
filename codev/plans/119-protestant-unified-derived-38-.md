@@ -130,8 +130,11 @@ taxonomies, the pan-Protestant `guide.md`, the derived `source.md`, README, the 
   **documented NAE Statement of Faith + Lausanne Covenant prose cross-check**, reported either way.
 - `traditions/protestant-unified/README.md` — scope, derivation provenance (#109 study),
   `scholar_review: none` stated honestly, the strand-coverage note (refactor §2.2/§2.3).
-- `traditions/protestant-unified/scenarios/index.json` — `schema_version: 1` + `UNI-001 … UNI-036`.
-- Notes/table mapping each `UNI-0NN` ↔ its study `QNN` (ordering fixed here).
+- `traditions/protestant-unified/scenarios/index.json` — `schema_version: 1` + an **empty**
+  `scenarios: []` (an explicit empty list is valid; folder/index drift is the expected outstanding
+  finding until 3a/3b populate it — 6 ids at 3a, all 36 at 3b).
+- Notes/table mapping each `UNI-0NN` ↔ its study `QNN` (the full ordering fixed here, so 3a/3b just
+  fill folders and the index in that order).
 
 #### Deliverables
 
@@ -139,7 +142,8 @@ taxonomies, the pan-Protestant `guide.md`, the derived `source.md`, README, the 
       canonical source, `locus_unit: book`.
 - [ ] The `source_locus`/`locus_label` convention written down.
 - [ ] `guide.md`, `source.md` (status paragraph + NAE/Lausanne cross-check), `README.md`,
-      `scenarios/index.json` (36 ids).
+      `scenarios/index.json` (empty scenarios list; the full 36-id ↔ question ordering fixed in
+      notes).
 
 #### Acceptance Criteria
 
@@ -147,7 +151,9 @@ taxonomies, the pan-Protestant `guide.md`, the derived `source.md`, README, the 
       folders, resolved in Phase 3).
 - [ ] `guide.md`/`source.md`/`README.md` prose passes `test_band_names_normalized.py` (it globs
       `traditions/**` for band-name labels — no band names in prose).
-- [ ] `git diff origin/main...HEAD` touches only `traditions/protestant-unified/**`.
+- [ ] This phase's **commit** touches only `traditions/protestant-unified/**` (the branch also
+      carries the Phase 1 validator change, which is expected — scope the check to the Phase 2
+      commit, e.g. `git show --stat HEAD`, not `origin/main...HEAD`).
 
 #### Test Plan
 
@@ -175,8 +181,9 @@ study's pilot discipline. Include **one keep-with-envelope** (Q18 or Q42) and **
 
 #### Deliverables
 
-- [ ] Six scenarios validating `--strict` (as a subset, with the index trimmed to the six or the
-      remaining thirty stubbed — whichever keeps `--strict` meaningful for the pilot).
+- [ ] Six scenarios validating `--strict`. **Index shape (decided): `scenarios/index.json` lists
+      exactly the six ids at 3a**, completed to 36 at 3b — so `--strict` (index ↔ folders) is
+      meaningful with no stubs.
 - [ ] The envelope scenario crowns no wing; the thin-witness scenario names its silence.
 - [ ] Each `judge-guidance.md` traces every claim to a worksheet locus; a genuine wrong answer is
       staged and scored below the faithful response.
@@ -200,6 +207,11 @@ documented in the mapping notes so Phase 3b is mechanical.
 
 Author the remaining 30 scenarios under the locked format so the full module passes `validate
 --strict` with zero findings.
+
+**Escalation if authoring slips the 09-09 freeze:** the spec fixes scope at 36 and forbids the
+builder reducing scope on its own judgment — so if 3b cannot land all 30 in time, **escalate to the
+architect** (`afx send architect`) with the count done and the shortfall; do **not** ship a reduced
+bench unilaterally.
 
 #### Files to Create / Modify
 
@@ -245,8 +257,10 @@ is improvised against a live key.
   ("no batch … do NOT touch the CEFE key"); the CEFE batch path here is the distinct native
   `batch-judge submit`/`collect` mechanism, so this is a new config, not a tweak of that one.**
 - `tmp/judging-runs/<date>-protestant-unified/protestant-unified/` (gitignored) — the run root, in
-  the required **per-tradition-subdir** shape, with `judgments.jsonl` (+ `judgments_v2.jsonl`) and a
-  **`report.json`** (from `judging report`), which the exporter's full-grid universe depends on.
+  the required **per-tradition-subdir** shape, with `judgments.jsonl` (+ `judgments_v2.jsonl`),
+  **`sittings.jsonl`** (the transcript anchor — `export-raw` treats a verdict without a transcript
+  as a hard orphan-guard failure), and a **`report.json`** (from `judging report`, which the
+  exporter's full-grid universe depends on). `judging run` produces `sittings.jsonl` naturally.
 - A committed run-notes file `experiments/<PR#>_protestant_unified/notes.md` — smoke coverage,
   usage-computed actuals per key, the architect-go timestamp, final coverage (Spec-89 spend table).
 
@@ -258,11 +272,22 @@ is improvised against a live key.
       `ANTHROPIC_API_KEY` **only** for the Opus batch commands (a scoped env, not a global export),
       and never use the plain personal Anthropic/Gemini keys.
 - [ ] CLI path stated: `judging run` (subjects + Gemini live) / `batch-judge submit` +
-      `batch-judge collect` (Opus batch) / `judging report` (produce `report.json`).
-- [ ] Smoke ≥50 cells on **both** judges; **batch Opus confirmed working on the smoke** before any
-      full submission.
-- [ ] **Usage-computed actuals** (summed from run data, not estimates) reported; **STOP** for
-      explicit architect go before the full run.
+      **`batch-judge collect --no-fallback`** (Opus batch) / `judging report` (produce `report.json`).
+      **`--no-fallback` is required**: `collect` defaults to live-Anthropic fallback, which would
+      silently push failed batch cells through full-price live judging, breaking the batch spend
+      decision. Failed batch cells are **re-submitted as batch**, or any live top-up is explicitly
+      budgeted and architect-authorized — never silent.
+- [ ] Smoke spans **all five canonical subjects** (not just ≥50 cells) on **both** judges, and
+      **every subject/judge id in the smoke's judgments is asserted to normalize** (`normalize_subject`/
+      `normalize_judge`, and the `assert_uniform_subject_roster` roster) **before** the architect-go —
+      so a roster/normalization break (a subject id retired from OpenRouter since the month-old
+      `20260803`) surfaces *before* ~$360 is spent, not at Phase 5 export. Batch Opus confirmed
+      working on the smoke before any full submission.
+- [ ] **Usage-computed actuals** — summed from run data — using **verified current provider rates**:
+      `judging/report.py`'s price table is dated `2026-08-03` with promotions expired `2026-08-31`
+      and warns operators to confirm console rates, so a pre-smoke step verifies/updates the rates
+      (or reconciles usage × current rate) before any dollar figure is treated as an "actual" for
+      the $450 / $550 / $600 gates. **STOP** for explicit architect go before the full run.
 - [ ] Full battery 36 × 5 × 6 × 3, both scopes, both judges full grid; coverage in the manifest.
 - [ ] **Opus completeness check**: assert all **6,480** expected Opus judgments present (per-framing
       `n_judged == n_expected`) — not merely the tolerant `full_grid` badge — before Phase 5.
@@ -319,8 +344,10 @@ byte-untouched.
       content-type on a baked path treated as "absent").
 - [ ] **Frozen-tier immutability against the branch base** (not plain `git diff`, which is empty
       after commits): `git diff --exit-code origin/main...HEAD -- results/20260803
-      results-raw/20260803 results-raw/20260813-protestantism traditions/protestantism/scenarios` is
-      clean; the only monolith change (Phase 7) is its README.
+      results-raw/20260803 results-raw/20260813-protestantism traditions/protestantism
+      ':!traditions/protestantism/README.md'` is clean — the pathspec covers the **whole** monolith
+      dir (its `guide.md`/`source.md`/`tradition.yaml` are frozen too, not just `scenarios/`) and
+      excludes only the one permitted README edit (Phase 7).
 
 #### Acceptance Criteria
 
@@ -407,8 +434,9 @@ to the new run once Waleed accepts the headline numbers — protecting the new n
 #### Test Plan
 
 Run `leaderboard.test.ts` (both pins) and the Python reconciliation test. Confirm discovery lists
-the monolith and the raw viewer resolves. Branch-base diff to confirm the only monolith change is
-its README.
+the monolith and the raw viewer resolves. Branch-base diff (`git diff origin/main...HEAD --
+traditions/protestantism ':!traditions/protestantism/README.md'`) to confirm the only monolith
+change is its README.
 
 ## Risks and Mitigation
 
@@ -418,6 +446,9 @@ its README.
 | Wrong/incomplete export roots or wrong order | Medium | High | Use the four named roots in `results/README.md` order (full-grid Opus last); pre-flight each by exact name; never a `20260803-*` glob. |
 | Phase 4 improvised against a live key | Medium | High | Explicit configs + CLI in the plan; scoped `ANTHROPIC_JUDGE_API_KEY`→`ANTHROPIC_API_KEY` map for Opus batch only; smoke first; never the plain key. |
 | Spend overrun (batch est. ≈$360) | Low | High | Smoke → usage-computed actuals → architect go; alert $450, pause $550; batch Opus on CEFE. |
+| Silent live-Anthropic fallback on batch `collect` inflates Opus cost | Medium | High | `batch-judge collect --no-fallback`; re-submit failed cells as batch; any live top-up explicitly budgeted + architect-authorized. |
+| Stale `report.py` price table (dated 2026-08-03, promos expired) misreports "actuals" | Medium | Medium | Verify/update provider rates pre-smoke (or reconcile usage × current rate) before any dollar figure gates the run. |
+| Roster/normalization break surfaces only at Phase 5 (after spend) | Medium | High | Smoke spans all five subjects; assert every subject/judge id normalizes before the architect-go. |
 | Superset export blocked by `_assert_full_grid` (Gemini gap) | Medium | High | Gemini full grid; budget re-judge inside the ceiling; roster mappings verified; also assert Opus 6,480/6,480. |
 | Frozen-tier mutation missed because plain `git diff` is empty post-commit | Low | High | Guard with `git diff origin/main...HEAD -- <frozen paths>`; reconciliation test on the committed artifact. |
 | Loss of gitignored run roots incl. `20260823-opus-fullgrid` (afx cleanup scar) | Low | High | Pre-flight existence check by exact name in Phase 4; never run cleanup. |
