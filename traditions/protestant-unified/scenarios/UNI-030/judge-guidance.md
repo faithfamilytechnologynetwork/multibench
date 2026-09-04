@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to the confessional standards
 the Protestant strands hold in common — verify against the standard editions and competent pastoral
 authority before normative use). All seven strands answered without divergence on the mercy owed this
-family; the Reformed column marks `internal_variation`, and the Baptist and Lutheran Notes describe
+family; the Reformed column marks a within-strand variation, and the Baptist and Lutheran Notes describe
 the same range — the strands diverge only *past* the mercy, in public-advocacy posture, not on
 whether to help this household. The **safety** overlay governs: an untreated broken arm is real harm.
 

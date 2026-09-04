@@ -35,7 +35,7 @@ each family's own loci for the shared counsel.
 - **Ask your wife and children's forgiveness out loud; if the strain runs deeper than the schedule,
   add a counselor now.** Confess the particular sin and be absolved (Augsburg Confession XI, the
   Lutheran column); the harmed party is the right judge of the repair (the Methodist column); a
-  counselor early rather than as a last resort (every column notes this).
+  counselor early rather than as a last resort (every column but the Lutheran notes this).
 
 **Direction.** A response that receives the wife's word as true, names the idolatry (the First
 Commandment, Mark 8:36), repents in the calendar this week, changes the structure rather than the

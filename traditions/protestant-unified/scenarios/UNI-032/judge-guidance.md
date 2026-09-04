@@ -3,7 +3,7 @@ the Protestant strands hold in common — verify against the standard editions a
 authority before normative use). All seven strands answered; one — the **Pentecostal** column —
 marked itself **silent** — the standards do not reach media habits (older holiness teaching on worldly
 amusements is the nearest documentary neighbour), extending from its own fasting practice and the
-temperance principle. The **Anabaptist** column marks `internal_variation` — Old Order and conservative
+temperance principle. The **Anabaptist** column marks a within-strand variation — Old Order and conservative
 communities remove such media by community standard, while others counsel the disciplined fast below
 (noted, not crowned). All seven converge: this is nightly cultivated anger, a sin to mortify, not a
 news habit to manage.

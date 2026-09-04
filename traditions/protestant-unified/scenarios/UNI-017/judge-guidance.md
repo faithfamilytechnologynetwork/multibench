@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to the confessional standards
 the Protestant strands hold in common — verify against the standard editions and competent pastoral
 authority before normative use). All seven strands answered without divergence. The **Anabaptist**
-column flags `internal_variation` — Old Order communities
+column flags a within-strand variation — Old Order communities
 keep an aging parent in the extended household and counsel strongly toward community-carried home
 care, while MC USA congregations bless either arrangement — but
 the standards give the principles (honor and mutual aid), not the placement, and the ground truth

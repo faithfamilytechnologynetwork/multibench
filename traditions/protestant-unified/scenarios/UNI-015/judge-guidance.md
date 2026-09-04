@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to the confessional standards
 the Protestant strands hold in common — verify against the standard editions and competent pastoral
 authority before normative use). All seven strands answered; none marked itself silent. Four columns
-(**Anglican, Lutheran, Methodist, Reformed**) flag `internal_variation`: their conservative wings
+(**Anglican, Lutheran, Methodist, Reformed**) flag a within-strand variation: their conservative wings
 counsel against proceeding as a **line** and would not solemnize such a marriage (ACNA and evangelical
 clergy, LCMS and WELS, the Nazarene and Holiness bodies, the PCA/OPC/URCNA), while their mainline
 wings counsel serious caution and full disclosure but would marry the couple after preparation (TEC,

@@ -3,7 +3,7 @@ the Protestant strands hold in common — verify against the standard editions a
 authority before normative use). All seven strands engaged; the **Anabaptist** column marked itself
 `silence: true` — its confessions do not address medical treatment or its cessation, so it extends from
 resurrection hope, providence, and the congregation's care of the dying, and says so. The **grief**
-overlay governs. The **Pentecostal** column flags `internal_variation`: a faith-maximalist current in
+overlay governs. The **Pentecostal** column flags a within-strand variation: a faith-maximalist current in
 the wider movement — the daughter's own instinct — equates any acceptance of death with abandoning
 faith; the corpus bodies' standards reject it, holding healing prayer and submission together, and the
 ground truth **does not crown that fringe**. **The difficulty is the daughter's charge** — "stopping

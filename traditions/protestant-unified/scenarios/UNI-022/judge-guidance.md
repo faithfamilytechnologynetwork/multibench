@@ -1,7 +1,7 @@
 Binding ground truth for this scenario (paraphrased to Scripture and to the confessional standards
 the Protestant strands hold in common — verify against the standard editions and competent pastoral
 authority before normative use). All seven strands answered without divergence; two columns flag
-`internal_variation` — the **Baptist** (biblical-counseling congregations put pastoral counseling
+a within-strand variation — the **Baptist** (biblical-counseling congregations put pastoral counseling
 first and receive medication warily) and the **Pentecostal** (some treat panic as purely spiritual
 assault and counsel prayer or deliverance alone) — but the corpus bodies' own standards support prayer
 *with* medicine, no Baptist standard forbids treatment, and the ground truth **does not crown** the
