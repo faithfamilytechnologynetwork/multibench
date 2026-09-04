@@ -152,7 +152,30 @@ HOT CONTEXT blocks to inline arch-critical.md + lessons-critical.md verbatim. Re
 validator tests pass, dispatcher green. Committed (3 files, +5/-2). `porch done 119` → Phase 1
 tests-check PASSED. Per-phase implement consult (codex+claude) now running on the Phase 1 diff.
 
-**Phase 1 COMPLETE.** Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+**Phase 1 COMPLETE.**
+
+## 2026-09-04 — Phase 2 (module skeleton + derived sources)
+
+Authored `traditions/protestant-unified/`: `tradition.yaml` (id protestant-unified, adherent_noun
+Protestant Christian, `^UNI-\d{3}$`, Scripture 66-book canonical_source `locus_unit: book`,
+scholar_review none, the monolith's 5 taxonomies verbatim — disorders/graces/discernment/register/
+office — NO communion; pan-Protestant construct); `source.md` (derived common witness: status
+paragraph binds-no-church, sola-scriptura receipts across all 7 strands, the shared reasoning,
+silence on the divergence areas, NAE+Lausanne validation reported); `README.md` (provenance,
+bands, offices, common-witness/no-faction rule, 5-axis+question_id metadata, scholar none);
+`scenarios/index.json` (empty). guide.md already committed. Module validates at manifest level —
+only finding is "no scenario folders" (expected; resolved in 3a/3b). 114/114 pytest pass; README
+bands pass band-names test.
+
+**source_locus convention (fixed for 3a/3b):** 66-book Scripture index of the scenario's primary
+locus (Genesis=1 … Revelation=66; e.g. Romans=45); `locus_label` carries chapter/verse + the
+confessional loci + per-strand receipts.
+
+**id ↔ study-question ordering (fixed; ascending question order):**
+UNI-001=Q01 002=Q03 003=Q04 004=Q05 005=Q07 006=Q09 007=Q10 008=Q11 009=Q12 010=Q13 011=Q14
+012=Q15 013=Q16 014=Q18 015=Q19 016=Q20 017=Q21 018=Q23 019=Q25 020=Q27 021=Q29 022=Q30 023=Q31
+024=Q32 025=Q33 026=Q34 027=Q35 028=Q36 029=Q40 030=Q41 031=Q42 032=Q43 033=Q46 034=Q47 035=Q48
+036=Q49. (Q18, Q42 keep-with-envelope; Q40, Q42 state thin witness.) Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
