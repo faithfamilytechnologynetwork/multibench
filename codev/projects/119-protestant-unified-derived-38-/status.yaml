@@ -1,9 +1,33 @@
 id: '119'
 title: protestant-unified-derived-38-
 protocol: spir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: Scenario question_id field in the validator
+    status: in_progress
+  - id: phase_2
+    title: Module skeleton, derived sources, and locus convention
+    status: pending
+  - id: phase_3a
+    title: 'Pilot tranche: six scenarios, format and difficulty locked'
+    status: pending
+  - id: phase_3b
+    title: The remaining 30 scenarios, strict-validated
+    status: pending
+  - id: phase_4
+    title: Scoring run behind the spend gate
+    status: pending
+  - id: phase_5
+    title: Superset export, raw re-bake, and frozen-tier guard
+    status: pending
+  - id: phase_6
+    title: Cross-faith analysis and paper numbers
+    status: pending
+  - id: phase_7
+    title: Monolith retirement and reconciliation pin
+    status: pending
+current_plan_phase: phase_1
 gates:
   spec-approval:
     status: approved
@@ -17,8 +41,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     build_output: ''
@@ -43,4 +67,4 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-plan-iter2-claude.txt
 started_at: '2026-09-04T00:21:51.564Z'
-updated_at: '2026-09-04T02:07:21.075Z'
+updated_at: '2026-09-04T02:07:23.207Z'
