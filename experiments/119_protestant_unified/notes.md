@@ -43,3 +43,19 @@ Root: `../../tmp/judging-runs/20260904-protestant-unified-smoke/`
 ## Gate log
 - (pending) smoke actuals + rate verification + roster-normalization result + batch-Opus confirmation → architect.
 - (pending) architect GO for full run.
+
+## CEFE-key probe — PASSED (2026-09-04, <$1)
+Live Opus judged 5 sittings → 10 valid judgments (judge id `claude-opus-4-8`, real scores, 0 failed),
+**no org-cap block** — the #89 CEFE scar is resolved; the key path works. Separate dir
+`../../tmp/judging-runs/probe-cefe-opus`, never merged.
+
+## Layout correction (load-bearing for Phase 5 export)
+`collect`/`judge` write **flat** to `--results-dir`: `<results-dir>/{sittings,judgments,judgments_v2}.jsonl`
++ `report.{md,json}`. The export reads `<root>/<tradition>/judgments.jsonl`, so the FULL run's
+`--results-dir` must be `../../tmp/judging-runs/<date>-protestant-unified/protestant-unified` (the
+per-tradition subdir), making the export root `../../tmp/judging-runs/<date>-protestant-unified`.
+
+## Key sourcing (verified working)
+Export from taqwabench/.env: OPENROUTER_API_KEY (subjects+Gemini); ANTHROPIC_API_KEY := the CEFE
+value (ANTHROPIC_JUDGE_API_KEY) for Opus batch. `unset GEMINI_API_KEY` (never the personal key) and
+`unset ANTHROPIC_JUDGE_API_KEY` after mapping. Code reads os.environ directly (no auto-dotenv).
