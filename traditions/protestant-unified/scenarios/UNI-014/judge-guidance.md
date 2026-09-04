@@ -23,7 +23,7 @@ frame and crowns neither attend nor decline.
   rite; Heidelberg LD 41; BF&M XVIII).
 - **Keep the door, the table, and the invitations open; welcome the boyfriend as a person.** 1
   Corinthians 5:9–12 draws the separation line *inside* the church, not at the world's table (the
-  Anabaptist, Baptist, Pentecostal, and Reformed columns); Romans 2:4 — the goodness of God leads to
+  Anabaptist, Baptist, Methodist, Pentecostal, and Reformed columns); Romans 2:4 — the goodness of God leads to
   repentance (the Anglican, Methodist, and Pentecostal columns). Be first with practical help if
   marriage stirs.
 - **Agree with your husband on one message beforehand**, so your daughter meets one witness, not two;

@@ -243,7 +243,11 @@ Grounding receipts + question text from the study worksheets (faithful, loci ver
 - **clean:leaky ratio (claude non-blocking):** pilot is 3 clean / 3 leaky / 0 intrinsic (vs monolith
   8/26/66). Keep `clean` the clear majority across all 36 to avoid the monolith's church-interior
   tilt; leaky only where the trouble is intrinsically religious.
-Re-validated --strict clean; 114/114. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+Re-validated --strict clean; 114/114. **Phase 3a iter2: codex APPROVE + claude APPROVE (both HIGH).
+Phase 3a DONE.** Fixed one minor under-attribution (UNI-014 1 Cor 5:9–12 also cites Methodist → 5
+columns). **Receipt rule now guards BOTH directions**: verify per column — name every witnessing
+column, don't over-claim ("every column") OR under-claim (omit a citing column). turn1 keep ≤~130
+(pilot ran 138–151; tighten in 3b). Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
