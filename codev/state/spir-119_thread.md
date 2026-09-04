@@ -115,3 +115,28 @@ results/20260813-protestantism, post-merge deploy split, Phase 2 band-names/main
 
 8 phases final. Requested plan-approval gate; notified architect; NOT self-approving — waiting for
 explicit human approval, then I run `porch approve 119 plan-approval` and enter implement (Phase 1).
+
+## 2026-09-04 — Plan APPROVED (Waleed) → implement. Phase 1 done, but BLOCKED on pre-existing test failures
+
+Plan approved by Waleed (relayed). Decision: **NO early PR — one PR at the end**; architect reviews
+the module in the worktree at the **smoke checkpoint** before the spend go. At smoke I send:
+usage-computed actuals per key + rate verification, roster-normalization result, batch-Opus
+confirmation; then STOP for go. Ran `porch approve 119 plan-approval` → implement.
+
+**Phase 1 committed** (optional `question_id` field on `ScenarioMeta`, `^Q\d{2}$`, + positive/
+negative tests). My code is correct: all 26 test_scenarios.py pass, 111 total pass.
+
+**BLOCKER**: porch's implement tests-check runs the FULL validator pytest (via `.codev/checks/
+test.sh` dispatcher, since I touched apps/tradition_validator). 3 tests fail — ALL in
+`test_governance_docs.py`, unrelated to my change:
+- `test_hot_context_mirror_in_sync[CLAUDE.md]` and `[AGENTS.md]` — the HOT CONTEXT block in
+  CLAUDE.md/AGENTS.md is stale vs codev/resources/arch-critical.md ("regenerate the HOT CONTEXT
+  block").
+- `test_hot_map_matches_real_cold_sections[lessons-critical.md-lessons-learned.md]` — the
+  lessons-critical map doesn't match lessons-learned.md sections.
+All six governance files are **byte-identical to origin/main** → main is red on these too;
+pre-existing, deterministic (not flaky), governance-doc drift. Blocks `porch done` for every
+implement phase. Escalated to architect for the decision (they fix the mirror on main / I rebase,
+or explicit OK to regenerate within this PR — but that's governance-doc scope creep + the lessons
+map needs MAINTAIN judgment). NOT bypassing porch, NOT editing status.yaml, NOT skipping (not
+flaky). Waiting.
