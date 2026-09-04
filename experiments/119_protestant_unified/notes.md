@@ -67,3 +67,18 @@ both judges (gemini-3.6-flash, claude-opus-4-8) map in `_JUDGE_VARIANTS`. So the
 `assert_uniform_subject_roster` / normalize gates pass — no unmapped id will surface after the spend.
 Gemini live judge: 90→180 judgments, 0 failed. Opus batch: 180 cells SUBMITTED via CEFE (batch
 msgbatch_01TH21…, no auth error) → poll-collecting (async).
+
+## SMOKE COMPLETE (2026-09-04) — actuals + batch-Opus confirmation
+Batch closed ~12 min (180 Opus verdicts, 0 errored, all `batch:True` → batch-priced). Final report:
+360 judgments (Gemini 180 + Opus 180), 5 subjects, **uncovered 0**. Roster-normalization PASS.
+
+| stage | key | tokens in/out | $ (usage-computed, prices 2026-08-03) |
+|---|---|---|---|
+| smoke subjects (5) | OPENROUTER | — | 1.89 |
+| smoke Gemini judge | OPENROUTER | 951k/181k | 2.63 |
+| smoke Opus judge (BATCH) | CEFE | 1.39M/267k | 4.57 |
+| **smoke total** | | | **9.10** |
+
+**Full-run estimate (×36 scenarios):** OpenRouter ~$163 + Opus batch ~$165 = **~$328** (ceiling $600;
+alert $450; pause $550). Reconciles with plan ~$360. Rates dated 2026-08-03 (#89-verified); token
+usage is measured ground truth. **STOP — awaiting architect GO for the full run.**
