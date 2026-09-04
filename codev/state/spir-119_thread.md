@@ -103,3 +103,15 @@ Key corrections (I re-verified against the repo):
   test already exists (test_export_raw_writer.py:219); reconciliation test on committed artifact.
 
 Rebuttal written. Committing "Plan with multi-agent review" → porch done → plan-approval gate.
+
+## 2026-09-04 — PLAN-APPROVAL GATE reached (awaiting human)
+
+Plan went through 3 consult iterations (codex+claude); converged. claude verified against the repo
+all three rounds (COMMENT by iter-2/3); codex's blockers (export-root reality, run mechanism, CEFE
+key mapping, silent live-fallback, deploy-before-merge, config/command pairing) all resolved with
+verified repo facts. Iter-3 refinements folded: two-config shape (dropped opus-batch; key from
+env), config↔command pairing, Opus 6,480 from run root not pooled manifest, frozen guard +
+results/20260813-protestantism, post-merge deploy split, Phase 2 band-names/maintainers fixes.
+
+8 phases final. Requested plan-approval gate; notified architect; NOT self-approving — waiting for
+explicit human approval, then I run `porch approve 119 plan-approval` and enter implement (Phase 1).
