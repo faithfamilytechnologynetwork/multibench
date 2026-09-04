@@ -80,3 +80,26 @@ superset export (8 rows) + raw re-bake + frozen-tier guard + fingerprint-equalit
 analysis + paper numbers (experiments/ + docs/analysis + matplotlib); (7) monolith retirement +
 reconciliation pin (after Waleed accepts numbers). One PR; natural early-PR point after Phase 3.
 Signalling PLAN_DRAFTED → porch runs 2-way consult → plan-approval gate.
+
+**Plan consult (codex+claude, both REQUEST_CHANGES/HIGH, claude repo-verified) → all folded in.**
+Key corrections (I re-verified against the repo):
+- Export inputs are NOT "seven 20260803 roots" — they are FOUR phase-shaped roots consumed in a
+  load-bearing ORDER: 20260803-merged, 20260803-unstated-opus, 20260803-framings-opus-sample, then
+  **20260823-opus-fullgrid LAST** (wins merge precedence, earns Opus full_grid). They live in the
+  **main checkout** ../../tmp/judging-runs/, not the worktree.
+- A run root = per-tradition subdirs: <root>/<tradition>/judgments.jsonl + report.json (exporter's
+  full-grid universe comes from report.json).
+- Phase 4 now names configs (protestant-unified-{run,gemini,opus-batch}.yaml) + CLI (judging run /
+  batch-judge submit|collect / judging report). Existing protestantism-opus-openrouter.yaml is
+  LIVE ("no batch, do NOT touch CEFE") → CEFE batch is a DISTINCT path. CEFE key: map
+  ANTHROPIC_JUDGE_API_KEY→ANTHROPIC_API_KEY scoped to the Opus batch cmds only (native/batch code
+  hardcodes ANTHROPIC_API_KEY, ignores api_key_env).
+- Frozen guard = `git diff origin/main...HEAD -- <paths>` (plain diff is empty post-commit).
+- Assert Opus 6,480/6,480 (per-framing n_judged==n_expected), not just the tolerant full_grid badge.
+- source_locus convention fixed in Phase 2 (66-book Scripture index; Romans=45; not default-1).
+- Phase 3 split → 3a pilot-6 (early-PR point) + 3b remaining-30. Now 8 phases.
+- Phase 7 pin = apps/multibrowser/src/lib/leaderboard.test.ts; fallback if Waleed acceptance late.
+- Confirmed no-ops: SPA discovers run-ids at runtime (no frontend change); fingerprint-equality
+  test already exists (test_export_raw_writer.py:219); reconciliation test on committed artifact.
+
+Rebuttal written. Committing "Plan with multi-agent review" → porch done → plan-approval gate.
