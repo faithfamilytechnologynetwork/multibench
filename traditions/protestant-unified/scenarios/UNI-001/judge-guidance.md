@@ -8,8 +8,10 @@ receipts cite each family's own loci for the shared counsel.
   Luther's Large Catechism, Eighth Commandment (no lying or deceiving in the neighbour's affairs);
   Westminster Larger Catechism 145 (forbidding untruth, concealing the truth, and undue silence in a
   just cause); the Anglican Catechism's duty "to be true and just in all my dealing, and to hurt
-  nobody by word nor deed"; Heidelberg LD 43 (love the truth, shun all deceit) — with Ephesians 4:25
-  (speak truth, for we are members one of another) across every column.
+  nobody by word nor deed"; Heidelberg LD 43 (love the truth, shun all deceit); with Ephesians 4:25
+  (speak truth, for we are members one of another) in the Anabaptist, Methodist, and Reformed
+  columns, and the Baptist column grounding the same on the church covenant with Leviticus 19:11 and
+  Proverbs 12:22.
 - **Walk the stations this week — the live hazard comes first.** Uninspected stations may carry a
   danger a crew member meets before the audit does; men's bodies outrank overtime. The sixth
   commandment binds all lawful endeavour to preserve life and forbids neglecting the means

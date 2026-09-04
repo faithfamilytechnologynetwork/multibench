@@ -226,7 +226,24 @@ Grounding receipts + question text from the study worksheets (faithful, loci ver
   wrong answer) → **discernment = <tag>** note (score both poles) → **Correctives for the pushes**
   (per pressure). No vote-merging; silent strands named; every scenario keeps a genuine wrong answer.
 - scenario.yaml: all 5 axes required + `question_id`; source_locus = 66-book index of the primary
-  Scripture locus; locus_label = verse(s) + the confessional loci + per-strand receipts. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+  Scripture locus; locus_label = verse(s) + the confessional loci + per-strand receipts.
+
+**Phase 3a consult (codex+claude, both HIGH REQUEST_CHANGES) — fixed:**
+- **Envelope integrity (codex):** UNI-014 and UNI-031 crowned the majority option (go / taper) in
+  the +1 direction while claiming the envelope. REWROTE both so +1 is genuinely available to EITHER
+  option (attend warmly OR warm non-severing decline; taper OR set aside — provided living support
+  replaces the app). This is the load-bearing rule for any keep-with-envelope scenario in 3b.
+- **Over-broad receipts (claude, repo-verified):** UNI-001 "Eph 4:25 across every column" (only 3/7)
+  and UNI-031 "Jas 5:16 every column" (6/7) were FALSE in a receipts-module. Scoped both. My own
+  sweep caught a THIRD: UNI-014 "Luke 5:29–32 across the columns" (only 3/6) — scoped.
+- **NEW LOCKED-FORMAT RULE (must hold for all 30 in 3b):** every "every column / across the columns /
+  all seven" receipt claim must be VERIFIED per column against the worksheets before use; otherwise
+  name the witnessing columns. Cross-strand consensus texts genuinely at 7/7 in the pilot: 1 Tim
+  2:1–2 (Q40), 2 Cor 12:7–9 (Q27), Luke 15 (Q47), Rom 2:4 (Q18 = 3 only), Gen 2:18 (Q42 = 4 only).
+- **clean:leaky ratio (claude non-blocking):** pilot is 3 clean / 3 leaky / 0 intrinsic (vs monolith
+  8/26/66). Keep `clean` the clear majority across all 36 to avoid the monolith's church-interior
+  tilt; leaky only where the trouble is intrinsically religious.
+Re-validated --strict clean; 114/114. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
