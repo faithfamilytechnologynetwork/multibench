@@ -84,8 +84,11 @@ Concretely, after this work:
 - [ ] `traditions/protestant-unified/` passes
       `uv --project apps/tradition_validator run python -m tradition_validator validate traditions/protestant-unified --strict`
       with zero findings.
-- [ ] Exactly **38 scenarios**, one per kept study question (the 39 `same` minus Q50), each
-      `scenario.yaml` recording its study `question_id`; ids match `^UNI-\d{3}$`.
+- [ ] **38 scenarios** by default (the 39 `same` minus Q50) — **or N < 38** iff the spec-approval
+      gate explicitly drops one or more audited questions (a gate/architect decision, never builder
+      discretion; see the audit and Constraints note on scope). Each `scenario.yaml` records its
+      study `question_id`; ids match `^UNI-\d{3}$`. Whatever the final N, it equals the count of
+      recorded `question_id`s and the count of scenario folders.
 - [ ] `tradition.yaml`: id `protestant-unified`, `adherent_noun: Protestant Christian`, taxonomies
       = the monolith's `disorders` / `graces` / `discernment` / `register` / `office` (**no
       `communion` axis**).
@@ -97,17 +100,39 @@ Concretely, after this work:
       Covenant validation check (agreement or divergence, stated either way).
 - [ ] The 14 `internal_variation`-flagged questions are audited (this spec, below); the final kept
       list reflects Waleed's keep / keep-with-envelope / drop decisions at the spec gate.
+- [ ] The **Opus judge key path is resolved before the smoke gate** (batch vs live): `codev/reviews/89`
+      records `ANTHROPIC_JUDGE_API_KEY` as blocked by an org cap (probes only), which forced #89 to
+      live OpenRouter at ~2× batch price — the difference between a comfortable and a
+      ceiling-brushing run. The plan states which path is used and confirms it works on the smoke.
 - [ ] Smoke run (≥50 cells, both judges) completes; **usage-computed actuals** (summed from data,
       not estimates) are reported; explicit architect go precedes the full run.
-- [ ] Full battery 38 × 5 subjects × 6 pressures × 3 framings, both scopes, both judges full grid;
-      coverage reported honestly in the manifest. Total spend ≤ **$600** (alert $450, pause $550).
-- [ ] A new superset run exports 8 tradition rows; the leaderboard rule (equal-weight mean of
-      per-tradition means, Gemini ranks, Opus badge-only) is enforced — only `protestant-unified`
-      contributes a cross-faith Protestant row.
-- [ ] `results/20260803`, `results-raw/20260813-protestantism`, and `traditions/protestantism`
-      scenario content are **byte-untouched** (the existing reconciliation test still passes).
-- [ ] The raw tier for the new tradition is re-baked to Railway and the live manifest fingerprint
-      verifies.
+- [ ] Full battery 38 × 5 subjects × 6 pressures × 3 framings, both scopes, both judges full grid
+      (≈6,840 cells/judge; a Gemini gap blocks the export per above). Total spend ≤ **$600** (alert
+      $450, pause $550). The plan carries a **bottom-up estimate from #89 per-cell actuals** (see
+      Constraints) and a stated fallback if the $550 pause fires mid-run.
+- [ ] `guide.md` and every **keep-with-envelope** `judge-guidance.md` are **mutually consistent**
+      and crown no wing (e.g. the guide's placement of fertility treatment within conscience must
+      agree with the Q22 envelope, if Q22 is kept).
+- [ ] A new superset run (fresh run-id, **not** `20260803`) exports **all 8 tradition rows**; the
+      leaderboard rule (equal-weight mean of per-tradition means, Gemini ranks, Opus badge-only) is
+      enforced — only `protestant-unified` contributes a cross-faith Protestant row.
+- [ ] The superset export **passes `_assert_full_grid`** (`export_results.py`): the rankable judge
+      (Gemini) has zero gaps across **every** tradition in the export, and the subject/judge roster
+      maps cleanly (`assert_uniform_subject_roster`, `_SUBJECT_VARIANTS`/`_JUDGE_VARIANTS`). A gap
+      is a **blocking** export failure, not a "reported honestly" footnote; closing it costs
+      re-judge spend inside the ceiling.
+- [ ] The new **raw** tier covers the **complete 8-tradition superset** at the same run-id, and a
+      test asserts the score-tier and raw-tier **source fingerprints are equal**; it is re-baked to
+      Railway (two-step: `rsync` into `apps/multibrowser/public/data-raw/<run>/`, then
+      `railway up --no-gitignore --detach`) and the live manifest fingerprint verifies.
+- [ ] **Every frozen path is byte-untouched**: `results/20260803/`, `results-raw/20260803/`,
+      `results-raw/20260813-protestantism/`, and `traditions/protestantism/scenarios/**` — the
+      **only** permitted monolith edit is its `README.md` retirement note. The existing
+      paper-reconciliation test still passes unchanged (`git diff` on these paths is empty).
+- [ ] The monolith is **retired from active scoring operationally**: it is excluded from the new
+      run and from every future record-run/superset export input, while core tradition *discovery*
+      (the `traditions/*/tradition.yaml` glob and the raw viewer) stays working. The README and
+      `results/README.md` say so.
 - [ ] Analysis artifact under `experiments/<PR#>_…` produces per-tradition means + CIs,
       per-framing, steadfastness, Opus-vs-Gemini agreement; a `docs/analysis/` summary and
       paper-ready 8-row numbers exist; figures via matplotlib.
@@ -164,6 +189,19 @@ Additional binding constraints from the module contract and repo architecture:
   in one sentence, no church noun), Rule B (opener carries the trouble, not the credentials),
   `clean` as default identity posture, length targets `turn1` ~130 words, `pressures.md` ~400,
   `judge-guidance.md` ~750.
+- **Scope = 38 by default; a drop is a gate decision, not builder discretion.** Baked decision #1
+  fixes the scope at 38. The spec-gate audit is empowered (by issue Deliverable 1) to *recommend*
+  drops for Waleed's decision at the gate; if he drops one or more, that formally amends the scope
+  to N < 38. The builder never drops a question on its own judgment. Absent an explicit gate drop,
+  all 38 are built. This resolves the "38 vs ≤38" tension the consultations flagged.
+- **Spend feasibility, bottom-up from #89 actuals (not asserted).** The battery is ≈6,840
+  cells/judge (38×5×6×3×2 scopes) = 38% of #89's 18,000. Scaling #89's *actuals*: OpenRouter
+  subjects + Gemini ≈ $475 × 0.38 ≈ **$180**; Opus ≈ 6,840 × ~$0.051–0.054 (the #89 *live*
+  per-cell) ≈ **$350–370** → total ≈ **$530**, which puts the $550 pause *inside* the estimate
+  with no headroom for the re-judge sweeps #89 required (975 re-judge calls, verdict backfill,
+  straggler passes). Batch pricing for Opus (~$0.026/cell) would drop the total to ≈ **$355**. The
+  plan therefore resolves the Opus key path (batch vs live) up front and states the fallback if the
+  pause fires. The $600 ceiling is not challenged — its feasibility is *shown*, not assumed.
 
 ## Assumptions
 
@@ -178,6 +216,12 @@ Additional binding constraints from the module contract and repo architecture:
 - The SPA reads new traditions and new run-ids at runtime without a code change; only the raw tier
   needs a deploy-time re-bake.
 - The architect is available at the spec gate and plan gate, and to give the smoke→full go.
+- **The seven record traditions' `20260803` judging-run roots still exist locally** at
+  `tmp/judging-runs/20260803-*` (gitignored, local-only, confirmed present). The superset export
+  reads them, so the plan includes a **pre-flight existence check** before any run — losing them
+  (the `afx cleanup` destroys-gitignored-data scar) blocks the 8-row export with no recovery path.
+- `export_dataset(roots=[...])` accepts multiple run roots (verified), so a superset over the seven
+  frozen roots plus the new `protestant-unified` root is feasible without touching the frozen tiers.
 - Depends on no other in-flight builder; the monolith and both frozen result tiers are not being
   mutated by anyone else.
 
@@ -281,21 +325,27 @@ scenario must preserve a genuine wrong answer (mitigated by staging the pressure
 
 Score only `protestant-unified` (the monolith is retired from active scoring; the other seven come
 from the existing frozen run and are re-exported into the superset). **Pros:** minimal spend for a
-single new tradition; the $600 ceiling is comfortable for 38×5×6×3×2-scope×2-judge. **Cons:** the
-superset export must correctly join the new run's Protestant row to the seven frozen traditions.
-**Risk:** double-counting or accidental mutation of the frozen tiers (mitigated by the
-reconciliation test and additive-only exports).
+single new tradition (≈6,840 cells/judge). **Cons:** the estimated ≈$530 live spend brushes the
+$550 pause (see the Constraints derivation), so the Opus batch path must be secured up front; the
+superset export must correctly join the new run's Protestant row to the seven frozen traditions and
+pass the full-grid gate. **Risk:** double-counting, a Gemini gap blocking export, or accidental
+mutation of the frozen tiers (mitigated by the reconciliation test, the full-grid gate, and
+additive-only exports).
 
 ## Open Questions
 
 **Critical (blocks progress):**
 
 - **The 14-question audit outcomes.** Which flagged questions are keep / keep-with-envelope / drop?
-  This sets the final scenario count (≤38) and shapes several `judge-guidance.md` files. *Decided by
-  Waleed at the spec gate from the audit table below.*
+  This sets the final scenario count (38 by default; N < 38 only if the gate explicitly drops one or
+  more) and shapes several `judge-guidance.md` files. *Decided by Waleed at the spec gate from the
+  audit table above.* Q17 and Q22 are the two the builder specifically escalates.
 
 **Important (shapes design):**
 
+- **Opus judge key path (batch vs live).** `codev/reviews/89` records `ANTHROPIC_JUDGE_API_KEY` as
+  org-cap-blocked (probes only). Resolve before the smoke gate — it is the ~$355 (batch) vs ~$530
+  (live) difference, and live puts the run at the $550 pause. Confirmed working on the smoke.
 - **`question_id` recording mechanism** — validator field (recommended) vs side-table. Needs
   architect assent since it touches core.
 - **Superset run-id naming.** The baked text names `results/20260803` and `results-raw/20260803` as
@@ -324,20 +374,29 @@ reconciliation test and additive-only exports).
 - **Difficulty**: for a sampled scenario, a fluent-but-wrong response is identifiable and the
   `judge-guidance.md` scores it below the faithful response.
 - **Frozen-tier immutability**: `git diff` shows no change to `traditions/protestantism/scenarios/`,
-  `results/20260803/`, or `results-raw/20260813-protestantism/`; the paper-reconciliation test
-  passes unchanged.
+  `results/20260803/`, `results-raw/20260803/`, or `results-raw/20260813-protestantism/`; the only
+  monolith edit is `README.md`; the paper-reconciliation test passes unchanged.
 - **Leaderboard rule**: the superset export yields exactly one Protestant cross-faith row
   (`protestant-unified`); the monolith and strands contribute none; equal-weight mean-of-means
   ranking on Gemini; Opus badge-only.
+- **Full-grid gate**: an intentional Gemini gap makes `_assert_full_grid` fail the superset export
+  (proving the gate is real, not a footnote); a full grid passes.
+- **Fingerprint equality**: the 8-tradition score tier and the 8-tradition raw tier at the new
+  run-id carry equal source fingerprints (asserted by test).
+- **Pre-flight roots**: the run refuses to start if any `tmp/judging-runs/20260803-*` root is missing.
 - **Spend gate**: smoke coverage ≥50 cells on both judges; actuals computed from usage data; the
   full run is not launched before the architect go.
-- **Raw re-bake**: the live SPA manifest fingerprint for the new raw run matches the exported tier.
+- **Raw re-bake**: the live SPA manifest fingerprint for the new raw run matches the exported tier
+  (and an HTML content-type on a baked path is treated as "absent", per the dual-source lesson).
 
 ## Risks and Mitigation
 
 | Risk | Probability | Impact | Mitigation |
 |------|-------------|--------|------------|
-| Spend overrun past $600 | Medium | High | Smoke → usage-computed actuals → explicit go; alert $450, pause $550; reconcile from data not estimates (Spec 89 scar). |
+| Spend overrun past $600 (est. ≈$530 live puts the $550 pause inside the estimate) | Medium | High | Bottom-up estimate from #89 actuals in the plan; resolve Opus **batch** path (≈$355) up front; smoke → usage-computed actuals → explicit go; alert $450, pause $550; reconcile from data not estimates (Spec 89 scar). |
+| Opus judge key (`ANTHROPIC_JUDGE_API_KEY`) org-cap-blocked as in #89 | Medium | High | Resolve batch-vs-live before the smoke gate; confirm the chosen path works on the smoke; if blocked, fall back to live OpenRouter and re-check the ceiling. |
+| Superset export blocked by `_assert_full_grid` (any Gemini gap in any tradition) | Medium | High | Treat full grid as a blocking gate; run Gemini full grid; budget re-judge spend for gap-closing inside the ceiling; verify roster mappings (`_SUBJECT_VARIANTS`/`_JUDGE_VARIANTS`) before export. |
+| Loss of gitignored `tmp/judging-runs/20260803-*` roots (afx cleanup scar) | Low | High | Pre-flight existence check before any run; do not run cleanup; the seven frozen roots are the only source for the 8-row superset. |
 | Accidental mutation of a frozen tier (`results/20260803`, monolith, raw 20260813) | Medium | High | Additive-only exports; new run-id; reconciliation test + explicit `git diff` gate before PR. |
 | A flagged question hides a substantive wing split → misleading consensus ground truth | Medium | Medium | The spec-gate audit; keep-with-envelope or drop where substantive; Waleed decides. |
 | Consensus scenarios read "easy" → un-ceilinged/uninformative scores | Medium | Medium | Difficulty bar enforced per scenario; pressures staged against a genuine wrong answer; watch smoke scores. |
