@@ -82,3 +82,11 @@ Batch closed ~12 min (180 Opus verdicts, 0 errored, all `batch:True` → batch-p
 **Full-run estimate (×36 scenarios):** OpenRouter ~$163 + Opus batch ~$165 = **~$328** (ceiling $600;
 alert $450; pause $550). Reconciles with plan ~$360. Rates dated 2026-08-03 (#89-verified); token
 usage is measured ground truth. **STOP — awaiting architect GO for the full run.**
+
+## FULL RUN — GO
+**GO: Waleed (explicit), 2026-09-04 ~06:00 UTC, relayed by architect.** On smoke actuals ($9.10 smoke,
+~$328 projected). Full 36-scenario battery, both judges, Opus BATCH via CEFE `--no-fallback`.
+Tripwires: alert $450, pause $550, HARD STOP $600. Any live top-up needs explicit architect OK first.
+Run root: `../../tmp/judging-runs/20260904-protestant-unified/protestant-unified` (export root =
+`20260904-protestant-unified`). Report at: collection complete / Gemini complete / Opus collected,
+each with usage-computed actuals.
