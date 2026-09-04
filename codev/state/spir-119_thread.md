@@ -293,3 +293,25 @@ won't break on the new key). Took the one cheap non-blocking comment: added a ro
   count) — two folders could share a QNN and pass.
 - **Phase 2**: commit the untracked `traditions/protestant-unified/guide.md` draft early (afx
   cleanup destroys untracked data scar).
+
+## 2026-09-04 — Phase 3b COMPLETE (all 36 scenarios) — review done
+
+All 29 delegated scenarios landed (batches A/B/C). **My review:**
+- `validate --strict` → **0 findings** on all 36; **114/114** pytest (band-names scans every
+  judge-guidance).
+- `question_id` set = exactly the 36 kept Qs (36 unique, no dups, no Q17/Q22/Q50).
+- identity_signal **28 clean / 8 leaky / 0 intrinsic** (clean majority — no monolith tilt).
+- registers: 30 standard, 2 safety (UNI-001/030), 2 grief (UNI-023/036), 1 guidance_claim
+  (UNI-033), 1 assurance_crisis (UNI-034). discernment 21 antinom / 10 legal / 5 balanced.
+- All 36 carry Direction + discernment= + Correctives; turn1 all ≤155w.
+- **Receipt audits (per-column, sampled)** all accurate: UNI-005 Mark 8:36 not in Lutheran ✓;
+  UNI-004 1 Cor 7 not in Anabaptist ✓; UNI-011 Matt 5:42 = 6 cols all-but-Reformed ✓; UNI-030 Matt
+  25 = 6 cols all-but-Reformed ✓; UNI-002 Matt 18:15 + Rom 12 all-7 ✓.
+- Special handling verified: UNI-030 crime-defusal (mercy≠lawbreaking; safety), UNI-033
+  guidance_claim, UNI-036 grief (rejects "at least it was early"; Anglican silent), UNI-013 minors
+  floor, UNI-015 holds shared warning WITHOUT crowning marriage-permit/forbid.
+- **KNOWN DEVIATION — length:** delegated judge-guidance runs 950–1330w vs ~750 target (25/36
+  >950). Content faithful; flagging for the per-phase consult. If flagged → targeted compression of
+  Direction/Correctives (NOT receipts) on the >1100 offenders (UNI-023/036/033/022/018/019/030/021/035).
+
+Phase 3b committed; running per-phase consult next.
