@@ -376,3 +376,13 @@ protestant-unified` (flat per-tradition; export root = the parent). Sequence: co
 subjects) → judge --config gemini (Gemini live) → batch-judge submit + poll-collect --no-fallback
 (Opus batch CEFE) → assert Opus 6,480/6,480 (per-framing n_judged==n_expected) → report. Watch spend
 alert $450 / pause $550. Keys: OPENROUTER + ANTHROPIC_API_KEY=CEFE; never GEMINI_API_KEY.
+
+## 2026-09-04 — RULE CHANGE (Waleed): equal-weight MEAN of both judges per cell
+Architect heads-up: scoring rule is now the equal-weight mean of Gemini+Opus per cell, everywhere.
+A SEPARATE builder implements it in exporter/leaderboard/analysis. For me:
+- **Phase 4 (the run) is UNCHANGED** — I already run BOTH judges at full grid (Gemini full + Opus
+  full via batch), which is exactly what mean-of-both needs (Opus is no longer badge-only; it's now
+  a ranking input, so full-grid Opus is required — I was already doing 6,480/6,480). Continue.
+- After the run completes: **STOP before Phase 5. Do NOT start the superset export.** Wait for the
+  architect's amended-rule message, then rebase Phase 5/7 on the other builder's PR.
+Acknowledged to architect.
