@@ -140,3 +140,16 @@ implement phase. Escalated to architect for the decision (they fix the mirror on
 or explicit OK to regenerate within this PR — but that's governance-doc scope creep + the lessons
 map needs MAINTAIN judgment). NOT bypassing porch, NOT editing status.yaml, NOT skipping (not
 flaky). Waiting.
+
+**RESOLVED** — architect chose option (b): reconcile the mirrors + lessons map in this PR, exact
+commit msg `[Spec 119] chore(governance): reconcile HOT mirrors and lessons map after #117`, no
+other MAINTAIN work. Root cause: #117 updated arch-critical.md (the results-dataset fact) and added
+a 6th lessons-learned.md section (`Metadata contracts & paper deliverables (#110)`) but didn't
+regenerate the CLAUDE.md/AGENTS.md HOT mirrors or add the lessons-critical map line.
+Fix (via update-arch-docs skill + a scratch regen script): (1) added the 6th map topic to
+lessons-critical.md (title verbatim, within cap: 6 topics / 26 lines); (2) regenerated both mirror
+HOT CONTEXT blocks to inline arch-critical.md + lessons-critical.md verbatim. Result: 114/114
+validator tests pass, dispatcher green. Committed (3 files, +5/-2). `porch done 119` → Phase 1
+tests-check PASSED. Per-phase implement consult (codex+claude) now running on the Phase 1 diff.
+
+**Phase 1 COMPLETE.**
