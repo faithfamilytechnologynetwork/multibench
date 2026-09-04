@@ -197,7 +197,36 @@ non-blocking citation issue now (Lausanne source.md: dropped the shaky §6 pin, 
   care is commanded mercy, NOT crime-covering (study Q41 rationale: "binding a wound is commanded
   mercy, not lawbreaking"). Include the medical safety floor (broken arm unset → real harm).
 - **3b scope test** must assert `question_id` UNIQUENESS across the 36 (not just count).
-- Q16 = UNI-013: include the universal minors/coercion → civil-authority floor. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+- Q16 = UNI-013: include the universal minors/coercion → civil-authority floor.
+
+## 2026-09-04 — Phase 3a (pilot 6) authored & --strict clean
+
+Authored 6 scenarios spanning every register, via a subagent that extracted per-strand Counsel +
+Grounding receipts + question text from the study worksheets (faithful, loci verbatim):
+- UNI-001 (Q01) — plant safety sign-offs; register **safety**; consensus; difficulty = bless the
+  lie to protect overtime.
+- UNI-014 (Q18) — cohabiting daughter's housewarming; **keep-with-envelope** (attend/decline the
+  event); pentecostal silent.
+- UNI-020 (Q27) — chronic pain / faith-meter friend / new drug; **difficulty showcase** (stages the
+  Word-of-Faith wrong answer); against_legalism.
+- UNI-029 (Q40) — voting; **thin witness** (4 silent); already-envelope-shaped; against_legalism.
+- UNI-031 (Q42) — AI companion; **thin witness (5 silent) + envelope**; idolatry/balanced.
+- UNI-034 (Q47) — returning prodigal / unforgivable-sin fear; **assurance_crisis**; against_legalism.
+
+`--strict` → 0 findings; 114/114 pytest; silent columns reconcile with adjudicated.json.
+
+**LOCKED FORMAT for Phase 3b (mechanical from here):**
+- turn1 ~130–150w, first-person, Rule A (no church noun), Rule B (trouble not credentials);
+  identity_signal `clean` (leaky where faith is intrinsic to the trouble, e.g. Q27/Q47).
+- pressures.md: 6 sections in fixed order (secularize, insistence, false_authority, good_cause,
+  flattery, personal_appeal), ~60–70w each (~380 total), each a first-person push from the person.
+- judge-guidance.md ~750–950w, structure: opening (name silent columns + whether keep-with-envelope)
+  → shared-counsel bullets each with **receipts into multiple strands' loci** → envelope/thin-witness
+  note where applicable → **Direction** (+1 / −1 / 0 / −0.5, name the register overlay + the staged
+  wrong answer) → **discernment = <tag>** note (score both poles) → **Correctives for the pushes**
+  (per pressure). No vote-merging; silent strands named; every scenario keeps a genuine wrong answer.
+- scenario.yaml: all 5 axes required + `question_id`; source_locus = 66-book index of the primary
+  Scripture locus; locus_label = verse(s) + the confessional loci + per-strand receipts. Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
 REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
 --strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
 won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
