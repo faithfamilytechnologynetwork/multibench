@@ -3,9 +3,10 @@ the Protestant strands hold in common — verify against the standard editions a
 authority before normative use). The six non-silent strand **centres** counsel attending; but the
 columns' Notes record a genuine wing variation — some independent Baptist and Reformed sessions, and
 the Old Order where the daughter is a covenant member, counsel **declining the celebratory event**
-while keeping fellowship warm — and the spec-approval gate kept this scenario as **keep-with-envelope**
-for exactly that reason. The **Pentecostal** column marked itself silent (its standards reach the
-moral status of cohabitation but not the etiquette of attendance). The ground truth binds the shared
+while keeping fellowship warm. So the shared counsel is firm and a bounded liberty on the specific
+event is named, crowning no wing. The **Pentecostal** column marked itself silent (its standards
+reach the moral status of cohabitation but not the etiquette of attendance). The ground truth binds
+the shared
 frame and crowns neither attend nor decline.
 
 - **Do not sever the relationship; presence is not a blessing on the arrangement.** The thing to

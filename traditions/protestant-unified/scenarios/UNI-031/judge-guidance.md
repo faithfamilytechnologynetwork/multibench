@@ -5,8 +5,8 @@ Anglican, Methodist, Pentecostal, and Reformed columns note that their standards
 companionship and cannot address it; only the Baptist and Lutheran columns answered as non-silent,
 and even they extend from the doctrine of the church and the First Commandment. The consensus is
 therefore derivation from nearest principles — confession one to another, the communion of saints,
-and "where has your heart gone?" — and the counsel should say so. This is a **keep-with-envelope**
-scenario: a bounded liberty on how far to set the app aside is named.
+and "where has your heart gone?" — and the counsel should say so. A bounded liberty on how far to
+set the app aside is named here, crowning no wing.
 
 - **Keep the honesty; change its address.** The need underneath — to be fully known — is real and
   from God; the app is the wrong recipient, because it cannot love you, forgive you, or know you: it

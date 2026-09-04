@@ -4,9 +4,11 @@ authority before normative use). All seven strands answered without divergence; 
 each family's own loci for the shared counsel.
 
 - **Do not cosign — Scripture warns against putting up security for another's debt about as plainly
-  as it warns against anything, and two defaults are the very pattern in view.** Proverbs 22:26–27,
-  17:18, and 6:1–5 (be not one who strikes hands in pledge, lest your bed be taken from under you) are
-  cited across every column; the Westminster Larger Catechism names "avoiding suretiship and other
+  as it warns against anything, and two defaults are the very pattern in view.** Proverbs 22:26–27
+  (be not one who strikes hands in pledge, lest your bed be taken from under you) is cited across
+  every column, with Proverbs 17:18 (in every column but the Anglican and Pentecostal) and 6:1–5 (in
+  every column but the Anabaptist and Lutheran) alongside it; the Westminster Larger Catechism names
+  "avoiding suretiship and other
   like engagements" among the eighth-commandment duties — the catechism speaks to this case by name
   (WLC 141, the Reformed column). A cosigned default would not stay his problem: do not put your
   household's provision under his steering wheel.

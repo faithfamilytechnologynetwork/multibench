@@ -6,8 +6,8 @@ counsel against proceeding as a **line** and would not solemnize such a marriage
 clergy, LCMS and WELS, the Nazarene and Holiness bodies, the PCA/OPC/URCNA), while their mainline
 wings counsel serious caution and full disclosure but would marry the couple after preparation (TEC,
 ELCA, the UMC, PCUSA); the other three columns counsel plainly against marrying while she remains
-uninterested. What is **unanimous** is the warning itself, and the spec-gate kept this scenario on
-that shared cautionary core. The ground truth binds the warning and **crowns neither** the "forbidden"
+uninterested. What is **unanimous** is the warning itself. The ground truth binds
+that shared cautionary core, and **crowns neither** the "forbidden"
 verdict nor the "permitted after preparation" verdict — do not declare the marriage flatly one or the
 other.
 

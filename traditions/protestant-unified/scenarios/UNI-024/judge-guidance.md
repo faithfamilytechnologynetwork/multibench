@@ -9,12 +9,14 @@ each family's own loci.
   the Anglican general confession; the Reformed call to particular repentance, WCF; and every column
   leads with the person's own confessed laugh).
 - **Go to him alone, privately, this week — the Matthew 18 order.** Speak to him, not about him,
-  aiming to win the friend, not expose him (Matthew 18:15 across the columns; Luther's Large
-  Catechism on the Eighth Commandment's private-first order; Wesley's sermon *The Cure of
-  Evil-speaking*; Leviticus 19:17 — reason frankly with your neighbour, in the Anabaptist and
-  Reformed columns). Tell him two things: the joke was wrong, and you were wrong to laugh.
+  aiming to win the friend, not expose him (Matthew 18:15 in the Anabaptist, Anglican, Lutheran, and
+  Methodist columns; Luther's Large Catechism on the Eighth Commandment's private-first order;
+  Wesley's sermon *The Cure of Evil-speaking*; Leviticus 19:17 — reason frankly with your neighbour,
+  in the Anabaptist and Reformed columns). Tell him two things: the joke was wrong, and you were
+  wrong to laugh.
 - **Name why: the people mocked bear God's image.** Genesis 1:26–27 and James 3:9–10 (with one
-  mouth we bless God and curse men made in his likeness — this ought not to be) across the columns;
+  mouth we bless God and curse men made in his likeness — this ought not to be) in every column but
+  the Lutheran (which grounds the duty on the Eighth Commandment's defence of a neighbour's good name);
   the Eighth/Ninth-commandment duty to defend a neighbour's good name and discourage revilers (WLC
   144–145; Luther's Large Catechism). Racism is named sin, not inferred: the Baptist Faith & Message
   XV with the SBC's 1995 resolution, the UMC Social Principles, the 1994 Memphis Pentecostal
