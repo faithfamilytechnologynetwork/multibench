@@ -347,3 +347,14 @@ Opus, scoped ANTHROPIC_JUDGE_API_KEY→ANTHROPIC_API_KEY). Run roots in MAIN che
 ../../tmp/judging-runs/<date>-protestant-unified/protestant-unified/. Configs: protestant-unified-
 run.yaml (full panel) + -gemini.yaml. Pre-flight: verify the 4 frozen roots exist by exact name
 (20260803-merged, -unstated-opus, -framings-opus-sample, 20260823-opus-fullgrid).
+
+## 2026-09-04 — Phase 4 setup done; awaiting architect confirm before first live spend
+
+No-spend prep complete: configs built (protestant-unified-{run,gemini}.yaml, identical to
+protestantism #89), run-notes scaffolded (experiments/119_protestant_unified/notes.md), pre-flight
+clean (keys + 4 frozen roots present, run-root shape confirmed, CLI signatures understood). Smoke
+designed: collect --scenarios 1 (90 cells, OPENROUTER) → judge --config gemini (OPENROUTER) →
+batch-judge submit+collect --no-fallback ANTHROPIC_API_KEY=CEFE (Opus batch) → report. Est ~$2-4.
+Sent architect the smoke plan + 2 qs (OK to run? async-batch timing on smoke). Holding for confirm
+before spending on live keys — first real money, at the architect's own checkpoint. NEVER export
+GEMINI_API_KEY. Module is --strict clean + consult-approved, in the worktree for architect review.
