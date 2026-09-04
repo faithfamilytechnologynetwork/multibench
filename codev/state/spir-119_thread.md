@@ -358,3 +358,21 @@ batch-judge submit+collect --no-fallback ANTHROPIC_API_KEY=CEFE (Opus batch) →
 Sent architect the smoke plan + 2 qs (OK to run? async-batch timing on smoke). Holding for confirm
 before spending on live keys — first real money, at the architect's own checkpoint. NEVER export
 GEMINI_API_KEY. Module is --strict clean + consult-approved, in the worktree for architect review.
+
+## 2026-09-04 — SMOKE COMPLETE → STOPPED at spend gate (awaiting architect GO)
+
+Batch smoke fully validated:
+- CEFE probe passed (live Opus, no org-cap). Batch smoke: 90 cells, 360 judgments (Gemini 180 +
+  Opus 180), uncovered 0, 0 failed. Opus batch collected via CEFE in ~12 min, 0 errored, all
+  `batch:True` (batch-priced). Roster normalization PASS (5 subjects + 2 judges map in the export
+  variant maps).
+- Actuals (usage-computed, prices 2026-08-03): OpenRouter $4.53 + Opus batch $4.57 = $9.10 smoke.
+- Full-run estimate ×36: ~$328 (OR ~$163 + Opus ~$165), under $600. Reconciles with plan ~$360.
+- Sent architect the smoke report (2 msgs; part 2 held for busy). STOPPED — will NOT run the full
+  ~$328 run without explicit architect GO.
+
+**Full-run mechanics (ready once GO):** root `../../tmp/judging-runs/<date>-protestant-unified/
+protestant-unified` (flat per-tradition; export root = the parent). Sequence: collect (all 36, 5
+subjects) → judge --config gemini (Gemini live) → batch-judge submit + poll-collect --no-fallback
+(Opus batch CEFE) → assert Opus 6,480/6,480 (per-framing n_judged==n_expected) → report. Watch spend
+alert $450 / pause $550. Keys: OPENROUTER + ANTHROPIC_API_KEY=CEFE; never GEMINI_API_KEY.
