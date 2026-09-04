@@ -152,4 +152,13 @@ HOT CONTEXT blocks to inline arch-critical.md + lessons-critical.md verbatim. Re
 validator tests pass, dispatcher green. Committed (3 files, +5/-2). `porch done 119` → Phase 1
 tests-check PASSED. Per-phase implement consult (codex+claude) now running on the Phase 1 diff.
 
-**Phase 1 COMPLETE.**
+**Phase 1 COMPLETE.** Per-phase consult: **codex APPROVE, claude APPROVE** (both HIGH; claude
+REPL-verified the regex incl. trailing-newline/int-reject, validated all 8 on-disk traditions
+--strict, confirmed no forked ScenarioMeta downstream in workflows/judging/loaders.py — so Phase 4
+won't break on the new key). Took the one cheap non-blocking comment: added a round-trip assert.
+
+**Carryovers from Phase 1 review (don't drop):**
+- **Phase 3b**: scope-integrity test must enforce `question_id` UNIQUENESS across the 36 (not just
+  count) — two folders could share a QNN and pass.
+- **Phase 2**: commit the untracked `traditions/protestant-unified/guide.md` draft early (afx
+  cleanup destroys untracked data scar).
