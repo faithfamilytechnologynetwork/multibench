@@ -39,8 +39,8 @@ uv --project workflows/analysis run python -m analysis export \
 The **full-grid Opus** stated+guided layer (`20260823-opus-fullgrid`, #110) is passed **last** so its
 verdicts deterministically win any overlap with the earlier `framings-opus-sample` layer (the merge
 uses a root-order source precedence; the sample now only back-fills cells the full-grid run failed).
-With it, Opus earns `full_grid: true` from real coverage (≈0.9994), while **Gemini values stay
-byte-identical**. Since #120 the leaderboard ranks on the **combined two-judge mean** (a `ranking`
+With it, Opus earns `full_grid: true` from real coverage (≈0.99996 after the #120 grid completion;
+≈0.9994 before it), while **Gemini values stay byte-identical**. Since #120 the leaderboard ranks on the **combined two-judge mean** (a `ranking`
 declaration + a `combined` shard block; see the schema table below and
 [`COMBINED-STATS.md`](COMBINED-STATS.md)), not on a single `rankable` judge. From a **builder worktree** the gitignored source
 roots are reachable at `../../tmp/judging-runs/…` (the paths above are repo-root-relative).

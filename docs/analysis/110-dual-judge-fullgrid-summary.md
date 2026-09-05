@@ -18,6 +18,9 @@ the tier×framing table, and the heatmap over every matched cell via the canonic
 > recovered cells). The numbers are regenerated in the v3 combined stats bundle (see
 > `results/COMBINED-STATS.md`) and are what the paper should cite.
 
+> **The sections below are the pre-#120 snapshot (Opus at 35 residual cells, 93,385 matched).** They
+> are retained for history; cite the completed-grid figures in the superseded-by note above instead.
+
 ## Coverage and the earned badge
 
 - Committed `counts.judgments`: **Opus 40,114 → 93,385** (unstated 31,114 + stated/guided 62,271);
