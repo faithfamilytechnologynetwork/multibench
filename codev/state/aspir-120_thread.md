@@ -56,5 +56,19 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 - claude: pending.
 
 ## Status
-- specify: spec drafted + scope-addition folded + codex feedback integrated; awaiting claude
-  consult, then commit "with review".
+- specify: DONE (spec + both consults REQUEST_CHANGES → all accepted+applied; rebuttal written;
+  porch advanced to plan).
+- plan: drafted (6 phases). Baked tension #2(Opus byte-identical) vs #7(re-judge adds 35 Opus)
+  flagged to architect; resolution: #7 governs → Gemini byte-identical, Opus diff bounded to the
+  35 grid-completion cells. Awaiting 2-way plan consult.
+
+## Plan phases
+1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
+2. Combined block + `ranking{score_key,judges,single_judge_cells}` in exporter; gate→"≥1 real judge
+   strictly complete"; fixture-testable.
+3. Committed combined ranked-stats capability + gitignored v3 figs step → v3 stats_bundle.json;
+   reconciliation ≤1e-9 test.
+4. Additive re-export results/20260803 (Gemini byte-identical, Opus delta = 35 cells, combined new).
+5. SPA leaderboard ranks combined via ranking.score_key; legacy→Gemini fallback, malformed→notice;
+   judge-role copy (co-equal components); raw/AFB untouched.
+6. Docs: results/README (~6 assertions + ranking schema row), arch-critical fact, HOT mirrors, review.
