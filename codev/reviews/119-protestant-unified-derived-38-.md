@@ -110,7 +110,24 @@ drop-in instance of shapes the HOT docs already describe, not a new system shape
   SPA-discoverable; nothing about how the system is shaped changed. It is recorded in the module and
   `results/` READMEs, which is the right home (per-artifact docs), not the arch docs.
 
-No lessons were promoted to `lessons-critical.md`: the two candidates (sum spend from usage not a
-report figure; verify a delegated agent's work) are re-confirmations of existing critical lessons
-("sum usage from data for exact spend"; the verification-discipline entries), not new displacers.
-They are recorded in this review's Lessons section.
+No lessons were promoted to `lessons-critical.md` (the HOT tier is capped and displacement-only) — see
+the Lessons Learned Updates section below for the COLD-tier recommendation.
+
+## Lessons Learned Updates
+
+The full lessons are in §5. For the COLD archive `codev/resources/lessons-learned.md`:
+
+- **Recommend adding one durable lesson** (Verification-discipline section): *"A delegated agent's
+  end-of-run report is not evidence — verify its file changes before acting on it. A fork here
+  returned a plausible, detailed summary with **0 tool uses**; it had done nothing. Check `git
+  status`/the actual files first."* This is a new cross-cutting pattern (not currently in
+  lessons-learned.md) and worth capturing for future multi-agent work.
+- **No new HOT (`lessons-critical.md`) entry** — the cap is full and this doesn't displace a stronger
+  one; it belongs in the COLD tier.
+- The other §5 lessons (sum spend from usage not a report figure; reconcile derived numbers through
+  the canonical code; a derived tradition is a compile not a merge) **re-confirm existing** entries
+  ("sum usage from data for exact spend"; "pre-aggregate in the canonical code"; the porting-fidelity
+  guidance) — no new archive entry needed.
+
+Actioning the COLD-archive addition is a MAINTAIN-protocol / follow-up edit (this review records the
+recommendation; it does not itself edit the governance docs).
