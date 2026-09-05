@@ -161,7 +161,7 @@ Spec 55) — one row per subject:
 ## Published runs
 
 - **`20260905`** — the **8-row cross-faith superset** (Spec 119): the seven record traditions **plus
-  [`protestant-unified`](../../traditions/protestant-unified/)** as the 8th row, ranked on the
+  [`protestant-unified`](../traditions/protestant-unified/)** as the 8th row, ranked on the
   **combined two-judge mean** (#120/#121). The seven record shards are **byte-identical** to
   `20260803` (only `protestant-unified` is new); it is the **newest run**, so the SPA shows it as the
   default 8-row leaderboard. Produced by appending the `protestant-unified` root to the four record

@@ -238,7 +238,7 @@ plus the immediately prior one for A/B and rollback), and prune older run direct
 
 > **Current state (Spec 119, 2026-09-05) — policy tension, deliberately not resolved here.** Three
 > score-backed raw runs are now committed: `20260803` (~132 MB, paper-pinned), `20260813-protestantism`
-> (~31 MB, the retired monolith), and `20260905` (~147 MB, the 8-row superset) — ~310 MB total, above
+> (~31 MB, the retired monolith), and `20260905` (~142 MB, the 8-row superset) — ~305 MB total, above
 > the N = 2 intent. Per the architect (2026-09-05), **#119 prunes nothing**: `20260803` is
 > paper-pinned and stays, and `20260813-protestantism`'s tier stays browsable while its module is only
 > *operationally* retired. Any retirement is a **separate, dedicated PR** on Waleed's call, using the
