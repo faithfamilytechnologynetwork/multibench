@@ -218,7 +218,12 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   (residual 2, matched 93,418, guided r 0.684, within 94.0) — architect task done.
 - codev/reviews/120-*.md written (verification evidence, spend, residual cells, dual_judge recompute,
   deploy note, lessons).
-- ALL 6 phases complete. Next: open PR.
+- ALL 6 phases complete + APPROVED (phase_6: codex COMMENT→addressed, claude APPROVE). Final suites
+  green: analysis 266, multibrowser 410, governance 9/9, typecheck clean. Branch pushed
+  (origin/builder/aspir-120 == HEAD 3e0cc2ab).
+- porch gates on `pr_exists`. Opening PR BLOCKED on GitHub API rate limit (transient) — retrying in
+  background. PR body drafted at scratchpad/pr-body.md. On success: porch done 120 --pr <N> --branch
+  builder/aspir-120, notify architect (PR gate = human approval, WAIT).
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
