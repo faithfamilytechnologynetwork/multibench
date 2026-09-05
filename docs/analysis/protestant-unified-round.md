@@ -121,11 +121,15 @@ scale point — the combined mean is not resting on a judge disagreement.
 
 ## Figures
 
-Rendered by `analyze.py` via the canonical `emit_figures` (house style, 95% CIs), written to
-`experiments/119_protestant_unified/data/output/figures/` as PDF + PNG:
+Rendered by `analyze.py`, written to `experiments/119_protestant_unified/data/output/figures/` as
+PDF + PNG (all in the house style). The `scorecard` / `framing` / `steadfastness` / `distribution`
+set comes from the canonical `analysis.figures.emit_figures`; `tradition_ranking` and
+`judge_agreement` are local figures in `analyze.py` built with the same house-style helpers:
 
 - `tradition_ranking` — the 8 traditions ranked by combined mean, with 95% CI error bars;
   protestant-unified marked.
+- `judge_agreement` — a 5×5 Gemini × Opus score-count heatmap over protestant-unified's 6,480
+  double-judged cells, with the equal-score diagonal and the r / bias / within-±0.5 annotation.
 - `scorecard` — cross-tradition headline (unstated/full) per subject, 95% CIs.
 - `framing` — the unstated/stated/guided staircase per subject.
 - `steadfastness` — full − turn1 per subject, by pressure.

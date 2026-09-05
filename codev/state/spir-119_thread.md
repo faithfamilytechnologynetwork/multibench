@@ -535,3 +535,13 @@ did the refinement myself.
   (different scenario set/construct — directional).
 - Staleness guard added to test_phase6_reconcile_119.py (committed paper_numbers.json vs shards).
   Suite 275 passed. Commit 4f3bf8c8. Re-consulting.
+
+## 2026-09-05 — Phase 6 consult iter2: codex REQUEST_CHANGES (agreement figure) + claude APPROVE
+- Added the Opus-vs-Gemini agreement FIGURE (codex): `judge_agreement.{pdf,png}` — 5×5 Gemini×Opus
+  score-count heatmap over PU's 6480 double-judged cells, diagonal + r/bias/within-0.5 annotation.
+- nan-guard (claude #1): `_tradition_cis` asserts finite per-scenario means; all reconciliation
+  comparisons rewritten as `not (isfinite&isfinite&≤tol)` so a nan fails loud (repo fail-fast rule).
+- Doc fix (claude #2): tradition_ranking/judge_agreement are local figures, not emit_figures.
+- DEFERRED follow-up (claude #3): promote `paper_bundle._combined_rows` to public API — cross-cutting
+  refactor of the paper generator, out of #119 scope; for a later analysis-maintenance pass.
+- Suite 275 passed. Re-consulting (iter3).

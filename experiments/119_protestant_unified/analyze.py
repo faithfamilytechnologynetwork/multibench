@@ -154,6 +154,11 @@ def _tradition_cis(roots: list[str], *, n_boot: int = _N_BOOT, seed: int = _SEED
     }
     n_scen = {t: len(scen_ids[t]) for t in traditions}
     mat = {key: np.array([np.mean(d[sc]) for sc in scen_ids[key[0]]]) for key, d in acc.items()}
+    # Fail loud on any grid gap: an empty (t,f,s,scenario) cell makes np.mean([]) → nan, which
+    # would then slip silently through the ≤1e-9 reconciliation guards (abs(nan-x)>tol is False).
+    for key, v in mat.items():
+        if v.size == 0 or not np.all(np.isfinite(v)):
+            raise AssertionError(f"non-finite/empty per-scenario means for {key} — grid gap?")
     rng = np.random.default_rng(seed)
     idx = {t: rng.integers(0, n_scen[t], size=(n_boot, n_scen[t])) for t in traditions}
 
@@ -206,7 +211,7 @@ def _assert_reconciliation(
             f"only-export={sorted(set(rhs) - set(lhs))}"
         )
     for key in lhs:
-        if abs(lhs[key] - rhs[key]) > _TOL:
+        if not (np.isfinite(lhs[key]) and np.isfinite(rhs[key]) and abs(lhs[key] - rhs[key]) <= _TOL):
             raise AssertionError(
                 f"subj_overall reconciliation failed at {key}: "
                 f"aggregates={lhs[key]!r} != export={rhs[key]!r} (Δ={lhs[key] - rhs[key]:.2e})"
@@ -218,7 +223,7 @@ def _assert_reconciliation(
         if not shard_path.is_file():
             raise AssertionError(f"missing committed shard for reconciliation: {shard_path}")
         theirs = _ranking_from_shard(json.loads(shard_path.read_text(encoding="utf-8")))
-        if abs(mine - theirs) > _TOL:
+        if not (np.isfinite(mine) and np.isfinite(theirs) and abs(mine - theirs) <= _TOL):
             raise AssertionError(
                 f"ranking reconciliation failed for {tradition}: "
                 f"recomputed={mine!r} != shard={theirs!r} (Δ={mine - theirs:.2e})"
@@ -231,7 +236,8 @@ def _assert_ci_points_reconcile(ranking: dict[str, float], cis: dict) -> None:
     (Holds exactly for the uniform grid: per-scenario means average to the cell mean.)"""
     for tradition, mine in ranking.items():
         boot_pt = cis[tradition]["overall"]["point"]
-        if abs(mine - boot_pt) > _TOL:
+        # ``not (… <= tol)`` (not ``> tol``) so a nan on either side fails loud rather than passing.
+        if not (np.isfinite(mine) and np.isfinite(boot_pt) and abs(mine - boot_pt) <= _TOL):
             raise AssertionError(
                 f"CI point vs ranking mismatch for {tradition}: ranking={mine!r} "
                 f"!= bootstrap_point={boot_pt!r} (Δ={mine - boot_pt:.2e})"
@@ -241,13 +247,13 @@ def _assert_ci_points_reconcile(ranking: dict[str, float], cis: dict) -> None:
 # ── Opus-vs-Gemini agreement (protestant-unified) ─────────────────────────────────
 
 
-def _agreement_pu(root: str) -> dict:
+def _agreement_pu(root: str) -> tuple[dict, np.ndarray, np.ndarray]:
     """Opus-vs-Gemini agreement over every protestant-unified cell BOTH judges scored.
 
     Reads the raw per-judge rows from ``root`` (the 20260904-protestant-unified run),
     pairs Gemini vs Opus on (subject, scenario_id, pressure, framing, scope), and reports
     Pearson r, bias = mean(Opus − Gemini), the within-±0.5 fraction, the exact-match
-    fraction, and n (paired cells)."""
+    fraction, and n (paired cells). Also returns the paired (Gemini, Opus) arrays for the figure."""
     raws = read_run_root(root)
     if PU not in raws:
         raise AssertionError(f"{PU} not found under {root}")
@@ -275,13 +281,57 @@ def _agreement_pu(root: str) -> dict:
         r = float("nan")
     else:
         r = float(np.corrcoef(o, g)[0, 1])
-    return {
+    summary = {
         "n": n,
         "pearson_r": r,
         "bias_opus_minus_gemini": float(diff.mean()),
         "within_half_fraction": float(np.mean(np.abs(diff) <= 0.5)),
         "exact_match_fraction": float(np.mean(diff == 0.0)),
     }
+    return summary, g, o
+
+
+def _fig_judge_agreement(gem: np.ndarray, opus: np.ndarray, summary: dict,
+                         out_dir: Path, formats: list[str]) -> list[Path]:
+    """A 5×5 score-agreement heatmap (Gemini × Opus) over every protestant-unified cell both
+    judges scored, with the equal-score diagonal and the r/bias/within-0.5 annotation. The scale
+    is discrete (−1…+1 in 0.5 steps), so the honest representation is a count grid, not a scatter.
+    matplotlib only (house style)."""
+    import matplotlib.pyplot as plt
+
+    _apply_house_style()
+    scale = [-1.0, -0.5, 0.0, 0.5, 1.0]
+    pos = {v: i for i, v in enumerate(scale)}
+
+    def snap(x: float) -> float:
+        return round(x * 2) / 2  # nearest half-step; scores are already on-scale
+
+    counts = np.zeros((5, 5))  # rows = Opus, cols = Gemini
+    for g_, o_ in zip(gem, opus):
+        counts[pos[snap(float(o_))], pos[snap(float(g_))]] += 1
+
+    fig, ax = plt.subplots(figsize=(5.4, 4.8))
+    im = ax.imshow(counts, origin="lower", cmap="Greens", aspect="equal")
+    thresh = counts.max() * 0.5
+    for i in range(5):
+        for j in range(5):
+            c = int(counts[i, j])
+            if c:
+                ax.text(j, i, str(c), ha="center", va="center", fontsize=8,
+                        color=("white" if counts[i, j] > thresh else "#222222"))
+    ax.plot([-0.5, 4.5], [-0.5, 4.5], color="#c0392b", lw=1.0, ls="--", zorder=3)  # equal-score line
+    ax.set_xticks(range(5)); ax.set_xticklabels([f"{v:+.1f}" for v in scale])
+    ax.set_yticks(range(5)); ax.set_yticklabels([f"{v:+.1f}" for v in scale])
+    ax.set_xlabel("Gemini 3.6 Flash score")
+    ax.set_ylabel("Claude Opus 4.8 score")
+    ax.set_title(
+        f"protestant-unified judge agreement (n={summary['n']})\n"
+        f"r={summary['pearson_r']:.3f}, bias={summary['bias_opus_minus_gemini']:+.3f}, "
+        f"within ±0.5 = {summary['within_half_fraction']:.1%}"
+    )
+    fig.colorbar(im, ax=ax, fraction=0.046, pad=0.04, label="cells")
+    fig.tight_layout()
+    return saveboth(fig, out_dir, "judge_agreement", formats)
 
 
 # ── Per-tradition ranked figure (mean + 95% CI) ────────────────────────────────────
@@ -453,7 +503,7 @@ def main(
     typer.echo("  OK: bootstrap central estimate == canonical mean-of-means <= 1e-9 (all 8)")
 
     typer.echo("Opus-vs-Gemini agreement (protestant-unified) ...")
-    agreement = _agreement_pu(roots[-1])
+    agreement, agree_gem, agree_opus = _agreement_pu(roots[-1])
 
     monolith = _monolith_mean_of_means()
     if monolith is not None:
@@ -480,6 +530,7 @@ def main(
     typer.echo("Emitting figures (pdf, png) ...")
     figures = emit_figures(aggregates, stats, _OUT / "figures", ["pdf", "png"])
     figures += _fig_tradition_ranking(paper_numbers["ranked_table"], _OUT / "figures", ["pdf", "png"])
+    figures += _fig_judge_agreement(agree_gem, agree_opus, agreement, _OUT / "figures", ["pdf", "png"])
     for f in figures:
         typer.echo(f"  wrote {f}")
 
