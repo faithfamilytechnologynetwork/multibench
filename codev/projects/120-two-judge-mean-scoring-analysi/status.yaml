@@ -1,7 +1,7 @@
 id: '120'
 title: two-judge-mean-scoring-analysi
 protocol: aspir
-phase: specify
+phase: plan
 plan_phases: []
 current_plan_phase: null
 gates:
@@ -10,7 +10,7 @@ gates:
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-09-04T23:54:27.145Z'
-updated_at: '2026-09-05T00:00:56.165Z'
+updated_at: '2026-09-05T00:19:34.956Z'
