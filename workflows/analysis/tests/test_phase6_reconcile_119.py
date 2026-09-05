@@ -12,6 +12,7 @@ two-judge ``mean_of_judges`` leaderboard:
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 from pathlib import Path
 
@@ -21,7 +22,9 @@ from analysis.export_results import CANONICAL_SUBJECTS, FRAMINGS
 
 _REPO = Path(__file__).resolve().parents[3]
 _RESULTS = _REPO / "results" / "20260905"
-_PAPER_NUMBERS = _REPO / "experiments" / "124_protestant_unified" / "data" / "output" / "paper_numbers.json"
+_EXPERIMENT = _REPO / "experiments" / "119_protestant_unified"
+_ANALYZE = _EXPERIMENT / "analyze.py"
+_PAPER_NUMBERS = _EXPERIMENT / "data" / "output" / "paper_numbers.json"
 _FULL = "full"
 _ALL = "all"
 _GEMINI = "gemini-3.6-flash"
@@ -127,3 +130,40 @@ def test_committed_paper_numbers_matches_shards() -> None:
         assert row["ci_lo"] <= got <= row["ci_hi"], (
             f"{row['tradition']}: point {got!r} not within CI [{row['ci_lo']}, {row['ci_hi']}]"
         )
+
+
+@pytest.mark.skipif(not _ANALYZE.is_file(), reason="analyze.py absent")
+def test_analyze_smoke_imports_and_default_roots_are_repo_root_relative() -> None:
+    """Smoke: `analyze.py` imports cleanly (no side effects at import) and its default roots resolve
+    from ``__file__`` to the repo root — absolute paths under ``<repo>/tmp/judging-runs/`` — so a bare
+    run reproduces from any CWD on the checkout it lives in (not tied to a worktree ``../../`` prefix
+    or a repo-root CWD). Also checks the 5 expected run dirs, the results-dir default, the portable
+    meta helper, and that the Typer CLI is constructed. Needs no ``tmp/`` roots."""
+    spec = importlib.util.spec_from_file_location("pu_analyze_smoke", _ANALYZE)
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)  # executes module body; `if __name__ == "__main__"` guard = no run
+
+    repo_root = mod._REPO_ROOT
+    assert repo_root == _REPO, (repo_root, _REPO)  # parents[2] really is the repo root
+
+    roots = mod.DEFAULT_ROOTS
+    assert len(roots) == 5, roots
+    for r in roots:
+        rp = Path(r)
+        assert rp.is_absolute(), r  # __file__-resolved, not CWD-relative
+        assert rp.parent == repo_root / "tmp" / "judging-runs", r
+    assert [Path(r).name for r in roots] == [
+        "20260803-merged",
+        "20260803-unstated-opus",
+        "20260803-framings-opus-sample",
+        "20260823-opus-fullgrid",
+        "20260904-protestant-unified",
+    ], roots
+    assert Path(mod.DEFAULT_RESULTS_DIR) == repo_root / "results" / "20260905"
+    # the committed-artifact path form is portable (repo-relative), whatever root was passed
+    assert mod._portable_root("/anywhere/../../tmp/judging-runs/20260904-protestant-unified") == \
+        "tmp/judging-runs/20260904-protestant-unified"
+
+    import typer
+
+    assert isinstance(mod.app, typer.Typer)

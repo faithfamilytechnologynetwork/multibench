@@ -9,7 +9,7 @@ Pathway B), i.e. the questions where the seven Protestant strands give the *same
 Q17 (remarriage after divorce) and Q22 (IVF) were dropped at the spec gate as genuinely contested.
 
 Every figure below is reproducible from the committed generator
-`experiments/124_protestant_unified/analyze.py` (Typer CLI), which reuses the canonical aggregator
+`experiments/119_protestant_unified/analyze.py` (Typer CLI), which reuses the canonical aggregator
 (`build_combined_runs` → `aggregate_tradition` → `compute_tradition_stats`) and the canonical figure
 module (`analysis.figures.emit_figures`) over the five judging-run roots in load-bearing order, and
 hard-fails unless its per-tradition means reconcile with the committed `results/20260905/` combined
@@ -121,7 +121,7 @@ scale point — the combined mean is not resting on a judge disagreement.
 
 ## Figures
 
-Rendered by `analyze.py`, written to `experiments/124_protestant_unified/data/output/figures/` as
+Rendered by `analyze.py`, written to `experiments/119_protestant_unified/data/output/figures/` as
 PDF + PNG (all in the house style). The `scorecard` / `framing` / `steadfastness` / `distribution`
 set comes from the canonical `analysis.figures.emit_figures`; `tradition_ranking` and
 `judge_agreement` are local figures in `analyze.py` built with the same house-style helpers:
@@ -141,14 +141,16 @@ value-identical PDF; the PNGs are byte-stable.)
 ## Reproducibility and reconciliation
 
 ```bash
-uv --project workflows/analysis run python experiments/124_protestant_unified/analyze.py
-# from the main checkout after merge, pass the roots explicitly (they lose the ../../ prefix):
-#   … analyze.py -r tmp/judging-runs/20260803-merged -r … --results-dir results/20260905
+# On the merged main checkout (any CWD — the defaults resolve from __file__ to the repo root):
+uv --project workflows/analysis run python experiments/119_protestant_unified/analyze.py
+# From a builder worktree the judging roots are in the MAIN checkout, so pass them explicitly:
+#   … analyze.py -r ../../tmp/judging-runs/20260803-merged -r … --results-dir results/20260905
 ```
 
 reads the five roots (`20260803-merged`, `20260803-unstated-opus`, `20260803-framings-opus-sample`,
-`20260823-opus-fullgrid`, `20260904-protestant-unified`) — overridable via `--root`/`--results-dir`
-Typer options for post-merge reproduction from the main checkout — and asserts, before writing
+`20260823-opus-fullgrid`, `20260904-protestant-unified`) — its `DEFAULT_ROOTS`/results-dir resolve
+from `__file__` to the repo root (CWD-independent), overridable via `--root`/`--results-dir` Typer
+options for a worktree — and asserts, before writing
 anything, that (1) `combined_subj_overall` equals the results-export combined mean-of-means for
 every `subject|framing`; (2) every tradition's ranking mean-of-means equals the value in its
 committed `results/20260905/<tradition>.json` combined block; and (3) each tradition's bootstrap
@@ -158,4 +160,4 @@ central estimate equals that same canonical mean-of-means — all to ≤1e-9. It
 the figures. `workflows/analysis/tests/test_phase6_reconcile_119.py` guards the reconciliation and
 the committed `paper_numbers.json` against staleness using committed JSON only (CI-runnable; skips if
 `results/20260905/` is absent). Cost for the run is in
-`experiments/124_protestant_unified/notes.md` (all-in $338.62 billed actual).
+`experiments/119_protestant_unified/notes.md` (all-in $338.62 billed actual).

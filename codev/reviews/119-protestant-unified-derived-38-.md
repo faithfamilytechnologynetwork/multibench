@@ -23,7 +23,7 @@ consult. One PR at the end.
   two-judge rule (`mean_of_judges`); the 7 record shards **byte-identical** to `results/20260803`;
   both tiers share an **equal source fingerprint** (`sha256:532e7b0f…`); frozen tiers byte-untouched
   (branch-base diff clean).
-- **Analysis** (`experiments/124_protestant_unified/`, `docs/analysis/protestant-unified-round.md`) —
+- **Analysis** (`experiments/119_protestant_unified/`, `docs/analysis/protestant-unified-round.md`) —
   the 8-row leaderboard with per-tradition bootstrap CIs, framing staircase, per-subject headline
   CIs, steadfastness, Opus-vs-Gemini agreement; figures via the canonical `emit_figures` + two local
   house-style figures. Every number reconciles with the committed tier under hard-fail assertions.
@@ -55,9 +55,10 @@ omissive-bias pattern the benchmark measures. Judge agreement r=0.810.
   Waleed's explicit acceptance of the numbers, which had not arrived at PR time. Per the plan's
   fallback and the architect's direction, the PR opens **without** the pin; it lands in a follow-up
   commit once acceptance is relayed. Never blocked the PR on the human acceptance.
-- **`experiments/` directory** was authored as `119_` (issue number) during the build where spec/plan
-  say `<PR#>`; **renamed to `experiments/124_protestant_unified/` at PR time** (this PR), with the
-  references in `analyze.py`, the round doc, and the reconciliation test updated to match.
+- **`experiments/` directory name.** The plan said `experiments/<PR#>_…`, but the actual repo
+  convention is the **spec number** (`48_multiweights…`, `54_afb…`), so the dir is
+  `experiments/119_protestant_unified/`. (A brief PR-time rename to `124_` was reverted per the 3-way
+  integration review — the spec number is correct.)
 
 ## 4. Spend — exact accounting
 
@@ -65,7 +66,7 @@ omissive-bias pattern the benchmark measures. Judge agreement r=0.810.
 CEFE probe), well under the $600 ceiling and below the $450 alert. Prices are the `report.py`
 2026-08-03 table; two subject promos expired 2026-08-31 (before the run), so at post-promo standard
 rates the all-in would be ~$356.21 — a labeled what-if for invoice reconciliation only (console
-invoices authoritative). Details in `experiments/124_protestant_unified/notes.md`.
+invoices authoritative). Details in `experiments/119_protestant_unified/notes.md`.
 
 ## 5. Lessons
 

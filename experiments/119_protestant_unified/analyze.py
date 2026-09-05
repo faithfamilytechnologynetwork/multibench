@@ -10,9 +10,13 @@ per tradition is the equal-weight mean over subjects × framings of the combined
 scenario-cluster bootstrap from ``analysis.paper_bundle`` (``_combined_rows`` + the same
 seed/n_boot/percentile convention), so the CI method matches the paper's ``trad_pooled``.
 
-Run (from repo root):
+Run from the **repo root** (the default roots are repo-root-relative, so this reproduces on the
+merged main checkout where the judging roots live at ``tmp/judging-runs/``):
 
-    uv --project workflows/analysis run python experiments/124_protestant_unified/analyze.py
+    uv --project workflows/analysis run python experiments/119_protestant_unified/analyze.py
+
+From a **builder worktree** the roots are in the main checkout at ``../../tmp/judging-runs/``, so pass
+them explicitly: ``… analyze.py -r ../../tmp/judging-runs/20260803-merged -r … --results-dir results/20260905``.
 
 Reconciliation is gated by hard-fail assertions (see ``_assert_reconciliation`` and the
 bootstrap-point check in ``main``).
@@ -43,16 +47,28 @@ from analysis.figures import _apply_house_style, band_color, emit_figures, saveb
 from analysis.paper_bundle import _combined_rows
 from analysis.stats import TraditionStats, compute_tradition_stats
 
-# The 5 judging-run roots in load-bearing priority order. The roots live in the MAIN
-# checkout, hence the ``../../`` default (correct when run from the builder worktree).
-DEFAULT_ROOTS: list[str] = [
-    "../../tmp/judging-runs/20260803-merged",
-    "../../tmp/judging-runs/20260803-unstated-opus",
-    "../../tmp/judging-runs/20260803-framings-opus-sample",
-    "../../tmp/judging-runs/20260823-opus-fullgrid",
-    "../../tmp/judging-runs/20260904-protestant-unified",
+# Resolve paths from THIS file, not the CWD, so a bare run reproduces from any working directory on
+# the checkout the script lives in (experiments/119_protestant_unified/analyze.py → parents[2] = repo
+# root). On the merged main checkout the judging roots are at <repo>/tmp/judging-runs/; from a builder
+# worktree they live in the main checkout, so pass `-r ../../tmp/judging-runs/…` overrides.
+_REPO_ROOT = Path(__file__).resolve().parents[2]
+_ROOT_NAMES = [
+    "20260803-merged",
+    "20260803-unstated-opus",
+    "20260803-framings-opus-sample",
+    "20260823-opus-fullgrid",
+    "20260904-protestant-unified",
 ]
-DEFAULT_RESULTS_DIR = "results/20260905"
+# The 5 judging-run roots in load-bearing priority order, as absolute repo-root-resolved paths.
+DEFAULT_ROOTS: list[str] = [str(_REPO_ROOT / "tmp" / "judging-runs" / n) for n in _ROOT_NAMES]
+DEFAULT_RESULTS_DIR = str(_REPO_ROOT / "results" / "20260905")
+
+
+def _portable_root(root: str) -> str:
+    """The repo-relative canonical form of a run root, for embedding in committed artifacts —
+    always ``tmp/judging-runs/<name>`` regardless of how the root was passed (absolute default or a
+    ``../../`` worktree override), so `paper_numbers.json` carries no machine-specific path."""
+    return f"tmp/judging-runs/{Path(root).name}"
 # The retired 7-strand monolith's committed score tier, for the sanity-check comparison.
 MONOLITH_SHARD = Path("results/20260813-protestantism/protestantism.json")
 
@@ -68,7 +84,7 @@ _SEED = 12345
 _GEMINI = "gemini-3.6-flash"
 _OPUS = "claude-opus-4-8"
 
-_OUT = Path("experiments/124_protestant_unified/data/output")
+_OUT = Path(__file__).resolve().parent / "data" / "output"
 
 app = typer.Typer(add_completion=False, help="Spec 119 Phase 6 analysis.")
 
@@ -448,8 +464,8 @@ def _build_paper_numbers(
         "meta": {
             "spec": 119,
             "tradition": PU,
-            "roots": roots,
-            "results_dir": str(results_dir),
+            "roots": [_portable_root(r) for r in roots],
+            "results_dir": f"results/{Path(results_dir).name}",
             "ranking_rule": "mean_of_judges",
             "ranking_score": (
                 "equal-weight mean over subjects x framings of combined by_framing[full] "
