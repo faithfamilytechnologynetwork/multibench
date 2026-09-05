@@ -21,7 +21,7 @@ from analysis.export_results import CANONICAL_SUBJECTS, FRAMINGS
 
 _REPO = Path(__file__).resolve().parents[3]
 _RESULTS = _REPO / "results" / "20260905"
-_PAPER_NUMBERS = _REPO / "experiments" / "119_protestant_unified" / "data" / "output" / "paper_numbers.json"
+_PAPER_NUMBERS = _REPO / "experiments" / "124_protestant_unified" / "data" / "output" / "paper_numbers.json"
 _FULL = "full"
 _ALL = "all"
 _GEMINI = "gemini-3.6-flash"

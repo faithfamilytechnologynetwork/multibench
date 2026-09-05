@@ -12,7 +12,7 @@ seed/n_boot/percentile convention), so the CI method matches the paper's ``trad_
 
 Run (from repo root):
 
-    uv --project workflows/analysis run python experiments/119_protestant_unified/analyze.py
+    uv --project workflows/analysis run python experiments/124_protestant_unified/analyze.py
 
 Reconciliation is gated by hard-fail assertions (see ``_assert_reconciliation`` and the
 bootstrap-point check in ``main``).
@@ -68,7 +68,7 @@ _SEED = 12345
 _GEMINI = "gemini-3.6-flash"
 _OPUS = "claude-opus-4-8"
 
-_OUT = Path("experiments/119_protestant_unified/data/output")
+_OUT = Path("experiments/124_protestant_unified/data/output")
 
 app = typer.Typer(add_completion=False, help="Spec 119 Phase 6 analysis.")
 
