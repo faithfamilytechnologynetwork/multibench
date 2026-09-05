@@ -870,7 +870,9 @@ def test_combined_stats_reconciles_with_export(tmp_path):
     roots = [str(root / "gemini-run"), str(root / "opus-run")]
     bundle = build_combined_stats(roots, n_boot=20)  # n_boot small: point estimate is boot-independent
     mom = export_combined_mean_of_means(roots)
-    assert bundle["subj_overall_point"] == mom
+    assert set(bundle["subj_overall_point"]) == set(mom)
+    for k in mom:  # reconcile to fp tolerance (both from cell_scores, so exact in practice)
+        assert bundle["subj_overall_point"][k] == pytest.approx(mom[k], abs=1e-12)
     assert set(mom) == {f"{s}|{fr}" for s in CANONICAL_SUBJECTS for fr in ("unstated", "stated", "guided")}
 
 
@@ -911,6 +913,24 @@ def test_combined_mean_of_means_reconciles_with_v3_bundle():
     v3 = json.loads(_V3_BUNDLE.read_text())["subj_overall"]
     for key, val in mom.items():
         assert val == pytest.approx(v3[key][0], abs=1e-9), key
+
+
+_V2_BUNDLE = _MERGED / "analysis-out" / "figures-report-v2" / "stats_bundle.json"
+
+
+@pytest.mark.skipif(not (_V3_BUNDLE.is_file() and _V2_BUNDLE.is_file()),
+                    reason="v2/v3 stats bundles not present")
+def test_v3_bundle_matches_v2_schema_and_dual_judge():
+    """v3 must keep v2's schema (so paper_figs_multibench.py runs unchanged) and its `dual_judge`
+    must be byte-identical to v2's — dual_judge is a RAW Gemini-vs-Opus validation section the
+    combined rule does not touch, so a divergence means the combined `merged` leaked into the
+    agreement inputs (the phase_3 review bug). The score aggregates, by contrast, MUST differ."""
+    v2 = json.loads(_V2_BUNDLE.read_text())
+    v3 = json.loads(_V3_BUNDLE.read_text())
+    assert sorted(v2) == sorted(v3)                      # same top-level keys
+    assert v3["dual_judge"] == v2["dual_judge"]          # per-judge section unchanged (incl. route_bridge/full_grid)
+    assert v3["meta"] == v2["meta"]                      # meta unchanged
+    assert v3["subj_overall"] != v2["subj_overall"]      # score aggregates ARE combined (differ)
 
 
 # ── CLI command-level test ────────────────────────────────────────────────────────

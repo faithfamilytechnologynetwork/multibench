@@ -34,9 +34,13 @@ The full paper bundle (`tier`, `trad_pooled`, `subj_overall`, `model_tier`,
 `tmp/report_figs_20260803_v3.py`, adapted from its v2 sibling by **swapping only the load step** so
 the accumulators receive canonical **combined cell values** (`build_combined_runs` + `cell_scores`,
 imported from `analysis` — no second dedup/averaging). Every score aggregate becomes combined
-automatically; `dual_judge` stays **per-judge** (it validates the two judges against each other) and
-`meta` is unchanged, so the bundle keeps the v2 schema and `tmp/paper_figs_multibench.py` runs
-unchanged.
+automatically. **`dual_judge`** is a RAW Gemini-vs-Opus validation section that the combined rule
+does **not** touch, so v3 **reuses v2's `dual_judge` block verbatim** (including the
+`route_bridge`/`full_grid` subsections added by `refresh_dualjudge_stats.py`) rather than
+recomputing it from the combined grid — otherwise the Gemini side of the agreement would be polluted
+by the combined mean (inflating the inter-judge `r`). `meta` is unchanged too, so the bundle keeps
+the exact v2 schema and `tmp/paper_figs_multibench.py` runs unchanged. Guarded by
+`test_v3_bundle_matches_v2_schema_and_dual_judge`.
 
 ```bash
 uv --project workflows/analysis run python ../../tmp/report_figs_20260803_v3.py

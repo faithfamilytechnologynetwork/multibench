@@ -137,6 +137,13 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 - Tests: combined_stats reconciles w/ export (fixture), CLI smoke+determinism, real-data v3
   reconciliation (skip-when-absent). 262 passed, 9 skipped.
 - Doc: results/COMBINED-STATS.md.
+- phase_3 consult: BOTH REQUEST_CHANGES — same real bug: v3 dual_judge built gem_lut from combined
+  `merged` → compared combined-vs-Opus (r 0.854→0.956). FIXED: v3 reuses v2's dual_judge verbatim
+  (raw Gemini-vs-Opus, incl route_bridge/full_grid). Added guard test (v3/v2 schema + dual_judge
+  identical + subj_overall differs). Float == → approx.
+  ⚠️ ARCHITECT DECISION FLAGGED: v2 dual_judge.full_grid was computed when Opus was PARTIAL; now
+  full-grid the true agreement is n=93,418 r=0.833. Reuse-v2 (default) vs recompute-on-grid — their
+  call (paper figure). If recompute: use refresh_dualjudge_stats.py mechanism.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
