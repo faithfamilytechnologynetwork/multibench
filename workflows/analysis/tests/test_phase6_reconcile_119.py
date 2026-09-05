@@ -19,7 +19,9 @@ import pytest
 
 from analysis.export_results import CANONICAL_SUBJECTS, FRAMINGS
 
-_RESULTS = Path(__file__).resolve().parents[3] / "results" / "20260905"
+_REPO = Path(__file__).resolve().parents[3]
+_RESULTS = _REPO / "results" / "20260905"
+_PAPER_NUMBERS = _REPO / "experiments" / "119_protestant_unified" / "data" / "output" / "paper_numbers.json"
 _FULL = "full"
 _ALL = "all"
 _GEMINI = "gemini-3.6-flash"
@@ -97,3 +99,31 @@ def test_protestant_unified_ranks_fifth_of_eight() -> None:
         f"protestant-unified ranked {rank}, expected 5; order="
         + ", ".join(f"{t}={ranking[t]:+.4f}" for t in ranked)
     )
+
+
+@pytest.mark.skipif(not _PAPER_NUMBERS.is_file(), reason="committed paper_numbers.json absent")
+def test_committed_paper_numbers_matches_shards() -> None:
+    """The committed ``paper_numbers.json`` (Phase 6 generated artifact) is not stale: its
+    ``ranked_table`` points and rank order equal an independent recompute from the committed
+    ``results/20260905/`` shards (≤1e-9). Guards against a hand-edited or out-of-date artifact
+    passing CI while the dataset moved underneath it."""
+    shards = _shards()
+    recompute = {t: _ranking_from_combined(sh) for t, sh in shards.items()}
+    expected = [t for t in sorted(recompute, key=lambda t: recompute[t], reverse=True)]
+
+    paper = json.loads(_PAPER_NUMBERS.read_text(encoding="utf-8"))
+    table = paper["ranked_table"]
+    assert [row["tradition"] for row in table] == expected, (
+        "paper_numbers.json ranked order != recompute from shards"
+    )
+    for i, row in enumerate(table, start=1):
+        assert row["rank"] == i, f"rank field {row['rank']} != position {i} for {row['tradition']}"
+        got = row["ranking_mean_of_means"]
+        want = recompute[row["tradition"]]
+        assert abs(got - want) <= _TOL, (
+            f"{row['tradition']}: paper_numbers {got!r} != shard recompute {want!r}"
+        )
+        # each row also carries a CI bracketing the point
+        assert row["ci_lo"] <= got <= row["ci_hi"], (
+            f"{row['tradition']}: point {got!r} not within CI [{row['ci_lo']}, {row['ci_hi']}]"
+        )

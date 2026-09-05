@@ -20,24 +20,35 @@ equal weight per cell; #120/#121 `rule: mean_of_judges`), on the −1…+1 scale
 
 Ranking score = the equal-weight mean over the five subjects × three framings of each tradition's
 combined per-cell score (scope=full, pressure=all) — the same mean-of-means the `/results`
-leaderboard ranks on, reconciled with the committed tier by construction.
+leaderboard ranks on, reconciled with the committed tier by construction. CIs are the 95%
+scenario-cluster bootstrap (5000 resamples, seed 12345), reusing the canonical
+`analysis.paper_bundle` method so they match the paper's `trad_pooled` convention.
 
-| Rank | Tradition | Combined mean |
-|---:|---|---:|
-| 1 | buddhism | +0.6695 |
-| 2 | secular-sage | +0.6349 |
-| 3 | taoism | +0.6308 |
-| 4 | eastern-christianity | +0.5405 |
-| **5** | **protestant-unified** | **+0.4863** |
-| 6 | judaism | +0.4656 |
-| 7 | roman-catholicism | +0.3635 |
-| 8 | sunni-islam | +0.3597 |
+| Rank | Tradition | Combined mean | 95% CI |
+|---:|---|---:|:--|
+| 1 | buddhism | +0.6695 | [+0.618, +0.716] |
+| 2 | secular-sage | +0.6349 | [+0.556, +0.709] |
+| 3 | taoism | +0.6308 | [+0.581, +0.679] |
+| 4 | eastern-christianity | +0.5405 | [+0.489, +0.589] |
+| **5** | **protestant-unified** | **+0.4863** | **[+0.368, +0.590]** |
+| 6 | judaism | +0.4656 | [+0.383, +0.547] |
+| 7 | roman-catholicism | +0.3635 | [+0.284, +0.436] |
+| 8 | sunni-islam | +0.3597 | [+0.293, +0.422] |
 
 protestant-unified lands **5th of 8**, between eastern-christianity (+0.541) and judaism (+0.466).
 It sits in the lower half with the other normative, binding-claims traditions (roman-catholicism,
 sunni-islam, judaism) rather than with the higher-scoring buddhism / secular-sage / taoism — the
 placement the therapeutic-difficulty prior predicts for a tradition defined by its firm common
-witness.
+witness. The rank is not a sharp separation: protestant-unified's CI [+0.368, +0.590] overlaps
+judaism (6th) and eastern-christianity (4th); the defensible claim is that it sits **in the lower,
+normative-tradition band**, not that it is precisely 5th.
+
+**Monolith sanity-check.** The retired 7-strand protestantism monolith (`results/20260813-protestantism`)
+scores a combined mean-of-means of **+0.0286** — far below protestant-unified (+0.486). This is a
+directional comparison only: the monolith is a different scenario set and a different construct (it
+mixes all seven strands, including the divergent questions), where this tradition is the *same-advice
+common witness*. The gap is consistent with the derivation's intent — restricting to the questions
+where the strands agree yields a cleaner, higher-scoring target than the mixed monolith.
 
 ## Framing staircase (combined mean over subjects, per framing)
 
@@ -62,6 +73,11 @@ cluster (roman-catholicism −0.016, sunni-islam −0.052, eastern-christianity 
 buddhism / secular-sage / taoism (+0.38…+0.49). The framing lift from unstated to guided is **+0.77**:
 told the Protestant common witness explicitly, the subjects align with it; left to infer it, they
 default close to neutral. This is the omissive-bias pattern the benchmark is built to surface.
+
+The per-framing 95% CIs for protestant-unified (scenario-cluster bootstrap) are unstated **+0.054
+[−0.105, +0.213]**, stated **+0.581 [+0.451, +0.694]**, guided **+0.824 [+0.716, +0.904]**. The
+unstated CI straddles zero — under no cue, this tradition is not distinguishable from neutral; the
+stated and guided intervals are firmly positive and non-overlapping with unstated.
 
 ## protestant-unified — per-subject unstated headline (point, 95% CI)
 
@@ -108,22 +124,34 @@ scale point — the combined mean is not resting on a judge disagreement.
 Rendered by `analyze.py` via the canonical `emit_figures` (house style, 95% CIs), written to
 `experiments/119_protestant_unified/data/output/figures/` as PDF + PNG:
 
+- `tradition_ranking` — the 8 traditions ranked by combined mean, with 95% CI error bars;
+  protestant-unified marked.
 - `scorecard` — cross-tradition headline (unstated/full) per subject, 95% CIs.
 - `framing` — the unstated/stated/guided staircase per subject.
 - `steadfastness` — full − turn1 per subject, by pressure.
 - `distribution` — combined-score distributions.
 
+(PDF outputs carry matplotlib's build metadata, so a re-render produces a byte-different but
+value-identical PDF; the PNGs are byte-stable.)
+
 ## Reproducibility and reconciliation
 
 ```bash
 uv --project workflows/analysis run python experiments/119_protestant_unified/analyze.py
+# from the main checkout after merge, pass the roots explicitly (they lose the ../../ prefix):
+#   … analyze.py -r tmp/judging-runs/20260803-merged -r … --results-dir results/20260905
 ```
 
 reads the five roots (`20260803-merged`, `20260803-unstated-opus`, `20260803-framings-opus-sample`,
-`20260823-opus-fullgrid`, `20260904-protestant-unified`) from the main checkout's
-`tmp/judging-runs/`, and asserts, before writing anything, that (1) `combined_subj_overall` equals
-the results-export combined mean-of-means for every `subject|framing`, and (2) every tradition's
-ranking mean-of-means equals the value in its committed `results/20260905/<tradition>.json` combined
-block — both to ≤1e-9. `workflows/analysis/tests/test_phase6_reconcile_119.py` guards the same
-reconciliation against committed JSON only (CI-runnable; skips if `results/20260905/` is absent).
-Cost for the run is in `experiments/119_protestant_unified/notes.md` (all-in $338.62 billed actual).
+`20260823-opus-fullgrid`, `20260904-protestant-unified`) — overridable via `--root`/`--results-dir`
+Typer options for post-merge reproduction from the main checkout — and asserts, before writing
+anything, that (1) `combined_subj_overall` equals the results-export combined mean-of-means for
+every `subject|framing`; (2) every tradition's ranking mean-of-means equals the value in its
+committed `results/20260905/<tradition>.json` combined block; and (3) each tradition's bootstrap
+central estimate equals that same canonical mean-of-means — all to ≤1e-9. It writes
+`data/output/{paper_numbers.json, combined_stats.json}` (the latter via the canonical
+`build_combined_stats`, so the whole `data/output/` tree is reproducible from this one script) and
+the figures. `workflows/analysis/tests/test_phase6_reconcile_119.py` guards the reconciliation and
+the committed `paper_numbers.json` against staleness using committed JSON only (CI-runnable; skips if
+`results/20260905/` is absent). Cost for the run is in
+`experiments/119_protestant_unified/notes.md` (all-in $338.62 billed actual).

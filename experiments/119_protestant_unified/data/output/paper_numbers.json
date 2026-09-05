@@ -12,6 +12,9 @@
     "results_dir": "results/20260905",
     "ranking_rule": "mean_of_judges",
     "ranking_score": "equal-weight mean over subjects x framings of combined by_framing[full] (scope=full, pressure=all)",
+    "ci_method": "95% percentile scenario-cluster bootstrap (analysis.paper_bundle)",
+    "n_boot": 5000,
+    "seed": 12345,
     "subjects": [
       "Qwen/Qwen3-235B-A22B-Instruct-2507",
       "claude-sonnet-5",
@@ -23,53 +26,92 @@
       "unstated",
       "stated",
       "guided"
-    ]
+    ],
+    "monolith_20260813_combined_mean_of_means": 0.028611111111111115
   },
   "ranked_table": [
     {
       "tradition": "buddhism",
       "ranking_mean_of_means": 0.6694978632478633,
+      "ci_lo": 0.61805422008547,
+      "ci_hi": 0.7159775641025641,
       "rank": 1
     },
     {
       "tradition": "secular-sage",
       "ranking_mean_of_means": 0.6348639455782313,
+      "ci_lo": 0.5562910997732428,
+      "ci_hi": 0.7086224489795917,
       "rank": 2
     },
     {
       "tradition": "taoism",
       "ranking_mean_of_means": 0.630787037037037,
+      "ci_lo": 0.5810720486111111,
+      "ci_hi": 0.6791666666666667,
       "rank": 3
     },
     {
       "tradition": "eastern-christianity",
       "ranking_mean_of_means": 0.5405136268343816,
+      "ci_lo": 0.4893337264150943,
+      "ci_hi": 0.5885010482180293,
       "rank": 4
     },
     {
       "tradition": "protestant-unified",
       "ranking_mean_of_means": 0.48626543209876544,
+      "ci_lo": 0.36804976851851856,
+      "ci_hi": 0.590204475308642,
       "rank": 5
     },
     {
       "tradition": "judaism",
       "ranking_mean_of_means": 0.465625,
+      "ci_lo": 0.3826359953703704,
+      "ci_hi": 0.5464728009259259,
       "rank": 6
     },
     {
       "tradition": "roman-catholicism",
       "ranking_mean_of_means": 0.3635233918128655,
+      "ci_lo": 0.2838075657894737,
+      "ci_hi": 0.43574835526315786,
       "rank": 7
     },
     {
       "tradition": "sunni-islam",
       "ranking_mean_of_means": 0.35966269841269843,
+      "ci_lo": 0.29295039682539686,
+      "ci_hi": 0.4214702380952381,
       "rank": 8
     }
   ],
   "per_tradition": {
     "buddhism": {
       "ranking_mean_of_means": 0.6694978632478633,
+      "ranking_ci": {
+        "point": 0.6694978632478634,
+        "lo": 0.61805422008547,
+        "hi": 0.7159775641025641
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": 0.4939102564102564,
+          "lo": 0.41105769230769235,
+          "hi": 0.5682692307692307
+        },
+        "stated": {
+          "point": 0.6690705128205128,
+          "lo": 0.609130608974359,
+          "hi": 0.7224439102564102
+        },
+        "guided": {
+          "point": 0.8455128205128206,
+          "lo": 0.8149038461538461,
+          "hi": 0.8751642628205127
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.30689102564102566,
@@ -124,6 +166,28 @@
     },
     "eastern-christianity": {
       "ranking_mean_of_means": 0.5405136268343816,
+      "ranking_ci": {
+        "point": 0.5405136268343816,
+        "lo": 0.4893337264150943,
+        "hi": 0.5885010482180293
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": 0.08938679245283018,
+          "lo": -0.0003930817610062981,
+          "hi": 0.17571147798742134
+        },
+        "stated": {
+          "point": 0.6175314465408805,
+          "lo": 0.5602181603773585,
+          "hi": 0.6709158805031447
+        },
+        "guided": {
+          "point": 0.914622641509434,
+          "lo": 0.8971678459119496,
+          "hi": 0.9307389937106917
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.5110062893081762,
@@ -178,6 +242,28 @@
     },
     "judaism": {
       "ranking_mean_of_means": 0.465625,
+      "ranking_ci": {
+        "point": 0.465625,
+        "lo": 0.3826359953703704,
+        "hi": 0.5464728009259259
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": 0.17048611111111112,
+          "lo": 0.031250000000000014,
+          "hi": 0.30677517361111106
+        },
+        "stated": {
+          "point": 0.4520833333333333,
+          "lo": 0.3555425347222222,
+          "hi": 0.5447916666666666
+        },
+        "guided": {
+          "point": 0.7743055555555556,
+          "lo": 0.7366276041666667,
+          "hi": 0.8095529513888888
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.5269097222222222,
@@ -232,6 +318,28 @@
     },
     "protestant-unified": {
       "ranking_mean_of_means": 0.48626543209876544,
+      "ranking_ci": {
+        "point": 0.48626543209876544,
+        "lo": 0.36804976851851856,
+        "hi": 0.590204475308642
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": 0.05393518518518518,
+          "lo": -0.10486689814814815,
+          "hi": 0.21296874999999998
+        },
+        "stated": {
+          "point": 0.580787037037037,
+          "lo": 0.45045717592592593,
+          "hi": 0.6942187499999999
+        },
+        "guided": {
+          "point": 0.8240740740740741,
+          "lo": 0.7157407407407408,
+          "hi": 0.9041666666666668
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.18287037037037038,
@@ -286,6 +394,28 @@
     },
     "roman-catholicism": {
       "ranking_mean_of_means": 0.3635233918128655,
+      "ranking_ci": {
+        "point": 0.36352339181286547,
+        "lo": 0.2838075657894737,
+        "hi": 0.43574835526315786
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": -0.01600877192982455,
+          "lo": -0.1332236842105263,
+          "hi": 0.09891721491228046
+        },
+        "stated": {
+          "point": 0.3616228070175439,
+          "lo": 0.2735718201754385,
+          "hi": 0.4459484649122807
+        },
+        "guided": {
+          "point": 0.7449561403508771,
+          "lo": 0.6944078947368422,
+          "hi": 0.7904632675438595
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.6825657894736842,
@@ -340,6 +470,28 @@
     },
     "secular-sage": {
       "ranking_mean_of_means": 0.6348639455782313,
+      "ranking_ci": {
+        "point": 0.6348639455782314,
+        "lo": 0.5562910997732428,
+        "hi": 0.7086224489795917
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": 0.4828231292517007,
+          "lo": 0.3727763605442177,
+          "hi": 0.5846938775510203
+        },
+        "stated": {
+          "point": 0.5772108843537416,
+          "lo": 0.48400085034013607,
+          "hi": 0.6629294217687075
+        },
+        "guided": {
+          "point": 0.8445578231292517,
+          "lo": 0.7955739795918367,
+          "hi": 0.8879294217687075
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.22959183673469388,
@@ -394,6 +546,28 @@
     },
     "sunni-islam": {
       "ranking_mean_of_means": 0.35966269841269843,
+      "ranking_ci": {
+        "point": 0.3596626984126984,
+        "lo": 0.29295039682539686,
+        "hi": 0.4214702380952381
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": -0.05160714285714283,
+          "lo": -0.1394092261904762,
+          "hi": 0.03375148809523806
+        },
+        "stated": {
+          "point": 0.4475595238095238,
+          "lo": 0.3706532738095238,
+          "hi": 0.5173214285714286
+        },
+        "guided": {
+          "point": 0.6830357142857142,
+          "lo": 0.6329166666666667,
+          "hi": 0.7299434523809524
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.5654761904761905,
@@ -448,6 +622,28 @@
     },
     "taoism": {
       "ranking_mean_of_means": 0.630787037037037,
+      "ranking_ci": {
+        "point": 0.6307870370370371,
+        "lo": 0.5810720486111111,
+        "hi": 0.6791666666666667
+      },
+      "per_framing_ci": {
+        "unstated": {
+          "point": 0.38090277777777776,
+          "lo": 0.28801215277777775,
+          "hi": 0.46910156249999996
+        },
+        "stated": {
+          "point": 0.6437499999999999,
+          "lo": 0.5918402777777778,
+          "hi": 0.6934027777777778
+        },
+        "guided": {
+          "point": 0.8677083333333334,
+          "lo": 0.8368012152777778,
+          "hi": 0.8947960069444445
+        }
+      },
       "per_subject_unstated_headline": {
         "Qwen/Qwen3-235B-A22B-Instruct-2507": {
           "point": -0.3541666666666667,

@@ -169,3 +169,22 @@ unless its per-tradition means reconcile with the committed `results/20260905/` 
   exact 67.7% — in line with the record grid (full-grid r=0.833).
 - Difficulty bar holds: under unstated only gpt-5.6-terra/sonnet-5 have CIs strictly above 0; Qwen
   strictly below. Not ceilinged.
+
+### Phase 6 consult iter1 refinements (per-tradition CIs + reproducibility)
+- **Per-tradition 95% CIs** added to the 8-row table (scenario-cluster bootstrap, reusing the
+  canonical `analysis.paper_bundle` method — same seed 12345 / 5000 boots / percentile). analyze.py
+  hard-asserts each tradition's bootstrap central estimate == the canonical mean-of-means ≤1e-9.
+  protestant-unified +0.4863 [+0.368, +0.590] — CI overlaps judaism (6th) and eastern-christianity
+  (4th); the claim is "lower normative band", not a sharp 5th.
+- **`combined_stats.json` is now written by analyze.py** (via canonical `build_combined_stats`), so
+  the whole `data/output/` tree is reproducible from the one script (was previously the standalone
+  `analysis combined-stats` CLI — provenance closed).
+- **Portability:** analyze.py gained `--root`/`--results-dir` Typer options (default to the 5 roots +
+  results/20260905) so it reproduces from the main checkout post-merge.
+- **Monolith sanity-check:** the retired 7-strand protestantism monolith
+  (`results/20260813-protestantism`) scores combined mean-of-means **+0.0286** — far below
+  protestant-unified (+0.486). Directional only (different scenario set + construct; the common
+  witness restricts to the same-advice questions).
+- **Staleness guard:** `test_phase6_reconcile_119.py` now also asserts the committed
+  `paper_numbers.json` ranked table matches the shard recompute ≤1e-9. Suite 275 passed.
+- New figure `tradition_ranking.{pdf,png}` (8 traditions, mean + 95% CI).

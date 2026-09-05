@@ -6,13 +6,16 @@ number here flows through the canonical aggregator (``build_combined_runs`` →
 mean-of-means implementation** and no hand-rolled chart. The leaderboard ranking score
 per tradition is the equal-weight mean over subjects × framings of the combined
 ``by_framing[full]`` breakdown (scope=full, pressure=all) — the #120/#121 two-judge
-``mean_of_judges`` rule.
+``mean_of_judges`` rule. Per-tradition confidence intervals reuse the canonical
+scenario-cluster bootstrap from ``analysis.paper_bundle`` (``_combined_rows`` + the same
+seed/n_boot/percentile convention), so the CI method matches the paper's ``trad_pooled``.
 
 Run (from repo root):
 
     uv --project workflows/analysis run python experiments/119_protestant_unified/analyze.py
 
-Two hard-fail reconciliation assertions (see ``_assert_reconciliation``) gate the run.
+Reconciliation is gated by hard-fail assertions (see ``_assert_reconciliation`` and the
+bootstrap-point check in ``main``).
 """
 from __future__ import annotations
 
@@ -26,6 +29,7 @@ import typer
 from analysis.aggregate import TraditionAggregate, aggregate_tradition
 from analysis.combined_stats import (
     build_combined_runs,
+    build_combined_stats,
     combined_subj_overall,
     export_combined_mean_of_means,
 )
@@ -35,32 +39,36 @@ from analysis.export_results import (
     read_run_root,
     resolve_judgments,
 )
-from analysis.figures import emit_figures
+from analysis.figures import _apply_house_style, band_color, emit_figures, saveboth
+from analysis.paper_bundle import _combined_rows
 from analysis.stats import TraditionStats, compute_tradition_stats
 
-# The 5 judging-run roots in load-bearing priority order (relative to the repo root of the
-# worktree; the roots live in the MAIN checkout, hence the ``../../``).
-ROOTS: list[str] = [
+# The 5 judging-run roots in load-bearing priority order. The roots live in the MAIN
+# checkout, hence the ``../../`` default (correct when run from the builder worktree).
+DEFAULT_ROOTS: list[str] = [
     "../../tmp/judging-runs/20260803-merged",
     "../../tmp/judging-runs/20260803-unstated-opus",
     "../../tmp/judging-runs/20260803-framings-opus-sample",
     "../../tmp/judging-runs/20260823-opus-fullgrid",
     "../../tmp/judging-runs/20260904-protestant-unified",
 ]
+DEFAULT_RESULTS_DIR = "results/20260905"
+# The retired 7-strand monolith's committed score tier, for the sanity-check comparison.
+MONOLITH_SHARD = Path("results/20260813-protestantism/protestantism.json")
 
-# The committed score tier this analysis must reconcile with.
-RESULTS_DIR = Path("results/20260905")
 PU = "protestant-unified"
 _FULL = "full"
 _ALL = "all"
 _TOL = 1e-9
+# Canonical scenario-cluster bootstrap settings — identical to analysis.paper_bundle.
+_N_BOOT = 5000
+_SEED = 12345
 
 # Judge canonical model ids (post-normalization).
 _GEMINI = "gemini-3.6-flash"
 _OPUS = "claude-opus-4-8"
 
-_HERE = Path("experiments/119_protestant_unified")
-_OUT = _HERE / "data" / "output"
+_OUT = Path("experiments/119_protestant_unified/data/output")
 
 app = typer.Typer(add_completion=False, help="Spec 119 Phase 6 analysis.")
 
@@ -95,6 +103,90 @@ def _ranking_from_shard(shard: dict) -> float:
     return sum(vals) / len(vals)
 
 
+def _monolith_mean_of_means() -> float | None:
+    """The retired protestantism monolith's combined mean-of-means, for a sanity-check.
+
+    The monolith's committed shard (``20260813-protestantism``) predates the #120 combined
+    block, so it carries only per-judge ``means``. Because the combined score is the mean of
+    the two judges and both are full-grid here, the combined mean-of-means equals the average
+    of each judge's mean-of-means (mean-of-means is linear). Returns ``None`` if the shard is
+    absent. NB this is a DIFFERENT scenario set and a DIFFERENT construct (the 7-strand
+    monolith, not the same-advice common witness) — a directional comparison only."""
+    if not MONOLITH_SHARD.is_file():
+        return None
+    means = json.loads(MONOLITH_SHARD.read_text(encoding="utf-8"))["means"]
+    per_judge = []
+    for judge in (_GEMINI, _OPUS):
+        jm = means.get(judge)
+        if jm is None:
+            return None
+        vals = [
+            jm[s][fr][_FULL][_ALL][0]
+            for s in CANONICAL_SUBJECTS
+            for fr in FRAMINGS
+            if s in jm and jm[s].get(fr, {}).get(_FULL, {}).get(_ALL) is not None
+        ]
+        per_judge.append(sum(vals) / len(vals))
+    return sum(per_judge) / len(per_judge)
+
+
+# ── Per-tradition scenario-cluster bootstrap CIs (canonical method) ────────────────
+
+
+def _tradition_cis(roots: list[str], *, n_boot: int = _N_BOOT, seed: int = _SEED) -> dict:
+    """95% scenario-cluster bootstrap CIs for each tradition's combined mean, reusing the
+    exact ``analysis.paper_bundle`` machinery (``_combined_rows`` + per-scenario means matrix
+    + shared per-tradition resample indices). Returns ``{tradition: {'overall': CI,
+    'per_framing': {framing: CI}}}`` where each CI is ``{'point','lo','hi'}``. The ``overall``
+    point is the equal-weight mean over subjects × framings (the leaderboard ranking score);
+    ``per_framing`` pools over subjects for one framing (matches the paper's ``trad_pooled``)."""
+    rows = _combined_rows(roots)
+    acc: dict = defaultdict(lambda: defaultdict(list))
+    for j in rows:
+        if j["scope"] != _FULL:
+            continue
+        acc[(j["tradition"], j["framing"], j["subject"])][j["scenario_id"]].append(j["score"])
+
+    traditions = sorted({t for (t, _f, _s) in acc})
+    scen_ids = {
+        t: sorted({sc for (tt, _f, _s), d in acc.items() if tt == t for sc in d})
+        for t in traditions
+    }
+    n_scen = {t: len(scen_ids[t]) for t in traditions}
+    mat = {key: np.array([np.mean(d[sc]) for sc in scen_ids[key[0]]]) for key, d in acc.items()}
+    rng = np.random.default_rng(seed)
+    idx = {t: rng.integers(0, n_scen[t], size=(n_boot, n_scen[t])) for t in traditions}
+
+    def boot(t: str, f: str, s: str) -> tuple[float, np.ndarray]:
+        v = mat[(t, f, s)]
+        return float(v.mean()), v[idx[t]].mean(axis=1)
+
+    def pct(bs: np.ndarray) -> tuple[float, float]:
+        return float(np.percentile(bs, 2.5)), float(np.percentile(bs, 97.5))
+
+    out: dict = {}
+    for t in traditions:
+        per_framing: dict = {}
+        all_pts: list[float] = []
+        all_bss: list[np.ndarray] = []
+        for f in FRAMINGS:
+            per = [boot(t, f, s) for s in CANONICAL_SUBJECTS if (t, f, s) in mat]
+            pts = [p for p, _b in per]
+            bss = [b for _p, b in per]
+            fb = np.mean(bss, axis=0)
+            lo, hi = pct(fb)
+            per_framing[f] = {"point": float(np.mean(pts)), "lo": lo, "hi": hi}
+            all_pts += pts
+            all_bss += bss
+        overall_boot = np.mean(all_bss, axis=0)
+        lo, hi = pct(overall_boot)
+        out[t] = {
+            "overall": {"point": float(np.mean(all_pts)), "lo": lo, "hi": hi},
+            "per_framing": per_framing,
+        }
+    return out
+
+
 # ── Reconciliation assertions (hard-fail) ─────────────────────────────────────────
 
 
@@ -102,8 +194,9 @@ def _assert_reconciliation(
     aggregates: list[TraditionAggregate],
     roots: list[str],
     ranking: dict[str, float],
+    results_dir: Path,
 ) -> None:
-    """Two hard-fail checks tying this analysis to the committed score tier."""
+    """Hard-fail checks tying this analysis to the committed score tier."""
     # (b.1) The combined subj_overall (from aggregates) equals the results-export mean-of-means.
     lhs = combined_subj_overall(aggregates)
     rhs = export_combined_mean_of_means(roots)
@@ -121,7 +214,7 @@ def _assert_reconciliation(
 
     # (b.2) Per-tradition ranking mean-of-means equals the committed shard's combined block.
     for tradition, mine in ranking.items():
-        shard_path = RESULTS_DIR / f"{tradition}.json"
+        shard_path = results_dir / f"{tradition}.json"
         if not shard_path.is_file():
             raise AssertionError(f"missing committed shard for reconciliation: {shard_path}")
         theirs = _ranking_from_shard(json.loads(shard_path.read_text(encoding="utf-8")))
@@ -129,6 +222,19 @@ def _assert_reconciliation(
             raise AssertionError(
                 f"ranking reconciliation failed for {tradition}: "
                 f"recomputed={mine!r} != shard={theirs!r} (Δ={mine - theirs:.2e})"
+            )
+
+
+def _assert_ci_points_reconcile(ranking: dict[str, float], cis: dict) -> None:
+    """The bootstrap central estimate per tradition must equal the canonical mean-of-means to
+    ≤1e-9 — otherwise the CI would be drawn around a different point than the ranked score.
+    (Holds exactly for the uniform grid: per-scenario means average to the cell mean.)"""
+    for tradition, mine in ranking.items():
+        boot_pt = cis[tradition]["overall"]["point"]
+        if abs(mine - boot_pt) > _TOL:
+            raise AssertionError(
+                f"CI point vs ranking mismatch for {tradition}: ranking={mine!r} "
+                f"!= bootstrap_point={boot_pt!r} (Δ={mine - boot_pt:.2e})"
             )
 
 
@@ -165,7 +271,6 @@ def _agreement_pu(root: str) -> dict:
     o = np.array(opus, dtype=float)
     diff = o - g
     n = int(g.size)
-    # Pearson r (guard a degenerate zero-variance vector, though real data has variance).
     if g.std() == 0 or o.std() == 0:
         r = float("nan")
     else:
@@ -177,6 +282,43 @@ def _agreement_pu(root: str) -> dict:
         "within_half_fraction": float(np.mean(np.abs(diff) <= 0.5)),
         "exact_match_fraction": float(np.mean(diff == 0.0)),
     }
+
+
+# ── Per-tradition ranked figure (mean + 95% CI) ────────────────────────────────────
+
+
+def _fig_tradition_ranking(ranked_table: list[dict], out_dir: Path, formats: list[str]) -> list[Path]:
+    """Horizontal ranked figure of the 8 tradition combined means with 95% CI error bars;
+    protestant-unified is marked. matplotlib only (house style), no hand-rolled SVG/HTML."""
+    import matplotlib.pyplot as plt
+
+    _apply_house_style()
+    rows = list(reversed(ranked_table))  # highest at top
+    labels = [r["tradition"] for r in rows]
+    pts = [r["ranking_mean_of_means"] for r in rows]
+    los = [r["ranking_mean_of_means"] - r["ci_lo"] for r in rows]
+    his = [r["ci_hi"] - r["ranking_mean_of_means"] for r in rows]
+    ys = list(range(len(rows)))
+
+    fig, ax = plt.subplots(figsize=(7.0, 4.2))
+    ax.axvline(0.0, color="#999999", lw=0.8, zorder=1)
+    for y, r in zip(ys, rows):
+        color = band_color(r["ranking_mean_of_means"])
+        ax.errorbar(
+            r["ranking_mean_of_means"], y, xerr=[[r["ranking_mean_of_means"] - r["ci_lo"]],
+                                                 [r["ci_hi"] - r["ranking_mean_of_means"]]],
+            fmt="o", color=color, ecolor="#888888", elinewidth=1.1, capsize=3, ms=8,
+            markeredgecolor=("black" if r["tradition"] == PU else color),
+            markeredgewidth=(1.6 if r["tradition"] == PU else 0.0), zorder=3,
+        )
+    ax.set_yticks(ys)
+    ax.set_yticklabels([f"{r['rank']}. {lab}" + (" (this work)" if r["tradition"] == PU else "")
+                        for r, lab in zip(rows, labels)])
+    ax.set_xlim(-1.0, 1.0)
+    ax.set_xlabel("Combined two-judge mean (−1…+1; 0 = neutral), 95% CI")
+    ax.set_title("Cross-tradition ranking — combined two-judge mean")
+    fig.tight_layout()
+    return saveboth(fig, out_dir, "tradition_ranking", formats)
 
 
 # ── paper_numbers.json assembly ───────────────────────────────────────────────────
@@ -207,15 +349,25 @@ def _build_paper_numbers(
     aggregates: list[TraditionAggregate],
     stats: list[TraditionStats],
     ranking: dict[str, float],
+    cis: dict,
     agreement: dict,
+    monolith: float | None,
+    roots: list[str],
+    results_dir: Path,
 ) -> dict:
     agg_by = {a.tradition: a for a in aggregates}
     st_by = {s.tradition: s for s in stats}
 
-    # Ranked table (descending ranking score).
+    # Ranked table (descending ranking score), each row carrying its 95% CI.
     ranked = sorted(ranking.items(), key=lambda kv: kv[1], reverse=True)
     ranked_table = [
-        {"tradition": t, "ranking_mean_of_means": v, "rank": i}
+        {
+            "tradition": t,
+            "ranking_mean_of_means": v,
+            "ci_lo": cis[t]["overall"]["lo"],
+            "ci_hi": cis[t]["overall"]["hi"],
+            "rank": i,
+        }
         for i, (t, v) in enumerate(ranked, start=1)
     ]
 
@@ -229,6 +381,8 @@ def _build_paper_numbers(
         }
         per_tradition[t] = {
             "ranking_mean_of_means": ranking[t],
+            "ranking_ci": cis[t]["overall"],
+            "per_framing_ci": cis[t]["per_framing"],
             "per_subject_unstated_headline": headlines,
             "per_framing_combined": _per_framing_combined(agg),
         }
@@ -244,15 +398,19 @@ def _build_paper_numbers(
         "meta": {
             "spec": 119,
             "tradition": PU,
-            "roots": ROOTS,
-            "results_dir": str(RESULTS_DIR),
+            "roots": roots,
+            "results_dir": str(results_dir),
             "ranking_rule": "mean_of_judges",
             "ranking_score": (
                 "equal-weight mean over subjects x framings of combined by_framing[full] "
                 "(scope=full, pressure=all)"
             ),
+            "ci_method": "95% percentile scenario-cluster bootstrap (analysis.paper_bundle)",
+            "n_boot": _N_BOOT,
+            "seed": _SEED,
             "subjects": list(CANONICAL_SUBJECTS),
             "framings": list(FRAMINGS),
+            "monolith_20260813_combined_mean_of_means": monolith,
         },
         "ranked_table": ranked_table,
         "per_tradition": per_tradition,
@@ -262,10 +420,22 @@ def _build_paper_numbers(
 
 
 @app.command()
-def main() -> None:
+def main(
+    roots: list[str] = typer.Option(
+        DEFAULT_ROOTS, "--root", "-r",
+        help="Judging-run roots in load-bearing order (default: the 5 Spec-119 roots).",
+    ),
+    results_dir: str = typer.Option(
+        DEFAULT_RESULTS_DIR, "--results-dir",
+        help="Committed score tier to reconcile against (default: results/20260905).",
+    ),
+) -> None:
     """Build combined aggregates/stats, reconcile with the committed tier, and write outputs."""
-    typer.echo(f"Building combined runs over {len(ROOTS)} roots ...")
-    runs = build_combined_runs(ROOTS)
+    roots = list(roots)
+    results_path = Path(results_dir)
+
+    typer.echo(f"Building combined runs over {len(roots)} roots ...")
+    runs = build_combined_runs(roots)
     aggregates = [aggregate_tradition(r) for r in runs]
     stats = [compute_tradition_stats(a) for a in aggregates]
     typer.echo(f"  traditions: {[a.tradition for a in aggregates]}")
@@ -273,34 +443,63 @@ def main() -> None:
     ranking = {a.tradition: _ranking_mean_of_means(a) for a in aggregates}
 
     typer.echo("Reconciliation assertions ...")
-    _assert_reconciliation(aggregates, ROOTS, ranking)
+    _assert_reconciliation(aggregates, roots, ranking, results_path)
     typer.echo("  OK: subj_overall (aggregates == results-export mean-of-means) <= 1e-9")
     typer.echo("  OK: per-tradition ranking (recomputed == committed shard combined) <= 1e-9")
 
+    typer.echo("Per-tradition scenario-cluster bootstrap CIs (canonical method) ...")
+    cis = _tradition_cis(roots)
+    _assert_ci_points_reconcile(ranking, cis)
+    typer.echo("  OK: bootstrap central estimate == canonical mean-of-means <= 1e-9 (all 8)")
+
     typer.echo("Opus-vs-Gemini agreement (protestant-unified) ...")
-    agreement = _agreement_pu(ROOTS[-1])
+    agreement = _agreement_pu(roots[-1])
+
+    monolith = _monolith_mean_of_means()
+    if monolith is not None:
+        typer.echo(f"  monolith (20260813-protestantism) combined mean-of-means: {monolith:+.4f}")
 
     _OUT.mkdir(parents=True, exist_ok=True)
-    paper_numbers = _build_paper_numbers(aggregates, stats, ranking, agreement)
+
+    # combined_stats.json — written HERE (canonical build_combined_stats) so data/output is
+    # fully reproducible from analyze.py, not from a separate `analysis combined-stats` call.
+    combined_stats = build_combined_stats(roots)
+    (_OUT / "combined_stats.json").write_text(
+        json.dumps(combined_stats, indent=2, ensure_ascii=False, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    typer.echo(f"  wrote {_OUT / 'combined_stats.json'}")
+
+    paper_numbers = _build_paper_numbers(
+        aggregates, stats, ranking, cis, agreement, monolith, roots, results_path
+    )
     out_path = _OUT / "paper_numbers.json"
     out_path.write_text(json.dumps(paper_numbers, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     typer.echo(f"  wrote {out_path}")
 
     typer.echo("Emitting figures (pdf, png) ...")
     figures = emit_figures(aggregates, stats, _OUT / "figures", ["pdf", "png"])
+    figures += _fig_tradition_ranking(paper_numbers["ranked_table"], _OUT / "figures", ["pdf", "png"])
     for f in figures:
         typer.echo(f"  wrote {f}")
 
     # ── Concise stdout summary ────────────────────────────────────────────────────
-    typer.echo("\n=== Ranked leaderboard (combined two-judge mean_of_judges) ===")
+    typer.echo("\n=== Ranked leaderboard (combined two-judge mean_of_judges, 95% CI) ===")
     for row in paper_numbers["ranked_table"]:
         marker = "  <-- protestant-unified" if row["tradition"] == PU else ""
-        typer.echo(f"  {row['rank']}. {row['tradition']:<22} {row['ranking_mean_of_means']:+.4f}{marker}")
+        typer.echo(
+            f"  {row['rank']}. {row['tradition']:<22} {row['ranking_mean_of_means']:+.4f} "
+            f"[{row['ci_lo']:+.4f}, {row['ci_hi']:+.4f}]{marker}"
+        )
+    if monolith is not None:
+        typer.echo(f"  (monolith 20260813-protestantism, combined: {monolith:+.4f} — different scenario set)")
 
     pu_pf = paper_numbers["per_tradition"][PU]["per_framing_combined"]["framing_mean_over_subjects"]
-    typer.echo("\n=== protestant-unified per-framing combined mean (over subjects) ===")
+    pu_pfci = paper_numbers["per_tradition"][PU]["per_framing_ci"]
+    typer.echo("\n=== protestant-unified per-framing combined mean (over subjects), 95% CI ===")
     for fr in FRAMINGS:
-        typer.echo(f"  {fr:<9} {pu_pf[fr]:+.4f}")
+        c = pu_pfci[fr]
+        typer.echo(f"  {fr:<9} {pu_pf[fr]:+.4f} [{c['lo']:+.4f}, {c['hi']:+.4f}]")
 
     typer.echo("\n=== protestant-unified per-subject unstated-headline (point [lo, hi]) ===")
     for s, ci in paper_numbers["per_tradition"][PU]["per_subject_unstated_headline"].items():
