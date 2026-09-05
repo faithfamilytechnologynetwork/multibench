@@ -31,9 +31,9 @@ scenario-cluster bootstrap (5000 resamples, seed 12345), reusing the canonical
 | 3 | taoism | +0.6308 | [+0.581, +0.679] |
 | 4 | eastern-christianity | +0.5405 | [+0.489, +0.589] |
 | **5** | **protestant-unified** | **+0.4863** | **[+0.368, +0.590]** |
-| 6 | judaism | +0.4656 | [+0.383, +0.547] |
+| 6 | judaism | +0.4656 | [+0.383, +0.546] |
 | 7 | roman-catholicism | +0.3635 | [+0.284, +0.436] |
-| 8 | sunni-islam | +0.3597 | [+0.293, +0.422] |
+| 8 | sunni-islam | +0.3597 | [+0.293, +0.421] |
 
 protestant-unified lands **5th of 8**, between eastern-christianity (+0.541) and judaism (+0.466).
 It sits in the lower half with the other normative, binding-claims traditions (roman-catholicism,
