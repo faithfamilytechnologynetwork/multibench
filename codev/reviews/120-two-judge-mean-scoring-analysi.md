@@ -161,3 +161,6 @@ No flaky tests encountered.
   the builder rebases).
 - **Deferred (non-blocking):** extend the Opus-delta guard to the `steadfastness` block + new-key
   detection (phase_4 comment).
+- **Filed (PR-review round 2, non-blocking):** #122 — coverage floor for averaged judges (fail the
+  export if the double-judged fraction drops too low); #123 — document the results baseline-fixture
+  re-pin procedure.
