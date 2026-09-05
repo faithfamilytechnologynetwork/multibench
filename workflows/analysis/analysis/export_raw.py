@@ -570,22 +570,22 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
             "rankable": ui["rankable"],
             "coverage": round(judge_coverage(coverage, model), 6),
         })
-    # Ranking-integrity guards — the MultiBench raw catalog carries the same ranking invariant as
-    # the score manifest (this builder is MB-specific; the AFB tier bypasses it via RawTierWriter).
-    # EXACTLY ONE rankable judge, and that judge must be STRICTLY complete across the WHOLE both-scope
-    # grid (not merely the tolerant full-scope badge) — so a rankable judge missing turn1 or stray
-    # cells can never be published. Strict completeness is a pooled count: resolved rows are unique
-    # per cell and confined to the declared grid, so judged == grid ⟺ every cell covered.
-    rankable_models = [m for m in judge_models if JUDGE_UI.get(m, {}).get("rankable")]
-    if len(rankable_models) != 1:
+    # Ranking-integrity guard (#120 re-shape) — the MultiBench raw catalog carries the same invariant
+    # as the score manifest (this builder is MB-specific; the AFB tier bypasses it via RawTierWriter).
+    # The score tier ranks on the COMBINED two-judge mean, well-defined as long as AT LEAST ONE real
+    # judge is STRICTLY complete across the WHOLE both-scope grid (was: exactly one `rankable` judge).
+    # Strict completeness is a pooled count: resolved rows are unique per cell and confined to the
+    # declared grid, so judged == grid ⟺ every cell covered.
+    complete_models = [m for m in judge_models if strict_judged.get(m, 0) == strict_expected]
+    if not complete_models:
+        got = {m: f"{strict_judged.get(m, 0)}/{strict_expected}" for m in judge_models}
         raise AnalysisInputError(
-            f"raw catalog needs exactly one rankable judge, found {rankable_models} "
-            f"among {list(judge_models)}")
-    ranker = rankable_models[0]
-    if strict_judged.get(ranker, 0) != strict_expected:
-        raise AnalysisInputError(
-            f"raw catalog rankable judge {ranker!r} is not strictly complete "
-            f"({strict_judged.get(ranker, 0)}/{strict_expected} cells) — cannot mark it rankable")
+            f"raw catalog needs at least one strictly-complete judge for the combined ranking; "
+            f"none complete ({got})")
+    # No `ranking` block on the raw catalog: the raw viewer is catalog-generic and reads only
+    # per-judge verdicts (never a combined per-cell score), so a ranking declaration here would be
+    # unread. The combined-mean ranking rule lives on the score-tier manifest (`export_results`),
+    # which is what `/results` consumes. The completeness guard above is retained as a real invariant.
 
     return {
         "schema_version": SCHEMA_VERSION,

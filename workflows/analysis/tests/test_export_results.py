@@ -418,12 +418,14 @@ def test_judge_coverage_is_pooled_fraction():
 
 
 def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None,
-                          opus_skip_subjects: tuple = ()):
+                          opus_skip_subjects: tuple = (), score_fn=None):
     """A COMPLETE Gemini grid + a (by default COMPLETE) Opus grid over 2 scenarios.
 
     ``opus_drop`` optionally omits one Opus (subject, framing, scope, pressure, scenario) cell;
     ``opus_skip_subjects`` omits whole subjects from the Opus layer (to test the DECLARED-universe
-    coverage denominator: Gemini's report still declares all 5 subjects).
+    coverage denominator: Gemini's report still declares all 5 subjects). ``score_fn(sub, subj, fr,
+    scope, pr, sc) -> float`` sets per-cell scores (default: a flat 0.5); pass a varying one to
+    exercise aggregation with non-uniform, judge-differing data.
     """
     scenarios = ["T-1", "T-2"]
     for judge, sub in (("gemini-run", "gemini-3.6-flash"), ("opus-run", "claude-opus-4-8")):
@@ -439,7 +441,8 @@ def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None,
                         for sc in scenarios:
                             if judge == "opus-run" and opus_drop == (subj, fr, scope, pr, sc):
                                 continue
-                            rows.append(_row(subj, sc, pr, fr, scope, sub, 0.5, f"{judge}{i}"))
+                            score = 0.5 if score_fn is None else score_fn(sub, subj, fr, scope, pr, sc)
+                            rows.append(_row(subj, sc, pr, fr, scope, sub, score, f"{judge}{i}"))
                             i += 1
         (d / "judgments.jsonl").write_text(
             "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
@@ -462,36 +465,157 @@ def test_earning_full_grid_never_makes_a_validation_judge_rankable(tmp_path):
     assert by_model["gemini-3.6-flash"]["rankable"] is True   # the sole ranking judge
 
 
-def test_rankable_judge_with_incomplete_grid_fails_fast(tmp_path):
-    # Gemini (rankable) missing a single cell must NOT be written — strict gate fails fast.
+def test_no_strictly_complete_judge_fails_fast(tmp_path):
+    # #120 re-shaped gate: the combined ranking needs AT LEAST ONE strictly-complete real judge.
+    # If BOTH judges are gappy, there is nothing to rank on → fail fast.
     root = _write_two_full_grids(tmp_path)
-    # Drop one Gemini cell by rewriting its run without it.
-    gem = root / "gemini-run" / _TRAD / "judgments.jsonl"
-    lines = gem.read_text().splitlines()
-    gem.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")  # remove one judged cell
+    for run in ("gemini-run", "opus-run"):  # drop a cell from EACH judge → neither complete
+        p = root / run / _TRAD / "judgments.jsonl"
+        lines = p.read_text().splitlines()
+        p.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
     exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="incomplete coverage"):
+    with pytest.raises(AnalysisInputError, match="no strictly-complete real judge"):
         build_manifest(exports, run_id="r", generated_at="t")
 
 
-def test_zero_rankable_judges_fails_fast(tmp_path):
-    # An Opus-only run has no rankable judge → the leaderboard would have nothing to rank.
+def test_one_incomplete_judge_still_ranks_on_the_complete_one(tmp_path):
+    # #120: if Gemini is complete but Opus has a gap, the combined ranking is still well-defined
+    # (Gemini covers the grid). The export must SUCCEED — the old "rankable must be complete" gate
+    # is gone; what matters is >=1 strictly-complete judge.
     root = _write_two_full_grids(tmp_path)
-    # Give the opus run a report so it can stand alone as a corpus.
+    opus = root / "opus-run" / _TRAD / "judgments.jsonl"
+    lines = opus.read_text().splitlines()
+    opus.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")  # Opus loses one cell
+    exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t")  # no raise
+    assert m["ranking"]["rule"] == "mean_of_judges"
+
+
+def test_opus_only_complete_run_ranks_on_combined(tmp_path):
+    # #120: a single strictly-complete real judge (Opus alone) is enough — combined == that judge.
+    root = _write_two_full_grids(tmp_path)
     (root / "opus-run" / _TRAD / "report.json").write_text(
         json.dumps(_report(["T-1", "T-2"], list(CANONICAL_SUBJECTS), ["claude-opus-4-8"])),
         encoding="utf-8")
     exports = build_corpus_export([root / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
-        build_manifest(exports, run_id="r", generated_at="t")
+    m = build_manifest(exports, run_id="r", generated_at="t")  # no raise (Opus is complete)
+    assert m["ranking"]["judges"] == ["claude-opus-4-8"]
+    assert m["ranking"]["score_key"] == "combined"
 
 
-def test_more_than_one_rankable_judge_fails_fast(tmp_path, monkeypatch):
-    # If two judges were both marked rankable, ranking would be ambiguous → fail fast.
+def test_two_rankable_judges_is_allowed_now(tmp_path, monkeypatch):
+    # #120: ranking is on the combined mean, so the old "exactly one rankable" ambiguity is gone —
+    # two judges flagged rankable is fine (rankable is now legacy selector/fallback metadata).
     monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
     exports = build_corpus_export(
         [_write_two_full_grids(tmp_path) / "gemini-run", tmp_path / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
+    m = build_manifest(exports, run_id="r", generated_at="t")  # no raise
+    assert m["ranking"]["rule"] == "mean_of_judges"
+
+
+# ── #120: combined two-judge block + ranking declaration ───────────────────────────
+
+def _combined_fixture(rows: list[dict], scenarios: list[str]) -> "object":
+    """Build one TraditionExport from explicit rows (both judges), report over `scenarios`."""
+    rep = _report(scenarios, list(CANONICAL_SUBJECTS), ["gemini-3.6-flash", "claude-opus-4-8"])
+    raw = RawTradition(tradition=_TRAD, base=rows, v2=[], report=rep)
+    return build_tradition_export(_TRAD, [raw])
+
+
+def test_combined_equals_mean_of_per_judge_means_when_fully_double_judged():
+    # Every cell scored by BOTH judges → the combined breakdown mean equals the mean of the two
+    # per-judge breakdown means, exactly (the equivalence the spec requires on double-judged sets).
+    S, FR, SCP, PR = "claude-sonnet-5", "unstated", "full", "secularize"
+    rows = []
+    for sc, g, o in (("T-1", 0.8, 0.4), ("T-2", 0.6, 0.2)):
+        rows.append(_row(S, sc, PR, FR, SCP, "gemini-3.6-flash", g, f"g{sc}"))
+        rows.append(_row(S, sc, PR, FR, SCP, "claude-opus-4-8", o, f"o{sc}"))
+    exp = _combined_fixture(rows, ["T-1", "T-2"])
+    gem = exp.means[("gemini-3.6-flash", S, FR, SCP, PR)].mean          # (0.8+0.6)/2 = 0.7
+    opus = exp.means[("claude-opus-4-8", S, FR, SCP, PR)].mean          # (0.4+0.2)/2 = 0.3
+    combined = exp.combined_means[(S, FR, SCP, PR)].mean                # (0.6+0.4)/2 = 0.5
+    assert combined == pytest.approx((gem + opus) / 2)                  # 0.5 == 0.5
+    assert not exp.single_judge_cells                                   # nothing single-judged
+
+
+def test_single_judge_cell_uses_lone_verdict_and_diverges():
+    # A cell scored by ONE judge contributes its lone verdict to the combined score, is reported as
+    # a single-judge cell, and makes combined differ from the mean of per-judge means.
+    S, FR, SCP, PR = "claude-sonnet-5", "unstated", "full", "secularize"
+    rows = [
+        _row(S, "T-1", PR, FR, SCP, "gemini-3.6-flash", 0.8, "g1"),
+        _row(S, "T-1", PR, FR, SCP, "claude-opus-4-8", 0.4, "o1"),  # T-1 double-judged
+        _row(S, "T-2", PR, FR, SCP, "gemini-3.6-flash", 0.2, "g2"),  # T-2 gemini-only
+    ]
+    exp = _combined_fixture(rows, ["T-1", "T-2"])
+    gem = exp.means[("gemini-3.6-flash", S, FR, SCP, PR)].mean   # (0.8+0.2)/2 = 0.5
+    opus = exp.means[("claude-opus-4-8", S, FR, SCP, PR)].mean   # 0.4
+    combined = exp.combined_means[(S, FR, SCP, PR)].mean         # (0.6 + 0.2)/2 = 0.4
+    assert combined == pytest.approx(0.4)
+    assert combined != pytest.approx((gem + opus) / 2)           # diverges (0.4 != 0.45)
+    # single-judge cell carries the PRESENT judge (T-2 was gemini-only)
+    assert (S, "T-2", PR, FR, SCP, "gemini-3.6-flash") in exp.single_judge_cells
+
+
+def test_combined_block_serialized_separately_from_means():
+    exp = _combined_fixture(
+        [_row("claude-sonnet-5", "T-1", "secularize", "unstated", "full", j, 0.5, f"{j}")
+         for j in ("gemini-3.6-flash", "claude-opus-4-8")], ["T-1"])
+    shard = serialize_tradition(exp)
+    assert "combined" in shard and "combined_steadfastness" in shard
+    assert set(shard["means"]) == {"gemini-3.6-flash", "claude-opus-4-8"}  # combined NOT in means
+    # combined shape mirrors a single judge's sub-tree: subject -> framing -> scope -> pressure -> [..]
+    cell = shard["combined"]["claude-sonnet-5"]["unstated"]["full"]["secularize"]
+    assert len(cell) == 3 and cell[0] == 0.5
+
+
+def test_ranking_declaration_shape_and_disjointness(tmp_path):
+    exports = build_corpus_export(
+        [_write_two_full_grids(tmp_path) / "gemini-run", tmp_path / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t", single_judge_attempts=3)
+    r = m["ranking"]
+    assert r["rule"] == "mean_of_judges"
+    assert r["score_key"] == "combined"
+    assert r["judges"] == ["claude-opus-4-8", "gemini-3.6-flash"]
+    assert r["score_key"] not in {j["model"] for j in m["judges"]}   # disjoint from real judges
+    assert r["score_key"] not in m["counts"]["coverage"]             # never leaked into coverage
+    assert r["single_judge_cells"] == {"count": 0, "cells": [], "attempts": 3}
+
+
+def test_single_judge_cells_recorded_in_manifest(tmp_path):
+    # Drop one Opus cell → that (subject, scenario, ...) becomes a single-judge (gemini-only) cell,
+    # recorded in ranking.single_judge_cells with its full id.
+    drop = ("claude-sonnet-5", "unstated", "full", "secularize", "T-1")
+    root = _write_two_full_grids(tmp_path, opus_drop=drop)
+    exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t")
+    sj = m["ranking"]["single_judge_cells"]
+    assert sj["count"] == 1
+    assert sj["cells"][0] == {
+        "tradition": _TRAD, "subject": "claude-sonnet-5", "scenario_id": "T-1",
+        "pressure": "secularize", "framing": "unstated", "scope": "full",
+        "judge_present": "gemini-3.6-flash",  # Opus cell dropped → only Gemini scored it
+    }
+
+
+def test_single_judge_cells_list_is_capped(tmp_path):
+    # A pathological single-judge run would enumerate ~93k cells and blow the manifest ceiling;
+    # the count stays exact but the cell list is capped + flagged truncated.
+    from analysis.export_results import SINGLE_JUDGE_CELLS_CAP, ranking_declaration
+    cells = [{"tradition": "t", "subject": f"s{i}"} for i in range(SINGLE_JUDGE_CELLS_CAP + 10)]
+    r = ranking_declaration(cells, ["claude-opus-4-8"])
+    assert r["single_judge_cells"]["count"] == SINGLE_JUDGE_CELLS_CAP + 10  # exact
+    assert len(r["single_judge_cells"]["cells"]) == SINGLE_JUDGE_CELLS_CAP  # capped
+    assert r["single_judge_cells"]["cells_truncated"] is True
+
+
+def test_build_manifest_empty_judges_fails_fast():
+    # An export with no judges (e.g. an empty judgments.jsonl) must fail-fast with a clear error,
+    # not an IndexError.
+    rep = _report(["T-1"], list(CANONICAL_SUBJECTS), ["gemini-3.6-flash"])
+    raw = RawTradition(tradition=_TRAD, base=[], v2=[], report=rep)
+    exports = {_TRAD: build_tradition_export(_TRAD, [raw])}
+    with pytest.raises(AnalysisInputError, match="no judges in the export"):
         build_manifest(exports, run_id="r", generated_at="t")
 
 
@@ -650,7 +774,8 @@ def test_build_manifest_rejects_incomplete_full_grid(tmp_path):
     ]
     gpath.write_text("\n".join(kept) + "\n", encoding="utf-8")
     exports = build_corpus_export([src / "gemini-run", src / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="incomplete coverage"):
+    # Gemini now incomplete AND the Opus validation layer is a partial sample → NO complete judge.
+    with pytest.raises(AnalysisInputError, match="no strictly-complete real judge"):
         build_manifest(exports, "r1", "2026-08-06T00:00:00+00:00")
 
 
@@ -736,6 +861,172 @@ def test_launch_gemini_steadfastness_matches_report(launch_export):
                 assert got.value == pytest.approx(want, abs=1e-9), f"{trad}/{subj}/{pr}"
 
 
+# ── #120: combined-stats capability + v3-bundle reconciliation ──────────────────────
+
+
+def test_combined_stats_reconciles_with_export(tmp_path):
+    # The committed combined-stats primitive's subj_overall (point) must equal the results-export
+    # combined mean-of-means — both are the mean over traditions of the combined by_framing[full],
+    # from the SAME cell_scores reducer (no second averaging implementation).
+    from analysis.combined_stats import build_combined_stats, export_combined_mean_of_means
+    # Non-uniform, judge-differing scores (from the valid discrete set) so the reconciliation
+    # actually exercises the aggregation — a flat fixture couldn't tell the two paths apart. The
+    # combined cell = (gemini+opus)/2 varies by framing and scenario.
+    _GEM = {"unstated": {"T-1": 0.0, "T-2": 0.5}, "stated": {"T-1": 0.5, "T-2": 1.0},
+            "guided": {"T-1": 1.0, "T-2": 0.5}}
+    _OPUS = {"unstated": {"T-1": -0.5, "T-2": 0.0}, "stated": {"T-1": 0.0, "T-2": 0.5},
+             "guided": {"T-1": 0.5, "T-2": 1.0}}
+    def score_fn(sub, subj, fr, scope, pr, sc):
+        return (_GEM if sub == "gemini-3.6-flash" else _OPUS)[fr][sc]
+    root = _write_two_full_grids(tmp_path, score_fn=score_fn)
+    roots = [str(root / "gemini-run"), str(root / "opus-run")]
+    bundle = build_combined_stats(roots, n_boot=20)  # n_boot small: point estimate is boot-independent
+    mom = export_combined_mean_of_means(roots)
+    assert set(bundle["subj_overall_point"]) == set(mom)
+    for k in mom:  # reconcile to fp tolerance (both from cell_scores, so exact in practice)
+        assert bundle["subj_overall_point"][k] == pytest.approx(mom[k], abs=1e-12)
+    assert set(mom) == {f"{s}|{fr}" for s in CANONICAL_SUBJECTS for fr in ("unstated", "stated", "guided")}
+    # Sanity: the fixture is genuinely non-uniform, so a constant-output bug in either path would
+    # fail the reconciliation above. combined unstated = mean(T-1 (0+-0.5)/2=-0.25, T-2 (0.5+0)/2=0.25)
+    # = 0.0; combined guided = mean(T-1 (1+0.5)/2=0.75, T-2 (0.5+1)/2=0.75) = 0.75.
+    assert mom["claude-sonnet-5|unstated"] == pytest.approx(0.0)
+    assert mom["claude-sonnet-5|guided"] == pytest.approx(0.75)
+
+
+def test_combined_stats_cli(tmp_path):
+    from typer.testing import CliRunner
+
+    from analysis.cli import app
+
+    root = _write_two_full_grids(tmp_path)
+    out = tmp_path / "combined.json"
+    result = CliRunner().invoke(app, [
+        "combined-stats", str(root / "gemini-run"), str(root / "opus-run"),
+        "--out", str(out), "--n-boot", "20",
+    ])
+    assert result.exit_code == 0, result.output
+    bundle = json.loads(out.read_text())
+    assert "subj_overall_point" in bundle and "traditions" in bundle
+    # Deterministic: re-running yields byte-identical output.
+    out2 = tmp_path / "combined2.json"
+    CliRunner().invoke(app, ["combined-stats", str(root / "gemini-run"), str(root / "opus-run"),
+                             "--out", str(out2), "--n-boot", "20"])
+    assert out.read_bytes() == out2.read_bytes()
+
+
+_V3_BUNDLE = _MERGED / "analysis-out" / "figures-report-v3" / "stats_bundle.json"
+
+
+@_skip
+@pytest.mark.skipif(not _V3_BUNDLE.is_file(), reason="v3 stats_bundle.json not present")
+def test_combined_mean_of_means_reconciles_with_v3_bundle():
+    """The combined headline guard (#120): the results-export combined mean-of-means
+    (scope=full, pressure=all) equals the v3 bundle's ``subj_overall`` point to ≤1e-9 — the
+    combined analogue of the Gemini paper pin at ``test_launch_gemini_leaderboard_matches_paper``.
+    """
+    from analysis.combined_stats import export_combined_mean_of_means
+    mom = export_combined_mean_of_means([str(_MERGED), str(_UNSTATED_OPUS), str(_FRAMINGS_OPUS),
+                                         str(_MERGED.parent / "20260823-opus-fullgrid")])
+    v3 = json.loads(_V3_BUNDLE.read_text())["subj_overall"]
+    for key, val in mom.items():
+        assert val == pytest.approx(v3[key][0], abs=1e-9), key
+
+
+_V2_BUNDLE = _MERGED / "analysis-out" / "figures-report-v2" / "stats_bundle.json"
+
+
+@pytest.mark.skipif(not (_V3_BUNDLE.is_file() and _V2_BUNDLE.is_file()),
+                    reason="v2/v3 stats bundles not present")
+def test_v3_bundle_schema_and_dual_judge_recompute():
+    """v3 (produced by the committed `analysis paper-bundle`) keeps v2's top-level schema (so
+    paper_figs_multibench.py runs unchanged); its `dual_judge` is RAW Gemini-vs-Opus, recomputed on
+    the CURRENT roots — so the sample-root subsections match v2 while the completed-grid ones
+    (unstated, full_grid) reflect the 33 recovered cells. Score aggregates ARE combined."""
+    v2 = json.loads(_V2_BUNDLE.read_text())
+    v3 = json.loads(_V3_BUNDLE.read_text())
+    assert sorted(v2) == sorted(v3)                       # same top-level keys
+    assert v3["meta"] == v2["meta"]                       # meta unchanged
+    assert v3["subj_overall"] != v2["subj_overall"]       # score aggregates ARE combined (differ)
+    dj2, dj3 = v2["dual_judge"], v3["dual_judge"]
+    # Sample-root subsections are unaffected by the grid completion → identical to v2.
+    for key in ("framings_sample", "framings_tier", "route_bridge"):
+        assert dj3[key] == dj2[key], key
+    # ABSOLUTE assertions on v3 (the v2 bundle is gitignored + may be re-patched by the paper-figs
+    # scripts, so avoid comparing against it): the unstated Opus layer grew to 31,139, and full_grid
+    # is recomputed over the completed grid (93,420 total − 2 residual single-judge cells).
+    assert dj3["unstated"]["n"] == 31139
+    assert dj3["full_grid"]["overall"]["n"] == 93418
+    # The committed generator does not carry the transitional v2-partial legacy key.
+    assert "full_grid_v2_partial" not in dj3
+    # The recomputed full_grid keeps ALL of v2's subkeys (incl. `rank`).
+    assert set(dj3["full_grid"]) >= set(dj2["full_grid"]), sorted(dj2["full_grid"])
+    assert set(dj3["full_grid"]["rank"]) == {"unstated", "stated", "guided"}
+    assert all("order_identical" in dj3["full_grid"]["rank"][f] for f in ("unstated", "stated", "guided"))
+    # Reconcile the recompute with the paper's reported full-grid agreement (docs/analysis/
+    # 110-dual-judge-fullgrid-summary.md), which was computed at n=93,385 — so per-framing r matches
+    # to within the shift from the 33 recovered cells (<=0.005), and overall r/within are unchanged.
+    fg = dj3["full_grid"]
+    assert fg["overall"]["r"] == pytest.approx(0.833, abs=0.003)
+    for framing, r_doc in (("unstated", 0.854), ("stated", 0.825), ("guided", 0.683)):
+        assert fg[framing]["r"] == pytest.approx(r_doc, abs=0.005), framing
+
+
+@_skip
+@pytest.mark.skipif(not _V3_BUNDLE.is_file(), reason="v3 stats bundle not present")
+def test_v3_dual_judge_n_matches_paper_figs_live_pairing():
+    """The v3 bundle's `dual_judge.unstated.n` / `framings_sample.n` must equal what
+    paper_figs_multibench.py computes LIVE (it asserts `len(pairs_un/fr) == bundle n`). After
+    Phase 1 grew the unstated Opus layer (31,114 -> 31,139), reusing v2's stale n would hard-fail
+    that assert — this replicates paper_figs's exact load_opus (raw-gemini lut; mapped dedupe + v2
+    overlay for the sample) and pins the equality."""
+    import json as _json
+    _SMAP = {"anthropic/claude-sonnet-5": "claude-sonnet-5",
+             "thinkingmachines/inkling": "thinkingmachines/Inkling",
+             "openai/gpt-5.6-terra": "gpt-5.6-terra", "google/gemini-3.6-flash": "gemini-3.6-flash",
+             "qwen/qwen3-235b-a22b-2507": "Qwen/Qwen3-235B-A22B-Instruct-2507"}
+    trads = sorted(p.name for p in _MERGED.iterdir()
+                   if (p / "judgments.jsonl").is_file())
+    gem = {}
+    for t in trads:
+        for line in (_MERGED / t / "judgments.jsonl").read_text().splitlines():
+            if line.strip():
+                j = _json.loads(line)
+                gem[(j["subject"], j["tradition"], j["scenario_id"], j["pressure"],
+                     j["framing"], j["scope"])] = j["score"]
+
+    def load_opus(base, mapped):
+        out, by_id = [], {}
+        for t in trads:
+            fp = base / t / "judgments.jsonl"
+            if not fp.is_file():
+                continue
+            lines = fp.read_text().splitlines()
+            v2 = base / t / "judgments_v2.jsonl"
+            if v2.is_file():
+                lines += v2.read_text().splitlines()
+            for line in lines:
+                if not line.strip():
+                    continue
+                j = _json.loads(line)
+                if mapped:
+                    j["subject"] = _SMAP[j["subject"]]
+                    k = (j["subject"], j["tradition"], j["scenario_id"], j["pressure"],
+                         j["framing"], j["scope"])
+                    if k not in by_id or j.get("ts", "") >= by_id[k].get("ts", ""):
+                        by_id[k] = j
+                else:
+                    out.append(j)
+        return list(by_id.values()) if mapped else out
+
+    def n_paired(rows):
+        return sum(1 for j in rows if (j["subject"], j["tradition"], j["scenario_id"],
+                                       j["pressure"], j["framing"], j["scope"]) in gem)
+
+    dj = _json.loads(_V3_BUNDLE.read_text())["dual_judge"]
+    assert n_paired(load_opus(_UNSTATED_OPUS, mapped=False)) == dj["unstated"]["n"]
+    assert n_paired(load_opus(_FRAMINGS_OPUS, mapped=True)) == dj["framings_sample"]["n"]
+
+
 # ── CLI command-level test ────────────────────────────────────────────────────────
 
 
@@ -819,3 +1110,109 @@ def test_committed_dataset_reconciles_with_paper():
                     if subj in shard["means"].get("gemini-3.6-flash", {})]
             mom = sum(vals) / len(vals)
             assert mom == pytest.approx(sb["subj_overall"][f"{subj}|{fr}"][0], abs=1e-9)
+
+
+# ── #120 Phase 4: additive re-export of results/20260803 vs the pinned pre-change baseline ──
+# The baseline is the committed dataset as of HEAD before the re-export (git show HEAD:results/...),
+# pinned so the byte-identity/delta assertions are reproducible on single-line minified shards.
+_BASELINE = Path(__file__).resolve().parent / "fixtures" / "results-20260803-baseline"
+_has_baseline = pytest.mark.skipif(
+    not (_BASELINE / "manifest.json").is_file(), reason="pinned baseline fixture absent")
+# Traditions whose Opus layer received a recovered cell in Phase 1 (per the runbook table).
+_RECOVERED_TRADS = {"judaism", "roman-catholicism", "secular-sage", "sunni-islam", "taoism"}
+
+
+@_has_committed
+@_has_baseline
+def test_committed_gemini_block_byte_identical_to_baseline():
+    """Baked #2: the Gemini per-judge block is byte-identical across the re-export (Gemini is
+    unchanged by the #120 re-judge) — the value the paper-reconciliation guard rests on."""
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        new = json.loads((_COMMITTED / entry["shard"]).read_text())
+        base = json.loads((_BASELINE / entry["shard"]).read_text())
+        for block in ("means", "steadfastness"):  # both the mean and steadfastness Gemini sub-trees
+            assert json.dumps(new[block].get("gemini-3.6-flash"), sort_keys=True) == \
+                json.dumps(base[block].get("gemini-3.6-flash"), sort_keys=True), f"{entry['id']}/{block}"
+
+
+@_has_committed
+@_has_baseline
+def test_committed_opus_delta_bounded_to_recovered_cells():
+    """The Opus block's delta is bounded to EXACTLY the grid-completion cells:
+    - untouched traditions (no recovered cell) are byte-identical;
+    - within any tradition, a slice whose ``n_judged`` is UNCHANGED must be byte-identical (so an
+      unrelated score change — a mean shift without added coverage — is caught);
+    - the total added Opus coverage over specific-pressure slices (both scopes) == 33 (35 missing −
+      2 residual).
+    This is the precise "delta bounded" guard (a monotonic-n check alone would miss a mean-only edit).
+    """
+    _EXPECTED_RECOVERED = 33
+    total_added = 0
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        t = entry["id"]
+        new = json.loads((_COMMITTED / entry["shard"]).read_text())["means"].get("claude-opus-4-8", {})
+        base = json.loads((_BASELINE / entry["shard"]).read_text())["means"].get("claude-opus-4-8", {})
+        if t not in _RECOVERED_TRADS:
+            assert json.dumps(new, sort_keys=True) == json.dumps(base, sort_keys=True), \
+                f"{t}: Opus block changed but received no recovered cell"
+        for subj, byfr in base.items():
+            for fr, bysc in byfr.items():
+                for sc, bypr in bysc.items():
+                    for pr, cell in bypr.items():
+                        ncell = new.get(subj, {}).get(fr, {}).get(sc, {}).get(pr)
+                        assert ncell is not None, f"{t}/{subj}/{fr}/{sc}/{pr} vanished"
+                        assert ncell[1] >= cell[1], f"{t}/{subj}/{fr}/{sc}/{pr} n_judged dropped"
+                        if ncell[1] == cell[1]:
+                            assert ncell == cell, f"{t}/{subj}/{fr}/{sc}/{pr} changed without added coverage"
+                        if pr != "all":  # specific-pressure slices count each cell once
+                            total_added += ncell[1] - cell[1]
+    assert total_added == _EXPECTED_RECOVERED, total_added
+
+
+@_has_committed
+def test_committed_combined_block_and_ranking():
+    """The re-export adds the combined block + a ranking declaration (rule/score_key/judges)."""
+    manifest = json.loads((_COMMITTED / "manifest.json").read_text())
+    r = manifest["ranking"]
+    assert r["rule"] == "mean_of_judges" and r["score_key"] == "combined"
+    assert r["score_key"] not in {j["model"] for j in manifest["judges"]}
+    for entry in manifest["traditions"]:
+        shard = json.loads((_COMMITTED / entry["shard"]).read_text())
+        assert "combined" in shard and "combined_steadfastness" in shard
+        assert set(shard["means"]) <= {j["model"] for j in manifest["judges"]}  # combined NOT in means
+
+
+@_has_committed
+@pytest.mark.skipif(not _V3_BUNDLE.is_file(), reason="v3 stats bundle not present")
+def test_committed_combined_mean_of_means_reconciles_with_v3_bundle():
+    """The combined headline guard on the COMMITTED artifact (analogue of the Gemini paper pin):
+    the mean over traditions of the committed shards' `combined[subject][framing][full][all]` equals
+    the v3 bundle's `subj_overall` point to ≤1e-9 — so the shipped dataset and the paper bundle
+    cannot disagree on the ranked number."""
+    shards = {}
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        shards[entry["id"]] = json.loads((_COMMITTED / entry["shard"]).read_text())
+    v3 = json.loads(_V3_BUNDLE.read_text())["subj_overall"]
+    for subj in CANONICAL_SUBJECTS:
+        for fr in ("unstated", "stated", "guided"):
+            vals = [sh["combined"][subj][fr]["full"]["all"][0]
+                    for sh in shards.values()
+                    if subj in sh.get("combined", {})]
+            mom = sum(vals) / len(vals)
+            assert mom == pytest.approx(v3[f"{subj}|{fr}"][0], abs=1e-9), f"{subj}|{fr}"
+
+
+@_has_committed
+def test_committed_ranking_single_judge_matches_grid_allowlist():
+    """Three-way lockstep: the manifest's single_judge_cells match the grid-completeness test's
+    documented residual set exactly — so the runbook, the test allowlist, and the shipped manifest
+    cannot drift on the residual pair."""
+    from test_grid_completeness import _KNOWN_RESIDUAL_OPUS_MISSING
+
+    sj = json.loads((_COMMITTED / "manifest.json").read_text())["ranking"]["single_judge_cells"]
+    manifest_cells = {
+        (c["tradition"], c["subject"], c["scenario_id"], c["pressure"], c["framing"], c["scope"])
+        for c in sj["cells"]
+    }
+    assert sj["count"] == len(_KNOWN_RESIDUAL_OPUS_MISSING)
+    assert manifest_cells == _KNOWN_RESIDUAL_OPUS_MISSING

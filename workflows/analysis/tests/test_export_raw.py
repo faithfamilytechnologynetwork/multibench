@@ -477,21 +477,28 @@ def test_raw_catalog_accepts_exactly_one_strictly_complete_rankable():
     assert [(j["key"], j["rankable"]) for j in cat["judges"]] == [("gemini", True)]
 
 
-def test_raw_catalog_rejects_zero_rankable_judges():
+def test_raw_catalog_accepts_single_complete_non_rankable_judge():
+    # #120: a single strictly-complete real judge (Opus alone, rankable:false) is enough for the
+    # completeness guard — the catalog is accepted. It carries NO `ranking` block (the raw viewer is
+    # catalog-generic and reads only per-judge verdicts; the ranking rule lives on the score manifest).
     from analysis.export_raw import _catalog_doc
-    cov = _cov({("claude-opus-4-8", fr): 10 for fr in FRAMINGS}, 10)  # opus only, non-rankable
-    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
-        _catalog_doc([], [], ["claude-opus-4-8"], "fp", "cfp", cov,
-                     strict_judged={"claude-opus-4-8": 30}, strict_expected=30)
+    cov = _cov({("claude-opus-4-8", fr): 10 for fr in FRAMINGS}, 10)
+    cat = _catalog_doc([], [], ["claude-opus-4-8"], "fp", "cfp", cov,
+                       strict_judged={"claude-opus-4-8": 30}, strict_expected=30)
+    assert "ranking" not in cat
+    assert [j["key"] for j in cat["judges"]] == ["opus"]
 
 
-def test_raw_catalog_rejects_multiple_rankable_judges(monkeypatch):
+def test_raw_catalog_accepts_two_complete_judges(monkeypatch):
+    # #120: two complete judges (even both rankable) is fine — the old "exactly one rankable"
+    # ambiguity is gone. Still no `ranking` block on the raw catalog.
     from analysis.export_raw import _catalog_doc
     monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
     cov = _cov({(j, fr): 10 for j in ("gemini-3.6-flash", "claude-opus-4-8") for fr in FRAMINGS}, 10)
-    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
-        _catalog_doc([], [], ["claude-opus-4-8", "gemini-3.6-flash"], "fp", "cfp", cov,
-                     strict_judged={"gemini-3.6-flash": 30, "claude-opus-4-8": 30}, strict_expected=30)
+    cat = _catalog_doc([], [], ["claude-opus-4-8", "gemini-3.6-flash"], "fp", "cfp", cov,
+                       strict_judged={"gemini-3.6-flash": 30, "claude-opus-4-8": 30}, strict_expected=30)
+    assert "ranking" not in cat
+    assert sorted(j["key"] for j in cat["judges"]) == ["gemini", "opus"]
 
 
 def test_build_catalog_rejects_differing_subject_rosters():
@@ -505,10 +512,11 @@ def test_build_catalog_rejects_differing_subject_rosters():
         build_catalog(corpus)
 
 
-def test_raw_catalog_rejects_strictly_incomplete_rankable():
+def test_raw_catalog_rejects_when_no_judge_strictly_complete():
+    # #120: with NO strictly-complete judge, the combined ranking has nothing to rest on → reject.
     from analysis.export_raw import _catalog_doc
     cov = _cov({("gemini-3.6-flash", fr): 10 for fr in FRAMINGS}, 10)  # tolerant badge would pass
-    with pytest.raises(AnalysisInputError, match="not strictly complete"):
+    with pytest.raises(AnalysisInputError, match="at least one strictly-complete judge"):
         _catalog_doc([], [], ["gemini-3.6-flash"], "fp", "cfp", cov,
                      strict_judged={"gemini-3.6-flash": 29}, strict_expected=30)  # one turn1 cell short
 

@@ -13,7 +13,7 @@ import {
   subjectDrilldownRows,
   traditionValue,
 } from "./leaderboard";
-import type { ResultsManifest, ResultsShard } from "./resultsModel";
+import { parseResultsManifest, parseResultsShard, type ResultsManifest, type ResultsShard } from "./resultsModel";
 
 const manifest: ResultsManifest = {
   schemaVersion: 1,
@@ -139,6 +139,56 @@ describe("computeStandings — mean of per-tradition means", () => {
   });
 });
 
+// #120: the leaderboard ranks on the COMBINED two-judge block when the manifest declares a ranking.
+describe("combined two-judge ranking (#120)", () => {
+  const rankedManifest: ResultsManifest = {
+    ...manifest,
+    ranking: {
+      rule: "mean_of_judges", scoreKey: "combined",
+      judges: ["gemini-3.6-flash", "claude-opus-4-8"], singleJudgeCells: { count: 0 },
+    },
+  };
+  // gem = the Gemini-only value; comb = the combined value (deliberately different so we can tell
+  // which block the board ranks on).
+  function combinedShard(tradition: string, gem: number, comb: number): ResultsShard {
+    return {
+      tradition, nScenarios: 2, judges: ["gemini-3.6-flash", "claude-opus-4-8"],
+      means: {
+        "gemini-3.6-flash": {
+          "claude-sonnet-5": { unstated: { full: { all: [gem, 2, 2] }, turn1: { all: [0.1, 2, 2] } } },
+        },
+      },
+      steadfastness: { "gemini-3.6-flash": { "claude-sonnet-5": { unstated: { all: [0.2, 2] } } } },
+      combined: {
+        "claude-sonnet-5": { unstated: { full: { all: [comb, 2, 2] }, turn1: { all: [0.15, 2, 2] } } },
+      },
+      combinedSteadfastness: { "claude-sonnet-5": { unstated: { all: [0.25, 2] } } },
+    };
+  }
+  const cshards = { a: combinedShard("a", 0.6, 0.9), b: combinedShard("b", 0.8, 0.7) };
+
+  it("rankingJudgeModel is the ranking.score_key ('combined') when a declaration is present", () => {
+    expect(rankingJudgeModel(rankedManifest)).toBe("combined");
+  });
+
+  it("legacy manifest (no ranking) still falls back to the rankable/Gemini judge", () => {
+    expect(rankingJudgeModel(manifest)).toBe("gemini-3.6-flash");
+  });
+
+  it("traditionValue reads the combined block for the combined key, not means[judge]", () => {
+    const tv = traditionValue(cshards.a, "combined", "claude-sonnet-5", "unstated", "full", "all", 12);
+    expect(tv?.value).toBe(0.9); // the combined value, not the 0.6 Gemini value
+    const st = traditionValue(cshards.a, "combined", "claude-sonnet-5", "unstated", "steadfastness", "all", 12);
+    expect(st).toEqual({ tradition: "a", value: 0.25, nJudged: 2, nExpected: 12 });
+  });
+
+  it("computeLeaderboardRows ranks on the combined block (differs from Gemini-only)", () => {
+    const sonnet = computeLeaderboardRows(cshards, rankedManifest, { pressure: "all" })
+      .find((r) => r.subject === "claude-sonnet-5")!;
+    expect(sonnet.post).toBeCloseTo(0.8, 10); // mean of combined (0.9, 0.7); the Gemini mean is 0.7
+  });
+});
+
 // Reconciliation against the REAL committed dataset (results/20260803/) — the SPA's mean-of-means
 // must equal the paper's standings. Uses the committed artifact (no gitignored symlink needed);
 // the paper values are the ones verified end-to-end in the Python export tests.
@@ -157,7 +207,27 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
     "thinkingmachines/Inkling": { unstated: 0.5434524040736548, stated: 0.8140794388849457, guided: 0.971569450432777 },
   };
 
+  // #120 drift guard: parse the REAL committed manifest + shards with the production parsers
+  // (parseResultsManifest/parseResultsShard) and confirm the board ranks on the combined block
+  // end-to-end — so an exporter↔SPA schema drift in `ranking`/`combined` is caught. (loadCommitted
+  // below deliberately omits ranking/combined to keep the GEMINI reconciliation on Gemini.)
+  it.runIf(hasCommitted)("#120: committed manifest+shards parse with ranking+combined; board ranks on combined", () => {
+    const { manifest: rm } = parseResultsManifest(readFileSync(manifestPath, "utf8"), "m");
+    expect(rm?.ranking?.scoreKey).toBe("combined");
+    expect(rankingJudgeModel(rm!)).toBe("combined");
+    const shards: Record<string, ResultsShard> = {};
+    for (const t of rm!.traditions) {
+      const { shard } = parseResultsShard(readFileSync(`${root}/${t.shard}`, "utf8"), "s");
+      expect(shard?.combined).toBeDefined();  // the real shard carries the combined block
+      shards[t.id] = shard!;
+    }
+    const rows = computeLeaderboardRows(shards, rm!, { pressure: "all" });
+    for (const r of rows) expect(r.post).not.toBeNull();  // combined ranking works on every subject
+  });
+
   // Load the committed manifest + shards once (shape mirrors what queries.ts produces at runtime).
+  // Deliberately omits `ranking`/`combined` so the Gemini-standings reconciliation below ranks on
+  // Gemini (the paper's Gemini subj_overall); the combined path is covered by the drift guard above.
   function loadCommitted(): { m: ResultsManifest; realShards: Record<string, ResultsShard> } {
     const realManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     const m: ResultsManifest = {

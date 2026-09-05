@@ -6,7 +6,7 @@ import {
   loadResultsShard,
   loadResultsManifest,
 } from "./queries";
-import { parseResultsManifest, parseResultsShard } from "./resultsModel";
+import { parseResultsManifest, parseResultsShard, shardConsistencyNotices } from "./resultsModel";
 import { tree } from "./github";
 import { REPO } from "./constants";
 import { buildTree, fakeFetch, resultsFiles } from "../test/fakeRepo";
@@ -246,6 +246,69 @@ describe("parseResultsManifest / parseResultsShard validation (fail-soft)", () =
     expect(manifest).not.toBeNull();
     expect(notices).toEqual([]);
     expect(manifest?.judges.find((j) => j.key === "gemini")?.rankable).toBeUndefined();
+  });
+
+  // #120: the manifest `ranking` declaration + the combined shard block.
+  const _validRanking = {
+    rule: "mean_of_judges", score_key: "combined",
+    judges: ["gemini-3.6-flash", "claude-opus-4-8"],
+    single_judge_cells: { count: 2, attempts: 3, cells: [{ tradition: "buddhism", subject: "x" }] },
+  };
+  function _manifestWith(ranking: unknown) {
+    const m = JSON.parse(resultsFiles("r1")["results/r1/manifest.json"]!);
+    m.ranking = ranking;
+    return JSON.stringify(m);
+  }
+
+  it("#120: parses a valid ranking declaration", () => {
+    const { manifest, notices } = parseResultsManifest(_manifestWith(_validRanking), "m");
+    expect(notices).toEqual([]);
+    expect(manifest?.ranking?.scoreKey).toBe("combined");
+    expect(manifest?.ranking?.rule).toBe("mean_of_judges");
+    expect(manifest?.ranking?.singleJudgeCells).toEqual({ count: 2, attempts: 3, cells: [{ tradition: "buddhism", subject: "x" }] });
+  });
+
+  it("#120: a manifest WITHOUT ranking still parses (legacy → Gemini fallback)", () => {
+    const { manifest, notices } = parseResultsManifest(resultsFiles("r1")["results/r1/manifest.json"]!, "m");
+    expect(manifest).not.toBeNull();
+    expect(manifest?.ranking).toBeUndefined();
+    expect(notices).toEqual([]);
+  });
+
+  it.each([
+    ["unknown rule", { ..._validRanking, rule: "median_of_judges" }, /unknown ranking.rule/],
+    ["score_key collides with a real judge", { ..._validRanking, score_key: "gemini-3.6-flash" }, /collides with a real judge/],
+    ["judges not in manifest", { ..._validRanking, judges: ["gemini-3.6-flash", "made-up"] }, /ranking.judges not in manifest/],
+    ["duplicate judges", { ..._validRanking, judges: ["gemini-3.6-flash", "gemini-3.6-flash"] }, /ranking.judges has duplicates/],
+    ["unsupported score_key", { ..._validRanking, score_key: "median" }, /unsupported ranking.score_key/],
+  ])("#120: a malformed ranking (%s) surfaces a visible error, not a silent revert", (_name, ranking, re) => {
+    const { manifest, notices } = parseResultsManifest(_manifestWith(ranking), "m");
+    // The manifest still parses (fail-soft) but carries a loud error notice.
+    expect(manifest).not.toBeNull();
+    expect(notices.some((n) => n.severity === "error" && re.test(n.message))).toBe(true);
+  });
+
+  it("#120: parses the combined shard block", () => {
+    const bad = JSON.stringify({
+      tradition: "b", n_scenarios: 2, judges: ["gemini-3.6-flash", "claude-opus-4-8"],
+      means: { "gemini-3.6-flash": { s: { unstated: { full: { all: [0.5, 2, 12] } } } } },
+      steadfastness: {},
+      combined: { s: { unstated: { full: { all: [0.4, 2, 12] } } } },
+      combined_steadfastness: { s: { unstated: { all: [0.1, 2] } } },
+    });
+    const { shard } = parseResultsShard(bad, "s");
+    expect(shard?.combined?.["s"]?.["unstated"]?.["full"]?.["all"]).toEqual([0.4, 2, 12]);
+    expect(shard?.combinedSteadfastness?.["s"]?.["unstated"]?.["all"]).toEqual([0.1, 2]);
+  });
+
+  it("#120: shardConsistencyNotices flags a ranking on combined when the shard lacks the block", () => {
+    const { manifest } = parseResultsManifest(_manifestWith(_validRanking), "m");
+    const { shard } = parseResultsShard(JSON.stringify({
+      tradition: "buddhism", n_scenarios: 2, judges: ["gemini-3.6-flash"],
+      means: {}, steadfastness: {},  // no combined block
+    }), "s");
+    const notices = shardConsistencyNotices(shard!, manifest!, "buddhism", "s");
+    expect(notices.some((n) => n.severity === "error" && /no combined block/.test(n.message))).toBe(true);
   });
 
   it("rejects an out-of-range score in a shard cell", () => {

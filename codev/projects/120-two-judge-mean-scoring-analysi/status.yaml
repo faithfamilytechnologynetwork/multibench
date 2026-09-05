@@ -1,0 +1,151 @@
+id: '120'
+title: two-judge-mean-scoring-analysi
+protocol: aspir
+phase: review
+plan_phases:
+  - id: phase_1
+    title: Complete the two-judge grid (re-judge missing cells)
+    status: complete
+  - id: phase_2
+    title: Combined block + ranking declaration in both exporters
+    status: complete
+  - id: phase_3
+    title: Combined ranked-stats capability + v3 stats bundle
+    status: complete
+  - id: phase_4
+    title: Additive re-export of results/20260803
+    status: complete
+  - id: phase_5
+    title: Leaderboard ranks on the combined score (SPA)
+    status: complete
+  - id: phase_6
+    title: Docs + HOT mirrors
+    status: complete
+current_plan_phase: null
+gates:
+  pr:
+    status: approved
+    requested_at: '2026-09-05T04:01:41.143Z'
+    approved_at: '2026-09-05T06:20:05.352Z'
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: true
+history:
+  - iteration: 1
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter1-claude.txt
+  - iteration: 2
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter2-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter2-claude.txt
+  - iteration: 3
+    plan_phase: phase_1
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter3-codex.txt
+      - model: claude
+        verdict: APPROVE
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter3-claude.txt
+  - iteration: 1
+    plan_phase: phase_2
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_2-iter1-codex.txt
+      - model: claude
+        verdict: COMMENT
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_2-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_3
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_3-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_3-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_4
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_4-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_4-iter1-claude.txt
+  - iteration: 1
+    plan_phase: phase_5
+    build_output: ''
+    reviews:
+      - model: codex
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_5-iter1-codex.txt
+      - model: claude
+        verdict: REQUEST_CHANGES
+        file: >-
+          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_5-iter1-claude.txt
+started_at: '2026-09-04T23:54:27.145Z'
+updated_at: '2026-09-05T06:20:05.353Z'
+force_advanced:
+  phase: phase_1
+  iteration: 3
+  max_iterations: 3
+  rebuttal_file: 120-phase_1-iter3-rebuttals.md
+  at: '2026-09-05T01:49:25.082Z'
+context_refreshes:
+  - boundary: plan-phase:phase_2
+    at: '2026-09-05T01:49:26.809Z'
+    acknowledged_at: '2026-09-05T01:49:37.024Z'
+  - boundary: plan-phase:phase_3
+    at: '2026-09-05T02:13:44.239Z'
+    acknowledged_at: '2026-09-05T02:21:41.696Z'
+  - boundary: plan-phase:phase_4
+    at: '2026-09-05T02:37:48.158Z'
+    acknowledged_at: '2026-09-05T02:38:03.504Z'
+  - boundary: plan-phase:phase_5
+    at: '2026-09-05T03:12:34.206Z'
+    acknowledged_at: '2026-09-05T03:24:12.590Z'
+  - boundary: plan-phase:phase_6
+    at: '2026-09-05T03:34:42.901Z'
+    acknowledged_at: '2026-09-05T03:44:21.912Z'
+  - boundary: enter:review
+    at: '2026-09-05T03:48:48.103Z'
+    acknowledged_at: '2026-09-05T03:48:57.054Z'
+pr_history:
+  - phase: review
+    pr_number: 121
+    branch: builder/aspir-120
+    created_at: '2026-09-05T03:51:53.810Z'
+pr_ready_for_human: false

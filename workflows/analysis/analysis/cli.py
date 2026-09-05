@@ -120,6 +120,11 @@ def export(
         "results", "--out",
         help="Root output dir; writes <out>/<run-id>/manifest.json + <tradition>.json.",
     ),
+    single_judge_attempts: int = typer.Option(
+        None, "--single-judge-attempts",
+        help="Re-judge attempts made on residual single-judge cells; recorded in "
+             "ranking.single_judge_cells.attempts (provenance not derivable from the data).",
+    ),
 ) -> None:
     """Export judging runs into a compact, browsable results/<run-id>/ dataset (#49).
 
@@ -136,7 +141,7 @@ def export(
 
     generated_at = datetime.now(timezone.utc).isoformat()
     try:
-        written = export_dataset(list(run_roots), out, run_id, generated_at)
+        written = export_dataset(list(run_roots), out, run_id, generated_at, single_judge_attempts)
     except AnalysisInputError as e:  # fail-fast, spec M7
         typer.echo(f"input error: {e}", err=True)
         raise typer.Exit(code=2) from e
@@ -153,6 +158,85 @@ def export(
             "counts": manifest["counts"],
         })
     )
+
+
+@app.command(name="combined-stats")
+def combined_stats(
+    run_roots: list[str] = typer.Argument(
+        ...,
+        metavar="RUN_ROOT...",
+        help="Judging run ROOTS (the full-grid Gemini run + the Opus layers). Overlapping "
+             "traditions are merged (priority = root order), so pass them like `analysis export`.",
+    ),
+    out: str = typer.Option(
+        None, "--out",
+        help="Write the combined stats bundle JSON here (default: print to stdout).",
+    ),
+    n_boot: int = typer.Option(5000, "--n-boot", help="Bootstrap resamples for the CIs."),
+    seed: int = typer.Option(12345, "--seed", help="Bootstrap RNG seed (determinism)."),
+) -> None:
+    """Combined two-judge ranked aggregates (+ scenario-cluster CIs) over multiple roots (#120).
+
+    The committed primitive behind the v3 paper stats bundle: reuses the results-export merge seam
+    (read_run_root + resolve_judgments) and the canonical aggregate/stats, feeding ALL judges' rows
+    so each cell is the mean of its present judges. Deterministic (sorted keys, fixed seed).
+    """
+    import json as _json
+    from pathlib import Path
+
+    from analysis.combined_stats import build_combined_stats
+    from analysis.loaders import AnalysisInputError
+
+    try:
+        bundle = build_combined_stats(list(run_roots), n_boot=n_boot, seed=seed)
+    except AnalysisInputError as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    text = _json.dumps(bundle, indent=2, sort_keys=True) + "\n"
+    if out:
+        Path(out).parent.mkdir(parents=True, exist_ok=True)
+        Path(out).write_text(text, encoding="utf-8")
+        typer.echo(_json.dumps({"out": out, "traditions": len(bundle.get("traditions", {})),
+                                "subj_overall_keys": len(bundle.get("subj_overall_point", {}))}))
+    else:
+        typer.echo(text)
+
+
+@app.command(name="paper-bundle")
+def paper_bundle(
+    run_roots: list[str] = typer.Argument(
+        ..., metavar="RUN_ROOT...",
+        help="The four judging run ROOTS in results/README order (merged, unstated-opus, "
+             "framings-opus-sample, opus-fullgrid). Pass them like `analysis export`.",
+    ),
+    out: str = typer.Option(
+        ..., "--out", help="Write the combined paper stats_bundle.json here.",
+    ),
+    n_boot: int = typer.Option(5000, "--n-boot", help="Scenario-cluster bootstrap resamples."),
+    seed: int = typer.Option(12345, "--seed", help="Bootstrap RNG seed (determinism)."),
+) -> None:
+    """Produce the combined two-judge paper `stats_bundle.json` from the four roots (#120).
+
+    Reproducible, committed replacement for the old gitignored figs script: every score aggregate is
+    over the combined cell score; `dual_judge` is the raw Gemini-vs-Opus validation block (full_grid
+    recomputed on the completed grid; route_bridge from the raw two-alias rows). Deterministic.
+    """
+    import json as _json
+    from pathlib import Path
+
+    from analysis.loaders import AnalysisInputError
+    from analysis.paper_bundle import build_paper_bundle
+
+    try:
+        bundle = build_paper_bundle(list(run_roots), n_boot=n_boot, seed=seed)
+    except (AnalysisInputError, ValueError) as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(_json.dumps(bundle, indent=1) + "\n", encoding="utf-8")
+    typer.echo(_json.dumps({"out": out, "keys": sorted(bundle), "subjects": len(bundle["subj_overall"])}))
 
 
 @app.command(name="export-raw")

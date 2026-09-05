@@ -23,3 +23,4 @@ MAINTAIN polices the cap and keeps the map in sync with lessons-learned.md's sec
 - Testing LLM pipelines — consult when testing a provider-backed or LLM-judge pipeline.
 - Porting fidelity — consult when porting a workflow and deciding what carries over.
 - Verification discipline — consult when deciding whether something is actually "done."
+- Metadata contracts & paper deliverables (#110) — consult when a run's metadata/coverage must reconcile with the paper.

@@ -162,3 +162,19 @@ pattern, gotcha, or constraint.
   numbers** — column count (the 6-col tier×framing `tab:djtier`), explicit `+`/U+2212 signs, and
   full labels — and its generator must be **persisted/committed** (an ephemeral scratch script is
   not reproducible; a standard re-run of the old generator silently reverts the artifacts).
+- **When two committed tiers share a source fingerprint, re-export BOTH or the invariant breaks.**
+  (#120) Re-exporting the `results/` score tier after re-judging changed its `fingerprint`, but the
+  committed `results-raw/` tier still stamped the old one — silently violating the Spec 51 cross-tier
+  equality (a runtime SPA guard, `rawData.test.ts`, went red). Any change to the resolved-judgment
+  stream (a re-judge, a new layer) means re-running **`analysis export` AND `analysis export-raw`**
+  over the same roots. The deterministic writers keep it cheap (only the affected scenario shards
+  change). Also: the raw tier's separate `content_fingerprint` shifts too, so the Railway baked
+  bundle is stale until a `railway up --no-gitignore` redeploy.
+- **A re-judge is a spend; make an overspend structurally impossible, and don't reuse a stat whose
+  coverage changed.** (#120) `judging judge` scores a WHOLE `sittings.jsonl` — feeding it a full
+  grid to fill a few gaps would judge ~21,840 cells (hundreds of USD) with no error; the guard is a
+  **filtered** sittings file + a **pre-spend work-count assertion** (== the enumerated gap). And
+  completing the grid shifts any coverage-dependent aggregate: reusing v2's `dual_judge.unstated`
+  (n=31,114) verbatim would have failed the paper figure script's live `len(pairs)==bundle n` assert
+  (now 31,139) — recompute anything whose inputs changed and pin `n` against the consumer's exact
+  pairing.

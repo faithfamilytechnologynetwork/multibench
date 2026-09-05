@@ -9,6 +9,18 @@ the tier×framing table, and the heatmap over every matched cell via the canonic
 `tab_dualjudge_tier.tex`, `tab_dualjudge_agree.tex`, and `fig_dual_judge.pdf` into
 `../multibench-papers/` (uncommitted; the architect wires them).
 
+> **Superseded by #120 (completed grid, 2026-09-05).** The figures below were computed when Opus had
+> **35** residual (single-judge) cells (**93,385** matched). #120 re-judged 33 of them, leaving **2**
+> residual and **93,418** matched, and rescored the benchmark on the **two-judge mean**. The
+> completed-grid agreement is: **overall n=93,418, r=0.833, bias −0.031, within-±0.5 94.0%**;
+> per-framing r = unstated 0.854 / stated 0.825 / **guided 0.684** (was 0.683); stated+guided r=0.781
+> (n=62,279). These supersede the 93,385-cell figures below (differences are ≤0.001, from the 33
+> recovered cells). The numbers are regenerated in the v3 combined stats bundle (see
+> `results/COMBINED-STATS.md`) and are what the paper should cite.
+
+> **The sections below are the pre-#120 snapshot (Opus at 35 residual cells, 93,385 matched).** They
+> are retained for history; cite the completed-grid figures in the superseded-by note above instead.
+
 ## Coverage and the earned badge
 
 - Committed `counts.judgments`: **Opus 40,114 → 93,385** (unstated 31,114 + stated/guided 62,271);

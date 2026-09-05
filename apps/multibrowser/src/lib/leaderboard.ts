@@ -2,7 +2,9 @@
 // is the equal-weight mean of the per-tradition means — which reconciles with the paper's
 // tab_standings by construction (the per-tradition means come from the canonical Python export).
 
-import type { Metric, ResultsManifest, ResultsShard } from "./resultsModel";
+import { COMBINED_SCORE_KEY, type Metric, type ResultsManifest, type ResultsShard } from "./resultsModel";
+
+export { COMBINED_SCORE_KEY };
 
 /**
  * The aggregation slice the cross-tradition statistics are computed over. Deliberately standalone
@@ -34,12 +36,12 @@ export interface Standing {
   nContributing: number;
 }
 
-/** The judge model that ranks the leaderboard: the manifest's `rankable` judge (Gemini).
- *  `rankable` is the static ranking role (#110), decoupled from the earned `fullGrid` coverage
- *  badge — a validation judge that reaches full coverage must NOT start ranking. Falls back to the
- *  first full-grid judge for pre-#110 manifests (which have no `rankable`), then to Gemini. */
+/** The key the leaderboard ranks on. Since #120 that is the manifest's `ranking.score_key` (the
+ *  combined two-judge mean). For a LEGACY manifest with no `ranking`, fall back to the static
+ *  `rankable` judge (#110), then the first full-grid judge, then Gemini. */
 export function rankingJudgeModel(manifest: ResultsManifest): string {
   return (
+    manifest.ranking?.scoreKey ??
     manifest.judges.find((j) => j.rankable)?.model ??
     manifest.judges.find((j) => j.fullGrid)?.model ??
     "gemini-3.6-flash"
@@ -85,6 +87,19 @@ export function traditionValue(
   shard: ResultsShard, judgeModel: string, subject: string, framing: string,
   metric: Metric, pressure: string, expectedCells: number,
 ): TraditionValue | null {
+  // #120: the combined block is a separate top-level field (no judge axis). When the caller ranks
+  // on the combined key, read it instead of `means[judge]` — so the board's aggregation path is
+  // otherwise unchanged and the per-judge drill-down still resolves each real judge below.
+  if (judgeModel === COMBINED_SCORE_KEY) {
+    if (metric === "steadfastness") {
+      const cell = shard.combinedSteadfastness?.[subject]?.[framing]?.[pressure];
+      if (!cell) return null;
+      return { tradition: shard.tradition, value: cell[0], nJudged: cell[1], nExpected: expectedCells };
+    }
+    const cell = shard.combined?.[subject]?.[framing]?.[metric]?.[pressure];
+    if (!cell) return null;
+    return { tradition: shard.tradition, value: cell[0], nJudged: cell[1], nExpected: cell[2] };
+  }
   if (metric === "steadfastness") {
     const cell = shard.steadfastness?.[judgeModel]?.[subject]?.[framing]?.[pressure];
     if (!cell) return null;
@@ -97,8 +112,9 @@ export function traditionValue(
 
 /**
  * Standings for the given selection, ranked by the equal-weight mean of per-tradition means,
- * descending. `judgeModel` defaults to the ranking (full-grid) judge — the leaderboard always
- * ranks on Gemini; the judge selector only re-points the drill-down/inspection layer.
+ * descending. `judgeModel` defaults to `rankingJudgeModel` — since #120 the combined two-judge
+ * block (the manifest `ranking.score_key`), or the `rankable`/Gemini judge on a legacy run; the
+ * judge selector only re-points the per-tradition drill-down, never the board.
  */
 export function computeStandings(
   shards: Record<string, ResultsShard>,
@@ -135,7 +151,8 @@ export function computeStandings(
 // ============================================================================================
 // Dense-table rows (leaderboard v2) — the jaleesbrowser-style whole-picture-at-a-glance model.
 //
-// A row carries, for one subject at a fixed pressure and the RANKING (Gemini) judge:
+// A row carries, for one subject at a fixed pressure and the RANKING key (#120: the combined
+// two-judge block via `ranking.score_key`; the `rankable`/Gemini judge on a legacy run):
 //   - Initial / Post / Δ headline columns, on the FIRST framing only (the paper's published slice);
 //   - one Post (`full`) column per framing (the framing staircase);
 //   - a per-tradition heat strip (1:1 with manifest.traditions);
@@ -186,10 +203,10 @@ function valueBySubject(standings: Standing[]): Map<string, number | null> {
 
 /**
  * One dense row per subject for the given pressure, ranked by the canonical (first-framing `full`)
- * ordering. The board is ALWAYS the ranking (full-grid) judge — this function takes no judge, so
- * "Opus never re-ranks/recolors the board" is true by construction, not by test. Rows are returned
- * in canonical rank order; the display layer re-sorts with `sortRows` while the `rank` field
- * persists.
+ * ordering. The board is ALWAYS `rankingJudgeModel` (the combined two-judge block, or Gemini on a
+ * legacy run) — this function takes no judge, so "the judge selector never re-ranks/recolors the
+ * board" is true by construction, not by test. Rows are returned in canonical rank order; the
+ * display layer re-sorts with `sortRows` while the `rank` field persists.
  *
  * Cross-column assembly joins by subject id, never by array index: each `computeStandings` call
  * returns a `Standing[]` sorted by ITS OWN column's value, so a positional zip would silently
@@ -327,7 +344,8 @@ export interface DrilldownRow {
 }
 
 /**
- * The per-tradition drill-down for one subject under `judgeModel` (the validation layer when Opus).
+ * The per-tradition drill-down for one subject under `judgeModel` (a real component judge — Gemini
+ * or Opus — selected by the judge selector; the board itself ranks on the combined mean).
  * Mirrors the headline columns per tradition (Initial/Post/Δ + each framing's `full`). A tradition
  * is included iff ANY displayed slice is non-null — so the sampled Opus case (e.g. `full` present
  * but `steadfastness` absent, or one framing not another) still shows what data exists. The coverage
