@@ -39,143 +39,14 @@ gates:
     approved_at: '2026-09-04T02:07:21.074Z'
   pr:
     status: pending
+    requested_at: '2026-09-05T08:25:27.424Z'
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
-history:
-  - iteration: 1
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-plan-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-plan-iter1-claude.txt
-  - iteration: 2
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-plan-iter2-codex.txt
-      - model: claude
-        verdict: COMMENT
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-plan-iter2-claude.txt
-  - iteration: 1
-    plan_phase: phase_2
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_2-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_2-iter1-claude.txt
-  - iteration: 1
-    plan_phase: phase_3a
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_3a-iter1-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_3a-iter1-claude.txt
-  - iteration: 1
-    plan_phase: phase_3b
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_3b-iter1-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_3b-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_3b
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_3b-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_3b-iter2-claude.txt
-  - iteration: 1
-    plan_phase: phase_4
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_4-iter1-codex.txt
-      - model: claude
-        verdict: COMMENT
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_4-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_4
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_4-iter2-codex.txt
-      - model: claude
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_4-iter2-claude.txt
-  - iteration: 1
-    plan_phase: phase_5
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_5-iter1-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_5-iter1-claude.txt
-  - iteration: 1
-    plan_phase: phase_6
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_6-iter1-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_6-iter1-claude.txt
-  - iteration: 2
-    plan_phase: phase_6
-    build_output: ''
-    reviews:
-      - model: codex
-        verdict: REQUEST_CHANGES
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_6-iter2-codex.txt
-      - model: claude
-        verdict: APPROVE
-        file: >-
-          /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_6-iter2-claude.txt
+build_complete: false
+history: []
 started_at: '2026-09-04T00:21:51.564Z'
-updated_at: '2026-09-05T08:20:15.576Z'
+updated_at: '2026-09-05T08:25:27.424Z'
 context_refreshes:
   - boundary: plan-phase:phase_2
     at: '2026-09-04T02:20:30.605Z'
@@ -206,3 +77,4 @@ pr_history:
     pr_number: 124
     branch: builder/spir-119
     created_at: '2026-09-05T08:17:25.932Z'
+pr_ready_for_human: true
