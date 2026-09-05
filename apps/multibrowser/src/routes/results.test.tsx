@@ -139,6 +139,18 @@ describe("/results leaderboard", () => {
     expect(within(sel).getByText(/opus \(component\)/)).toBeInTheDocument();
     // The component caption replaces the "validation … ranking stays on Gemini" copy.
     expect(screen.getByTestId("component-caption")).toHaveTextContent(/component judge/i);
+    // The header names the two-judge mean for a ranked run.
+    expect(document.body).toHaveTextContent(/two-judge mean \(Gemini \+ Opus\)/);
+  });
+
+  it("#120: a LEGACY run (no ranking) keeps Gemini-ranked copy + ranking/validation labels", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFullGridOpus()));  // no `ranking` in the manifest
+    renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    // Header does NOT claim the two-judge mean; the selector keeps the legacy labels.
+    expect(document.body).not.toHaveTextContent(/two-judge mean/);
+    expect(within(screen.getByTestId("sel-judge")).getByText(/opus \(validation\)/)).toBeInTheDocument();
+    expect(screen.queryByTestId("component-caption")).toBeNull();
   });
 
   it("renders the dense columns (Initial / Post / Δ + per-framing) at a glance", async () => {

@@ -13,7 +13,7 @@ import {
   subjectDrilldownRows,
   traditionValue,
 } from "./leaderboard";
-import type { ResultsManifest, ResultsShard } from "./resultsModel";
+import { parseResultsManifest, parseResultsShard, type ResultsManifest, type ResultsShard } from "./resultsModel";
 
 const manifest: ResultsManifest = {
   schemaVersion: 1,
@@ -207,7 +207,27 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
     "thinkingmachines/Inkling": { unstated: 0.5434524040736548, stated: 0.8140794388849457, guided: 0.971569450432777 },
   };
 
+  // #120 drift guard: parse the REAL committed manifest + shards with the production parsers
+  // (parseResultsManifest/parseResultsShard) and confirm the board ranks on the combined block
+  // end-to-end — so an exporter↔SPA schema drift in `ranking`/`combined` is caught. (loadCommitted
+  // below deliberately omits ranking/combined to keep the GEMINI reconciliation on Gemini.)
+  it.runIf(hasCommitted)("#120: committed manifest+shards parse with ranking+combined; board ranks on combined", () => {
+    const { manifest: rm } = parseResultsManifest(readFileSync(manifestPath, "utf8"), "m");
+    expect(rm?.ranking?.scoreKey).toBe("combined");
+    expect(rankingJudgeModel(rm!)).toBe("combined");
+    const shards: Record<string, ResultsShard> = {};
+    for (const t of rm!.traditions) {
+      const { shard } = parseResultsShard(readFileSync(`${root}/${t.shard}`, "utf8"), "s");
+      expect(shard?.combined).toBeDefined();  // the real shard carries the combined block
+      shards[t.id] = shard!;
+    }
+    const rows = computeLeaderboardRows(shards, rm!, { pressure: "all" });
+    for (const r of rows) expect(r.post).not.toBeNull();  // combined ranking works on every subject
+  });
+
   // Load the committed manifest + shards once (shape mirrors what queries.ts produces at runtime).
+  // Deliberately omits `ranking`/`combined` so the Gemini-standings reconciliation below ranks on
+  // Gemini (the paper's Gemini subj_overall); the combined path is covered by the drift guard above.
   function loadCommitted(): { m: ResultsManifest; realShards: Record<string, ResultsShard> } {
     const realManifest = JSON.parse(readFileSync(manifestPath, "utf8"));
     const m: ResultsManifest = {

@@ -2,7 +2,9 @@
 // is the equal-weight mean of the per-tradition means — which reconciles with the paper's
 // tab_standings by construction (the per-tradition means come from the canonical Python export).
 
-import type { Metric, ResultsManifest, ResultsShard } from "./resultsModel";
+import { COMBINED_SCORE_KEY, type Metric, type ResultsManifest, type ResultsShard } from "./resultsModel";
+
+export { COMBINED_SCORE_KEY };
 
 /**
  * The aggregation slice the cross-tradition statistics are computed over. Deliberately standalone
@@ -33,10 +35,6 @@ export interface Standing {
   /** how many of the run's traditions contributed a value. */
   nContributing: number;
 }
-
-/** The reserved shard key for the combined two-judge block (#120) — mirrors the exporter's
- *  `COMBINED_KEY`; it is a top-level shard field + the manifest `ranking.score_key`, never a judge. */
-export const COMBINED_SCORE_KEY = "combined";
 
 /** The key the leaderboard ranks on. Since #120 that is the manifest's `ranking.score_key` (the
  *  combined two-judge mean). For a LEGACY manifest with no `ranking`, fall back to the static

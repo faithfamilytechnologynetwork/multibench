@@ -14,6 +14,11 @@ import { FRAMINGS, PRESSURES } from "./constants";
 /** The schema version this build understands. A dataset stamped otherwise is not trusted. */
 export const SUPPORTED_SCHEMA_VERSION = 1;
 
+/** The only ranking `score_key` this build can render — the combined two-judge block (#120), a
+ *  top-level shard field. A manifest declaring any other key would rank on a block the SPA can't
+ *  read, so it is flagged at parse time rather than silently rendering empty standings. */
+export const COMBINED_SCORE_KEY = "combined";
+
 /** The UI's supported leaderboard metrics (the scopes plus the derived steadfastness). Lives here
  *  (the data model) so both `leaderboard.ts` and `resultsSelection.ts` depend on it without a cycle. */
 export type Metric = "turn1" | "full" | "steadfastness";
@@ -268,6 +273,11 @@ export function parseResultsManifest(
     if (judgeModels.has(r.score_key)) {
       notices.push(notice("error", "results", where,
         `ranking.score_key "${r.score_key}" collides with a real judge model`));
+    } else if (r.score_key !== COMBINED_SCORE_KEY) {
+      // The only key this build can rank on is the combined block; anything else would silently
+      // render empty standings, so flag it loudly.
+      notices.push(notice("error", "results", where,
+        `unsupported ranking.score_key "${r.score_key}" (this build ranks only on "${COMBINED_SCORE_KEY}")`));
     }
     const badJudges = r.judges.filter((j) => !judgeModels.has(j));
     if (badJudges.length) {
@@ -333,7 +343,7 @@ export function shardConsistencyNotices(
   }
   // #120: if the manifest declares a ranking on a combined block, the shard must carry it — else the
   // leaderboard has nothing to rank on. Flag its absence loudly rather than degrade silently.
-  if (manifest.ranking && manifest.ranking.scoreKey === "combined" && !shard.combined) {
+  if (manifest.ranking && manifest.ranking.scoreKey === COMBINED_SCORE_KEY && !shard.combined) {
     notices.push(notice("error", "results", where,
       `manifest ranks on "${manifest.ranking.scoreKey}" but the shard has no combined block`));
   }

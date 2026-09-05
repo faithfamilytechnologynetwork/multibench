@@ -18,7 +18,6 @@ import {
   isRankingJudge,
   isSortableColumn,
   judgeModelForKey,
-  rankingJudgeModel,
   sortRows,
   subjectDrilldownRows,
   type StripCell,
@@ -161,8 +160,11 @@ export function ResultsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Results</h1>
         <p className="text-default-500">
-          Cross-tradition standings — the mean of per-tradition means, ranked on the two-judge mean
-          (Gemini + Opus). Every column is one pressure slice; sort any column, the rank stays canonical.
+          Cross-tradition standings — the mean of per-tradition means, ranked on{" "}
+          {manifest?.ranking
+            ? "the two-judge mean (Gemini + Opus)"
+            : "the full-grid ranking judge"}. Every column is one pressure slice; sort any column,
+          the rank stays canonical.
         </p>
       </div>
 
@@ -494,7 +496,9 @@ function Leaderboard({
   const display = sel.sort && isSortableColumn(manifest, sel.sort.key)
     ? sortRows(rows, sel.sort.key, sel.sort.dir)
     : rows;
-  const drillJudge = judgeModelForKey(manifest, sel.judge) ?? rankingJudgeModel(manifest);
+  // The drill-down always shows a REAL judge's per-tradition breakdown (sel.judge is validated to a
+  // manifest key). Fall back to the first real judge, never the synthetic combined ranking key.
+  const drillJudge = judgeModelForKey(manifest, sel.judge) ?? manifest.judges[0]?.model ?? "";
   const selJudgeMeta = manifest.judges.find((j) => j.key === sel.judge);
   const isSample = !selJudgeMeta?.fullGrid;  // coverage: a sub-grid sample (badged n/N)
   const drillJudgeIsRanking = selJudgeMeta ? isRankingJudge(selJudgeMeta) : true;  // role: ranking vs validation

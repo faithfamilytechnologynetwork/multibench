@@ -280,6 +280,7 @@ describe("parseResultsManifest / parseResultsShard validation (fail-soft)", () =
     ["score_key collides with a real judge", { ..._validRanking, score_key: "gemini-3.6-flash" }, /collides with a real judge/],
     ["judges not in manifest", { ..._validRanking, judges: ["gemini-3.6-flash", "made-up"] }, /ranking.judges not in manifest/],
     ["duplicate judges", { ..._validRanking, judges: ["gemini-3.6-flash", "gemini-3.6-flash"] }, /ranking.judges has duplicates/],
+    ["unsupported score_key", { ..._validRanking, score_key: "median" }, /unsupported ranking.score_key/],
   ])("#120: a malformed ranking (%s) surfaces a visible error, not a silent revert", (_name, ranking, re) => {
     const { manifest, notices } = parseResultsManifest(_manifestWith(ranking), "m");
     // The manifest still parses (fail-soft) but carries a loud error notice.
