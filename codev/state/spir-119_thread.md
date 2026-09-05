@@ -545,3 +545,16 @@ did the refinement myself.
 - DEFERRED follow-up (claude #3): promote `paper_bundle._combined_rows` to public API — cross-cutting
   refactor of the paper generator, out of #119 scope; for a later analysis-maintenance pass.
 - Suite 275 passed. Re-consulting (iter3).
+
+## 2026-09-05 — Phase 7 (final): retirement notes landed; pin awaits Waleed acceptance
+- **Retirement notes committed (6820efc3):** traditions/protestantism/README.md retirement note (the
+  one permitted monolith edit); results/README.md new 20260905 8-row run entry (5-root command +
+  raw pointer + paper-numbers link) + monolith run retirement note; results-raw/README.md retention
+  note (3 runs ~310MB vs N=2; #119 prunes nothing per architect; retirement = separate later PR).
+- **Frozen-tier branch-base diff CLEAN** — only the permitted monolith README changed; all
+  results/20260803, results/20260813-protestantism, results-raw/* frozen paths byte-untouched.
+- **Leaderboard PIN (leaderboard.test.ts) is acceptance-gated.** The plan requires Waleed's explicit
+  acceptance of the PU numbers before pinning; asked the architect. Plan FALLBACK if late: land notes
+  + open PR WITHOUT the pin, add pin in a follow-up once accepted — never block the PR on acceptance.
+  Pin pattern = a results/20260905 reconciliation block mirroring the committed 20260803 pin
+  (leaderboard.test.ts:192). Holding on the pin pending the architect's answer.
