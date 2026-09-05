@@ -153,6 +153,15 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   93,385→93,418, guided 0.683→0.684). ARCHITECT ASSIGNED (2026-09-05): update it in MY Phase 6 to
   the completed-grid numbers + a 'supersedes the 93,385-cell figures' note; architect carries into
   paper. Added to plan Phase 6.
+- phase_3 re-review (rank fix): codex APPROVE, claude REQUEST_CHANGES — REAL catch: reusing v2's
+  dual_judge left `unstated` n STALE (31,114) but Phase 1 grew unstated Opus to 31,139 → would
+  HARD-FAIL paper_figs_multibench.py's live `len(pairs)==bundle n` asserts. porch force-advanced to
+  phase_4 (codex approve) but I FIXED it (real correctness bug for the paper regen):
+  v3 dual_judge is now FULLY recomputed on the completed grid using paper_figs's EXACT load_opus
+  (raw-gemini lut; mapped dedupe + v2 overlay). Results: unstated n=31,139, framings_sample n=9,000
+  (deduped, r=0.777), unstated_rank/framings_tier recomputed, route_bridge reused (fixed artifact),
+  full_grid recomputed n=93,418 (+rank), v2 full_grid → full_grid_v2_partial. Added
+  test_v3_dual_judge_n_matches_paper_figs_live_pairing (pins n vs paper_figs's exact pairing).
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).

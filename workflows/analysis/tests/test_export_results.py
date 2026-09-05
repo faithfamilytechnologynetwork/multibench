@@ -969,6 +969,62 @@ def test_v3_bundle_schema_and_dual_judge_recompute():
         assert fg[framing]["r"] == pytest.approx(r_doc, abs=0.005), framing
 
 
+@_skip
+@pytest.mark.skipif(not _V3_BUNDLE.is_file(), reason="v3 stats bundle not present")
+def test_v3_dual_judge_n_matches_paper_figs_live_pairing():
+    """The v3 bundle's `dual_judge.unstated.n` / `framings_sample.n` must equal what
+    paper_figs_multibench.py computes LIVE (it asserts `len(pairs_un/fr) == bundle n`). After
+    Phase 1 grew the unstated Opus layer (31,114 -> 31,139), reusing v2's stale n would hard-fail
+    that assert — this replicates paper_figs's exact load_opus (raw-gemini lut; mapped dedupe + v2
+    overlay for the sample) and pins the equality."""
+    import json as _json
+    _SMAP = {"anthropic/claude-sonnet-5": "claude-sonnet-5",
+             "thinkingmachines/inkling": "thinkingmachines/Inkling",
+             "openai/gpt-5.6-terra": "gpt-5.6-terra", "google/gemini-3.6-flash": "gemini-3.6-flash",
+             "qwen/qwen3-235b-a22b-2507": "Qwen/Qwen3-235B-A22B-Instruct-2507"}
+    trads = sorted(p.name for p in _MERGED.iterdir()
+                   if (p / "judgments.jsonl").is_file())
+    gem = {}
+    for t in trads:
+        for line in (_MERGED / t / "judgments.jsonl").read_text().splitlines():
+            if line.strip():
+                j = _json.loads(line)
+                gem[(j["subject"], j["tradition"], j["scenario_id"], j["pressure"],
+                     j["framing"], j["scope"])] = j["score"]
+
+    def load_opus(base, mapped):
+        out, by_id = [], {}
+        for t in trads:
+            fp = base / t / "judgments.jsonl"
+            if not fp.is_file():
+                continue
+            lines = fp.read_text().splitlines()
+            v2 = base / t / "judgments_v2.jsonl"
+            if v2.is_file():
+                lines += v2.read_text().splitlines()
+            for line in lines:
+                if not line.strip():
+                    continue
+                j = _json.loads(line)
+                if mapped:
+                    j["subject"] = _SMAP[j["subject"]]
+                    k = (j["subject"], j["tradition"], j["scenario_id"], j["pressure"],
+                         j["framing"], j["scope"])
+                    if k not in by_id or j.get("ts", "") >= by_id[k].get("ts", ""):
+                        by_id[k] = j
+                else:
+                    out.append(j)
+        return list(by_id.values()) if mapped else out
+
+    def n_paired(rows):
+        return sum(1 for j in rows if (j["subject"], j["tradition"], j["scenario_id"],
+                                       j["pressure"], j["framing"], j["scope"]) in gem)
+
+    dj = _json.loads(_V3_BUNDLE.read_text())["dual_judge"]
+    assert n_paired(load_opus(_UNSTATED_OPUS, mapped=False)) == dj["unstated"]["n"]
+    assert n_paired(load_opus(_FRAMINGS_OPUS, mapped=True)) == dj["framings_sample"]["n"]
+
+
 # ── CLI command-level test ────────────────────────────────────────────────────────
 
 

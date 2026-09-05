@@ -35,16 +35,22 @@ The full paper bundle (`tier`, `trad_pooled`, `subj_overall`, `model_tier`,
 the accumulators receive canonical **combined cell values** (`build_combined_runs` + `cell_scores`,
 imported from `analysis` — no second dedup/averaging). Every score aggregate becomes combined
 automatically. **`dual_judge`** is a RAW Gemini-vs-Opus validation section that the combined rule
-does **not** touch (it must compare the two judges against each other, never against their mean).
-Its per-judge subsections (`unstated`, `framings_sample`, `unstated_rank`, `framings_tier`,
-`route_bridge`) are reused from v2 verbatim; its **`full_grid`** subsection is **recomputed on the
-completed grid** (architect, 2026-09-05) — raw Gemini vs raw Opus over every double-judged cell
-(n=93,418 after the #120 re-judge, vs v2's partial-Opus n=93,385), using the exact `agree()`
-convention from `docs/analysis/110-dualjudge-fullgrid-figs.py`. v2's partial-Opus `full_grid` is
+does **not** touch (it compares the two judges against each other, never against their mean). It is
+**fully recomputed on the completed grid** (architect, 2026-09-05), NOT reused from v2 — because
+Phase 1 grew the unstated Opus layer (31,114 → 31,139 matched), so v2's values are stale and would
+fail `paper_figs_multibench.py`'s live `len(pairs) == bundle n` asserts. The v3 producer uses
+`paper_figs_multibench.py`'s **exact** `load_opus` (raw-Gemini lut; mapped dedupe + `judgments_v2`
+overlay for the sample) so every n matches by construction: `unstated` n=31,139, `framings_sample`
+n=9,000 (deduped, unchanged), plus `unstated_rank` / `framings_tier`. `route_bridge` (a fixed
+sample-root artifact, not consumed by paper_figs) is reused from v2. **`full_grid`** is recomputed
+over every double-judged cell across the four roots (n=93,418; overall r=0.833; by-framing
+0.854/0.825/0.684; guided within-0.5 95.4%) via the `agree()` convention from
+`docs/analysis/110-dualjudge-fullgrid-figs.py`; v2's partial-Opus `full_grid` (n=93,385) is
 preserved under the labelled legacy key **`full_grid_v2_partial`**. `meta` is unchanged, so the
 bundle keeps the exact v2 schema and `tmp/paper_figs_multibench.py` runs unchanged. Guarded by
-`test_v3_bundle_schema_and_dual_judge_recompute` (reconciles the recomputed agreement with the
-paper's reported r=0.833 / 0.854 / 0.825 / 0.683±).
+`test_v3_bundle_schema_and_dual_judge_recompute` (reconciles the recompute with the paper's
+r=0.833 / 0.854 / 0.825 / 0.683±) and `test_v3_dual_judge_n_matches_paper_figs_live_pairing` (pins
+the `unstated`/`framings_sample` n against paper_figs's exact pairing).
 
 ```bash
 uv --project workflows/analysis run python ../../tmp/report_figs_20260803_v3.py
