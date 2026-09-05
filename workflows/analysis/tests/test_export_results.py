@@ -858,6 +858,61 @@ def test_launch_gemini_steadfastness_matches_report(launch_export):
                 assert got.value == pytest.approx(want, abs=1e-9), f"{trad}/{subj}/{pr}"
 
 
+# ── #120: combined-stats capability + v3-bundle reconciliation ──────────────────────
+
+
+def test_combined_stats_reconciles_with_export(tmp_path):
+    # The committed combined-stats primitive's subj_overall (point) must equal the results-export
+    # combined mean-of-means — both are the mean over traditions of the combined by_framing[full],
+    # from the SAME cell_scores reducer (no second averaging implementation).
+    from analysis.combined_stats import build_combined_stats, export_combined_mean_of_means
+    root = _write_two_full_grids(tmp_path)
+    roots = [str(root / "gemini-run"), str(root / "opus-run")]
+    bundle = build_combined_stats(roots, n_boot=20)  # n_boot small: point estimate is boot-independent
+    mom = export_combined_mean_of_means(roots)
+    assert bundle["subj_overall_point"] == mom
+    assert set(mom) == {f"{s}|{fr}" for s in CANONICAL_SUBJECTS for fr in ("unstated", "stated", "guided")}
+
+
+def test_combined_stats_cli(tmp_path):
+    from typer.testing import CliRunner
+
+    from analysis.cli import app
+
+    root = _write_two_full_grids(tmp_path)
+    out = tmp_path / "combined.json"
+    result = CliRunner().invoke(app, [
+        "combined-stats", str(root / "gemini-run"), str(root / "opus-run"),
+        "--out", str(out), "--n-boot", "20",
+    ])
+    assert result.exit_code == 0, result.output
+    bundle = json.loads(out.read_text())
+    assert "subj_overall_point" in bundle and "traditions" in bundle
+    # Deterministic: re-running yields byte-identical output.
+    out2 = tmp_path / "combined2.json"
+    CliRunner().invoke(app, ["combined-stats", str(root / "gemini-run"), str(root / "opus-run"),
+                             "--out", str(out2), "--n-boot", "20"])
+    assert out.read_bytes() == out2.read_bytes()
+
+
+_V3_BUNDLE = _MERGED / "analysis-out" / "figures-report-v3" / "stats_bundle.json"
+
+
+@_skip
+@pytest.mark.skipif(not _V3_BUNDLE.is_file(), reason="v3 stats_bundle.json not present")
+def test_combined_mean_of_means_reconciles_with_v3_bundle():
+    """The combined headline guard (#120): the results-export combined mean-of-means
+    (scope=full, pressure=all) equals the v3 bundle's ``subj_overall`` point to ≤1e-9 — the
+    combined analogue of the Gemini paper pin at ``test_launch_gemini_leaderboard_matches_paper``.
+    """
+    from analysis.combined_stats import export_combined_mean_of_means
+    mom = export_combined_mean_of_means([str(_MERGED), str(_UNSTATED_OPUS), str(_FRAMINGS_OPUS),
+                                         str(_MERGED.parent / "20260823-opus-fullgrid")])
+    v3 = json.loads(_V3_BUNDLE.read_text())["subj_overall"]
+    for key, val in mom.items():
+        assert val == pytest.approx(v3[key][0], abs=1e-9), key
+
+
 # ── CLI command-level test ────────────────────────────────────────────────────────
 
 

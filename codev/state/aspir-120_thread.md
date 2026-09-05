@@ -121,6 +121,22 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 - Real-data smoke (4 roots): ranking ok, single_judge_cells count=2 attempts=3 = the exact 2
   residual cells (three-way lockstep w/ test allowlist holds). 258 passed, 8 skipped.
 - NOTE: results/20260803 NOT re-exported yet (that's phase_4). SPA is phase_5.
+- phase_2 iter2: BOTH APPROVE.
+
+## Phase 3 — DONE (combined ranked-stats capability + v3 bundle)
+- Committed `analysis/combined_stats.py` + CLI `analysis combined-stats`: reuses the export merge
+  seam (read_run_root+resolve_judgments) → shim run → aggregate_tradition → compute_tradition_stats,
+  feeding ALL judges' rows so cell_scores gives combined cells. Emits combined CIs (analysis_stats
+  schema) + subj_overall_point. Deterministic/byte-stable. `export_combined_mean_of_means` helper
+  for reconciliation.
+- v3 bundle produced (gitignored, main checkout): `tmp/report_figs_20260803_v3.py` = v2 with the
+  LOAD swapped to combined cells (build_combined_runs + cell_scores; no 2nd dedup); dual_judge/meta
+  unchanged; stops after bundle write. Output:
+  `…/analysis-out/figures-report-v3/stats_bundle.json` (v2 NOT overwritten; same top-level keys).
+- Reconciliation VERIFIED: export_combined_mean_of_means == v3 subj_overall[0], max diff 2.2e-16.
+- Tests: combined_stats reconciles w/ export (fixture), CLI smoke+determinism, real-data v3
+  reconciliation (skip-when-absent). 262 passed, 9 skipped.
+- Doc: results/COMBINED-STATS.md.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
