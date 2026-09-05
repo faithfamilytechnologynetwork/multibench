@@ -1,0 +1,80 @@
+id: '119'
+title: protestant-unified-derived-38-
+protocol: spir
+phase: review
+plan_phases:
+  - id: phase_1
+    title: Scenario question_id field in the validator
+    status: complete
+  - id: phase_2
+    title: Module skeleton, derived sources, and locus convention
+    status: complete
+  - id: phase_3a
+    title: 'Pilot tranche: six scenarios, format and difficulty locked'
+    status: complete
+  - id: phase_3b
+    title: The remaining 30 scenarios, strict-validated
+    status: complete
+  - id: phase_4
+    title: Scoring run behind the spend gate
+    status: complete
+  - id: phase_5
+    title: Superset export, raw re-bake, and frozen-tier guard
+    status: complete
+  - id: phase_6
+    title: Cross-faith analysis and paper numbers
+    status: complete
+  - id: phase_7
+    title: Monolith retirement and reconciliation pin
+    status: complete
+current_plan_phase: null
+gates:
+  spec-approval:
+    status: approved
+    requested_at: '2026-09-04T00:41:15.009Z'
+    approved_at: '2026-09-04T01:26:28.193Z'
+  plan-approval:
+    status: approved
+    requested_at: '2026-09-04T01:51:59.878Z'
+    approved_at: '2026-09-04T02:07:21.074Z'
+  pr:
+    status: pending
+    requested_at: '2026-09-05T08:25:27.424Z'
+  verify-approval:
+    status: pending
+iteration: 1
+build_complete: false
+history: []
+started_at: '2026-09-04T00:21:51.564Z'
+updated_at: '2026-09-05T08:25:27.424Z'
+context_refreshes:
+  - boundary: plan-phase:phase_2
+    at: '2026-09-04T02:20:30.605Z'
+    acknowledged_at: '2026-09-04T02:20:39.854Z'
+  - boundary: plan-phase:phase_3a
+    at: '2026-09-04T02:35:34.364Z'
+    acknowledged_at: '2026-09-04T02:55:57.648Z'
+  - boundary: plan-phase:phase_3b
+    at: '2026-09-04T03:09:32.099Z'
+    acknowledged_at: '2026-09-04T05:00:05.369Z'
+  - boundary: plan-phase:phase_4
+    at: '2026-09-04T05:11:58.129Z'
+    acknowledged_at: '2026-09-05T06:48:20.251Z'
+  - boundary: plan-phase:phase_5
+    at: '2026-09-05T07:14:17.561Z'
+    acknowledged_at: '2026-09-05T07:15:01.244Z'
+  - boundary: plan-phase:phase_6
+    at: '2026-09-05T07:30:25.176Z'
+    acknowledged_at: '2026-09-05T07:45:27.238Z'
+  - boundary: plan-phase:phase_7
+    at: '2026-09-05T08:06:53.312Z'
+    acknowledged_at: '2026-09-05T08:07:10.189Z'
+  - boundary: enter:review
+    at: '2026-09-05T08:14:53.210Z'
+    acknowledged_at: '2026-09-05T08:15:00.972Z'
+pr_history:
+  - phase: review
+    pr_number: 124
+    branch: builder/spir-119
+    created_at: '2026-09-05T08:17:25.932Z'
+pr_ready_for_human: true

@@ -232,9 +232,17 @@ axis, a single `single` scope, and a diverging **center-grey** ramp (grey at the
 
 ## Retention policy
 
-This is a **committed** tier — each `results-raw/<run-id>/` is ~126 MB, so runs accumulate weight
+This is a **committed** tier — each `results-raw/<run-id>/` is ~126–147 MB, so runs accumulate weight
 in git history. **Intent: keep the last N run-ids** (default **N = 2** — the current published run
 plus the immediately prior one for A/B and rollback), and prune older run directories.
+
+> **Current state (Spec 119, 2026-09-05) — policy tension, deliberately not resolved here.** Three
+> score-backed raw runs are now committed: `20260803` (~132 MB, paper-pinned), `20260813-protestantism`
+> (~31 MB, the retired monolith), and `20260905` (~142 MB, the 8-row superset) — ~305 MB total, above
+> the N = 2 intent. Per the architect (2026-09-05), **#119 prunes nothing**: `20260803` is
+> paper-pinned and stays, and `20260813-protestantism`'s tier stays browsable while its module is only
+> *operationally* retired. Any retirement is a **separate, dedicated PR** on Waleed's call, using the
+> `git rm -r` mechanics below — not part of #119.
 
 - **What to keep:** the run(s) the SPA can select from `/results` (the score tier's committed runs)
   — the raw tier must exist for any run a reader can drill into. Keep the raw `<run-id>` for every

@@ -249,6 +249,53 @@ def test_raw_and_score_fingerprint_match_with_opus_layer(tmp_path):
             == _read_manifest(tmp_path / "scores" / "run1")["fingerprint"])
 
 
+# ── Committed-artifact regression: the SHIPPED score↔raw tiers ─────────────────────────
+# The synthetic tests above prove the exporters *can* agree; these prove the tiers that
+# actually shipped in this repo *do* agree. The source run-roots live in gitignored tmp/ and
+# are not in CI, so this guards the committed manifests directly (skips cleanly if absent, e.g.
+# a shallow checkout). The dispatcher won't run this on a data-only change — run it manually.
+_REPO_ROOT = Path(__file__).resolve().parents[3]
+
+
+def _committed_dual_tier_runs() -> list[str]:
+    """Every committed results/<run> that also has a results-raw/<run> (raw-only AFB runs and
+    the afb-* tier have no score sibling and are excluded)."""
+    out = []
+    for mf in sorted((_REPO_ROOT / "results").glob("*/manifest.json")):
+        run = mf.parent.name
+        if (_REPO_ROOT / "results-raw" / run / "manifest.json").is_file():
+            out.append(run)
+    return out
+
+
+@pytest.mark.skipif(not _committed_dual_tier_runs(), reason="no committed dual-tier runs present")
+@pytest.mark.parametrize("run", _committed_dual_tier_runs())
+def test_committed_score_raw_fingerprints_equal(run):
+    """For every shipped run that has both a score and a raw tier, the two manifests stamp an
+    equal sha256 source fingerprint — the checkable 'cannot disagree', on the real committed
+    bytes (durable across future runs, not pinned to one run-id). Guards #119's 20260905 too."""
+    score = json.loads((_REPO_ROOT / "results" / run / "manifest.json").read_text())
+    raw = json.loads((_REPO_ROOT / "results-raw" / run / "manifest.json").read_text())
+    fp = score["fingerprint"]
+    assert fp.startswith("sha256:")
+    assert fp == raw["fingerprint"], f"{run}: score fp {fp} != raw fp {raw['fingerprint']}"
+
+
+@pytest.mark.skipif(
+    not (_REPO_ROOT / "results" / "20260905" / "manifest.json").is_file(),
+    reason="committed 20260905 superset absent",
+)
+def test_committed_20260905_superset_shape():
+    """The shipped #119 superset carries the combined two-judge ranking (#120/#121, not the
+    legacy Gemini fallback) over the 8-tradition roster incl. protestant-unified."""
+    score = json.loads((_REPO_ROOT / "results" / "20260905" / "manifest.json").read_text())
+    assert score["ranking"]["rule"] == "mean_of_judges"
+    assert score["ranking"]["score_key"] == "combined"
+    trad_ids = {t["id"] if isinstance(t, dict) else t for t in score["traditions"]}
+    assert "protestant-unified" in trad_ids
+    assert len(trad_ids) == 8
+
+
 def test_score_manifest_fingerprint_is_deterministic_no_wallclock_dependence(tmp_path):
     """The score-tier fingerprint depends only on the data, not on generated_at."""
     root = _grid_root(tmp_path, subjects=tuple(CANONICAL_SUBJECTS))
