@@ -56,7 +56,23 @@ def missing_opus_sittings(runs: Path) -> dict[tuple[str, str], set[tuple]]:
     return out
 
 
-_SCOPES = ("turn1", "full")
+def _config_judges_scopes(config_path: str) -> tuple[list[str], tuple[str, ...]]:
+    """The (judge model ids, scopes) the supplied config will actually run — so the work-count
+    guard reflects the REAL config, not a hard-coded assumption. A config adding judges/scopes
+    (which would make `judge` bill more) changes the derived work count, so `--assert-work` catches
+    it instead of silently passing.
+
+    Parses the YAML directly (the `judging` package isn't installed in the analysis env this runs
+    under); mirrors `judging.config` defaults: scopes default to (turn1, full) when unspecified.
+    """
+    import yaml
+    raw = yaml.safe_load(Path(config_path).read_text()) or {}
+    judges = raw.get("judges") or []
+    models = [j["model"] for j in judges]
+    if not models:
+        raise SystemExit(f"config {config_path} declares no judges")
+    scopes = tuple(raw.get("scopes") or ("turn1", "full"))
+    return models, scopes
 
 
 def _existing_rec_keys(judgments_path: Path) -> set[str]:
@@ -75,20 +91,22 @@ def _existing_rec_keys(judgments_path: Path) -> set[str]:
 
 
 def work_count(runs: Path, tradition: str, group: str, filtered_lines: list[str],
-               model: str = _OPUS) -> int:
-    """The judge's ACTUAL post-resume work: filtered (sitting x scope) cells NOT already judged in
-    the target layer — exactly what `judge` will bill. This is the pre-spend guard (mirrors
-    `_judge_pass`'s rec_key + resume set); asserting it bounds the spend precisely.
+               judge_models: list[str], scopes: tuple[str, ...]) -> int:
+    """The judge's ACTUAL post-resume work: filtered (sitting x judge x scope) cells NOT already
+    judged in the target layer — exactly what `judge` will bill. Mirrors `_judge_pass`'s rec_key +
+    resume set over EVERY judge and scope the supplied config declares (not a hard-coded panel), so
+    a config with extra judges/scopes raises the count and `--assert-work` catches it.
     """
     dst_root = "20260803-unstated-opus" if group == "unstated" else "20260823-opus-fullgrid"
     done = _existing_rec_keys(runs / dst_root / tradition / "judgments.jsonl")
     work = 0
     for line in filtered_lines:
         s = json.loads(line)
-        for scope in _SCOPES:
-            k = "|".join([s["subject"], s["scenario_id"], s["pressure"], s["framing"], model, scope])
-            if k not in done:
-                work += 1
+        for model in judge_models:
+            for scope in scopes:
+                k = "|".join([s["subject"], s["scenario_id"], s["pressure"], s["framing"], model, scope])
+                if k not in done:
+                    work += 1
     return work
 
 
@@ -110,6 +128,7 @@ def build(runs: Path, out_dir: Path, config: str, assert_work: int | None = None
     work count; with ``assert_work`` set, raises unless it matches — the pre-spend guard.
     """
     out_dir.mkdir(parents=True, exist_ok=True)
+    judge_models, scopes = _config_judges_scopes(config)  # derive the guard from the REAL config
     miss = missing_opus_sittings(runs)
     total_work = 0
     blocks: list[str] = []
@@ -126,7 +145,7 @@ def build(runs: Path, out_dir: Path, config: str, assert_work: int | None = None
             raise SystemExit(f"ERROR {t}/{grp}: transcripts absent in {src_root}: {absent}")
         out = out_dir / f"{t}__{grp}.sittings.jsonl"
         out.write_text("\n".join(lines) + ("\n" if lines else ""))
-        work = work_count(runs, t, grp, lines)
+        work = work_count(runs, t, grp, lines, judge_models, scopes)
         total_work += work
         blocks.append(
             f"# {t}/{grp}: {len(lines)} sittings, {work} post-resume cells -> {dst_root}/{t}/\n"

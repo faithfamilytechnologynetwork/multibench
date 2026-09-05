@@ -93,8 +93,9 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 - **2 residual single-judge cells** (persistent empty/truncated Opus, ≥9 attempts each; reported,
   not imputed): judaism|MSR-025|insistence|unstated|full ; sunni-islam|JLS-122|flattery|guided|full.
 - Spend: MEASURED $11.02 exact (33 persisted verdicts, usage-computed) + ESTIMATED ~$1-3 for 48
-  failed calls (no persisted usage) → best est ~$12-14, ≤$20. Authoritative = dedicated-key console
-  delta (requested from architect). (Earlier "$14-17" figure superseded — reconciled to this split.)
+  failed calls (no persisted usage) → best est ~$12-14, ≤$20. Console delta: NOT CHECKED
+  (architect-accepted 2026-09-05 — no console access; estimate deemed sufficient). Earlier "$14-17"
+  superseded.
 - **single_judge_cells becomes a STRUCTURED object** (architect): {count, attempts, cells[...]},
   not a bare int — carry into Phase 2/4 manifest.
 - Committed: results/REJUDGE-20260803.md, test_grid_completeness.py (skips where roots absent).
@@ -108,7 +109,7 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
    strictly complete"; fixture-testable.
 3. Committed combined ranked-stats capability + gitignored v3 figs step → v3 stats_bundle.json;
    reconciliation ≤1e-9 test.
-4. Additive re-export results/20260803 (Gemini byte-identical, Opus delta = 35 cells, combined new).
+4. Additive re-export results/20260803 (Gemini byte-identical, Opus delta = 33 recovered cells, combined new).
 5. SPA leaderboard ranks combined via ranking.score_key; legacy→Gemini fallback, malformed→notice;
    judge-role copy (co-equal components); raw/AFB untouched.
 6. Docs: results/README (~6 assertions + ranking schema row), arch-critical fact, HOT mirrors, review.
