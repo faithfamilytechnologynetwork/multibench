@@ -177,6 +177,14 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   266 passed, 11 skipped.
 - NOTE: porch force-advanced phase_3 (codex approve) before Claude's stale-n catch; the dual_judge
   fix + phase_4 ride the branch and get reviewed in phase_4's consult.
+- phase_4 consult: codex + claude REQUEST_CHANGES. claude BLOCKING catch: the re-export changed the
+  score-tier fingerprint but committed results-raw/20260803 still had the old one → Spec 51 cross-tier
+  invariant broken (rawData.test.ts:463 red). FIXED: re-exported the RAW tier over the same 4 roots
+  (analysis export-raw) → both tiers stamp sha256:696a24c1… (EQUAL); 26 affected-scenario shards +
+  manifest changed (deterministic writer; not all 519). rawData.test.ts 35/35 pass. Also
+  strengthened: opus-delta test (n_judged-unchanged→byte-identical + total==33 exact), added
+  committed↔v3 combined reconciliation test, gemini byte-identity now covers steadfastness block too.
+  pnpm install done (node_modules present for phase_5).
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).

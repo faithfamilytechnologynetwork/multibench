@@ -1128,29 +1128,43 @@ def test_committed_gemini_block_byte_identical_to_baseline():
     for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
         new = json.loads((_COMMITTED / entry["shard"]).read_text())
         base = json.loads((_BASELINE / entry["shard"]).read_text())
-        assert json.dumps(new["means"].get("gemini-3.6-flash"), sort_keys=True) == \
-            json.dumps(base["means"].get("gemini-3.6-flash"), sort_keys=True), entry["id"]
+        for block in ("means", "steadfastness"):  # both the mean and steadfastness Gemini sub-trees
+            assert json.dumps(new[block].get("gemini-3.6-flash"), sort_keys=True) == \
+                json.dumps(base[block].get("gemini-3.6-flash"), sort_keys=True), f"{entry['id']}/{block}"
 
 
 @_has_committed
 @_has_baseline
-def test_committed_opus_delta_bounded_to_recovered_traditions():
-    """The Opus block changes ONLY in traditions that received a recovered cell, and only by
-    ADDING coverage (n_judged never drops) — the delta is bounded to the grid-completion cells."""
+def test_committed_opus_delta_bounded_to_recovered_cells():
+    """The Opus block's delta is bounded to EXACTLY the grid-completion cells:
+    - untouched traditions (no recovered cell) are byte-identical;
+    - within any tradition, a slice whose ``n_judged`` is UNCHANGED must be byte-identical (so an
+      unrelated score change — a mean shift without added coverage — is caught);
+    - the total added Opus coverage over specific-pressure slices (both scopes) == 33 (35 missing −
+      2 residual).
+    This is the precise "delta bounded" guard (a monotonic-n check alone would miss a mean-only edit).
+    """
+    _EXPECTED_RECOVERED = 33
+    total_added = 0
     for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
         t = entry["id"]
         new = json.loads((_COMMITTED / entry["shard"]).read_text())["means"].get("claude-opus-4-8", {})
         base = json.loads((_BASELINE / entry["shard"]).read_text())["means"].get("claude-opus-4-8", {})
-        changed = json.dumps(new, sort_keys=True) != json.dumps(base, sort_keys=True)
         if t not in _RECOVERED_TRADS:
-            assert not changed, f"{t}: Opus block changed but received no recovered cell"
-        # n_judged is monotonic (cells only added): every baseline slice's n_judged <= the new one.
+            assert json.dumps(new, sort_keys=True) == json.dumps(base, sort_keys=True), \
+                f"{t}: Opus block changed but received no recovered cell"
         for subj, byfr in base.items():
             for fr, bysc in byfr.items():
                 for sc, bypr in bysc.items():
                     for pr, cell in bypr.items():
                         ncell = new.get(subj, {}).get(fr, {}).get(sc, {}).get(pr)
-                        assert ncell is not None and ncell[1] >= cell[1], f"{t}/{subj}/{fr}/{sc}/{pr}"
+                        assert ncell is not None, f"{t}/{subj}/{fr}/{sc}/{pr} vanished"
+                        assert ncell[1] >= cell[1], f"{t}/{subj}/{fr}/{sc}/{pr} n_judged dropped"
+                        if ncell[1] == cell[1]:
+                            assert ncell == cell, f"{t}/{subj}/{fr}/{sc}/{pr} changed without added coverage"
+                        if pr != "all":  # specific-pressure slices count each cell once
+                            total_added += ncell[1] - cell[1]
+    assert total_added == _EXPECTED_RECOVERED, total_added
 
 
 @_has_committed
@@ -1164,6 +1178,26 @@ def test_committed_combined_block_and_ranking():
         shard = json.loads((_COMMITTED / entry["shard"]).read_text())
         assert "combined" in shard and "combined_steadfastness" in shard
         assert set(shard["means"]) <= {j["model"] for j in manifest["judges"]}  # combined NOT in means
+
+
+@_has_committed
+@pytest.mark.skipif(not _V3_BUNDLE.is_file(), reason="v3 stats bundle not present")
+def test_committed_combined_mean_of_means_reconciles_with_v3_bundle():
+    """The combined headline guard on the COMMITTED artifact (analogue of the Gemini paper pin):
+    the mean over traditions of the committed shards' `combined[subject][framing][full][all]` equals
+    the v3 bundle's `subj_overall` point to ≤1e-9 — so the shipped dataset and the paper bundle
+    cannot disagree on the ranked number."""
+    shards = {}
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        shards[entry["id"]] = json.loads((_COMMITTED / entry["shard"]).read_text())
+    v3 = json.loads(_V3_BUNDLE.read_text())["subj_overall"]
+    for subj in CANONICAL_SUBJECTS:
+        for fr in ("unstated", "stated", "guided"):
+            vals = [sh["combined"][subj][fr]["full"]["all"][0]
+                    for sh in shards.values()
+                    if subj in sh.get("combined", {})]
+            mom = sum(vals) / len(vals)
+            assert mom == pytest.approx(v3[f"{subj}|{fr}"][0], abs=1e-9), f"{subj}|{fr}"
 
 
 @_has_committed
