@@ -96,3 +96,12 @@ each with usage-computed actuals.
   (per subject: sonnet-5 $21.13, gemini-flash $21.65, gpt-5.6-terra $6.52, qwen $0.75, inkling $12.41)
 - STAGE B Gemini judge: 6,480 judgments, 0 failed. **$97.79** OpenRouter. Running total **$160.25**.
 - STAGE C Opus batch (CEFE): submit 6,480 + poll-collect --no-fallback. [running]
+
+### RUN COMPLETE (2026-09-05 ~06:40 UTC)
+- Opus batch (msgbatch_01Cdh4…) ended: 6480 succeeded, 0 errored. Collect landed 6,479; **1 verdict
+  unparseable** → re-submitted as batch (submit 1 → collect 1), NO live top-up. Opus now 6,480.
+- Coverage: **12,960 judgments, uncovered 0**. Per-judge 6,480/6,480; per-framing 2160 each (PASS).
+- **FINAL ACTUALS (usage-computed):** OpenRouter $160.25 + Opus batch $168.03 = **$328.28** total.
+  (ceiling $600; alert $450, pause $550 — not tripped.) On the ~$328 estimate.
+- Run root: `../../tmp/judging-runs/20260904-protestant-unified/protestant-unified` (gitignored).
+- Phase 4 DONE. Next: rebase on main (#121 two-judge-mean) → Phase 5 export.
