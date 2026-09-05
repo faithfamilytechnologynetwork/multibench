@@ -410,3 +410,21 @@ My branch touched validator/traditions/judging-configs — no overlap expected w
   carries ranking{rule,score_key:combined,judges,single_judge_cells}; raw shards per-judge only.
   My new-run-id export won't touch 20260803 → branch-base diff stays empty on frozen paths.
 - Phase 4 done; consult running. Next: Phase 5 export under the new rule.
+
+## 2026-09-04 — Phase 4 consult iter1 → fixes (docs/reconciliation only)
+Both reviewers confirmed the RUN is complete/correct (claude re-derived the whole grid from raw:
+12,960 unique cells, 6,480/judge, every Opus cell `batch:True`, gate order respected, $328.28 under
+ceiling). codex REQUEST_CHANGES + claude COMMENT on the operational record — 4 items, all applied:
+1. **All-in total.** $328.28 was run-only; added smoke ($9.10) + probe (exact $0.007) → **all-in
+   $337.39** (billed 2026-08-03 rates), with an **ALL-IN COST RECONCILIATION** section in notes.
+2. **Rate reconciliation.** report.py table dated 2026-08-03; two SUBJECT promos (sonnet-5 $2/$10,
+   gpt-5.6-terra $1/$6) expired 2026-08-31, before the 09-04/05 run. No console-invoice access →
+   stated a **range**: all-in **$337.39 (billed) … $356.16 (current standard)**; invoices named
+   authoritative. Under $450 alert either way. Judges (gemini/Opus) unaffected.
+3. **CEFE probe.** Recorded as architect-**pre-authorized** (quoted the "YES, approved as a key-path
+   probe only… ≤10 cells, $1 cap, separate dir" message) in the Gate log — not an unratified
+   deviation. Ran exactly inside the envelope; no live top-up during the run.
+4. **Stale docs.** notes header (Opus→co-ranking mean, not badge); dropped blank placeholder table;
+   config comments fixed (`--fallback`→`--no-fallback`, dropped `run --scenarios 2`/"validation
+   coverage"/"full_grid:false"). No code/run-data changed. Rebuttal:
+   `119-phase_4-iter1-rebuttals.md`. Re-running consult (iter2).

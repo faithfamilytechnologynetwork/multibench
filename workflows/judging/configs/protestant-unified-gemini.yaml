@@ -3,7 +3,7 @@
 # Same subjects + Gemini ranking judge as protestantism-run.yaml, but WITHOUT the Opus judge, so
 # the live `judge` command scores only the Gemini (full-grid, ranking) cells while the Opus judge
 # runs server-side as Anthropic Message Batches (submitted from the full config). Idempotent
-# identity keys let the later `batch-judge collect --fallback` see the Gemini cells as already
+# identity keys let the later `batch-judge collect --no-fallback` see the Gemini cells as already
 # judged and leave them untouched. Subjects are unused by `judge` (it reads sittings) but kept
 # identical for coverage-count consistency if this config is ever passed to `report`.
 

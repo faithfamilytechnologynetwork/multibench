@@ -5,9 +5,12 @@
 # Keys: OPENROUTER_API_KEY (subjects + Gemini judge) and ANTHROPIC_API_KEY (Opus judge) ONLY —
 # sourced from /Users/mwk/Development/fftn/taqwabench/.env. Never a personal Gemini key.
 #
-# This single config carries BOTH judges — used as-is for the SMOKE (`run --scenarios 2`,
-# both judges full over 2 whole scenarios). The full run splits Gemini (full grid) from Opus
-# (validation coverage) into separate passes; see the run notes / smoke report.
+# This single config carries BOTH judges. The run splits the work into separate passes:
+# Gemini via the live `judge` command (using the -gemini.yaml sibling), Opus via `batch-judge
+# submit`/`collect --no-fallback` (Anthropic Message Batches) from THIS config. Both judges cover
+# the FULL grid; per the post-#121 rule they are combined by equal-weight mean per cell for ranking
+# (Opus is a co-ranking input, not a badge). The SMOKE used `collect --scenarios 1` + the same
+# two-pass judging over 1 whole scenario; see the run notes / smoke report.
 
 subjects:
   # GPT-5.6 Terra — OpenRouter billed 1.00/6.00 (50%-off promo; standard 2.00/12.00).
@@ -25,8 +28,9 @@ judges:
   # Gemini 3.6 Flash — ranking judge, FULL GRID. Via OpenRouter, safety-ON (record decision
   # 2026-08-03: OpenRouter can't forward Google BLOCK_NONE; refusals surface as failed cells).
   - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, safety_off: false}
-  # Opus 4.8 — validation judge (full_grid: false in the export layer). Direct Anthropic key.
-  # max_tokens 8000 (up from the 4096 default): the smoke saw ~1% Opus cells truncate
+  # Opus 4.8 — co-ranking judge, FULL GRID (post-#121: combined with Gemini by equal-weight mean
+  # per cell). Run as Anthropic Message Batches via the CEFE key. max_tokens 8000 (up from the
+  # 4096 default): the smoke saw ~1% Opus cells truncate
   # ("Unterminated string") because thinking + the JSON verdict overran 4096 (#89 architect go).
   - {model: claude-opus-4-8, provider: anthropic, thinking: true, max_tokens: 8000}
 
