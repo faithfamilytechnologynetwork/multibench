@@ -14,21 +14,21 @@ plan_phases:
     status: complete
   - id: phase_4
     title: Additive re-export of results/20260803
-    status: in_progress
+    status: complete
   - id: phase_5
     title: Leaderboard ranks on the combined score (SPA)
-    status: pending
+    status: in_progress
   - id: phase_6
     title: Docs + HOT mirrors
     status: pending
-current_plan_phase: phase_4
+current_plan_phase: phase_5
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 2
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -103,7 +103,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_4-iter1-claude.txt
 started_at: '2026-09-04T23:54:27.145Z'
-updated_at: '2026-09-05T03:07:45.926Z'
+updated_at: '2026-09-05T03:12:34.206Z'
 force_advanced:
   phase: phase_1
   iteration: 3
@@ -120,3 +120,5 @@ context_refreshes:
   - boundary: plan-phase:phase_4
     at: '2026-09-05T02:37:48.158Z'
     acknowledged_at: '2026-09-05T02:38:03.504Z'
+  - boundary: plan-phase:phase_5
+    at: '2026-09-05T03:12:34.206Z'
