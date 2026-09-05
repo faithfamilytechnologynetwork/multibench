@@ -520,3 +520,18 @@ narrative doc myself for voice/terminology fidelity).
   normative-tradition lower cluster. Unstated (hardest) +0.0539 (near neutral, with RC/sunni/EC);
   guided +0.8241 (framing lift +0.77). Opus-vs-Gemini r=0.810, bias +0.045, within-±0.5 92.1%.
 - Commit 158a1c8f. Running Phase 6 consult.
+
+## 2026-09-05 — Phase 6 consult iter1: codex REQUEST_CHANGES (per-tradition CIs) + claude APPROVE
+Addressed all, reusing the canonical paper_bundle bootstrap (no new stats). NB a delegated fork
+returned 0 tool-uses (did NOT execute) — caught it by verifying git status/grep before trusting;
+did the refinement myself.
+- Per-tradition 95% CIs (scenario-cluster bootstrap, seed 12345/5000, matches trad_pooled).
+  analyze.py hard-asserts bootstrap point == canonical mean-of-means ≤1e-9 (all 8). New
+  tradition_ranking figure. protestant-unified +0.4863 **[+0.368, +0.590]** — CI overlaps judaism &
+  eastern-christianity → "lower normative band", not a sharp 5th (now stated in the doc).
+- combined_stats.json now written BY analyze.py (build_combined_stats) — data/output reproducible.
+- Typer --root/--results-dir options (post-merge portability).
+- Monolith sanity-check: results/20260813-protestantism combined +0.0286, far below PU +0.486
+  (different scenario set/construct — directional).
+- Staleness guard added to test_phase6_reconcile_119.py (committed paper_numbers.json vs shards).
+  Suite 275 passed. Commit 4f3bf8c8. Re-consulting.
