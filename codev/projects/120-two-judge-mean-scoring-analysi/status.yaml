@@ -5,10 +5,10 @@ phase: implement
 plan_phases:
   - id: phase_1
     title: Complete the two-judge grid (re-judge missing cells)
-    status: in_progress
+    status: complete
   - id: phase_2
     title: Combined block + ranking declaration in both exporters
-    status: pending
+    status: in_progress
   - id: phase_3
     title: Combined ranked-stats capability + v3 stats bundle
     status: pending
@@ -21,14 +21,14 @@ plan_phases:
   - id: phase_6
     title: Docs + HOT mirrors
     status: pending
-current_plan_phase: phase_1
+current_plan_phase: phase_2
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     plan_phase: phase_1
@@ -67,10 +67,13 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_1-iter3-claude.txt
 started_at: '2026-09-04T23:54:27.145Z'
-updated_at: '2026-09-05T01:49:25.083Z'
+updated_at: '2026-09-05T01:49:26.809Z'
 force_advanced:
   phase: phase_1
   iteration: 3
   max_iterations: 3
   rebuttal_file: 120-phase_1-iter3-rebuttals.md
   at: '2026-09-05T01:49:25.082Z'
+context_refreshes:
+  - boundary: plan-phase:phase_2
+    at: '2026-09-05T01:49:26.809Z'
