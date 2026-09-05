@@ -491,7 +491,10 @@ Exported the 8-row superset, run-id **20260905** (export date), roots in load-be
   Suite 272 passed. Rebuttal `119-phase_5-iter1-rebuttals.md`. Re-consulting.
 - **Phase 7 / review-doc TODOs from claude (non-blocking, carry-forward):**
   1. `results-raw/README.md` stale (519 shards/~126MB launch text; retention N=2 now exceeded ~305MB
-     across 3 raw runs) — update + **put the 20260803 prune decision to the architect** (paper-pinned).
+     across 3 raw runs). **Architect DECIDED 2026-09-05T07:31Z: NO prune in #119** — keep
+     results-raw/{20260803 (paper-pinned), 20260813-protestantism, 20260905}. Any retirement is a
+     separate dedicated PR later on Waleed's call. Phase 7: just note the 3-runs-vs-N=2 policy tension
+     in the review as a follow-up (no prune action).
   2. `results/README.md` "Producing/refreshing" block still 4-root 20260803 — add the exact 5-root
      command (load-bearing order + `--single-judge-attempts 3`).
   3. Spec says "Gemini ranks, Opus badge-only" but artifact ships `mean_of_judges`/`combined` — record
@@ -499,3 +502,21 @@ Exported the 8-row superset, run-id **20260905** (export date), roots in load-be
   5. `/results` default = newest by generated_at → a future 20260803 re-export flips default back to
      7-row; add to verify checklist.
   6. Dispatcher skips analysis on data-only changes → committed-tier tests run manually (ran green).
+
+## 2026-09-05 — Phase 6 DONE (cross-faith analysis + paper numbers)
+Built via canonical reuse (delegated the mechanical analyze.py to a subagent; I verified it
+independently — re-ran, reconciliation passes live, scorecard.png renders correctly, then wrote the
+narrative doc myself for voice/terminology fidelity).
+- `experiments/119_protestant_unified/analyze.py` (Typer): build_combined_runs → aggregate_tradition
+  → compute_tradition_stats over the 5 roots; `emit_figures` (scorecard/framing/steadfastness/
+  distribution, 95% CIs); Opus-vs-Gemini agreement. HARD-FAILS unless per-tradition means reconcile
+  with committed results/20260905 combined block ≤1e-9 — BOTH assertions pass.
+- `docs/analysis/protestant-unified-round.md`: 8-row leaderboard, framing staircase, per-subject
+  unstated-headline CIs, steadfastness, judge agreement. Terminology per Waleed (normative traditions;
+  no mannered prose; full names; final-analysis voice).
+- `data/output/`: paper_numbers.json + combined_stats.json + 8 figures.
+- `test_phase6_reconcile_119.py` (2 passed); full analysis suite 274 passed.
+- **protestant-unified = 5th (+0.4863)**, between eastern-christianity and judaism, in the
+  normative-tradition lower cluster. Unstated (hardest) +0.0539 (near neutral, with RC/sunni/EC);
+  guided +0.8241 (framing lift +0.77). Opus-vs-Gemini r=0.810, bias +0.045, within-±0.5 92.1%.
+- Commit 158a1c8f. Running Phase 6 consult.
