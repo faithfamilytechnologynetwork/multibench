@@ -394,3 +394,19 @@ ranking; manifest ranking block); (3) Phase 5 export 8-row superset, run-id = ex
 pin MAY include 20260803 (Waleed accepted those numbers). Stop-before-Phase-5 lifts once Opus reported.
 My branch touched validator/traditions/judging-configs — no overlap expected with #121
 (exporter/analysis/leaderboard), so rebase should be clean.
+
+## 2026-09-05 — FULL RUN COMPLETE + rebased on main (#121)
+- Run done: 12,960 judgments, uncovered 0; Opus & Gemini 6,480/6,480 (per-framing 2160 each). 1 Opus
+  cell was unparseable on first collect → re-submitted as BATCH (no live top-up). Final actuals:
+  OpenRouter $160.25 + Opus batch $168.03 = **$328.28** (on estimate; tripwires not tripped).
+  Run root: ../../tmp/judging-runs/20260904-protestant-unified/protestant-unified (gitignored).
+- Rebased on origin/main (post-#121). Only conflict = governance docs (CLAUDE/AGENTS/lessons-critical)
+  — took main's canonical version (my #117 reconciliation superseded by #120/#121). --strict PASS,
+  validator 114/114, judging 185/9-skip, #121 two-judge-mean exporter present. Force-with-lease pushed
+  builder/spir-119 (remote had only my superseded pre-rebase commits).
+- Architect clarifications: (a) Phase 5/7 use the combined two-judge rule (exporter emits it);
+  8-row superset, run-id=export date; pin may include 20260803. (b) FROZEN-GUARD shape: raw catalog
+  manifests have NO ranking block (#121 dropped as unread); only score-tier results/<run>/manifest.json
+  carries ranking{rule,score_key:combined,judges,single_judge_cells}; raw shards per-judge only.
+  My new-run-id export won't touch 20260803 → branch-base diff stays empty on frozen paths.
+- Phase 4 done; consult running. Next: Phase 5 export under the new rule.
