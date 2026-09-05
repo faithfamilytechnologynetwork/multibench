@@ -461,3 +461,23 @@ $338.61 (floor) / $356.20 (likely actual)** — under $450 alert. Rebuttal
 - **Carry-forward (claude nit #2):** `experiments/119_protestant_unified/` uses the issue number;
   spec/plan say `experiments/<PR#>_…`. Rename to the PR number at PR time (before Phase 6 fills it).
 - Phase 4 substantively COMPLETE + approved. Still HOLDING before Phase 5 per architect standing order.
+
+## 2026-09-05 — Phase 5 export DONE (architect GO 07:14:51Z)
+Exported the 8-row superset, run-id **20260905** (export date), roots in load-bearing order
+(20260803-merged, -unstated-opus, -framings-opus-sample, 20260823-opus-fullgrid, 20260904-protestant-unified),
+`--single-judge-attempts 3`.
+- **results/20260905/** (score tier, 328K): 8 traditions; ranking block `rule: mean_of_judges,
+  score_key: combined, judges [opus,gemini]`, single_judge_cells attempts=3 count=2 (both from
+  20260803 data — judaism MSR-025, sunni-islam JLS-122; protestant-unified full-grid, 0 single-judge).
+  **The 7 record shards are byte-identical to frozen results/20260803** (verified) — only
+  protestant-unified is new.
+- **results-raw/20260905/** (raw tier, 142M gz): 555 per-scenario shards, all 8 traditions
+  (protestant-unified 36). **Equal source fingerprint** with score tier: sha256:532e7b0f…
+- **Frozen-tier immutability**: branch-base diff on results/20260803, results/20260813-protestantism,
+  results-raw/{20260803,20260813-protestantism}, traditions/protestantism (excl. README) — CLEAN.
+- Analysis suite 268 passed / 12 skip. SPA discovers runs by globbing the GitHub tree (no registry to
+  update); appears post-merge on default branch. Baked bundle + live verification are POST-MERGE
+  (verify phase), not this phase.
+- **Per-tradition combined mean (ranked):** buddhism +0.6695, secular-sage +0.6349, taoism +0.6308,
+  eastern-christianity +0.5405, **protestant-unified +0.4863 (5th)**, judaism +0.4656,
+  roman-catholicism +0.3635, sunni-islam +0.3597. Commit e21bbb62. Running Phase 5 consult.
