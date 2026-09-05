@@ -58,9 +58,30 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 ## Status
 - specify: DONE (spec + both consults REQUEST_CHANGES → all accepted+applied; rebuttal written;
   porch advanced to plan).
-- plan: drafted (6 phases). Baked tension #2(Opus byte-identical) vs #7(re-judge adds 35 Opus)
-  flagged to architect; resolution: #7 governs → Gemini byte-identical, Opus diff bounded to the
-  35 grid-completion cells. Awaiting 2-way plan consult.
+- plan: drafted → 2-way consult (both REQUEST_CHANGES, code-verified) → all accepted, plan
+  materially revised → rebuttal written. Awaiting re-verification.
+
+### Plan consult — critical catches (all fixed)
+- Phase 1 as first-drafted risked ~1000× overspend: `judge` takes a whole sittings file; unstated
+  gaps (26) have NO sittings in `20260803-unstated-opus`, and `20260823-opus-fullgrid` sittings are
+  stated+guided only. FIX: filtered temp sittings (unstated ← `20260803-merged`; stated/guided ←
+  fullgrid), route verdicts to correct layer (unstated → unstated-opus; s/g → fullgrid), pre-spend
+  assert work-count == enumerated. Verified enumeration: **35 cells / 34 sittings**, no Gemini gaps.
+- Combined block MUST be a separate top-level shard field (`combined`), NOT a `means` judge key —
+  else breaks test_export_results.py:801, shardConsistencyNotices (resultsModel.ts:280),
+  results.data.test.ts:92.
+- BOTH exporters' gates re-shape (export_raw.py:573-588 too), not just export_results.
+- Phase 3: `analysis report --combined` NOT viable (load_corpus rejects dup traditions); use
+  read_run_root+resolve_judgments→aggregate_tradition→compute_tradition_stats seam via new
+  `analysis combined-stats` cmd. v3 figs: swap the LOAD to canonical cell values.
+- Phase 4 byte-identity: pin baseline via `git show HEAD:results/20260803/<t>.json` (minified JSON,
+  no git-diff-subtree). Gemini byte-identical; Opus delta bounded to touched slices.
+- Backup judgments.jsonl before in-place appends.
+
+### ⚠️ BLOCKING before Phase 1 spend — architect confirmation (flagged, held msg):
+1. #2 vs #7 conflict (Opus byte-identical vs +35 verdicts) — do NOT auto-resolve.
+2. Per-cell routing (unstated 26 → unstated-opus, not fullgrid).
+3. dual_judge stays on sample roots (reads oddly once Opus complete)?
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
