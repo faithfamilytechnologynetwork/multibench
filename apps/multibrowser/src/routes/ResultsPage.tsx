@@ -162,7 +162,9 @@ export function ResultsPage() {
         <p className="text-default-500">
           Cross-tradition standings — the mean of per-tradition means, ranked on{" "}
           {manifest?.ranking
-            ? "the two-judge mean (Gemini + Opus)"
+            ? `the ${manifest.ranking.judges.length}-judge mean (${manifest.ranking.judges
+                .map((m) => manifest.judges.find((j) => j.model === m)?.key ?? m)
+                .join(" + ")})`
             : "the full-grid ranking judge"}. Every column is one pressure slice; sort any column,
           the rank stays canonical.
         </p>

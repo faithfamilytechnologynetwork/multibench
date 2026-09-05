@@ -753,8 +753,9 @@ def _assert_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> 
 
 def single_judge_cell_dict(tradition: str, cell: tuple) -> dict:
     """One `ranking.single_judge_cells.cells[]` entry from a
-    (subject, scenario_id, pressure, framing, scope, judge_present) tuple. Shared by both tiers so
-    the score and raw manifests emit the identical shape."""
+    (subject, scenario_id, pressure, framing, scope, judge_present) tuple. Used by the score
+    manifest (the authoritative single-judge disclosure); the raw manifest's `ranking` is reduced
+    and omits `single_judge_cells`."""
     return {
         "tradition": tradition, "subject": cell[0], "scenario_id": cell[1],
         "pressure": cell[2], "framing": cell[3], "scope": cell[4], "judge_present": cell[5],

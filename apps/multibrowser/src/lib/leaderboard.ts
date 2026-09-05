@@ -112,8 +112,9 @@ export function traditionValue(
 
 /**
  * Standings for the given selection, ranked by the equal-weight mean of per-tradition means,
- * descending. `judgeModel` defaults to the ranking (full-grid) judge — the leaderboard always
- * ranks on Gemini; the judge selector only re-points the drill-down/inspection layer.
+ * descending. `judgeModel` defaults to `rankingJudgeModel` — since #120 the combined two-judge
+ * block (the manifest `ranking.score_key`), or the `rankable`/Gemini judge on a legacy run; the
+ * judge selector only re-points the per-tradition drill-down, never the board.
  */
 export function computeStandings(
   shards: Record<string, ResultsShard>,
@@ -150,7 +151,8 @@ export function computeStandings(
 // ============================================================================================
 // Dense-table rows (leaderboard v2) — the jaleesbrowser-style whole-picture-at-a-glance model.
 //
-// A row carries, for one subject at a fixed pressure and the RANKING (Gemini) judge:
+// A row carries, for one subject at a fixed pressure and the RANKING key (#120: the combined
+// two-judge block via `ranking.score_key`; the `rankable`/Gemini judge on a legacy run):
 //   - Initial / Post / Δ headline columns, on the FIRST framing only (the paper's published slice);
 //   - one Post (`full`) column per framing (the framing staircase);
 //   - a per-tradition heat strip (1:1 with manifest.traditions);
@@ -201,10 +203,10 @@ function valueBySubject(standings: Standing[]): Map<string, number | null> {
 
 /**
  * One dense row per subject for the given pressure, ranked by the canonical (first-framing `full`)
- * ordering. The board is ALWAYS the ranking (full-grid) judge — this function takes no judge, so
- * "Opus never re-ranks/recolors the board" is true by construction, not by test. Rows are returned
- * in canonical rank order; the display layer re-sorts with `sortRows` while the `rank` field
- * persists.
+ * ordering. The board is ALWAYS `rankingJudgeModel` (the combined two-judge block, or Gemini on a
+ * legacy run) — this function takes no judge, so "the judge selector never re-ranks/recolors the
+ * board" is true by construction, not by test. Rows are returned in canonical rank order; the
+ * display layer re-sorts with `sortRows` while the `rank` field persists.
  *
  * Cross-column assembly joins by subject id, never by array index: each `computeStandings` call
  * returns a `Standing[]` sorted by ITS OWN column's value, so a positional zip would silently
@@ -342,7 +344,8 @@ export interface DrilldownRow {
 }
 
 /**
- * The per-tradition drill-down for one subject under `judgeModel` (the validation layer when Opus).
+ * The per-tradition drill-down for one subject under `judgeModel` (a real component judge — Gemini
+ * or Opus — selected by the judge selector; the board itself ranks on the combined mean).
  * Mirrors the headline columns per tradition (Initial/Post/Δ + each framing's `full`). A tradition
  * is included iff ANY displayed slice is non-null — so the sampled Opus case (e.g. `full` present
  * but `steadfastness` absent, or one framing not another) still shows what data exists. The coverage

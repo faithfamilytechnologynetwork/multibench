@@ -139,16 +139,16 @@ describe("/results leaderboard", () => {
     expect(within(sel).getByText(/opus \(component\)/)).toBeInTheDocument();
     // The component caption replaces the "validation … ranking stays on Gemini" copy.
     expect(screen.getByTestId("component-caption")).toHaveTextContent(/component judge/i);
-    // The header names the two-judge mean for a ranked run.
-    expect(document.body).toHaveTextContent(/two-judge mean \(Gemini \+ Opus\)/);
+    // The header names the two-judge mean for a ranked run (judges derived from ranking.judges).
+    expect(document.body).toHaveTextContent(/2-judge mean \(gemini \+ opus\)/);
   });
 
   it("#120: a LEGACY run (no ranking) keeps Gemini-ranked copy + ranking/validation labels", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesFullGridOpus()));  // no `ranking` in the manifest
     renderApp("/results");
     await screen.findAllByTestId("standings-row");
-    // Header does NOT claim the two-judge mean; the selector keeps the legacy labels.
-    expect(document.body).not.toHaveTextContent(/two-judge mean/);
+    // Header does NOT claim the multi-judge mean; the selector keeps the legacy labels.
+    expect(document.body).not.toHaveTextContent(/-judge mean \(/);
     expect(within(screen.getByTestId("sel-judge")).getByText(/opus \(validation\)/)).toBeInTheDocument();
     expect(screen.queryByTestId("component-caption")).toBeNull();
   });

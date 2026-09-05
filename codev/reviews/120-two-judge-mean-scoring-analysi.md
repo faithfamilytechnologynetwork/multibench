@@ -65,6 +65,16 @@ force-advanced on codex APPROVE once the flagged item was addressed + architect-
 - **Codex** (COMMENT): stale Opus coverage number; retain-history labeling → **Addressed**.
 - **Claude** (APPROVE): raw-README `ranking` row; record deferred test-robustness → **Addressed** (added the row + a Deferred note).
 
+### Review Phase — PR-level (Round 1)
+- **Codex** (COMMENT): stale `leaderboard.ts` comments ("always ranks on Gemini", "RANKING
+  (Gemini)", Opus-as-validation) contradict the combined ranking → **Addressed** (comments updated
+  to the `rankingJudgeModel`/combined behavior).
+- **Claude** (APPROVE): `single_judge_cell_dict` docstring claimed both tiers share it → **Addressed**
+  (score-tier only); header hardcoded "(Gemini + Opus)" → **Addressed** (derived from
+  `ranking.judges`); `singleJudgeCells` parsed but not rendered → **N/A** (parsed for schema
+  completeness; disclosure is manifest-only, by design); combined-steadfastness pairing on the 2
+  residual cells → **N/A** (numerically immaterial; the 2 cells are disclosed).
+
 No `CONSULT_ERROR`s.
 
 ## Lessons Learned
