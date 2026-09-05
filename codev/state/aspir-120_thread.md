@@ -150,7 +150,9 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   reused from v2 verbatim. Dead gem_lut block deleted from v3 script; stale fig PNGs removed.
   Reconciliation fixture strengthened (varied valid scores). Test asserts recompute vs doc ≤0.005.
 - ⚠️ FLAGGED: docs/analysis/110-dual-judge-fullgrid-summary.md now stale (residual 35→2, n
-  93,385→93,418, guided 0.683→0.684) — paper content, architect's call to update.
+  93,385→93,418, guided 0.683→0.684). ARCHITECT ASSIGNED (2026-09-05): update it in MY Phase 6 to
+  the completed-grid numbers + a 'supersedes the 93,385-cell figures' note; architect carries into
+  paper. Added to plan Phase 6.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).

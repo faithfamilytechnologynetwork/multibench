@@ -339,6 +339,10 @@ Update governance/docs to describe two-judge-mean ranking and keep the HOT mirro
   note the strict full-grid gate now guards a **component** of the ranked score.
 - `codev/resources/arch-critical.md`: update the one leaderboard fact line (ranks on the two-judge
   mean; gate guards a component).
+- `docs/analysis/110-dual-judge-fullgrid-summary.md` (architect task, 2026-09-05): update to the
+  **completed-grid** numbers (residual 2, matched 93,418, guided r 0.684, overall within-0.5 94.0)
+  + a one-line note that these supersede the 93,385-cell figures. The architect carries them into
+  the paper from the v3 bundle.
 - `CLAUDE.md`, `AGENTS.md`: regenerate the `BEGIN…END CODEV HOT CONTEXT` blocks verbatim.
 - `codev/reviews/120-two-judge-mean-scoring-analysi.md`: the review (verification evidence, spend
   actuals, the Gemini-byte-identity + Opus-delta note, lessons).
