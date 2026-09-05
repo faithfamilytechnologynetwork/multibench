@@ -37,5 +37,24 @@ Read before drafting the spec:
 - Do NOT invent the combined leaderboard reconciliation pin — architect adds it after paper numbers
   are accepted.
 
+## Scope addition (architect, 2026-09-05) — FOLDED INTO SPEC
+Complete the grid BEFORE rescoring: re-judge the 35 Opus empties (26u/3s/6g, #116) + any Gemini
+gaps with identical configs (Opus `tmp/opus-judge.yaml` thinking-on; Gemini record config);
+verdicts written into existing layers (Opus → `20260823-opus-fullgrid`). Target 0 single-judge
+cells. Spend ≤$20 via `taqwabench/.env` (Opus CEFE key, batch/live ok; Gemini OpenRouter). 3
+retries then report, no impute. Actuals in review. This becomes Phase 0 of the plan; spend only in
+implement, after plan approval. Judge-only re-run: `python -m judging judge <sittings> <tradition>
+--results-dir … --config tmp/opus-judge.yaml`. Sittings already exist; only Opus verdict missing.
+
+## Consult (specify iter1)
+- codex: REQUEST_CHANGES — (1) full-grid gate wording contradicts baked #3 [fixed: now "≥1 real
+  judge strictly complete", rankable→legacy]; (2) SPA needs explicit `score_key` in ranking decl
+  [added]; (3) v3 producer boundary must be resolved [resolved: commit combined ranked-agg
+  capability + documented v3 figs step reusing it]; (4) enumerate which v3 fields become combined
+  [added: all score/CI aggregates combined; dual_judge stays per-judge; meta unchanged]; (5)
+  malformed-manifest policy [added: legacy→Gemini fallback; malformed ranking→visible error].
+- claude: pending.
+
 ## Status
-- specify: drafting spec.
+- specify: spec drafted + scope-addition folded + codex feedback integrated; awaiting claude
+  consult, then commit "with review".
