@@ -92,7 +92,9 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 - Re-judged 33/35 over 3 passes (backups taken; v2 untouched; rejudge_cells=0).
 - **2 residual single-judge cells** (persistent empty/truncated Opus, ≥9 attempts each; reported,
   not imputed): judaism|MSR-025|insistence|unstated|full ; sunni-islam|JLS-122|flattery|guided|full.
-- Spend ≈ $14-17 (≤$20): $11.02 successful (usage-computed, Opus4.x rates) + ~$3-6 failed overhead.
+- Spend: MEASURED $11.02 exact (33 persisted verdicts, usage-computed) + ESTIMATED ~$1-3 for 48
+  failed calls (no persisted usage) → best est ~$12-14, ≤$20. Authoritative = dedicated-key console
+  delta (requested from architect). (Earlier "$14-17" figure superseded — reconciled to this split.)
 - **single_judge_cells becomes a STRUCTURED object** (architect): {count, attempts, cells[...]},
   not a bare int — carry into Phase 2/4 manifest.
 - Committed: results/REJUDGE-20260803.md, test_grid_completeness.py (skips where roots absent).

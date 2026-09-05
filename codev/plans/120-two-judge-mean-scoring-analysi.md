@@ -261,6 +261,9 @@ Regenerate the committed `results/20260803/` dataset over the completed grid: co
   framing, scope, pressure)` contain a grid-completion cell (their `n_judged` rises by exactly the
   added cells); every untouched Opus slice equals the baseline. Documented in the review.
 - [ ] Combined mean-of-means on the committed artifact reconciles with the v3 bundle (≤ 1e-9).
+- [ ] **Three-way lockstep**: a test asserts the manifest `ranking.single_judge_cells` cell set
+  equals `test_grid_completeness._KNOWN_RESIDUAL_OPUS_MISSING` (the test allowlist) so the runbook,
+  the test, and the manifest cannot drift on the residual pair.
 - [ ] Size ceilings satisfied; size/consistency tests pass.
 
 #### Test Plan
