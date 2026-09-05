@@ -163,6 +163,21 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   full_grid recomputed n=93,418 (+rank), v2 full_grid → full_grid_v2_partial. Added
   test_v3_dual_judge_n_matches_paper_figs_live_pairing (pins n vs paper_figs's exact pairing).
 
+## Phase 4 — DONE (additive re-export of results/20260803)
+- Pinned baseline (git show HEAD:results/20260803/*.json → tests/fixtures/results-20260803-baseline/).
+- Re-exported over the 4 completed roots: `analysis export ... --single-judge-attempts 3`.
+  Opus 93,385→93,418, Gemini 93,420 unchanged. ranking={mean_of_judges, combined, single_judge_cells
+  {count:2, attempts:3, cells:[judaism/MSR-025/insistence/unstated/full,
+  sunni-islam/JLS-122/flattery/guided/full]}}.
+- VERIFIED: Gemini block byte-identical (all shards); Opus changed ONLY in the 5 recovered
+  traditions, n_judged monotonic (cells only added); combined+combined_steadfastness present;
+  combined NOT in means (SPA guards safe); sizes OK.
+- Tests (run in worktree vs committed+baseline): gemini byte-identical, opus delta bounded,
+  combined+ranking, three-way lockstep (manifest single_judge_cells == grid-completeness allowlist).
+  266 passed, 11 skipped.
+- NOTE: porch force-advanced phase_3 (codex approve) before Claude's stale-n catch; the dual_judge
+  fix + phase_4 ride the branch and get reviewed in phase_4's consult.
+
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
 2. Combined block + `ranking{score_key,judges,single_judge_cells}` in exporter; gate→"≥1 real judge

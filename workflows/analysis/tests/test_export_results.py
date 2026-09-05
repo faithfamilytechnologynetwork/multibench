@@ -1108,3 +1108,75 @@ def test_committed_dataset_reconciles_with_paper():
                     if subj in shard["means"].get("gemini-3.6-flash", {})]
             mom = sum(vals) / len(vals)
             assert mom == pytest.approx(sb["subj_overall"][f"{subj}|{fr}"][0], abs=1e-9)
+
+
+# ── #120 Phase 4: additive re-export of results/20260803 vs the pinned pre-change baseline ──
+# The baseline is the committed dataset as of HEAD before the re-export (git show HEAD:results/...),
+# pinned so the byte-identity/delta assertions are reproducible on single-line minified shards.
+_BASELINE = Path(__file__).resolve().parent / "fixtures" / "results-20260803-baseline"
+_has_baseline = pytest.mark.skipif(
+    not (_BASELINE / "manifest.json").is_file(), reason="pinned baseline fixture absent")
+# Traditions whose Opus layer received a recovered cell in Phase 1 (per the runbook table).
+_RECOVERED_TRADS = {"judaism", "roman-catholicism", "secular-sage", "sunni-islam", "taoism"}
+
+
+@_has_committed
+@_has_baseline
+def test_committed_gemini_block_byte_identical_to_baseline():
+    """Baked #2: the Gemini per-judge block is byte-identical across the re-export (Gemini is
+    unchanged by the #120 re-judge) — the value the paper-reconciliation guard rests on."""
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        new = json.loads((_COMMITTED / entry["shard"]).read_text())
+        base = json.loads((_BASELINE / entry["shard"]).read_text())
+        assert json.dumps(new["means"].get("gemini-3.6-flash"), sort_keys=True) == \
+            json.dumps(base["means"].get("gemini-3.6-flash"), sort_keys=True), entry["id"]
+
+
+@_has_committed
+@_has_baseline
+def test_committed_opus_delta_bounded_to_recovered_traditions():
+    """The Opus block changes ONLY in traditions that received a recovered cell, and only by
+    ADDING coverage (n_judged never drops) — the delta is bounded to the grid-completion cells."""
+    for entry in json.loads((_COMMITTED / "manifest.json").read_text())["traditions"]:
+        t = entry["id"]
+        new = json.loads((_COMMITTED / entry["shard"]).read_text())["means"].get("claude-opus-4-8", {})
+        base = json.loads((_BASELINE / entry["shard"]).read_text())["means"].get("claude-opus-4-8", {})
+        changed = json.dumps(new, sort_keys=True) != json.dumps(base, sort_keys=True)
+        if t not in _RECOVERED_TRADS:
+            assert not changed, f"{t}: Opus block changed but received no recovered cell"
+        # n_judged is monotonic (cells only added): every baseline slice's n_judged <= the new one.
+        for subj, byfr in base.items():
+            for fr, bysc in byfr.items():
+                for sc, bypr in bysc.items():
+                    for pr, cell in bypr.items():
+                        ncell = new.get(subj, {}).get(fr, {}).get(sc, {}).get(pr)
+                        assert ncell is not None and ncell[1] >= cell[1], f"{t}/{subj}/{fr}/{sc}/{pr}"
+
+
+@_has_committed
+def test_committed_combined_block_and_ranking():
+    """The re-export adds the combined block + a ranking declaration (rule/score_key/judges)."""
+    manifest = json.loads((_COMMITTED / "manifest.json").read_text())
+    r = manifest["ranking"]
+    assert r["rule"] == "mean_of_judges" and r["score_key"] == "combined"
+    assert r["score_key"] not in {j["model"] for j in manifest["judges"]}
+    for entry in manifest["traditions"]:
+        shard = json.loads((_COMMITTED / entry["shard"]).read_text())
+        assert "combined" in shard and "combined_steadfastness" in shard
+        assert set(shard["means"]) <= {j["model"] for j in manifest["judges"]}  # combined NOT in means
+
+
+@_has_committed
+def test_committed_ranking_single_judge_matches_grid_allowlist():
+    """Three-way lockstep: the manifest's single_judge_cells match the grid-completeness test's
+    documented residual set exactly — so the runbook, the test allowlist, and the shipped manifest
+    cannot drift on the residual pair."""
+    from test_grid_completeness import _KNOWN_RESIDUAL_OPUS_MISSING
+
+    sj = json.loads((_COMMITTED / "manifest.json").read_text())["ranking"]["single_judge_cells"]
+    manifest_cells = {
+        (c["tradition"], c["subject"], c["scenario_id"], c["pressure"], c["framing"], c["scope"])
+        for c in sj["cells"]
+    }
+    assert sj["count"] == len(_KNOWN_RESIDUAL_OPUS_MISSING)
+    assert manifest_cells == _KNOWN_RESIDUAL_OPUS_MISSING
