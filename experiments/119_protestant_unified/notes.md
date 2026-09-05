@@ -90,3 +90,8 @@ Tripwires: alert $450, pause $550, HARD STOP $600. Any live top-up needs explici
 Run root: `../../tmp/judging-runs/20260904-protestant-unified/protestant-unified` (export root =
 `20260904-protestant-unified`). Report at: collection complete / Gemini complete / Opus collected,
 each with usage-computed actuals.
+
+### Full-run spend log (usage-computed, prices 2026-08-03)
+- STAGE A collection: 3,240 sittings, 0 failed. **$62.46** OpenRouter. Running total **$62.46**.
+  (per subject: sonnet-5 $21.13, gemini-flash $21.65, gpt-5.6-terra $6.52, qwen $0.75, inkling $12.41)
+- STAGE B Gemini judge: launched (6,480 judgments, OpenRouter). [pending]
