@@ -43,16 +43,32 @@ all-in reconciliation (smoke + probe + run, two rate sets) is under "ALL-IN COST
 ## Gate log
 - ✅ smoke actuals + rate note + roster-normalization PASS + batch-Opus confirmation → architect (2026-09-04).
 - ✅ architect GO for full run (Waleed via architect, 2026-09-04 ~06:00 UTC — see "FULL RUN — GO").
-- ✅ live CEFE probe (≤10 cells, $1 cap, separate dir) — **architect pre-authorized** before the batch
+- ⚠️ live CEFE probe (≤10 cells, $1 cap, separate dir) — **architect pre-authorized** before the batch
   smoke: *"YES, approved as a key-path probe only: at most 10 cells live on the CEFE key, cost cap 1
-  USD, written to a separate probe dir, never merged into the run root."* Actual: 10 cells, $0.007.
+  USD, written to a separate probe dir, never merged into the run root."* Actual: 10 cells,
+  **$1.23 live Opus** — cell count within the cap but **cost $0.23 (~23%) OVER the $1 cost cap**.
+  Immaterial to the $450/$550/$600 tripwires, but it exceeded an architect-set cap → **flagged to the
+  architect for ratification** (their cap, their call). See the corrected probe section below.
 - No live top-ups were taken during the run (the 1 unparseable Opus cell was re-submitted as **batch**).
 
-## CEFE-key probe — PASSED (2026-09-04, architect-authorized, $0.007)
+## CEFE-key probe — key path PASSED, but cost cap BREACHED (2026-09-04)
 Live Opus judged 5 sittings → 10 valid judgments (judge id `claude-opus-4-8`, real scores, 0 failed),
 **no org-cap block** — the #89 CEFE scar is resolved; the key path works. **Architect pre-authorized**
-as a key-path probe (≤10 cells, $1 cap; see Gate log). Exact usage-computed cost **$0.007**. Separate
-dir `../../tmp/judging-runs/probe-cefe-opus`, never merged into the run root.
+as a key-path probe (≤10 cells, **$1 cost cap**; see Gate log).
+
+**COST CORRECTION (iter2, from claude review).** An earlier note recorded the probe at **$0.007** —
+that was wrong: $0.007 is the *collection-only* total from `probe-cefe-opus/report.json`, which was
+written **before** the Opus judgments landed (`judgments: 0, uncovered: 10`). The **actual live Opus
+spend**, recomputed canonically from the 10 judgments' own usage records via `judging/report.py`
+(`_usage_cost`, model `claude-opus-4-8` @ $5/$25, cache_write 2×, cache_read 0.1×, live not batch):
+in 26,262 / out 25,747 / cache_write 44,760 / cache_read 11,190 → **$1.2282**.
+
+So the probe **exceeded the architect's $1 cost cap by ~23% ($0.23)**. The cell count (10) was within
+the authorized envelope; the cost cap was not. This is a small absolute overage, immaterial to the
+$450/$550/$600 gates, but it is a breach of an architect-set cap and is **flagged for architect
+ratification** — recorded honestly rather than papered over (repo scar: *sum usage from data for
+exact spend; never trust a report figure*). Separate dir `../../tmp/judging-runs/probe-cefe-opus`,
+never merged into the run root.
 
 ## Layout correction (load-bearing for Phase 5 export)
 `collect`/`judge` write **flat** to `--results-dir`: `<results-dir>/{sittings,judgments,judgments_v2}.jsonl`
@@ -114,19 +130,36 @@ each with usage-computed actuals.
 ## ALL-IN COST RECONCILIATION (Phase 4 total)
 The `report.json` cost uses the **2026-08-03** price table (#89-verified) — token usage is measured
 ground truth; only the per-token rates carry a date. Two **subject** models were on promo rates that
-**expired 2026-08-31** (after this run): `claude-sonnet-5` (billed $2/$10 → standard $3/$15) and
-`openai/gpt-5.6-terra` (billed $1/$6 → standard $2/$12). Judges (gemini-flash, Opus batch) are
-unaffected. I did not have console-invoice access to confirm which rate the account was actually
-billed at, so the all-in is stated as a **range**; the Anthropic + OpenRouter console invoices are
-the authoritative figures and should be reconciled against this by whoever holds console access.
+**expired 2026-08-31 — *before* this run (2026-09-04/05).** So the account was **most likely billed
+at standard rates**, making the standard-rate column below the *likely actual* and the 2026-08-03
+`report.json` figure a floor. `claude-sonnet-5` promo $2/$10 → standard $3/$15; `openai/gpt-5.6-terra`
+promo $1/$6 → standard $2/$12. Judges (gemini-flash, Opus batch) are unaffected. I do not hold
+console-invoice access, so both columns are shown; the Anthropic + OpenRouter console invoices are
+authoritative and should be reconciled against this by whoever holds console access.
 
-| component | billed rates (2026-08-03) | current standard rates (post-promo) |
+**Standard-rate figures are recomputed canonically** — the subject usage (with its cache_read/
+cache_write/batch split) was re-accumulated from each run's `sittings.jsonl` and re-priced through
+`judging/report.py`'s own `_usage_cost` at the standard rates. This is exact where a hand delta is
+not: both promos are clean multiples of the standard rate (sonnet ×1.5, terra ×2.0), and because the
+cache-tier rates are multiples of the base input price, each model's *entire* billed cost — cache
+reads included — scales by that same factor:
+- sonnet-5 (run): billed $21.1308 → std $31.6962  (×1.5)  → Δ **+$10.5654**
+- terra (run):    billed $6.5162 → std $13.0323  (×2.0, incl. 633,652 cache-read tokens)  → Δ **+$6.5162**
+- run collection Δ = **+$17.0816**; smoke collection Δ = **+$0.5098**.
+
+(An earlier iter1/iter2 note used a naive per-token delta of +$7.09 for terra — wrong, because it
+ignored terra's cache-read discount; the canonical ×2.0 gives +$6.52. Both independent reviewers
+reached $345.37 for the run.)
+
+| component | billed rates (2026-08-03, floor) | standard rates (likely actual, post-promo) |
 |---|---|---|
-| full run (36 scenarios) | $328.28 | $346.51 |
-| batch smoke (1 scenario) | $9.10 | $9.64 |
-| live CEFE probe (10 cells) | $0.007 | $0.007 |
-| **all-in total** | **$337.39** | **$356.16** |
+| full run (36 scenarios) | $328.28 | $345.37 |
+| batch smoke (1 scenario) | $9.10 | $9.61 |
+| live CEFE probe (10 cells) | $1.23 | $1.23 |
+| **all-in total** | **$338.61** | **$356.20** |
 
-**All-in Phase 4 spend = $337–356** (2026-08-03 billed → current-standard upper bound), well under the
-$600 ceiling and below the $450 alert. The $18 spread is entirely the two expired subject promos on
-the run+smoke collection; every judgment (both judges) was batch/normally priced with no live top-ups.
+**All-in Phase 4 spend = $338.61 – $356.20** (2026-08-03 floor → standard-rate likely actual), well
+under the $600 ceiling and below the $450 alert. The ~$18 spread is entirely the two expired subject
+promos on the run+smoke collection; every *judgment* (both judges) was batch/normally priced, and the
+only live spend was the $1.23 CEFE probe (over its $1 cap — see Gate log). No live top-ups occurred
+during the run itself. Console invoices remain authoritative and should be reconciled against this.

@@ -428,3 +428,21 @@ ceiling). codex REQUEST_CHANGES + claude COMMENT on the operational record — 4
    config comments fixed (`--fallback`→`--no-fallback`, dropped `run --scenarios 2`/"validation
    coverage"/"full_grid:false"). No code/run-data changed. Rebuttal:
    `119-phase_4-iter1-rebuttals.md`. Re-running consult (iter2).
+
+## 2026-09-05 — Phase 4 consult iter2 → real number errors fixed (esp. probe cap breach)
+Both reviewers REQUEST_CHANGES on the reconciliation numbers (run still verified correct). Three
+errors in my iter1 correction, all fixed canonically via `judging/report.py._usage_cost` (no more
+hand arithmetic):
+1. **Probe cost misreported.** iter1 `$0.007` was the collection-only total from a report.json
+   written BEFORE the Opus judgments landed. Actual live Opus spend = **$1.2282** → **BREACHES the
+   architect's $1 cost cap by ~23%** (cell count 10 was within cap). Corrected the record (was
+   falsely "within cap") and **flagged to architect for ratification** — their cap. Repo scar: sum
+   usage from data, never trust a report figure.
+2. **Chronology backwards.** Promos expired 2026-08-31 = BEFORE the 09-04/05 run → standard rates are
+   the *likely actual*, billed figure is a floor (I'd written "after this run").
+3. **Run standard arithmetic $346.51/$345.94 → $345.37.** Terra scales exactly ×2.0 incl. its 633k
+   cache-read tokens (promo is half of standard); my hand-delta ignored the cache discount. Matches
+   both reviewers.
+Final figures: run $328.28/$345.37, smoke $9.10/$9.61, probe $1.23 (live, over cap), **all-in
+$338.61 (floor) / $356.20 (likely actual)** — under $450 alert. Rebuttal
+`119-phase_4-iter2-rebuttals.md`. Notified architect of the cap breach. Re-consulting (iter3).
