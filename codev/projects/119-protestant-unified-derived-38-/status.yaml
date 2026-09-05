@@ -17,17 +17,17 @@ plan_phases:
     status: complete
   - id: phase_4
     title: Scoring run behind the spend gate
-    status: in_progress
+    status: complete
   - id: phase_5
     title: Superset export, raw re-bake, and frozen-tier guard
-    status: pending
+    status: in_progress
   - id: phase_6
     title: Cross-faith analysis and paper numbers
     status: pending
   - id: phase_7
     title: Monolith retirement and reconciliation pin
     status: pending
-current_plan_phase: phase_4
+current_plan_phase: phase_5
 gates:
   spec-approval:
     status: approved
@@ -41,8 +41,8 @@ gates:
     status: pending
   verify-approval:
     status: pending
-iteration: 3
-build_complete: true
+iteration: 1
+build_complete: false
 history:
   - iteration: 1
     build_output: ''
@@ -139,7 +139,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/spir-119/codev/projects/119-protestant-unified-derived-38-/119-phase_4-iter2-claude.txt
 started_at: '2026-09-04T00:21:51.564Z'
-updated_at: '2026-09-05T07:08:48.904Z'
+updated_at: '2026-09-05T07:14:17.561Z'
 context_refreshes:
   - boundary: plan-phase:phase_2
     at: '2026-09-04T02:20:30.605Z'
@@ -153,3 +153,5 @@ context_refreshes:
   - boundary: plan-phase:phase_4
     at: '2026-09-04T05:11:58.129Z'
     acknowledged_at: '2026-09-05T06:48:20.251Z'
+  - boundary: plan-phase:phase_5
+    at: '2026-09-05T07:14:17.561Z'
