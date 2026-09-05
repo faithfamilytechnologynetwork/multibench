@@ -249,3 +249,14 @@ All 5 addressed, all suites green (analysis 268, multibrowser 411, typecheck cle
    completeness guard; re-exported raw tier (only manifest.json changed, shards byte-stable, fingerprint
    parity held); updated raw README + golden fixture + raw tests.
 Committing all 5, pushing, re-requesting the pr gate. PR gate = HUMAN approval — will WAIT.
+
+## Merged + verify — 2026-09-05
+PR #121 MERGED (merge commit 106c1f39c7d2b2b1901cf33b785994f64ab2de7f). Verify on origin/main:
+- results/20260803 manifest: ranking{rule:mean_of_judges, score_key:combined, judges:[opus,gemini],
+  single_judge_cells.count:2} present.
+- results-raw/20260803 manifest: no ranking block; fingerprint parity with score tier (696a24c1…) held.
+- paper_bundle.py committed (reproducible v3 generator).
+- All suites green on the merged tree (analysis 268, multibrowser 411, tsc, governance 9/9); /results
+  end-to-end committed-tier test ranks on combined.
+Follow-ups filed: #122 (coverage floor), #123 (baseline re-pin doc). Architect owns closing #120 +
+Railway re-bake (raw content_fingerprint changed). Merge SHA reported.
