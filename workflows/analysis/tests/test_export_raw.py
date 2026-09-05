@@ -478,24 +478,27 @@ def test_raw_catalog_accepts_exactly_one_strictly_complete_rankable():
 
 
 def test_raw_catalog_accepts_single_complete_non_rankable_judge():
-    # #120: a single strictly-complete real judge (Opus alone, rankable:false) is enough — the
-    # combined ranking is well-defined. The catalog is accepted and declares the mean-of-judges rule.
+    # #120: a single strictly-complete real judge (Opus alone, rankable:false) is enough for the
+    # completeness guard — the catalog is accepted. It carries NO `ranking` block (the raw viewer is
+    # catalog-generic and reads only per-judge verdicts; the ranking rule lives on the score manifest).
     from analysis.export_raw import _catalog_doc
     cov = _cov({("claude-opus-4-8", fr): 10 for fr in FRAMINGS}, 10)
     cat = _catalog_doc([], [], ["claude-opus-4-8"], "fp", "cfp", cov,
                        strict_judged={"claude-opus-4-8": 30}, strict_expected=30)
-    assert cat["ranking"] == {"rule": "mean_of_judges", "judges": ["claude-opus-4-8"]}
+    assert "ranking" not in cat
+    assert [j["key"] for j in cat["judges"]] == ["opus"]
 
 
 def test_raw_catalog_accepts_two_complete_judges(monkeypatch):
-    # #120: ranking is on the combined mean, so two complete judges (even both rankable) is fine —
-    # the old "exactly one rankable" ambiguity is gone.
+    # #120: two complete judges (even both rankable) is fine — the old "exactly one rankable"
+    # ambiguity is gone. Still no `ranking` block on the raw catalog.
     from analysis.export_raw import _catalog_doc
     monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
     cov = _cov({(j, fr): 10 for j in ("gemini-3.6-flash", "claude-opus-4-8") for fr in FRAMINGS}, 10)
     cat = _catalog_doc([], [], ["claude-opus-4-8", "gemini-3.6-flash"], "fp", "cfp", cov,
                        strict_judged={"gemini-3.6-flash": 30, "claude-opus-4-8": 30}, strict_expected=30)
-    assert cat["ranking"]["judges"] == ["claude-opus-4-8", "gemini-3.6-flash"]
+    assert "ranking" not in cat
+    assert sorted(j["key"] for j in cat["judges"]) == ["gemini", "opus"]
 
 
 def test_build_catalog_rejects_differing_subject_rosters():

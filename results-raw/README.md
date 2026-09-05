@@ -59,7 +59,6 @@ AFB 0–4 explorer) uses the identical structure with different values. Nothing 
 | `ramp` | the diverging color-ramp stops (the `scoreColor` colormap), catalog-declared data. |
 | `subjects` | `[{id, label}]` — catalog-declared (the run's subjects, not a leaderboard set). |
 | `judges` | `[{key, label, fullGrid, rankable, coverage}]` — `key` is the UI short name (`gemini`/`opus`). `fullGrid` is the **earned** coverage badge (tolerant; #96), `rankable` the **static** ranking role (the raw viewer defaults its judge to the rankable one), `coverage` the full-scope fraction. A judge below full-grid is badged a sample by the viewer; a full-grid validation judge is not. (`rankable`/`coverage` optional for pre-#110 / non-MB catalogs.) |
-| `ranking` | (#120, optional) `{rule: "mean_of_judges", judges: [<real judge models>]}` — mirrors the score tier's ranking rule (the score board ranks on the two-judge mean). **Reduced** vs the score manifest: no `score_key`/`single_judge_cells`, since raw shards carry per-judge verdicts, not a combined per-cell block. The raw viewer does not consume it. |
 | `conditionAxes` | `[{key, label, values:[{id,label}]}]` — MultiBench ships `framing` + `pressure`; the viewer iterates these generically. |
 | `groupBy` | the item grouping axis (`{key:"tradition", label}`). |
 | `scopes` | `[{id, label}]` — `turn1` (initial) / `full` (post-pressure). |

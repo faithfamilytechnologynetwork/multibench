@@ -938,25 +938,27 @@ _V2_BUNDLE = _MERGED / "analysis-out" / "figures-report-v2" / "stats_bundle.json
 @pytest.mark.skipif(not (_V3_BUNDLE.is_file() and _V2_BUNDLE.is_file()),
                     reason="v2/v3 stats bundles not present")
 def test_v3_bundle_schema_and_dual_judge_recompute():
-    """v3 keeps v2's top-level schema (so paper_figs_multibench.py runs unchanged); its dual_judge
-    per-judge subsections stay RAW Gemini-vs-Opus (not polluted by the combined score); and
-    `dual_judge.full_grid` is RECOMPUTED on the COMPLETED grid (architect 2026-09-05), with v2's
-    partial-Opus full_grid preserved under a labelled legacy key. Score aggregates ARE combined."""
+    """v3 (produced by the committed `analysis paper-bundle`) keeps v2's top-level schema (so
+    paper_figs_multibench.py runs unchanged); its `dual_judge` is RAW Gemini-vs-Opus, recomputed on
+    the CURRENT roots — so the sample-root subsections match v2 while the completed-grid ones
+    (unstated, full_grid) reflect the 33 recovered cells. Score aggregates ARE combined."""
     v2 = json.loads(_V2_BUNDLE.read_text())
     v3 = json.loads(_V3_BUNDLE.read_text())
     assert sorted(v2) == sorted(v3)                       # same top-level keys
     assert v3["meta"] == v2["meta"]                       # meta unchanged
     assert v3["subj_overall"] != v2["subj_overall"]       # score aggregates ARE combined (differ)
     dj2, dj3 = v2["dual_judge"], v3["dual_judge"]
-    # The raw per-judge subsections are unchanged from v2 (combined rule does not touch them).
-    for key in ("unstated", "framings_sample", "unstated_rank", "framings_tier", "route_bridge"):
+    # Sample-root subsections are unaffected by the grid completion → identical to v2.
+    for key in ("framings_sample", "framings_tier", "route_bridge"):
         assert dj3[key] == dj2[key], key
-    # full_grid recomputed on the completed grid: its n exceeds v2's partial-Opus n (the 33 recovered
-    # cells), and v2's block is preserved verbatim under the legacy key.
-    assert dj3["full_grid"]["overall"]["n"] > dj2["full_grid"]["overall"]["n"]  # 93,418 > 93,385
-    assert dj3["full_grid_v2_partial"] == dj2["full_grid"]                       # labelled legacy
-    # The recomputed full_grid keeps ALL of v2's subkeys (incl. `rank`: order/order_identical/
-    # per-subject means) — so the narrowing that dropped `rank` can't recur.
+    # ABSOLUTE assertions on v3 (the v2 bundle is gitignored + may be re-patched by the paper-figs
+    # scripts, so avoid comparing against it): the unstated Opus layer grew to 31,139, and full_grid
+    # is recomputed over the completed grid (93,420 total − 2 residual single-judge cells).
+    assert dj3["unstated"]["n"] == 31139
+    assert dj3["full_grid"]["overall"]["n"] == 93418
+    # The committed generator does not carry the transitional v2-partial legacy key.
+    assert "full_grid_v2_partial" not in dj3
+    # The recomputed full_grid keeps ALL of v2's subkeys (incl. `rank`).
     assert set(dj3["full_grid"]) >= set(dj2["full_grid"]), sorted(dj2["full_grid"])
     assert set(dj3["full_grid"]["rank"]) == {"unstated", "stated", "guided"}
     assert all("order_identical" in dj3["full_grid"]["rank"][f] for f in ("unstated", "stated", "guided"))

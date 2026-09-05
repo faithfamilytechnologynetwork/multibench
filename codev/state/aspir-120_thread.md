@@ -235,3 +235,17 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 5. SPA leaderboard ranks combined via ranking.score_key; legacy→Gemini fallback, malformed→notice;
    judge-role copy (co-equal components); raw/AFB untouched.
 6. Docs: results/README (~6 assertions + ranking schema row), arch-critical fact, HOT mirrors, review.
+
+## PR #121 review round 2 (architect-relayed 3-way, 5 items) — 2026-09-04
+All 5 addressed, all suites green (analysis 268, multibrowser 411, typecheck clean, governance 9/9):
+1. Committed the v3 bundle generator: `analysis paper-bundle` (paper_bundle.py + test_paper_bundle.py,
+   non-skipping reconciliation fixture); test_v3_bundle_schema → absolute assertions; COMBINED-STATS.md
+   points at the committed command. No gitignored throwaway script in the loop.
+2. ResultsPage judge copy derived from ranking.judges (count+names); one-judge manifest SPA test.
+3. Fixed false "Gemini ranks the leaderboard" line in ReviewScenarioPage.tsx — now "/results ranks
+   on the per-cell mean of the judges".
+4. leaderboard.ts comments verified consistent (fixed round 1, no residual drift).
+5. Dropped the unread `ranking` block from the raw catalog (export_raw._catalog_doc); kept the
+   completeness guard; re-exported raw tier (only manifest.json changed, shards byte-stable, fingerprint
+   parity held); updated raw README + golden fixture + raw tests.
+Committing all 5, pushing, re-requesting the pr gate. PR gate = HUMAN approval — will WAIT.

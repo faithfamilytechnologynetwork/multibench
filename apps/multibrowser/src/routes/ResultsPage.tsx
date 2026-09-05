@@ -243,8 +243,8 @@ export function ResultsPage() {
               return (
                 <p className="text-xs text-default-500" data-testid="component-caption">
                   Showing <span className="font-medium">{sel.judge}</span> in the per-tradition
-                  drill-down — one of the two component judges. The leaderboard ranks on their
-                  per-cell mean{jm.fullGrid
+                  drill-down — one of the {manifest.ranking.judges.length} component judges. The
+                  leaderboard ranks on their per-cell mean{jm.fullGrid
                     ? (jm.coverage != null && jm.coverage < 1
                         ? <> ({sel.judge} coverage {(jm.coverage * 100).toFixed(2)}%)</> : <></>)
                     : <> ({sel.judge} coverage is a sample, badged <span className="font-mono">n/N</span>)</>}.

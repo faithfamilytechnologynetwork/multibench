@@ -26,40 +26,41 @@ reconciles **by construction** with the results-tier combined block (both are th
 traditions of `breakdown_mean(cell_scores(all judges), …, scope=full)`), guarded by
 `test_combined_stats_reconciles_with_export`.
 
-## The v3 paper `stats_bundle.json` (gitignored)
+## The v3 paper `stats_bundle.json` — committed generator `analysis paper-bundle`
 
 The full paper bundle (`tier`, `trad_pooled`, `subj_overall`, `model_tier`,
 `guided_residual_hard_minus_easy`, `subj_trad_framing`, `steadfastness_by_framing`,
-`pct_scen_negative_unstated`, `spread`, `gaps_pooled`, `dual_judge`) is produced by the gitignored
-`tmp/report_figs_20260803_v3.py`, adapted from its v2 sibling by **swapping only the load step** so
-the accumulators receive canonical **combined cell values** (`build_combined_runs` + `cell_scores`,
-imported from `analysis` — no second dedup/averaging). Every score aggregate becomes combined
-automatically. **`dual_judge`** is a RAW Gemini-vs-Opus validation section that the combined rule
-does **not** touch (it compares the two judges against each other, never against their mean). It is
-**fully recomputed on the completed grid** (architect, 2026-09-05), NOT reused from v2 — because
-Phase 1 grew the unstated Opus layer (31,114 → 31,139 matched), so v2's values are stale and would
-fail `paper_figs_multibench.py`'s live `len(pairs) == bundle n` asserts. The v3 producer uses
-`paper_figs_multibench.py`'s **exact** `load_opus` (raw-Gemini lut; mapped dedupe + `judgments_v2`
-overlay for the sample) so every n matches by construction: `unstated` n=31,139, `framings_sample`
-n=9,000 (deduped, unchanged), plus `unstated_rank` / `framings_tier`. `route_bridge` (a fixed
-sample-root artifact, not consumed by paper_figs) is reused from v2. **`full_grid`** is recomputed
-over every double-judged cell across the four roots (n=93,418; overall r=0.833; by-framing
-0.854/0.825/0.684; guided within-0.5 95.4%) via the `agree()` convention from
-`docs/analysis/110-dualjudge-fullgrid-figs.py`; v2's partial-Opus `full_grid` (n=93,385) is
-preserved under the labelled legacy key **`full_grid_v2_partial`**. `meta` is unchanged, so the
-bundle keeps the exact v2 schema and `tmp/paper_figs_multibench.py` runs unchanged. Guarded by
-`test_v3_bundle_schema_and_dual_judge_recompute` (reconciles the recompute with the paper's
-r=0.833 / 0.854 / 0.825 / 0.683±) and `test_v3_dual_judge_n_matches_paper_figs_live_pairing` (pins
-the `unstated`/`framings_sample` n against paper_figs's exact pairing).
+`pct_scen_negative_unstated`, `spread`, `gaps_pooled`, `dual_judge`) is produced by the **committed**
+`analysis paper-bundle` command (`workflows/analysis/analysis/paper_bundle.py`) — a clean checkout
+with the four roots regenerates it, **no gitignored throwaway script in the loop**:
 
 ```bash
-uv --project workflows/analysis run python ../../tmp/report_figs_20260803_v3.py
-# -> ../../tmp/judging-runs/20260803-merged/analysis-out/figures-report-v3/stats_bundle.json
+uv --project workflows/analysis run python -m analysis paper-bundle \
+  ../../tmp/judging-runs/20260803-merged \
+  ../../tmp/judging-runs/20260803-unstated-opus \
+  ../../tmp/judging-runs/20260803-framings-opus-sample \
+  ../../tmp/judging-runs/20260823-opus-fullgrid \
+  --out ../../tmp/judging-runs/20260803-merged/analysis-out/figures-report-v3/stats_bundle.json
 ```
 
-The v2 bundle is **not** overwritten (v3 is a sibling directory). The v3 script stops after writing
-the bundle (its own fig1–5 rendering assumes discrete per-judge scores and is not the deliverable —
-the paper figures are rendered separately from the bundle by `paper_figs_multibench.py`).
+Every **score aggregate** is over the canonical **combined cell value** (`build_combined_runs` +
+`cell_scores` — no second dedup/averaging). **`dual_judge`** is a RAW Gemini-vs-Opus validation
+section the combined rule does **not** touch (it compares the judges against each other, never
+against their mean), recomputed on the CURRENT roots using `paper_figs_multibench.py`'s exact
+`load_opus` (raw-Gemini lut; mapped dedupe + `judgments_v2` overlay) so every n matches its live
+asserts by construction: `unstated` n=31,139, `framings_sample` n=9,000 (deduped). `route_bridge` is
+computed from the raw two-alias sample rows; **`full_grid`** is the combined-grid agreement over
+every double-judged cell (n=93,418; overall r=0.833; by-framing 0.854/0.825/0.684; guided within-0.5
+95.4%), with its `rank` subsection. The taxonomy is parameterized so a small fixture drives the whole
+pipeline in CI. Guarded by `test_paper_bundle.py` (fixture, CI-runnable — the generator's
+`subj_overall` reconciles with the export combined mean-of-means),
+`test_v3_bundle_schema_and_dual_judge_recompute`, and
+`test_v3_dual_judge_n_matches_paper_figs_live_pairing`.
+
+`tmp/paper_figs_multibench.py` renders the paper figures from this bundle unchanged.
+
+The v2 bundle is **not** overwritten (v3 is a sibling directory). The prior gitignored
+`tmp/report_figs_20260803_v3.py` is superseded by this committed command.
 
 ## Reconciliation guard
 

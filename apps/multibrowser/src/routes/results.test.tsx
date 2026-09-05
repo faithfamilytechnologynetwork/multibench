@@ -153,6 +153,19 @@ describe("/results leaderboard", () => {
     expect(screen.queryByTestId("component-caption")).toBeNull();
   });
 
+  it("#120: a ONE-judge ranking derives '1-judge mean (gemini)' copy (not hardcoded)", async () => {
+    const f = filesCombinedRanked();
+    const mkey = "results/20260803/manifest.json";
+    const m = JSON.parse(f[mkey]!);
+    m.ranking.judges = ["gemini-3.6-flash"]; // a valid single-judge combined ranking
+    f[mkey] = JSON.stringify(m);
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, f));
+    renderApp("/results");
+    await screen.findAllByTestId("standings-row");
+    expect(document.body).toHaveTextContent(/1-judge mean \(gemini\)/);
+    expect(screen.getByTestId("component-caption")).toHaveTextContent(/one of the 1 component judges/);
+  });
+
   it("renders the dense columns (Initial / Post / Δ + per-framing) at a glance", async () => {
     vi.stubGlobal("fetch", fakeFetch(REPO, SHA, files()));
     renderApp("/results");

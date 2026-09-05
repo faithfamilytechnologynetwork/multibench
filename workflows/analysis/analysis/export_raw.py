@@ -37,7 +37,6 @@ from analysis.core_imports import FRAMINGS, PRESSURES
 from analysis.export_results import (
     CANONICAL_SUBJECTS,
     JUDGE_UI,
-    RANKING_RULE,
     SCOPES,
     Coverage,
     RawTradition,
@@ -583,9 +582,10 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
         raise AnalysisInputError(
             f"raw catalog needs at least one strictly-complete judge for the combined ranking; "
             f"none complete ({got})")
-    # The combined-mean ranking declaration (mirrors the score manifest; raw shards carry per-judge
-    # verdicts, so there is no combined per-cell block here — only the rule + the judges averaged).
-    ranking = {"rule": RANKING_RULE, "judges": list(judge_models)}
+    # No `ranking` block on the raw catalog: the raw viewer is catalog-generic and reads only
+    # per-judge verdicts (never a combined per-cell score), so a ranking declaration here would be
+    # unread. The combined-mean ranking rule lives on the score-tier manifest (`export_results`),
+    # which is what `/results` consumes. The completeness guard above is retained as a real invariant.
 
     return {
         "schema_version": SCHEMA_VERSION,
@@ -594,7 +594,6 @@ def _catalog_doc(items: list[dict], subjects: list[str], judge_models: list[str]
         "ramp": list(RAMP_STOPS),
         "subjects": [{"id": s, "label": s} for s in subjects],
         "judges": judges,
-        "ranking": ranking,
         "conditionAxes": [
             {"key": "framing", "label": "Framing",
              "values": [{"id": f, "label": _humanize(f)} for f in FRAMINGS]},

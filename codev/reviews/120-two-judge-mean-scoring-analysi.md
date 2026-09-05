@@ -5,8 +5,8 @@
 Rescored the benchmark of record (`20260803`) on the **equal-weight mean of both judges** (Gemini
 3.6 Flash + Claude Opus 4.8) per cell — the analysis stats bundle, the committed `results/20260803/`
 tier, and the `/results` leaderboard — after **completing the grid** (re-judging the Opus
-empty-response cells). Six phases; PR #121; all suites green (analysis 266, multibrowser 410,
-governance 9/9, typecheck clean); reconciliation to 2.2e-16.
+empty-response cells). Six phases; PR #121 (+2 review rounds); all suites green (analysis 268,
+multibrowser 411, governance 9/9, typecheck clean); reconciliation to 2.2e-16.
 
 ## Spec Compliance
 
@@ -76,6 +76,28 @@ force-advanced on codex APPROVE once the flagged item was addressed + architect-
   residual cells → **N/A** (numerically immaterial; the 2 cells are disclosed).
 
 No `CONSULT_ERROR`s.
+
+### Review Phase — PR-level (Round 2, architect-relayed 3-way, 5 items)
+Changes requested, all small; all addressed:
+1. **v3 bundle generator reproducibility** → the gitignored throwaway figs script is committed as
+   `analysis paper-bundle` (`paper_bundle.py`, Typer CLI, deterministic seed) with a CI fixture test
+   (`test_paper_bundle.py`) whose `subj_overall` reconciles with the export combined mean-of-means
+   (non-skipping); `test_v3_bundle_schema` switched to ABSOLUTE assertions (v2 bundle is gitignored
+   and may be re-patched). `COMBINED-STATS.md` updated to point at the committed command.
+2. **ResultsPage judge copy derived from data** → header/caption derive the judge count and names
+   from `manifest.ranking.judges`; a one-judge manifest SPA test added (`results.test.tsx`).
+3. **False "Gemini ranks the leaderboard" line** (`ReviewScenarioPage.tsx`) → the ranking judge no
+   longer claims to "rank the leaderboard"; copy now states the `/results` board ranks on the
+   per-cell mean of the judges.
+4. **Stale `leaderboard.ts` comments** → verified consistent with the combined `rankingJudgeModel`
+   behavior (fixed in Round 1; no residual drift).
+5. **Raw catalog `ranking` block shape** → DROPPED from `export_raw._catalog_doc` (the raw viewer is
+   catalog-generic and never read it; the ranking rule lives on the score manifest). Kept the
+   completeness guard as a real invariant; raw tier manifest re-exported (only `manifest.json`
+   changes, shards byte-stable, cross-tier fingerprint parity preserved); raw README + golden-freeze
+   fixture + raw tests updated.
+
+All suites green after Round 2 (analysis 268, multibrowser 411, typecheck clean, governance 9/9).
 
 ## Lessons Learned
 

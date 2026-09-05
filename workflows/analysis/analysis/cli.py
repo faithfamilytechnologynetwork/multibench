@@ -203,6 +203,42 @@ def combined_stats(
         typer.echo(text)
 
 
+@app.command(name="paper-bundle")
+def paper_bundle(
+    run_roots: list[str] = typer.Argument(
+        ..., metavar="RUN_ROOT...",
+        help="The four judging run ROOTS in results/README order (merged, unstated-opus, "
+             "framings-opus-sample, opus-fullgrid). Pass them like `analysis export`.",
+    ),
+    out: str = typer.Option(
+        ..., "--out", help="Write the combined paper stats_bundle.json here.",
+    ),
+    n_boot: int = typer.Option(5000, "--n-boot", help="Scenario-cluster bootstrap resamples."),
+    seed: int = typer.Option(12345, "--seed", help="Bootstrap RNG seed (determinism)."),
+) -> None:
+    """Produce the combined two-judge paper `stats_bundle.json` from the four roots (#120).
+
+    Reproducible, committed replacement for the old gitignored figs script: every score aggregate is
+    over the combined cell score; `dual_judge` is the raw Gemini-vs-Opus validation block (full_grid
+    recomputed on the completed grid; route_bridge from the raw two-alias rows). Deterministic.
+    """
+    import json as _json
+    from pathlib import Path
+
+    from analysis.loaders import AnalysisInputError
+    from analysis.paper_bundle import build_paper_bundle
+
+    try:
+        bundle = build_paper_bundle(list(run_roots), n_boot=n_boot, seed=seed)
+    except (AnalysisInputError, ValueError) as e:  # fail-fast, spec M7
+        typer.echo(f"input error: {e}", err=True)
+        raise typer.Exit(code=2) from e
+
+    Path(out).parent.mkdir(parents=True, exist_ok=True)
+    Path(out).write_text(_json.dumps(bundle, indent=1) + "\n", encoding="utf-8")
+    typer.echo(_json.dumps({"out": out, "keys": sorted(bundle), "subjects": len(bundle["subj_overall"])}))
+
+
 @app.command(name="export-raw")
 def export_raw(
     run_roots: list[str] = typer.Argument(
