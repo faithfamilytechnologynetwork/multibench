@@ -386,3 +386,11 @@ A SEPARATE builder implements it in exporter/leaderboard/analysis. For me:
 - After the run completes: **STOP before Phase 5. Do NOT start the superset export.** Wait for the
   architect's amended-rule message, then rebase Phase 5/7 on the other builder's PR.
 Acknowledged to architect.
+
+## 2026-09-05 — PR #121 (two-judge mean) MERGED to main (106c1f39)
+Architect: after the Opus batch collects → (1) report Opus actuals + 6,480/6,480 check [still required
+first]; (2) rebase on main to pick up #121 (exporter/analysis now emit the combined two-judge-mean
+ranking; manifest ranking block); (3) Phase 5 export 8-row superset, run-id = export date; (4) Phase 7
+pin MAY include 20260803 (Waleed accepted those numbers). Stop-before-Phase-5 lifts once Opus reported.
+My branch touched validator/traditions/judging-configs — no overlap expected with #121
+(exporter/analysis/leaderboard), so rebase should be clean.
