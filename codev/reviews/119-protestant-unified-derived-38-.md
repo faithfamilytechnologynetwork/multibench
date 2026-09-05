@@ -93,3 +93,23 @@ invoices authoritative). Details in `experiments/119_protestant_unified/notes.md
   it to a public API in a later analysis-maintenance pass.
 - Production raw re-bake + live fingerprint verification (`railway up --no-gitignore`) are post-merge,
   architect-driven (verify phase).
+
+## Architecture Updates
+
+**No `arch.md` / `arch-critical.md` / `lessons-critical.md` changes are required.** This work is a
+drop-in instance of shapes the HOT docs already describe, not a new system shape:
+
+- **A new tradition** (`protestant-unified`) is exactly the "adding a tradition adds a directory,
+  never changes core" fact — core discovers it by glob; no code path changed.
+- **The `20260905` 8-row run** is a new instance of the committed `results/<run-id>/` +
+  `results-raw/<run-id>/` tiers the arch-critical "Results datasets" / "Raw-results tier" facts
+  already cover, produced by the canonical `analysis export`/`export-raw`. The combined two-judge
+  ranking is the #120/#121 rule already documented there.
+- **Monolith retirement is operational, not structural** — the module and its tiers stay on disk and
+  SPA-discoverable; nothing about how the system is shaped changed. It is recorded in the module and
+  `results/` READMEs, which is the right home (per-artifact docs), not the arch docs.
+
+No lessons were promoted to `lessons-critical.md`: the two candidates (sum spend from usage not a
+report figure; verify a delegated agent's work) are re-confirmations of existing critical lessons
+("sum usage from data for exact spend"; the verification-discipline entries), not new displacers.
+They are recorded in this review's Lessons section.
