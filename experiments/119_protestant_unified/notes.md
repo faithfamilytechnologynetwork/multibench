@@ -94,4 +94,5 @@ each with usage-computed actuals.
 ### Full-run spend log (usage-computed, prices 2026-08-03)
 - STAGE A collection: 3,240 sittings, 0 failed. **$62.46** OpenRouter. Running total **$62.46**.
   (per subject: sonnet-5 $21.13, gemini-flash $21.65, gpt-5.6-terra $6.52, qwen $0.75, inkling $12.41)
-- STAGE B Gemini judge: launched (6,480 judgments, OpenRouter). [pending]
+- STAGE B Gemini judge: 6,480 judgments, 0 failed. **$97.79** OpenRouter. Running total **$160.25**.
+- STAGE C Opus batch (CEFE): submit 6,480 + poll-collect --no-fallback. [running]
