@@ -70,6 +70,28 @@ const ShardSchema = z.object({
   judges: z.array(z.string()),
   means: rec(rec(rec(rec(rec(meanCell))))),
   steadfastness: rec(rec(rec(rec(steadfastnessCell)))),
+  // #120: the combined two-judge block — a SEPARATE top-level field (no judge axis), so the
+  // per-judge `means`/`steadfastness` guards are untouched. Optional: pre-#120 shards omit it.
+  // subject → framing → scope → pressure(+"all") → [mean, nJudged, nExpected]
+  combined: rec(rec(rec(rec(meanCell)))).optional(),
+  // subject → framing → pressure(+"all") → [value, matchedN]
+  combined_steadfastness: rec(rec(rec(steadfastnessCell))).optional(),
+});
+
+// #120 manifest `ranking` declaration: the leaderboard ranks on `score_key`'s shard block (the
+// combined two-judge mean). Optional so pre-#120 manifests fall back to the `rankable`/Gemini judge.
+const RankingSchema = z.object({
+  rule: z.string(),
+  score_key: z.string(),
+  judges: z.array(z.string()),
+  single_judge_cells: z
+    .object({
+      count: count,
+      cells: z.array(z.record(z.string(), z.union([z.string(), z.number()]))).optional(),
+      attempts: z.number().optional(),
+      cells_truncated: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 const JudgeMetaSchema = z.object({
@@ -108,6 +130,7 @@ const ManifestSchema = z.object({
       coverage: CoverageSchema.optional(),
     })
     .optional(),
+  ranking: RankingSchema.optional(),
 });
 
 // ---- TS-facing types (top-level fields camelCased; nested cells kept as-is) ------------------
@@ -132,6 +155,16 @@ export interface ResultsRunRef {
   shard: string;
 }
 
+/** #120: how the leaderboard ranks. `scoreKey` names the shard block to rank on (the combined
+ *  two-judge mean); `judges` are the real judges averaged; `singleJudgeCells` discloses cells
+ *  resting on a single verdict. Absent on pre-#120 manifests (→ rankable/Gemini fallback). */
+export interface ResultsRanking {
+  rule: string;
+  scoreKey: string;
+  judges: string[];
+  singleJudgeCells?: { count: number; cells?: Record<string, string | number>[]; attempts?: number; cellsTruncated?: boolean };
+}
+
 export interface ResultsManifest {
   schemaVersion: number;
   runId: string;
@@ -147,6 +180,8 @@ export interface ResultsManifest {
   metrics: string[];
   traditions: ResultsRunRef[];
   coverage: Record<string, Record<string, { nJudged: number; nExpected: number }>>;
+  /** #120 ranking declaration; undefined on pre-#120 datasets (→ rankable/Gemini fallback). */
+  ranking?: ResultsRanking;
 }
 
 export interface ResultsShard {
@@ -157,6 +192,10 @@ export interface ResultsShard {
   means: Record<string, Record<string, Record<string, Record<string, Record<string, MeanCell>>>>>;
   // judge → subject → framing → pressure(+"all") → [value, matchedN]
   steadfastness: Record<string, Record<string, Record<string, Record<string, SteadfastnessCell>>>>;
+  // #120 combined block (no judge axis): subject → framing → scope → pressure(+"all") → cell
+  combined?: Record<string, Record<string, Record<string, Record<string, MeanCell>>>>;
+  // subject → framing → pressure(+"all") → [value, matchedN]
+  combinedSteadfastness?: Record<string, Record<string, Record<string, SteadfastnessCell>>>;
 }
 
 // ---- tolerant parsers -----------------------------------------------------------------------
@@ -216,6 +255,36 @@ export function parseResultsManifest(
     }
     coverage[judge] = dst;
   }
+  // #120: validate the ranking declaration if present (a legacy manifest omits it and falls back to
+  // the rankable/Gemini judge). A PRESENT-but-malformed declaration must surface a visible notice —
+  // not silently revert to Gemini — so a bad dataset degrades loudly.
+  let ranking: ResultsRanking | undefined;
+  if (m.ranking) {
+    const r = m.ranking;
+    const judgeModels = new Set(m.judges.map((j) => j.model));
+    if (r.rule !== "mean_of_judges") {
+      notices.push(notice("error", "results", where, `unknown ranking.rule "${r.rule}"`));
+    }
+    if (judgeModels.has(r.score_key)) {
+      notices.push(notice("error", "results", where,
+        `ranking.score_key "${r.score_key}" collides with a real judge model`));
+    }
+    const badJudges = r.judges.filter((j) => !judgeModels.has(j));
+    if (badJudges.length) {
+      notices.push(notice("error", "results", where,
+        `ranking.judges not in manifest: ${badJudges.join(", ")}`));
+    }
+    if (new Set(r.judges).size !== r.judges.length) {
+      notices.push(notice("error", "results", where, "ranking.judges has duplicates"));
+    }
+    ranking = {
+      rule: r.rule, scoreKey: r.score_key, judges: r.judges,
+      singleJudgeCells: r.single_judge_cells && {
+        count: r.single_judge_cells.count, cells: r.single_judge_cells.cells,
+        attempts: r.single_judge_cells.attempts, cellsTruncated: r.single_judge_cells.cells_truncated,
+      },
+    };
+  }
   return {
     manifest: {
       schemaVersion: m.schema_version,
@@ -234,6 +303,7 @@ export function parseResultsManifest(
       metrics: m.metrics,
       traditions: m.traditions.map((t) => ({ id: t.id, nScenarios: t.n_scenarios, shard: t.shard })),
       coverage,
+      ranking,
     },
     notices,
   };
@@ -260,6 +330,12 @@ export function shardConsistencyNotices(
   if (trad && shard.nScenarios !== trad.nScenarios) {
     notices.push(notice("warning", "results", where,
       `n_scenarios ${shard.nScenarios} disagrees with manifest ${trad.nScenarios}`));
+  }
+  // #120: if the manifest declares a ranking on a combined block, the shard must carry it — else the
+  // leaderboard has nothing to rank on. Flag its absence loudly rather than degrade silently.
+  if (manifest.ranking && manifest.ranking.scoreKey === "combined" && !shard.combined) {
+    notices.push(notice("error", "results", where,
+      `manifest ranks on "${manifest.ranking.scoreKey}" but the shard has no combined block`));
   }
   const judges = new Set(manifest.judges.map((j) => j.model));
   const subjects = new Set(manifest.subjects);
@@ -345,6 +421,8 @@ export function parseResultsShard(
       judges: s.judges,
       means: s.means,
       steadfastness: s.steadfastness,
+      combined: s.combined,
+      combinedSteadfastness: s.combined_steadfastness,
     },
     notices: [],
   };

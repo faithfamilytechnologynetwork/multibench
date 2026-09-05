@@ -186,6 +186,23 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   committed↔v3 combined reconciliation test, gemini byte-identity now covers steadfastness block too.
   pnpm install done (node_modules present for phase_5).
 
+## Phase 5 — DONE (SPA leaderboard ranks on combined)
+- resultsModel.ts: parse combined/combined_steadfastness shard fields + manifest `ranking`
+  declaration (non-strict zod, no schema bump). Validate ranking (rule known, score_key not
+  colliding with a real judge, judges⊆manifest, no dups) → visible ERROR notices, never silent
+  revert. shardConsistencyNotices flags a combined-ranked manifest whose shard lacks the block.
+- leaderboard.ts: COMBINED_SCORE_KEY="combined"; rankingJudgeModel returns ranking.scoreKey first
+  (legacy → rankable/gemini). traditionValue reads shard.combined for the combined key (drill-down
+  still resolves each real judge from means).
+- ResultsPage.tsx: when ranking present, judges labelled "(component)" + a component-caption ("board
+  ranks on the two-judge mean"); legacy keeps ranking/validation copy. Header says two-judge mean.
+  Raw viewer / RawComparison / raw-catalog rankable UNTOUCHED (scoped out).
+- Tests: leaderboard.test (combined ranking, legacy fallback, traditionValue combined), results.data
+  (ranking parse + 4 malformed cases + combined shard + shard-missing-combined notice), results.test
+  page-level (board ranks combined, component labels/caption). typecheck clean. multibrowser 407,
+  analysis 266.
+- NO invented combined leaderboard pin (architect adds after paper numbers accepted).
+
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
 2. Combined block + `ranking{score_key,judges,single_judge_cells}` in exporter; gate→"≥1 real judge

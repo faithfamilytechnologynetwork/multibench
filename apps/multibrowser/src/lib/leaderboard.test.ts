@@ -139,6 +139,56 @@ describe("computeStandings — mean of per-tradition means", () => {
   });
 });
 
+// #120: the leaderboard ranks on the COMBINED two-judge block when the manifest declares a ranking.
+describe("combined two-judge ranking (#120)", () => {
+  const rankedManifest: ResultsManifest = {
+    ...manifest,
+    ranking: {
+      rule: "mean_of_judges", scoreKey: "combined",
+      judges: ["gemini-3.6-flash", "claude-opus-4-8"], singleJudgeCells: { count: 0 },
+    },
+  };
+  // gem = the Gemini-only value; comb = the combined value (deliberately different so we can tell
+  // which block the board ranks on).
+  function combinedShard(tradition: string, gem: number, comb: number): ResultsShard {
+    return {
+      tradition, nScenarios: 2, judges: ["gemini-3.6-flash", "claude-opus-4-8"],
+      means: {
+        "gemini-3.6-flash": {
+          "claude-sonnet-5": { unstated: { full: { all: [gem, 2, 2] }, turn1: { all: [0.1, 2, 2] } } },
+        },
+      },
+      steadfastness: { "gemini-3.6-flash": { "claude-sonnet-5": { unstated: { all: [0.2, 2] } } } },
+      combined: {
+        "claude-sonnet-5": { unstated: { full: { all: [comb, 2, 2] }, turn1: { all: [0.15, 2, 2] } } },
+      },
+      combinedSteadfastness: { "claude-sonnet-5": { unstated: { all: [0.25, 2] } } },
+    };
+  }
+  const cshards = { a: combinedShard("a", 0.6, 0.9), b: combinedShard("b", 0.8, 0.7) };
+
+  it("rankingJudgeModel is the ranking.score_key ('combined') when a declaration is present", () => {
+    expect(rankingJudgeModel(rankedManifest)).toBe("combined");
+  });
+
+  it("legacy manifest (no ranking) still falls back to the rankable/Gemini judge", () => {
+    expect(rankingJudgeModel(manifest)).toBe("gemini-3.6-flash");
+  });
+
+  it("traditionValue reads the combined block for the combined key, not means[judge]", () => {
+    const tv = traditionValue(cshards.a, "combined", "claude-sonnet-5", "unstated", "full", "all", 12);
+    expect(tv?.value).toBe(0.9); // the combined value, not the 0.6 Gemini value
+    const st = traditionValue(cshards.a, "combined", "claude-sonnet-5", "unstated", "steadfastness", "all", 12);
+    expect(st).toEqual({ tradition: "a", value: 0.25, nJudged: 2, nExpected: 12 });
+  });
+
+  it("computeLeaderboardRows ranks on the combined block (differs from Gemini-only)", () => {
+    const sonnet = computeLeaderboardRows(cshards, rankedManifest, { pressure: "all" })
+      .find((r) => r.subject === "claude-sonnet-5")!;
+    expect(sonnet.post).toBeCloseTo(0.8, 10); // mean of combined (0.9, 0.7); the Gemini mean is 0.7
+  });
+});
+
 // Reconciliation against the REAL committed dataset (results/20260803/) — the SPA's mean-of-means
 // must equal the paper's standings. Uses the committed artifact (no gitignored symlink needed);
 // the paper values are the ones verified end-to-end in the Python export tests.

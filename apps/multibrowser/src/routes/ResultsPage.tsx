@@ -161,8 +161,8 @@ export function ResultsPage() {
       <div>
         <h1 className="text-2xl font-semibold">Results</h1>
         <p className="text-default-500">
-          Cross-tradition standings — the mean of per-tradition means, ranked on the full-grid Gemini judge.
-          Every column is one pressure slice; sort any column, the rank stays canonical.
+          Cross-tradition standings — the mean of per-tradition means, ranked on the two-judge mean
+          (Gemini + Opus). Every column is one pressure slice; sort any column, the rank stays canonical.
         </p>
       </div>
 
@@ -222,14 +222,32 @@ export function ResultsPage() {
               onChange={(judge) => update({ judge })}
               options={manifest.judges.map((j) => ({
                 value: j.key,
-                label: isRankingJudge(j) ? `${j.key} (ranking)` : `${j.key} (validation)`,
+                // #120: under a mean-of-judges ranking, both judges are co-equal COMPONENTS of the
+                // headline mean — not "ranking vs validation". Legacy manifests keep the old labels.
+                label: manifest.ranking
+                  ? `${j.key} (component)`
+                  : (isRankingJudge(j) ? `${j.key} (ranking)` : `${j.key} (validation)`),
               }))}
             />
           </div>
 
           {(() => {
             const jm = manifest.judges.find((j) => j.key === sel.judge);
-            if (!jm || isRankingJudge(jm)) return null;  // only for a non-ranking (validation) judge
+            if (!jm) return null;
+            if (manifest.ranking) {
+              // The board ranks on the two-judge mean; the drill-down shows one component judge.
+              return (
+                <p className="text-xs text-default-500" data-testid="component-caption">
+                  Showing <span className="font-medium">{sel.judge}</span> in the per-tradition
+                  drill-down — one of the two component judges. The leaderboard ranks on their
+                  per-cell mean{jm.fullGrid
+                    ? (jm.coverage != null && jm.coverage < 1
+                        ? <> ({sel.judge} coverage {(jm.coverage * 100).toFixed(2)}%)</> : <></>)
+                    : <> ({sel.judge} coverage is a sample, badged <span className="font-mono">n/N</span>)</>}.
+                </p>
+              );
+            }
+            if (isRankingJudge(jm)) return null;  // legacy: only for a non-ranking (validation) judge
             return (
               <p className="text-xs text-warning-700" data-testid="opus-caption">
                 Showing <span className="font-medium">{sel.judge}</span> as a validation judge in the
@@ -558,9 +576,11 @@ function Leaderboard({
                     <td colSpan={totalCols} className="pb-3">
                       <div className="rounded-md border border-default-200 bg-default-50/50 p-2">
                         <div className="mb-1 text-xs text-default-500">
-                          Per-tradition ({drillJudgeIsRanking
-                            ? sel.judge
-                            : `${sel.judge} — validation${isSample ? " sample" : ""}`})
+                          Per-tradition ({manifest.ranking
+                            ? `${sel.judge} — component${isSample ? " (sample)" : ""}`
+                            : (drillJudgeIsRanking
+                                ? sel.judge
+                                : `${sel.judge} — validation${isSample ? " sample" : ""}`)})
                           {drill.length === 0 && " — no data for this judge/selection"}
                         </div>
                         {drill.length > 0 && (

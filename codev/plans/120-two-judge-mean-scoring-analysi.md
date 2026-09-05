@@ -349,6 +349,13 @@ Update governance/docs to describe two-judge-mean ranking and keep the HOT mirro
 - `CLAUDE.md`, `AGENTS.md`: regenerate the `BEGIN…END CODEV HOT CONTEXT` blocks verbatim.
 - `codev/reviews/120-two-judge-mean-scoring-analysi.md`: the review (verification evidence, spend
   actuals, the Gemini-byte-identity + Opus-delta note, lessons).
+- **Operational note for the architect (phase_4 review):** the raw tier's `content_fingerprint`
+  changed (33 recovered verdicts), so the deployed Railway **baked** bundle is now stale and the
+  SPA falls back to the rate-limited GitHub tier until a redeploy with `railway up --no-gitignore`
+  (Railway access is the architect's). Record in the README revision note + review.
+- **Deferred test robustness (phase_4 comments, non-blocking):** extend the Opus-delta guard to also
+  delta-bound the `steadfastness` block (symmetry with Gemini) and to catch a brand-new key in the
+  re-export (currently iterates baseline keys only).
 
 #### Deliverables
 

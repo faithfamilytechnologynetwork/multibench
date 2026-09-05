@@ -79,6 +79,29 @@ function filesFullGridOpus() {
   return f;
 }
 
+// #120: add a manifest `ranking` (mean_of_judges → combined) + a combined block to each shard, so
+// the page ranks on the two-judge mean. Combined values are a constant 0.5 (distinct from the
+// Gemini 0.700) so a test can tell which block the board used.
+function filesCombinedRanked() {
+  const f = filesFullGridOpus();
+  const mkey = "results/20260803/manifest.json";
+  const m = JSON.parse(f[mkey]!);
+  m.ranking = {
+    rule: "mean_of_judges", score_key: "combined",
+    judges: ["gemini-3.6-flash", "claude-opus-4-8"],
+    single_judge_cells: { count: 0, cells: [] },
+  };
+  f[mkey] = JSON.stringify(m);
+  for (const t of ["buddhism", "taoism"]) {
+    const skey = `results/20260803/${t}.json`;
+    const s = JSON.parse(f[skey]!);
+    s.combined = { "claude-sonnet-5": { unstated: { full: { all: [0.5, 2, 12] }, turn1: { all: [0.2, 2, 12] } } } };
+    s.combined_steadfastness = { "claude-sonnet-5": { unstated: { all: [0.3, 2] } } };
+    f[skey] = JSON.stringify(s);
+  }
+  return f;
+}
+
 /** A counting wrapper to assert the leaderboard adds no on-budget GitHub API calls for results data. */
 function countingFetch(base: ReturnType<typeof fakeFetch>) {
   const calls: string[] = [];
@@ -101,6 +124,21 @@ describe("/results leaderboard", () => {
     expect(within(rows[0]!).getByTestId("standings-score")).toHaveTextContent("0.700");
     const gem = rows.find((r) => r.getAttribute("data-subject") === "gemini-3.6-flash")!;
     expect(within(gem).getByTestId("standings-score")).toHaveTextContent("0.300");
+  });
+
+  it("#120: ranks on the combined two-judge block and labels judges as components", async () => {
+    vi.stubGlobal("fetch", fakeFetch(REPO, SHA, filesCombinedRanked()));
+    renderApp("/results");
+    const rows = await screen.findAllByTestId("standings-row");
+    const sonnet = rows.find((r) => r.getAttribute("data-subject") === "claude-sonnet-5")!;
+    // Post = mean of the COMBINED block (0.5, 0.5) = 0.500 — NOT the Gemini-only 0.700.
+    expect(within(sonnet).getByTestId("standings-score")).toHaveTextContent("0.500");
+    // The judge selector frames both judges as co-equal components (not ranking/validation).
+    const sel = screen.getByTestId("sel-judge");
+    expect(within(sel).getByText(/gemini \(component\)/)).toBeInTheDocument();
+    expect(within(sel).getByText(/opus \(component\)/)).toBeInTheDocument();
+    // The component caption replaces the "validation … ranking stays on Gemini" copy.
+    expect(screen.getByTestId("component-caption")).toHaveTextContent(/component judge/i);
   });
 
   it("renders the dense columns (Initial / Post / Δ + per-framing) at a glance", async () => {

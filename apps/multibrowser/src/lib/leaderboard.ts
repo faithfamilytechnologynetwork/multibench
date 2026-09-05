@@ -34,12 +34,16 @@ export interface Standing {
   nContributing: number;
 }
 
-/** The judge model that ranks the leaderboard: the manifest's `rankable` judge (Gemini).
- *  `rankable` is the static ranking role (#110), decoupled from the earned `fullGrid` coverage
- *  badge — a validation judge that reaches full coverage must NOT start ranking. Falls back to the
- *  first full-grid judge for pre-#110 manifests (which have no `rankable`), then to Gemini. */
+/** The reserved shard key for the combined two-judge block (#120) — mirrors the exporter's
+ *  `COMBINED_KEY`; it is a top-level shard field + the manifest `ranking.score_key`, never a judge. */
+export const COMBINED_SCORE_KEY = "combined";
+
+/** The key the leaderboard ranks on. Since #120 that is the manifest's `ranking.score_key` (the
+ *  combined two-judge mean). For a LEGACY manifest with no `ranking`, fall back to the static
+ *  `rankable` judge (#110), then the first full-grid judge, then Gemini. */
 export function rankingJudgeModel(manifest: ResultsManifest): string {
   return (
+    manifest.ranking?.scoreKey ??
     manifest.judges.find((j) => j.rankable)?.model ??
     manifest.judges.find((j) => j.fullGrid)?.model ??
     "gemini-3.6-flash"
@@ -85,6 +89,19 @@ export function traditionValue(
   shard: ResultsShard, judgeModel: string, subject: string, framing: string,
   metric: Metric, pressure: string, expectedCells: number,
 ): TraditionValue | null {
+  // #120: the combined block is a separate top-level field (no judge axis). When the caller ranks
+  // on the combined key, read it instead of `means[judge]` — so the board's aggregation path is
+  // otherwise unchanged and the per-judge drill-down still resolves each real judge below.
+  if (judgeModel === COMBINED_SCORE_KEY) {
+    if (metric === "steadfastness") {
+      const cell = shard.combinedSteadfastness?.[subject]?.[framing]?.[pressure];
+      if (!cell) return null;
+      return { tradition: shard.tradition, value: cell[0], nJudged: cell[1], nExpected: expectedCells };
+    }
+    const cell = shard.combined?.[subject]?.[framing]?.[metric]?.[pressure];
+    if (!cell) return null;
+    return { tradition: shard.tradition, value: cell[0], nJudged: cell[1], nExpected: cell[2] };
+  }
   if (metric === "steadfastness") {
     const cell = shard.steadfastness?.[judgeModel]?.[subject]?.[framing]?.[pressure];
     if (!cell) return null;
