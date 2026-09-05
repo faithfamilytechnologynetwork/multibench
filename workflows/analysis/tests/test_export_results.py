@@ -418,12 +418,14 @@ def test_judge_coverage_is_pooled_fraction():
 
 
 def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None,
-                          opus_skip_subjects: tuple = ()):
+                          opus_skip_subjects: tuple = (), score_fn=None):
     """A COMPLETE Gemini grid + a (by default COMPLETE) Opus grid over 2 scenarios.
 
     ``opus_drop`` optionally omits one Opus (subject, framing, scope, pressure, scenario) cell;
     ``opus_skip_subjects`` omits whole subjects from the Opus layer (to test the DECLARED-universe
-    coverage denominator: Gemini's report still declares all 5 subjects).
+    coverage denominator: Gemini's report still declares all 5 subjects). ``score_fn(sub, subj, fr,
+    scope, pr, sc) -> float`` sets per-cell scores (default: a flat 0.5); pass a varying one to
+    exercise aggregation with non-uniform, judge-differing data.
     """
     scenarios = ["T-1", "T-2"]
     for judge, sub in (("gemini-run", "gemini-3.6-flash"), ("opus-run", "claude-opus-4-8")):
@@ -439,7 +441,8 @@ def _write_two_full_grids(root: Path, *, opus_drop: tuple | None = None,
                         for sc in scenarios:
                             if judge == "opus-run" and opus_drop == (subj, fr, scope, pr, sc):
                                 continue
-                            rows.append(_row(subj, sc, pr, fr, scope, sub, 0.5, f"{judge}{i}"))
+                            score = 0.5 if score_fn is None else score_fn(sub, subj, fr, scope, pr, sc)
+                            rows.append(_row(subj, sc, pr, fr, scope, sub, score, f"{judge}{i}"))
                             i += 1
         (d / "judgments.jsonl").write_text(
             "".join(json.dumps(r) + "\n" for r in rows), encoding="utf-8")
@@ -866,7 +869,16 @@ def test_combined_stats_reconciles_with_export(tmp_path):
     # combined mean-of-means — both are the mean over traditions of the combined by_framing[full],
     # from the SAME cell_scores reducer (no second averaging implementation).
     from analysis.combined_stats import build_combined_stats, export_combined_mean_of_means
-    root = _write_two_full_grids(tmp_path)
+    # Non-uniform, judge-differing scores (from the valid discrete set) so the reconciliation
+    # actually exercises the aggregation — a flat fixture couldn't tell the two paths apart. The
+    # combined cell = (gemini+opus)/2 varies by framing and scenario.
+    _GEM = {"unstated": {"T-1": 0.0, "T-2": 0.5}, "stated": {"T-1": 0.5, "T-2": 1.0},
+            "guided": {"T-1": 1.0, "T-2": 0.5}}
+    _OPUS = {"unstated": {"T-1": -0.5, "T-2": 0.0}, "stated": {"T-1": 0.0, "T-2": 0.5},
+             "guided": {"T-1": 0.5, "T-2": 1.0}}
+    def score_fn(sub, subj, fr, scope, pr, sc):
+        return (_GEM if sub == "gemini-3.6-flash" else _OPUS)[fr][sc]
+    root = _write_two_full_grids(tmp_path, score_fn=score_fn)
     roots = [str(root / "gemini-run"), str(root / "opus-run")]
     bundle = build_combined_stats(roots, n_boot=20)  # n_boot small: point estimate is boot-independent
     mom = export_combined_mean_of_means(roots)
@@ -874,6 +886,11 @@ def test_combined_stats_reconciles_with_export(tmp_path):
     for k in mom:  # reconcile to fp tolerance (both from cell_scores, so exact in practice)
         assert bundle["subj_overall_point"][k] == pytest.approx(mom[k], abs=1e-12)
     assert set(mom) == {f"{s}|{fr}" for s in CANONICAL_SUBJECTS for fr in ("unstated", "stated", "guided")}
+    # Sanity: the fixture is genuinely non-uniform, so a constant-output bug in either path would
+    # fail the reconciliation above. combined unstated = mean(T-1 (0+-0.5)/2=-0.25, T-2 (0.5+0)/2=0.25)
+    # = 0.0; combined guided = mean(T-1 (1+0.5)/2=0.75, T-2 (0.5+1)/2=0.75) = 0.75.
+    assert mom["claude-sonnet-5|unstated"] == pytest.approx(0.0)
+    assert mom["claude-sonnet-5|guided"] == pytest.approx(0.75)
 
 
 def test_combined_stats_cli(tmp_path):
@@ -920,17 +937,31 @@ _V2_BUNDLE = _MERGED / "analysis-out" / "figures-report-v2" / "stats_bundle.json
 
 @pytest.mark.skipif(not (_V3_BUNDLE.is_file() and _V2_BUNDLE.is_file()),
                     reason="v2/v3 stats bundles not present")
-def test_v3_bundle_matches_v2_schema_and_dual_judge():
-    """v3 must keep v2's schema (so paper_figs_multibench.py runs unchanged) and its `dual_judge`
-    must be byte-identical to v2's — dual_judge is a RAW Gemini-vs-Opus validation section the
-    combined rule does not touch, so a divergence means the combined `merged` leaked into the
-    agreement inputs (the phase_3 review bug). The score aggregates, by contrast, MUST differ."""
+def test_v3_bundle_schema_and_dual_judge_recompute():
+    """v3 keeps v2's top-level schema (so paper_figs_multibench.py runs unchanged); its dual_judge
+    per-judge subsections stay RAW Gemini-vs-Opus (not polluted by the combined score); and
+    `dual_judge.full_grid` is RECOMPUTED on the COMPLETED grid (architect 2026-09-05), with v2's
+    partial-Opus full_grid preserved under a labelled legacy key. Score aggregates ARE combined."""
     v2 = json.loads(_V2_BUNDLE.read_text())
     v3 = json.loads(_V3_BUNDLE.read_text())
-    assert sorted(v2) == sorted(v3)                      # same top-level keys
-    assert v3["dual_judge"] == v2["dual_judge"]          # per-judge section unchanged (incl. route_bridge/full_grid)
-    assert v3["meta"] == v2["meta"]                      # meta unchanged
-    assert v3["subj_overall"] != v2["subj_overall"]      # score aggregates ARE combined (differ)
+    assert sorted(v2) == sorted(v3)                       # same top-level keys
+    assert v3["meta"] == v2["meta"]                       # meta unchanged
+    assert v3["subj_overall"] != v2["subj_overall"]       # score aggregates ARE combined (differ)
+    dj2, dj3 = v2["dual_judge"], v3["dual_judge"]
+    # The raw per-judge subsections are unchanged from v2 (combined rule does not touch them).
+    for key in ("unstated", "framings_sample", "unstated_rank", "framings_tier", "route_bridge"):
+        assert dj3[key] == dj2[key], key
+    # full_grid recomputed on the completed grid: its n exceeds v2's partial-Opus n (the 33 recovered
+    # cells), and v2's block is preserved verbatim under the legacy key.
+    assert dj3["full_grid"]["overall"]["n"] > dj2["full_grid"]["overall"]["n"]  # 93,418 > 93,385
+    assert dj3["full_grid_v2_partial"] == dj2["full_grid"]                       # labelled legacy
+    # Reconcile the recompute with the paper's reported full-grid agreement (docs/analysis/
+    # 110-dual-judge-fullgrid-summary.md), which was computed at n=93,385 — so per-framing r matches
+    # to within the shift from the 33 recovered cells (<=0.005), and overall r/within are unchanged.
+    fg = dj3["full_grid"]
+    assert fg["overall"]["r"] == pytest.approx(0.833, abs=0.003)
+    for framing, r_doc in (("unstated", 0.854), ("stated", 0.825), ("guided", 0.683)):
+        assert fg[framing]["r"] == pytest.approx(r_doc, abs=0.005), framing
 
 
 # ── CLI command-level test ────────────────────────────────────────────────────────

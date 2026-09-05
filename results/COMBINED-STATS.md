@@ -35,12 +35,16 @@ The full paper bundle (`tier`, `trad_pooled`, `subj_overall`, `model_tier`,
 the accumulators receive canonical **combined cell values** (`build_combined_runs` + `cell_scores`,
 imported from `analysis` — no second dedup/averaging). Every score aggregate becomes combined
 automatically. **`dual_judge`** is a RAW Gemini-vs-Opus validation section that the combined rule
-does **not** touch, so v3 **reuses v2's `dual_judge` block verbatim** (including the
-`route_bridge`/`full_grid` subsections added by `refresh_dualjudge_stats.py`) rather than
-recomputing it from the combined grid — otherwise the Gemini side of the agreement would be polluted
-by the combined mean (inflating the inter-judge `r`). `meta` is unchanged too, so the bundle keeps
-the exact v2 schema and `tmp/paper_figs_multibench.py` runs unchanged. Guarded by
-`test_v3_bundle_matches_v2_schema_and_dual_judge`.
+does **not** touch (it must compare the two judges against each other, never against their mean).
+Its per-judge subsections (`unstated`, `framings_sample`, `unstated_rank`, `framings_tier`,
+`route_bridge`) are reused from v2 verbatim; its **`full_grid`** subsection is **recomputed on the
+completed grid** (architect, 2026-09-05) — raw Gemini vs raw Opus over every double-judged cell
+(n=93,418 after the #120 re-judge, vs v2's partial-Opus n=93,385), using the exact `agree()`
+convention from `docs/analysis/110-dualjudge-fullgrid-figs.py`. v2's partial-Opus `full_grid` is
+preserved under the labelled legacy key **`full_grid_v2_partial`**. `meta` is unchanged, so the
+bundle keeps the exact v2 schema and `tmp/paper_figs_multibench.py` runs unchanged. Guarded by
+`test_v3_bundle_schema_and_dual_judge_recompute` (reconciles the recomputed agreement with the
+paper's reported r=0.833 / 0.854 / 0.825 / 0.683±).
 
 ```bash
 uv --project workflows/analysis run python ../../tmp/report_figs_20260803_v3.py

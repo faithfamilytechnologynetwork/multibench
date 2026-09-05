@@ -141,9 +141,16 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   `merged` → compared combined-vs-Opus (r 0.854→0.956). FIXED: v3 reuses v2's dual_judge verbatim
   (raw Gemini-vs-Opus, incl route_bridge/full_grid). Added guard test (v3/v2 schema + dual_judge
   identical + subj_overall differs). Float == → approx.
-  ⚠️ ARCHITECT DECISION FLAGGED: v2 dual_judge.full_grid was computed when Opus was PARTIAL; now
-  full-grid the true agreement is n=93,418 r=0.833. Reuse-v2 (default) vs recompute-on-grid — their
-  call (paper figure). If recompute: use refresh_dualjudge_stats.py mechanism.
+- phase_3 iter2: BOTH APPROVE (on reuse-v2). Then ARCHITECT DECIDED: RECOMPUTE dual_judge.full_grid
+  on the completed grid.
+- DONE: v3 dual_judge.full_grid recomputed (raw Gemini vs raw Opus over 93,418 double-judged cells,
+  agree() from 110-dualjudge-fullgrid-figs.py): overall n=93,418 r=0.833 bias=-0.031 within 94.0;
+  by-framing r 0.854/0.825/0.684 (guided +0.001 vs doc's 0.683 from the 33 recovered cells); guided
+  within 95.4. v2's partial block → `full_grid_v2_partial` (n=93,385). Other dual_judge subsections
+  reused from v2 verbatim. Dead gem_lut block deleted from v3 script; stale fig PNGs removed.
+  Reconciliation fixture strengthened (varied valid scores). Test asserts recompute vs doc ≤0.005.
+- ⚠️ FLAGGED: docs/analysis/110-dual-judge-fullgrid-summary.md now stale (residual 35→2, n
+  93,385→93,418, guided 0.683→0.684) — paper content, architect's call to update.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
