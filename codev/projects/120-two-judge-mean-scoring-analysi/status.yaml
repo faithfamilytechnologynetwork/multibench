@@ -1,16 +1,34 @@
 id: '120'
 title: two-judge-mean-scoring-analysi
 protocol: aspir
-phase: plan
-plan_phases: []
-current_plan_phase: null
+phase: implement
+plan_phases:
+  - id: phase_1
+    title: Complete the two-judge grid (re-judge missing cells)
+    status: in_progress
+  - id: phase_2
+    title: Combined block + ranking declaration in both exporters
+    status: pending
+  - id: phase_3
+    title: Combined ranked-stats capability + v3 stats bundle
+    status: pending
+  - id: phase_4
+    title: Additive re-export of results/20260803
+    status: pending
+  - id: phase_5
+    title: Leaderboard ranks on the combined score (SPA)
+    status: pending
+  - id: phase_6
+    title: Docs + HOT mirrors
+    status: pending
+current_plan_phase: phase_1
 gates:
   pr:
     status: pending
   verify-approval:
     status: pending
 iteration: 1
-build_complete: true
+build_complete: false
 history: []
 started_at: '2026-09-04T23:54:27.145Z'
-updated_at: '2026-09-05T00:23:02.320Z'
+updated_at: '2026-09-05T00:33:36.163Z'
