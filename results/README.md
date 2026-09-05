@@ -160,6 +160,30 @@ Spec 55) — one row per subject:
 
 ## Published runs
 
+- **`20260905`** — the **8-row cross-faith superset** (Spec 119): the seven record traditions **plus
+  [`protestant-unified`](../../traditions/protestant-unified/)** as the 8th row, ranked on the
+  **combined two-judge mean** (#120/#121). The seven record shards are **byte-identical** to
+  `20260803` (only `protestant-unified` is new); it is the **newest run**, so the SPA shows it as the
+  default 8-row leaderboard. Produced by appending the `protestant-unified` root to the four record
+  roots, in load-bearing order:
+
+  ```bash
+  uv --project workflows/analysis run python -m analysis export \
+    tmp/judging-runs/20260803-merged \
+    tmp/judging-runs/20260803-unstated-opus \
+    tmp/judging-runs/20260803-framings-opus-sample \
+    tmp/judging-runs/20260823-opus-fullgrid \
+    tmp/judging-runs/20260904-protestant-unified \
+    --run-id 20260905 --single-judge-attempts 3 --out results
+  # matching raw tier (equal source fingerprint):  analysis export-raw <same roots> --run-id 20260905
+  ```
+
+  Paper numbers + figures for this run: [`docs/analysis/protestant-unified-round.md`](../docs/analysis/protestant-unified-round.md).
+  The retired **`protestantism` monolith is excluded** from this run's inputs (superseded by
+  `protestant-unified` for cross-faith scoring); its own committed tiers (`20260813-protestantism`,
+  score + raw) are untouched and still discovered/resolved by the SPA — retirement is operational,
+  not a deletion.
+
 - **`20260803`** — the benchmark-of-record (7 traditions / 519 scenarios), the paper's snapshot.
   Ranked on the **two-judge mean** (#120). The **Gemini per-judge values stay byte-identical** across
   re-exports (guarded by the paper-reconciliation test); the **Opus** per-judge block changes only
@@ -181,6 +205,11 @@ Spec 55) — one row per subject:
   run. Both judges are complete full grids (18000/18000 each). This run predates #120 and carries
   **no `ranking` declaration or `combined` block**, so the leaderboard **falls back to Gemini** for
   it (the legacy path); Opus remains a per-cell validation layer here.
+
+  *Retired from active cross-faith scoring (Spec 119, 2026-09-05):* the `protestantism` monolith is
+  **superseded by `protestant-unified`** and is **not an input** to the `20260905` cross-faith run.
+  This run's committed score + raw tiers stay in place and remain SPA-discoverable/browsable — the
+  retirement is operational, not a deletion. See [`traditions/protestantism/README.md`](../traditions/protestantism/README.md).
 
   *Provenance note (two-key Opus path):* the Opus grid was completed in two stages under one model
   (Claude Opus 4.8). The first ~46 % (8280 cells, PRO-057…100 plus a partial ramp) came from
