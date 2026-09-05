@@ -202,6 +202,23 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   page-level (board ranks combined, component labels/caption). typecheck clean. multibrowser 407,
   analysis 266.
 - NO invented combined leaderboard pin (architect adds after paper numbers accepted).
+- phase_5 iter2: BOTH APPROVE.
+
+## Phase 6 — DONE (docs + HOT mirrors + review)
+- results/README.md: rewrote all Gemini-only-ranking assertions → two-judge mean; added a `ranking`
+  schema-table row + a `combined` shard-doc block; noted the gate guards a component; dated #120
+  revision note (both tiers re-stamped fingerprint; Railway baked bundle stale until redeploy);
+  linked COMBINED-STATS.md.
+- arch-critical.md: leaderboard fact → two-judge mean (Spec 49/110/120). Regenerated CLAUDE.md +
+  AGENTS.md HOT CONTEXT mirrors verbatim.
+- Found + fixed a PRE-EXISTING #110 governance drift: lessons-learned.md "Metadata contracts & paper
+  deliverables (#110)" section was missing from the lessons-critical.md map → added it. Governance
+  test now 9/9 (was 3 failing: 2 mirror-stale from my arch edit + this pre-existing map drift).
+- docs/analysis/110-dual-judge-fullgrid-summary.md: supersedes note w/ completed-grid numbers
+  (residual 2, matched 93,418, guided r 0.684, within 94.0) — architect task done.
+- codev/reviews/120-*.md written (verification evidence, spend, residual cells, dual_judge recompute,
+  deploy note, lessons).
+- ALL 6 phases complete. Next: open PR.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).
