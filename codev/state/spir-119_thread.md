@@ -446,3 +446,18 @@ hand arithmetic):
 Final figures: run $328.28/$345.37, smoke $9.10/$9.61, probe $1.23 (live, over cap), **all-in
 $338.61 (floor) / $356.20 (likely actual)** — under $450 alert. Rebuttal
 `119-phase_4-iter2-rebuttals.md`. Notified architect of the cap breach. Re-consulting (iter3).
+
+## 2026-09-05 — Phase 4 consult iter3 APPROVED + architect notes rework
+- **iter3: codex APPROVE ("None"), claude APPROVE.** Run verified complete/correct; all reconciliation
+  figures match to the cent. claude's 3 non-blocking nits all folded in below.
+- **Architect ratified the probe cap overage** (2026-09-05T07:08:25Z, "$1.23 vs $1 cap RATIFIED, no
+  rework"). Recorded in Gate log + probe section.
+- **Architect notes-format instruction applied:** ONE figure of record = **$338.62** usage-computed
+  **billed actual** ($328.28 run + $9.10 smoke + $1.24 probe). Spend table is billed-only; the
+  standard-rate recompute is now a single labeled footnote ("what-if: OpenRouter standard rates for
+  the 2 promo-priced subjects, for invoice reconciliation only" → $356.21), out of the table/summaries.
+- **claude cent-fix:** probe row now $1.24 = $1.2282 CEFE Opus + $0.0070 qwen collection (the $0.007
+  the earlier stale report showed); all-in $338.61 → **$338.62**. CEFE-cap quantity stays $1.23.
+- **Carry-forward (claude nit #2):** `experiments/119_protestant_unified/` uses the issue number;
+  spec/plan say `experiments/<PR#>_…`. Rename to the PR number at PR time (before Phase 6 fills it).
+- Phase 4 substantively COMPLETE + approved. Still HOLDING before Phase 5 per architect standing order.
