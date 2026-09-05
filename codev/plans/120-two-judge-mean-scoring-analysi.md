@@ -336,7 +336,8 @@ Update governance/docs to describe two-judge-mean ranking and keep the HOT mirro
 
 - `results/README.md`: correct **every** Gemini-only-ranking assertion (intro, `judges`
   schema-table row, leaderboard + published-runs sections); add a schema-table row for `ranking`;
-  note the strict full-grid gate now guards a **component** of the ranked score.
+  note the strict full-grid gate now guards a **component** of the ranked score; **link
+  `results/COMBINED-STATS.md`** (currently unreferenced).
 - `codev/resources/arch-critical.md`: update the one leaderboard fact line (ranks on the two-judge
   mean; gate guards a component).
 - `docs/analysis/110-dual-judge-fullgrid-summary.md` (architect task, 2026-09-05): update to the

@@ -955,6 +955,11 @@ def test_v3_bundle_schema_and_dual_judge_recompute():
     # cells), and v2's block is preserved verbatim under the legacy key.
     assert dj3["full_grid"]["overall"]["n"] > dj2["full_grid"]["overall"]["n"]  # 93,418 > 93,385
     assert dj3["full_grid_v2_partial"] == dj2["full_grid"]                       # labelled legacy
+    # The recomputed full_grid keeps ALL of v2's subkeys (incl. `rank`: order/order_identical/
+    # per-subject means) — so the narrowing that dropped `rank` can't recur.
+    assert set(dj3["full_grid"]) >= set(dj2["full_grid"]), sorted(dj2["full_grid"])
+    assert set(dj3["full_grid"]["rank"]) == {"unstated", "stated", "guided"}
+    assert all("order_identical" in dj3["full_grid"]["rank"][f] for f in ("unstated", "stated", "guided"))
     # Reconcile the recompute with the paper's reported full-grid agreement (docs/analysis/
     # 110-dual-judge-fullgrid-summary.md), which was computed at n=93,385 — so per-framing r matches
     # to within the shift from the 33 recovered cells (<=0.005), and overall r/within are unchanged.
