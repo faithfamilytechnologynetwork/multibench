@@ -78,10 +78,27 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
   no git-diff-subtree). Gemini byte-identical; Opus delta bounded to touched slices.
 - Backup judgments.jsonl before in-place appends.
 
-### ⚠️ BLOCKING before Phase 1 spend — architect confirmation (flagged, held msg):
-1. #2 vs #7 conflict (Opus byte-identical vs +35 verdicts) — do NOT auto-resolve.
-2. Per-cell routing (unstated 26 → unstated-opus, not fullgrid).
-3. dual_judge stays on sample roots (reads oddly once Opus complete)?
+### Architect confirmations (2026-09-05)
+1. #2 vs #7: CONFIRMED — #7 governs; Gemini byte-identical, Opus changes only in grid-completion
+   cells, combined new. Phase 4 asserts Opus diff bounded.
+2. Per-cell routing: proceeded (unstated → unstated-opus, s/g → fullgrid; forced — fullgrid has no
+   unstated sittings). Flagged, not objected.
+3. dual_judge on sample roots: deferred to Phase 3.
+4. 2 residual single-judge cells: APPROVED to proceed; record cell ids + attempt count in manifest
+   `single_judge_cells` + review; do NOT impute.
+
+## Phase 1 — DONE (grid completion)
+- Verified 35 missing Opus cells = 34 sittings; built filtered sittings; pre-spend assert ==35.
+- Re-judged 33/35 over 3 passes (backups taken; v2 untouched; rejudge_cells=0).
+- **2 residual single-judge cells** (persistent empty/truncated Opus, ≥9 attempts each; reported,
+  not imputed): judaism|MSR-025|insistence|unstated|full ; sunni-islam|JLS-122|flattery|guided|full.
+- Spend ≈ $14-17 (≤$20): $11.02 successful (usage-computed, Opus4.x rates) + ~$3-6 failed overhead.
+- **single_judge_cells becomes a STRUCTURED object** (architect): {count, attempts, cells[...]},
+  not a bare int — carry into Phase 2/4 manifest.
+- Committed: results/REJUDGE-20260803.md, test_grid_completeness.py (skips where roots absent).
+- Data lives in gitignored ../../tmp (NOT committed).
+
+## Status: implement phase_1 complete → porch done → phase_2.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).

@@ -137,8 +137,13 @@ the per-judge blocks or any existing guard.
   - `serialize_tradition`: write top-level `"combined"` and `"combined_steadfastness"` fields
     (NOT inside `means`); `means`/`judges` unchanged.
   - `build_manifest`: add `ranking = {"rule": "mean_of_judges", "score_key": COMBINED_KEY,
-    "judges": [<real judges>], "single_judge_cells": N}` (N = cells with exactly one judge, both
-    scopes). Re-shape the gate: replace "exactly one `rankable`" with "**≥1 real judge strictly
+    "judges": [<real judges>], "single_judge_cells": {...}}`. Per the architect (2026-09-05),
+    `single_judge_cells` is a **structured object**, not a bare int:
+    `{"count": N, "attempts": <re-judge attempts>, "cells": [{tradition, subject, scenario_id,
+    pressure, framing, scope, judge_present}, …]}` — recording each residual cell id. For
+    `20260803`, N=2 (the two persistent Opus empties from Phase 1). The exporter computes the
+    cells whose combined score rests on a single judge; the `attempts` value is carried from the
+    re-judge runbook (a manifest annotation, since attempts aren't in the verdict rows). Re-shape the gate: replace "exactly one `rankable`" with "**≥1 real judge strictly
     complete**" (`_assert_full_grid` on ≥1 real judge); keep `rankable`/`full_grid`/`coverage`
     per-judge metadata. The combined key never enters `TraditionExport.judges`, the shard `judges`
     list, `_coverage_from_exports`, or `JUDGE_UI[...]`.
