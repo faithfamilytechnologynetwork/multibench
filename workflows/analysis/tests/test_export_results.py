@@ -471,7 +471,7 @@ def test_no_strictly_complete_judge_fails_fast(tmp_path):
         lines = p.read_text().splitlines()
         p.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
     exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="incomplete coverage"):
+    with pytest.raises(AnalysisInputError, match="no strictly-complete real judge"):
         build_manifest(exports, run_id="r", generated_at="t")
 
 
@@ -550,7 +550,8 @@ def test_single_judge_cell_uses_lone_verdict_and_diverges():
     combined = exp.combined_means[(S, FR, SCP, PR)].mean         # (0.6 + 0.2)/2 = 0.4
     assert combined == pytest.approx(0.4)
     assert combined != pytest.approx((gem + opus) / 2)           # diverges (0.4 != 0.45)
-    assert (S, "T-2", PR, FR, SCP) in exp.single_judge_cells
+    # single-judge cell carries the PRESENT judge (T-2 was gemini-only)
+    assert (S, "T-2", PR, FR, SCP, "gemini-3.6-flash") in exp.single_judge_cells
 
 
 def test_combined_block_serialized_separately_from_means():
@@ -590,7 +591,29 @@ def test_single_judge_cells_recorded_in_manifest(tmp_path):
     assert sj["cells"][0] == {
         "tradition": _TRAD, "subject": "claude-sonnet-5", "scenario_id": "T-1",
         "pressure": "secularize", "framing": "unstated", "scope": "full",
+        "judge_present": "gemini-3.6-flash",  # Opus cell dropped → only Gemini scored it
     }
+
+
+def test_single_judge_cells_list_is_capped(tmp_path):
+    # A pathological single-judge run would enumerate ~93k cells and blow the manifest ceiling;
+    # the count stays exact but the cell list is capped + flagged truncated.
+    from analysis.export_results import SINGLE_JUDGE_CELLS_CAP, ranking_declaration
+    cells = [{"tradition": "t", "subject": f"s{i}"} for i in range(SINGLE_JUDGE_CELLS_CAP + 10)]
+    r = ranking_declaration(cells, ["claude-opus-4-8"])
+    assert r["single_judge_cells"]["count"] == SINGLE_JUDGE_CELLS_CAP + 10  # exact
+    assert len(r["single_judge_cells"]["cells"]) == SINGLE_JUDGE_CELLS_CAP  # capped
+    assert r["single_judge_cells"]["cells_truncated"] is True
+
+
+def test_build_manifest_empty_judges_fails_fast():
+    # An export with no judges (e.g. an empty judgments.jsonl) must fail-fast with a clear error,
+    # not an IndexError.
+    rep = _report(["T-1"], list(CANONICAL_SUBJECTS), ["gemini-3.6-flash"])
+    raw = RawTradition(tradition=_TRAD, base=[], v2=[], report=rep)
+    exports = {_TRAD: build_tradition_export(_TRAD, [raw])}
+    with pytest.raises(AnalysisInputError, match="no judges in the export"):
+        build_manifest(exports, run_id="r", generated_at="t")
 
 
 def _one_row_tradition(score: float, ts: str) -> RawTradition:
@@ -748,7 +771,8 @@ def test_build_manifest_rejects_incomplete_full_grid(tmp_path):
     ]
     gpath.write_text("\n".join(kept) + "\n", encoding="utf-8")
     exports = build_corpus_export([src / "gemini-run", src / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="incomplete coverage"):
+    # Gemini now incomplete AND the Opus validation layer is a partial sample → NO complete judge.
+    with pytest.raises(AnalysisInputError, match="no strictly-complete real judge"):
         build_manifest(exports, "r1", "2026-08-06T00:00:00+00:00")
 
 

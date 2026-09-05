@@ -13,10 +13,11 @@ alias collision + the ``judgments_v2.jsonl`` overlay, and produces per-tradition
 
 Aggregation reuses the canonical semantics in :mod:`analysis.aggregate`
 (``cell_scores`` + ``breakdown_mean``): a breakdown is the unweighted mean of the
-in-scope cells, uncovered cells excluded (never 0). Because the leaderboard ranks on
-Gemini (a full grid), the SPA's only cross-tradition statistic is an equal-weight mean
-of these per-tradition means — which reconciles with the paper's ``subj_overall`` by
-construction (see the parity self-check in the tests).
+in-scope cells, uncovered cells excluded (never 0). Since #120 the leaderboard ranks on the
+**combined** two-judge mean (a separate top-level shard block, the ``ranking.score_key``), so the
+SPA's only cross-tradition statistic is an equal-weight mean of these per-tradition combined means
+— which reconciles with the paper's combined ``subj_overall`` by construction (parity self-checks
+in the tests). Per-judge blocks are still emitted for the selector.
 
 This module owns the whole score tier: the pure transform (normalize → resolve → aggregate) plus
 the manifest builder and the committed-dataset writer (``build_manifest`` / ``write_dataset`` /
@@ -75,12 +76,12 @@ _JUDGE_ALIAS: dict[str, str] = {
 }
 _JUDGE_ALIAS.update({canon: canon for canon in _JUDGE_VARIANTS})
 
-# Short UI keys the SPA uses in deep-links / the judge selector, and whether the judge is
-# **rankable** — the leaderboard ranks on the single rankable judge (Gemini). `rankable` is a
-# STATIC property of the judge's ROLE and is deliberately decoupled from `full_grid` (#96): a
-# validation judge that reaches full-grid coverage earns the `full_grid` *badge* but must NEVER
-# become rankable. `full_grid` itself is no longer stored here — it is EARNED per run from actual
-# coverage (see `earns_full_grid`); this dict carries only the stable key + ranking role.
+# Short UI keys the SPA uses in deep-links / the judge selector, plus a LEGACY `rankable` flag.
+# Since #120 the leaderboard ranks on the COMBINED two-judge mean (the manifest `ranking`
+# declaration), not on a single judge — so `rankable` is no longer a gate; it is retained only as
+# optional selector/old-manifest-fallback metadata (a pre-#120 manifest with no `ranking` still
+# ranks on the `rankable` judge). `full_grid` is not stored here — it is EARNED per run from actual
+# coverage (see `earns_full_grid`); this dict carries only the stable key + the legacy flag.
 JUDGE_UI: dict[str, dict] = {
     "gemini-3.6-flash": {"key": "gemini", "rankable": True},
     "claude-opus-4-8": {"key": "opus", "rankable": False},
@@ -89,8 +90,8 @@ JUDGE_UI: dict[str, dict] = {
 # A judge earns the `full_grid` badge when it covered every framing at full-grid scale. Coverage
 # is never a clean 100% (judges persistently refuse / emit unparseable verdicts on a few cells),
 # so the badge is TOLERANT: all three framings present with per-framing coverage >= this floor.
-# It cleanly separates a designed sub-sample (~0.14) from a full-grid layer (~0.999). Ranking
-# eligibility stays strict — a `rankable` judge must be strictly complete (`_assert_full_grid`).
+# It cleanly separates a designed sub-sample (~0.14) from a full-grid layer (~0.999). The combined
+# ranking's gate stays strict — it needs >=1 real judge strictly complete (`_assert_full_grid`).
 FULL_GRID_MIN_COVERAGE = 0.95
 
 
@@ -354,8 +355,8 @@ class TraditionExport:
     # `means`), so the per-judge blocks + every shard/coverage guard are untouched by construction.
     combined_means: dict[tuple, Slice] = field(default_factory=dict)  # (subject, framing, scope, pressure)
     combined_steadfastness: dict[tuple, Steadfastness] = field(default_factory=dict)  # (subject, framing, pressure)
-    # cells scored by exactly ONE judge (subject, scenario_id, pressure, framing, scope) — the
-    # combined score rests on a single verdict here; disclosed in the manifest `ranking`.
+    # cells scored by exactly ONE judge (subject, scenario_id, pressure, framing, scope,
+    # judge_present) — the combined score rests on that one verdict; disclosed in `ranking`.
     single_judge_cells: tuple[tuple, ...] = ()
 
 
@@ -503,13 +504,16 @@ def build_tradition_export(tradition: str, raws: list[RawTradition],
                         n_expected=n_expected,
                     )
 
-    # Cells scored by exactly one judge (the combined score rests on a single verdict there).
+    # Cells scored by exactly one judge (the combined score rests on a single verdict there) —
+    # carry the present judge so the manifest can disclose `judge_present` per cell.
     judges_by_cell: dict[tuple, set[str]] = {}
     for j in judgments:
         judges_by_cell.setdefault(
             (j["subject"], j["scenario_id"], j["pressure"], j["framing"], j["scope"]), set()
         ).add(j["judge"])
-    single_judge_cells = tuple(sorted(c for c, js in judges_by_cell.items() if len(js) == 1))
+    single_judge_cells = tuple(
+        sorted((*c, next(iter(js))) for c, js in judges_by_cell.items() if len(js) == 1)
+    )
 
     return TraditionExport(
         tradition=tradition,
@@ -726,10 +730,11 @@ def _is_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> bool
 
 def _assert_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> None:
     """Fail-fast unless *judge_model* covered the COMPLETE grid — every tradition × subject ×
-    framing × scope × pressure. This is the STRICT gate for a **rankable** judge (Gemini): the
-    leaderboard ranks on it, so its grid must have no gaps. (The tolerant `full_grid` *badge* for
-    validation judges is a separate, earned signal — see ``earns_full_grid``.) Coverage is checked
-    per specific pressure (n_judged == n_scenarios) across every subject/framing/scope, per tradition.
+    framing × scope × pressure. Since #120 the combined ranking requires **≥1** real judge to be
+    strictly complete (``build_manifest`` calls ``_is_full_grid`` per judge); this is that strict
+    check. (The tolerant `full_grid` *badge* is a separate earned signal — see ``earns_full_grid``.)
+    Coverage is checked per specific pressure (n_judged == n_scenarios) across every
+    subject/framing/scope, per tradition.
     """
     for tradition, exp in exports.items():
         for subject in exp.subjects:  # the report-declared grid (matches the coverage denominator)
@@ -746,11 +751,48 @@ def _assert_full_grid(exports: dict[str, TraditionExport], judge_model: str) -> 
                             )
 
 
+def single_judge_cell_dict(tradition: str, cell: tuple) -> dict:
+    """One `ranking.single_judge_cells.cells[]` entry from a
+    (subject, scenario_id, pressure, framing, scope, judge_present) tuple. Shared by both tiers so
+    the score and raw manifests emit the identical shape."""
+    return {
+        "tradition": tradition, "subject": cell[0], "scenario_id": cell[1],
+        "pressure": cell[2], "framing": cell[3], "scope": cell[4], "judge_present": cell[5],
+    }
+
+
+# Cap the enumerated single-judge cell list so a pathological single-judge run (every one of ~93k
+# cells single-judge) can't inflate the manifest past the size ceiling with an unrelated error. The
+# `count` is always exact; the `cells` list is truncated (with `cells_truncated`) beyond the cap.
+# The record run has 2, so its list is always complete.
+SINGLE_JUDGE_CELLS_CAP = 500
+
+
+def ranking_declaration(single_judge_cells: list[dict], judges: list[str],
+                        single_judge_attempts: int | None = None) -> dict:
+    """The manifest `ranking` block for the score tier (#120): the leaderboard ranks on the combined
+    block (`score_key`) = the mean of the listed judges per cell; `single_judge_cells` discloses
+    cells resting on one verdict (with `judge_present` + optional re-judge `attempts`). The cell list
+    is capped (count stays exact) so a single-judge run can't blow the manifest size ceiling."""
+    sj: dict = {"count": len(single_judge_cells)}
+    if len(single_judge_cells) > SINGLE_JUDGE_CELLS_CAP:
+        sj["cells"] = single_judge_cells[:SINGLE_JUDGE_CELLS_CAP]
+        sj["cells_truncated"] = True
+    else:
+        sj["cells"] = single_judge_cells
+    if single_judge_attempts is not None:
+        sj["attempts"] = single_judge_attempts
+    return {"rule": RANKING_RULE, "score_key": COMBINED_KEY, "judges": judges,
+            "single_judge_cells": sj}
+
+
 def build_manifest(exports: dict[str, TraditionExport], run_id: str,
                    generated_at: str, single_judge_attempts: int | None = None) -> dict:
     """The run-level manifest (subjects, judges, framings, pressures, scopes, counts, ranking)."""
     all_judges = sorted({j for exp in exports.values() for j in exp.judges})
     assert_uniform_subject_roster(exp.subjects for exp in exports.values())  # one uniform grid
+    if not all_judges:  # no real judge at all — nothing to aggregate or rank (fail-fast)
+        raise AnalysisInputError("no judges in the export — cannot build a manifest")
     if COMBINED_KEY in all_judges:  # the synthetic key must never be a real judge (#120)
         raise AnalysisInputError(
             f"combined score_key {COMBINED_KEY!r} collides with a real judge model — rename it")
@@ -763,11 +805,12 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
     # `rankable` is now optional/legacy metadata for the SPA selector + old-manifest fallback.
     complete = [m for m in all_judges if _is_full_grid(exports, m)]
     if not complete:
-        # Reuse _assert_full_grid's detailed message on the would-be ranking judge for a clear error.
-        _assert_full_grid(exports, all_judges[0])
-        raise AnalysisInputError(  # (unreachable if the above raised, but explicit)
+        # Report EVERY judge's coverage fraction (not one alphabetically-first judge's cell gaps), so
+        # the error names the near-complete judge rather than an arbitrary one.
+        cov = {m: round(judge_coverage(coverage, m), 4) for m in all_judges}
+        raise AnalysisInputError(
             "no strictly-complete real judge — the combined ranking needs at least one judge "
-            f"covering the full grid (judges: {all_judges})")
+            f"covering the full grid; per-judge coverage: {cov}")
     judges_meta = []
     for model in all_judges:
         ui = JUDGE_UI[model]
@@ -788,19 +831,10 @@ def build_manifest(exports: dict[str, TraditionExport], run_id: str,
     # #120 ranking declaration: the leaderboard ranks on the combined block (`score_key`), the mean
     # of the listed real judges per cell. `single_judge_cells` discloses cells resting on one verdict.
     sj_cells = [
-        {"tradition": t, "subject": c[0], "scenario_id": c[1], "pressure": c[2],
-         "framing": c[3], "scope": c[4]}
+        single_judge_cell_dict(t, c)
         for t in sorted(exports) for c in exports[t].single_judge_cells
     ]
-    single_judge = {"count": len(sj_cells), "cells": sj_cells}
-    if single_judge_attempts is not None:
-        single_judge["attempts"] = single_judge_attempts
-    ranking = {
-        "rule": RANKING_RULE,
-        "score_key": COMBINED_KEY,
-        "judges": all_judges,
-        "single_judge_cells": single_judge,
-    }
+    ranking = ranking_declaration(sj_cells, all_judges, single_judge_attempts)
     return {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,

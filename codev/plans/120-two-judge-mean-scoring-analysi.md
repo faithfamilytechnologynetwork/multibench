@@ -149,9 +149,16 @@ the per-judge blocks or any existing guard.
     list, `_coverage_from_exports`, or `JUDGE_UI[...]`.
 - `workflows/analysis/analysis/export_raw.py`: re-shape its ranking-integrity guard
   (`export_raw.py:573-588`) from "exactly one rankable, strictly complete" to "**≥1 real judge
-  strictly complete**", and emit the same `ranking` declaration in the raw manifest. **No** combined
-  per-cell block in raw shards (they carry transcripts + per-judge verdicts); raw viewer UI
-  untouched (scoped out in the spec).
+  strictly complete**", and emit a **reduced** `ranking` declaration in the raw manifest —
+  `{rule, judges}` **without** `score_key`/`single_judge_cells`. **Rationale (plan amendment, phase_2
+  review):** raw shards carry per-judge transcripts+verdicts, **no** combined per-cell block, so a
+  `score_key: "combined"` there would point at nothing; the authoritative combined ranking + the
+  single-judge accounting live in the **score** manifest. Raw viewer UI untouched (scoped out).
+- **Manifest robustness (phase_2 review):** `ranking.single_judge_cells.count` is always exact, but
+  the enumerated `cells` list is capped (`SINGLE_JUDGE_CELLS_CAP`, `cells_truncated` flag) so a
+  pathological single-judge run can't inflate the manifest past the size ceiling; `build_manifest`
+  fails fast with a clear error (not `IndexError`) on an export with no judges, and the
+  no-strictly-complete-judge error reports every judge's coverage fraction (not one arbitrary judge).
 - `workflows/analysis/tests/test_export_results.py`, `test_export_raw*.py`: new tests.
 
 #### Deliverables
