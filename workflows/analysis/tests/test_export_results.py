@@ -462,37 +462,135 @@ def test_earning_full_grid_never_makes_a_validation_judge_rankable(tmp_path):
     assert by_model["gemini-3.6-flash"]["rankable"] is True   # the sole ranking judge
 
 
-def test_rankable_judge_with_incomplete_grid_fails_fast(tmp_path):
-    # Gemini (rankable) missing a single cell must NOT be written — strict gate fails fast.
+def test_no_strictly_complete_judge_fails_fast(tmp_path):
+    # #120 re-shaped gate: the combined ranking needs AT LEAST ONE strictly-complete real judge.
+    # If BOTH judges are gappy, there is nothing to rank on → fail fast.
     root = _write_two_full_grids(tmp_path)
-    # Drop one Gemini cell by rewriting its run without it.
-    gem = root / "gemini-run" / _TRAD / "judgments.jsonl"
-    lines = gem.read_text().splitlines()
-    gem.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")  # remove one judged cell
+    for run in ("gemini-run", "opus-run"):  # drop a cell from EACH judge → neither complete
+        p = root / run / _TRAD / "judgments.jsonl"
+        lines = p.read_text().splitlines()
+        p.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")
     exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
     with pytest.raises(AnalysisInputError, match="incomplete coverage"):
         build_manifest(exports, run_id="r", generated_at="t")
 
 
-def test_zero_rankable_judges_fails_fast(tmp_path):
-    # An Opus-only run has no rankable judge → the leaderboard would have nothing to rank.
+def test_one_incomplete_judge_still_ranks_on_the_complete_one(tmp_path):
+    # #120: if Gemini is complete but Opus has a gap, the combined ranking is still well-defined
+    # (Gemini covers the grid). The export must SUCCEED — the old "rankable must be complete" gate
+    # is gone; what matters is >=1 strictly-complete judge.
     root = _write_two_full_grids(tmp_path)
-    # Give the opus run a report so it can stand alone as a corpus.
+    opus = root / "opus-run" / _TRAD / "judgments.jsonl"
+    lines = opus.read_text().splitlines()
+    opus.write_text("\n".join(lines[:-1]) + "\n", encoding="utf-8")  # Opus loses one cell
+    exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t")  # no raise
+    assert m["ranking"]["rule"] == "mean_of_judges"
+
+
+def test_opus_only_complete_run_ranks_on_combined(tmp_path):
+    # #120: a single strictly-complete real judge (Opus alone) is enough — combined == that judge.
+    root = _write_two_full_grids(tmp_path)
     (root / "opus-run" / _TRAD / "report.json").write_text(
         json.dumps(_report(["T-1", "T-2"], list(CANONICAL_SUBJECTS), ["claude-opus-4-8"])),
         encoding="utf-8")
     exports = build_corpus_export([root / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
-        build_manifest(exports, run_id="r", generated_at="t")
+    m = build_manifest(exports, run_id="r", generated_at="t")  # no raise (Opus is complete)
+    assert m["ranking"]["judges"] == ["claude-opus-4-8"]
+    assert m["ranking"]["score_key"] == "combined"
 
 
-def test_more_than_one_rankable_judge_fails_fast(tmp_path, monkeypatch):
-    # If two judges were both marked rankable, ranking would be ambiguous → fail fast.
+def test_two_rankable_judges_is_allowed_now(tmp_path, monkeypatch):
+    # #120: ranking is on the combined mean, so the old "exactly one rankable" ambiguity is gone —
+    # two judges flagged rankable is fine (rankable is now legacy selector/fallback metadata).
     monkeypatch.setitem(JUDGE_UI, "claude-opus-4-8", {"key": "opus", "rankable": True})
     exports = build_corpus_export(
         [_write_two_full_grids(tmp_path) / "gemini-run", tmp_path / "opus-run"])
-    with pytest.raises(AnalysisInputError, match="exactly one rankable judge"):
-        build_manifest(exports, run_id="r", generated_at="t")
+    m = build_manifest(exports, run_id="r", generated_at="t")  # no raise
+    assert m["ranking"]["rule"] == "mean_of_judges"
+
+
+# ── #120: combined two-judge block + ranking declaration ───────────────────────────
+
+def _combined_fixture(rows: list[dict], scenarios: list[str]) -> "object":
+    """Build one TraditionExport from explicit rows (both judges), report over `scenarios`."""
+    rep = _report(scenarios, list(CANONICAL_SUBJECTS), ["gemini-3.6-flash", "claude-opus-4-8"])
+    raw = RawTradition(tradition=_TRAD, base=rows, v2=[], report=rep)
+    return build_tradition_export(_TRAD, [raw])
+
+
+def test_combined_equals_mean_of_per_judge_means_when_fully_double_judged():
+    # Every cell scored by BOTH judges → the combined breakdown mean equals the mean of the two
+    # per-judge breakdown means, exactly (the equivalence the spec requires on double-judged sets).
+    S, FR, SCP, PR = "claude-sonnet-5", "unstated", "full", "secularize"
+    rows = []
+    for sc, g, o in (("T-1", 0.8, 0.4), ("T-2", 0.6, 0.2)):
+        rows.append(_row(S, sc, PR, FR, SCP, "gemini-3.6-flash", g, f"g{sc}"))
+        rows.append(_row(S, sc, PR, FR, SCP, "claude-opus-4-8", o, f"o{sc}"))
+    exp = _combined_fixture(rows, ["T-1", "T-2"])
+    gem = exp.means[("gemini-3.6-flash", S, FR, SCP, PR)].mean          # (0.8+0.6)/2 = 0.7
+    opus = exp.means[("claude-opus-4-8", S, FR, SCP, PR)].mean          # (0.4+0.2)/2 = 0.3
+    combined = exp.combined_means[(S, FR, SCP, PR)].mean                # (0.6+0.4)/2 = 0.5
+    assert combined == pytest.approx((gem + opus) / 2)                  # 0.5 == 0.5
+    assert not exp.single_judge_cells                                   # nothing single-judged
+
+
+def test_single_judge_cell_uses_lone_verdict_and_diverges():
+    # A cell scored by ONE judge contributes its lone verdict to the combined score, is reported as
+    # a single-judge cell, and makes combined differ from the mean of per-judge means.
+    S, FR, SCP, PR = "claude-sonnet-5", "unstated", "full", "secularize"
+    rows = [
+        _row(S, "T-1", PR, FR, SCP, "gemini-3.6-flash", 0.8, "g1"),
+        _row(S, "T-1", PR, FR, SCP, "claude-opus-4-8", 0.4, "o1"),  # T-1 double-judged
+        _row(S, "T-2", PR, FR, SCP, "gemini-3.6-flash", 0.2, "g2"),  # T-2 gemini-only
+    ]
+    exp = _combined_fixture(rows, ["T-1", "T-2"])
+    gem = exp.means[("gemini-3.6-flash", S, FR, SCP, PR)].mean   # (0.8+0.2)/2 = 0.5
+    opus = exp.means[("claude-opus-4-8", S, FR, SCP, PR)].mean   # 0.4
+    combined = exp.combined_means[(S, FR, SCP, PR)].mean         # (0.6 + 0.2)/2 = 0.4
+    assert combined == pytest.approx(0.4)
+    assert combined != pytest.approx((gem + opus) / 2)           # diverges (0.4 != 0.45)
+    assert (S, "T-2", PR, FR, SCP) in exp.single_judge_cells
+
+
+def test_combined_block_serialized_separately_from_means():
+    exp = _combined_fixture(
+        [_row("claude-sonnet-5", "T-1", "secularize", "unstated", "full", j, 0.5, f"{j}")
+         for j in ("gemini-3.6-flash", "claude-opus-4-8")], ["T-1"])
+    shard = serialize_tradition(exp)
+    assert "combined" in shard and "combined_steadfastness" in shard
+    assert set(shard["means"]) == {"gemini-3.6-flash", "claude-opus-4-8"}  # combined NOT in means
+    # combined shape mirrors a single judge's sub-tree: subject -> framing -> scope -> pressure -> [..]
+    cell = shard["combined"]["claude-sonnet-5"]["unstated"]["full"]["secularize"]
+    assert len(cell) == 3 and cell[0] == 0.5
+
+
+def test_ranking_declaration_shape_and_disjointness(tmp_path):
+    exports = build_corpus_export(
+        [_write_two_full_grids(tmp_path) / "gemini-run", tmp_path / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t", single_judge_attempts=3)
+    r = m["ranking"]
+    assert r["rule"] == "mean_of_judges"
+    assert r["score_key"] == "combined"
+    assert r["judges"] == ["claude-opus-4-8", "gemini-3.6-flash"]
+    assert r["score_key"] not in {j["model"] for j in m["judges"]}   # disjoint from real judges
+    assert r["score_key"] not in m["counts"]["coverage"]             # never leaked into coverage
+    assert r["single_judge_cells"] == {"count": 0, "cells": [], "attempts": 3}
+
+
+def test_single_judge_cells_recorded_in_manifest(tmp_path):
+    # Drop one Opus cell → that (subject, scenario, ...) becomes a single-judge (gemini-only) cell,
+    # recorded in ranking.single_judge_cells with its full id.
+    drop = ("claude-sonnet-5", "unstated", "full", "secularize", "T-1")
+    root = _write_two_full_grids(tmp_path, opus_drop=drop)
+    exports = build_corpus_export([root / "gemini-run", root / "opus-run"])
+    m = build_manifest(exports, run_id="r", generated_at="t")
+    sj = m["ranking"]["single_judge_cells"]
+    assert sj["count"] == 1
+    assert sj["cells"][0] == {
+        "tradition": _TRAD, "subject": "claude-sonnet-5", "scenario_id": "T-1",
+        "pressure": "secularize", "framing": "unstated", "scope": "full",
+    }
 
 
 def _one_row_tradition(score: float, ts: str) -> RawTradition:

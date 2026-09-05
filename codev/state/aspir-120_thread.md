@@ -101,7 +101,26 @@ implement, after plan approval. Judge-only re-run: `python -m judging judge <sit
 - Committed: results/REJUDGE-20260803.md, test_grid_completeness.py (skips where roots absent).
 - Data lives in gitignored ../../tmp (NOT committed).
 
-## Status: implement phase_1 complete → porch done → phase_2.
+## Status: phase_1 COMPLETE (force-advanced; claude APPROVE all iters, codex points all addressed).
+
+## Phase 2 — DONE (combined block + ranking in both exporters)
+- export_results.py: combined block as SEPARATE top-level shard fields (`combined`,
+  `combined_steadfastness`) via cell_scores over ALL judgments — NOT inside `means` (preserves
+  test:801 + shardConsistencyNotices + results.data.test by construction). Manifest gains
+  `ranking={rule:mean_of_judges, score_key:"combined", judges:[...], single_judge_cells:{count,
+  cells:[...], attempts?}}`. Gate re-shaped: "exactly one rankable" → "≥1 real judge strictly
+  complete"; rankable now legacy selector/fallback metadata. COMBINED_KEY asserted disjoint from
+  real judges; never enters judges list/coverage/JUDGE_UI.
+- export_raw.py: gate re-shaped same way; emits `ranking={rule,judges}` (no combined per-cell block
+  — raw shards are transcripts+verdicts). Golden fixture regenerated (only manifest changed).
+- single_judge_attempts threaded through export_dataset/write_dataset/build_manifest + CLI
+  `--single-judge-attempts` (provenance not in data).
+- Tests: equivalence (combined==mean-of-per-judge on double-judged; diverges + reported on
+  single-judge), combined-serialized-separately, ranking shape+disjointness, single_judge recorded,
+  gate both directions (both exporters). Old "exactly one rankable" tests repurposed to new gate.
+- Real-data smoke (4 roots): ranking ok, single_judge_cells count=2 attempts=3 = the exact 2
+  residual cells (three-way lockstep w/ test allowlist holds). 258 passed, 8 skipped.
+- NOTE: results/20260803 NOT re-exported yet (that's phase_4). SPA is phase_5.
 
 ## Plan phases
 1. Complete grid (re-judge 35 Opus + any Gemini gaps; ≤$20; runbook + completeness test).

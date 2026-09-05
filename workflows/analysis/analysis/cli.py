@@ -120,6 +120,11 @@ def export(
         "results", "--out",
         help="Root output dir; writes <out>/<run-id>/manifest.json + <tradition>.json.",
     ),
+    single_judge_attempts: int = typer.Option(
+        None, "--single-judge-attempts",
+        help="Re-judge attempts made on residual single-judge cells; recorded in "
+             "ranking.single_judge_cells.attempts (provenance not derivable from the data).",
+    ),
 ) -> None:
     """Export judging runs into a compact, browsable results/<run-id>/ dataset (#49).
 
@@ -136,7 +141,7 @@ def export(
 
     generated_at = datetime.now(timezone.utc).isoformat()
     try:
-        written = export_dataset(list(run_roots), out, run_id, generated_at)
+        written = export_dataset(list(run_roots), out, run_id, generated_at, single_judge_attempts)
     except AnalysisInputError as e:  # fail-fast, spec M7
         typer.echo(f"input error: {e}", err=True)
         raise typer.Exit(code=2) from e
