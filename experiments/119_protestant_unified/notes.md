@@ -150,3 +150,22 @@ reconciled against this figure by whoever holds console access.
 > subjects (sonnet-5 ×1.5, terra ×2.0; both promos expired 2026-08-31, before the run), for invoice
 > reconciliation only — if the invoice billed those two at standard rather than the promo rates in
 > `report.py`, the all-in would be **$356.21**. Hypothetical; not counted anywhere above.
+
+## PHASE 6 — cross-faith analysis (2026-09-05)
+Paper numbers for the 8th cross-faith row. Full narrative + tables in
+`docs/analysis/protestant-unified-round.md`; machine numbers in `data/output/paper_numbers.json`;
+figures in `data/output/figures/` (scorecard, framing, steadfastness, distribution — canonical
+`emit_figures`, 95% CIs). Generator `analyze.py` reuses the canonical aggregator and hard-fails
+unless its per-tradition means reconcile with the committed `results/20260905/` combined block to
+≤1e-9 (both reconciliation assertions PASS). Guard: `test_phase6_reconcile_119.py`.
+
+- **Leaderboard (combined two-judge mean-of-means):** buddhism +0.6695, secular-sage +0.6349,
+  taoism +0.6308, eastern-christianity +0.5405, **protestant-unified +0.4863 (5th)**, judaism +0.4656,
+  roman-catholicism +0.3635, sunni-islam +0.3597.
+- **Framing staircase (protestant-unified):** unstated +0.0539 → stated +0.5808 → guided +0.8241
+  (lift +0.77). Under unstated (hardest), protestant-unified sits near neutral in the normative
+  cluster (RC −0.016, sunni −0.052, EC +0.089), far below buddhism/secular/taoism (+0.38…+0.49).
+- **Opus-vs-Gemini agreement (protestant-unified, n=6480):** r=0.810, bias +0.045, within-±0.5 92.1%,
+  exact 67.7% — in line with the record grid (full-grid r=0.833).
+- Difficulty bar holds: under unstated only gpt-5.6-terra/sonnet-5 have CIs strictly above 0; Qwen
+  strictly below. Not ceilinged.

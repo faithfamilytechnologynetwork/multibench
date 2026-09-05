@@ -1,0 +1,538 @@
+{
+  "meta": {
+    "spec": 119,
+    "tradition": "protestant-unified",
+    "roots": [
+      "../../tmp/judging-runs/20260803-merged",
+      "../../tmp/judging-runs/20260803-unstated-opus",
+      "../../tmp/judging-runs/20260803-framings-opus-sample",
+      "../../tmp/judging-runs/20260823-opus-fullgrid",
+      "../../tmp/judging-runs/20260904-protestant-unified"
+    ],
+    "results_dir": "results/20260905",
+    "ranking_rule": "mean_of_judges",
+    "ranking_score": "equal-weight mean over subjects x framings of combined by_framing[full] (scope=full, pressure=all)",
+    "subjects": [
+      "Qwen/Qwen3-235B-A22B-Instruct-2507",
+      "claude-sonnet-5",
+      "gemini-3.6-flash",
+      "gpt-5.6-terra",
+      "thinkingmachines/Inkling"
+    ],
+    "framings": [
+      "unstated",
+      "stated",
+      "guided"
+    ]
+  },
+  "ranked_table": [
+    {
+      "tradition": "buddhism",
+      "ranking_mean_of_means": 0.6694978632478633,
+      "rank": 1
+    },
+    {
+      "tradition": "secular-sage",
+      "ranking_mean_of_means": 0.6348639455782313,
+      "rank": 2
+    },
+    {
+      "tradition": "taoism",
+      "ranking_mean_of_means": 0.630787037037037,
+      "rank": 3
+    },
+    {
+      "tradition": "eastern-christianity",
+      "ranking_mean_of_means": 0.5405136268343816,
+      "rank": 4
+    },
+    {
+      "tradition": "protestant-unified",
+      "ranking_mean_of_means": 0.48626543209876544,
+      "rank": 5
+    },
+    {
+      "tradition": "judaism",
+      "ranking_mean_of_means": 0.465625,
+      "rank": 6
+    },
+    {
+      "tradition": "roman-catholicism",
+      "ranking_mean_of_means": 0.3635233918128655,
+      "rank": 7
+    },
+    {
+      "tradition": "sunni-islam",
+      "ranking_mean_of_means": 0.35966269841269843,
+      "rank": 8
+    }
+  ],
+  "per_tradition": {
+    "buddhism": {
+      "ranking_mean_of_means": 0.6694978632478633,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.30689102564102566,
+          "lo": -0.421474358974359,
+          "hi": -0.19150641025641027
+        },
+        "claude-sonnet-5": {
+          "point": 0.8084935897435898,
+          "lo": 0.7347756410256411,
+          "hi": 0.8701923076923077
+        },
+        "gemini-3.6-flash": {
+          "point": 0.4567307692307692,
+          "lo": 0.31009615384615385,
+          "hi": 0.5921674679487177
+        },
+        "gpt-5.6-terra": {
+          "point": 0.6674679487179487,
+          "lo": 0.5240384615384616,
+          "hi": 0.7876802884615381
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.84375,
+          "lo": 0.7876602564102564,
+          "hi": 0.8926282051282052
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.30689102564102566,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.13381410256410256,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.3629807692307692,
+          "claude-sonnet-5|unstated": 0.8084935897435898,
+          "claude-sonnet-5|stated": 0.9350961538461539,
+          "claude-sonnet-5|guided": 0.9903846153846154,
+          "gemini-3.6-flash|unstated": 0.4567307692307692,
+          "gemini-3.6-flash|stated": 0.7387820512820513,
+          "gemini-3.6-flash|guided": 0.9326923076923077,
+          "gpt-5.6-terra|unstated": 0.6674679487179487,
+          "gpt-5.6-terra|stated": 0.8637820512820513,
+          "gpt-5.6-terra|guided": 0.9431089743589743,
+          "thinkingmachines/Inkling|unstated": 0.84375,
+          "thinkingmachines/Inkling|stated": 0.9415064102564102,
+          "thinkingmachines/Inkling|guided": 0.9983974358974359
+        },
+        "framing_mean_over_subjects": {
+          "unstated": 0.4939102564102564,
+          "stated": 0.6690705128205129,
+          "guided": 0.8455128205128204
+        }
+      }
+    },
+    "eastern-christianity": {
+      "ranking_mean_of_means": 0.5405136268343816,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.5110062893081762,
+          "lo": -0.6159591194968553,
+          "hi": -0.4072228773584907
+        },
+        "claude-sonnet-5": {
+          "point": 0.47327044025157233,
+          "lo": 0.3742138364779874,
+          "hi": 0.5644654088050315
+        },
+        "gemini-3.6-flash": {
+          "point": -0.13757861635220126,
+          "lo": -0.2582645440251572,
+          "hi": -0.016499606918239137
+        },
+        "gpt-5.6-terra": {
+          "point": 0.18081761006289307,
+          "lo": 0.05934551886792453,
+          "hi": 0.2999410377358488
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.4414308176100629,
+          "lo": 0.3352987421383648,
+          "hi": 0.5389249213836476
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.5110062893081762,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.03498427672955975,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.6647012578616353,
+          "claude-sonnet-5|unstated": 0.47327044025157233,
+          "claude-sonnet-5|stated": 0.9477201257861635,
+          "claude-sonnet-5|guided": 0.9897798742138365,
+          "gemini-3.6-flash|unstated": -0.13757861635220126,
+          "gemini-3.6-flash|stated": 0.5691823899371069,
+          "gemini-3.6-flash|guided": 0.9764150943396226,
+          "gpt-5.6-terra|unstated": 0.18081761006289307,
+          "gpt-5.6-terra|stated": 0.6682389937106918,
+          "gpt-5.6-terra|guided": 0.9430031446540881,
+          "thinkingmachines/Inkling|unstated": 0.4414308176100629,
+          "thinkingmachines/Inkling|stated": 0.9375,
+          "thinkingmachines/Inkling|guided": 0.9992138364779874
+        },
+        "framing_mean_over_subjects": {
+          "unstated": 0.08938679245283018,
+          "stated": 0.6175314465408805,
+          "guided": 0.914622641509434
+        }
+      }
+    },
+    "judaism": {
+      "ranking_mean_of_means": 0.465625,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.5269097222222222,
+          "lo": -0.6545138888888888,
+          "hi": -0.3914930555555556
+        },
+        "claude-sonnet-5": {
+          "point": 0.5095486111111112,
+          "lo": 0.3454861111111111,
+          "hi": 0.6588541666666666
+        },
+        "gemini-3.6-flash": {
+          "point": 0.109375,
+          "lo": -0.08159722222222222,
+          "hi": 0.2934027777777778
+        },
+        "gpt-5.6-terra": {
+          "point": 0.3298611111111111,
+          "lo": 0.1467013888888889,
+          "hi": 0.5026041666666666
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.4305555555555556,
+          "lo": 0.26384548611111114,
+          "hi": 0.5850694444444444
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.5269097222222222,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.4418402777777778,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.010416666666666666,
+          "claude-sonnet-5|unstated": 0.5095486111111112,
+          "claude-sonnet-5|stated": 0.8038194444444444,
+          "claude-sonnet-5|guided": 0.9826388888888888,
+          "gemini-3.6-flash|unstated": 0.109375,
+          "gemini-3.6-flash|stated": 0.4513888888888889,
+          "gemini-3.6-flash|guided": 0.9809027777777778,
+          "gpt-5.6-terra|unstated": 0.3298611111111111,
+          "gpt-5.6-terra|stated": 0.6692708333333334,
+          "gpt-5.6-terra|guided": 0.9296875,
+          "thinkingmachines/Inkling|unstated": 0.4305555555555556,
+          "thinkingmachines/Inkling|stated": 0.7777777777777778,
+          "thinkingmachines/Inkling|guided": 0.9678819444444444
+        },
+        "framing_mean_over_subjects": {
+          "unstated": 0.17048611111111112,
+          "stated": 0.4520833333333333,
+          "guided": 0.7743055555555556
+        }
+      }
+    },
+    "protestant-unified": {
+      "ranking_mean_of_means": 0.48626543209876544,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.18287037037037038,
+          "lo": -0.35300925925925924,
+          "hi": -0.009259259259259259
+        },
+        "claude-sonnet-5": {
+          "point": 0.1736111111111111,
+          "lo": 0.015046296296296295,
+          "hi": 0.32294560185185145
+        },
+        "gemini-3.6-flash": {
+          "point": -0.10416666666666667,
+          "lo": -0.2835648148148148,
+          "hi": 0.07757523148148106
+        },
+        "gpt-5.6-terra": {
+          "point": 0.22453703703703703,
+          "lo": 0.03935185185185185,
+          "hi": 0.40625
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.15856481481481483,
+          "lo": -0.032407407407407406,
+          "hi": 0.3484085648148144
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.18287037037037038,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": 0.3020833333333333,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.6724537037037037,
+          "claude-sonnet-5|unstated": 0.1736111111111111,
+          "claude-sonnet-5|stated": 0.6284722222222222,
+          "claude-sonnet-5|guided": 0.8958333333333334,
+          "gemini-3.6-flash|unstated": -0.10416666666666667,
+          "gemini-3.6-flash|stated": 0.5405092592592593,
+          "gemini-3.6-flash|guided": 0.8229166666666666,
+          "gpt-5.6-terra|unstated": 0.22453703703703703,
+          "gpt-5.6-terra|stated": 0.7326388888888888,
+          "gpt-5.6-terra|guided": 0.8888888888888888,
+          "thinkingmachines/Inkling|unstated": 0.15856481481481483,
+          "thinkingmachines/Inkling|stated": 0.7002314814814815,
+          "thinkingmachines/Inkling|guided": 0.8402777777777778
+        },
+        "framing_mean_over_subjects": {
+          "unstated": 0.05393518518518518,
+          "stated": 0.580787037037037,
+          "guided": 0.8240740740740741
+        }
+      }
+    },
+    "roman-catholicism": {
+      "ranking_mean_of_means": 0.3635233918128655,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.6825657894736842,
+          "lo": -0.7686540570175439,
+          "hi": -0.5921052631578947
+        },
+        "claude-sonnet-5": {
+          "point": 0.33223684210526316,
+          "lo": 0.20230263157894737,
+          "hi": 0.45836074561403467
+        },
+        "gemini-3.6-flash": {
+          "point": -0.16447368421052633,
+          "lo": -0.3075794956140351,
+          "hi": -0.01806469298245654
+        },
+        "gpt-5.6-terra": {
+          "point": 0.13815789473684212,
+          "lo": -0.009333881578947363,
+          "hi": 0.28015350877192985
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.29660087719298245,
+          "lo": 0.14144736842105263,
+          "hi": 0.4457236842105263
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.6825657894736842,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.3569078947368421,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.20285087719298245,
+          "claude-sonnet-5|unstated": 0.33223684210526316,
+          "claude-sonnet-5|stated": 0.7341008771929824,
+          "claude-sonnet-5|guided": 0.9473684210526315,
+          "gemini-3.6-flash|unstated": -0.16447368421052633,
+          "gemini-3.6-flash|stated": 0.28234649122807015,
+          "gemini-3.6-flash|guided": 0.856359649122807,
+          "gpt-5.6-terra|unstated": 0.13815789473684212,
+          "gpt-5.6-terra|stated": 0.49451754385964913,
+          "gpt-5.6-terra|guided": 0.762609649122807,
+          "thinkingmachines/Inkling|unstated": 0.29660087719298245,
+          "thinkingmachines/Inkling|stated": 0.6540570175438597,
+          "thinkingmachines/Inkling|guided": 0.9555921052631579
+        },
+        "framing_mean_over_subjects": {
+          "unstated": -0.016008771929824556,
+          "stated": 0.3616228070175439,
+          "guided": 0.7449561403508772
+        }
+      }
+    },
+    "secular-sage": {
+      "ranking_mean_of_means": 0.6348639455782313,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.22959183673469388,
+          "lo": -0.39625850340136054,
+          "hi": -0.06547619047619048
+        },
+        "claude-sonnet-5": {
+          "point": 0.8384353741496599,
+          "lo": 0.7389455782312925,
+          "hi": 0.9217687074829932
+        },
+        "gemini-3.6-flash": {
+          "point": 0.40816326530612246,
+          "lo": 0.24317602040816327,
+          "hi": 0.560374149659864
+        },
+        "gpt-5.6-terra": {
+          "point": 0.6394557823129252,
+          "lo": 0.49657738095238096,
+          "hi": 0.7661777210884351
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.7576530612244898,
+          "lo": 0.631781462585034,
+          "hi": 0.8596938775510204
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.22959183673469388,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.06802721088435375,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.42091836734693877,
+          "claude-sonnet-5|unstated": 0.8384353741496599,
+          "claude-sonnet-5|stated": 0.8715986394557823,
+          "claude-sonnet-5|guided": 0.9736394557823129,
+          "gemini-3.6-flash|unstated": 0.40816326530612246,
+          "gemini-3.6-flash|stated": 0.5994897959183674,
+          "gemini-3.6-flash|guided": 0.9481292517006803,
+          "gpt-5.6-terra|unstated": 0.6394557823129252,
+          "gpt-5.6-terra|stated": 0.7253401360544217,
+          "gpt-5.6-terra|guided": 0.9141156462585034,
+          "thinkingmachines/Inkling|unstated": 0.7576530612244898,
+          "thinkingmachines/Inkling|stated": 0.7576530612244898,
+          "thinkingmachines/Inkling|guided": 0.9659863945578231
+        },
+        "framing_mean_over_subjects": {
+          "unstated": 0.4828231292517007,
+          "stated": 0.5772108843537416,
+          "guided": 0.8445578231292517
+        }
+      }
+    },
+    "sunni-islam": {
+      "ranking_mean_of_means": 0.35966269841269843,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.5654761904761905,
+          "lo": -0.6464285714285715,
+          "hi": -0.48273809523809524
+        },
+        "claude-sonnet-5": {
+          "point": 0.22738095238095238,
+          "lo": 0.1267782738095238,
+          "hi": 0.32767857142857143
+        },
+        "gemini-3.6-flash": {
+          "point": -0.16220238095238096,
+          "lo": -0.265483630952381,
+          "hi": -0.05744047619047619
+        },
+        "gpt-5.6-terra": {
+          "point": 0.030357142857142857,
+          "lo": -0.07114583333333332,
+          "hi": 0.13303571428571428
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.2119047619047619,
+          "lo": 0.0955282738095238,
+          "hi": 0.3261979166666666
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.5654761904761905,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.1523809523809524,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.12113095238095238,
+          "claude-sonnet-5|unstated": 0.22738095238095238,
+          "claude-sonnet-5|stated": 0.725297619047619,
+          "claude-sonnet-5|guided": 0.8758928571428571,
+          "gemini-3.6-flash|unstated": -0.16220238095238096,
+          "gemini-3.6-flash|stated": 0.39672619047619045,
+          "gemini-3.6-flash|guided": 0.8074404761904762,
+          "gpt-5.6-terra|unstated": 0.030357142857142857,
+          "gpt-5.6-terra|stated": 0.5339285714285714,
+          "gpt-5.6-terra|guided": 0.6851190476190476,
+          "thinkingmachines/Inkling|unstated": 0.2119047619047619,
+          "thinkingmachines/Inkling|stated": 0.7342261904761904,
+          "thinkingmachines/Inkling|guided": 0.9255952380952381
+        },
+        "framing_mean_over_subjects": {
+          "unstated": -0.051607142857142865,
+          "stated": 0.4475595238095238,
+          "guided": 0.6830357142857143
+        }
+      }
+    },
+    "taoism": {
+      "ranking_mean_of_means": 0.630787037037037,
+      "per_subject_unstated_headline": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "point": -0.3541666666666667,
+          "lo": -0.4887152777777778,
+          "hi": -0.21614583333333334
+        },
+        "claude-sonnet-5": {
+          "point": 0.7256944444444444,
+          "lo": 0.6336805555555556,
+          "hi": 0.8090277777777778
+        },
+        "gemini-3.6-flash": {
+          "point": 0.2907986111111111,
+          "lo": 0.1371527777777778,
+          "hi": 0.4427083333333333
+        },
+        "gpt-5.6-terra": {
+          "point": 0.5763888888888888,
+          "lo": 0.4583333333333333,
+          "hi": 0.6875
+        },
+        "thinkingmachines/Inkling": {
+          "point": 0.6657986111111112,
+          "lo": 0.5633680555555556,
+          "hi": 0.7612847222222222
+        }
+      },
+      "per_framing_combined": {
+        "by_subject_framing": {
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.3541666666666667,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.043402777777777776,
+          "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.4826388888888889,
+          "claude-sonnet-5|unstated": 0.7256944444444444,
+          "claude-sonnet-5|stated": 0.8880208333333334,
+          "claude-sonnet-5|guided": 0.9661458333333334,
+          "gemini-3.6-flash|unstated": 0.2907986111111111,
+          "gemini-3.6-flash|stated": 0.7022569444444444,
+          "gemini-3.6-flash|guided": 0.9696180555555556,
+          "gpt-5.6-terra|unstated": 0.5763888888888888,
+          "gpt-5.6-terra|stated": 0.8446180555555556,
+          "gpt-5.6-terra|guided": 0.9401041666666666,
+          "thinkingmachines/Inkling|unstated": 0.6657986111111112,
+          "thinkingmachines/Inkling|stated": 0.8272569444444444,
+          "thinkingmachines/Inkling|guided": 0.9800347222222222
+        },
+        "framing_mean_over_subjects": {
+          "unstated": 0.38090277777777776,
+          "stated": 0.64375,
+          "guided": 0.8677083333333334
+        }
+      }
+    }
+  },
+  "protestant_unified_steadfastness": {
+    "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+      "point": -0.03935185185185186,
+      "lo": -0.09259259259259259,
+      "hi": 0.015046296296296308
+    },
+    "claude-sonnet-5": {
+      "point": 0.016203703703703692,
+      "lo": -0.045138888888888895,
+      "hi": 0.07407407407407407
+    },
+    "gemini-3.6-flash": {
+      "point": -0.09837962962962964,
+      "lo": -0.16666666666666666,
+      "hi": -0.03356481481481481
+    },
+    "gpt-5.6-terra": {
+      "point": -0.002314814814814825,
+      "lo": -0.06597222222222224,
+      "hi": 0.05555555555555555
+    },
+    "thinkingmachines/Inkling": {
+      "point": -0.019675925925925902,
+      "lo": -0.09030671296296297,
+      "hi": 0.049768518518518504
+    }
+  },
+  "protestant_unified_judge_agreement": {
+    "n": 6480,
+    "pearson_r": 0.8100276975514371,
+    "bias_opus_minus_gemini": 0.04506172839506173,
+    "within_half_fraction": 0.9205246913580247,
+    "exact_match_fraction": 0.6770061728395061
+  }
+}
