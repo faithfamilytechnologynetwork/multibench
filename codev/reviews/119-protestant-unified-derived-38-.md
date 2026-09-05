@@ -29,7 +29,9 @@ consult. One PR at the end.
   house-style figures. Every number reconciles with the committed tier under hard-fail assertions.
 - **Retirement** — monolith README + `results/README.md` + `results-raw/README.md` notes; the monolith
   is out of the cross-faith run/export inputs but stays browsable.
-- **Tests** — analysis suite **275 passed / 12 skipped**; committed-artifact guards for the
+- **Tests** — analysis suite **287 passed** (114 validator); the 12 launch-data tests skip only in a
+  bare CI without the gitignored `tmp/judging-runs/` roots (→ 275 passed / 12 skipped there).
+  Committed-artifact guards for the
   cross-tier fingerprint (every dual-tier run), the Phase-6 reconciliation, and `paper_numbers.json`
   staleness.
 
