@@ -481,3 +481,21 @@ Exported the 8-row superset, run-id **20260905** (export date), roots in load-be
 - **Per-tradition combined mean (ranked):** buddhism +0.6695, secular-sage +0.6349, taoism +0.6308,
   eastern-christianity +0.5405, **protestant-unified +0.4863 (5th)**, judaism +0.4656,
   roman-catholicism +0.3635, sunni-islam +0.3597. Commit e21bbb62. Running Phase 5 consult.
+
+## 2026-09-05 — Phase 5 consult iter1: codex REQUEST_CHANGES (test) + claude APPROVE
+- **codex** blocked on the missing committed-artifact fingerprint test (plan required it); **claude
+  APPROVE** with the same ask as comment #4 (generic sweep). Added to `test_export_raw_writer.py`:
+  `test_committed_score_raw_fingerprints_equal[run]` — parametrized over every committed dual-tier
+  run (20260803, 20260813-protestantism, 20260905), asserts equal sha256 fingerprints on real bytes;
+  + `test_committed_20260905_superset_shape` (combined ranking, 8 traditions incl protestant-unified).
+  Suite 272 passed. Rebuttal `119-phase_5-iter1-rebuttals.md`. Re-consulting.
+- **Phase 7 / review-doc TODOs from claude (non-blocking, carry-forward):**
+  1. `results-raw/README.md` stale (519 shards/~126MB launch text; retention N=2 now exceeded ~305MB
+     across 3 raw runs) — update + **put the 20260803 prune decision to the architect** (paper-pinned).
+  2. `results/README.md` "Producing/refreshing" block still 4-root 20260803 — add the exact 5-root
+     command (load-bearing order + `--single-judge-attempts 3`).
+  3. Spec says "Gemini ranks, Opus badge-only" but artifact ships `mean_of_judges`/`combined` — record
+     the architect-sanctioned deviation in the review doc (paper table uses combined).
+  5. `/results` default = newest by generated_at → a future 20260803 re-export flips default back to
+     7-row; add to verify checklist.
+  6. Dispatcher skips analysis on data-only changes → committed-tier tests run manually (ran green).
