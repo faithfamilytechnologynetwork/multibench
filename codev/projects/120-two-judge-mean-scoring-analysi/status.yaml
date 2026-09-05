@@ -117,7 +117,7 @@ history:
         file: >-
           /Users/mwk/Development/faithfamilytechnologynetwork/multibench/.builders/aspir-120/codev/projects/120-two-judge-mean-scoring-analysi/120-phase_5-iter1-claude.txt
 started_at: '2026-09-04T23:54:27.145Z'
-updated_at: '2026-09-05T06:20:05.353Z'
+updated_at: '2026-09-05T06:20:27.524Z'
 force_advanced:
   phase: phase_1
   iteration: 3
@@ -148,4 +148,6 @@ pr_history:
     pr_number: 121
     branch: builder/aspir-120
     created_at: '2026-09-05T03:51:53.810Z'
+    merged: true
+    merged_at: '2026-09-05T06:20:27.523Z'
 pr_ready_for_human: false
