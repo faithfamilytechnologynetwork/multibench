@@ -558,3 +558,14 @@ did the refinement myself.
   + open PR WITHOUT the pin, add pin in a follow-up once accepted — never block the PR on acceptance.
   Pin pattern = a results/20260905 reconciliation block mirroring the committed 20260803 pin
   (leaderboard.test.ts:192). Holding on the pin pending the architect's answer.
+
+## 2026-09-06 — PR gate APPROVED (Waleed) + numbers accepted → pin landed, merging
+- Architect relayed: **Waleed APPROVED the pr gate AND accepts the PU numbers of record** (5th of 8,
+  +0.4863 [+0.368,+0.590], run 20260905).
+- Also fixed the 3-way integration review's 4 items earlier (analyze.py __file__ resolution + smoke
+  test + portable meta paths; experiments renamed BACK to 119_ = spec-number convention; traditions/
+  README question_id + roster + monolith-retired; figures committed).
+- **Leaderboard pin LANDED on-branch** (before merge): leaderboard.test.ts results/20260905 block —
+  recomputes each tradition's combined mean-of-means via the production parsers/traditionValue and
+  pins the accepted 8-row order (PU 5th, within CI). `pnpm -C apps/multibrowser install` then vitest:
+  **413 passed** (leaderboard.test.ts 32). Next: porch approve pr (human-approved), merge w/ merge commit.

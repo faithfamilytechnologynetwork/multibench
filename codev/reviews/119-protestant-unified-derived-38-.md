@@ -51,10 +51,12 @@ omissive-bias pattern the benchmark measures. Judge agreement r=0.810.
 - **CEFE probe cap overage.** A pre-authorized live key-path probe (≤10 cells, **$1 cap**) cost
   **$1.23** — ~23% over the cost cap (cell count within). Recorded honestly, **ratified by the
   architect** 2026-09-05T07:08:25Z, no rework.
-- **Leaderboard pin deferred (plan fallback).** The `leaderboard.test.ts` reconciliation pin requires
-  Waleed's explicit acceptance of the numbers, which had not arrived at PR time. Per the plan's
-  fallback and the architect's direction, the PR opens **without** the pin; it lands in a follow-up
-  commit once acceptance is relayed. Never blocked the PR on the human acceptance.
+- **Leaderboard pin — deferred then landed on-branch.** The `leaderboard.test.ts` reconciliation pin
+  required Waleed's explicit acceptance; the PR first opened **without** it (plan fallback). Waleed
+  approved the gate and accepted the numbers of record (2026-09-06), so the pin was **landed as a
+  commit on the PR branch before merge** — a `results/20260905` block that recomputes each tradition's
+  combined mean-of-means through the production parsers/accessor and pins the accepted 8-row order
+  (protestant-unified 5th, +0.4863, within CI). Full multibrowser vitest suite: 413 passed.
 - **`experiments/` directory name.** The plan said `experiments/<PR#>_…`, but the actual repo
   convention is the **spec number** (`48_multiweights…`, `54_afb…`), so the dir is
   `experiments/119_protestant_unified/`. (A brief PR-time rename to `124_` was reverted per the 3-way
@@ -87,10 +89,8 @@ invoices authoritative). Details in `experiments/119_protestant_unified/notes.md
 
 ## 6. Follow-ups (post-PR)
 
-- **Leaderboard pin** — add the `results/20260905` reconciliation block to `leaderboard.test.ts` once
-  Waleed accepts the numbers (architect relays). That commit touches `apps/multibrowser`, so it will
-  trigger the vitest suite in the dispatcher — run `pnpm -C apps/multibrowser install` first (the
-  worktree has no `node_modules`), or the check errors on missing deps.
+- ~~**Leaderboard pin**~~ — **DONE** (landed on-branch before merge, 2026-09-06): the
+  `results/20260905` reconciliation block in `leaderboard.test.ts`; full vitest suite 413 passed.
 - **Raw-tier retention** — 3 score-backed raw runs (~305 MB) now exceed the N=2 intent; a dedicated
   retirement PR is Waleed's call (documented in `results-raw/README.md`).
 - **`analysis.paper_bundle._combined_rows`** now has an out-of-module consumer (`analyze.py`); promote
