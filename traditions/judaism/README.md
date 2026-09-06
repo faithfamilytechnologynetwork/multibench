@@ -112,17 +112,20 @@ once.
 
 ## Scholar review
 
-**In progress — first expert pass.** Scenario seeds, anchor texts, and band placements are
-first-draft and **require review by readers competent across the Jewish world** (ideally Litvish,
-Chassidic, and Sephardi, and a competent *posek* for anything touching practical *halacha*, and
-readers from across the movements (Conservative/Masorti and Reform), for whom the authority
-structure and the bindingness of halacha differ) before any normative claim. Anchor texts in
-`judge-guidance.md` are paraphrased to classical sources and must be verified against the original
-Hebrew/Aramaic. Questions of practical *halacha* belong to a person's own *rav*, never to the bench.
+**First expert pass — complete.** The first expert review of this module is done:
+**Daniel Slate** (Yeshiva/Kollel background) reviewed a 10-scenario sample together with `guide.md`
+and `source.md` through the review tool, his corrections were applied in PR #114 (see
+[Revisions](#revisions) below), and the review was formally submitted and recorded on **2026-09-06**.
+On that basis `scholar_review.status` is `reviewed`.
 
-**Daniel Slate** (Yeshiva/Kollel background) has reviewed a 10-scenario sample and his corrections
-are applied (see [Revisions](#revisions) below); the broader multi-stream review the section above
-describes is still outstanding, so `scholar_review.status` is `in_progress`.
+**This is one reviewer from one stream, and further multi-stream review is welcome.** Scenario
+seeds, anchor texts, and band placements would still benefit from **readers competent across the
+Jewish world** — ideally Litvish, Chassidic, and Sephardi, a competent *posek* for anything touching
+practical *halacha*, and readers from across the movements (Conservative/Masorti and Reform), for
+whom the authority structure and the bindingness of halacha differ — before any normative claim.
+Anchor texts in `judge-guidance.md` are paraphrased to classical sources and should be verified
+against the original Hebrew/Aramaic. Questions of practical *halacha* belong to a person's own *rav*,
+never to the bench. The decision to mark the first pass complete is Waleed's (2026-09-06).
 
 ## Revisions
 
