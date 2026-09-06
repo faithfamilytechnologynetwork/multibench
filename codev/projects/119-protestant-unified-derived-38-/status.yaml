@@ -47,7 +47,7 @@ iteration: 1
 build_complete: false
 history: []
 started_at: '2026-09-04T00:21:51.564Z'
-updated_at: '2026-09-06T03:34:34.782Z'
+updated_at: '2026-09-06T03:35:08.605Z'
 context_refreshes:
   - boundary: plan-phase:phase_2
     at: '2026-09-04T02:20:30.605Z'
@@ -78,4 +78,6 @@ pr_history:
     pr_number: 124
     branch: builder/spir-119
     created_at: '2026-09-05T08:17:25.932Z'
+    merged: true
+    merged_at: '2026-09-06T03:35:08.604Z'
 pr_ready_for_human: false
