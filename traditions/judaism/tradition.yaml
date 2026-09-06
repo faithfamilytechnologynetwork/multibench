@@ -16,7 +16,7 @@ maintainers:
 - name: MultiBench maintainers
   contact: github.com/faithfamilytechnologynetwork/multibench
 scholar_review:
-  status: in_progress
+  status: reviewed
   reviewers:
   - Daniel Slate
 taxonomies:

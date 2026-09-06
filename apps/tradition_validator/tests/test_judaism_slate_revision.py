@@ -41,10 +41,14 @@ def test_module_still_validates_clean():
 
 
 def test_scholar_review_credits_slate():
-    """scholar_review records the expert reviewer and moves off 'none'."""
+    """scholar_review records the expert reviewer and marks the first pass complete.
+
+    Waleed's decision (2026-09-06) flipped the status to the schema's terminal
+    ``reviewed`` value once Daniel Slate's first expert pass was formally recorded.
+    """
     manifest = yaml.safe_load((JUDAISM / "tradition.yaml").read_text(encoding="utf-8"))
     review = manifest["scholar_review"]
-    assert review["status"] == "in_progress"
+    assert review["status"] == "reviewed"
     assert "Daniel Slate" in review["reviewers"]
 
 
