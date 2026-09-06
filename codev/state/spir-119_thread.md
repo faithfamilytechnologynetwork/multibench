@@ -569,3 +569,14 @@ did the refinement myself.
   recomputes each tradition's combined mean-of-means via the production parsers/traditionValue and
   pins the accepted 8-row order (PU 5th, within CI). `pnpm -C apps/multibrowser install` then vitest:
   **413 passed** (leaderboard.test.ts 32). Next: porch approve pr (human-approved), merge w/ merge commit.
+
+## 2026-09-06 — MERGED + verify phase
+- **PR #124 MERGED** with a merge commit: **b6580cdb** (parents 106c1f39 + branch tip; not squashed),
+  2026-09-06T03:34:47Z. porch recorded --merged 124.
+- Builder-side post-merge verification PASS: b6580cdb is origin/main HEAD; all Spec-119 artifacts
+  present on origin/main (protestant-unified module, results/20260905 + results-raw/20260905 tiers,
+  analyze.py, round doc, leaderboard pin, review doc).
+- Live verification (Railway raw re-bake `railway up --no-gitignore`, 8-row SPA default, baked-manifest
+  fingerprint curl) + issue close are **architect-driven** (their deploy).
+- Requested the **verify-approval gate** — STOPPING, awaiting architect approval after their live check.
+  Project 119 DONE from the builder side.
