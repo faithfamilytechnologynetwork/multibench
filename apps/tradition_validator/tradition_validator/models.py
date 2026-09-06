@@ -104,3 +104,7 @@ class ScenarioMeta(BaseModel):
     source_locus: int
     locus_label: str = Field(min_length=1)
     identity_signal: Literal["clean", "leaky", "intrinsic"]
+    # Optional provenance: the study question a derived scenario compiles from (e.g. protestant-unified
+    # → the guidance-divergence study's ``Q16``). Omitted by every non-derived tradition; when present
+    # it must match ``Q`` + two digits.
+    question_id: str | None = Field(default=None, pattern=r"^Q\d{2}$")

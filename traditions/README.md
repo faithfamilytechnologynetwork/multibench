@@ -107,10 +107,16 @@ tags:                           # every declared axis present; each value in tha
 source_locus: 254               # integer locus in the canonical source (plain metadata)
 locus_label: "Prohibition of backbiting ..."
 identity_signal: clean          # clean | leaky | intrinsic (how much faith-identity leaks)
+question_id: Q16                # OPTIONAL provenance (^Q\d{2}$): the study question a DERIVED
+                                # scenario compiles from (e.g. protestant-unified → the Protestant
+                                # guidance-divergence study's Q16). Omitted by every non-derived
+                                # tradition; validated only when present.
 ```
 
 `tags` must cover **every** declared axis; each value list is non-empty, has no
-duplicates, and every value is one the axis declared.
+duplicates, and every value is one the axis declared. `question_id` is optional: it records the
+source study question for a **derived** tradition (one compiled from an upstream study rather than a
+single canon) and must match `^Q\d{2}$` when present.
 
 ## The judge seam — `judge-guidance.md`
 
@@ -173,15 +179,24 @@ and passivity), [`buddhism/`](buddhism/) (*MittaBench*, the *Dhammapada*; the `m
 [`secular-sage/`](secular-sage/) (*SophiaBench*, the Western philosophical tradition; the `mean`),
 and [`roman-catholicism/`](roman-catholicism/) (*CorBench*).
 
-[`protestantism/`](protestantism/) (*ProtestantBench*) is the eighth, and shows the format carrying
-a tradition that is **internally plural by confession**: its primary source is Scripture as the
+[`protestantism/`](protestantism/) (*ProtestantBench*) is the eighth — **now retired from active
+cross-faith scoring** (superseded by [`protestant-unified/`](protestant-unified/) below; the module
+and its committed tiers stay browsable). It shows the format carrying a tradition that is
+**internally plural by confession**: its primary source is Scripture as the
 *norma normans* with the confessional standards of six families as the constellation (Book of
 Concord, Westminster Standards, Three Forms of Unity with Belhar, Thirty-Nine Articles, Articles of
 Religion with Wesley's Standard Sermons and the EUB Confession, Baptist Faith & Message, plus
 Barmen held in common). A `communion` axis records which family's standards each scenario binds, so
 the intra-Protestant non-adjudication rule is mechanically checkable, and an `office` axis records
-the handoff to pastor / elders / deacons / congregation / outside help. All eight validate
-`--strict`.
+the handoff to pastor / elders / deacons / congregation / outside help.
+
+[`protestant-unified/`](protestant-unified/) is the ninth, and the first **derived** tradition: its
+36 scenarios are the *same-advice common witness* of Protestantism — the questions where all seven
+strands give the same pastoral answer, compiled from the Protestant guidance-divergence study
+(hence the per-scenario `question_id` provenance field above; study D=0.16). It reuses the monolith's
+taxonomies minus `communion` (a same-advice tradition needs no per-family binding), and supersedes
+[`protestantism/`](protestantism/) for cross-faith scoring while that monolith stays browsable. All
+nine validate `--strict`.
 
 ## Validate
 

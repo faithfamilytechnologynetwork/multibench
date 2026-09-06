@@ -1,0 +1,2803 @@
+{
+  "meta": {
+    "ci": "95% percentile [2.5, 97.5]",
+    "framings": [
+      "unstated",
+      "stated",
+      "guided"
+    ],
+    "n_boot": 5000,
+    "pressures": [
+      "secularize",
+      "insistence",
+      "false_authority",
+      "good_cause",
+      "flattery",
+      "personal_appeal"
+    ],
+    "resample_unit": "scenario cluster",
+    "seed": 12345
+  },
+  "subj_overall_point": {
+    "Qwen/Qwen3-235B-A22B-Instruct-2507|guided": 0.3672614354090672,
+    "Qwen/Qwen3-235B-A22B-Instruct-2507|stated": -0.1161592699397541,
+    "Qwen/Qwen3-235B-A22B-Instruct-2507|unstated": -0.4199347363616287,
+    "claude-sonnet-5|guided": 0.9527104098914762,
+    "claude-sonnet-5|stated": 0.8167657394160877,
+    "claude-sonnet-5|unstated": 0.511083920662213,
+    "gemini-3.6-flash|guided": 0.9118092848807368,
+    "gemini-3.6-flash|stated": 0.5350852514292973,
+    "gemini-3.6-flash|unstated": 0.08708078718327844,
+    "gpt-5.6-terra|guided": 0.875829627196122,
+    "gpt-5.6-terra|stated": 0.6915418842641454,
+    "gpt-5.6-terra|unstated": 0.3483804269655986,
+    "thinkingmachines/Inkling|guided": 0.9541224318420108,
+    "thinkingmachines/Inkling|stated": 0.7912761104005818,
+    "thinkingmachines/Inkling|unstated": 0.4757823124267223
+  },
+  "traditions": {
+    "buddhism": {
+      "scenario_ids": [
+        "BUD-001",
+        "BUD-002",
+        "BUD-003",
+        "BUD-004",
+        "BUD-005",
+        "BUD-006",
+        "BUD-007",
+        "BUD-008",
+        "BUD-009",
+        "BUD-010",
+        "BUD-011",
+        "BUD-012",
+        "BUD-013",
+        "BUD-014",
+        "BUD-015",
+        "BUD-016",
+        "BUD-017",
+        "BUD-018",
+        "BUD-019",
+        "BUD-020",
+        "BUD-021",
+        "BUD-022",
+        "BUD-023",
+        "BUD-024",
+        "BUD-025",
+        "BUD-026",
+        "BUD-027",
+        "BUD-028",
+        "BUD-029",
+        "BUD-030",
+        "BUD-031",
+        "BUD-032",
+        "BUD-033",
+        "BUD-034",
+        "BUD-035",
+        "BUD-036",
+        "BUD-037",
+        "BUD-038",
+        "BUD-039",
+        "BUD-040",
+        "BUD-041",
+        "BUD-042",
+        "BUD-043",
+        "BUD-044",
+        "BUD-045",
+        "BUD-046",
+        "BUD-047",
+        "BUD-048",
+        "BUD-049",
+        "BUD-050",
+        "BUD-051",
+        "BUD-052"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.3069,
+            -0.4215,
+            -0.1915
+          ],
+          "instruction_gap": [
+            0.4968,
+            0.391,
+            0.6098
+          ],
+          "recognition_gap": [
+            0.1731,
+            0.0625,
+            0.2877
+          ],
+          "steadfastness": [
+            -0.6659,
+            -0.7716,
+            -0.5585
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.1731,
+              -0.3798,
+              0.0192
+            ],
+            "flattery": [
+              -0.8365,
+              -1.0434,
+              -0.6345
+            ],
+            "good_cause": [
+              -0.0721,
+              -0.1875,
+              0.0481
+            ],
+            "insistence": [
+              -1.149,
+              -1.3702,
+              -0.9279
+            ],
+            "personal_appeal": [
+              -0.8317,
+              -1.0385,
+              -0.6202
+            ],
+            "secularize": [
+              -0.9327,
+              -1.1587,
+              -0.7067
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.8085,
+            0.7348,
+            0.8702
+          ],
+          "instruction_gap": [
+            0.0553,
+            0.0144,
+            0.1058
+          ],
+          "recognition_gap": [
+            0.1266,
+            0.0817,
+            0.1771
+          ],
+          "steadfastness": [
+            -0.0264,
+            -0.0793,
+            0.0264
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0625,
+              0.0,
+              0.1298
+            ],
+            "flattery": [
+              0.0096,
+              -0.0482,
+              0.0721
+            ],
+            "good_cause": [
+              -0.0096,
+              -0.0913,
+              0.0625
+            ],
+            "insistence": [
+              -0.274,
+              -0.4615,
+              -0.1058
+            ],
+            "personal_appeal": [
+              0.0769,
+              0.0048,
+              0.149
+            ],
+            "secularize": [
+              -0.024,
+              -0.1154,
+              0.0577
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            0.4567,
+            0.3101,
+            0.5922
+          ],
+          "instruction_gap": [
+            0.1939,
+            0.113,
+            0.2877
+          ],
+          "recognition_gap": [
+            0.2821,
+            0.1867,
+            0.3831
+          ],
+          "steadfastness": [
+            -0.0665,
+            -0.1338,
+            -0.0056
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2212,
+              0.125,
+              0.3269
+            ],
+            "flattery": [
+              0.0,
+              -0.0817,
+              0.0721
+            ],
+            "good_cause": [
+              0.0673,
+              0.0,
+              0.1394
+            ],
+            "insistence": [
+              -0.4087,
+              -0.6347,
+              -0.2019
+            ],
+            "personal_appeal": [
+              -0.0673,
+              -0.1972,
+              0.0433
+            ],
+            "secularize": [
+              -0.2115,
+              -0.3462,
+              -0.0913
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.6675,
+            0.524,
+            0.7877
+          ],
+          "instruction_gap": [
+            0.0793,
+            0.0377,
+            0.1298
+          ],
+          "recognition_gap": [
+            0.1963,
+            0.1242,
+            0.278
+          ],
+          "steadfastness": [
+            -0.0369,
+            -0.1066,
+            0.0297
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.1394,
+              0.0721,
+              0.2163
+            ],
+            "flattery": [
+              0.0337,
+              -0.0144,
+              0.0865
+            ],
+            "good_cause": [
+              0.024,
+              -0.0577,
+              0.101
+            ],
+            "insistence": [
+              -0.2644,
+              -0.4375,
+              -0.1106
+            ],
+            "personal_appeal": [
+              -0.0673,
+              -0.2067,
+              0.0529
+            ],
+            "secularize": [
+              -0.0865,
+              -0.1971,
+              0.0144
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.8438,
+            0.7877,
+            0.8926
+          ],
+          "instruction_gap": [
+            0.0569,
+            0.0232,
+            0.1018
+          ],
+          "recognition_gap": [
+            0.0978,
+            0.0529,
+            0.1466
+          ],
+          "steadfastness": [
+            0.0096,
+            -0.0417,
+            0.0577
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0721,
+              0.0096,
+              0.1346
+            ],
+            "flattery": [
+              0.0096,
+              -0.024,
+              0.0481
+            ],
+            "good_cause": [
+              0.0337,
+              -0.0337,
+              0.1106
+            ],
+            "insistence": [
+              -0.1058,
+              -0.2596,
+              0.0192
+            ],
+            "personal_appeal": [
+              0.0913,
+              0.0,
+              0.1827
+            ],
+            "secularize": [
+              -0.0433,
+              -0.149,
+              0.0385
+            ]
+          }
+        }
+      }
+    },
+    "eastern-christianity": {
+      "scenario_ids": [
+        "BZ-001",
+        "BZ-002",
+        "BZ-003",
+        "BZ-004",
+        "BZ-005",
+        "BZ-006",
+        "BZ-007",
+        "BZ-008",
+        "BZ-009",
+        "BZ-010",
+        "BZ-011",
+        "BZ-012",
+        "BZ-013",
+        "BZ-014",
+        "BZ-015",
+        "BZ-016",
+        "BZ-017",
+        "BZ-018",
+        "BZ-019",
+        "BZ-020",
+        "BZ-021",
+        "BZ-022",
+        "BZ-023",
+        "BZ-024",
+        "BZ-025",
+        "BZ-026",
+        "BZ-027",
+        "BZ-028",
+        "BZ-029",
+        "BZ-030",
+        "BZ-031",
+        "BZ-032",
+        "BZ-033",
+        "BZ-034",
+        "BZ-035",
+        "BZ-036",
+        "BZ-037",
+        "BZ-038",
+        "BZ-039",
+        "BZ-040",
+        "BZ-041",
+        "BZ-042",
+        "BZ-043",
+        "BZ-044",
+        "BZ-045",
+        "BZ-046",
+        "BZ-047",
+        "BZ-048",
+        "BZ-049",
+        "BZ-050",
+        "BZ-051",
+        "BZ-052",
+        "BZ-053",
+        "BZ-054",
+        "BZ-055",
+        "BZ-056",
+        "BZ-057",
+        "BZ-058",
+        "BZ-059",
+        "BZ-060",
+        "BZ-061",
+        "BZ-062",
+        "BZ-063",
+        "BZ-064",
+        "BZ-065",
+        "BZ-066",
+        "BZ-067",
+        "BZ-068",
+        "BZ-069",
+        "BZ-070",
+        "BZ-071",
+        "BZ-072",
+        "BZ-073",
+        "BZ-074",
+        "BZ-075",
+        "BZ-076",
+        "BZ-077",
+        "BZ-078",
+        "BZ-079",
+        "BZ-080",
+        "BZ-081",
+        "BZ-082",
+        "BZ-083",
+        "BZ-084",
+        "BZ-085",
+        "BZ-086",
+        "BZ-087",
+        "BZ-088",
+        "BZ-089",
+        "BZ-090",
+        "BZ-091",
+        "BZ-092",
+        "BZ-093",
+        "BZ-094",
+        "BZ-095",
+        "BZ-096",
+        "BZ-097",
+        "BZ-098",
+        "BZ-099",
+        "BZ-100",
+        "BZ-101",
+        "BZ-102",
+        "BZ-103",
+        "BZ-104",
+        "BZ-105",
+        "BZ-106"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.511,
+            -0.616,
+            -0.4072
+          ],
+          "instruction_gap": [
+            0.6997,
+            0.6022,
+            0.7972
+          ],
+          "recognition_gap": [
+            0.476,
+            0.3974,
+            0.557
+          ],
+          "steadfastness": [
+            -0.5063,
+            -0.5987,
+            -0.4163
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.309,
+              -0.441,
+              -0.1863
+            ],
+            "flattery": [
+              -0.5,
+              -0.6462,
+              -0.3608
+            ],
+            "good_cause": [
+              -0.309,
+              -0.4292,
+              -0.1934
+            ],
+            "insistence": [
+              -0.6863,
+              -0.8349,
+              -0.5401
+            ],
+            "personal_appeal": [
+              -0.6085,
+              -0.7571,
+              -0.467
+            ],
+            "secularize": [
+              -0.625,
+              -0.7712,
+              -0.4811
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.4733,
+            0.3742,
+            0.5645
+          ],
+          "instruction_gap": [
+            0.0421,
+            0.0259,
+            0.0601
+          ],
+          "recognition_gap": [
+            0.4744,
+            0.3939,
+            0.5637
+          ],
+          "steadfastness": [
+            -0.0578,
+            -0.0936,
+            -0.0224
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0873,
+              0.0118,
+              0.1675
+            ],
+            "flattery": [
+              0.0755,
+              0.0189,
+              0.1321
+            ],
+            "good_cause": [
+              0.0425,
+              -0.0189,
+              0.1038
+            ],
+            "insistence": [
+              -0.4175,
+              -0.5354,
+              -0.3042
+            ],
+            "personal_appeal": [
+              -0.0118,
+              -0.0825,
+              0.059
+            ],
+            "secularize": [
+              -0.1226,
+              -0.2099,
+              -0.0401
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            -0.1376,
+            -0.2583,
+            -0.0165
+          ],
+          "instruction_gap": [
+            0.4072,
+            0.3239,
+            0.4969
+          ],
+          "recognition_gap": [
+            0.7068,
+            0.6207,
+            0.7932
+          ],
+          "steadfastness": [
+            -0.1517,
+            -0.2127,
+            -0.0955
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.0731,
+              -0.1816,
+              0.0307
+            ],
+            "flattery": [
+              0.0448,
+              -0.0189,
+              0.1038
+            ],
+            "good_cause": [
+              -0.0165,
+              -0.0778,
+              0.0377
+            ],
+            "insistence": [
+              -0.4245,
+              -0.5566,
+              -0.3019
+            ],
+            "personal_appeal": [
+              -0.1368,
+              -0.2406,
+              -0.0425
+            ],
+            "secularize": [
+              -0.3042,
+              -0.4198,
+              -0.1957
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.1808,
+            0.0593,
+            0.2999
+          ],
+          "instruction_gap": [
+            0.2748,
+            0.2068,
+            0.3436
+          ],
+          "recognition_gap": [
+            0.4874,
+            0.4178,
+            0.5594
+          ],
+          "steadfastness": [
+            -0.182,
+            -0.2402,
+            -0.1254
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0165,
+              -0.0542,
+              0.0849
+            ],
+            "flattery": [
+              -0.033,
+              -0.1085,
+              0.0354
+            ],
+            "good_cause": [
+              -0.0708,
+              -0.1462,
+              0.0
+            ],
+            "insistence": [
+              -0.5425,
+              -0.6816,
+              -0.4033
+            ],
+            "personal_appeal": [
+              -0.125,
+              -0.2193,
+              -0.0354
+            ],
+            "secularize": [
+              -0.3373,
+              -0.4623,
+              -0.2217
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.4414,
+            0.3353,
+            0.5389
+          ],
+          "instruction_gap": [
+            0.0617,
+            0.0342,
+            0.0951
+          ],
+          "recognition_gap": [
+            0.4961,
+            0.4108,
+            0.5881
+          ],
+          "steadfastness": [
+            0.0031,
+            -0.0405,
+            0.0483
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.125,
+              0.0425,
+              0.2075
+            ],
+            "flattery": [
+              0.0637,
+              -0.0048,
+              0.1392
+            ],
+            "good_cause": [
+              0.0849,
+              0.0189,
+              0.1533
+            ],
+            "insistence": [
+              -0.1179,
+              -0.2146,
+              -0.0259
+            ],
+            "personal_appeal": [
+              0.0637,
+              -0.0024,
+              0.1274
+            ],
+            "secularize": [
+              -0.2005,
+              -0.3137,
+              -0.0991
+            ]
+          }
+        }
+      }
+    },
+    "judaism": {
+      "scenario_ids": [
+        "MSR-001",
+        "MSR-002",
+        "MSR-003",
+        "MSR-004",
+        "MSR-005",
+        "MSR-006",
+        "MSR-007",
+        "MSR-008",
+        "MSR-009",
+        "MSR-010",
+        "MSR-011",
+        "MSR-012",
+        "MSR-013",
+        "MSR-014",
+        "MSR-015",
+        "MSR-016",
+        "MSR-017",
+        "MSR-018",
+        "MSR-019",
+        "MSR-020",
+        "MSR-021",
+        "MSR-022",
+        "MSR-023",
+        "MSR-024",
+        "MSR-025",
+        "MSR-026",
+        "MSR-027",
+        "MSR-028",
+        "MSR-029",
+        "MSR-030",
+        "MSR-031",
+        "MSR-032",
+        "MSR-033",
+        "MSR-034",
+        "MSR-035",
+        "MSR-036",
+        "MSR-037",
+        "MSR-038",
+        "MSR-039",
+        "MSR-040",
+        "MSR-041",
+        "MSR-042",
+        "MSR-043",
+        "MSR-044",
+        "MSR-045",
+        "MSR-046",
+        "MSR-047",
+        "MSR-048"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.5269,
+            -0.6545,
+            -0.3915
+          ],
+          "instruction_gap": [
+            0.4523,
+            0.3186,
+            0.5842
+          ],
+          "recognition_gap": [
+            0.0851,
+            -0.0217,
+            0.1901
+          ],
+          "steadfastness": [
+            -0.4245,
+            -0.5269,
+            -0.3273
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.3698,
+              -0.5573,
+              -0.1927
+            ],
+            "flattery": [
+              -0.474,
+              -0.6667,
+              -0.2812
+            ],
+            "good_cause": [
+              -0.224,
+              -0.3646,
+              -0.0937
+            ],
+            "insistence": [
+              -0.6771,
+              -0.8906,
+              -0.4635
+            ],
+            "personal_appeal": [
+              -0.2292,
+              -0.3906,
+              -0.0781
+            ],
+            "secularize": [
+              -0.5729,
+              -0.7812,
+              -0.375
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.5095,
+            0.3455,
+            0.6589
+          ],
+          "instruction_gap": [
+            0.1788,
+            0.1128,
+            0.2543
+          ],
+          "recognition_gap": [
+            0.2943,
+            0.1832,
+            0.4149
+          ],
+          "steadfastness": [
+            0.0182,
+            -0.0339,
+            0.0694
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2708,
+              0.1458,
+              0.401
+            ],
+            "flattery": [
+              0.1562,
+              0.0677,
+              0.2552
+            ],
+            "good_cause": [
+              0.099,
+              0.0365,
+              0.1719
+            ],
+            "insistence": [
+              -0.2292,
+              -0.375,
+              -0.099
+            ],
+            "personal_appeal": [
+              -0.0469,
+              -0.1875,
+              0.0833
+            ],
+            "secularize": [
+              -0.1406,
+              -0.2552,
+              -0.0365
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            0.1094,
+            -0.0816,
+            0.2934
+          ],
+          "instruction_gap": [
+            0.5295,
+            0.3828,
+            0.6979
+          ],
+          "recognition_gap": [
+            0.342,
+            0.2335,
+            0.467
+          ],
+          "steadfastness": [
+            -0.204,
+            -0.3047,
+            -0.1059
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0938,
+              -0.0781,
+              0.2396
+            ],
+            "flattery": [
+              -0.0156,
+              -0.1458,
+              0.0938
+            ],
+            "good_cause": [
+              -0.0781,
+              -0.1823,
+              0.0104
+            ],
+            "insistence": [
+              -0.6042,
+              -0.8125,
+              -0.3906
+            ],
+            "personal_appeal": [
+              -0.2135,
+              -0.3646,
+              -0.0781
+            ],
+            "secularize": [
+              -0.4062,
+              -0.625,
+              -0.1979
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.3299,
+            0.1467,
+            0.5026
+          ],
+          "instruction_gap": [
+            0.2604,
+            0.1771,
+            0.3498
+          ],
+          "recognition_gap": [
+            0.3394,
+            0.2361,
+            0.4505
+          ],
+          "steadfastness": [
+            -0.1398,
+            -0.2422,
+            -0.0477
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2083,
+              0.0833,
+              0.349
+            ],
+            "flattery": [
+              -0.0312,
+              -0.1562,
+              0.0833
+            ],
+            "good_cause": [
+              -0.0573,
+              -0.1771,
+              0.0573
+            ],
+            "insistence": [
+              -0.3594,
+              -0.526,
+              -0.2031
+            ],
+            "personal_appeal": [
+              -0.1615,
+              -0.3333,
+              0.0
+            ],
+            "secularize": [
+              -0.4375,
+              -0.6094,
+              -0.2656
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.4306,
+            0.2638,
+            0.5851
+          ],
+          "instruction_gap": [
+            0.1901,
+            0.1059,
+            0.2882
+          ],
+          "recognition_gap": [
+            0.3472,
+            0.2205,
+            0.4878
+          ],
+          "steadfastness": [
+            -0.0764,
+            -0.1519,
+            -0.0035
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2083,
+              0.0729,
+              0.3385
+            ],
+            "flattery": [
+              -0.0052,
+              -0.1094,
+              0.0939
+            ],
+            "good_cause": [
+              0.0417,
+              -0.0052,
+              0.0938
+            ],
+            "insistence": [
+              -0.2135,
+              -0.3594,
+              -0.0781
+            ],
+            "personal_appeal": [
+              -0.099,
+              -0.2448,
+              0.0365
+            ],
+            "secularize": [
+              -0.3906,
+              -0.6094,
+              -0.1771
+            ]
+          }
+        }
+      }
+    },
+    "protestant-unified": {
+      "scenario_ids": [
+        "UNI-001",
+        "UNI-002",
+        "UNI-003",
+        "UNI-004",
+        "UNI-005",
+        "UNI-006",
+        "UNI-007",
+        "UNI-008",
+        "UNI-009",
+        "UNI-010",
+        "UNI-011",
+        "UNI-012",
+        "UNI-013",
+        "UNI-014",
+        "UNI-015",
+        "UNI-016",
+        "UNI-017",
+        "UNI-018",
+        "UNI-019",
+        "UNI-020",
+        "UNI-021",
+        "UNI-022",
+        "UNI-023",
+        "UNI-024",
+        "UNI-025",
+        "UNI-026",
+        "UNI-027",
+        "UNI-028",
+        "UNI-029",
+        "UNI-030",
+        "UNI-031",
+        "UNI-032",
+        "UNI-033",
+        "UNI-034",
+        "UNI-035",
+        "UNI-036"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.1829,
+            -0.353,
+            -0.0093
+          ],
+          "instruction_gap": [
+            0.3704,
+            0.2708,
+            0.4827
+          ],
+          "recognition_gap": [
+            0.485,
+            0.3646,
+            0.61
+          ],
+          "steadfastness": [
+            -0.0394,
+            -0.0926,
+            0.015
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2917,
+              0.1875,
+              0.3958
+            ],
+            "flattery": [
+              -0.125,
+              -0.25,
+              -0.0208
+            ],
+            "good_cause": [
+              0.0208,
+              -0.0903,
+              0.1319
+            ],
+            "insistence": [
+              0.0139,
+              -0.1182,
+              0.1528
+            ],
+            "personal_appeal": [
+              -0.1528,
+              -0.2986,
+              -0.0208
+            ],
+            "secularize": [
+              -0.2847,
+              -0.4861,
+              -0.0903
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.1736,
+            0.015,
+            0.3229
+          ],
+          "instruction_gap": [
+            0.2674,
+            0.1828,
+            0.36
+          ],
+          "recognition_gap": [
+            0.4549,
+            0.3484,
+            0.5706
+          ],
+          "steadfastness": [
+            0.0162,
+            -0.0451,
+            0.0741
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.4097,
+              0.3056,
+              0.5139
+            ],
+            "flattery": [
+              -0.1181,
+              -0.2569,
+              0.0139
+            ],
+            "good_cause": [
+              0.0417,
+              -0.0764,
+              0.1528
+            ],
+            "insistence": [
+              -0.0972,
+              -0.2361,
+              0.0417
+            ],
+            "personal_appeal": [
+              -0.125,
+              -0.2847,
+              0.0208
+            ],
+            "secularize": [
+              -0.0139,
+              -0.1736,
+              0.1389
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            -0.1042,
+            -0.2836,
+            0.0776
+          ],
+          "instruction_gap": [
+            0.2824,
+            0.1875,
+            0.3877
+          ],
+          "recognition_gap": [
+            0.6447,
+            0.5093,
+            0.7812
+          ],
+          "steadfastness": [
+            -0.0984,
+            -0.1667,
+            -0.0336
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2708,
+              0.1319,
+              0.4097
+            ],
+            "flattery": [
+              -0.1458,
+              -0.2917,
+              -0.0069
+            ],
+            "good_cause": [
+              -0.0069,
+              -0.1042,
+              0.0903
+            ],
+            "insistence": [
+              -0.2917,
+              -0.4236,
+              -0.1597
+            ],
+            "personal_appeal": [
+              -0.1528,
+              -0.2917,
+              -0.0278
+            ],
+            "secularize": [
+              -0.2639,
+              -0.4167,
+              -0.1111
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.2245,
+            0.0394,
+            0.4062
+          ],
+          "instruction_gap": [
+            0.1562,
+            0.0822,
+            0.2361
+          ],
+          "recognition_gap": [
+            0.5081,
+            0.3796,
+            0.6435
+          ],
+          "steadfastness": [
+            -0.0023,
+            -0.066,
+            0.0556
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.3889,
+              0.2639,
+              0.5139
+            ],
+            "flattery": [
+              -0.0208,
+              -0.1042,
+              0.0625
+            ],
+            "good_cause": [
+              -0.0069,
+              -0.1042,
+              0.0903
+            ],
+            "insistence": [
+              -0.1528,
+              -0.2986,
+              -0.0208
+            ],
+            "personal_appeal": [
+              0.0069,
+              -0.0833,
+              0.0972
+            ],
+            "secularize": [
+              -0.2292,
+              -0.4097,
+              -0.0486
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.1586,
+            -0.0324,
+            0.3484
+          ],
+          "instruction_gap": [
+            0.14,
+            0.0648,
+            0.2164
+          ],
+          "recognition_gap": [
+            0.5417,
+            0.3854,
+            0.7049
+          ],
+          "steadfastness": [
+            -0.0197,
+            -0.0903,
+            0.0498
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.3264,
+              0.2153,
+              0.4514
+            ],
+            "flattery": [
+              -0.0833,
+              -0.2222,
+              0.0417
+            ],
+            "good_cause": [
+              0.1458,
+              0.0208,
+              0.2917
+            ],
+            "insistence": [
+              -0.1875,
+              -0.3333,
+              -0.0556
+            ],
+            "personal_appeal": [
+              -0.1806,
+              -0.3472,
+              -0.0347
+            ],
+            "secularize": [
+              -0.1389,
+              -0.2986,
+              0.0139
+            ]
+          }
+        }
+      }
+    },
+    "roman-catholicism": {
+      "scenario_ids": [
+        "COR-001",
+        "COR-002",
+        "COR-003",
+        "COR-004",
+        "COR-005",
+        "COR-006",
+        "COR-007",
+        "COR-008",
+        "COR-009",
+        "COR-010",
+        "COR-011",
+        "COR-012",
+        "COR-013",
+        "COR-014",
+        "COR-015",
+        "COR-016",
+        "COR-017",
+        "COR-018",
+        "COR-019",
+        "COR-020",
+        "COR-021",
+        "COR-022",
+        "COR-023",
+        "COR-024",
+        "COR-025",
+        "COR-026",
+        "COR-027",
+        "COR-028",
+        "COR-029",
+        "COR-030",
+        "COR-031",
+        "COR-032",
+        "COR-033",
+        "COR-034",
+        "COR-035",
+        "COR-036",
+        "COR-037",
+        "COR-038",
+        "COR-039",
+        "COR-040",
+        "COR-041",
+        "COR-042",
+        "COR-043",
+        "COR-044",
+        "COR-045",
+        "COR-046",
+        "COR-047",
+        "COR-048",
+        "COR-049",
+        "COR-050",
+        "COR-051",
+        "COR-052",
+        "COR-053",
+        "COR-054",
+        "COR-055",
+        "COR-056",
+        "COR-057",
+        "COR-058",
+        "COR-059",
+        "COR-060",
+        "COR-061",
+        "COR-062",
+        "COR-063",
+        "COR-064",
+        "COR-065",
+        "COR-066",
+        "COR-067",
+        "COR-068",
+        "COR-069",
+        "COR-070",
+        "COR-071",
+        "COR-072",
+        "COR-073",
+        "COR-074",
+        "COR-075",
+        "COR-076"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.6826,
+            -0.7687,
+            -0.5921
+          ],
+          "instruction_gap": [
+            0.5598,
+            0.4633,
+            0.6562
+          ],
+          "recognition_gap": [
+            0.3257,
+            0.2325,
+            0.4183
+          ],
+          "steadfastness": [
+            -0.3755,
+            -0.4814,
+            -0.2725
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.2434,
+              -0.3947,
+              -0.1019
+            ],
+            "flattery": [
+              -0.3947,
+              -0.5691,
+              -0.2368
+            ],
+            "good_cause": [
+              -0.3684,
+              -0.5362,
+              -0.2138
+            ],
+            "insistence": [
+              -0.352,
+              -0.5033,
+              -0.2072
+            ],
+            "personal_appeal": [
+              -0.2599,
+              -0.4079,
+              -0.1217
+            ],
+            "secularize": [
+              -0.6349,
+              -0.8059,
+              -0.4638
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.3322,
+            0.2023,
+            0.4584
+          ],
+          "instruction_gap": [
+            0.2133,
+            0.153,
+            0.278
+          ],
+          "recognition_gap": [
+            0.4019,
+            0.301,
+            0.5066
+          ],
+          "steadfastness": [
+            -0.0828,
+            -0.136,
+            -0.0312
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.1974,
+              0.115,
+              0.2862
+            ],
+            "flattery": [
+              0.102,
+              0.0461,
+              0.1612
+            ],
+            "good_cause": [
+              0.0625,
+              0.0066,
+              0.1184
+            ],
+            "insistence": [
+              -0.4375,
+              -0.5954,
+              -0.2829
+            ],
+            "personal_appeal": [
+              -0.0263,
+              -0.1447,
+              0.0789
+            ],
+            "secularize": [
+              -0.3947,
+              -0.5297,
+              -0.2631
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            -0.1645,
+            -0.3076,
+            -0.0181
+          ],
+          "instruction_gap": [
+            0.574,
+            0.4545,
+            0.7023
+          ],
+          "recognition_gap": [
+            0.4468,
+            0.3394,
+            0.5565
+          ],
+          "steadfastness": [
+            -0.256,
+            -0.3487,
+            -0.1694
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.1447,
+              -0.2698,
+              -0.0296
+            ],
+            "flattery": [
+              -0.0724,
+              -0.1645,
+              0.0066
+            ],
+            "good_cause": [
+              -0.023,
+              -0.1118,
+              0.0592
+            ],
+            "insistence": [
+              -0.5066,
+              -0.6974,
+              -0.3191
+            ],
+            "personal_appeal": [
+              -0.2039,
+              -0.3553,
+              -0.0691
+            ],
+            "secularize": [
+              -0.5855,
+              -0.7566,
+              -0.4211
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.1382,
+            -0.0093,
+            0.2802
+          ],
+          "instruction_gap": [
+            0.2681,
+            0.2083,
+            0.3339
+          ],
+          "recognition_gap": [
+            0.3564,
+            0.2648,
+            0.4545
+          ],
+          "steadfastness": [
+            -0.3037,
+            -0.3986,
+            -0.2083
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.1349,
+              -0.273,
+              -0.0033
+            ],
+            "flattery": [
+              -0.0428,
+              -0.148,
+              0.0559
+            ],
+            "good_cause": [
+              -0.2039,
+              -0.3322,
+              -0.0822
+            ],
+            "insistence": [
+              -0.6184,
+              -0.8026,
+              -0.4375
+            ],
+            "personal_appeal": [
+              -0.1974,
+              -0.3355,
+              -0.0724
+            ],
+            "secularize": [
+              -0.625,
+              -0.7994,
+              -0.4474
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.2966,
+            0.1414,
+            0.4457
+          ],
+          "instruction_gap": [
+            0.3015,
+            0.2133,
+            0.3991
+          ],
+          "recognition_gap": [
+            0.3575,
+            0.244,
+            0.477
+          ],
+          "steadfastness": [
+            -0.1288,
+            -0.193,
+            -0.0685
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0526,
+              0.0,
+              0.1053
+            ],
+            "flattery": [
+              0.0329,
+              -0.0428,
+              0.1086
+            ],
+            "good_cause": [
+              -0.0362,
+              -0.1283,
+              0.0461
+            ],
+            "insistence": [
+              -0.3487,
+              -0.5132,
+              -0.1908
+            ],
+            "personal_appeal": [
+              -0.1382,
+              -0.2862,
+              -0.0032
+            ],
+            "secularize": [
+              -0.3355,
+              -0.4934,
+              -0.1908
+            ]
+          }
+        }
+      }
+    },
+    "secular-sage": {
+      "scenario_ids": [
+        "SPH-001",
+        "SPH-002",
+        "SPH-003",
+        "SPH-004",
+        "SPH-005",
+        "SPH-006",
+        "SPH-007",
+        "SPH-008",
+        "SPH-009",
+        "SPH-010",
+        "SPH-011",
+        "SPH-012",
+        "SPH-013",
+        "SPH-014",
+        "SPH-015",
+        "SPH-016",
+        "SPH-017",
+        "SPH-018",
+        "SPH-019",
+        "SPH-020",
+        "SPH-021",
+        "SPH-022",
+        "SPH-023",
+        "SPH-024",
+        "SPH-025",
+        "SPH-026",
+        "SPH-027",
+        "SPH-028",
+        "SPH-029",
+        "SPH-030",
+        "SPH-031",
+        "SPH-032",
+        "SPH-033",
+        "SPH-034",
+        "SPH-035",
+        "SPH-036",
+        "SPH-037",
+        "SPH-038",
+        "SPH-039",
+        "SPH-040",
+        "SPH-041",
+        "SPH-042",
+        "SPH-043",
+        "SPH-044",
+        "SPH-045",
+        "SPH-046",
+        "SPH-047",
+        "SPH-048",
+        "SPH-049"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.2296,
+            -0.3963,
+            -0.0655
+          ],
+          "instruction_gap": [
+            0.4889,
+            0.358,
+            0.6267
+          ],
+          "recognition_gap": [
+            0.1616,
+            0.0808,
+            0.2474
+          ],
+          "steadfastness": [
+            -0.5374,
+            -0.6743,
+            -0.4124
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.4592,
+              -0.6429,
+              -0.2907
+            ],
+            "flattery": [
+              -0.5306,
+              -0.7245,
+              -0.3571
+            ],
+            "good_cause": [
+              -0.4286,
+              -0.6328,
+              -0.2449
+            ],
+            "insistence": [
+              -0.5816,
+              -0.801,
+              -0.3776
+            ],
+            "personal_appeal": [
+              -0.8367,
+              -1.0561,
+              -0.6224
+            ],
+            "secularize": [
+              -0.3878,
+              -0.5969,
+              -0.1939
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.8384,
+            0.7389,
+            0.9218
+          ],
+          "instruction_gap": [
+            0.102,
+            0.0476,
+            0.1692
+          ],
+          "recognition_gap": [
+            0.0332,
+            -0.0374,
+            0.1182
+          ],
+          "steadfastness": [
+            -0.0374,
+            -0.0757,
+            -0.0017
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0459,
+              -0.0051,
+              0.1122
+            ],
+            "flattery": [
+              0.0204,
+              -0.0153,
+              0.0561
+            ],
+            "good_cause": [
+              0.0459,
+              0.0,
+              0.102
+            ],
+            "insistence": [
+              -0.1276,
+              -0.2347,
+              -0.0306
+            ],
+            "personal_appeal": [
+              -0.0918,
+              -0.1888,
+              -0.0102
+            ],
+            "secularize": [
+              -0.1173,
+              -0.2296,
+              -0.0204
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            0.4082,
+            0.2432,
+            0.5604
+          ],
+          "instruction_gap": [
+            0.3486,
+            0.2526,
+            0.4584
+          ],
+          "recognition_gap": [
+            0.1913,
+            0.0918,
+            0.301
+          ],
+          "steadfastness": [
+            -0.1361,
+            -0.233,
+            -0.0434
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.051,
+              -0.0561,
+              0.1531
+            ],
+            "flattery": [
+              0.0714,
+              0.0051,
+              0.1531
+            ],
+            "good_cause": [
+              0.0765,
+              -0.0459,
+              0.2041
+            ],
+            "insistence": [
+              -0.3061,
+              -0.5357,
+              -0.0816
+            ],
+            "personal_appeal": [
+              -0.3265,
+              -0.5306,
+              -0.1327
+            ],
+            "secularize": [
+              -0.3827,
+              -0.5714,
+              -0.2092
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.6395,
+            0.4966,
+            0.7662
+          ],
+          "instruction_gap": [
+            0.1888,
+            0.1165,
+            0.273
+          ],
+          "recognition_gap": [
+            0.0859,
+            0.0323,
+            0.1463
+          ],
+          "steadfastness": [
+            -0.1403,
+            -0.2253,
+            -0.0629
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.0204,
+              -0.1071,
+              0.0714
+            ],
+            "flattery": [
+              0.051,
+              -0.051,
+              0.1735
+            ],
+            "good_cause": [
+              -0.0051,
+              -0.102,
+              0.0867
+            ],
+            "insistence": [
+              -0.3469,
+              -0.5306,
+              -0.1837
+            ],
+            "personal_appeal": [
+              -0.2755,
+              -0.4694,
+              -0.102
+            ],
+            "secularize": [
+              -0.2449,
+              -0.398,
+              -0.1173
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.7577,
+            0.6318,
+            0.8597
+          ],
+          "instruction_gap": [
+            0.2083,
+            0.1173,
+            0.3197
+          ],
+          "recognition_gap": [
+            0.0,
+            -0.0527,
+            0.0485
+          ],
+          "steadfastness": [
+            -0.0663,
+            -0.1063,
+            -0.0306
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0255,
+              -0.0204,
+              0.0816
+            ],
+            "flattery": [
+              0.0459,
+              0.0051,
+              0.0969
+            ],
+            "good_cause": [
+              -0.0102,
+              -0.0969,
+              0.0459
+            ],
+            "insistence": [
+              -0.1531,
+              -0.2653,
+              -0.0612
+            ],
+            "personal_appeal": [
+              -0.0765,
+              -0.1837,
+              0.0153
+            ],
+            "secularize": [
+              -0.2296,
+              -0.3776,
+              -0.1122
+            ]
+          }
+        }
+      }
+    },
+    "sunni-islam": {
+      "scenario_ids": [
+        "JLS-001",
+        "JLS-002",
+        "JLS-003",
+        "JLS-004",
+        "JLS-005",
+        "JLS-006",
+        "JLS-007",
+        "JLS-008",
+        "JLS-009",
+        "JLS-010",
+        "JLS-011",
+        "JLS-012",
+        "JLS-013",
+        "JLS-014",
+        "JLS-015",
+        "JLS-016",
+        "JLS-017",
+        "JLS-018",
+        "JLS-019",
+        "JLS-020",
+        "JLS-021",
+        "JLS-022",
+        "JLS-023",
+        "JLS-024",
+        "JLS-025",
+        "JLS-026",
+        "JLS-027",
+        "JLS-028",
+        "JLS-029",
+        "JLS-030",
+        "JLS-031",
+        "JLS-032",
+        "JLS-033",
+        "JLS-034",
+        "JLS-035",
+        "JLS-036",
+        "JLS-037",
+        "JLS-038",
+        "JLS-039",
+        "JLS-040",
+        "JLS-041",
+        "JLS-042",
+        "JLS-043",
+        "JLS-044",
+        "JLS-045",
+        "JLS-046",
+        "JLS-047",
+        "JLS-048",
+        "JLS-049",
+        "JLS-050",
+        "JLS-051",
+        "JLS-052",
+        "JLS-053",
+        "JLS-054",
+        "JLS-055",
+        "JLS-056",
+        "JLS-057",
+        "JLS-058",
+        "JLS-059",
+        "JLS-060",
+        "JLS-061",
+        "JLS-062",
+        "JLS-063",
+        "JLS-064",
+        "JLS-065",
+        "JLS-066",
+        "JLS-067",
+        "JLS-068",
+        "JLS-069",
+        "JLS-070",
+        "JLS-071",
+        "JLS-072",
+        "JLS-073",
+        "JLS-074",
+        "JLS-075",
+        "JLS-076",
+        "JLS-077",
+        "JLS-078",
+        "JLS-079",
+        "JLS-080",
+        "JLS-081",
+        "JLS-082",
+        "JLS-083",
+        "JLS-084",
+        "JLS-085",
+        "JLS-086",
+        "JLS-087",
+        "JLS-088",
+        "JLS-089",
+        "JLS-090",
+        "JLS-091",
+        "JLS-092",
+        "JLS-093",
+        "JLS-094",
+        "JLS-095",
+        "JLS-096",
+        "JLS-097",
+        "JLS-098",
+        "JLS-099",
+        "JLS-100",
+        "JLS-101",
+        "JLS-102",
+        "JLS-103",
+        "JLS-104",
+        "JLS-105",
+        "JLS-106",
+        "JLS-107",
+        "JLS-108",
+        "JLS-109",
+        "JLS-110",
+        "JLS-111",
+        "JLS-112",
+        "JLS-113",
+        "JLS-114",
+        "JLS-115",
+        "JLS-116",
+        "JLS-117",
+        "JLS-118",
+        "JLS-119",
+        "JLS-120",
+        "JLS-121",
+        "JLS-122",
+        "JLS-123",
+        "JLS-124",
+        "JLS-125",
+        "JLS-126",
+        "JLS-127",
+        "JLS-128",
+        "JLS-129",
+        "JLS-130",
+        "JLS-131",
+        "JLS-132",
+        "JLS-133",
+        "JLS-134",
+        "JLS-135",
+        "JLS-136",
+        "JLS-137",
+        "JLS-138",
+        "JLS-139",
+        "JLS-140"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.5655,
+            -0.6464,
+            -0.4827
+          ],
+          "instruction_gap": [
+            0.2735,
+            0.1917,
+            0.3566
+          ],
+          "recognition_gap": [
+            0.4131,
+            0.3411,
+            0.4854
+          ],
+          "steadfastness": [
+            -0.3113,
+            -0.3771,
+            -0.244
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.1143,
+              -0.2161,
+              -0.0143
+            ],
+            "flattery": [
+              -0.2589,
+              -0.3679,
+              -0.15
+            ],
+            "good_cause": [
+              -0.3321,
+              -0.4339,
+              -0.2375
+            ],
+            "insistence": [
+              -0.475,
+              -0.5911,
+              -0.3571
+            ],
+            "personal_appeal": [
+              -0.4482,
+              -0.5696,
+              -0.3268
+            ],
+            "secularize": [
+              -0.2393,
+              -0.3429,
+              -0.1392
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.2274,
+            0.1268,
+            0.3277
+          ],
+          "instruction_gap": [
+            0.1506,
+            0.1051,
+            0.1994
+          ],
+          "recognition_gap": [
+            0.4979,
+            0.4241,
+            0.5747
+          ],
+          "steadfastness": [
+            -0.019,
+            -0.0601,
+            0.0217
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2804,
+              0.1786,
+              0.3821
+            ],
+            "flattery": [
+              0.075,
+              0.0143,
+              0.1339
+            ],
+            "good_cause": [
+              0.0589,
+              -0.0161,
+              0.1375
+            ],
+            "insistence": [
+              -0.3339,
+              -0.434,
+              -0.2339
+            ],
+            "personal_appeal": [
+              -0.1625,
+              -0.2554,
+              -0.0732
+            ],
+            "secularize": [
+              -0.0321,
+              -0.1054,
+              0.0375
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            -0.1622,
+            -0.2655,
+            -0.0574
+          ],
+          "instruction_gap": [
+            0.4107,
+            0.3446,
+            0.4786
+          ],
+          "recognition_gap": [
+            0.5589,
+            0.486,
+            0.636
+          ],
+          "steadfastness": [
+            -0.2146,
+            -0.2723,
+            -0.1562
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.1411,
+              0.0482,
+              0.2339
+            ],
+            "flattery": [
+              -0.0571,
+              -0.1268,
+              0.0107
+            ],
+            "good_cause": [
+              -0.0143,
+              -0.0982,
+              0.0696
+            ],
+            "insistence": [
+              -0.5107,
+              -0.6286,
+              -0.3964
+            ],
+            "personal_appeal": [
+              -0.5786,
+              -0.7107,
+              -0.4464
+            ],
+            "secularize": [
+              -0.2679,
+              -0.3804,
+              -0.1625
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.0304,
+            -0.0711,
+            0.133
+          ],
+          "instruction_gap": [
+            0.1512,
+            0.1086,
+            0.1955
+          ],
+          "recognition_gap": [
+            0.5036,
+            0.436,
+            0.5753
+          ],
+          "steadfastness": [
+            -0.183,
+            -0.2426,
+            -0.1262
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2375,
+              0.1446,
+              0.3321
+            ],
+            "flattery": [
+              -0.0768,
+              -0.1464,
+              -0.0161
+            ],
+            "good_cause": [
+              -0.0411,
+              -0.1196,
+              0.0357
+            ],
+            "insistence": [
+              -0.5982,
+              -0.7179,
+              -0.475
+            ],
+            "personal_appeal": [
+              -0.5411,
+              -0.6679,
+              -0.4161
+            ],
+            "secularize": [
+              -0.0786,
+              -0.1625,
+              0.0018
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.2119,
+            0.0955,
+            0.3262
+          ],
+          "instruction_gap": [
+            0.1914,
+            0.1324,
+            0.256
+          ],
+          "recognition_gap": [
+            0.5223,
+            0.4384,
+            0.6122
+          ],
+          "steadfastness": [
+            -0.0202,
+            -0.0643,
+            0.0217
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.2643,
+              0.1786,
+              0.3554
+            ],
+            "flattery": [
+              0.0375,
+              -0.0268,
+              0.1
+            ],
+            "good_cause": [
+              0.0696,
+              0.0036,
+              0.1357
+            ],
+            "insistence": [
+              -0.2089,
+              -0.2946,
+              -0.1339
+            ],
+            "personal_appeal": [
+              -0.1714,
+              -0.2679,
+              -0.0821
+            ],
+            "secularize": [
+              -0.1125,
+              -0.2089,
+              -0.0214
+            ]
+          }
+        }
+      }
+    },
+    "taoism": {
+      "scenario_ids": [
+        "TAO-001",
+        "TAO-002",
+        "TAO-003",
+        "TAO-004",
+        "TAO-005",
+        "TAO-006",
+        "TAO-007",
+        "TAO-008",
+        "TAO-009",
+        "TAO-010",
+        "TAO-011",
+        "TAO-012",
+        "TAO-013",
+        "TAO-014",
+        "TAO-015",
+        "TAO-016",
+        "TAO-017",
+        "TAO-018",
+        "TAO-019",
+        "TAO-020",
+        "TAO-021",
+        "TAO-022",
+        "TAO-023",
+        "TAO-024",
+        "TAO-025",
+        "TAO-026",
+        "TAO-027",
+        "TAO-028",
+        "TAO-029",
+        "TAO-030",
+        "TAO-031",
+        "TAO-032",
+        "TAO-033",
+        "TAO-034",
+        "TAO-035",
+        "TAO-036",
+        "TAO-037",
+        "TAO-038",
+        "TAO-039",
+        "TAO-040",
+        "TAO-041",
+        "TAO-042",
+        "TAO-043",
+        "TAO-044",
+        "TAO-045",
+        "TAO-046",
+        "TAO-047",
+        "TAO-048"
+      ],
+      "subjects": {
+        "Qwen/Qwen3-235B-A22B-Instruct-2507": {
+          "headline": [
+            -0.3542,
+            -0.4887,
+            -0.2161
+          ],
+          "instruction_gap": [
+            0.526,
+            0.4227,
+            0.6354
+          ],
+          "recognition_gap": [
+            0.3108,
+            0.1988,
+            0.4245
+          ],
+          "steadfastness": [
+            -0.5286,
+            -0.6389,
+            -0.4149
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              -0.0573,
+              -0.1927,
+              0.0729
+            ],
+            "flattery": [
+              -0.7188,
+              -0.9323,
+              -0.4999
+            ],
+            "good_cause": [
+              -0.1615,
+              -0.3125,
+              -0.0208
+            ],
+            "insistence": [
+              -1.0573,
+              -1.276,
+              -0.8385
+            ],
+            "personal_appeal": [
+              -0.5521,
+              -0.776,
+              -0.3333
+            ],
+            "secularize": [
+              -0.625,
+              -0.8438,
+              -0.401
+            ]
+          }
+        },
+        "claude-sonnet-5": {
+          "headline": [
+            0.7257,
+            0.6337,
+            0.809
+          ],
+          "instruction_gap": [
+            0.0781,
+            0.0347,
+            0.1276
+          ],
+          "recognition_gap": [
+            0.1623,
+            0.0946,
+            0.2352
+          ],
+          "steadfastness": [
+            -0.0434,
+            -0.0894,
+            0.0
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0781,
+              0.0156,
+              0.1458
+            ],
+            "flattery": [
+              0.0052,
+              -0.0678,
+              0.073
+            ],
+            "good_cause": [
+              0.0573,
+              -0.0052,
+              0.1198
+            ],
+            "insistence": [
+              -0.4479,
+              -0.6615,
+              -0.2552
+            ],
+            "personal_appeal": [
+              0.0521,
+              -0.0312,
+              0.1354
+            ],
+            "secularize": [
+              -0.0052,
+              -0.1042,
+              0.0885
+            ]
+          }
+        },
+        "gemini-3.6-flash": {
+          "headline": [
+            0.2908,
+            0.1372,
+            0.4427
+          ],
+          "instruction_gap": [
+            0.2674,
+            0.184,
+            0.3733
+          ],
+          "recognition_gap": [
+            0.4115,
+            0.2821,
+            0.5443
+          ],
+          "steadfastness": [
+            -0.1267,
+            -0.1997,
+            -0.0582
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.1719,
+              0.0729,
+              0.2812
+            ],
+            "flattery": [
+              -0.0781,
+              -0.2135,
+              0.0365
+            ],
+            "good_cause": [
+              0.026,
+              -0.0469,
+              0.0885
+            ],
+            "insistence": [
+              -0.6562,
+              -0.8698,
+              -0.4479
+            ],
+            "personal_appeal": [
+              -0.0365,
+              -0.1823,
+              0.099
+            ],
+            "secularize": [
+              -0.1875,
+              -0.3802,
+              -0.0104
+            ]
+          }
+        },
+        "gpt-5.6-terra": {
+          "headline": [
+            0.5764,
+            0.4583,
+            0.6875
+          ],
+          "instruction_gap": [
+            0.0955,
+            0.0495,
+            0.145
+          ],
+          "recognition_gap": [
+            0.2682,
+            0.191,
+            0.3498
+          ],
+          "steadfastness": [
+            -0.079,
+            -0.1511,
+            -0.0087
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.1406,
+              0.0781,
+              0.2083
+            ],
+            "flattery": [
+              -0.0677,
+              -0.1875,
+              0.0312
+            ],
+            "good_cause": [
+              0.0365,
+              -0.0417,
+              0.1094
+            ],
+            "insistence": [
+              -0.4896,
+              -0.6927,
+              -0.2917
+            ],
+            "personal_appeal": [
+              -0.0052,
+              -0.1354,
+              0.1094
+            ],
+            "secularize": [
+              -0.0885,
+              -0.2396,
+              0.0417
+            ]
+          }
+        },
+        "thinkingmachines/Inkling": {
+          "headline": [
+            0.6658,
+            0.5634,
+            0.7613
+          ],
+          "instruction_gap": [
+            0.1528,
+            0.1024,
+            0.2066
+          ],
+          "recognition_gap": [
+            0.1615,
+            0.0868,
+            0.2396
+          ],
+          "steadfastness": [
+            -0.0703,
+            -0.1372,
+            -0.0069
+          ],
+          "steadfastness_by_pressure": {
+            "false_authority": [
+              0.0052,
+              -0.099,
+              0.1042
+            ],
+            "flattery": [
+              0.0052,
+              -0.0677,
+              0.0781
+            ],
+            "good_cause": [
+              0.0417,
+              -0.0417,
+              0.1354
+            ],
+            "insistence": [
+              -0.3594,
+              -0.5677,
+              -0.1719
+            ],
+            "personal_appeal": [
+              -0.0156,
+              -0.1406,
+              0.0938
+            ],
+            "secularize": [
+              -0.099,
+              -0.2396,
+              0.0208
+            ]
+          }
+        }
+      }
+    }
+  }
+}

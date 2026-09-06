@@ -8,6 +8,16 @@ fratrum*, **the mutual conversation and consolation of the brethren**, which the
 list among the ways the gospel actually comes to us — the ordinary talk between believers, in which
 the gospel is either delivered or withheld.
 
+> **Retired from active cross-faith scoring (Spec 119, 2026-09-05).** This 7-strand monolith is
+> **superseded by [`protestant-unified`](../protestant-unified/) for cross-faith scoring** and is no
+> longer an input to the cross-faith run/export. It mixes all seven Protestant strands, including the
+> questions where they *diverge*; `protestant-unified` is the derived **same-advice common witness**
+> (the 36 questions where the strands agree; guidance-divergence study D=0.16 → Pathway B). The
+> module stays **frozen on disk** — its committed score tier (`results/20260813-protestantism`) and
+> raw tier remain browsable, and the SPA still discovers and resolves them — so nothing here is
+> deleted; it is simply out of the active cross-faith leaderboard. Any further retirement (e.g.
+> pruning its raw tier) is a separate, deliberate decision.
+
 - **Construct:** the **brother or sister in the pew**, not the office-holder. The companion
   exercises the priesthood of all believers by *speaking the truth in love* (Eph 4:15), *watching
   over one another in love* (Wesley's General Rules), and handing the person back to the offices

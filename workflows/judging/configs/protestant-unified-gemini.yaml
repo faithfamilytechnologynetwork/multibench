@@ -1,0 +1,21 @@
+# protestant-unified (Spec 119) — GEMINI-ONLY live-judge config.
+#
+# Same subjects + Gemini ranking judge as protestantism-run.yaml, but WITHOUT the Opus judge, so
+# the live `judge` command scores only the Gemini (full-grid, ranking) cells while the Opus judge
+# runs server-side as Anthropic Message Batches (submitted from the full config). Idempotent
+# identity keys let the later `batch-judge collect --no-fallback` see the Gemini cells as already
+# judged and leave them untouched. Subjects are unused by `judge` (it reads sittings) but kept
+# identical for coverage-count consistency if this config is ever passed to `report`.
+
+subjects:
+  - {model: openai/gpt-5.6-terra, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: anthropic/claude-sonnet-5, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: qwen/qwen3-235b-a22b-2507, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+  - {model: thinkingmachines/inkling, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY}
+
+judges:
+  # Gemini 3.6 Flash — ranking judge, FULL GRID. OpenRouter, safety-ON (record decision 2026-08-03).
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, safety_off: false}
+
+framings: [unstated, stated, guided]

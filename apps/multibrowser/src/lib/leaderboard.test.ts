@@ -3,6 +3,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   classifyJudgeRoles,
+  COMBINED_SCORE_KEY,
   computeLeaderboardRows,
   computeStandings,
   isRankingJudge,
@@ -288,6 +289,83 @@ describe("committed dataset reconciles with the paper (Gemini standings)", () =>
         expect(r.delta).toBeCloseTo(r.post - r.initial, 9);
       }
     }
+  });
+});
+
+// Reconciliation against the REAL committed 20260905 superset (Spec 119) — pins the accepted 8-row
+// cross-faith numbers of record (protestant-unified 5th of 8; Waleed accepted run 20260905,
+// 2026-09-06) the way the 20260803 block protects the record run. Every value is recomputed through
+// the production parsers + accessor (parseResultsManifest / parseResultsShard / traditionValue on the
+// combined key), so an exporter↔SPA drift that moved a number fails CI rather than shipping silently.
+describe("committed 20260905 superset pins the accepted cross-faith numbers", () => {
+  const root = resolve(process.cwd(), "../../results/20260905");
+  const manifestPath = `${root}/manifest.json`;
+  const hasCommitted = existsSync(manifestPath);
+  const FRAMINGS = ["unstated", "stated", "guided"] as const;
+
+  // Accepted per-tradition combined mean-of-means (equal-weight over subjects × framings, full/all) —
+  // the numbers of record from `experiments/119_protestant_unified/data/output/paper_numbers.json`.
+  const ACCEPTED: Record<string, number> = {
+    buddhism: 0.6694978632478633,
+    "secular-sage": 0.6348639455782313,
+    taoism: 0.630787037037037,
+    "eastern-christianity": 0.5405136268343816,
+    "protestant-unified": 0.48626543209876544,
+    judaism: 0.465625,
+    "roman-catholicism": 0.3635233918128655,
+    "sunni-islam": 0.35966269841269843,
+  };
+  const EXPECTED_ORDER = [
+    "buddhism", "secular-sage", "taoism", "eastern-christianity",
+    "protestant-unified", "judaism", "roman-catholicism", "sunni-islam",
+  ];
+
+  function loadShards(): { rm: ResultsManifest; shards: Record<string, ResultsShard> } {
+    const { manifest: rm } = parseResultsManifest(readFileSync(manifestPath, "utf8"), "m");
+    const shards: Record<string, ResultsShard> = {};
+    for (const t of rm!.traditions) {
+      const { shard } = parseResultsShard(readFileSync(`${root}/${t.shard}`, "utf8"), "s");
+      shards[t.id] = shard!;
+    }
+    return { rm: rm!, shards };
+  }
+
+  // Per-tradition ranking score: equal-weight mean over subjects × framings of the combined
+  // full/all cell, read via the production `traditionValue` accessor on the combined key.
+  function traditionMeanOfMeans(rm: ResultsManifest, shard: ResultsShard): number {
+    const judge = rankingJudgeModel(rm); // "combined" for this run
+    const vals: number[] = [];
+    for (const subject of rm.subjects) {
+      for (const framing of FRAMINGS) {
+        const tv = traditionValue(shard, judge, subject, framing, "full", "all", 0);
+        if (tv) vals.push(tv.value);
+      }
+    }
+    return vals.reduce((a, b) => a + b, 0) / vals.length;
+  }
+
+  it.runIf(hasCommitted)("ranks on the combined block over 8 traditions incl protestant-unified", () => {
+    const { rm, shards } = loadShards();
+    expect(rm.ranking?.scoreKey).toBe(COMBINED_SCORE_KEY);
+    expect(rankingJudgeModel(rm)).toBe(COMBINED_SCORE_KEY);
+    expect(Object.keys(shards).sort()).toEqual([...EXPECTED_ORDER].sort());
+    expect(shards["protestant-unified"]!.combined).toBeDefined();
+  });
+
+  it.runIf(hasCommitted)("per-tradition combined mean-of-means == accepted numbers; PU ranks 5th", () => {
+    const { rm, shards } = loadShards();
+    const values: Record<string, number> = {};
+    for (const [id, shard] of Object.entries(shards)) values[id] = traditionMeanOfMeans(rm, shard);
+
+    for (const id of EXPECTED_ORDER) expect(values[id]).toBeCloseTo(ACCEPTED[id]!, 9);
+
+    const order = Object.keys(values).sort((a, b) => values[b]! - values[a]!);
+    expect(order).toEqual(EXPECTED_ORDER);
+    expect(order.indexOf("protestant-unified")).toBe(4); // 5th of 8 (0-indexed)
+
+    // protestant-unified sits within its accepted 95% CI [+0.368, +0.590].
+    expect(values["protestant-unified"]!).toBeGreaterThanOrEqual(0.36804976851851856);
+    expect(values["protestant-unified"]!).toBeLessThanOrEqual(0.590204475308642);
   });
 });
 
