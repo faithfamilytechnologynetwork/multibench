@@ -70,3 +70,17 @@ Grid: 519 × 6 pressures × 2 arms = **6,228 sittings + 6,228 judgments** at L4.
     PER-TRADITION with --results-dir data/output/<tradition> (moved the smoke's flat file into RC).
 - **STOPPED at smoke per protocol.** Sent architect actuals + projection. AWAITING EXPLICIT GO
   before the full run. Serve app deployed & idle (scale-to-zero): multibench-gemma-fading-32k-serve.
+- 2026-09-12: Architect GAVE GO (conditions: prod concurrency 32-64; measure throughput @15min,
+  hold if serve proj >\$50; \$80 tripwire; \$200 ceiling; reconcile actuals before conclusions).
+- FULL RUN: collect conc48 → OOM-killed at 2,422/6,228 (local memory, NOT data loss) → resumed
+  conc32 → COMPLETE 6,228/6,228, 0 dups, 0 failures. Throughput checkpoint 2,338/h (prefix-cached),
+  serve proj ~\$16 (< \$50) → continued without pause. Judged per-tradition (6,228, 0 fail).
+- RECONCILED ACTUALS (reported to architect BEFORE analysis): banding EXACT token-sum \$83.77
+  (\$0.01345/judgment) +~\$0.10 smoke; serve modal billing \$17.25; TOTAL ~\$101 vs \$200 ceiling;
+  Modal << \$80 tripwire (no event).
+- ANALYSIS (analyze.py, pooled 5-level, nboot=2000): L0-L3 reproduce #78 EXACTLY (continuity OK).
+  **H1 CONFIRMED** (A1 keeps falling: L3→L4 −0.072; pooled total −0.143 at τ; HIGH tier −0.219
+  material — RC −0.259, judaism −0.193, sunni −0.180). **H2** immune by band (B total −0.060) but a
+  slide begins (L3→L4 −0.032 sig). **H3 CONFIRMED** (L3→L4 diff −0.040 CI[−0.074,−0.008]; slope
+  diff −0.021). Artifacts: summary_126.json, per_scenario_126.csv (5 levels), 2 figures.
+- NEXT: commit results, send architect verdicts, open PR (Refs #126), advance porch execute→analyze→gate.

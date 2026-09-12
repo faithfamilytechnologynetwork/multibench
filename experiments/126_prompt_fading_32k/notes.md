@@ -306,10 +306,133 @@ end-to-end.
 so the full run must judge **per tradition** with `--results-dir data/output/<tradition>` (matching the
 collector's per-tradition `sittings.jsonl` and the analyzer's `*/judgments.jsonl` glob).
 
-### Full run
+### Full run (2026-09-12) — 6,228 sittings + 6,228 judgments, 0 failures
 
-_TBD_
+**Data integrity: exact.** All 519 scenarios × 6 pressures × 2 arms at L4, full scope, single
+`gemini-3.6-flash` via OpenRouter, 0 re-judge, **0 duplicates**. Per-arm 3,114 each; per-tradition
+counts all complete (buddhism 624, EC 1272, judaism 576, RC 912, secular-sage 588, sunni 1680,
+taoism 576). Score spread {−1: 926, −0.5: 69, 0: 58, +0.5: 266, +1: 4909}. (The collect was killed
+once by a local OOM at 2,422/6,228 and resumed with zero data loss — incremental writes + skip-done.)
 
-## What Worked / What Didn't / Next Steps
+**Reconciled actuals (usage-computed, reported to architect BEFORE conclusions):**
+- **Banding — EXACT OpenRouter token-sum: $83.77** (29,502,717 in × $1.50/M + 5,269,264 out ×
+  $7.50/M; $0.01345/judgment) + ~$0.10 smoke (8 re-judged) ≈ **$83.9**.
+- **Serve — `modal billing report --for today` (multibench-gemma-fading-32k-serve): $17.25**
+  (smoke + collect + OOM-resume). Warm throughput ~2,000–2,338 sittings/h at concurrency 32–48 —
+  close to #78's 2,540/h *despite the 32k prompts*, because the identical system+fluff prefix is
+  **prefix-cached** (hit rate 75–87%), amortizing the 32k prefill.
+- **TOTAL ≈ $101.0 all-in** vs the **$200 ceiling** (~$99 headroom). Modal $17.25 ≪ $80 tripwire —
+  no tripwire event.
 
-_TBD_
+#### Pooled level-mean counsel score by arm (519 scenarios) — L0–L3 pooled from #78, L4 new
+
+| Arm | L0 | L1 ~1k | L2 ~4k | L3 ~12k | **L4 ~32k** | 5-level slope [95% CI] | total L0→L4 [95% CI] |
+|---|---:|---:|---:|---:|---:|---|---|
+| **A1 prompted-guide** | +0.684 | +0.677 | +0.623 | +0.613 | **+0.541** | **−0.0350 [−0.0418, −0.0282]** | **−0.143 [−0.174, −0.113]** |
+| **B stated-weights** | +0.830 | +0.822 | +0.798 | +0.802 | **+0.770** | −0.0141 [−0.0202, −0.0090] | −0.060 [−0.087, −0.036] |
+
+(L0–L3 reproduce #78's table **exactly** — the pool is aligned by construction; continuity check
+passes.) The **L3→L4 drop for A1 is −0.072 [−0.097, −0.048]** — steeper than A1's entire L0→L3
+decline (−0.080 in #78). The prompted curve does **not** plateau; it falls faster at 32k.
+
+#### Verdicts against the pre-registration (τ=0.15, scenario-clustered bootstrap 95% CIs, nboot=2000)
+
+- **H1 — prompted fade continues / becomes material: CONFIRMED.** A1 **keeps falling** past 12k
+  (L3→L4 = −0.0723 [−0.0968, −0.0480], CI excludes 0). Pooled total L0→L4 = **−0.143 [−0.174,
+  −0.113]** — sits **right at the τ=0.15 materiality bar** (point just under, CI straddles it), and
+  in the **high/normative tier it goes materially past τ** (see below). So at 32k the prompted fade
+  reaches materiality where it matters, and is no longer the modest ≤12k effect of #78.
+- **H2 — weights arm, floor vs slide: IMMUNE BY THE BAND, but a slide has begun.** Total L0→L4 B =
+  **−0.060 [−0.087, −0.036]**, |0.060| < 0.15 and CI within ±0.15 → still **immune** by the
+  pre-registered equivalence band. **Nuance:** its L3→L4 change (−0.0320 [−0.0546, −0.0106], CI
+  excludes 0) shows the tuned arm has **begun to slide** at 32k too — not the flat of #78's *unstated*
+  B. It fades ~2.3× less than the prose guide and stays within its immunity band, but 32k is where
+  its residual decline becomes visible.
+- **H3 — differential persists at 32k: CONFIRMED.** L3→L4 A1−B = **−0.0403 [−0.0739, −0.0080]**
+  (excludes 0, negative); 5-level `slope_A1 − slope_B` = **−0.0209 [−0.0286, −0.0133]**. Prompt-
+  delivered guidance decays significantly faster than stated+weights formation, now out to 32k.
+
+#### By FaithfulBench tier (mean of tradition means) — the point of the tiered pre-registration
+
+| Tier | total L0→L4 A1 | total L0→L4 B | L3→L4 A1 | L3→L4 A1−B [95% CI] |
+|---|---:|---:|---:|---|
+| **high** (RC, sunni) | **−0.219** | −0.114 | −0.110 [−0.162, −0.061] | −0.056 [−0.123, +0.009] |
+| **medium** (EC, judaism) | **−0.143** | −0.046 | −0.073 [−0.118, −0.030] | −0.065 [−0.127, −0.005] |
+| **low** (bud, tao, sec-sage) | −0.069 | −0.009 | −0.051 [−0.091, −0.012] | −0.028 [−0.076, +0.021] |
+
+**Prompt fading at 32k is materially concentrated in the normative tier.** The **high** tier's
+A1 total decline (−0.219) is **well past τ=0.15**; medium (−0.143) is at it; low (−0.069) stays
+under. Per-tradition A1 L0→L4: **RC −0.259, judaism −0.193, sunni −0.180** (all material), vs
+secular-sage −0.111, EC −0.093, buddhism −0.061, taoism −0.036. The weights arm (B) stays under τ
+everywhere (worst: sunni −0.125), though its high-tier decline (−0.114) is now approaching the band.
+
+sunni-islam (n=140), the powered guided-floor case, full ramp:
+
+| sunni-islam | L0 | L1 | L2 | L3 | L4 |
+|---|---:|---:|---:|---:|---:|
+| A1 prompted-guide | +0.380 | +0.393 | +0.323 | +0.266 | **+0.201** |
+| B stated-weights | +0.657 | +0.625 | +0.583 | +0.586 | **+0.532** |
+
+#### Disclosed confound (pre-registered)
+
+The L3→L4 step mixes *more separation distance* with a *shift from repeating to novel filler*: #78's
+L3 (~12k) cycled the 20-exchange bank ~2.5×, whereas #126's L4 (~32k) uses fresh non-repeating
+filler (88 exchanges, no cycling). The robust claims subtract this: the **A1−B differential**
+(−0.040 L3→L4) cancels any arm-independent filler-composition effect, since both arms saw identical
+filler; and the **5-level slope** trend is monotone across L0→L4. The absolute L3→L4 magnitudes
+should be read with this confound in mind, but the direction and the differential are not explained
+by it.
+
+### Bottom line
+
+At **32k tokens of separation** the #78 picture sharpens decisively: **prompt-delivered guidance
+does not plateau — it keeps falling, and its fade becomes material in the normative tier** (high-tier
+A1 total −0.219, RC −0.259, judaism −0.193, sunni −0.180, all past τ=0.15; pooled −0.143 sits at the
+bar). The **stated+weights arm remains immune by the pre-registered ±0.15 band** (total −0.060) and
+fades ~2.3× less, **but a small significant slide has begun** at 32k (L3→L4 −0.032) — its residual
+decline is not a perfect floor once the prompt is pushed this far. The **prompt-vs-weights
+differential holds and is significant** out to 32k (L3→L4 −0.040; 5-level slope −0.021). For the
+FaithfulWeights thesis: as context grows, a prose `guide.md` keeps eroding — materially so in
+normative traditions — while weights formation holds far better, though not perfectly.
+
+#### Artifacts
+- `data/output/summary_126.json` — all estimands + bootstrap CIs + 5-level curves + per-tier + verdicts.
+- `data/output/per_scenario_126.csv` — per (arm, scenario, level) mean, **all 5 levels** (519×2×5).
+- `data/output/fig_fading_126.{pdf,png}` — pooled 5-level A1 vs B, 95% CI bands (L3 marked).
+- `data/output/fig_fading_126_by_tradition.{pdf,png}` — per-tradition small multiples, tier-tagged.
+- Raw sittings/judgments (gitignored) regenerable via `collect_fading.py` + `judging judge`.
+
+## What Worked
+
+- **Inheriting #78 wholesale, one delta.** Only `LEVELS` gained `L4`; the collector's arm→`subject` /
+  level→`framing` encoding let the stock judge score L4 sittings with zero code change, and pooling
+  L4 with #78's committed per-scenario CSV gave a 5-level ramp whose L0–L3 reproduce #78 exactly.
+- **Prefix caching made 32k cheap.** All sittings share the system+fluff prefix, so vLLM prefilled
+  the 32k once per (tradition, arm) and reused it (75–87% hit) — serve landed at $17.25, not the
+  naive per-sitting-prefill cost, and throughput held near #78's despite 2.6× longer prompts.
+- **Pre-registration + reconciliation discipline.** Design/estimands committed before any data;
+  actuals reconciled by exact token-sum ($83.77) and `modal billing report` ($17.25) and reported
+  before conclusions; total $101 landed well under the $200 ceiling with no tripwire event.
+- **Resumable collect survived an OOM** at 2,422/6,228 with zero data loss.
+
+## What Didn't (/ honest limitations)
+
+- **Pooled absolute fade sits *at* τ, not clearly past it** (−0.143, CI straddles 0.15); the clean
+  "material" claim is a **tier** result (high −0.219), not a pooled one — diluted by ceiling/easy
+  traditions, as in #78.
+- **The L3→L4 filler-composition confound** (cycled → novel) is real; mitigated by the differential
+  and the monotone slope but not eliminated for the absolute L3→L4 magnitude.
+- **B is no longer perfectly flat** — at 32k even the weights arm shows a small significant slide
+  (L3→L4 −0.032; high-tier total −0.114 nears the band edge). "Immune" is by the τ band, not literally flat.
+- **temperature=0** (no within-cell sampling variance); **single judge**; **L0 reference is #78's**
+  (a within-experiment L4 anchored to a cross-run lower ramp).
+
+## Next Steps
+
+1. **PR this experiment** (`Refs #126`) so the pre-registration + full-run notes + figures land in
+   the review record. No production code to ship.
+2. **Feed the papers repo** `fading_figs.py` the 5-level `per_scenario_126.csv` — `fig_fading_126`
+   (pooled) and the high-tier curves (RC/sunni) are the paper-ready "prompt fade goes material at
+   32k in normative traditions" panels.
+3. **Follow-ups the data motivates:** push further (64k+) to find where the prompted normative curve
+   bottoms out and whether B's incipient slide becomes material; a temp>0 replicate; a second judge.
