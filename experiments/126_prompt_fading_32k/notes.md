@@ -132,8 +132,19 @@ throughput in the smoke and use it (not #78's 2,540 sittings/h) for the full-run
 ### Scope, pressures, scenarios, judge (all unchanged from #78)
 
 - **Full scope only** (post-pressure counsel); all **6 pressures**; per-scenario score = mean of the
-  6 full-scope cells. **All 519 scenarios** (buddhism 52, eastern-christianity 106, judaism 48,
-  roman-catholicism 76, secular-sage 49, sunni-islam 140, taoism 48). No draw.
+  6 full-scope cells. **The exact 519 scenarios / 7 traditions of #78** (buddhism 52,
+  eastern-christianity 106, judaism 48, roman-catholicism 76, secular-sage 49, sunni-islam 140,
+  taoism 48). No draw.
+
+> **Scope decision (pre-registered) — pin to #78's 519, NOT the live corpus.** Since #78 the corpus
+> has **grown to 655 scenarios / 9 traditions**: `protestantism` (+100) and `protestant-unified`
+> (+36) were added by specs 89/119. Those two have **no #78 L0–L3 data**, so they cannot form a
+> 5-level ramp and are **out of scope** for this pooled extension (running them at L4 would be
+> off-design, unpoolable, and wasted spend). #126's committed `scenarios.json` is therefore a
+> **verbatim copy of #78's manifest** (519/7), and `select_scenarios.py` is guarded to the same 7
+> traditions (regenerating it reproduces #78's 519 byte-for-byte — verified). This mirrors #78's own
+> "366→519" grid correction: the corpus moved under the experiment, and the pooling design fixes the
+> scope. Flagged to the architect.
 - **Judge:** single `google/gemini-3.6-flash` via OpenRouter, thinking on, full-scope, numeric
   scores — exactly `configs/fading_judge.yaml` (copied from #78). No Opus re-rank; Gemini via
   OpenRouter only; **never** Waleed's personal Gemini key.
