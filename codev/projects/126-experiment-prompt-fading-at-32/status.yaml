@@ -7,11 +7,12 @@ current_plan_phase: null
 gates:
   experiment-complete:
     status: pending
+    requested_at: '2026-09-12T08:19:03.494Z'
 iteration: 1
 build_complete: false
 history: []
 started_at: '2026-09-12T03:54:07.341Z'
-updated_at: '2026-09-12T08:18:42.716Z'
+updated_at: '2026-09-12T08:19:03.496Z'
 pr_history:
   - phase: execute
     pr_number: 127
