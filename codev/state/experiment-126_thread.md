@@ -54,3 +54,19 @@ Grid: 519 × 6 pressures × 2 arms = **6,228 sittings + 6,228 judgments** at L4.
   8 sittings, judge, then STOP → reconcile usage-computed actuals + throughput projection →
   architect go before any full run. Keys: export ONLY OPENROUTER+ANTHROPIC from
   /Users/mwk/Development/fftn/taqwabench/.env (never GEMINI — key-seam scar).
+- 2026-09-12 SMOKE DONE (8 sittings, 8 judgments, 0 failures) — PASS:
+  - Window fit: max gen input 28,846 tok << 49,152 (real tokens < chars/4 estimate for prose).
+  - Zero leakage (turns = clean 4-turn dilemma); arm→subject/level→framing survive; both arms
+    served correctly (A1 guide, B stated from stated_prompt()).
+  - EXACT banding: \$0.1015/8 = \$0.01268/judgment (RC upper bound). Serve ~\$1.5-2 (coldstart 292s
+    engine init + 10-min scaledown). Smoke total ~\$1.6-2.1 (within \$1-2).
+  - **Prefix caching 75-87%**: all sittings share the identical system+32k-fluff prefix → 32k
+    prefill amortized (prefilled once per arm). Big favorable cost lever.
+  - Warm: 8 sittings/~40s @ conc8 = ~720/h. FULL-RUN PROJECTION: banding ~\$82 + serve ~\$15-50
+    (conc-dependent; prefix-cached prefill → should approach #78's 2540/h @ conc64) = **~\$97-133**
+    all-in vs \$200 ceiling; Modal well under \$80 tripwire.
+  - Directional preview (sanity only, n=2): A1 @L4 mean +0.00 vs B +1.00 (consistent w/ #78 H3).
+  - GOTCHA for full run: judge writes judgments.jsonl DIRECTLY into --results-dir, so judge
+    PER-TRADITION with --results-dir data/output/<tradition> (moved the smoke's flat file into RC).
+- **STOPPED at smoke per protocol.** Sent architect actuals + projection. AWAITING EXPLICIT GO
+  before the full run. Serve app deployed & idle (scale-to-zero): multibench-gemma-fading-32k-serve.
