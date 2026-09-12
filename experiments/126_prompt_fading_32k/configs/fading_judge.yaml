@@ -1,0 +1,11 @@
+# Experiment 76 judging config — single Gemini judge via OpenRouter, FULL scope only.
+# Clone of experiments/58/configs/samplability.yaml (the pilot-validated r=0.93 OpenRouter path).
+# The judge scores the CLEAN, framing-blinded dilemma turns (turn1/reply1/push/reply2); the
+# guide framing and the fluff live OUTSIDE the judged turns, so the judge never sees them and
+# banding cost is flat across the ramp. No Opus, no personal Gemini key. Numeric scores, no bands.
+judges:
+  - {model: google/gemini-3.6-flash, provider: openai, base_url: https://openrouter.ai/api/v1, api_key_env: OPENROUTER_API_KEY, thinking: true, safety_off: false}
+
+scopes: [full]
+concurrency: 32
+retries: 3
