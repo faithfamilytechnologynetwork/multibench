@@ -339,32 +339,45 @@ decline (−0.080 in #78). The prompted curve does **not** plateau; it falls fas
 
 - **H1 — prompted fade continues / becomes material: CONFIRMED.** A1 **keeps falling** past 12k
   (L3→L4 = −0.0723 [−0.0968, −0.0480], CI excludes 0). Pooled total L0→L4 = **−0.143 [−0.174,
-  −0.113]** — sits **right at the τ=0.15 materiality bar** (point just under, CI straddles it), and
-  in the **high/normative tier it goes materially past τ** (see below). So at 32k the prompted fade
-  reaches materiality where it matters, and is no longer the modest ≤12k effect of #78.
-- **H2 — weights arm, floor vs slide: IMMUNE BY THE BAND, but a slide has begun.** Total L0→L4 B =
-  **−0.060 [−0.087, −0.036]**, |0.060| < 0.15 and CI within ±0.15 → still **immune** by the
-  pre-registered equivalence band. **Nuance:** its L3→L4 change (−0.0320 [−0.0546, −0.0106], CI
-  excludes 0) shows the tuned arm has **begun to slide** at 32k too — not the flat of #78's *unstated*
-  B. It fades ~2.3× less than the prose guide and stays within its immunity band, but 32k is where
-  its residual decline becomes visible.
+  −0.113]** — sits **right at the τ=0.15 materiality bar** (point just under, CI straddles it). In
+  the **high/normative tier it is unambiguously material: total −0.219 [−0.276, −0.165], the entire
+  CI beyond −0.15** (medium −0.143 [−0.212, −0.082] at τ; low −0.069 [−0.108, −0.032] under). So at
+  32k the prompted fade reaches materiality where it matters, no longer the modest ≤12k effect of #78.
+- **H2 — weights arm, floor vs slide: IMMUNE ONLY POOLED; the high tier crosses the band, and a
+  slide has begun.** Pooled total L0→L4 B = **−0.060 [−0.087, −0.036]**, within ±0.15 → immune by the
+  pre-registered band **pooled** (and in the low/medium tiers). **But immunity does not hold in the
+  normative tier:** high-tier B total = **−0.114 [−0.168, −0.068], whose CI CROSSES −0.15**, so the
+  band test fails there. And B's pooled L3→L4 change (−0.0320 [−0.0546, −0.0106], CI excludes 0)
+  shows the tuned arm has **begun to slide** at 32k — not the flat of #78's *unstated* B. Net: the
+  weights arm fades ~2.3× less than the prose guide and is immune pooled, but at 32k in normative
+  traditions its decline is real and its interval extends past the immunity boundary.
 - **H3 — differential persists at 32k: CONFIRMED.** L3→L4 A1−B = **−0.0403 [−0.0739, −0.0080]**
   (excludes 0, negative); 5-level `slope_A1 − slope_B` = **−0.0209 [−0.0286, −0.0133]**. Prompt-
   delivered guidance decays significantly faster than stated+weights formation, now out to 32k.
 
 #### By FaithfulBench tier (mean of tradition means) — the point of the tiered pre-registration
 
-| Tier | total L0→L4 A1 | total L0→L4 B | L3→L4 A1 | L3→L4 A1−B [95% CI] |
-|---|---:|---:|---:|---|
-| **high** (RC, sunni) | **−0.219** | −0.114 | −0.110 [−0.162, −0.061] | −0.056 [−0.123, +0.009] |
-| **medium** (EC, judaism) | **−0.143** | −0.046 | −0.073 [−0.118, −0.030] | −0.065 [−0.127, −0.005] |
-| **low** (bud, tao, sec-sage) | −0.069 | −0.009 | −0.051 [−0.091, −0.012] | −0.028 [−0.076, +0.021] |
+All per-tier estimands carry scenario-clustered bootstrap 95% CIs (pre-registered #3, #4;
+resampled within each tradition of the tier, mean of tradition means):
+
+| Tier | total L0→L4 A1 [95% CI] | total L0→L4 B [95% CI] | 5-level slope A1 [95% CI] | L3→L4 A1−B [95% CI] |
+|---|---|---|---|---|
+| **high** (RC, sunni) | **−0.219 [−0.276, −0.165]** | −0.114 [−0.168, −0.068] | −0.052 [−0.065, −0.040] | −0.056 [−0.123, +0.009] |
+| **medium** (EC, judaism) | **−0.143 [−0.212, −0.082]** | −0.046 [−0.101, −0.003] | −0.034 [−0.052, −0.020] | −0.065 [−0.127, −0.005] |
+| **low** (bud, tao, sec-sage) | −0.069 [−0.108, −0.032] | −0.009 [−0.041, +0.028] | −0.016 [−0.023, −0.008] | −0.028 [−0.076, +0.021] |
 
 **Prompt fading at 32k is materially concentrated in the normative tier.** The **high** tier's
-A1 total decline (−0.219) is **well past τ=0.15**; medium (−0.143) is at it; low (−0.069) stays
-under. Per-tradition A1 L0→L4: **RC −0.259, judaism −0.193, sunni −0.180** (all material), vs
-secular-sage −0.111, EC −0.093, buddhism −0.061, taoism −0.036. The weights arm (B) stays under τ
-everywhere (worst: sunni −0.125), though its high-tier decline (−0.114) is now approaching the band.
+A1 total decline is **−0.219 [−0.276, −0.165] — the entire CI lies beyond τ=0.15**, so prompted
+fade is unambiguously material there; medium (−0.143 [−0.212, −0.082]) straddles τ; low (−0.069
+[−0.108, −0.032]) stays under. Per-tradition A1 L0→L4: **RC −0.259, judaism −0.193, sunni −0.180**
+(all material), vs secular-sage −0.111, EC −0.093, buddhism −0.061, taoism −0.036.
+
+**The weights arm's immunity is a POOLED result, not a tier one.** Pooled B total is −0.060 [−0.087,
+−0.036] (within ±0.15). But in the **high/normative tier B's total is −0.114 [−0.168, −0.068], whose
+CI CROSSES −0.15** — so by the pre-registered band test the weights arm is **not** immune in the
+high tier; its decline there is real and the interval extends past the immunity boundary. B still
+fades far less than A1 (high tier −0.114 vs −0.219), but "immune within ±0.15" holds only pooled and
+in the low/medium tiers, not in the normative tier where it matters most.
 
 sunni-islam (n=140), the powered guided-floor case, full ramp:
 
@@ -387,13 +400,16 @@ by it.
 
 At **32k tokens of separation** the #78 picture sharpens decisively: **prompt-delivered guidance
 does not plateau — it keeps falling, and its fade becomes material in the normative tier** (high-tier
-A1 total −0.219, RC −0.259, judaism −0.193, sunni −0.180, all past τ=0.15; pooled −0.143 sits at the
-bar). The **stated+weights arm remains immune by the pre-registered ±0.15 band** (total −0.060) and
-fades ~2.3× less, **but a small significant slide has begun** at 32k (L3→L4 −0.032) — its residual
-decline is not a perfect floor once the prompt is pushed this far. The **prompt-vs-weights
-differential holds and is significant** out to 32k (L3→L4 −0.040; 5-level slope −0.021). For the
-FaithfulWeights thesis: as context grows, a prose `guide.md` keeps eroding — materially so in
-normative traditions — while weights formation holds far better, though not perfectly.
+A1 high-tier total −0.219 [−0.276, −0.165] with the whole CI past τ; RC −0.259, judaism −0.193,
+sunni −0.180; pooled −0.143 sits at the bar). The **stated+weights arm is immune by the ±0.15 band
+only pooled** (total −0.060) and in the low/medium tiers; **in the high/normative tier its total
+−0.114 [−0.168, −0.068] crosses the band**, and a small significant slide has begun at 32k (L3→L4
+−0.032) — its residual decline is not a floor once the prompt is pushed this far. The **prompt-vs-
+weights differential holds and is significant** out to 32k (L3→L4 −0.040; 5-level slope −0.021), and
+B still fades far less than A1 everywhere (high tier −0.114 vs −0.219). For the FaithfulWeights
+thesis: as context grows, a prose `guide.md` keeps eroding — materially so in normative traditions —
+while weights formation holds far better but, at 32k in the normative tier, no longer within the
+immunity band.
 
 #### Artifacts
 - `data/output/summary_126.json` — all estimands + bootstrap CIs + 5-level curves + per-tier + verdicts.
@@ -422,8 +438,11 @@ normative traditions — while weights formation holds far better, though not pe
   traditions, as in #78.
 - **The L3→L4 filler-composition confound** (cycled → novel) is real; mitigated by the differential
   and the monotone slope but not eliminated for the absolute L3→L4 magnitude.
-- **B is no longer perfectly flat** — at 32k even the weights arm shows a small significant slide
-  (L3→L4 −0.032; high-tier total −0.114 nears the band edge). "Immune" is by the τ band, not literally flat.
+- **B is no longer perfectly flat, and its immunity is only a pooled property** — at 32k even the
+  weights arm shows a small significant slide (L3→L4 −0.032), and its **high-tier total −0.114
+  [−0.168, −0.068] CROSSES ±0.15**, so the band-test immunity fails in the normative tier (it holds
+  pooled and in the low/medium tiers). "Immune" is a pooled statement, not literally flat and not
+  tier-universal.
 - **temperature=0** (no within-cell sampling variance); **single judge**; **L0 reference is #78's**
   (a within-experiment L4 anchored to a cross-run lower ramp).
 

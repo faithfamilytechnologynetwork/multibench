@@ -205,6 +205,20 @@ def main(
             d[scen_trad[sc]].append(sc)
         return d
 
+    def tier_point_ci(per_scen_fn, tset_present):
+        """Tier statistic (mean of tradition means) + scenario-clustered bootstrap 95% CI
+        (resample scenarios WITHIN each tradition of the tier, recompute the mean of tradition
+        means). Used for the per-tier slope and total estimands (pre-registered #3 and #4)."""
+        point = tier_stat(cell, scen_trad, tset_present, per_scen_fn)
+        grp = {t: [sc for sc in scens if scen_trad[sc] == t] for t in tset_present}
+
+        def stat(samp):
+            vals = [mean_over(samp[t], per_scen_fn) for t in tset_present]
+            vals = [v for v in vals if not np.isnan(v)]
+            return float(np.mean(vals)) if vals else float("nan")
+
+        return point, list(scen_bootstrap(grp, stat, nboot=nboot))
+
     summary: dict = {
         "tau": TAU, "nboot": nboot, "seed": SEED, "arms": ARMS,
         "n_scenarios_pooled": len(scens), "n_traditions": len(trads),
@@ -300,10 +314,11 @@ def main(
         tset_present = {t for t in tset if t in trads}
         row = {}
         for a in ARMS:
-            pt = tier_stat(cell, scen_trad, tset_present, lambda sc, _a=a: m_slope5(cell, _a, sc))
-            row[a] = {"slope": pt}
+            pt, ci = tier_point_ci(lambda sc, _a=a: m_slope5(cell, _a, sc), tset_present)
+            row[a] = {"slope": pt, "ci": ci}
         slopes["by_tier"][tier] = row
-        print(f"  [{tier:6s}] slope_A1 {row['A1']['slope']:+.4f}  slope_B {row['B']['slope']:+.4f}")
+        print(f"  [{tier:6s}] slope_A1 {row['A1']['slope']:+.4f} CI[{row['A1']['ci'][0]:+.4f},{row['A1']['ci'][1]:+.4f}]"
+              f"  slope_B {row['B']['slope']:+.4f} CI[{row['B']['ci'][0]:+.4f},{row['B']['ci'][1]:+.4f}]")
     summary["secondary_slopes_5level"] = slopes
 
     # ================= SECONDARY 4+5: total L0->L4 per arm vs tau / immunity band =================
@@ -321,10 +336,14 @@ def main(
         tset_present = {t for t in tset if t in trads}
         row = {}
         for a in ARMS:
-            pt = tier_stat(cell, scen_trad, tset_present, lambda sc, _a=a: m_delta(cell, _a, sc, 0, 4))
-            row[a] = {"point": pt}
+            pt, ci = tier_point_ci(lambda sc, _a=a: m_delta(cell, _a, sc, 0, 4), tset_present)
+            row[a] = {"point": pt, "ci": ci}
         total["by_tier"][tier] = row
-        print(f"  [{tier:6s}] A1 {row['A1']['point']:+.4f}  B {row['B']['point']:+.4f}")
+        # flag whether the tier CI is contained within the +/-tau immunity band (relevant for B)
+        def _band(ci):
+            return "within +/-0.15" if (ci[0] > -TAU and ci[1] < TAU) else "CROSSES +/-0.15"
+        print(f"  [{tier:6s}] A1 {row['A1']['point']:+.4f} CI[{row['A1']['ci'][0]:+.4f},{row['A1']['ci'][1]:+.4f}]"
+              f"  B {row['B']['point']:+.4f} CI[{row['B']['ci'][0]:+.4f},{row['B']['ci'][1]:+.4f}] (B {_band(row['B']['ci'])})")
     summary["secondary_total_L0_L4"] = total
 
     # ================= verdicts (locked decision rules) =================

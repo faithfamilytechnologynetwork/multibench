@@ -83,4 +83,12 @@ Grid: 519 × 6 pressures × 2 arms = **6,228 sittings + 6,228 judgments** at L4.
   material — RC −0.259, judaism −0.193, sunni −0.180). **H2** immune by band (B total −0.060) but a
   slide begins (L3→L4 −0.032 sig). **H3 CONFIRMED** (L3→L4 diff −0.040 CI[−0.074,−0.008]; slope
   diff −0.021). Artifacts: summary_126.json, per_scenario_126.csv (5 levels), 2 figures.
-- NEXT: commit results, send architect verdicts, open PR (Refs #126), advance porch execute→analyze→gate.
+- Committed results, opened PR #127 (Closes #126), sent architect verdicts, reached experiment-complete gate (WAITING on human approval — NOT self-approving).
+- 2026-09-12 PR REVIEW (architect APPROVE w/ 2 changes before merge, gate held):
+  (1) analyze.py + summary lacked per-tier bootstrap CIs (pre-reg estimands 3-4) → ADDED
+      tier_point_ci helper; re-ran. high A1 total −0.219 CI[−0.276,−0.165] (whole CI past τ);
+      high B total −0.114 CI[−0.168,−0.068] CROSSES ±0.15.
+  (2) notes.md: corrected H2 — B immunity is POOLED only; high/normative tier B CI crosses the
+      band (not "approaching"). Cited per-tier CIs throughout, bottom line + limitations fixed.
+  Changes pushed to PR #127. Verdicts unchanged (H1/H3 CONFIRMED; H2 nuance sharpened).
+  When architect relays gate approval: I run porch approve, then MERGE COMMIT (never squash).
